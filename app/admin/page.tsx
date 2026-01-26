@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import CustomerTable from '@/components/customer-table';
 
 export const metadata = {
@@ -15,6 +16,12 @@ export default function AdminPage() {
             <h1>Admin Dashboard</h1>
             <p className="subtitle">Manage customer loyalty cards</p>
           </div>
+        </div>
+
+        <div className="admin-nav">
+          <Link href="/admin/design" className="btn btn-secondary">
+            Card Designs
+          </Link>
         </div>
 
         <CustomerTable />
