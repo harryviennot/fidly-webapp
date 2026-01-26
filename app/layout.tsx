@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "@/lib/supabase/auth-provider";
+import { BusinessProvider } from "@/lib/context/business-context";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Coffee Shop - Loyalty Card",
-  description: "Get your digital loyalty card and collect stamps for free coffee!",
+  title: "Stampeo Dashboard",
+  description: "Manage your loyalty card program",
 };
 
 export default function RootLayout({
@@ -13,7 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          <BusinessProvider>{children}</BusinessProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }
