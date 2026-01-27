@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { StampeoLogo } from "@/components/ui/stampeo-logo";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: HouseIcon },
@@ -54,7 +55,15 @@ export function DashboardSidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-50 flex h-screen w-[280px] flex-col border-r bg-white">
+    <aside className="fixed left-0 top-0 z-50 flex h-screen w-[280px] flex-col border-r border-[var(--border)] bg-[var(--cream)]">
+      {/* Logo */}
+      <div className="flex items-center gap-2 px-6 py-4">
+        <StampeoLogo className="w-7 h-7 text-[var(--accent)]" />
+        <span className="font-bold text-lg text-[var(--foreground)]">Stampeo</span>
+      </div>
+
+      <Separator className="bg-[var(--border)]" />
+
       {/* Business Selector */}
       <div className="p-4">
         {memberships.length > 1 ? (
@@ -65,7 +74,7 @@ export function DashboardSidebar() {
                 className="w-full justify-between h-auto py-3 px-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent)] text-white font-semibold">
                     {currentBusiness?.name?.[0] || "B"}
                   </div>
                   <div className="text-left">
@@ -91,7 +100,7 @@ export function DashboardSidebar() {
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10 text-primary font-medium text-sm">
+                    <div className="flex h-8 w-8 items-center justify-center rounded bg-[var(--accent-muted)] text-[var(--accent)] font-medium text-sm">
                       {membership.business.name[0]}
                     </div>
                     <div>
@@ -107,7 +116,7 @@ export function DashboardSidebar() {
           </DropdownMenu>
         ) : (
           <div className="flex items-center gap-3 py-3 px-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent)] text-white font-semibold">
               {currentBusiness?.name?.[0] || "B"}
             </div>
             <div>
@@ -122,7 +131,7 @@ export function DashboardSidebar() {
         )}
       </div>
 
-      <Separator />
+      <Separator className="bg-[var(--border)]" />
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
@@ -134,10 +143,10 @@ export function DashboardSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
                 active
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-[var(--accent)] text-white"
+                  : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)] hover:text-[var(--accent)]"
               )}
             >
               <Icon className="h-5 w-5" weight={active ? "fill" : "regular"} />
@@ -147,13 +156,13 @@ export function DashboardSidebar() {
         })}
       </nav>
 
-      <Separator />
+      <Separator className="bg-[var(--border)]" />
 
       {/* User Profile */}
       <div className="p-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-muted">
+            <AvatarFallback className="bg-[var(--accent-muted)] text-[var(--accent)]">
               {user?.email ? getInitials(user.email.split("@")[0]) : "U"}
             </AvatarFallback>
           </Avatar>

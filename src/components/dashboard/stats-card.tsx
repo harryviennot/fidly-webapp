@@ -21,13 +21,13 @@ export function StatsCard({
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold mt-1">{value}</p>
+            <p className="text-sm font-medium text-[var(--muted-foreground)]">{title}</p>
+            <p className="text-3xl font-bold mt-1 text-[var(--foreground)]">{value}</p>
             {description && (
-              <p className="text-sm text-muted-foreground mt-1">{description}</p>
+              <p className="text-sm text-[var(--muted-foreground)] mt-1">{description}</p>
             )}
           </div>
-          <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+          <div className="h-12 w-12 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
             {icon}
           </div>
         </div>
