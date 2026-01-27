@@ -51,7 +51,7 @@ export default function DesignCard({
 
       {/* Actions */}
       <div className="design-card-actions">
-        <Link href={`/admin/design/${design.id}`} className="btn btn-secondary btn-small">
+        <Link href={`/app/design/${design.id}`} className="btn btn-secondary btn-small">
           Edit
         </Link>
         {!design.is_active && (

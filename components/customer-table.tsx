@@ -1,23 +1,22 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getAllCustomers } from '@/lib/api';
+import { useBusiness } from '@/lib/context/business-context';
 import { CustomerResponse } from '@/lib/types';
 import CustomerRow from './customer-row';
 
 export default function CustomerTable() {
+  const { currentBusiness } = useBusiness();
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadCustomers();
-  }, []);
-
-  const loadCustomers = async () => {
+  const loadCustomers = useCallback(async () => {
+    if (!currentBusiness?.id) return;
     try {
-      const data = await getAllCustomers();
+      const data = await getAllCustomers(currentBusiness.id);
       setCustomers(data);
       setError(null);
     } catch (err) {
@@ -25,7 +24,11 @@ export default function CustomerTable() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentBusiness?.id]);
+
+  useEffect(() => {
+    loadCustomers();
+  }, [loadCustomers]);
 
   const handleStampAdded = (customerId: string, newStamps: number) => {
     setCustomers((prev) =>

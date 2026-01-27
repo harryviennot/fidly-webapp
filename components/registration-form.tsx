@@ -5,10 +5,11 @@ import { createCustomer } from '@/lib/api';
 import { CustomerResponse } from '@/lib/types';
 
 interface Props {
+  businessId: string;
   onSuccess: (customer: CustomerResponse) => void;
 }
 
-export default function RegistrationForm({ onSuccess }: Props) {
+export default function RegistrationForm({ businessId, onSuccess }: Props) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +21,7 @@ export default function RegistrationForm({ onSuccess }: Props) {
     setIsLoading(true);
 
     try {
-      const customer = await createCustomer({ name, email });
+      const customer = await createCustomer(businessId, { name, email });
       onSuccess(customer);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CardDesign, CardDesignCreate, PassField } from '@/lib/types';
+import { CardDesign, CardDesignCreate } from '@/lib/types';
 import { createDesign, updateDesign, uploadLogo, uploadStamp, activateDesign } from '@/lib/api';
+import { useBusiness } from '@/lib/context/business-context';
 import CardPreview from './CardPreview';
 import ColorPicker from './ColorPicker';
 import ImageUploader from './ImageUploader';
@@ -35,6 +36,7 @@ const DEFAULT_DESIGN: CardDesignCreate = {
 
 export default function DesignEditor({ design, isNew = false }: DesignEditorProps) {
   const router = useRouter();
+  const { currentBusiness } = useBusiness();
   const [formData, setFormData] = useState<CardDesignCreate & { logo_url?: string }>(
     design ? { ...design } : { ...DEFAULT_DESIGN }
   );
@@ -50,6 +52,7 @@ export default function DesignEditor({ design, isNew = false }: DesignEditorProp
   };
 
   const handleSave = async () => {
+    if (!currentBusiness?.id) return;
     if (!formData.name || !formData.organization_name || !formData.description) {
       setError('Please fill in all required fields (Name, Organization, Description)');
       return;
@@ -60,10 +63,10 @@ export default function DesignEditor({ design, isNew = false }: DesignEditorProp
 
     try {
       if (isNew) {
-        const created = await createDesign(formData);
-        router.push(`/admin/design/${created.id}`);
+        const created = await createDesign(currentBusiness.id, formData);
+        router.push(`/app/design/${created.id}`);
       } else if (design) {
-        await updateDesign(design.id, formData);
+        await updateDesign(currentBusiness.id, design.id, formData);
         router.refresh();
       }
     } catch (err) {
@@ -74,14 +77,14 @@ export default function DesignEditor({ design, isNew = false }: DesignEditorProp
   };
 
   const handleActivate = async () => {
-    if (!design) return;
+    if (!design || !currentBusiness?.id) return;
     if (!confirm('Activate this design? All customers will receive the updated card.')) return;
 
     setSaving(true);
     setError(null);
     setSuccessMessage(null);
     try {
-      await activateDesign(design.id);
+      await activateDesign(currentBusiness.id, design.id);
       setIsActive(true);
       setSuccessMessage('Design activated! All customers have been notified.');
     } catch (err) {
@@ -92,14 +95,14 @@ export default function DesignEditor({ design, isNew = false }: DesignEditorProp
   };
 
   const handlePushUpdate = async () => {
-    if (!design) return;
+    if (!design || !currentBusiness?.id) return;
     if (!confirm('Push this design to all customers? They will receive updated cards.')) return;
 
     setSaving(true);
     setError(null);
     setSuccessMessage(null);
     try {
-      await activateDesign(design.id);
+      await activateDesign(currentBusiness.id, design.id);
       setSuccessMessage('Updates pushed to all customers!');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to push updates');
@@ -109,18 +112,18 @@ export default function DesignEditor({ design, isNew = false }: DesignEditorProp
   };
 
   const handleLogoUpload = async (file: File) => {
-    if (!design) {
+    if (!design || !currentBusiness?.id) {
       throw new Error('Please save the design first before uploading images');
     }
-    const result = await uploadLogo(design.id, file);
+    const result = await uploadLogo(currentBusiness.id, design.id, file);
     updateField('logo_url', result.url);
   };
 
   const handleStampUpload = async (file: File, type: 'filled' | 'empty') => {
-    if (!design) {
+    if (!design || !currentBusiness?.id) {
       throw new Error('Please save the design first before uploading images');
     }
-    await uploadStamp(design.id, file, type);
+    await uploadStamp(currentBusiness.id, design.id, file, type);
     router.refresh();
   };
 
