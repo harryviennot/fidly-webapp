@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
+import { applyTheme, getAccentFromSettings } from "@/utils/theme";
 
 interface Business {
   id: string;
@@ -98,6 +99,10 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
         setCurrentBusinessState(defaultMembership.business);
         setCurrentRole(defaultMembership.role);
+
+        // Apply theme from business settings
+        const accentColor = getAccentFromSettings(defaultMembership.business.settings);
+        applyTheme(accentColor);
       } else {
         // No memberships - user needs to create a business
         setMemberships([]);
@@ -121,6 +126,10 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("currentBusinessId", business.id);
     const membership = memberships.find((m) => m.business.id === business.id);
     setCurrentRole(membership?.role || null);
+
+    // Apply theme from business settings
+    const accentColor = getAccentFromSettings(business.settings);
+    applyTheme(accentColor);
   };
 
   return (
