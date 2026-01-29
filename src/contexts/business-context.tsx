@@ -11,6 +11,7 @@ interface Business {
   url_slug: string;
   subscription_tier: "pay" | "pro";
   settings: Record<string, unknown>;
+  logo_url?: string | null;
 }
 
 interface Membership {

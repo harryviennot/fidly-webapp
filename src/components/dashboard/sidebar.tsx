@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { StampeoLogo } from "@/components/ui/stampeo-logo";
+import { getBackgroundFromSettings, getContrastTextColor } from "@/utils/theme";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: HouseIcon },
@@ -57,79 +58,43 @@ export function DashboardSidebar() {
   return (
     <aside className="fixed left-0 top-0 z-50 flex h-screen w-[280px] flex-col border-r border-[var(--border)] bg-[var(--cream)]">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-6 py-4">
-        <StampeoLogo className="w-7 h-7 text-[var(--accent)]" />
-        <span className="font-bold text-lg text-[var(--foreground)]">Stampeo</span>
-      </div>
+      {(() => {
+        const bgColor = currentBusiness?.logo_url
+          ? getBackgroundFromSettings(currentBusiness.settings)
+          : null;
+        const textColor = bgColor ? getContrastTextColor(bgColor) : "dark";
 
-      <Separator className="bg-[var(--border)]" />
-
-      {/* Business Selector */}
-      <div className="p-4">
-        {memberships.length > 1 ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-between h-auto py-3 px-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent)] text-white font-semibold">
-                    {currentBusiness?.name?.[0] || "B"}
-                  </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-sm">
-                      {currentBusiness?.name || "Select Business"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {currentBusiness?.subscription_tier || ""}
-                    </p>
-                  </div>
-                </div>
-                <CaretDownIcon className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[248px]">
-              {memberships.map((membership) => (
-                <DropdownMenuItem
-                  key={membership.id}
-                  onClick={() => setCurrentBusiness(membership.business)}
-                  className={cn(
-                    "cursor-pointer",
-                    currentBusiness?.id === membership.business.id && "bg-accent"
-                  )}
+        return (
+          <div
+            className="flex h-[68px] items-center gap-3 px-4"
+            style={bgColor ? { backgroundColor: bgColor } : undefined}
+          >
+            {currentBusiness?.logo_url ? (
+              <>
+                <img
+                  src={currentBusiness.logo_url}
+                  alt={currentBusiness.name}
+                  className="object-contain transition-all duration-300"
+                  style={{ height: 40, maxWidth: 120 }}
+                />
+                <span
+                  className="font-bold text-xl"
+                  style={{ color: textColor === "white" ? "#ffffff" : "var(--foreground)" }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded bg-[var(--accent-muted)] text-[var(--accent)] font-medium text-sm">
-                      {membership.business.name[0]}
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{membership.business.name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {membership.role}
-                      </p>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <div className="flex items-center gap-3 py-3 px-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent)] text-white font-semibold">
-              {currentBusiness?.name?.[0] || "B"}
-            </div>
-            <div>
-              <p className="font-semibold text-sm">
-                {currentBusiness?.name || "Loading..."}
-              </p>
-              <p className="text-xs text-muted-foreground capitalize">
-                {currentBusiness?.subscription_tier || ""}
-              </p>
-            </div>
+                  {currentBusiness.name}
+                </span>
+              </>
+            ) : (
+              <>
+                <StampeoLogo className="w-8 h-8 text-[var(--accent)]" />
+                <span className="font-bold text-xl text-[var(--foreground)]">Stampeo</span>
+              </>
+            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
+
+
 
       <Separator className="bg-[var(--border)]" />
 
@@ -155,6 +120,23 @@ export function DashboardSidebar() {
           );
         })}
       </nav>
+
+
+
+
+      <div className="px-6 py-3">
+        <div className="flex items-center flex-col gap-1 text-xs text-muted-foreground">
+          <span>Powered by</span>
+          <div className="flex items-center gap-2 transition-transform group-hover:scale-105">
+            <StampeoLogo className="w-6 h-6" />
+            <span className="text-xl font-bold gradient-text">
+              Stampeo
+            </span>
+          </div>
+        </div>
+      </div>
+
+
 
       <Separator className="bg-[var(--border)]" />
 

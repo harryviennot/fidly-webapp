@@ -258,6 +258,46 @@ export function getAccentFromSettings(
 }
 
 /**
+ * Extract background color from business settings.
+ */
+export function getBackgroundFromSettings(
+  settings: Record<string, unknown>
+): string | null {
+  const backgroundColor = settings?.backgroundColor;
+  if (typeof backgroundColor === "string" && backgroundColor.startsWith("#")) {
+    return backgroundColor;
+  }
+  return null;
+}
+
+/**
+ * Calculate relative luminance of a color for WCAG contrast calculations.
+ * Returns a value between 0 (black) and 1 (white).
+ */
+function getLuminance(hex: string): number {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return 0;
+
+  const rgb = [
+    parseInt(result[1], 16) / 255,
+    parseInt(result[2], 16) / 255,
+    parseInt(result[3], 16) / 255,
+  ].map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+
+  return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+}
+
+/**
+ * Determine if text should be white or dark based on background color.
+ * Uses WCAG luminance calculation for better accessibility.
+ */
+export function getContrastTextColor(backgroundColor: string): "white" | "dark" {
+  const luminance = getLuminance(backgroundColor);
+  // If background is dark (luminance < 0.5), use white text
+  return luminance < 0.5 ? "white" : "dark";
+}
+
+/**
  * Check if a color has good contrast with white.
  * Colors with lightness <= 55% typically provide good readability on white backgrounds.
  */
