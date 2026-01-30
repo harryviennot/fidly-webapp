@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon, Crown } from '@phosphor-icons/react';
 import { CardDesign } from '@/types';
 import { getDesigns, activateDesign, deleteDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { DesignCard } from '@/components/design';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 export default function DesignListPage() {
   const { currentBusiness } = useBusiness();
@@ -15,6 +16,11 @@ export default function DesignListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activatingId, setActivatingId] = useState<string | null>(null);
+
+  // Plan-based limits
+  const isBasePlan = currentBusiness?.subscription_tier === 'pay';
+  const designLimit = isBasePlan ? 1 : Infinity;
+  const canCreateNew = designs.length < designLimit;
 
   const loadDesigns = useCallback(async () => {
     if (!currentBusiness?.id) return;
@@ -74,14 +80,45 @@ export default function DesignListPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Card Designs</h2>
-        <Button asChild>
-          <Link href="/design/new">
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold">Card Designs</h2>
+          {isBasePlan ? (
+            <Badge variant="secondary" className="text-xs">
+              {designs.length}/1 designs
+            </Badge>
+          ) : (
+            <Badge variant="default" className="text-xs">
+              <Crown className="w-3 h-3 mr-1" />
+              Pro
+            </Badge>
+          )}
+        </div>
+        {canCreateNew ? (
+          <Button asChild>
+            <Link href="/design/new">
+              <PlusIcon className="mr-2 h-4 w-4" />
+              New Design
+            </Link>
+          </Button>
+        ) : (
+          <Button disabled title="Upgrade to Pro to create multiple designs">
             <PlusIcon className="mr-2 h-4 w-4" />
             New Design
-          </Link>
-        </Button>
+          </Button>
+        )}
       </div>
+
+      {!canCreateNew && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
+          <Crown className="w-5 h-5 text-amber-600" />
+          <div>
+            <p className="font-medium text-amber-800">Design limit reached</p>
+            <p className="text-sm text-amber-700">
+              Upgrade to Pro to create multiple card designs for different campaigns.
+            </p>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-4">
@@ -99,7 +136,7 @@ export default function DesignListPage() {
           </Button>
         </div>
       ) : (
-        <div className="design-grid">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {designs.map((design) => (
             <DesignCard
               key={design.id}

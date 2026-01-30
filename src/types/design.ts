@@ -24,6 +24,8 @@ export interface CardDesign {
   stamp_filled_color: string;
   stamp_empty_color: string;
   stamp_border_color: string;
+  stamp_icon?: string;
+  reward_icon?: string;
 
   // Asset URLs
   logo_url?: string;
@@ -53,6 +55,8 @@ export interface CardDesignCreate {
   stamp_filled_color?: string;
   stamp_empty_color?: string;
   stamp_border_color?: string;
+  stamp_icon?: string;
+  reward_icon?: string;
 
   secondary_fields?: PassField[];
   auxiliary_fields?: PassField[];

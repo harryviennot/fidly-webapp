@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowsClockwise } from '@phosphor-icons/react';
 import { CardDesign } from '@/types';
 import { getDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
-import DesignEditor from '@/components/design/DesignEditor';
+import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -14,10 +15,12 @@ export default function EditDesignPage() {
   const params = useParams();
   const designId = params.id as string;
   const { currentBusiness } = useBusiness();
+  const editorRef = useRef<DesignEditorRef>(null);
 
   const [design, setDesign] = useState<CardDesign | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function loadDesign() {
@@ -34,6 +37,10 @@ export default function EditDesignPage() {
 
     loadDesign();
   }, [designId, currentBusiness?.id]);
+
+  const handleSave = () => {
+    editorRef.current?.handleSave();
+  };
 
   if (loading) {
     return (
@@ -58,16 +65,25 @@ export default function EditDesignPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h2 className="text-2xl font-bold">{design.name}</h2>
-        {design.is_active && (
-          <Badge variant="default">Active</Badge>
-        )}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold">{design.name}</h2>
+          {design.is_active && (
+            <Badge variant="default">Active</Badge>
+          )}
+        </div>
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? (
+            <>
+              <ArrowsClockwise className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            'Save Design'
+          )}
+        </Button>
       </div>
-
-      <div className="bg-white rounded-lg border p-6">
-        <DesignEditor design={design} />
-      </div>
+      <DesignEditorV2 ref={editorRef} design={design} onSavingChange={setSaving} />
     </div>
   );
 }
