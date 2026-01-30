@@ -15,6 +15,8 @@ export interface MembershipWithUser {
   role: MembershipRole;
   user: User;
   created_at?: string;
+  last_active_at?: string;
+  scans_count?: number;
 }
 
 export interface MembershipCreate {

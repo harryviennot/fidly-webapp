@@ -48,18 +48,30 @@ export default function ImageUploader({
   };
 
   return (
-    <div className="image-uploader">
-      <label className="uploader-label">{label}</label>
+    <div className="space-y-2">
+      {label && <label className="text-sm font-medium text-[var(--foreground)]">{label}</label>}
 
       {value ? (
-        <div className="image-preview">
-          <img src={value} alt={label} />
-          <div className="image-actions">
-            <button type="button" onClick={handleClick} className="btn-change">
+        <div className="relative inline-block">
+          <img
+            src={value}
+            alt={label || 'Uploaded image'}
+            className="w-24 h-24 object-cover rounded-xl border border-[var(--border)]"
+          />
+          <div className="flex gap-2 mt-2">
+            <button
+              type="button"
+              onClick={handleClick}
+              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-colors"
+            >
               Change
             </button>
             {onClear && (
-              <button type="button" onClick={onClear} className="btn-remove-image">
+              <button
+                type="button"
+                onClick={onClear}
+                className="px-3 py-1.5 text-sm font-medium rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+              >
                 Remove
               </button>
             )}
@@ -67,22 +79,22 @@ export default function ImageUploader({
         </div>
       ) : (
         <div
-          className={`upload-dropzone ${isUploading ? 'uploading' : ''}`}
+          className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
           onClick={handleClick}
         >
           {isUploading ? (
-            <span className="uploading-text">Uploading...</span>
+            <span className="text-sm text-[var(--muted-foreground)]">Uploading...</span>
           ) : (
             <>
-              <span className="upload-icon">+</span>
-              <span className="upload-text">Click to upload</span>
-              {hint && <span className="upload-hint">{hint}</span>}
+              <span className="text-2xl text-[var(--muted-foreground)] mb-1">+</span>
+              <span className="text-sm text-[var(--muted-foreground)]">Click to upload</span>
+              {hint && <span className="text-xs text-[var(--muted-foreground)] mt-1">{hint}</span>}
             </>
           )}
         </div>
       )}
 
-      {error && <div className="upload-error">{error}</div>}
+      {error && <div className="text-sm text-red-600 mt-1">{error}</div>}
 
       <input
         ref={inputRef}

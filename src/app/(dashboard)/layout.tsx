@@ -4,6 +4,7 @@ import { AppSidebar, DashboardHeader } from "@/components/dashboard";
 import { RoleGuard } from "@/components/auth/role-guard";
 import { useBusiness } from "../../contexts/business-context";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function AdminLayout({
   children,
@@ -47,6 +48,7 @@ export default function AdminLayout({
           <main className="p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>
+      <Toaster position="bottom-right" />
     </RoleGuard>
   );
 }
