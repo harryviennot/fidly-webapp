@@ -23,10 +23,6 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(false);
 
-  // Owners and admins can invite (but not scanners)
-  const canInvite = currentRole === "owner" || currentRole === "admin";
-  const canViewInvitations = canInvite;
-
   const loadData = useCallback(async () => {
     if (!currentBusiness?.id) return;
 
@@ -34,9 +30,7 @@ export default function TeamPage() {
     try {
       const [membersData, invitationsData] = await Promise.all([
         getBusinessMembers(currentBusiness.id),
-        canViewInvitations
-          ? getPendingInvitations(currentBusiness.id)
-          : Promise.resolve([]),
+        getPendingInvitations(currentBusiness.id),
       ]);
       setMembers(membersData);
       setInvitations(invitationsData);
@@ -45,7 +39,7 @@ export default function TeamPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentBusiness?.id, canViewInvitations]);
+  }, [currentBusiness?.id]);
 
   useEffect(() => {
     loadData();
@@ -89,12 +83,10 @@ export default function TeamPage() {
             Manage who has access to your business
           </p>
         </div>
-        {canInvite && (
-          <Button onClick={() => setInviteOpen(true)}>
-            <UserPlusIcon className="mr-2 h-4 w-4" />
-            Invite Member
-          </Button>
-        )}
+        <Button onClick={() => setInviteOpen(true)}>
+          <UserPlusIcon className="mr-2 h-4 w-4" />
+          Invite Member
+        </Button>
       </div>
 
       <Card>
@@ -112,7 +104,7 @@ export default function TeamPage() {
         </CardContent>
       </Card>
 
-      {canViewInvitations && invitations.length > 0 && (
+      {invitations.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -130,7 +122,7 @@ export default function TeamPage() {
         </Card>
       )}
 
-      {canInvite && currentBusiness && (
+      {currentBusiness && (
         <InviteDialog
           open={inviteOpen}
           onOpenChange={setInviteOpen}
