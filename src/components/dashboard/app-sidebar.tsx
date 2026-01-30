@@ -1,9 +1,10 @@
 import * as React from "react"
 import { StampeoLogo } from "@/components/ui/stampeo-logo";
-import { getBackgroundFromSettings, getContrastTextColor } from "@/utils/theme";
 import { canSeeNavItem } from "@/lib/rbac";
 import { useBusiness } from "@/contexts/business-context";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { BusinessSwitcher } from "./business-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -35,7 +36,7 @@ const navItems = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { currentBusiness, currentRole } = useBusiness();
+  const { currentRole } = useBusiness();
 
   const filteredNavItems = navItems.filter((item) =>
     canSeeNavItem(currentRole, item.href)
@@ -48,48 +49,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return pathname.startsWith(href);
   };
 
-  const bgColor = currentBusiness?.logo_url
-    ? getBackgroundFromSettings(currentBusiness.settings)
-    : null;
-  const textColor = bgColor ? getContrastTextColor(bgColor) : "dark";
-
   return (
     <Sidebar variant="floating" {...props}>
-      <SidebarHeader
-        className="flex flex-row items-center gap-3 px-4 py-4"
-        style={bgColor ? { backgroundColor: bgColor } : undefined}
-      >
-        {currentBusiness?.logo_url ? (
-          <>
-            <img
-              src={currentBusiness.logo_url}
-              alt={currentBusiness.name}
-              className="object-contain transition-all duration-300"
-              style={{ height: 36, maxWidth: 100 }}
-            />
-            <span
-              className="font-bold text-lg truncate"
-              style={{
-                color: textColor === "white" ? "#ffffff" : "var(--foreground)",
-              }}
-            >
-              {currentBusiness.name}
-            </span>
-          </>
-        ) : (
-          <>
-            <StampeoLogo className="w-8 h-8 text-[var(--accent)]" />
-            <span className="font-bold text-xl text-[var(--foreground)]">
-              Stampeo
-            </span>
-          </>
-        )}
+      <SidebarHeader className="p-2">
+        <BusinessSwitcher />
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu className="gap-2">
-            {navItems.map((item) => {
+          <SidebarMenu className="gap-2 pt-2">
+            {filteredNavItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
               return (
@@ -104,13 +73,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
                     )}
                   >
-                    <a href={item.href}>
+                    <Link href={item.href}>
                       <Icon
                         className="h-5 w-5"
                         weight={active ? "fill" : "regular"}
                       />
                       <span>{item.label}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )
