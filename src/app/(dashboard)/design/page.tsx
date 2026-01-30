@@ -74,12 +74,7 @@ export default function DesignListPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Card Designs</h2>
-          <p className="text-muted-foreground">
-            Create and manage your loyalty card designs
-          </p>
-        </div>
+        <h2 className="text-2xl font-bold">Card Designs</h2>
         <Button asChild>
           <Link href="/design/new">
             <PlusIcon className="mr-2 h-4 w-4" />

@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImageUploader from '@/components/design/ImageUploader';
-import { getMyProfile, uploadAvatar, deleteAvatar } from '@/api';
+import { getMyProfile, uploadAvatar, deleteAvatar, updateProfile } from '@/api';
 import { useAuth } from '@/contexts/auth-provider';
 import { createClient } from '@/utils/supabase/client';
 import { cn } from '@/lib/utils';
@@ -28,6 +28,12 @@ export default function AccountPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState('profile-picture');
   const [avatarKey, setAvatarKey] = useState(Date.now());
+
+  // Name editing state
+  const [name, setName] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
+  const saveNameTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Password change state
   const [newPassword, setNewPassword] = useState('');
@@ -72,12 +78,54 @@ export default function AccountPage() {
     try {
       const data = await getMyProfile();
       setProfile(data);
+      setName(data.name || '');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load profile');
     } finally {
       setLoading(false);
     }
   };
+
+  // Save name (debounced)
+  const saveName = useCallback(async (newName: string) => {
+    setSavingName(true);
+    setError(null);
+    try {
+      const updated = await updateProfile({ name: newName });
+      setProfile(prev => prev ? { ...prev, name: updated.name } : null);
+      setNameSaved(true);
+      setTimeout(() => setNameSaved(false), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save name');
+    } finally {
+      setSavingName(false);
+    }
+  }, []);
+
+  // Handle name change with debounced auto-save
+  const handleNameChange = (value: string) => {
+    setName(value);
+    setNameSaved(false);
+
+    // Clear existing timer
+    if (saveNameTimer.current) {
+      clearTimeout(saveNameTimer.current);
+    }
+
+    // Set new timer for auto-save after 1.5 seconds
+    saveNameTimer.current = setTimeout(() => {
+      saveName(value);
+    }, 1500);
+  };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (saveNameTimer.current) {
+        clearTimeout(saveNameTimer.current);
+      }
+    };
+  }, []);
 
   const handleAvatarUpload = async (file: File) => {
     setError(null);
@@ -171,8 +219,8 @@ export default function AccountPage() {
 
   return (
     <div className="flex gap-6">
-      {/* Sidebar */}
-      <nav className="w-48 shrink-0">
+      {/* Sidebar - hidden on mobile */}
+      <nav className="hidden md:block w-48 shrink-0">
         <div className="sticky top-[92px] space-y-1 pr-4">
           {sections.map((section) => (
             <button
@@ -294,19 +342,29 @@ export default function AccountPage() {
           </CardContent>
         </Card>
 
-        {/* Account Info Section (read-only) */}
+        {/* Account Info Section */}
         <Card id="account-info" className="scroll-mt-24">
           <CardHeader>
             <CardTitle className="text-lg">Account Information</CardTitle>
+            <CardDescription>
+              Update your personal information
+              {savingName && <span className="ml-2 text-[var(--accent)]">Saving...</span>}
+              {nameSaved && <span className="ml-2 text-green-600">Saved</span>}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label className="text-muted-foreground">Name</Label>
-              <p className="font-medium">{profile?.name || 'Not set'}</p>
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                placeholder="Your name"
+              />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="text-muted-foreground">Email</Label>
-              <p className="font-medium">{profile?.email || authUser?.email}</p>
+              <p className="font-medium text-sm">{profile?.email || authUser?.email}</p>
             </div>
           </CardContent>
         </Card>

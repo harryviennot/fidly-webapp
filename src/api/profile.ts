@@ -44,3 +44,18 @@ export async function deleteAvatar(): Promise<void> {
     throw new Error(error.detail || 'Failed to delete avatar');
   }
 }
+
+export async function updateProfile(data: { name?: string }): Promise<User> {
+  const response = await fetch(`${API_BASE_URL}/profile/me`, {
+    method: 'PUT',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to update profile');
+  }
+
+  return response.json();
+}

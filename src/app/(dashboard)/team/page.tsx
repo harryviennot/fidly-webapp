@@ -105,12 +105,7 @@ export default function TeamPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Team Members</h2>
-            <p className="text-muted-foreground">
-              Manage who has access to your business
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold">Team Members</h2>
           <Button disabled>
             <UserPlusIcon className="mr-2 h-4 w-4" />
             Invite Member
@@ -140,12 +135,7 @@ export default function TeamPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Team Members</h2>
-            <p className="text-muted-foreground">
-              Manage who has access to your business
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold">Team Members</h2>
           <Button onClick={() => setInviteOpen(true)} variant="gradient" size="lg">
             <UserPlusIcon className="mr-2 h-4 w-4" />
             Invite Member
@@ -173,12 +163,7 @@ export default function TeamPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Team Members</h2>
-          <p className="text-muted-foreground">
-            Manage who has access to your business
-          </p>
-        </div>
+        <h2 className="text-2xl font-bold">Team Members</h2>
         <Button onClick={() => setInviteOpen(true)} variant="gradient">
           <UserPlusIcon className="mr-2 h-4 w-4" />
           Invite Member

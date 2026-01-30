@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeftIcon } from '@phosphor-icons/react';
 import { CardDesign } from '@/types';
 import { getDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
@@ -59,21 +58,11 @@ export default function EditDesignPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/design">
-            <ArrowLeftIcon className="h-5 w-5" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-3">
-          <div>
-            <h2 className="text-2xl font-bold">{design.name}</h2>
-            <p className="text-muted-foreground">Edit design</p>
-          </div>
-          {design.is_active && (
-            <Badge variant="default">Active</Badge>
-          )}
-        </div>
+      <div className="flex items-center gap-3">
+        <h2 className="text-2xl font-bold">{design.name}</h2>
+        {design.is_active && (
+          <Badge variant="default">Active</Badge>
+        )}
       </div>
 
       <div className="bg-white rounded-lg border p-6">

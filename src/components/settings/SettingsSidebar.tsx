@@ -25,7 +25,7 @@ export function SettingsSidebar({ activeSection }: SettingsSidebarProps) {
   };
 
   return (
-    <nav className="w-48 shrink-0">
+    <nav className="hidden md:block w-48 shrink-0">
       <div className="sticky top-[92px] space-y-1 pr-4">
         {sections.map((section) => (
           <button
