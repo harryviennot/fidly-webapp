@@ -11,13 +11,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import type { MembershipRole } from "@/types";
 
 interface RoleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentRole: "owner" | "scanner";
+  currentRole: MembershipRole;
   memberName: string;
-  onConfirm: (newRole: "owner" | "scanner") => void;
+  onConfirm: (newRole: MembershipRole) => void;
   loading: boolean;
 }
 
@@ -29,7 +30,7 @@ export function RoleDialog({
   onConfirm,
   loading,
 }: RoleDialogProps) {
-  const [selectedRole, setSelectedRole] = useState<"owner" | "scanner">(currentRole);
+  const [selectedRole, setSelectedRole] = useState<MembershipRole>(currentRole);
 
   useEffect(() => {
     setSelectedRole(currentRole);
@@ -58,11 +59,12 @@ export function RoleDialog({
             <select
               id="role"
               value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value as "owner" | "scanner")}
+              onChange={(e) => setSelectedRole(e.target.value as MembershipRole)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value="scanner">Scanner - Can view and add stamps</option>
-              <option value="owner">Owner - Full access</option>
+              <option value="scanner">Scanner - Can scan passes via mobile app</option>
+              <option value="admin">Admin - Can manage team and settings</option>
+              <option value="owner">Owner - Full access including billing</option>
             </select>
           </div>
         </div>

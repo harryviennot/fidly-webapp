@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/auth-provider";
 import { updateMembershipRole, deleteMembership } from "@/api";
-import type { MembershipWithUser } from "@/types";
+import type { MembershipWithUser, MembershipRole } from "@/types";
 import { RoleDialog } from "./role-dialog";
 
 interface TeamTableProps {
@@ -66,7 +66,7 @@ export function TeamTable({ members, isOwner, onMemberUpdated }: TeamTableProps)
     }
   };
 
-  const handleRoleUpdated = async (newRole: "owner" | "scanner") => {
+  const handleRoleUpdated = async (newRole: MembershipRole) => {
     if (!selectedMember) return;
 
     setLoading(selectedMember.id);

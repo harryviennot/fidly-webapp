@@ -6,11 +6,13 @@ export interface User {
   created_at?: string;
 }
 
+export type MembershipRole = 'owner' | 'admin' | 'scanner';
+
 export interface MembershipWithUser {
   id: string;
   user_id: string;
   business_id: string;
-  role: 'owner' | 'scanner';
+  role: MembershipRole;
   user: User;
   created_at?: string;
 }
@@ -18,9 +20,9 @@ export interface MembershipWithUser {
 export interface MembershipCreate {
   user_id: string;
   business_id: string;
-  role: 'owner' | 'scanner';
+  role: MembershipRole;
 }
 
 export interface MembershipUpdate {
-  role: 'owner' | 'scanner';
+  role: MembershipRole;
 }

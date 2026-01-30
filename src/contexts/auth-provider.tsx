@@ -1,13 +1,28 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { createClient } from "../utils/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import type { User, Session, AuthError } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  signUp: (
+    email: string,
+    password: string,
+    name: string
+  ) => Promise<{ error: AuthError | null }>;
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -40,16 +55,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
-  const signOut = async () => {
+  const signUp = useCallback(
+    async (email: string, password: string, name: string) => {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      return { error };
+    },
+    [supabase.auth]
+  );
+
+  const signIn = useCallback(
+    async (email: string, password: string) => {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { error };
+    },
+    [supabase.auth]
+  );
+
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     // Redirect to showcase login after sign out
     const showcaseUrl =
       process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
     window.location.href = `${showcaseUrl}/login`;
-  };
+  }, [supabase.auth]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider
+      value={{ user, session, loading, signUp, signIn, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

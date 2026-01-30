@@ -72,7 +72,8 @@ export const config = {
      * - public folder files
      * - api routes (they handle their own auth)
      * - register (public customer registration page)
+     * - invite (team invitation acceptance page)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api|register).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api|register|invite).*)",
   ],
 };

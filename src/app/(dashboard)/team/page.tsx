@@ -1,40 +1,76 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { UserPlusIcon } from "@phosphor-icons/react";
+import { UserPlusIcon, EnvelopeSimpleIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBusiness } from "@/contexts/business-context";
-import { getBusinessMembers } from "@/api";
-import type { MembershipWithUser } from "@/types";
+import {
+  getBusinessMembers,
+  getPendingInvitations,
+  cancelInvitation,
+  resendInvitation,
+} from "@/api";
+import type { MembershipWithUser, Invitation } from "@/types";
 import { TeamTable } from "@/components/team/team-table";
 import { InviteDialog } from "@/components/team/invite-dialog";
+import { PendingInvitationsTable } from "@/components/team/pending-invitations-table";
 
 export default function TeamPage() {
   const { currentBusiness, currentRole } = useBusiness();
   const [members, setMembers] = useState<MembershipWithUser[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(false);
 
-  const loadMembers = useCallback(async () => {
+  // Owners and admins can invite (but not scanners)
+  const canInvite = currentRole === "owner" || currentRole === "admin";
+  const canViewInvitations = canInvite;
+
+  const loadData = useCallback(async () => {
     if (!currentBusiness?.id) return;
 
     setLoading(true);
     try {
-      const data = await getBusinessMembers(currentBusiness.id);
-      setMembers(data);
+      const [membersData, invitationsData] = await Promise.all([
+        getBusinessMembers(currentBusiness.id),
+        canViewInvitations
+          ? getPendingInvitations(currentBusiness.id)
+          : Promise.resolve([]),
+      ]);
+      setMembers(membersData);
+      setInvitations(invitationsData);
     } catch (error) {
-      console.error("Failed to load team members:", error);
+      console.error("Failed to load team data:", error);
     } finally {
       setLoading(false);
     }
-  }, [currentBusiness?.id]);
+  }, [currentBusiness?.id, canViewInvitations]);
 
   useEffect(() => {
-    loadMembers();
-  }, [loadMembers]);
+    loadData();
+  }, [loadData]);
 
-  const isOwner = currentRole === "owner";
+  const handleCancelInvitation = async (invitationId: string) => {
+    if (!currentBusiness?.id) return;
+    try {
+      await cancelInvitation(currentBusiness.id, invitationId);
+      // Remove from local state
+      setInvitations((prev) => prev.filter((i) => i.id !== invitationId));
+    } catch (error) {
+      console.error("Failed to cancel invitation:", error);
+    }
+  };
+
+  const handleResendInvitation = async (invitationId: string) => {
+    if (!currentBusiness?.id) return;
+    try {
+      await resendInvitation(currentBusiness.id, invitationId);
+      // Could show a toast notification here
+    } catch (error) {
+      console.error("Failed to resend invitation:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -53,7 +89,7 @@ export default function TeamPage() {
             Manage who has access to your business
           </p>
         </div>
-        {isOwner && (
+        {canInvite && (
           <Button onClick={() => setInviteOpen(true)}>
             <UserPlusIcon className="mr-2 h-4 w-4" />
             Invite Member
@@ -70,18 +106,36 @@ export default function TeamPage() {
         <CardContent>
           <TeamTable
             members={members}
-            isOwner={isOwner}
-            onMemberUpdated={loadMembers}
+            isOwner={currentRole === "owner"}
+            onMemberUpdated={loadData}
           />
         </CardContent>
       </Card>
 
-      {isOwner && currentBusiness && (
+      {canViewInvitations && invitations.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <EnvelopeSimpleIcon className="h-5 w-5" />
+              Pending Invitations
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PendingInvitationsTable
+              invitations={invitations}
+              onCancel={handleCancelInvitation}
+              onResend={handleResendInvitation}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {canInvite && currentBusiness && (
         <InviteDialog
           open={inviteOpen}
           onOpenChange={setInviteOpen}
           businessId={currentBusiness.id}
-          onInvited={loadMembers}
+          onInvited={loadData}
         />
       )}
     </div>

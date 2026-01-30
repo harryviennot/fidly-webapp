@@ -14,16 +14,18 @@ interface Business {
   logo_url?: string | null;
 }
 
+type MembershipRole = "owner" | "admin" | "scanner";
+
 interface Membership {
   id: string;
-  role: "owner" | "scanner";
+  role: MembershipRole;
   business: Business;
 }
 
 interface BusinessContextType {
   memberships: Membership[];
   currentBusiness: Business | null;
-  currentRole: "owner" | "scanner" | null;
+  currentRole: MembershipRole | null;
   setCurrentBusiness: (business: Business) => void;
   loading: boolean;
   error: string | null;
@@ -39,7 +41,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const [currentBusiness, setCurrentBusinessState] = useState<Business | null>(
     null
   );
-  const [currentRole, setCurrentRole] = useState<"owner" | "scanner" | null>(
+  const [currentRole, setCurrentRole] = useState<MembershipRole | null>(
     null
   );
   const [loading, setLoading] = useState(true);
@@ -86,7 +88,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       if (membershipsData && membershipsData.length > 0) {
         const formatted: Membership[] = membershipsData.map((m) => ({
           id: m.id,
-          role: m.role as "owner" | "scanner",
+          role: m.role as MembershipRole,
           business: m.businesses as unknown as Business,
         }));
         setMemberships(formatted);
