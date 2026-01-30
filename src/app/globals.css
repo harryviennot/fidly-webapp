@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   /* Base - Soft warm gray (professional, appeals to all businesses) */
@@ -15,12 +18,14 @@
   /* Primary - Dark slate */
   --primary: #2d3436;
   --primary-hover: #1e2324;
+  --primary-foreground: #ffffff;
 
   /* Accent - Terracotta/Burnt orange (CTAs, stamps, highlights) */
   --accent: #f97316;
   --accent-hover: #ea580c;
   --accent-light: #f5ebe7;
   --accent-muted: rgba(199, 91, 57, 0.1);
+  --accent-foreground: #ffffff;
   --terracotta: #f97316;
 
   /* Decorative stamp colors */
@@ -35,31 +40,91 @@
   --muted-gray: #8c655a;
   --border: #ddd9d0;
   --border-light: #e8e6e1;
+  --input: #ddd9d0;
+  --ring: #f97316;
 
   /* Card styles */
+  --card: var(--cream);
+  --card-foreground: var(--foreground);
   --card-bg: var(--cream);
   --card-border: rgba(255, 255, 255, 0.5);
   --card-shadow: 0 2px 8px rgba(45, 52, 54, 0.06), 0 8px 24px rgba(45, 52, 54, 0.04);
   --card-shadow-hover: 0 8px 32px rgba(45, 52, 54, 0.1);
 
+  /* Popover */
+  --popover: var(--cream);
+  --popover-foreground: var(--foreground);
+
+  /* Secondary */
+  --secondary: #e8e6e1;
+  --secondary-foreground: #2d3436;
+
   /* Semantic colors */
   --success: #7d9f7d;
   --error: #f97316;
   --warning: #d4a574;
+  --destructive: #dc2626;
+
+  /* Radius */
+  --radius: 0.625rem;
+
+  /* Sidebar - mapped to our design system */
+  --sidebar: var(--cream);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--accent-muted);
+  --sidebar-accent-foreground: var(--accent);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--accent);
 }
 
 @theme inline {
+  /* Core colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--accent);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* UI elements */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radii */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
   font-family: "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
 }
 
@@ -198,4 +263,13 @@ html {
 
 .stamp-fill-animation {
   animation: stamp-fill 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
