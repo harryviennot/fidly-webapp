@@ -25,18 +25,16 @@ interface StatCardProps {
 function StatCard({ icon, label, value, subtext, highlight }: StatCardProps) {
   return (
     <div
-      className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 ${
-        highlight
-          ? "border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_5%,transparent)]"
-          : "border-[var(--border)] bg-[var(--cream)]"
-      }`}
+      className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 ${highlight
+        ? "border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_5%,transparent)]"
+        : "border-[var(--border)] bg-[var(--cream)]"
+        }`}
     >
       <div
-        className={`flex items-center justify-center w-10 h-10 rounded-lg ${
-          highlight
-            ? "bg-[color-mix(in_srgb,var(--accent)_15%,transparent)] text-[var(--accent)]"
-            : "bg-[var(--muted)] text-[var(--muted-foreground)]"
-        }`}
+        className={`flex items-center justify-center w-10 h-10 rounded-lg ${highlight
+          ? "bg-[color-mix(in_srgb,var(--accent)_15%,transparent)] text-[var(--accent)]"
+          : "bg-[var(--muted)] text-[var(--muted-foreground)]"
+          }`}
       >
         {icon}
       </div>
@@ -93,11 +91,6 @@ export function TeamStats({
         icon={<UsersIcon size={20} weight="duotone" />}
         label="Team members"
         value={members.length}
-        subtext={
-          members.length > 0
-            ? `${ownerCount} owner${ownerCount !== 1 ? "s" : ""}, ${adminCount} admin${adminCount !== 1 ? "s" : ""}`
-            : undefined
-        }
       />
 
       <StatCard
@@ -131,9 +124,6 @@ export function TeamStats({
         icon={<EnvelopeSimpleIcon size={20} weight="duotone" />}
         label="Pending invites"
         value={invitations.length}
-        subtext={
-          invitations.length > 0 ? "Awaiting response" : "No pending invites"
-        }
         highlight={invitations.length > 0}
       />
     </div>

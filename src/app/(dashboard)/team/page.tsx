@@ -119,7 +119,7 @@ export default function TeamPage() {
 
         <TeamStatsSkeleton />
 
-        <Card>
+        <Card hover={false}>
           <CardHeader>
             <div className="h-6 w-24 bg-[var(--muted)] rounded animate-pulse" />
           </CardHeader>
@@ -152,7 +152,7 @@ export default function TeamPage() {
           </Button>
         </div>
 
-        <Card>
+        <Card hover={false}>
           <CardContent className="pt-6">
             <EmptyTeamState onInvite={() => setInviteOpen(true)} />
           </CardContent>
@@ -192,7 +192,7 @@ export default function TeamPage() {
       />
 
       {invitations.length > 0 && (
-        <Card>
+        <Card hover={false}>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <EnvelopeSimpleIcon className="h-5 w-5" />
@@ -209,7 +209,7 @@ export default function TeamPage() {
         </Card>
       )}
 
-      <Card>
+      <Card hover={false}>
         <CardHeader>
           <CardTitle className="text-lg">
             {members.length} {members.length === 1 ? "Member" : "Members"}
@@ -222,6 +222,7 @@ export default function TeamPage() {
                 const isCurrentUser = user?.email === member.user.email;
                 const isLastOwner = member.role === "owner" && ownerCount === 1;
                 const canManageTeam = currentRole === "owner" || currentRole === "admin";
+                // Can't modify yourself or the last owner
                 const canModify = canManageTeam && !isCurrentUser && !isLastOwner;
 
                 return (
@@ -229,7 +230,6 @@ export default function TeamPage() {
                     key={member.id}
                     member={member}
                     isCurrentUser={isCurrentUser}
-                    isLastOwner={isLastOwner}
                     canModify={canModify}
                     loading={cardLoading === member.id}
                     onChangeRole={() => {

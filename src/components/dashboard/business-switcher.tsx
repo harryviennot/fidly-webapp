@@ -57,8 +57,13 @@ export function BusinessSwitcher() {
       ) : (
         <>
           <StampeoLogo className="w-8 h-8 text-[var(--accent)]" />
-          <span className="font-bold text-xl text-[var(--foreground)]">
-            Stampeo
+          <span
+            className="truncate font-bold text-lg"
+            style={{
+              color: textColor === "white" ? "#ffffff" : "var(--foreground)",
+            }}
+          >
+            {currentBusiness?.name || "Stampeo"}
           </span>
         </>
       )}
