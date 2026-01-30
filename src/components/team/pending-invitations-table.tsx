@@ -2,6 +2,17 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
@@ -52,30 +63,47 @@ export function PendingInvitationsTable({
   onResend,
 }: PendingInvitationsTableProps) {
   const [loadingStates, setLoadingStates] = useState<Record<string, string>>({});
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedInvitation, setSelectedInvitation] = useState<Invitation | null>(null);
 
-  const handleResend = async (id: string) => {
-    setLoadingStates((prev) => ({ ...prev, [id]: "resending" }));
+  const handleResend = async (invitation: Invitation) => {
+    setLoadingStates((prev) => ({ ...prev, [invitation.id]: "resending" }));
     try {
-      await onResend(id);
+      await onResend(invitation.id);
+      toast.success(`Invitation resent to ${invitation.email}`);
+    } catch {
+      toast.error("Failed to resend invitation");
     } finally {
       setLoadingStates((prev) => {
         const next = { ...prev };
-        delete next[id];
+        delete next[invitation.id];
         return next;
       });
     }
   };
 
-  const handleCancel = async (id: string) => {
-    setLoadingStates((prev) => ({ ...prev, [id]: "cancelling" }));
+  const handleCancelClick = (invitation: Invitation) => {
+    setSelectedInvitation(invitation);
+    setCancelDialogOpen(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!selectedInvitation) return;
+
+    setCancelDialogOpen(false);
+    setLoadingStates((prev) => ({ ...prev, [selectedInvitation.id]: "cancelling" }));
     try {
-      await onCancel(id);
+      await onCancel(selectedInvitation.id);
+      toast.success(`Invitation to ${selectedInvitation.email} cancelled`);
+    } catch {
+      toast.error("Failed to cancel invitation");
     } finally {
       setLoadingStates((prev) => {
         const next = { ...prev };
-        delete next[id];
+        delete next[selectedInvitation.id];
         return next;
       });
+      setSelectedInvitation(null);
     }
   };
 
@@ -88,6 +116,7 @@ export function PendingInvitationsTable({
   }
 
   return (
+    <>
     <Table>
       <TableHeader>
         <TableRow>
@@ -123,7 +152,7 @@ export function PendingInvitationsTable({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleResend(invitation.id)}
+                  onClick={() => handleResend(invitation)}
                   disabled={isLoading}
                 >
                   {loadingAction === "resending" ? "Sending..." : "Resend"}
@@ -132,7 +161,7 @@ export function PendingInvitationsTable({
                   variant="ghost"
                   size="sm"
                   className="text-destructive hover:text-destructive"
-                  onClick={() => handleCancel(invitation.id)}
+                  onClick={() => handleCancelClick(invitation)}
                   disabled={isLoading}
                 >
                   {loadingAction === "cancelling" ? "Cancelling..." : "Cancel"}
@@ -143,5 +172,30 @@ export function PendingInvitationsTable({
         })}
       </TableBody>
     </Table>
+
+    <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Cancel invitation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to cancel the invitation to{" "}
+            <span className="font-medium text-[var(--foreground)]">
+              {selectedInvitation?.email}
+            </span>
+            ? They will no longer be able to join your team with this invite.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Keep Invitation</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleCancelConfirm}
+            className="bg-destructive text-white hover:bg-destructive/90"
+          >
+            Cancel Invitation
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

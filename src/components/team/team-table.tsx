@@ -12,6 +12,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -22,7 +32,7 @@ import {
 import { useAuth } from "@/contexts/auth-provider";
 import { updateMembershipRole, deleteMembership } from "@/api";
 import type { MembershipWithUser, MembershipRole } from "@/types";
-import { RoleDialog } from "./role-dialog";
+import { toast } from "sonner";
 
 interface TeamTableProps {
   members: MembershipWithUser[];
@@ -33,6 +43,7 @@ interface TeamTableProps {
 export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTableProps) {
   const { user } = useAuth();
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MembershipWithUser | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -50,19 +61,25 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
     setRoleDialogOpen(true);
   };
 
-  const handleRemove = async (member: MembershipWithUser) => {
-    if (!confirm(`Remove ${member.user.name || member.user.email} from the team?`)) {
-      return;
-    }
+  const handleRemoveClick = (member: MembershipWithUser) => {
+    setSelectedMember(member);
+    setRemoveDialogOpen(true);
+  };
 
-    setLoading(member.id);
+  const handleRemoveConfirm = async () => {
+    if (!selectedMember) return;
+
+    setLoading(selectedMember.id);
+    setRemoveDialogOpen(false);
     try {
-      await deleteMembership(member.id);
+      await deleteMembership(selectedMember.id);
+      toast.success(`${selectedMember.user.name || selectedMember.user.email} has been removed from the team`);
       onMemberUpdated();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to remove member");
+      toast.error(error instanceof Error ? error.message : "Failed to remove member");
     } finally {
       setLoading(null);
+      setSelectedMember(null);
     }
   };
 
@@ -72,10 +89,11 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
     setLoading(selectedMember.id);
     try {
       await updateMembershipRole(selectedMember.id, { role: newRole });
+      toast.success(`Role updated to ${newRole}`);
       onMemberUpdated();
       setRoleDialogOpen(false);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to update role");
+      toast.error(error instanceof Error ? error.message : "Failed to update role");
     } finally {
       setLoading(null);
     }
@@ -94,99 +112,114 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Member</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Joined</TableHead>
-            {(currentRole === "owner" || currentRole === "admin") && <TableHead className="w-[50px]"></TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {members.map((member) => {
-            const isCurrentUser = user?.email === member.user.email;
-            const isLastOwner = member.role === "owner" && ownerCount === 1;
-            const canManageTeam = currentRole === "owner" || currentRole === "admin";
-            const canModify = canManageTeam && !isCurrentUser && !isLastOwner;
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Member</TableHead>
+          <TableHead>Role</TableHead>
+          <TableHead>Joined</TableHead>
+          {(currentRole === "owner" || currentRole === "admin") && <TableHead className="w-[50px]"></TableHead>}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {members.map((member) => {
+          const isCurrentUser = user?.email === member.user.email;
+          const isLastOwner = member.role === "owner" && ownerCount === 1;
+          const canManageTeam = currentRole === "owner" || currentRole === "admin";
+          const canModify = canManageTeam && !isCurrentUser && !isLastOwner;
 
-            return (
-              <TableRow key={member.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback className="bg-muted text-sm">
-                        {getInitials(member.user.name || member.user.email)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-sm">
-                        {member.user.name || "Unnamed"}
-                        {isCurrentUser && (
-                          <span className="text-muted-foreground ml-1">(you)</span>
-                        )}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {member.user.email}
-                      </p>
-                    </div>
+          return (
+            <TableRow key={member.id}>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback className="bg-muted text-sm">
+                      {getInitials(member.user.name || member.user.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium text-sm">
+                      {member.user.name || "Unnamed"}
+                      {isCurrentUser && (
+                        <span className="text-muted-foreground ml-1">(you)</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {member.user.email}
+                    </p>
                   </div>
-                </TableCell>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant={member.role === "owner" ? "default" : "secondary"}
+                  className="capitalize"
+                >
+                  {member.role}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {member.created_at
+                  ? new Date(member.created_at).toLocaleDateString()
+                  : "-"}
+              </TableCell>
+              {(currentRole === "owner" || currentRole === "admin") && (
                 <TableCell>
-                  <Badge
-                    variant={member.role === "owner" ? "default" : "secondary"}
-                    className="capitalize"
-                  >
-                    {member.role}
-                  </Badge>
+                  {canModify ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={loading === member.id}
+                        >
+                          <DotsThreeIcon className="h-4 w-4" weight="bold" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleChangeRole(member)}>
+                          Change Role
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleRemoveClick(member)}
+                          className="text-destructive"
+                        >
+                          Remove
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : null}
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {member.created_at
-                    ? new Date(member.created_at).toLocaleDateString()
-                    : "-"}
-                </TableCell>
-                {(currentRole === "owner" || currentRole === "admin") && (
-                  <TableCell>
-                    {canModify ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={loading === member.id}
-                          >
-                            <DotsThreeIcon className="h-4 w-4" weight="bold" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleChangeRole(member)}>
-                            Change Role
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleRemove(member)}
-                            className="text-destructive"
-                          >
-                            Remove
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : null}
-                  </TableCell>
-                )}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+              )}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
 
-      <RoleDialog
-        open={roleDialogOpen}
-        onOpenChange={setRoleDialogOpen}
-        currentRole={selectedMember?.role || "scanner"}
-        memberName={selectedMember?.user.name || selectedMember?.user.email || ""}
-        onConfirm={handleRoleUpdated}
-        loading={loading !== null}
-      />
+    <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remove team member?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to remove{" "}
+            <span className="font-medium text-[var(--foreground)]">
+              {selectedMember?.user.name || selectedMember?.user.email}
+            </span>{" "}
+            from the team? They will lose access to this business.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleRemoveConfirm}
+            className="bg-destructive text-white hover:bg-destructive/90"
+          >
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 }
