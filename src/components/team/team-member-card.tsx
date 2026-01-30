@@ -1,7 +1,7 @@
 "use client";
 
 import { DotsThreeIcon } from "@phosphor-icons/react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,6 +77,7 @@ export function TeamMemberCard({
       {/* Avatar with activity indicator */}
       <div className="relative flex-shrink-0">
         <Avatar className="h-12 w-12">
+          <AvatarImage src={member.user.avatar_url} className="object-cover" />
           <AvatarFallback className="bg-[var(--muted)] text-base font-medium">
             {getInitials(member.user.name || member.user.email)}
           </AvatarFallback>
@@ -129,7 +130,7 @@ export function TeamMemberCard({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 flex-shrink-0"
+              className="h-8 w-8 flex-shrink-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               disabled={loading}
             >
               <DotsThreeIcon size={18} weight="bold" />

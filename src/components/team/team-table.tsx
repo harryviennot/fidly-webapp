@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DotsThreeIcon } from "@phosphor-icons/react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -133,6 +133,7 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
+                    <AvatarImage src={member.user.avatar_url} className="object-cover" />
                     <AvatarFallback className="bg-muted text-sm">
                       {getInitials(member.user.name || member.user.email)}
                     </AvatarFallback>

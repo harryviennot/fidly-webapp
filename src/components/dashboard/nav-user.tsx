@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   BadgeCheck,
   Bell,
@@ -29,10 +31,17 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/auth-provider";
+import { getMyProfile } from "@/api";
+import type { User } from "@/types";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, signOut } = useAuth();
+  const [profile, setProfile] = useState<User | null>(null);
+
+  useEffect(() => {
+    getMyProfile().then(setProfile).catch(console.error);
+  }, []);
 
   const getInitials = (name: string) => {
     return name
@@ -43,9 +52,9 @@ export function NavUser() {
       .slice(0, 2);
   };
 
-  const displayName = user?.email?.split("@")[0] || "User";
+  const displayName = profile?.name || user?.email?.split("@")[0] || "User";
   const email = user?.email || "";
-  const initials = user?.email ? getInitials(displayName) : "U";
+  const initials = getInitials(displayName);
 
   return (
     <SidebarMenu>
@@ -57,6 +66,7 @@ export function NavUser() {
               className="hover:bg-transparent hover:text-inherit active:bg-transparent active:text-inherit data-[state=open]:bg-transparent data-[state=open]:text-inherit focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={profile?.avatar_url} className="rounded-lg object-cover" />
                 <AvatarFallback className="rounded-lg bg-[var(--accent-muted)] text-[var(--accent)]">
                   {initials}
                 </AvatarFallback>
@@ -77,6 +87,7 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarImage src={profile?.avatar_url} className="rounded-lg object-cover" />
                   <AvatarFallback className="rounded-lg bg-[var(--accent-muted)] text-[var(--accent)]">
                     {initials}
                   </AvatarFallback>
@@ -96,10 +107,12 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
+              <Link href="/account">
+                <DropdownMenuItem>
+                  <BadgeCheck />
+                  Account
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem>
                 <CreditCard />
                 Billing
