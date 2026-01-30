@@ -7,13 +7,14 @@ import { StatsCard } from "@/components/dashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBusiness } from "@/contexts/business-context";
-import { getAllCustomers, getActiveDesign } from "@/api";
-import type { CustomerResponse, CardDesign } from "@/types";
+import { getAllCustomers, getActiveDesign, getBusinessMembers } from "@/api";
+import type { CustomerResponse, CardDesign, MembershipWithUser } from "@/types";
 
 export default function AdminPage() {
-  const { currentBusiness, memberships } = useBusiness();
+  const { currentBusiness } = useBusiness();
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
   const [activeDesign, setActiveDesign] = useState<CardDesign | null>(null);
+  const [teamMembers, setTeamMembers] = useState<MembershipWithUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,12 +23,14 @@ export default function AdminPage() {
 
       setLoading(true);
       try {
-        const [customersData, designData] = await Promise.all([
+        const [customersData, designData, membersData] = await Promise.all([
           getAllCustomers(currentBusiness.id),
           getActiveDesign(currentBusiness.id),
+          getBusinessMembers(currentBusiness.id),
         ]);
         setCustomers(customersData);
         setActiveDesign(designData);
+        setTeamMembers(membersData);
       } catch (error) {
         console.error("Failed to load dashboard data:", error);
       } finally {
@@ -39,9 +42,6 @@ export default function AdminPage() {
   }, [currentBusiness?.id]);
 
   const totalStamps = customers.reduce((sum, c) => sum + c.stamps, 0);
-  const currentMembership = memberships.find(
-    (m) => m.business.id === currentBusiness?.id
-  );
 
   if (loading) {
     return (
@@ -85,8 +85,8 @@ export default function AdminPage() {
         />
         <StatsCard
           title="Team Members"
-          value={memberships.length}
-          description={`You are ${currentMembership?.role || "member"}`}
+          value={teamMembers.length}
+          description="Owners, admins & scanners"
           icon={<UserPlusIcon className="h-6 w-6" weight="duotone" />}
         />
       </div>

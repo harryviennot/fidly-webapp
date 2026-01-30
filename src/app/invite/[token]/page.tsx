@@ -69,8 +69,13 @@ export default function InviteAcceptPage() {
       sessionStorage.removeItem("pendingInviteToken");
       setSuccess(true);
       // Full page reload to ensure business context loads fresh with new membership
+      // Scanners go to welcome page, others go to dashboard
       setTimeout(() => {
-        window.location.href = "/";
+        if (invitation.role === "scanner") {
+          window.location.href = "/scanner-welcome";
+        } else {
+          window.location.href = "/";
+        }
       }, 2000);
     } catch (err) {
       setError(

@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { StampeoLogo } from "@/components/ui/stampeo-logo";
 import { getBackgroundFromSettings, getContrastTextColor } from "@/utils/theme";
+import { canSeeNavItem } from "@/lib/rbac";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: HouseIcon },
@@ -36,8 +37,13 @@ const navItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const { currentBusiness, memberships, setCurrentBusiness, loading } = useBusiness();
+  const { currentBusiness, currentRole } = useBusiness();
   const { user, signOut } = useAuth();
+
+  // Filter nav items based on user's role
+  const filteredNavItems = navItems.filter((item) =>
+    canSeeNavItem(currentRole, item.href)
+  );
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -100,7 +106,7 @@ export function DashboardSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => {
+        {filteredNavItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
           return (

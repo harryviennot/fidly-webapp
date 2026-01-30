@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardSidebar, DashboardHeader } from "@/components/dashboard";
+import { RoleGuard } from "@/components/auth/role-guard";
 import { useBusiness } from "../../contexts/business-context";
 
 export default function AdminLayout({
@@ -37,12 +38,14 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <DashboardSidebar />
-      <div className="pl-[280px]">
-        <DashboardHeader />
-        <main className="p-6">{children}</main>
+    <RoleGuard>
+      <div className="min-h-screen bg-[var(--background)]">
+        <DashboardSidebar />
+        <div className="pl-[280px]">
+          <DashboardHeader />
+          <main className="p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </RoleGuard>
   );
 }

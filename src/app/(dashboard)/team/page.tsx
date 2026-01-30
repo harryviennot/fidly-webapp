@@ -106,7 +106,7 @@ export default function TeamPage() {
         <CardContent>
           <TeamTable
             members={members}
-            isOwner={currentRole === "owner"}
+            currentRole={currentRole}
             onMemberUpdated={loadData}
           />
         </CardContent>

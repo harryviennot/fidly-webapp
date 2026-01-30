@@ -26,11 +26,11 @@ import { RoleDialog } from "./role-dialog";
 
 interface TeamTableProps {
   members: MembershipWithUser[];
-  isOwner: boolean;
+  currentRole: MembershipRole;
   onMemberUpdated: () => void;
 }
 
-export function TeamTable({ members, isOwner, onMemberUpdated }: TeamTableProps) {
+export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTableProps) {
   const { user } = useAuth();
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MembershipWithUser | null>(null);
@@ -100,14 +100,15 @@ export function TeamTable({ members, isOwner, onMemberUpdated }: TeamTableProps)
             <TableHead>Member</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Joined</TableHead>
-            {isOwner && <TableHead className="w-[50px]"></TableHead>}
+            {(currentRole === "owner" || currentRole === "admin") && <TableHead className="w-[50px]"></TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {members.map((member) => {
             const isCurrentUser = user?.email === member.user.email;
             const isLastOwner = member.role === "owner" && ownerCount === 1;
-            const canModify = isOwner && !isCurrentUser && !isLastOwner;
+            const canManageTeam = currentRole === "owner" || currentRole === "admin";
+            const canModify = canManageTeam && !isCurrentUser && !isLastOwner;
 
             return (
               <TableRow key={member.id}>
@@ -144,7 +145,7 @@ export function TeamTable({ members, isOwner, onMemberUpdated }: TeamTableProps)
                     ? new Date(member.created_at).toLocaleDateString()
                     : "-"}
                 </TableCell>
-                {isOwner && (
+                {(currentRole === "owner" || currentRole === "admin") && (
                   <TableCell>
                     {canModify ? (
                       <DropdownMenu>
