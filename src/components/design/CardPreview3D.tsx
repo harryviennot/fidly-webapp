@@ -99,10 +99,18 @@ export function CardPreview3D({
   const bgGradientFrom = adjustBrightness(bgHex, 15);
   const bgGradientTo = adjustBrightness(bgHex, -10);
 
-  // Determine text color based on background
+  // Determine text color - use foreground_color if set, otherwise auto-calculate from background
   const isLightBg = isLightColor(bgHex);
-  const textColor = isLightBg ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,1)";
-  const mutedTextColor = isLightBg ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
+  const foregroundColor = design.foreground_color;
+
+  // Calculate auto colors based on background brightness
+  const autoTextColor = isLightBg ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,1)";
+  const autoMutedColor = isLightBg ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
+
+  // Use foreground_color if set, otherwise use auto-calculated colors
+  const textColor = foregroundColor ? rgbToHex(foregroundColor) : autoTextColor;
+  const mutedTextColor = foregroundColor ? `${rgbToHex(foregroundColor)}80` : autoMutedColor;
+
   const emptyStampBg = isLightBg ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
   const emptyStampBorder = isLightBg ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.2)";
 

@@ -3,13 +3,14 @@
 import { useState, useImperativeHandle, forwardRef, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { CardDesign, CardDesignCreate } from '@/types';
-import { createDesign, updateDesign, uploadLogo, activateDesign } from '@/api';
+import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activateDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import CardPreview3D from './CardPreview3D';
 import CardPreviewBack from './CardPreviewBack';
 import ImageUploader from './ImageUploader';
 import FieldEditor from './FieldEditor';
 import { StampIconPicker, RewardIconPicker, StampIconType } from './StampIconPicker';
+import { LabelWithTooltip } from './FieldTooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -86,6 +87,13 @@ const iconColors = [
   { name: "Cyan", value: "#06b6d4" },
 ];
 
+const textColors = [
+  { name: "White", value: "#ffffff" },
+  { name: "Black", value: "#000000" },
+  { name: "Dark Gray", value: "#374151" },
+  { name: "Light Gray", value: "#d1d5db" },
+];
+
 // Convert rgb to hex
 function rgbToHex(rgb: string): string {
   if (!rgb) return '#1c1c1e';
@@ -113,7 +121,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
   function DesignEditorV2({ design, isNew = false, onSave, onSavingChange }, ref) {
   const router = useRouter();
   const { currentBusiness } = useBusiness();
-  const [formData, setFormData] = useState<CardDesignCreate & { logo_url?: string }>(
+  const [formData, setFormData] = useState<CardDesignCreate & { logo_url?: string; strip_background_url?: string }>(
     design ? { ...design } : { ...DEFAULT_DESIGN }
   );
   const [isActive, setIsActive] = useState(design?.is_active ?? false);
@@ -163,13 +171,11 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     saving,
   }), [handleSave, saving]);
 
-  // Collapsed sections state
+  // Collapsed sections state (3 consolidated sections)
   const [openSections, setOpenSections] = useState({
-    basic: true,
-    colors: true,
+    branding: true,
     stamps: true,
-    logo: false,
-    fields: false,
+    passContent: false,
   });
 
   const toggleSection = (section: keyof typeof openSections) => {
@@ -211,77 +217,48 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     updateField('logo_url', result.url);
   };
 
+  const handleStripBackgroundUpload = async (file: File) => {
+    if (!design || !currentBusiness?.id) {
+      throw new Error('Please save the design first before uploading images');
+    }
+    const result = await uploadStripBackground(currentBusiness.id, design.id, file);
+    updateField('strip_background_url', result.url);
+  };
+
   // Get current colors as hex for pickers
   const bgHex = rgbToHex(formData.background_color || 'rgb(28, 28, 30)');
   const accentHex = rgbToHex(formData.stamp_filled_color || 'rgb(249, 115, 22)');
   const iconHex = rgbToHex(formData.label_color || 'rgb(255, 255, 255)');
+  const textHex = rgbToHex(formData.foreground_color || 'rgb(255, 255, 255)');
 
   // Check if current colors are custom
   const isCustomBackground = !backgroundColors.some(c => c.value.toLowerCase() === bgHex.toLowerCase());
   const isCustomAccent = !accentColors.some(c => c.value.toLowerCase() === accentHex.toLowerCase());
   const isCustomIcon = !iconColors.some(c => c.value.toLowerCase() === iconHex.toLowerCase());
+  const isCustomText = !textColors.some(c => c.value.toLowerCase() === textHex.toLowerCase());
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 min-h-[calc(100vh-200px)]">
       {/* Left: Scrollable Form */}
       <div className="lg:w-[420px] flex-shrink-0 overflow-y-auto pb-6 space-y-4">
-        {/* Basic Info Section */}
+        {/* Branding Section - Logo + Colors */}
         <CollapsibleSection
-          title="Basic Info"
-          isOpen={openSections.basic}
-          onToggle={() => toggleSection('basic')}
-        >
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Design Name *</Label>
-              <Input
-                id="name"
-                placeholder="e.g., Summer Theme"
-                value={formData.name}
-                onChange={(e) => updateField('name', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="organization_name">Organization Name *</Label>
-              <Input
-                id="organization_name"
-                placeholder="e.g., Coffee Shop"
-                value={formData.organization_name}
-                onChange={(e) => updateField('organization_name', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Card Description *</Label>
-              <Input
-                id="description"
-                placeholder="e.g., Loyalty Card"
-                value={formData.description}
-                onChange={(e) => updateField('description', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="logo_text">Logo Text (fallback)</Label>
-              <Input
-                id="logo_text"
-                placeholder="e.g., CAFE"
-                value={formData.logo_text || ''}
-                onChange={(e) => updateField('logo_text', e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">Shown if no logo image is uploaded</p>
-            </div>
-          </div>
-        </CollapsibleSection>
-
-        {/* Colors Section */}
-        <CollapsibleSection
-          title="Colors"
-          isOpen={openSections.colors}
-          onToggle={() => toggleSection('colors')}
+          title="Branding"
+          isOpen={openSections.branding}
+          onToggle={() => toggleSection('branding')}
         >
           <div className="space-y-5">
+            {/* Logo Upload */}
+            <ImageUploader
+              label="Logo"
+              value={formData.logo_url}
+              onUpload={handleLogoUpload}
+              hint="Appears in top-left of pass. PNG, 160x50pt max"
+            />
+
             {/* Background Color */}
             <div className="space-y-2">
-              <Label>Card Background</Label>
+              <LabelWithTooltip tooltip="Main background of your wallet pass">Background Color</LabelWithTooltip>
               <div className="grid grid-cols-8 gap-2">
                 {backgroundColors.map((color) => (
                   <button
@@ -317,9 +294,47 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               </div>
             </div>
 
-            {/* Accent/Stamp Color */}
+            {/* Text Color */}
             <div className="space-y-2">
-              <Label>Stamp Color</Label>
+              <LabelWithTooltip tooltip="Color for stamps count and main text on the pass">Text Color</LabelWithTooltip>
+              <div className="grid grid-cols-8 gap-2">
+                {textColors.map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => updateColorField('foreground_color', color.value)}
+                    className={`
+                      w-10 h-10 rounded-lg transition-all duration-200
+                      hover:scale-110 focus:outline-none
+                      ${textHex.toLowerCase() === color.value.toLowerCase()
+                        ? "ring-2 ring-primary ring-offset-2"
+                        : "ring-1 ring-black/10"
+                      }
+                    `}
+                    style={{ backgroundColor: color.value }}
+                    title={color.name}
+                  />
+                ))}
+                <div
+                  className={`w-10 h-10 rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center bg-white relative ${
+                    isCustomText ? "ring-2 ring-primary ring-offset-2" : "ring-1 ring-black/20"
+                  }`}
+                  title="Custom color"
+                >
+                  <input
+                    type="color"
+                    value={textHex}
+                    onChange={(e) => updateColorField('foreground_color', e.target.value)}
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                  />
+                  <Palette className="w-4 h-4 text-muted-foreground pointer-events-none" weight="bold" />
+                </div>
+              </div>
+            </div>
+
+            {/* Stamp Color */}
+            <div className="space-y-2">
+              <LabelWithTooltip tooltip="Color for filled stamp circles">Stamp Color</LabelWithTooltip>
               <div className="grid grid-cols-8 gap-2">
                 {accentColors.map((color) => (
                   <button
@@ -357,7 +372,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
             {/* Icon Color */}
             <div className="space-y-2">
-              <Label>Icon Color</Label>
+              <LabelWithTooltip tooltip="Color for icons inside filled stamps">Icon Color</LabelWithTooltip>
               <div className="grid grid-cols-8 gap-2">
                 {iconColors.map((color) => (
                   <button
@@ -403,10 +418,10 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         >
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Total Stamps</Label>
+              <LabelWithTooltip tooltip="Stamps needed to earn the reward">Total Stamps</LabelWithTooltip>
               <Select
                 value={String(formData.total_stamps || 10)}
-                onValueChange={(v) => updateField('total_stamps', parseInt(v))}
+                onValueChange={(v) => updateField('total_stamps', Number.parseInt(v))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -423,7 +438,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             </div>
 
             <div className="space-y-2">
-              <Label>Stamp Icon</Label>
+              <LabelWithTooltip tooltip="Icon shown inside each filled stamp">Stamp Icon</LabelWithTooltip>
               <StampIconPicker
                 value={(formData.stamp_icon || 'checkmark') as StampIconType}
                 onChange={(icon) => updateField('stamp_icon', icon)}
@@ -432,55 +447,93 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             </div>
 
             <div className="space-y-2">
-              <Label>Reward Icon (final stamp)</Label>
+              <LabelWithTooltip tooltip="Special icon for the final stamp (the reward)">Reward Icon</LabelWithTooltip>
               <RewardIconPicker
                 value={(formData.reward_icon || 'gift') as StampIconType}
                 onChange={(icon) => updateField('reward_icon', icon)}
                 accentColor={accentHex}
               />
             </div>
+
+            <div className="space-y-2 pt-2 border-t">
+              <LabelWithTooltip tooltip="Optional pattern or texture displayed behind the stamps">Strip Background</LabelWithTooltip>
+              <ImageUploader
+                label=""
+                value={formData.strip_background_url}
+                onUpload={handleStripBackgroundUpload}
+                hint="Pattern behind stamps. 1125x432px recommended"
+              />
+            </div>
           </div>
         </CollapsibleSection>
 
-        {/* Logo Section */}
+        {/* Pass Content Section - Text fields + Pass fields */}
         <CollapsibleSection
-          title="Logo"
-          isOpen={openSections.logo}
-          onToggle={() => toggleSection('logo')}
-        >
-          <ImageUploader
-            label="Logo Image"
-            value={formData.logo_url}
-            onUpload={handleLogoUpload}
-            hint="PNG recommended, max 2MB"
-          />
-        </CollapsibleSection>
-
-        {/* Pass Fields Section */}
-        <CollapsibleSection
-          title="Pass Fields"
-          isOpen={openSections.fields}
-          onToggle={() => toggleSection('fields')}
+          title="Pass Content"
+          isOpen={openSections.passContent}
+          onToggle={() => toggleSection('passContent')}
         >
           <div className="space-y-4">
-            <FieldEditor
-              title="Secondary Fields"
-              fields={formData.secondary_fields || []}
-              onChange={(f) => updateField('secondary_fields', f)}
-              maxFields={3}
-            />
-            <FieldEditor
-              title="Auxiliary Fields"
-              fields={formData.auxiliary_fields || []}
-              onChange={(f) => updateField('auxiliary_fields', f)}
-              maxFields={3}
-            />
-            <FieldEditor
-              title="Back Fields"
-              fields={formData.back_fields || []}
-              onChange={(f) => updateField('back_fields', f)}
-              maxFields={10}
-            />
+            <div className="space-y-2">
+              <LabelWithTooltip htmlFor="name" tooltip="Internal name - customers don't see this">Design Name *</LabelWithTooltip>
+              <Input
+                id="name"
+                placeholder="e.g., Summer Theme"
+                value={formData.name}
+                onChange={(e) => updateField('name', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <LabelWithTooltip htmlFor="organization_name" tooltip="Your business name - shown at the top of the pass">Organization Name *</LabelWithTooltip>
+              <Input
+                id="organization_name"
+                placeholder="e.g., Coffee Shop"
+                value={formData.organization_name}
+                onChange={(e) => updateField('organization_name', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <LabelWithTooltip htmlFor="description" tooltip="Subtitle shown below your business name">Card Description *</LabelWithTooltip>
+              <Input
+                id="description"
+                placeholder="e.g., Loyalty Card"
+                value={formData.description}
+                onChange={(e) => updateField('description', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <LabelWithTooltip htmlFor="logo_text" tooltip="Text shown if no logo image is uploaded">Logo Text</LabelWithTooltip>
+              <Input
+                id="logo_text"
+                placeholder="e.g., CAFE"
+                value={formData.logo_text || ''}
+                onChange={(e) => updateField('logo_text', e.target.value)}
+              />
+            </div>
+
+            <div className="border-t pt-4 mt-4">
+              <p className="text-sm font-medium mb-3">Pass Fields</p>
+              <div className="space-y-4">
+                <FieldEditor
+                  title="Secondary Fields"
+                  fields={formData.secondary_fields || []}
+                  onChange={(f) => updateField('secondary_fields', f)}
+                  maxFields={3}
+                />
+                <FieldEditor
+                  title="Auxiliary Fields"
+                  fields={formData.auxiliary_fields || []}
+                  onChange={(f) => updateField('auxiliary_fields', f)}
+                  maxFields={3}
+                />
+                <FieldEditor
+                  title="Back Fields"
+                  fields={formData.back_fields || []}
+                  onChange={(f) => updateField('back_fields', f)}
+                  maxFields={10}
+                />
+              </div>
+            </div>
           </div>
         </CollapsibleSection>
 

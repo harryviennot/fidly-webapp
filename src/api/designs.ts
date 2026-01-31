@@ -133,3 +133,25 @@ export async function uploadStamp(
 
   return response.json();
 }
+
+export async function uploadStripBackground(
+  businessId: string,
+  designId: string,
+  file: File
+): Promise<UploadResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE_URL}/designs/${businessId}/${designId}/upload/strip-background`, {
+    method: 'POST',
+    headers: await getAuthHeadersForFormData(),
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to upload strip background');
+  }
+
+  return response.json();
+}
