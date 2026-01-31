@@ -147,7 +147,7 @@ export function CardPreview3D({
 
   return (
     <div
-      className="relative w-full max-w-[340px] mx-auto aspect-[10/12]"
+      className="relative w-full max-w-[340px] mx-auto aspect-[1/1.282]"
       style={{ perspective: "1200px" }}
     >
       <div
@@ -239,9 +239,22 @@ export function CardPreview3D({
             </div>
 
             {/* Middle: Stamps Grid */}
-            <div className="flex flex-col justify-center gap-3 w-full my-auto py-4">
+            <div className="relative flex flex-col justify-center gap-3 w-full my-auto py-4">
+              {/* Strip background layer */}
+              {design.strip_background_url && (
+                <div
+                  className="absolute inset-0 rounded-lg overflow-hidden"
+                  style={{ zIndex: 0 }}
+                >
+                  <img
+                    src={design.strip_background_url}
+                    alt=""
+                    className="w-full h-full object-cover opacity-40"
+                  />
+                </div>
+              )}
               {/* Row 1 */}
-              <div className="flex justify-between w-full px-1">
+              <div className="relative z-10 flex justify-between w-full px-1">
                 {Array.from({ length: row1Count }, (_, i) => (
                   <Stamp
                     key={`stamp-${i}`}
@@ -258,7 +271,7 @@ export function CardPreview3D({
               </div>
               {/* Row 2 */}
               {row2Count > 0 && (
-                <div className="flex justify-between w-full px-1">
+                <div className="relative z-10 flex justify-between w-full px-1">
                   {Array.from({ length: row2Count }, (_, i) => {
                     const actualIndex = row1Count + i;
                     const isLastStamp = actualIndex === totalStamps - 1;
