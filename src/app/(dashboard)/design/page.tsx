@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { PlusIcon, Crown } from '@phosphor-icons/react';
 import { CardDesign } from '@/types';
-import { getDesigns, activateDesign, deleteDesign } from '@/api';
+import { getDesigns } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { DesignCard } from '@/components/design';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,6 @@ export default function DesignListPage() {
   const [designs, setDesigns] = useState<CardDesign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activatingId, setActivatingId] = useState<string | null>(null);
 
   // Plan-based limits
   const isBasePlan = currentBusiness?.subscription_tier === 'pay';
@@ -37,37 +36,6 @@ export default function DesignListPage() {
   useEffect(() => {
     loadDesigns();
   }, [loadDesigns]);
-
-  const handleActivate = async (id: string) => {
-    if (!currentBusiness?.id) return;
-    if (!confirm('Activate this design? All existing customers will receive the updated card design.')) {
-      return;
-    }
-
-    setActivatingId(id);
-    try {
-      await activateDesign(currentBusiness.id, id);
-      await loadDesigns();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to activate design');
-    } finally {
-      setActivatingId(null);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!currentBusiness?.id) return;
-    if (!confirm('Are you sure you want to delete this design? This cannot be undone.')) {
-      return;
-    }
-
-    try {
-      await deleteDesign(currentBusiness.id, id);
-      await loadDesigns();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete design');
-    }
-  };
 
   if (loading) {
     return (
@@ -138,13 +106,7 @@ export default function DesignListPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {designs.map((design) => (
-            <DesignCard
-              key={design.id}
-              design={design}
-              onActivate={handleActivate}
-              onDelete={handleDelete}
-              isActivating={activatingId === design.id}
-            />
+            <DesignCard key={design.id} design={design} />
           ))}
         </div>
       )}

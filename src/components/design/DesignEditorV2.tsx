@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useImperativeHandle, forwardRef } from 'react';
+import { useState, useImperativeHandle, forwardRef, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { CardDesign, CardDesignCreate } from '@/types';
 import { createDesign, updateDesign, uploadLogo, activateDesign } from '@/api';
@@ -123,11 +123,45 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Use ref to always have access to latest form data for save
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
+
+  const handleSave = useCallback(async () => {
+    if (!currentBusiness?.id) return;
+    const data = formDataRef.current;
+    if (!data.name || !data.organization_name || !data.description) {
+      setError('Please fill in all required fields (Name, Organization, Description)');
+      return;
+    }
+
+    setSaving(true);
+    onSavingChange?.(true);
+    setError(null);
+
+    try {
+      if (isNew) {
+        const created = await createDesign(currentBusiness.id, data);
+        router.push(`/design/${created.id}`);
+      } else if (design) {
+        await updateDesign(currentBusiness.id, design.id, data);
+        setSuccessMessage('Design saved successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
+        onSave?.();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save design');
+    } finally {
+      setSaving(false);
+      onSavingChange?.(false);
+    }
+  }, [currentBusiness?.id, isNew, design, router, onSave, onSavingChange]);
+
   // Expose save function to parent
   useImperativeHandle(ref, () => ({
     handleSave,
     saving,
-  }), [saving]);
+  }), [handleSave, saving]);
 
   // Collapsed sections state
   const [openSections, setOpenSections] = useState({
@@ -149,35 +183,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
   // Update color field (converts hex to rgb for storage)
   const updateColorField = (key: 'background_color' | 'stamp_filled_color' | 'label_color' | 'foreground_color' | 'stamp_empty_color' | 'stamp_border_color', hexValue: string) => {
     updateField(key, hexToRgb(hexValue));
-  };
-
-  const handleSave = async () => {
-    if (!currentBusiness?.id) return;
-    if (!formData.name || !formData.organization_name || !formData.description) {
-      setError('Please fill in all required fields (Name, Organization, Description)');
-      return;
-    }
-
-    setSaving(true);
-    onSavingChange?.(true);
-    setError(null);
-
-    try {
-      if (isNew) {
-        const created = await createDesign(currentBusiness.id, formData);
-        router.push(`/design/${created.id}`);
-      } else if (design) {
-        await updateDesign(currentBusiness.id, design.id, formData);
-        setSuccessMessage('Design saved successfully!');
-        setTimeout(() => setSuccessMessage(null), 3000);
-        onSave?.();
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save design');
-    } finally {
-      setSaving(false);
-      onSavingChange?.(false);
-    }
   };
 
   const handleActivate = async () => {

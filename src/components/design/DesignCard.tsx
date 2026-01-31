@@ -2,16 +2,10 @@
 
 import Link from 'next/link';
 import { CardDesign } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash, CheckCircle } from '@phosphor-icons/react';
 import { StampIconSvg, StampIconType } from './StampIconPicker';
 
 interface DesignCardProps {
   design: CardDesign;
-  onActivate: (id: string) => void;
-  onDelete: (id: string) => void;
-  isActivating?: boolean;
 }
 
 // Convert rgb(r, g, b) to hex
@@ -69,12 +63,7 @@ function getInitials(name: string): string {
   return (words[0][0] + words[1][0]).toUpperCase();
 }
 
-export default function DesignCard({
-  design,
-  onActivate,
-  onDelete,
-  isActivating = false,
-}: DesignCardProps) {
+export default function DesignCard({ design }: DesignCardProps) {
   const backgroundColor = design.background_color ?? 'rgb(28, 28, 30)';
   const accentColor = design.stamp_filled_color ?? 'rgb(249, 115, 22)';
   const iconColor = design.label_color ?? 'rgb(255, 255, 255)';
@@ -90,130 +79,168 @@ export default function DesignCard({
   const textColor = isLightBg ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,1)';
   const mutedTextColor = isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
   const emptyStampBg = isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+  const emptyStampBorder = isLightBg ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
 
   const displayName = design.organization_name || 'Your Business';
   const initials = getInitials(displayName);
 
-  // Show max 6 stamps in mini preview
-  const previewStamps = Math.min(totalStamps, 6);
+  // Calculate stamp rows
+  const row1Count = Math.ceil(totalStamps / 2);
+  const row2Count = totalStamps - row1Count;
   const filledCount = 3;
 
   return (
-    <div className={`rounded-xl border overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow ${design.is_active ? 'ring-2 ring-primary' : ''}`}>
-      {/* Mini Card Preview */}
+    <Link href={`/design/${design.id}`} className="block w-[280px] flex-shrink-0">
       <div
-        className="p-4 relative"
+        className="rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl aspect-[10/12]"
         style={{
           background: `linear-gradient(135deg, ${bgGradientFrom}, ${bgGradientTo})`,
+          boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
         }}
       >
-        {/* Active Badge */}
-        {design.is_active && (
-          <Badge className="absolute top-2 right-2 text-xs">Active</Badge>
-        )}
-
-        {/* Header */}
-        <div className="flex items-center gap-2 mb-4">
-          {design.logo_url ? (
-            <img
-              src={design.logo_url}
-              alt={displayName}
-              className="h-8 max-w-[80px] object-contain"
-            />
-          ) : (
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: accentHex }}
-            >
-              <span className="text-white font-bold text-xs">{initials}</span>
+        {/* Subtle gradient overlay */}
+        <div
+          className="h-full flex flex-col p-4"
+          style={{
+            background: isLightBg
+              ? 'linear-gradient(to bottom right, rgba(255,255,255,0.4), transparent, rgba(0,0,0,0.05))'
+              : 'linear-gradient(to bottom right, rgba(255,255,255,0.1), transparent, rgba(0,0,0,0.2))',
+          }}
+        >
+          {/* Header */}
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2">
+              {design.logo_url ? (
+                <img
+                  src={design.logo_url}
+                  alt={displayName}
+                  className="h-7 max-w-[80px] object-contain"
+                />
+              ) : (
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: accentHex }}
+                >
+                  <span className="text-white font-bold text-[10px]">{initials}</span>
+                </div>
+              )}
+              <div>
+                <h3
+                  className="font-semibold text-xs leading-tight"
+                  style={{ color: textColor }}
+                >
+                  {displayName}
+                </h3>
+                <p
+                  className="text-[9px] font-bold uppercase tracking-wider"
+                  style={{ color: mutedTextColor }}
+                >
+                  {design.description || 'Loyalty Card'}
+                </p>
+              </div>
             </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h3
-              className="font-semibold text-sm truncate"
-              style={{ color: textColor }}
-            >
-              {displayName}
-            </h3>
-            <p
-              className="text-xs truncate"
-              style={{ color: mutedTextColor }}
-            >
-              {design.description || 'Loyalty Card'}
-            </p>
+            <div className="text-right">
+              <div
+                className="text-[9px] font-bold uppercase tracking-wider"
+                style={{ color: mutedTextColor }}
+              >
+                Stamps
+              </div>
+              <div
+                className="text-base font-medium"
+                style={{ color: textColor }}
+              >
+                {filledCount} / {totalStamps}
+              </div>
+            </div>
+          </div>
+
+          {/* Stamps Grid */}
+          <div className="flex flex-col justify-center gap-2 w-full my-auto py-3">
+            {/* Row 1 */}
+            <div className="flex justify-between w-full px-1">
+              {Array.from({ length: row1Count }, (_, i) => {
+                const isFilled = i < filledCount;
+                return (
+                  <div
+                    key={`stamp-${i}`}
+                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                    style={{
+                      backgroundColor: isFilled ? accentHex : emptyStampBg,
+                      border: isFilled ? 'none' : `1px solid ${emptyStampBorder}`,
+                      boxShadow: isFilled ? `0 3px 8px ${accentHex}40` : 'none',
+                    }}
+                  >
+                    {isFilled && (
+                      <StampIconSvg
+                        icon={(design.stamp_icon || 'checkmark') as StampIconType}
+                        className="w-4 h-4"
+                        color={iconColorHex}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {/* Row 2 */}
+            {row2Count > 0 && (
+              <div className="flex justify-between w-full px-1">
+                {Array.from({ length: row2Count }, (_, i) => {
+                  const actualIndex = row1Count + i;
+                  const isFilled = actualIndex < filledCount;
+                  const isLast = actualIndex === totalStamps - 1;
+                  return (
+                    <div
+                      key={`stamp-${actualIndex}`}
+                      className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                      style={{
+                        backgroundColor: isFilled ? accentHex : emptyStampBg,
+                        border: isFilled ? 'none' : `1px solid ${emptyStampBorder}`,
+                        boxShadow: isFilled ? `0 3px 8px ${accentHex}40` : 'none',
+                      }}
+                    >
+                      {isFilled && (
+                        <StampIconSvg
+                          icon={(isLast ? design.reward_icon : design.stamp_icon) as StampIconType || 'checkmark'}
+                          className="w-4 h-4"
+                          color={iconColorHex}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-auto">
+            <div className="flex justify-between items-center">
+              <div>
+                <p
+                  className="text-[9px] font-bold uppercase tracking-wider"
+                  style={{ color: mutedTextColor }}
+                >
+                  Collect stamps
+                </p>
+                <p
+                  className="text-xs"
+                  style={{ color: textColor, opacity: 0.9 }}
+                >
+                  to earn your reward
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* QR Code placeholder */}
+          <div className="mt-2 pt-2 flex justify-center border-t" style={{ borderColor: emptyStampBorder }}>
+            <div className="bg-white p-1 rounded-lg">
+              <div className="w-12 h-12 bg-gray-200 rounded" />
+            </div>
           </div>
         </div>
-
-        {/* Stamp Row */}
-        <div className="flex justify-between gap-1">
-          {Array.from({ length: previewStamps }, (_, i) => {
-            const isFilled = i < filledCount;
-            const isLast = i === previewStamps - 1;
-            return (
-              <div
-                key={i}
-                className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
-                style={{
-                  backgroundColor: isFilled ? accentHex : emptyStampBg,
-                  boxShadow: isFilled ? `0 2px 8px ${accentHex}40` : 'none',
-                }}
-              >
-                {isFilled && (
-                  <StampIconSvg
-                    icon={(isLast ? design.reward_icon : design.stamp_icon) as StampIconType || 'checkmark'}
-                    className="w-4 h-4"
-                    color={iconColorHex}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Stamp count indicator */}
-        <div className="mt-3 text-center">
-          <span className="text-xs font-medium" style={{ color: mutedTextColor }}>
-            {totalStamps} stamps total
-          </span>
-        </div>
       </div>
-
-      {/* Card Info & Actions */}
-      <div className="p-4 space-y-3">
-        <div>
-          <h3 className="font-semibold text-base">{design.name}</h3>
-          <p className="text-sm text-muted-foreground">{design.organization_name}</p>
-        </div>
-
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild className="flex-1">
-            <Link href={`/design/${design.id}`}>
-              <Pencil className="w-4 h-4 mr-1" />
-              Edit
-            </Link>
-          </Button>
-          {!design.is_active && (
-            <>
-              <Button
-                size="sm"
-                onClick={() => onActivate(design.id)}
-                disabled={isActivating}
-                className="flex-1"
-              >
-                <CheckCircle className="w-4 h-4 mr-1" />
-                {isActivating ? 'Activating...' : 'Activate'}
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onDelete(design.id)}
-              >
-                <Trash className="w-4 h-4" />
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+    </Link>
   );
 }
