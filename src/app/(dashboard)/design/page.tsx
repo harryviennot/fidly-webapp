@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { PlusIcon, Crown } from '@phosphor-icons/react';
 import { CardDesign } from '@/types';
-import { getDesigns } from '@/api';
+import { getDesigns, deleteDesign, activateDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { DesignCard } from '@/components/design';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,29 @@ export default function DesignListPage() {
   useEffect(() => {
     loadDesigns();
   }, [loadDesigns]);
+
+  const handleDelete = async (designId: string) => {
+    if (!currentBusiness?.id) return;
+    if (!confirm('Are you sure you want to delete this design?')) return;
+
+    try {
+      await deleteDesign(currentBusiness.id, designId);
+      loadDesigns();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete design');
+    }
+  };
+
+  const handleActivate = async (designId: string) => {
+    if (!currentBusiness?.id) return;
+
+    try {
+      await activateDesign(currentBusiness.id, designId);
+      loadDesigns();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to activate design');
+    }
+  };
 
   if (loading) {
     return (
@@ -104,9 +127,17 @@ export default function DesignListPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {designs.map((design) => (
-            <DesignCard key={design.id} design={design} />
+        <div
+          className="grid gap-8"
+          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}
+        >
+          {[...designs].sort((a, b) => (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0)).map((design) => (
+            <DesignCard
+              key={design.id}
+              design={design}
+              onDelete={handleDelete}
+              onActivate={handleActivate}
+            />
           ))}
         </div>
       )}
