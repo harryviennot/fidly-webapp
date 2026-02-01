@@ -43,6 +43,7 @@ const DEFAULT_DESIGN: CardDesignCreate = {
   stamp_border_color: 'rgb(255, 255, 255)',
   stamp_icon: 'checkmark',
   reward_icon: 'gift',
+  icon_color: 'rgb(255, 255, 255)',
   secondary_fields: [{ key: 'reward', label: 'REWARD', value: 'Free item at 10 stamps!' }],
   auxiliary_fields: [],
   back_fields: [
@@ -206,7 +207,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     };
 
     // Update color field (converts hex to rgb for storage)
-    const updateColorField = (key: 'background_color' | 'stamp_filled_color' | 'label_color' | 'foreground_color' | 'stamp_empty_color' | 'stamp_border_color', hexValue: string) => {
+    const updateColorField = (key: 'background_color' | 'stamp_filled_color' | 'label_color' | 'foreground_color' | 'stamp_empty_color' | 'stamp_border_color' | 'icon_color', hexValue: string) => {
       updateField(key, hexToRgb(hexValue));
     };
 
@@ -247,7 +248,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     // Get current colors as hex for pickers
     const bgHex = rgbToHex(formData.background_color || 'rgb(28, 28, 30)');
     const accentHex = rgbToHex(formData.stamp_filled_color || 'rgb(249, 115, 22)');
-    const iconHex = rgbToHex(formData.label_color || 'rgb(255, 255, 255)');
+    const iconHex = rgbToHex(formData.icon_color || 'rgb(255, 255, 255)');
+    const labelHex = rgbToHex(formData.label_color || 'rgb(255, 255, 255)');
     const textHex = rgbToHex(formData.foreground_color || 'rgb(255, 255, 255)');
     const emptyStampHex = rgbToHex(formData.stamp_empty_color || 'rgb(255, 255, 255)');
 
@@ -255,6 +257,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const isCustomBackground = !backgroundColors.some(c => c.value.toLowerCase() === bgHex.toLowerCase());
     const isCustomAccent = !accentColors.some(c => c.value.toLowerCase() === accentHex.toLowerCase());
     const isCustomIcon = !iconColors.some(c => c.value.toLowerCase() === iconHex.toLowerCase());
+    const isCustomLabel = !textColors.some(c => c.value.toLowerCase() === labelHex.toLowerCase());
     const isCustomText = !textColors.some(c => c.value.toLowerCase() === textHex.toLowerCase());
     const isCustomEmptyStamp = !emptyStampColors.some(c => c.value.toLowerCase() === emptyStampHex.toLowerCase());
 
@@ -329,6 +332,42 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                       type="color"
                       value={bgHex}
                       onChange={(e) => updateColorField('background_color', e.target.value)}
+                      className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                    />
+                    <Palette className="w-4 h-4 text-muted-foreground pointer-events-none" weight="bold" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <LabelWithTooltip tooltip="Color for labels like 'STAMPS' and 'REWARD' on the pass">Label Color</LabelWithTooltip>
+                <div className="grid grid-cols-8 gap-2">
+                  {textColors.map((color) => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => updateColorField('label_color', color.value)}
+                      className={`
+                      w-10 h-10 rounded-lg transition-all duration-200
+                      hover:scale-110 focus:outline-none
+                      ${labelHex.toLowerCase() === color.value.toLowerCase()
+                          ? "ring-2 ring-primary ring-offset-2"
+                          : "ring-1 ring-black/10"
+                        }
+                    `}
+                      style={{ backgroundColor: color.value }}
+                      title={color.name}
+                    />
+                  ))}
+                  <div
+                    className={`w-10 h-10 rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center bg-white relative ${isCustomLabel ? "ring-2 ring-primary ring-offset-2" : "ring-1 ring-black/20"
+                      }`}
+                    title="Custom color"
+                  >
+                    <input
+                      type="color"
+                      value={labelHex}
+                      onChange={(e) => updateColorField('label_color', e.target.value)}
                       className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                     />
                     <Palette className="w-4 h-4 text-muted-foreground pointer-events-none" weight="bold" />
@@ -473,7 +512,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                     <button
                       key={color.value}
                       type="button"
-                      onClick={() => updateColorField('label_color', color.value)}
+                      onClick={() => updateColorField('icon_color', color.value)}
                       className={`
                       w-10 h-10 rounded-lg transition-all duration-200
                       hover:scale-110 focus:outline-none
@@ -494,7 +533,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                     <input
                       type="color"
                       value={iconHex}
-                      onChange={(e) => updateColorField('label_color', e.target.value)}
+                      onChange={(e) => updateColorField('icon_color', e.target.value)}
                       className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                     />
                     <Palette className="w-4 h-4 text-muted-foreground pointer-events-none" weight="bold" />

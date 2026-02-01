@@ -88,7 +88,7 @@ export function CardPreview3D({
   // Get colors with defaults
   const backgroundColor = design.background_color ?? "rgb(28, 28, 30)";
   const accentColor = design.stamp_filled_color ?? "rgb(249, 115, 22)";
-  const iconColor = design.label_color ?? "rgb(255, 255, 255)";
+  const iconColor = design.icon_color ?? "rgb(255, 255, 255)";
   const totalStamps = design.total_stamps ?? 10;
 
   // Convert to hex for gradient calculations
@@ -103,6 +103,7 @@ export function CardPreview3D({
   // Determine text color - use foreground_color if set, otherwise auto-calculate from background
   const isLightBg = isLightColor(bgHex);
   const foregroundColor = design.foreground_color;
+  const labelColor = design.label_color;
 
   // Calculate auto colors based on background brightness
   const autoTextColor = isLightBg ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,1)";
@@ -110,7 +111,7 @@ export function CardPreview3D({
 
   // Use foreground_color if set, otherwise use auto-calculated colors
   const textColor = foregroundColor ? rgbToHex(foregroundColor) : autoTextColor;
-  const mutedTextColor = foregroundColor ? `${rgbToHex(foregroundColor)}80` : autoMutedColor;
+  const mutedTextColor = labelColor ? rgbToHex(labelColor) : autoMutedColor;
 
   const emptyStampBg = isLightBg ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
   const emptyStampBorder = isLightBg ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.2)";

@@ -26,6 +26,7 @@ export interface CardDesign {
   stamp_border_color: string;
   stamp_icon?: string;
   reward_icon?: string;
+  icon_color?: string;
 
   // Asset URLs
   logo_url?: string;
@@ -58,6 +59,7 @@ export interface CardDesignCreate {
   stamp_border_color?: string;
   stamp_icon?: string;
   reward_icon?: string;
+  icon_color?: string;
 
   secondary_fields?: PassField[];
   auxiliary_fields?: PassField[];
