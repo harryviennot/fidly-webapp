@@ -66,7 +66,7 @@ export function StatusIndicators({
               <Link
                 key={indicator.label}
                 href={indicator.href}
-                className="group p-4 rounded-lg border hover:border-[var(--accent)]/50 hover:bg-[var(--accent)]/5 transition-all"
+                className="group p-4 rounded-lg border border-[var(--border)] hover:border-[var(--accent)]/50 hover:bg-[var(--accent)]/5 transition-all"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">

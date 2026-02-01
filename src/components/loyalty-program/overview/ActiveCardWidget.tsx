@@ -3,12 +3,22 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { CardDesign } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PencilIcon, PlusIcon, ArrowsLeftRightIcon } from '@phosphor-icons/react';
+import {
+  PencilSimple,
+  PlusIcon,
+  ArrowsLeftRightIcon,
+  DotsThree,
+} from '@phosphor-icons/react';
 import { ScaledCardWrapper } from '@/components/design/ScaledCardWrapper';
 import { StampIconSvg, StampIconType } from '@/components/design/StampIconPicker';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ActiveCardWidgetProps {
   design: CardDesign | undefined;
@@ -62,27 +72,20 @@ function getInitials(name: string): string {
 export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
   if (!design) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Active Card</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col items-center justify-center py-8 px-4 border-2 border-dashed rounded-xl text-center">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
-              <PlusIcon className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              No card design yet. Create your first loyalty card.
-            </p>
-            <Button asChild className="rounded-full">
-              <Link href="/loyalty-program/design/new">
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Create Card
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-8 px-4 border-2 border-dashed rounded-xl text-center">
+        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+          <PlusIcon className="w-6 h-6 text-muted-foreground" />
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          No card design yet. Create your first loyalty card.
+        </p>
+        <Button asChild className="rounded-full">
+          <Link href="/loyalty-program/design/new">
+            <PlusIcon className="w-4 h-4 mr-2" />
+            Create Card
+          </Link>
+        </Button>
+      </div>
     );
   }
 
@@ -110,15 +113,12 @@ export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
   const filledCount = 3;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">Active Card</CardTitle>
-        <Badge variant="secondary" className="bg-green-100 text-green-700">
-          Live
-        </Badge>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Card Preview */}
+    <div className="space-y-3">
+      {/* Clickable Card Preview with Hover Effect */}
+      <Link
+        href={`/loyalty-program/design/${design.id}`}
+        className="block group relative"
+      >
         <ScaledCardWrapper baseWidth={280} aspectRatio={1.282} minScale={0.6}>
           <div
             className="w-full h-full rounded-2xl overflow-hidden"
@@ -242,24 +242,44 @@ export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
           </div>
         </ScaledCardWrapper>
 
-        {/* Actions */}
-        <div className="flex gap-2">
-          <Button asChild variant="default" className="flex-1 rounded-full">
-            <Link href={`/loyalty-program/design/${design.id}`}>
-              <PencilIcon className="w-4 h-4 mr-2" />
-              Edit Card
-            </Link>
-          </Button>
-          {isProPlan && (
-            <Button asChild variant="outline" className="flex-1 rounded-full">
-              <Link href="/loyalty-program/templates">
-                <ArrowsLeftRightIcon className="w-4 h-4 mr-2" />
-                Switch Card
-              </Link>
-            </Button>
-          )}
+        {/* Hover Edit Icon */}
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-md">
+            <PencilSimple className="w-4 h-4 text-gray-700" />
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </Link>
+
+      {/* Label + Badge + Dropdown Menu */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm">Active Card</span>
+          <Badge variant="secondary" className="bg-green-100 text-green-700">
+            Live
+          </Badge>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="p-1.5 hover:bg-muted rounded-lg transition-colors">
+            <DotsThree className="w-5 h-5" weight="bold" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href={`/loyalty-program/design/${design.id}`} className="cursor-pointer">
+                <PencilSimple className="mr-2 h-4 w-4" />
+                Edit Design
+              </Link>
+            </DropdownMenuItem>
+            {isProPlan && (
+              <DropdownMenuItem asChild>
+                <Link href="/loyalty-program/templates" className="cursor-pointer">
+                  <ArrowsLeftRightIcon className="mr-2 h-4 w-4" />
+                  Switch Card
+                </Link>
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 }

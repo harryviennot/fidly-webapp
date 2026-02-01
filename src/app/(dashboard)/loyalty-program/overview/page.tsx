@@ -23,25 +23,23 @@ export default function OverviewPage() {
         </p>
       </div>
 
-      {/* Active card + stats row */}
+      {/* Main content - Stats + status indicators on top, card below */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Active card widget */}
-        <div className="lg:col-span-1">
-          <ActiveCardWidget design={activeDesign} isProPlan={isProPlan} />
-        </div>
-
-        {/* Stats grid */}
-        <div className="lg:col-span-2">
+        {/* Stats grid + Status indicators - appears first on mobile, right side on desktop */}
+        <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
           <QuickStatsGrid
             totalCustomers={0}
             activeCustomers={0}
             redemptionsThisMonth={0}
           />
+          <StatusIndicators isProPlan={isProPlan} />
+        </div>
+
+        {/* Active card widget - appears second on mobile, left side on desktop */}
+        <div className="lg:col-span-1 order-2 lg:order-1 max-w-xs lg:max-w-none">
+          <ActiveCardWidget design={activeDesign} isProPlan={isProPlan} />
         </div>
       </div>
-
-      {/* Status indicators */}
-      <StatusIndicators isProPlan={isProPlan} />
     </div>
   );
 }

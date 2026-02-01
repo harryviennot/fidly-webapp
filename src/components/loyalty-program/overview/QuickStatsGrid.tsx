@@ -1,10 +1,8 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { UsersIcon, CreditCardIcon, TrophyIcon } from '@phosphor-icons/react';
 
 interface QuickStatsGridProps {
-  // These would come from an API in the future
   totalCustomers?: number;
   activeCustomers?: number;
   redemptionsThisMonth?: number;
@@ -21,24 +19,18 @@ export function QuickStatsGrid({
       value: totalCustomers,
       icon: CreditCardIcon,
       description: 'Total loyalty cards',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
     },
     {
       label: 'Active Customers',
       value: activeCustomers,
       icon: UsersIcon,
       description: 'With wallet passes',
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
     },
     {
       label: 'Redemptions',
       value: redemptionsThisMonth,
       icon: TrophyIcon,
       description: 'This month',
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-100',
     },
   ];
 
@@ -47,20 +39,18 @@ export function QuickStatsGrid({
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
-          <Card key={stat.label} hover={false}>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold mt-1">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
-                </div>
-                <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
-                  <Icon className={`w-5 h-5 ${stat.color}`} weight="fill" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div
+            key={stat.label}
+            className="flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border-[var(--border)] bg-[var(--cream)]"
+          >
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)]">
+              <Icon size={20} weight="duotone" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-2xl font-bold text-[var(--foreground)]">{stat.value}</p>
+              <p className="text-sm text-[var(--muted-foreground)] truncate">{stat.label}</p>
+            </div>
+          </div>
         );
       })}
     </div>
