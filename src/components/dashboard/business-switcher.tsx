@@ -85,7 +85,7 @@ export function BusinessSwitcher() {
         <SidebarMenuItem>
           <SidebarMenuButton
             size="lg"
-            className="flex items-center gap-3 px-4 py-4 cursor-default hover:bg-transparent hover:text-inherit active:bg-transparent active:text-inherit focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="flex items-center gap-3 px-2 py-4 cursor-default hover:bg-transparent hover:text-inherit active:bg-transparent active:text-inherit focus-visible:ring-0 focus-visible:ring-offset-0"
             style={bgColor ? { backgroundColor: bgColor } : undefined}
           >
             {triggerContent}
@@ -103,7 +103,7 @@ export function BusinessSwitcher() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="flex items-center gap-3 px-4 py-4 hover:bg-transparent hover:text-inherit active:bg-transparent active:text-inherit focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="flex items-center gap-3 px-2 py-4 hover:bg-transparent hover:text-inherit active:bg-transparent active:text-inherit focus-visible:ring-0 focus-visible:ring-offset-0"
               style={bgColor ? { backgroundColor: bgColor } : undefined}
             >
               {triggerContent}

@@ -4,15 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
 import { applyTheme, getAccentFromSettings } from "@/utils/theme";
-
-interface Business {
-  id: string;
-  name: string;
-  url_slug: string;
-  subscription_tier: "pay" | "pro";
-  settings: Record<string, unknown>;
-  logo_url?: string | null;
-}
+import { Business } from "@/types";
 
 type MembershipRole = "owner" | "admin" | "scanner";
 
