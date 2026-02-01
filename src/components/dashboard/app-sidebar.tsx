@@ -21,7 +21,7 @@ import { NavUser } from "./nav-user";
 import {
   HouseIcon,
   UsersIcon,
-  PaletteIcon,
+  HeartIcon,
   UserPlusIcon,
   GearIcon,
 } from "@phosphor-icons/react";
@@ -29,7 +29,7 @@ import {
 const navItems = [
   { href: "/", label: "Dashboard", icon: HouseIcon },
   { href: "/customers", label: "Customers", icon: UsersIcon },
-  { href: "/design", label: "Card Design", icon: PaletteIcon },
+  { href: "/loyalty-program", label: "Loyalty Program", icon: HeartIcon },
   { href: "/team", label: "Team", icon: UserPlusIcon },
   { href: "/settings", label: "Settings", icon: GearIcon },
 ];

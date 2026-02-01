@@ -3,13 +3,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowsClockwise } from '@phosphor-icons/react';
+import { ArrowsClockwise, PencilSimple } from '@phosphor-icons/react';
 import { CardDesign } from '@/types';
 import { getDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 export default function EditDesignPage() {
   const params = useParams();
@@ -21,6 +22,8 @@ export default function EditDesignPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [designName, setDesignName] = useState('');
 
   useEffect(() => {
     async function loadDesign() {
@@ -28,6 +31,7 @@ export default function EditDesignPage() {
       try {
         const data = await getDesign(currentBusiness.id, designId);
         setDesign(data);
+        setDesignName(data.name);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load design');
       } finally {
@@ -67,7 +71,28 @@ export default function EditDesignPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold">{design.name}</h2>
+          {editingName ? (
+            <Input
+              value={designName}
+              onChange={(e) => setDesignName(e.target.value)}
+              onBlur={() => setEditingName(false)}
+              onKeyDown={(e) => e.key === 'Enter' && setEditingName(false)}
+              autoFocus
+              className="text-2xl font-bold h-auto py-1 w-64"
+              placeholder="Design name..."
+            />
+          ) : (
+            <div
+              className="group flex items-center gap-2 cursor-pointer"
+              onClick={() => setEditingName(true)}
+            >
+              <h2 className="text-2xl font-bold">{designName || 'Untitled Design'}</h2>
+              <PencilSimple
+                className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                weight="bold"
+              />
+            </div>
+          )}
           {design.is_active && (
             <Badge variant="default">Active</Badge>
           )}
@@ -83,7 +108,7 @@ export default function EditDesignPage() {
           )}
         </Button>
       </div>
-      <DesignEditorV2 ref={editorRef} design={design} onSavingChange={setSaving} />
+      <DesignEditorV2 ref={editorRef} design={design} onSavingChange={setSaving} designName={designName} onNameChange={setDesignName} />
     </div>
   );
 }

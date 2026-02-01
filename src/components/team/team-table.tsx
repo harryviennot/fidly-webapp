@@ -30,7 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/auth-provider";
-import { updateMembershipRole, deleteMembership } from "@/api";
+import { deleteMembership } from "@/api";
 import type { MembershipWithUser, MembershipRole } from "@/types";
 import { toast } from "sonner";
 
@@ -42,7 +42,6 @@ interface TeamTableProps {
 
 export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTableProps) {
   const { user } = useAuth();
-  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MembershipWithUser | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -54,11 +53,6 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  const handleChangeRole = (member: MembershipWithUser) => {
-    setSelectedMember(member);
-    setRoleDialogOpen(true);
   };
 
   const handleRemoveClick = (member: MembershipWithUser) => {
@@ -80,22 +74,6 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
     } finally {
       setLoading(null);
       setSelectedMember(null);
-    }
-  };
-
-  const handleRoleUpdated = async (newRole: MembershipRole) => {
-    if (!selectedMember) return;
-
-    setLoading(selectedMember.id);
-    try {
-      await updateMembershipRole(selectedMember.id, { role: newRole });
-      toast.success(`Role updated to ${newRole}`);
-      onMemberUpdated();
-      setRoleDialogOpen(false);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to update role");
-    } finally {
-      setLoading(null);
     }
   };
 
@@ -178,9 +156,6 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleChangeRole(member)}>
-                          Change Role
-                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleRemoveClick(member)}
                           className="text-destructive"

@@ -19,7 +19,7 @@ export default function CustomerTable() {
       const data = await getAllCustomers(currentBusiness.id);
       setCustomers(data);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load customers. Make sure the backend is running.');
     } finally {
       setIsLoading(false);

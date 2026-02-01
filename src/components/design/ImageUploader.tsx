@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Image from 'next/image';
 
 interface ImageUploaderProps {
   label: string;
@@ -53,10 +54,13 @@ export default function ImageUploader({
 
       {value ? (
         <div className="relative inline-block">
-          <img
+          <Image
             src={value}
             alt={label || 'Uploaded image'}
+            width={96}
+            height={96}
             className="w-24 h-24 object-cover rounded-xl border border-[var(--border)]"
+            unoptimized
           />
           <div className="flex gap-2 mt-2">
             <button

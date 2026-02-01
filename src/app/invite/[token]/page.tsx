@@ -213,13 +213,13 @@ export default function InviteAcceptPage() {
             <>
               <CardTitle className="text-green-600">Welcome aboard!</CardTitle>
               <CardDescription>
-                You've successfully joined {invitation.business_name}.
+                You&apos;ve successfully joined {invitation.business_name}.
                 Redirecting to dashboard...
               </CardDescription>
             </>
           ) : (
             <>
-              <CardTitle>You're Invited!</CardTitle>
+              <CardTitle>You&apos;re Invited!</CardTitle>
               <CardDescription>
                 <span className="font-medium">{invitation.inviter_name}</span>{" "}
                 has invited you to join{" "}
@@ -266,7 +266,7 @@ export default function InviteAcceptPage() {
                   <span className="font-semibold">{invitation.email}</span>.
                 </p>
                 <p className="mt-1">
-                  You're signed in as{" "}
+                  You&apos;re signed in as{" "}
                   <span className="font-semibold">{user?.email}</span>.
                 </p>
               </div>

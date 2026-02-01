@@ -15,7 +15,8 @@ export const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/": ["owner", "admin"],
   "/customers": ["owner", "admin"],
   "/team": ["owner", "admin"],
-  "/design": ["owner"],
+  "/loyalty-program": ["owner"],
+  "/design": ["owner"], // Legacy route, redirects to /loyalty-program
   "/settings": ["owner"],
   "/account": ["owner", "admin"],
 };

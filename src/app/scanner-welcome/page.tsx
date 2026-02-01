@@ -43,11 +43,11 @@ export default function ScannerWelcomePage() {
           <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
             <CheckCircleIcon className="h-10 w-10 text-green-600" weight="fill" />
           </div>
-          <CardTitle className="text-green-600">You're All Set!</CardTitle>
+          <CardTitle className="text-green-600">You&rsquo;re All Set!</CardTitle>
           <CardDescription>
             {currentBusiness ? (
               <>
-                You've joined <span className="font-semibold">{currentBusiness.name}</span> as a scanner.
+                You&rsquo;ve joined <span className="font-semibold">{currentBusiness.name}</span> as a scanner.
               </>
             ) : (
               "You've been set up as a scanner."
@@ -74,7 +74,7 @@ export default function ScannerWelcomePage() {
 
           <div className="text-center text-sm text-gray-500">
             <p>The scanner app is currently in development.</p>
-            <p>You'll be notified when it's available.</p>
+            <p>You&rsquo;ll be notified when it&rsquo;s available.</p>
           </div>
 
           <Button

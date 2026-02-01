@@ -31,6 +31,7 @@ export interface CardDesign {
   logo_url?: string;
   custom_filled_stamp_url?: string;
   custom_empty_stamp_url?: string;
+  strip_background_url?: string;
 
   // Pass fields
   secondary_fields: PassField[];
@@ -63,7 +64,7 @@ export interface CardDesignCreate {
   back_fields?: PassField[];
 }
 
-export interface CardDesignUpdate extends Partial<CardDesignCreate> {}
+export type CardDesignUpdate = Partial<CardDesignCreate>;
 
 export interface UploadResponse {
   id: string;

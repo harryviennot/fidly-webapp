@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useBusiness } from "@/contexts/business-context";
 import { canAccessRoute } from "@/lib/rbac";
@@ -20,24 +20,24 @@ interface RoleGuardProps {
 export function RoleGuard({ children }: RoleGuardProps) {
   const pathname = usePathname();
   const { currentRole, loading } = useBusiness();
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const hasRedirectedRef = useRef(false);
 
   useEffect(() => {
-    if (loading || isRedirecting) return;
+    if (loading || hasRedirectedRef.current) return;
 
     // Scanners should never access the dashboard
     if (currentRole === "scanner") {
-      setIsRedirecting(true);
+      hasRedirectedRef.current = true;
       window.location.href = "/scanner-welcome";
       return;
     }
 
     // Check if current role can access this route
     if (currentRole && !canAccessRoute(currentRole, pathname)) {
-      setIsRedirecting(true);
+      hasRedirectedRef.current = true;
       window.location.href = "/";
     }
-  }, [loading, currentRole, pathname, isRedirecting]);
+  }, [loading, currentRole, pathname]);
 
   // Show loading while checking permissions
   if (loading) {
@@ -53,26 +53,12 @@ export function RoleGuard({ children }: RoleGuardProps) {
     );
   }
 
-  // Don't render while redirecting
-  if (isRedirecting) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
-          <p className="mt-4 text-sm text-[var(--muted-foreground)]">
-            Redirecting...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render if scanner somehow gets here
+  // Don't render if scanner - redirect is happening
   if (currentRole === "scanner") {
     return null;
   }
 
-  // Don't render if role can't access this route
+  // Don't render if role can't access this route - redirect is happening
   if (currentRole && !canAccessRoute(currentRole, pathname)) {
     return null;
   }
