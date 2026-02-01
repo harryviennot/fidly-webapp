@@ -81,7 +81,7 @@ export function NotificationsSection({ embedded = false }: NotificationsSectionP
     }
   }, [currentBusiness]);
 
-  const handleSave = async (key: keyof NotificationTemplates) => {
+  const handleSave = async () => {
     if (!currentBusiness?.id || !isProPlan) return;
 
     setSaving(true);
@@ -224,7 +224,7 @@ export function NotificationsSection({ embedded = false }: NotificationsSectionP
                       </button>
                       <button
                         className="text-xs text-[var(--accent)] font-medium hover:underline"
-                        onClick={() => handleSave(type.key)}
+                        onClick={() => handleSave()}
                         disabled={saving}
                       >
                         {saving ? 'Saving...' : 'Save'}

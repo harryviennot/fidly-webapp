@@ -71,7 +71,7 @@ export function CardDesignsGrid({
           </Badge>
         </div>
         <Button asChild size="sm">
-          <Link href="/design/new">
+          <Link href="/loyalty-program/design/new">
             <PlusIcon className="mr-2 h-4 w-4" />
             New Design
           </Link>
@@ -84,7 +84,7 @@ export function CardDesignsGrid({
             Create additional designs for seasonal campaigns or special promotions
           </p>
           <Button asChild size="sm" variant="outline">
-            <Link href="/design/new">
+            <Link href="/loyalty-program/design/new">
               <PlusIcon className="mr-2 h-4 w-4" />
               Create Design
             </Link>

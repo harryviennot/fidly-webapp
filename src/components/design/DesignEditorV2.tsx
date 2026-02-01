@@ -27,7 +27,6 @@ interface DesignEditorV2Props {
   onSave?: () => void;
   onSavingChange?: (saving: boolean) => void;
   designName?: string;
-  onNameChange?: (name: string) => void;
 }
 
 const DEFAULT_DESIGN: CardDesignCreate = {
@@ -121,7 +120,7 @@ function hexToRgb(hex: string): string {
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, onNameChange }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName }, ref) {
     const router = useRouter();
     const { currentBusiness } = useBusiness();
     const [formData, setFormData] = useState<CardDesignCreate & { logo_url?: string; strip_background_url?: string }>(
@@ -187,6 +186,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       if (designName !== undefined && designName !== formData.name) {
         updateField('name', designName);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [designName]);
 
     // Auto-fill organization name from business context for new designs
@@ -194,6 +194,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       if (isNew && currentBusiness?.name && !formData.organization_name) {
         updateField('organization_name', currentBusiness.name);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBusiness?.name, isNew]);
 
     const toggleSection = (section: keyof typeof openSections) => {

@@ -104,7 +104,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         setCurrentBusinessState(null);
         setCurrentRole(null);
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred while loading your businesses");
     } finally {
       setLoading(false);

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useBusiness } from "@/contexts/business-context"
 import { getBackgroundFromSettings, getContrastTextColor } from "@/utils/theme"
+import Image from "next/image"
 
 export function BusinessSwitcher() {
   const { memberships, currentBusiness, setCurrentBusiness } = useBusiness()
@@ -39,11 +40,14 @@ export function BusinessSwitcher() {
     <>
       {currentBusiness?.logo_url ? (
         <>
-          <img
+          <Image
             src={currentBusiness.logo_url}
             alt={currentBusiness.name}
+            width={100}
+            height={36}
             className="object-contain"
             style={{ height: 36, maxWidth: 100 }}
+            unoptimized
           />
           <span
             className="truncate font-bold text-lg"
@@ -128,10 +132,13 @@ export function BusinessSwitcher() {
                 >
                   <div className="flex size-6 items-center justify-center rounded-sm border overflow-hidden">
                     {membership.business.logo_url ? (
-                      <img
+                      <Image
                         src={membership.business.logo_url}
                         alt={membership.business.name}
+                        width={24}
+                        height={24}
                         className="size-full object-contain"
+                        unoptimized
                       />
                     ) : (
                       <span className="text-xs font-bold text-muted-foreground">

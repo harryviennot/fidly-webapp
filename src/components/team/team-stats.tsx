@@ -68,8 +68,6 @@ export function TeamStats({
   );
 
   const scannerCount = roleCounts.scanner || 0;
-  const adminCount = roleCounts.admin || 0;
-  const ownerCount = roleCounts.owner || 0;
 
   // Pay tier has scanner limit
   const scannerLimit = subscriptionTier === "pay" ? 3 : null;

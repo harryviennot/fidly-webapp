@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { CardDesign } from '@/types';
 import { StampIconSvg, StampIconType } from './StampIconPicker';
 import { ScaledCardWrapper } from './ScaledCardWrapper';
@@ -102,7 +103,7 @@ export default function DesignCard({ design, onDelete, onActivate }: DesignCardP
   return (
     <div className="w-full">
       {/* Scaled card preview */}
-      <Link href={`/design/${design.id}`} className="block">
+      <Link href={`/loyalty-program/design/${design.id}`} className="block">
         <ScaledCardWrapper baseWidth={280} aspectRatio={1.282} minScale={0.6}>
           <div
             className="w-full h-full rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
@@ -124,10 +125,13 @@ export default function DesignCard({ design, onDelete, onActivate }: DesignCardP
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   {design.logo_url ? (
-                    <img
+                    <Image
                       src={design.logo_url}
                       alt={displayName}
+                      width={80}
+                      height={28}
                       className="h-7 max-w-[80px] object-contain"
+                      unoptimized
                     />
                   ) : (
                     <div

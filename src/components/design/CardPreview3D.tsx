@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 import { CardDesign } from "@/types";
 import { StampIconSvg, StampIconType } from "./StampIconPicker";
 
@@ -190,11 +191,14 @@ export function CardPreview3D({
               <div>
                 <div className="flex items-center gap-2">
                   {design.logo_url ? (
-                    <img
+                    <Image
                       src={design.logo_url}
                       alt={displayName}
+                      width={115}
+                      height={36}
                       className="object-contain transition-all duration-300"
                       style={{ height: 36, maxWidth: 115 }}
+                      unoptimized
                     />
                   ) : (
                     <div
@@ -246,10 +250,12 @@ export function CardPreview3D({
                   className="absolute inset-0 rounded-lg overflow-hidden"
                   style={{ zIndex: 0 }}
                 >
-                  <img
+                  <Image
                     src={design.strip_background_url}
                     alt=""
-                    className="w-full h-full object-cover opacity-40"
+                    fill
+                    className="object-cover opacity-40"
+                    unoptimized
                   />
                 </div>
               )}

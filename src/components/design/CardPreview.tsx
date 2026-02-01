@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { CardDesign, PassField } from '@/types';
 
 interface CardPreviewProps {
@@ -77,7 +78,7 @@ export default function CardPreview({ design, stamps = 3, showBack = false }: Ca
     }
   }, [stamps, totalStamps, filledColor, emptyColor, borderColor, bgColor]);
 
-  const renderField = (field: PassField, isLabel: boolean = false) => (
+  const renderField = (field: PassField) => (
     <div key={field.key} className="pass-field">
       <span className="field-label" style={{ color: labelColor, opacity: 0.8 }}>
         {field.label}
@@ -97,7 +98,7 @@ export default function CardPreview({ design, stamps = 3, showBack = false }: Ca
           <div className="pass-header">
             <div className="pass-logo">
               {design.logo_url ? (
-                <img src={design.logo_url} alt="Logo" />
+                <Image src={design.logo_url} alt="Logo" width={100} height={50} unoptimized />
               ) : (
                 <span style={{ color: fgColor, fontWeight: 600 }}>
                   {design.logo_text || design.organization_name || 'Your Brand'}

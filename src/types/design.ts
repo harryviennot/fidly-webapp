@@ -64,7 +64,7 @@ export interface CardDesignCreate {
   back_fields?: PassField[];
 }
 
-export interface CardDesignUpdate extends Partial<CardDesignCreate> {}
+export type CardDesignUpdate = Partial<CardDesignCreate>;
 
 export interface UploadResponse {
   id: string;

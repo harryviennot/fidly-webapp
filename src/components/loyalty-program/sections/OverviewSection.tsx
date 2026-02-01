@@ -201,7 +201,6 @@ export function OverviewSection({
         {/* Setup Steps */}
         <div className="space-y-3">
           {setupSteps.map((step, index) => {
-            const Icon = step.icon;
             const StepIndicator = step.isComplete ? CheckCircleIcon : CircleIcon;
 
             return (
