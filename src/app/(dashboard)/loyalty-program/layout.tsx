@@ -5,6 +5,7 @@ import { CardDesign } from '@/types';
 import { getDesigns, deleteDesign, activateDesign, duplicateDesign } from '@/api';
 import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
+import { getPlanLimits, isLimitExceededError } from '@/lib/features';
 
 interface LoyaltyProgramContextType {
   designs: CardDesign[];
@@ -83,11 +84,23 @@ export default function LoyaltyProgramLayout({ children }: { children: ReactNode
   const handleDuplicate = async (designId: string) => {
     if (!currentBusiness?.id) return;
 
+    // Check design limit before duplicating
+    const limits = getPlanLimits(currentBusiness.subscription_tier || 'pay');
+    if (limits.max_card_designs !== null && designs.length >= limits.max_card_designs) {
+      toast.error(`Design limit reached. Your plan allows ${limits.max_card_designs} design(s). Upgrade to Pro for unlimited designs.`);
+      return;
+    }
+
     try {
       await duplicateDesign(currentBusiness.id, designId);
       await loadDesigns();
       toast.success('Card duplicated');
-    } catch (err) {
+    } catch (err: unknown) {
+      // Handle backend limit error
+      if (isLimitExceededError(err)) {
+        toast.error(err.detail.message || 'Design limit reached. Upgrade to Pro for more designs.');
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Failed to duplicate design');
     }
   };
