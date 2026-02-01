@@ -1,52 +1,39 @@
 'use client';
 
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { PlusIcon } from '@phosphor-icons/react';
 
 export function TemplatesPageSkeleton() {
   return (
     <div className="space-y-6">
-      {/* Page header skeleton */}
+      {/* Static page header with disabled button */}
       <div className="flex items-center justify-between">
         <div>
-          <Skeleton className="h-8 w-40 mb-2" />
-          <Skeleton className="h-4 w-64" />
+          <h1 className="text-2xl font-bold">Card Templates</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your loyalty card designs
+          </p>
         </div>
-        <Skeleton className="h-10 w-32 rounded-full" />
-      </div>
-
-      {/* Active card skeleton */}
-      <div className="p-4 rounded-xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5">
-        <Skeleton className="h-4 w-20 mb-4" />
-        <div className="flex items-start gap-6">
-          <Skeleton className="w-64 h-44 rounded-xl" />
-          <div className="flex-1 space-y-3">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-32" />
-            <div className="flex gap-2 pt-2">
-              <Skeleton className="h-9 w-24 rounded-full" />
-              <Skeleton className="h-9 w-28 rounded-full" />
-            </div>
-          </div>
-        </div>
+        <Button disabled className="rounded-full">
+          <PlusIcon className="w-4 h-4 mr-2" />
+          New Card
+        </Button>
       </div>
 
       {/* Card grid skeleton */}
-      <div>
-        <Skeleton className="h-5 w-32 mb-4" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="w-full aspect-[1/1.282] rounded-xl" />
-              <div className="flex items-center justify-between px-1">
-                <div>
-                  <Skeleton className="h-4 w-24 mb-1" />
-                  <Skeleton className="h-3 w-16" />
-                </div>
-                <Skeleton className="h-8 w-8 rounded" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="space-y-3">
+            <div className="w-full aspect-[1/1.282] rounded-2xl bg-[var(--muted)] animate-pulse" />
+            <div className="flex items-center justify-between px-1">
+              <div className="space-y-1">
+                <div className="h-4 w-24 bg-[var(--muted)] rounded animate-pulse" />
+                <div className="h-3 w-16 bg-[var(--muted)] rounded animate-pulse" />
               </div>
+              <div className="h-6 w-6 bg-[var(--muted)] rounded animate-pulse" />
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

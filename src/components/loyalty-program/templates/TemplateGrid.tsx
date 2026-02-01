@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { CardDesign } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { PlusIcon, Crown } from '@phosphor-icons/react';
+import { PlusIcon } from '@phosphor-icons/react';
 import { TemplateCard } from './TemplateCard';
 
 interface TemplateGridProps {
@@ -13,6 +12,7 @@ interface TemplateGridProps {
   isProPlan: boolean;
   onDelete: (id: string) => void;
   onActivate: (id: string) => void;
+  onDuplicate: (id: string) => void;
 }
 
 export function TemplateGrid({
@@ -21,103 +21,61 @@ export function TemplateGrid({
   isProPlan,
   onDelete,
   onActivate,
+  onDuplicate,
 }: TemplateGridProps) {
   const canCreateNew = isProPlan || (!activeDesign && inactiveDesigns.length === 0);
 
+  // Combine all cards with active first
+  const allDesigns = activeDesign
+    ? [activeDesign, ...inactiveDesigns]
+    : inactiveDesigns;
+
   return (
-    <div className="space-y-8">
-      {/* Active Card Section */}
-      {activeDesign && (
-        <div className="p-6 rounded-xl border-2 border-[var(--accent)]/30 bg-[var(--accent)]/5">
-          <div className="flex items-center gap-2 mb-4">
-            <Badge variant="secondary" className="bg-green-100 text-green-700">
-              Active Card
-            </Badge>
-            <span className="text-xs text-muted-foreground">
-              This card is currently being used by your customers
-            </span>
-          </div>
-          <div className="max-w-xs">
+    <div className="space-y-6">
+      {/* Card grid */}
+      {allDesigns.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {allDesigns.map((design) => (
             <TemplateCard
-              design={activeDesign}
+              key={design.id}
+              design={design}
               onDelete={onDelete}
               onActivate={onActivate}
+              onDuplicate={onDuplicate}
             />
-          </div>
+          ))}
         </div>
-      )}
-
-      {/* Other Templates Section */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">
-            {activeDesign ? 'Other Templates' : 'Your Templates'}
-          </h3>
-          {canCreateNew ? (
-            <Button asChild className="rounded-full">
+      ) : (
+        <div className="text-center py-12 border-2 border-dashed rounded-xl">
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+            <PlusIcon className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Create your first loyalty card design
+          </p>
+          {canCreateNew && (
+            <Button asChild variant="outline" className="rounded-full">
               <Link href="/loyalty-program/design/new">
                 <PlusIcon className="w-4 h-4 mr-2" />
-                New Card
+                Create Card
               </Link>
-            </Button>
-          ) : (
-            <Button className="rounded-full" disabled>
-              <Crown className="w-4 h-4 mr-2 text-amber-500" weight="fill" />
-              Upgrade for More Cards
             </Button>
           )}
         </div>
+      )}
 
-        {inactiveDesigns.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {inactiveDesigns.map((design) => (
-              <TemplateCard
-                key={design.id}
-                design={design}
-                onDelete={onDelete}
-                onActivate={onActivate}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 border-2 border-dashed rounded-xl">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
-              <PlusIcon className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              {activeDesign
-                ? 'Create additional card templates for different campaigns or seasons'
-                : 'Create your first loyalty card design'}
-            </p>
-            {canCreateNew && (
-              <Button asChild variant="outline" className="rounded-full">
-                <Link href="/loyalty-program/design/new">
-                  <PlusIcon className="w-4 h-4 mr-2" />
-                  Create Template
-                </Link>
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Pro upsell for non-pro users with existing card */}
+      {/* Pro hint for non-pro users with existing card */}
       {!isProPlan && activeDesign && (
-        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-          <div className="flex items-start gap-3">
-            <Crown className="w-5 h-5 text-amber-600 mt-0.5" weight="fill" />
-            <div>
-              <p className="font-medium text-amber-900">Want multiple card designs?</p>
-              <p className="text-sm text-amber-700 mt-1">
-                Upgrade to Pro to create unlimited card templates for seasonal campaigns, special events, or A/B testing.
-              </p>
-              <Button asChild variant="outline" size="sm" className="mt-3 rounded-full border-amber-300 text-amber-700 hover:bg-amber-100">
-                <Link href="/settings/billing">
-                  Upgrade to Pro
-                </Link>
-              </Button>
-            </div>
-          </div>
+        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--cream)] p-4">
+          <p className="text-sm">
+            <span className="font-medium">Want more card designs?</span>
+            <span className="text-muted-foreground ml-1">Upgrade to create unlimited templates.</span>
+          </p>
+          <Button asChild variant="outline" size="sm" className="rounded-full shrink-0 ml-4">
+            <Link href="/settings/billing">
+              Upgrade to Pro
+            </Link>
+          </Button>
         </div>
       )}
     </div>

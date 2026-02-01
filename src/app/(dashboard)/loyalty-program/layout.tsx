@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { CardDesign } from '@/types';
-import { getDesigns, deleteDesign, activateDesign } from '@/api';
+import { getDesigns, deleteDesign, activateDesign, duplicateDesign } from '@/api';
+import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 
 interface LoyaltyProgramContextType {
@@ -15,6 +16,7 @@ interface LoyaltyProgramContextType {
   refreshDesigns: () => Promise<void>;
   handleDelete: (designId: string) => Promise<void>;
   handleActivate: (designId: string) => Promise<void>;
+  handleDuplicate: (designId: string) => Promise<void>;
 }
 
 const LoyaltyProgramContext = createContext<LoyaltyProgramContextType | null>(null);
@@ -78,6 +80,18 @@ export default function LoyaltyProgramLayout({ children }: { children: ReactNode
     }
   };
 
+  const handleDuplicate = async (designId: string) => {
+    if (!currentBusiness?.id) return;
+
+    try {
+      await duplicateDesign(currentBusiness.id, designId);
+      await loadDesigns();
+      toast.success('Card duplicated');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to duplicate design');
+    }
+  };
+
   return (
     <LoyaltyProgramContext.Provider
       value={{
@@ -90,6 +104,7 @@ export default function LoyaltyProgramLayout({ children }: { children: ReactNode
         refreshDesigns: loadDesigns,
         handleDelete,
         handleActivate,
+        handleDuplicate,
       }}
     >
       <div className="space-y-6">

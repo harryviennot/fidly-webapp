@@ -93,6 +93,32 @@ export async function activateDesign(businessId: string, designId: string): Prom
   return response.json();
 }
 
+export async function duplicateDesign(businessId: string, designId: string): Promise<CardDesign> {
+  const original = await getDesign(businessId, designId);
+
+  const copyData: CardDesignCreate = {
+    name: `${original.name} (Copy)`,
+    organization_name: original.organization_name,
+    description: original.description,
+    logo_text: original.logo_text,
+    foreground_color: original.foreground_color,
+    background_color: original.background_color,
+    label_color: original.label_color,
+    total_stamps: original.total_stamps,
+    stamp_filled_color: original.stamp_filled_color,
+    stamp_empty_color: original.stamp_empty_color,
+    stamp_border_color: original.stamp_border_color,
+    stamp_icon: original.stamp_icon,
+    reward_icon: original.reward_icon,
+    icon_color: original.icon_color,
+    secondary_fields: original.secondary_fields,
+    auxiliary_fields: original.auxiliary_fields,
+    back_fields: original.back_fields,
+  };
+
+  return createDesign(businessId, copyData);
+}
+
 export async function uploadLogo(businessId: string, designId: string, file: File): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append('file', file);
