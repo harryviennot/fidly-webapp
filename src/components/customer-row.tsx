@@ -7,16 +7,18 @@ import StampsDisplay from './stamps-display';
 
 interface Props {
   customer: CustomerResponse;
+  businessId: string;
+  totalStamps: number;
   onStampAdded: (customerId: string, newStamps: number) => void;
 }
 
-export default function CustomerRow({ customer, onStampAdded }: Props) {
+export default function CustomerRow({ customer, businessId, totalStamps, onStampAdded }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddStamp = async () => {
     setIsLoading(true);
     try {
-      const result = await addStamp(customer.id);
+      const result = await addStamp(businessId, customer.id);
       onStampAdded(customer.id, result.stamps);
     } catch (error) {
       console.error('Failed to add stamp:', error);
@@ -25,20 +27,22 @@ export default function CustomerRow({ customer, onStampAdded }: Props) {
     }
   };
 
+  const isMaxed = customer.stamps >= totalStamps;
+
   return (
     <tr>
       <td>{customer.name}</td>
       <td>{customer.email}</td>
       <td>
-        <StampsDisplay count={customer.stamps} />
+        <StampsDisplay count={customer.stamps} total={totalStamps} />
       </td>
       <td>
         <button
           className={`btn btn-primary btn-action ${isLoading ? 'loading' : ''}`}
           onClick={handleAddStamp}
-          disabled={isLoading || customer.stamps >= 10}
+          disabled={isLoading || isMaxed}
         >
-          {customer.stamps >= 10 ? 'Max!' : 'Add Stamp'}
+          {isMaxed ? 'Max!' : 'Add Stamp'}
         </button>
       </td>
     </tr>

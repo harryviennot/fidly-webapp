@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { getAllCustomers } from '@/api';
+import { getAllCustomers, getActiveDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { CustomerResponse } from '@/types';
 import CustomerRow from './customer-row';
@@ -9,6 +9,7 @@ import CustomerRow from './customer-row';
 export default function CustomerTable() {
   const { currentBusiness } = useBusiness();
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
+  const [totalStamps, setTotalStamps] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,8 +17,14 @@ export default function CustomerTable() {
   const loadCustomers = useCallback(async () => {
     if (!currentBusiness?.id) return;
     try {
-      const data = await getAllCustomers(currentBusiness.id);
+      const [data, design] = await Promise.all([
+        getAllCustomers(currentBusiness.id),
+        getActiveDesign(currentBusiness.id),
+      ]);
       setCustomers(data);
+      if (design?.total_stamps) {
+        setTotalStamps(design.total_stamps);
+      }
       setError(null);
     } catch {
       setError('Failed to load customers. Make sure the backend is running.');
@@ -85,6 +92,8 @@ export default function CustomerTable() {
               <CustomerRow
                 key={customer.id}
                 customer={customer}
+                businessId={currentBusiness!.id}
+                totalStamps={totalStamps}
                 onStampAdded={handleStampAdded}
               />
             ))}
