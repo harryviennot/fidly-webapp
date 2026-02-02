@@ -2,62 +2,40 @@
 
 import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { Crown, RocketLaunch, Info } from '@phosphor-icons/react';
+import { Crown, Info } from '@phosphor-icons/react';
 import Link from 'next/link';
 
+// BYPASSED FOR MVP: Props preserved for re-enabling later
 interface ProFeatureGateProps {
-  feature: string;
-  description: string;
-  isProPlan: boolean;
+  feature?: string;
+  description?: string;
+  isProPlan?: boolean;
   children: ReactNode;
 }
 
 /**
  * Gates content behind Pro subscription.
  * Shows blurred preview with upgrade prompt for non-Pro users.
+ *
+ * NOTE: BYPASSED FOR MVP - Always renders children regardless of plan.
  */
-export function ProFeatureGate({ feature, description, isProPlan, children }: ProFeatureGateProps) {
-  if (isProPlan) {
-    return <>{children}</>;
-  }
-
-  return (
-    <div className="relative">
-      {/* Blurred preview */}
-      <div className="blur-sm pointer-events-none select-none opacity-50">
-        {children}
-      </div>
-
-      {/* Upgrade overlay */}
-      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
-        <div className="text-center max-w-sm p-6">
-          <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-            <Crown className="w-6 h-6 text-amber-600" weight="fill" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">{feature}</h3>
-          <p className="text-sm text-muted-foreground mb-4">{description}</p>
-          <Button asChild className="rounded-full">
-            <Link href="/settings/billing">
-              <RocketLaunch className="w-4 h-4 mr-2" />
-              Upgrade to Pro
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+export function ProFeatureGate({ children }: ProFeatureGateProps) {
+  // BYPASSED FOR MVP: Always show content regardless of plan
+  // Re-enable gating when implementing paid tiers
+  return <>{children}</>;
 }
 
 /**
  * Flexible feature gate supporting both feature flags and usage limits.
+ * BYPASSED FOR MVP: Props preserved for re-enabling later
  */
 interface FeatureGateProps {
   /** Whether the feature/action is allowed */
-  allowed: boolean;
+  allowed?: boolean;
   /** Title for the gate message */
   title?: string;
   /** Description explaining why it's gated */
-  description: string;
+  description?: string;
   /** What to show when gated: 'blur' shows blurred content, 'hide' hides completely, 'disable' renders children but disabled */
   fallback?: 'blur' | 'hide' | 'disable';
   /** Custom fallback element */
@@ -65,57 +43,15 @@ interface FeatureGateProps {
   children: ReactNode;
 }
 
+/**
+ * NOTE: BYPASSED FOR MVP - Always renders children regardless of allowed prop.
+ */
 export function FeatureGate({
-  allowed,
-  title = 'Upgrade Required',
-  description,
-  fallback = 'blur',
-  customFallback,
   children,
 }: FeatureGateProps) {
-  if (allowed) {
-    return <>{children}</>;
-  }
-
-  if (fallback === 'hide') {
-    return null;
-  }
-
-  if (customFallback) {
-    return <>{customFallback}</>;
-  }
-
-  if (fallback === 'disable') {
-    return (
-      <div className="opacity-50 pointer-events-none select-none">
-        {children}
-      </div>
-    );
-  }
-
-  // Default: blur with overlay
-  return (
-    <div className="relative">
-      <div className="blur-sm pointer-events-none select-none opacity-50">
-        {children}
-      </div>
-      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
-        <div className="text-center max-w-sm p-6">
-          <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-            <Crown className="w-6 h-6 text-amber-600" weight="fill" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">{title}</h3>
-          <p className="text-sm text-muted-foreground mb-4">{description}</p>
-          <Button asChild className="rounded-full">
-            <Link href="/settings/billing">
-              <RocketLaunch className="w-4 h-4 mr-2" />
-              Upgrade to Pro
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+  // BYPASSED FOR MVP: Always show content regardless of allowed prop
+  // Re-enable gating when implementing paid tiers
+  return <>{children}</>;
 }
 
 /**

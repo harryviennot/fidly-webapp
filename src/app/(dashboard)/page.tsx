@@ -1,47 +1,178 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { UsersIcon, PaletteIcon, UserPlusIcon, StampIcon } from "@phosphor-icons/react";
-import { StatsCard } from "@/components/dashboard";
+import {
+  PlusIcon,
+  CopyIcon,
+  CheckIcon,
+  QrCodeIcon,
+  UserIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBusiness } from "@/contexts/business-context";
-import { getAllCustomers, getActiveDesign, getBusinessMembers } from "@/api";
-import type { CustomerResponse, CardDesign, MembershipWithUser } from "@/types";
+import { getDesigns, deleteDesign, activateDesign, duplicateDesign, updateBusiness } from "@/api";
+import { ActiveCardWidget } from "@/components/loyalty-program/overview/ActiveCardWidget";
+import { TemplateGrid } from "@/components/loyalty-program/templates/TemplateGrid";
+import { toast } from "sonner";
+import type { CardDesign } from "@/types";
 
-export default function AdminPage() {
-  const { currentBusiness } = useBusiness();
-  const [customers, setCustomers] = useState<CustomerResponse[]>([]);
-  const [activeDesign, setActiveDesign] = useState<CardDesign | null>(null);
-  const [teamMembers, setTeamMembers] = useState<MembershipWithUser[]>([]);
+interface DataCollectionSettings {
+  collect_name: boolean;
+  collect_email: boolean;
+  collect_phone: boolean;
+}
+
+export default function LoyaltyProgramPage() {
+  const { currentBusiness, refetch } = useBusiness();
+
+  // Design state
+  const [designs, setDesigns] = useState<CardDesign[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadData() {
-      if (!currentBusiness?.id) return;
+  // Settings state
+  const [copied, setCopied] = useState(false);
+  const [settings, setSettings] = useState<DataCollectionSettings>({
+    collect_name: false,
+    collect_email: false,
+    collect_phone: false,
+  });
+  const [saving, setSaving] = useState(false);
 
-      setLoading(true);
-      try {
-        const [customersData, designData, membersData] = await Promise.all([
-          getAllCustomers(currentBusiness.id),
-          getActiveDesign(currentBusiness.id),
-          getBusinessMembers(currentBusiness.id),
-        ]);
-        setCustomers(customersData);
-        setActiveDesign(designData);
-        setTeamMembers(membersData);
-      } catch (error) {
-        console.error("Failed to load dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
+  // Computed values
+  const activeDesign = designs.find((d) => d.is_active);
+  const inactiveDesigns = designs.filter((d) => !d.is_active);
+  const baseUrl = globalThis.window === undefined ? "" : globalThis.window.location.origin;
+  const slug = currentBusiness?.url_slug || "";
+  const fullUrl = `${baseUrl}/${slug}`;
+
+  // Load designs
+  const loadDesigns = useCallback(async () => {
+    if (!currentBusiness?.id) return;
+    try {
+      const data = await getDesigns(currentBusiness.id);
+      setDesigns(data);
+    } catch (err) {
+      console.error("Failed to load designs:", err);
+    } finally {
+      setLoading(false);
     }
-
-    loadData();
   }, [currentBusiness?.id]);
 
-  const totalStamps = customers.reduce((sum, c) => sum + c.stamps, 0);
+  useEffect(() => {
+    loadDesigns();
+  }, [loadDesigns]);
+
+  // Load settings from business
+  useEffect(() => {
+    if (currentBusiness?.settings?.customer_data_collection) {
+      setSettings({
+        collect_name: currentBusiness.settings.customer_data_collection.collect_name ?? false,
+        collect_email: currentBusiness.settings.customer_data_collection.collect_email ?? false,
+        collect_phone: currentBusiness.settings.customer_data_collection.collect_phone ?? false,
+      });
+    }
+  }, [currentBusiness]);
+
+  // Handlers
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(fullUrl);
+    setCopied(true);
+    toast.success("Link copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleToggle = async (field: keyof DataCollectionSettings) => {
+    if (!currentBusiness?.id) return;
+
+    const newSettings = { ...settings, [field]: !settings[field] };
+    setSettings(newSettings);
+    setSaving(true);
+
+    try {
+      await updateBusiness(currentBusiness.id, {
+        settings: {
+          ...currentBusiness.settings,
+          customer_data_collection: newSettings,
+        },
+      });
+      await refetch();
+    } catch (error) {
+      console.error("Failed to update settings:", error);
+      // Revert to previous settings on error
+      setSettings((prev) => ({ ...prev, [field]: !prev[field] }));
+      toast.error("Failed to update settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (designId: string) => {
+    if (!currentBusiness?.id) return;
+    if (!confirm("Are you sure you want to delete this card design?")) return;
+
+    try {
+      await deleteDesign(currentBusiness.id, designId);
+      await loadDesigns();
+      toast.success("Card deleted");
+    } catch (error) {
+      console.error("Failed to delete design:", error);
+      toast.error("Failed to delete card");
+    }
+  };
+
+  const handleActivate = async (designId: string) => {
+    if (!currentBusiness?.id) return;
+
+    try {
+      await activateDesign(currentBusiness.id, designId);
+      await loadDesigns();
+      toast.success("Card activated");
+    } catch (error) {
+      console.error("Failed to activate design:", error);
+      toast.error("Failed to activate card");
+    }
+  };
+
+  const handleDuplicate = async (designId: string) => {
+    if (!currentBusiness?.id) return;
+
+    try {
+      await duplicateDesign(currentBusiness.id, designId);
+      await loadDesigns();
+      toast.success("Card duplicated");
+    } catch (error) {
+      console.error("Failed to duplicate design:", error);
+      toast.error("Failed to duplicate card");
+    }
+  };
+
+  const dataFields = [
+    {
+      key: "collect_name" as const,
+      label: "Name",
+      description: "Collect customer names for personalization",
+      icon: UserIcon,
+    },
+    {
+      key: "collect_email" as const,
+      label: "Email",
+      description: "Enable pass recovery and email notifications",
+      icon: EnvelopeIcon,
+    },
+    {
+      key: "collect_phone" as const,
+      label: "Phone",
+      description: "Enable SMS notifications (coming soon)",
+      icon: PhoneIcon,
+    },
+  ];
 
   if (loading) {
     return (
@@ -53,95 +184,123 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
+      {/* Page header */}
       <div>
-        <h2 className="text-2xl font-bold">
-          Welcome back, {currentBusiness?.name}
-        </h2>
+        <h2 className="text-2xl font-bold">Loyalty Program</h2>
         <p className="text-muted-foreground">
-          Here&apos;s what&apos;s happening with your loyalty program
+          Manage your loyalty card and program settings
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Total Customers"
-          value={customers.length}
-          description="Registered customers"
-          icon={<UsersIcon className="h-6 w-6" weight="duotone" />}
-        />
-        <StatsCard
-          title="Total Stamps"
-          value={totalStamps}
-          description="Stamps collected"
-          icon={<StampIcon className="h-6 w-6" weight="duotone" />}
-        />
-        <StatsCard
-          title="Active Design"
-          value={activeDesign ? "1" : "0"}
-          description={activeDesign?.name || "No active design"}
-          icon={<PaletteIcon className="h-6 w-6" weight="duotone" />}
-        />
-        <StatsCard
-          title="Team Members"
-          value={teamMembers.length}
-          description="Owners, admins & scanners"
-          icon={<UserPlusIcon className="h-6 w-6" weight="duotone" />}
-        />
+      {/* Main content - Active Card + Settings */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Active Card - 1 column */}
+        <div className="lg:col-span-1">
+          <ActiveCardWidget design={activeDesign} isProPlan={true} />
+        </div>
+
+        {/* Settings Card with tabs - 2 columns */}
+        <div className="lg:col-span-2">
+          <Card className="h-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Program Settings</CardTitle>
+              <CardDescription>
+                Configure your loyalty program
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="url">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="url">Business URL</TabsTrigger>
+                  <TabsTrigger value="data">Data Collection</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="url" className="space-y-4">
+                  <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">Your signup link</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCopy}
+                        className="rounded-full"
+                      >
+                        {copied ? (
+                          <CheckIcon className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <CopyIcon className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground break-all font-mono bg-background/50 p-2 rounded">
+                      {fullUrl}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <QrCodeIcon className="h-4 w-4" />
+                    <span>QR code downloads are available in the scanner app</span>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="data" className="space-y-4">
+                  {dataFields.map((field) => {
+                    const Icon = field.icon;
+                    return (
+                      <div
+                        key={field.key}
+                        className="flex items-center justify-between p-4 border rounded-xl"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                            <Icon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium">{field.label}</Label>
+                            <p className="text-xs text-muted-foreground">
+                              {field.description}
+                            </p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={settings[field.key]}
+                          onCheckedChange={() => handleToggle(field.key)}
+                          disabled={saving}
+                        />
+                      </div>
+                    );
+                  })}
+
+                  <p className="text-xs text-muted-foreground pt-2">
+                    Note: Collecting no data enables anonymous mode - customers can
+                    sign up without providing any information.
+                  </p>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-3">
-            <Button asChild>
-              <Link href="/customers">View Customers</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/design">Manage Designs</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/team">Manage Team</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Recent Customers */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Recent Customers</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {customers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No customers yet. Share your loyalty program to get started!
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {customers.slice(0, 5).map((customer) => (
-                  <div
-                    key={customer.id}
-                    className="flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">{customer.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {customer.email}
-                      </p>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {customer.stamps} stamps
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Card Templates - full width */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Card Templates</h3>
+          <Button asChild className="rounded-full">
+            <Link href="/loyalty-program/design/new">
+              <PlusIcon className="w-4 h-4 mr-2" />
+              New Card
+            </Link>
+          </Button>
+        </div>
+        <TemplateGrid
+          activeDesign={activeDesign}
+          inactiveDesigns={inactiveDesigns}
+          isProPlan={true}
+          onDelete={handleDelete}
+          onActivate={handleActivate}
+          onDuplicate={handleDuplicate}
+        />
       </div>
     </div>
   );

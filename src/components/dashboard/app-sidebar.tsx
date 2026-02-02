@@ -42,7 +42,7 @@ import {
 } from "@phosphor-icons/react";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: HouseIcon },
+  { href: "/", label: "Loyalty Program", icon: HeartIcon },
   { href: "/customers", label: "Customers", icon: UsersIcon },
   { href: "/team", label: "Team", icon: UserPlusIcon },
   { href: "/settings", label: "Settings", icon: GearIcon },
@@ -142,8 +142,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               )
             })}
 
-            {/* Loyalty Program - Collapsible with sub-items */}
-            {canSeeLoyaltyProgram && (
+            {/* HIDDEN FOR MVP: Loyalty Program collapsible submenu
+                Pages are still accessible via direct URL.
+                Re-enable when adding back advanced features. */}
+            {/* {canSeeLoyaltyProgram && (
               <Collapsible
                 asChild
                 defaultOpen={isLoyaltyProgramActive}
@@ -205,7 +207,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
-            )}
+            )} */}
 
             {/* Rest of nav items (Team, Settings) */}
             {filteredNavItems.filter(item => item.href !== "/" && item.href !== "/customers").map((item) => {
