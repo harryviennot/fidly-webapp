@@ -1,24 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useBusiness } from '@/contexts/business-context';
 import { updateBusiness } from '@/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Crown, StampIcon, TrophyIcon, TargetIcon, MegaphoneIcon } from '@phosphor-icons/react';
+import { StampIcon, TrophyIcon, TargetIcon, MegaphoneSimpleIcon, CheckCircleIcon, UsersIcon, CalendarBlankIcon } from '@phosphor-icons/react';
 import { NotificationsPageSkeleton } from '@/components/loyalty-program/skeletons/NotificationsPageSkeleton';
 import { ProBadge } from '@/components/loyalty-program/ProFeatureGate';
-
-interface NotificationTemplate {
-  title: string;
-  message: string;
-  enabled?: boolean;
-}
+import { NotificationCard, NotificationTemplate, Variable } from '@/components/loyalty-program/notifications';
 
 interface NotificationTemplates {
   stamp: NotificationTemplate;
@@ -44,36 +34,53 @@ const defaultTemplates: NotificationTemplates = {
   },
 };
 
-const notificationTypes = [
+const notificationTypes: Array<{
+  key: 'stamp' | 'milestone' | 'reward';
+  label: string;
+  description: string;
+  icon: typeof StampIcon;
+  variables: Variable[];
+}> = [
   {
-    key: 'stamp' as const,
+    key: 'stamp',
     label: 'Stamp Earned',
     description: 'Sent when a customer receives a stamp',
     icon: StampIcon,
-    variables: ['{remaining}', '{total}', '{customer_name}'],
+    variables: [
+      { key: '{remaining}', label: 'Stamps remaining until reward', example: '3' },
+      { key: '{total}', label: 'Total stamps needed', example: '10' },
+      { key: '{customer_name}', label: "Customer's name", example: 'Sarah' },
+    ],
   },
   {
-    key: 'milestone' as const,
+    key: 'milestone',
     label: 'Milestone',
     description: 'Sent when customer is 2 stamps away from reward',
     icon: TargetIcon,
-    variables: ['{remaining}', '{customer_name}'],
+    variables: [
+      { key: '{remaining}', label: 'Stamps remaining until reward', example: '2' },
+      { key: '{customer_name}', label: "Customer's name", example: 'Sarah' },
+    ],
   },
   {
-    key: 'reward' as const,
+    key: 'reward',
     label: 'Reward Ready',
     description: 'Sent when customer earns their reward',
     icon: TrophyIcon,
-    variables: ['{reward_name}', '{customer_name}'],
+    variables: [
+      { key: '{reward_name}', label: 'Name of the reward', example: 'Free Coffee' },
+      { key: '{customer_name}', label: "Customer's name", example: 'Sarah' },
+    ],
   },
 ];
 
 export default function NotificationsPage() {
   const { currentBusiness, refetch } = useBusiness();
   const [templates, setTemplates] = useState<NotificationTemplates>(defaultTemplates);
-  const [saving, setSaving] = useState(false);
-  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isProPlan = currentBusiness?.subscription_tier === 'pro';
 
@@ -89,38 +96,55 @@ export default function NotificationsPage() {
     }
   }, [currentBusiness]);
 
-  const handleSave = async () => {
-    if (!currentBusiness?.id || !isProPlan) return;
+  // Autosave with debounce
+  const saveTemplates = useCallback(
+    async (newTemplates: NotificationTemplates) => {
+      if (!currentBusiness?.id || !isProPlan) return;
 
-    setSaving(true);
-    try {
-      await updateBusiness(currentBusiness.id, {
-        settings: {
-          ...currentBusiness.settings,
-          notification_templates: templates,
+      setSaveStatus('saving');
+      try {
+        await updateBusiness(currentBusiness.id, {
+          settings: {
+            ...currentBusiness.settings,
+            notification_templates: newTemplates,
+          },
+        });
+        await refetch();
+        setSaveStatus('saved');
+        // Reset to idle after 2 seconds
+        setTimeout(() => setSaveStatus('idle'), 2000);
+      } catch (error) {
+        console.error('Failed to save notification templates:', error);
+        setSaveStatus('idle');
+      }
+    },
+    [currentBusiness, isProPlan, refetch]
+  );
+
+  const handleTemplateChange = useCallback(
+    (key: keyof NotificationTemplates, field: keyof NotificationTemplate, value: string | boolean) => {
+      const newTemplates = {
+        ...templates,
+        [key]: {
+          ...templates[key],
+          [field]: value,
         },
-      });
-      await refetch();
-      setEditingKey(null);
-    } catch (error) {
-      console.error('Failed to save notification templates:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
+      };
+      setTemplates(newTemplates);
 
-  const handleChange = (
-    key: keyof NotificationTemplates,
-    field: keyof NotificationTemplate,
-    value: string | boolean
-  ) => {
-    setTemplates((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        [field]: value,
-      },
-    }));
+      // Debounced save
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      saveTimeoutRef.current = setTimeout(() => {
+        saveTemplates(newTemplates);
+      }, 1000);
+    },
+    [templates, saveTemplates]
+  );
+
+  const handleExpandChange = (key: string, expanded: boolean) => {
+    setExpandedKey(expanded ? key : null);
   };
 
   if (loading) {
@@ -130,172 +154,132 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold">Notifications</h1>
-        <p className="text-muted-foreground mt-1">
-          Configure the push notifications sent to your customers
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Notifications</h1>
+          <p className="text-muted-foreground mt-1">
+            Configure the push notifications sent to your customers
+          </p>
+        </div>
+        {/* Save status indicator */}
+        {saveStatus !== 'idle' && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {saveStatus === 'saving' && (
+              <>
+                <div className="w-3 h-3 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+                <span>Saving...</span>
+              </>
+            )}
+            {saveStatus === 'saved' && (
+              <>
+                <CheckCircleIcon className="w-4 h-4 text-green-500" weight="fill" />
+                <span className="text-green-600 dark:text-green-500">Saved</span>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Notification templates */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            Push Notifications
-            {!isProPlan && <ProBadge />}
-          </CardTitle>
-          <CardDescription>
-            Customize the messages your customers receive
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {notificationTypes.map((type) => {
-            const Icon = type.icon;
-            const template = templates[type.key];
-            const isEditing = editingKey === type.key;
+      {/* Push Notifications section */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Automated Notifications
+          </h2>
+          {!isProPlan && <ProBadge />}
+        </div>
 
-            return (
-              <div
-                key={type.key}
-                className="space-y-3 pb-6 border-b border-[var(--border)] last:border-0 last:pb-0"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center">
-                      <Icon className="h-4 w-4 text-[var(--accent)]" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{type.label}</p>
-                      <p className="text-xs text-muted-foreground">{type.description}</p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={template.enabled !== false}
-                    onCheckedChange={(checked) => {
-                      if (isProPlan) {
-                        handleChange(type.key, 'enabled', checked);
-                      }
-                    }}
-                    disabled={!isProPlan}
-                  />
+        <div className="space-y-3">
+          {notificationTypes.map((type) => (
+            <NotificationCard
+              key={type.key}
+              type={type.key}
+              label={type.label}
+              description={type.description}
+              icon={type.icon}
+              template={templates[type.key]}
+              variables={type.variables}
+              isExpanded={expandedKey === type.key}
+              onExpandChange={(expanded) => handleExpandChange(type.key, expanded)}
+              onTemplateChange={(field, value) => handleTemplateChange(type.key, field, value)}
+              isProPlan={isProPlan}
+              appName={currentBusiness?.name}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Promotional Notifications - Coming Soon */}
+      <Card className="overflow-hidden">
+        <div className="relative">
+          {/* Gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-purple-500/5" />
+
+          <CardHeader className="relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center">
+                  <MegaphoneSimpleIcon className="w-5 h-5 text-white" weight="fill" />
                 </div>
-
-                <div className="ml-12 space-y-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor={`${type.key}-title`} className="text-xs text-muted-foreground">
-                      Title
-                    </Label>
-                    {isProPlan && isEditing ? (
-                      <Input
-                        id={`${type.key}-title`}
-                        value={template.title}
-                        onChange={(e) => handleChange(type.key, 'title', e.target.value)}
-                        className="text-sm"
-                      />
-                    ) : (
-                      <p
-                        className="text-sm py-2 px-3 bg-muted/50 rounded-md cursor-pointer hover:bg-muted/70 transition-colors"
-                        onClick={() => isProPlan && setEditingKey(type.key)}
-                      >
-                        {template.title}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor={`${type.key}-message`} className="text-xs text-muted-foreground">
-                      Message
-                    </Label>
-                    {isProPlan && isEditing ? (
-                      <Textarea
-                        id={`${type.key}-message`}
-                        value={template.message}
-                        onChange={(e) => handleChange(type.key, 'message', e.target.value)}
-                        className="text-sm min-h-[60px]"
-                      />
-                    ) : (
-                      <p
-                        className="text-sm py-2 px-3 bg-muted/50 rounded-md cursor-pointer hover:bg-muted/70 transition-colors"
-                        onClick={() => isProPlan && setEditingKey(type.key)}
-                      >
-                        {template.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {isProPlan && isEditing && (
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex flex-wrap gap-1">
-                        {type.variables.map((variable) => (
-                          <Badge
-                            key={variable}
-                            variant="outline"
-                            className="text-xs cursor-pointer hover:bg-muted"
-                            onClick={() => {
-                              handleChange(type.key, 'message', template.message + ' ' + variable);
-                            }}
-                          >
-                            {variable}
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setEditingKey(null)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="rounded-full"
-                          onClick={handleSave}
-                          disabled={saving}
-                        >
-                          {saving ? 'Saving...' : 'Save'}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {!isProPlan && (
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Crown className="h-3 w-3 text-amber-500" />
-                      Upgrade to Pro to customize notification text
-                    </p>
-                  )}
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    Promotional Notifications
+                    <ProBadge />
+                  </CardTitle>
+                  <CardDescription>
+                    Send custom promotional messages to drive engagement
+                  </CardDescription>
                 </div>
               </div>
-            );
-          })}
-        </CardContent>
-      </Card>
+              <Badge variant="secondary" className="bg-muted/80">
+                Coming Soon
+              </Badge>
+            </div>
+          </CardHeader>
 
-      {/* Promotional Notifications - Pro only */}
-      <Card className={!isProPlan ? 'opacity-60' : ''}>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <MegaphoneIcon className="w-5 h-5" />
-            Promotional Notifications
-            <ProBadge />
-          </CardTitle>
-          <CardDescription>
-            Send custom promotional messages to all your customers
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 border-2 border-dashed rounded-xl">
-            <MegaphoneIcon className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground mb-2">
-              Send targeted promotions to drive engagement
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Coming soon
-            </p>
-          </div>
-        </CardContent>
+          <CardContent className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FeaturePreview
+                icon={MegaphoneSimpleIcon}
+                title="Custom Messages"
+                description="Send personalized promotional messages to all your customers"
+              />
+              <FeaturePreview
+                icon={UsersIcon}
+                title="Audience Targeting"
+                description="Target active, inactive, or customers near their reward"
+              />
+              <FeaturePreview
+                icon={CalendarBlankIcon}
+                title="Scheduled Sends"
+                description="Schedule promotions to send at the perfect time"
+              />
+            </div>
+          </CardContent>
+        </div>
       </Card>
+    </div>
+  );
+}
+
+function FeaturePreview({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: typeof MegaphoneSimpleIcon;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+      <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0 shadow-sm">
+        <Icon className="w-4 h-4 text-muted-foreground" />
+      </div>
+      <div>
+        <p className="text-sm font-medium">{title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      </div>
     </div>
   );
 }
