@@ -157,6 +157,89 @@ export function StampGrid({
   );
 }
 
+interface SecondaryFieldsRowProps {
+  fields: Array<{ key?: string; label: string; value: string }>;
+  colors: ReturnType<typeof computeCardColors>;
+}
+
+function SecondaryFieldsRow({ fields, colors }: SecondaryFieldsRowProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState(14); // Start with text-sm equivalent
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const checkOverflow = () => {
+      // Reset to max size first
+      setFontSize(14);
+
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        if (!container) return;
+        const containerWidth = container.offsetWidth;
+        const contentWidth = container.scrollWidth;
+
+        if (contentWidth > containerWidth) {
+          // Calculate scale factor needed
+          const scale = containerWidth / contentWidth;
+          const newSize = Math.max(10, Math.floor(14 * scale));
+          setFontSize(newSize);
+        }
+      });
+    };
+
+    checkOverflow();
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, [fields]);
+
+  const fieldCount = fields.length;
+
+  return (
+    <div className="px-2.5 py-1 overflow-hidden">
+      <div
+        ref={containerRef}
+        className="flex items-start"
+        style={{ gap: '8px' }}
+      >
+        {fields.map((field, i) => {
+          const isFirst = i === 0;
+          const isLast = i === fieldCount - 1;
+
+          return (
+            <div
+              key={field.key || i}
+              className={`${isFirst ? '' : isLast ? 'ml-auto' : ''}`}
+              style={{
+                textAlign: isFirst ? 'left' : isLast ? 'right' : 'center',
+                flexShrink: isFirst || isLast ? 0 : 1,
+              }}
+            >
+              <div
+                className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300 whitespace-nowrap"
+                style={{ color: colors.mutedTextColor }}
+              >
+                {field.label}
+              </div>
+              <div
+                className="font-medium transition-colors duration-300 whitespace-nowrap"
+                style={{
+                  color: colors.textColor,
+                  fontSize: `${fontSize}px`,
+                }}
+              >
+                {field.value}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function FakeQRCode({ size = 80 }: { size?: number }) {
   const modules = 21;
   const moduleSize = size / modules;
@@ -497,29 +580,12 @@ export function WalletCard({
               />
             </div>
 
-            {/* Secondary Fields */}
+            {/* Secondary Fields - horizontal row like real Apple Wallet */}
             {showSecondaryFields && secondaryFields.length > 0 && (
-              <div
-                className="px-2.5"
-                style={{ borderColor: colors.emptyStampBorder }}
-              >
-                {secondaryFields.slice(0, 2).map((field, i) => (
-                  <div key={field.key || i} className="items-center py-0.5">
-                    <div
-                      className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300"
-                      style={{ color: colors.mutedTextColor }}
-                    >
-                      {field.label}
-                    </div>
-                    <div
-                      className="text-[18px] font-medium"
-                      style={{ color: colors.textColor }}
-                    >
-                      {field.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <SecondaryFieldsRow
+                fields={secondaryFields.slice(0, 4)}
+                colors={colors}
+              />
             )}
 
             {/* QR Code */}
