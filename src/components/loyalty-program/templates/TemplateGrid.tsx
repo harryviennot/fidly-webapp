@@ -3,8 +3,14 @@
 import Link from 'next/link';
 import { CardDesign } from '@/types';
 import { Button } from '@/components/ui/button';
-import { PlusIcon } from '@phosphor-icons/react';
-import { TemplateCard } from './TemplateCard';
+import {
+  PlusIcon,
+  PencilIcon,
+  CopyIcon,
+  CheckCircleIcon,
+  TrashIcon,
+} from '@phosphor-icons/react';
+import { WalletCard, CardWrapper } from '@/components/card';
 
 interface TemplateGridProps {
   activeDesign: CardDesign | undefined;
@@ -36,13 +42,54 @@ export function TemplateGrid({
       {allDesigns.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {allDesigns.map((design) => (
-            <TemplateCard
+            <CardWrapper
               key={design.id}
-              design={design}
-              onDelete={onDelete}
-              onActivate={onActivate}
-              onDuplicate={onDuplicate}
-            />
+              href={`/design/${design.id}`}
+              title={design.organization_name || 'Your Business'}
+              badge={
+                design.is_active
+                  ? { label: 'Active', variant: 'success' }
+                  : undefined
+              }
+              metadata={`${design.total_stamps} stamps`}
+              actions={[
+                {
+                  label: 'Edit',
+                  icon: <PencilIcon className="h-4 w-4" />,
+                  href: `/design/${design.id}`,
+                },
+                {
+                  label: 'Duplicate',
+                  icon: <CopyIcon className="h-4 w-4" />,
+                  onClick: () => onDuplicate(design.id),
+                },
+                ...(!design.is_active
+                  ? [
+                      {
+                        label: 'Set as Active',
+                        icon: <CheckCircleIcon className="h-4 w-4" />,
+                        onClick: () => onActivate(design.id),
+                      },
+                    ]
+                  : []),
+                ...(!design.is_active
+                  ? [
+                      {
+                        label: 'Delete',
+                        icon: <TrashIcon className="h-4 w-4" />,
+                        onClick: () => onDelete(design.id),
+                        destructive: true,
+                      },
+                    ]
+                  : []),
+              ]}
+            >
+              <WalletCard
+                design={design}
+                showQR={false}
+                showSecondaryFields={false}
+              />
+            </CardWrapper>
           ))}
         </div>
       ) : (

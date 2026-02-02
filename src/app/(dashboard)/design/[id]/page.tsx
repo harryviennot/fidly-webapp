@@ -108,7 +108,7 @@ export default function EditDesignPage() {
           )}
         </Button>
       </div>
-      <DesignEditorV2 ref={editorRef} design={design} onSavingChange={setSaving} designName={designName} onNameChange={setDesignName} />
+      <DesignEditorV2 ref={editorRef} design={design} onSavingChange={setSaving} designName={designName} />
     </div>
   );
 }
