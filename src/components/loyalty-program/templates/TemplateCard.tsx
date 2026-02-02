@@ -92,7 +92,7 @@ export function TemplateCard({ design, onDelete, onActivate, onDuplicate }: Temp
   return (
     <div className="w-full">
       {/* Card Preview */}
-      <Link href={`/loyalty-program/design/${design.id}`} className="block">
+      <Link href={`/design/${design.id}`} className="block">
         <ScaledCardWrapper baseWidth={280} aspectRatio={1.282} minScale={0.6}>
           <div
             className="w-full h-full rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
@@ -241,7 +241,7 @@ export function TemplateCard({ design, onDelete, onActivate, onDuplicate }: Temp
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={`/loyalty-program/design/${design.id}`}>
+              <Link href={`/design/${design.id}`}>
                 <PencilIcon className="mr-2 h-4 w-4" />
                 Edit
               </Link>

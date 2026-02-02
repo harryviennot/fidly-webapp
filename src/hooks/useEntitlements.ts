@@ -7,8 +7,9 @@
  */
 import { useBusiness } from "@/contexts/business-context";
 import {
-  getPlanLimits,
-  hasFeature as checkFeature,
+  // BYPASSED FOR MVP: Unused imports preserved for re-enabling later
+  // getPlanLimits,
+  // hasFeature as checkFeature,
   PlanLimits,
   SubscriptionTier,
 } from "@/lib/features";
@@ -60,49 +61,36 @@ export function useEntitlements(): EntitlementsResult {
   const { currentBusiness } = useBusiness();
 
   const tier = (currentBusiness?.subscription_tier || "pay") as SubscriptionTier;
-  const limits = getPlanLimits(tier);
 
-  const canCreateDesign = (currentCount: number): boolean => {
-    if (limits.max_card_designs === null) return true;
-    return currentCount < limits.max_card_designs;
-  };
-
-  const canAddScanner = (currentCount: number): boolean => {
-    if (limits.max_scanner_accounts === null) return true;
-    return currentCount < limits.max_scanner_accounts;
-  };
-
-  const getDesignsRemaining = (currentCount: number): number | null => {
-    if (limits.max_card_designs === null) return null;
-    return Math.max(0, limits.max_card_designs - currentCount);
-  };
-
-  const getScannersRemaining = (currentCount: number): number | null => {
-    if (limits.max_scanner_accounts === null) return null;
-    return Math.max(0, limits.max_scanner_accounts - currentCount);
-  };
-
-  const isAtDesignLimit = (currentCount: number): boolean => {
-    if (limits.max_card_designs === null) return false;
-    return currentCount >= limits.max_card_designs;
-  };
-
-  const isAtScannerLimit = (currentCount: number): boolean => {
-    if (limits.max_scanner_accounts === null) return false;
-    return currentCount >= limits.max_scanner_accounts;
+  // BYPASSED FOR MVP: Always return unlimited
+  // Re-enable when implementing paid tiers
+  // const limits = getPlanLimits(tier);
+  const limits: PlanLimits = {
+    max_card_designs: null,
+    max_scanner_accounts: null,
+    features: [
+      "basic_analytics",
+      "advanced_analytics",
+      "standard_notifications",
+      "custom_notifications",
+      "scheduled_campaigns",
+      "multiple_locations",
+      "geofencing",
+      "promotional_messaging",
+    ],
   };
 
   return {
     tier,
     limits,
-    isPro: tier === "pro",
-    hasFeature: (feature: string) => checkFeature(tier, feature),
-    canCreateDesign,
-    canAddScanner,
-    getDesignsRemaining,
-    getScannersRemaining,
-    isAtDesignLimit,
-    isAtScannerLimit,
+    isPro: true, // Always treat as Pro for MVP
+    hasFeature: () => true, // All features enabled
+    canCreateDesign: () => true,
+    canAddScanner: () => true,
+    getDesignsRemaining: () => null,
+    getScannersRemaining: () => null,
+    isAtDesignLimit: () => false,
+    isAtScannerLimit: () => false,
   };
 }
 

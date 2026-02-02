@@ -103,7 +103,7 @@ export default function DesignCard({ design, onDelete, onActivate }: DesignCardP
   return (
     <div className="w-full">
       {/* Scaled card preview */}
-      <Link href={`/loyalty-program/design/${design.id}`} className="block">
+      <Link href={`/design/${design.id}`} className="block">
         <ScaledCardWrapper baseWidth={280} aspectRatio={1.282} minScale={0.6}>
           <div
             className="w-full h-full rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"

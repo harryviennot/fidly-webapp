@@ -80,7 +80,7 @@ export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
           No card design yet. Create your first loyalty card.
         </p>
         <Button asChild className="rounded-full">
-          <Link href="/loyalty-program/design/new">
+          <Link href="/design/new">
             <PlusIcon className="w-4 h-4 mr-2" />
             Create Card
           </Link>
@@ -116,7 +116,7 @@ export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
     <div className="space-y-3">
       {/* Clickable Card Preview with Hover Effect */}
       <Link
-        href={`/loyalty-program/design/${design.id}`}
+        href={`/design/${design.id}`}
         className="block group relative"
       >
         <ScaledCardWrapper baseWidth={280} aspectRatio={1.282} minScale={0.6}>
@@ -264,7 +264,7 @@ export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={`/loyalty-program/design/${design.id}`} className="cursor-pointer">
+              <Link href={`/design/${design.id}`} className="cursor-pointer">
                 <PencilSimple className="mr-2 h-4 w-4" />
                 Edit Design
               </Link>

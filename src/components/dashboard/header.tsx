@@ -15,7 +15,7 @@ import {
 
 // Route configuration for breadcrumb labels
 const routeLabels: Record<string, string> = {
-  "": "Dashboard",
+  "": "Loyalty Program",
   customers: "Customers",
   design: "Card Design",
   team: "Team",
@@ -33,13 +33,13 @@ interface Crumb {
 function generateBreadcrumbs(pathname: string): Crumb[] {
   const segments = pathname.split("/").filter(Boolean);
 
-  // If we're at root dashboard
+  // If we're at root (Loyalty Program page)
   if (segments.length === 0) {
-    return [{ label: "Dashboard", href: "/", isLast: true }];
+    return [{ label: "Loyalty Program", href: "/", isLast: true }];
   }
 
   const breadcrumbs: Crumb[] = [
-    { label: "Dashboard", href: "/", isLast: false },
+    { label: "Loyalty Program", href: "/", isLast: false },
   ];
 
   let currentPath = "";
