@@ -29,29 +29,29 @@ export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
       actions={
         design
           ? [
-              {
-                label: 'Edit Design',
-                icon: <PencilIcon className="h-4 w-4" />,
-                href: `/design/${design.id}`,
-              },
-              ...(isProPlan
-                ? [
-                    {
-                      label: 'Switch Card',
-                      icon: <ArrowsLeftRightIcon className="h-4 w-4" />,
-                      href: '/loyalty-program/templates',
-                    },
-                  ]
-                : []),
-            ]
+            {
+              label: 'Edit Design',
+              icon: <PencilIcon className="h-4 w-4" />,
+              href: `/design/${design.id}`,
+            },
+            ...(isProPlan
+              ? [
+                {
+                  label: 'Switch Card',
+                  icon: <ArrowsLeftRightIcon className="h-4 w-4" />,
+                  href: '/loyalty-program/templates',
+                },
+              ]
+              : []),
+          ]
           : undefined
       }
     >
       {design && (
         <WalletCard
           design={design}
-          showQR={false}
-          showSecondaryFields={false}
+          showQR={true}
+          showSecondaryFields={true}
         />
       )}
     </CardWrapper>

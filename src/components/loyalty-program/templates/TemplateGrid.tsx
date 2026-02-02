@@ -65,29 +65,29 @@ export function TemplateGrid({
                 },
                 ...(!design.is_active
                   ? [
-                      {
-                        label: 'Set as Active',
-                        icon: <CheckCircleIcon className="h-4 w-4" />,
-                        onClick: () => onActivate(design.id),
-                      },
-                    ]
+                    {
+                      label: 'Set as Active',
+                      icon: <CheckCircleIcon className="h-4 w-4" />,
+                      onClick: () => onActivate(design.id),
+                    },
+                  ]
                   : []),
                 ...(!design.is_active
                   ? [
-                      {
-                        label: 'Delete',
-                        icon: <TrashIcon className="h-4 w-4" />,
-                        onClick: () => onDelete(design.id),
-                        destructive: true,
-                      },
-                    ]
+                    {
+                      label: 'Delete',
+                      icon: <TrashIcon className="h-4 w-4" />,
+                      onClick: () => onDelete(design.id),
+                      destructive: true,
+                    },
+                  ]
                   : []),
               ]}
             >
               <WalletCard
                 design={design}
-                showQR={false}
-                showSecondaryFields={false}
+                showQR={true}
+                showSecondaryFields={true}
               />
             </CardWrapper>
           ))}

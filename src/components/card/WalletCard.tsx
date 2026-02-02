@@ -401,7 +401,7 @@ export function WalletCard({
     >
       <div
         ref={cardRef}
-        className="relative w-full h-full cursor-pointer"
+        className="relative w-full h-full cursor-pointer rounded-2xl"
         style={cardStyle}
         onMouseMove={interactive3D ? handleMouseMove : undefined}
         onMouseLeave={interactive3D ? handleMouseLeave : undefined}
@@ -426,7 +426,7 @@ export function WalletCard({
           {/* Content Layout */}
           <div className="relative h-full px-0 py-0 flex flex-col z-10">
             {/* Header: Logo + Business Name */}
-            <div className="flex justify-between items-center px-2.5 py-2 border border-red-500">
+            <div className="flex justify-between items-center px-2.5 py-2">
               <div className="flex items-center gap-2">
                 {design.logo_url ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
@@ -472,7 +472,7 @@ export function WalletCard({
             </div>
 
             {/* Stamps Grid */}
-            <div className="relative flex-1 flex items-start justify-center py-2 border border-red-500">
+            <div className="relative flex items-start justify-center py-2">
               {/* Strip background layer */}
               {design.strip_background_url && (
                 <div
@@ -500,23 +500,23 @@ export function WalletCard({
             {/* Secondary Fields */}
             {showSecondaryFields && secondaryFields.length > 0 && (
               <div
-                className="py-2 border-t"
+                className="px-2.5"
                 style={{ borderColor: colors.emptyStampBorder }}
               >
                 {secondaryFields.slice(0, 2).map((field, i) => (
-                  <div key={field.key || i} className="flex justify-between items-center py-0.5">
-                    <span
-                      className="text-[10px] uppercase tracking-wider"
+                  <div key={field.key || i} className="items-center py-0.5">
+                    <div
+                      className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300"
                       style={{ color: colors.mutedTextColor }}
                     >
                       {field.label}
-                    </span>
-                    <span
-                      className="text-xs font-medium"
+                    </div>
+                    <div
+                      className="text-[18px] font-medium"
                       style={{ color: colors.textColor }}
                     >
                       {field.value}
-                    </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -525,7 +525,7 @@ export function WalletCard({
             {/* QR Code */}
             {showQR && (
               <div
-                className="mt-auto pt-2 flex justify-center border-t"
+                className="mt-auto pb-2 flex justify-center"
                 style={{ borderColor: colors.emptyStampBorder }}
               >
                 <div className="bg-white p-2 rounded-lg">
