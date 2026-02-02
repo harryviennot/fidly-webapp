@@ -55,7 +55,7 @@ export function TemplateGrid({
           </p>
           {canCreateNew && (
             <Button asChild variant="outline" className="rounded-full">
-              <Link href="/loyalty-program/design/new">
+              <Link href="/design/new">
                 <PlusIcon className="w-4 h-4 mr-2" />
                 Create Card
               </Link>

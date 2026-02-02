@@ -51,6 +51,7 @@ export default function LoyaltyProgramPage() {
   const baseUrl = globalThis.window === undefined ? "" : globalThis.window.location.origin;
   const slug = currentBusiness?.url_slug || "";
   const fullUrl = `${baseUrl}/${slug}`;
+  const showTemplatesSection = designs.length > 1;
 
   // Load designs
   const loadDesigns = useCallback(async () => {
@@ -157,19 +158,19 @@ export default function LoyaltyProgramPage() {
     {
       key: "collect_name" as const,
       label: "Name",
-      description: "Collect customer names for personalization",
+      description: "Personalize their card and help you identify customers",
       icon: UserIcon,
     },
     {
       key: "collect_email" as const,
       label: "Email",
-      description: "Enable pass recovery and email notifications",
+      description: "Enable pass recovery, email campaigns, and customer lookup",
       icon: EnvelopeIcon,
     },
     {
       key: "collect_phone" as const,
       label: "Phone",
-      description: "Enable SMS notifications (coming soon)",
+      description: "Enable SMS notifications and campaigns (coming soon)",
       icon: PhoneIcon,
     },
   ];
@@ -185,23 +186,28 @@ export default function LoyaltyProgramPage() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div>
-        <h2 className="text-2xl font-bold">Loyalty Program</h2>
-        <p className="text-muted-foreground">
-          Manage your loyalty card and program settings
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Loyalty Program</h2>
+          <p className="text-muted-foreground">
+            Manage your loyalty card and program settings
+          </p>
+        </div>
+        {!showTemplatesSection && (
+          <Button asChild className="rounded-full">
+            <Link href="/design/new">
+              <PlusIcon className="w-4 h-4 mr-2" />
+              New Card
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Main content - Active Card + Settings */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Active Card - 1 column */}
-        <div className="lg:col-span-1">
-          <ActiveCardWidget design={activeDesign} isProPlan={true} />
-        </div>
-
-        {/* Settings Card with tabs - 2 columns */}
-        <div className="lg:col-span-2">
-          <Card className="h-full">
+        {/* Settings Card with tabs - shows first on mobile */}
+        <div className="lg:col-span-2 order-1 lg:order-2">
+          <Card className="h-full max-w-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Program Settings</CardTitle>
               <CardDescription>
@@ -244,6 +250,10 @@ export default function LoyaltyProgramPage() {
                 </TabsContent>
 
                 <TabsContent value="data" className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Collect this information when customers sign up for their loyalty card.
+                  </p>
+
                   {dataFields.map((field) => {
                     const Icon = field.icon;
                     return (
@@ -280,28 +290,35 @@ export default function LoyaltyProgramPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Active Card - shows second on mobile, with max-width */}
+        <div className="lg:col-span-1 order-2 lg:order-1 max-w-xs">
+          <ActiveCardWidget design={activeDesign} isProPlan={true} />
+        </div>
       </div>
 
-      {/* Card Templates - full width */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Card Templates</h3>
-          <Button asChild className="rounded-full">
-            <Link href="/loyalty-program/design/new">
-              <PlusIcon className="w-4 h-4 mr-2" />
-              New Card
-            </Link>
-          </Button>
+      {/* Card Templates - only show when more than one card */}
+      {showTemplatesSection && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Card Templates</h3>
+            <Button asChild className="rounded-full">
+              <Link href="/design/new">
+                <PlusIcon className="w-4 h-4 mr-2" />
+                New Card
+              </Link>
+            </Button>
+          </div>
+          <TemplateGrid
+            activeDesign={activeDesign}
+            inactiveDesigns={inactiveDesigns}
+            isProPlan={true}
+            onDelete={handleDelete}
+            onActivate={handleActivate}
+            onDuplicate={handleDuplicate}
+          />
         </div>
-        <TemplateGrid
-          activeDesign={activeDesign}
-          inactiveDesigns={inactiveDesigns}
-          isProPlan={true}
-          onDelete={handleDelete}
-          onActivate={handleActivate}
-          onDuplicate={handleDuplicate}
-        />
-      </div>
+      )}
     </div>
   );
 }
