@@ -52,24 +52,12 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      // Get user's public profile by auth_id
-      const { data: profile, error: profileError } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", user.id)
-        .single();
-
-      if (profileError || !profile) {
-        setError("User profile not found");
-        setLoading(false);
-        return;
-      }
-
       // Get memberships with business details
+      // After migration: user.id (from auth) equals users.id directly
       const { data: membershipsData, error: membershipsError } = await supabase
         .from("memberships")
         .select("id, role, businesses(*)")
-        .eq("user_id", profile.id);
+        .eq("user_id", user.id);
 
       if (membershipsError) {
         setError("Failed to load memberships");

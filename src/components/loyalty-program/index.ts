@@ -7,7 +7,6 @@ export { QuickStatsGrid } from './overview/QuickStatsGrid';
 export { StatusIndicators } from './overview/StatusIndicators';
 
 // Templates components
-export { TemplateCard } from './templates/TemplateCard';
 export { TemplateGrid } from './templates/TemplateGrid';
 
 // Skeletons

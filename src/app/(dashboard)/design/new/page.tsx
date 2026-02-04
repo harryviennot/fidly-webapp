@@ -52,7 +52,7 @@ export default function NewDesignPage() {
           )}
         </Button>
       </div>
-      <DesignEditorV2 ref={editorRef} isNew onSavingChange={setSaving} designName={designName} onNameChange={setDesignName} />
+      <DesignEditorV2 ref={editorRef} isNew onSavingChange={setSaving} designName={designName} />
     </div>
   );
 }

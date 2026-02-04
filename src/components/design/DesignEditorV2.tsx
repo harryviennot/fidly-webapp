@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CardDesign, CardDesignCreate } from '@/types';
 import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activateDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
-import CardPreview3D from './CardPreview3D';
-import CardPreviewBack from './CardPreviewBack';
+import { EditorCard } from '@/components/card';
 import ImageUploader from './ImageUploader';
 import FieldEditor from './FieldEditor';
 import { StampIconPicker, RewardIconPicker, StampIconType } from './StampIconPicker';
@@ -679,18 +678,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
           {/* Card Preview */}
           <div className="w-full max-w-sm">
-            {showBack ? (
-              <CardPreviewBack
-                design={formData}
-                organizationName={formData.organization_name}
-              />
-            ) : (
-              <CardPreview3D
-                design={formData}
-                stamps={previewStamps}
-                organizationName={formData.organization_name}
-              />
-            )}
+            <EditorCard
+              design={formData}
+              previewStamps={previewStamps}
+              organizationName={formData.organization_name}
+              showBack={showBack}
+            />
           </div>
 
           {/* Stamp Slider */}
