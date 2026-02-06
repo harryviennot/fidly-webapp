@@ -6,6 +6,7 @@ import { CardDesign, CardDesignCreate } from '@/types';
 import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activateDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { EditorCard } from '@/components/card';
+import { GoogleWalletCard } from '@/components/card/GoogleWalletCard';
 import ImageUploader from './ImageUploader';
 import FieldEditor from './FieldEditor';
 import { StampIconPicker, RewardIconPicker, StampIconType } from './StampIconPicker';
@@ -129,6 +130,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
     const [previewStamps, setPreviewStamps] = useState(3);
     const [showBack, setShowBack] = useState(false);
+    const [previewWallet, setPreviewWallet] = useState<'apple' | 'google'>('apple');
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -664,30 +666,58 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
         {/* Right: Sticky Preview */}
         <div className="flex-1 lg:sticky lg:top-6 lg:self-start flex flex-col items-center justify-center min-h-[500px]">
-          {/* Flip Toggle */}
-          <div className="mb-4">
+          {/* Wallet Type Toggle */}
+          <div className="mb-4 flex gap-2">
             <Button
-              variant="outline"
+              variant={previewWallet === 'apple' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setShowBack(!showBack)}
+              onClick={() => setPreviewWallet('apple')}
             >
-              <FlipHorizontal className="w-4 h-4 mr-2" />
-              {showBack ? 'Show Front' : 'Show Back'}
+              Apple Wallet
+            </Button>
+            <Button
+              variant={previewWallet === 'google' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setPreviewWallet('google')}
+            >
+              Google Wallet
             </Button>
           </div>
 
+          {/* Flip Toggle (Apple only) */}
+          {previewWallet === 'apple' && (
+            <div className="mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowBack(!showBack)}
+              >
+                <FlipHorizontal className="w-4 h-4 mr-2" />
+                {showBack ? 'Show Front' : 'Show Back'}
+              </Button>
+            </div>
+          )}
+
           {/* Card Preview */}
           <div className="w-full max-w-sm">
-            <EditorCard
-              design={formData}
-              previewStamps={previewStamps}
-              organizationName={formData.organization_name}
-              showBack={showBack}
-            />
+            {previewWallet === 'apple' ? (
+              <EditorCard
+                design={formData}
+                previewStamps={previewStamps}
+                organizationName={formData.organization_name}
+                showBack={showBack}
+              />
+            ) : (
+              <GoogleWalletCard
+                design={formData}
+                stamps={previewStamps}
+                organizationName={formData.organization_name}
+              />
+            )}
           </div>
 
-          {/* Stamp Slider */}
-          {!showBack && (
+          {/* Stamp Slider (hide when showing Apple Wallet back) */}
+          {!(previewWallet === 'apple' && showBack) && (
             <div className="w-full max-w-sm mt-6 px-4">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-sm text-muted-foreground">Preview Stamps</Label>
