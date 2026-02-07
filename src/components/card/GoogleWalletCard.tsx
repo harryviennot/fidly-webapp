@@ -251,174 +251,167 @@ export function GoogleWalletCard({
     }
   }, []);
 
+  const auxiliaryFields = design.auxiliary_fields || [];
+
   return (
     <div
       ref={containerRef}
       className={`relative w-full ${className}`}
       style={{
-        background: "#f5f5f5", // Google Wallet uses light gray background
-        borderRadius: "16px",
+        background: `linear-gradient(135deg, ${colors.bgGradientFrom}, ${colors.bgGradientTo})`,
+        borderRadius: "28px",
         overflow: "hidden",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
       }}
     >
-      {/* Google Wallet Card Container */}
-      <div className="bg-white rounded-2xl overflow-hidden">
-        {/* Header Section - Program Logo and Name */}
-        <div
-          className="px-4 py-3 flex items-center gap-3"
-          style={{
-            background: `linear-gradient(135deg, ${colors.bgGradientFrom}, ${colors.bgGradientTo})`,
-          }}
-        >
-          {design.logo_url ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
+      {/* Header Section - Round Logo + Business Name */}
+      <div className="px-4 py-4 flex items-center gap-3">
+        {design.logo_url ? (
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+            style={{ backgroundColor: colors.accentHex }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={design.logo_url}
               alt={displayName}
-              className="h-10 w-auto max-w-[120px] object-contain"
+              className="w-full h-full object-cover"
             />
-          ) : (
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: colors.accentHex }}
-            >
-              <span className="text-white font-bold text-sm">{initials}</span>
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h3
-              className="font-semibold text-base truncate"
-              style={{ color: colors.textColor }}
-            >
-              {displayName}
-            </h3>
-            <p
-              className="text-xs truncate"
-              style={{ color: colors.mutedTextColor }}
-            >
-              {design.description || "Loyalty Card"}
-            </p>
           </div>
-        </div>
-
-        {/* Hero Image (Stamp Strip) */}
-        <div
-          className="relative"
-          style={{
-            background: `linear-gradient(135deg, ${colors.bgGradientFrom}, ${colors.bgGradientTo})`,
-          }}
+        ) : (
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: colors.accentHex }}
+          >
+            <span className="text-white font-bold text-base">{initials}</span>
+          </div>
+        )}
+        <h3
+          className="font-medium text-base"
+          style={{ color: colors.textColor }}
         >
-          {/* Strip background layer */}
-          {design.strip_background_url && (
-            <div className="absolute inset-0 overflow-hidden">
-              <Image
-                src={design.strip_background_url}
-                alt=""
-                fill
-                className="object-cover opacity-40"
-                unoptimized
-              />
-            </div>
-          )}
+          {displayName}
+        </h3>
+      </div>
 
-          {/* Stamps */}
-          <div className="relative px-2 py-4">
-            {heroWidth > 0 && heroHeight > 0 && (
-              <GoogleStampGrid
-                totalStamps={totalStamps}
-                filledCount={stamps}
-                colors={colors}
-                stampIcon={stampIcon}
-                rewardIcon={rewardIcon}
-                containerWidth={heroWidth - 16}
-                containerHeight={heroHeight}
-              />
-            )}
-          </div>
-        </div>
+      {/* Header Title - Description (Large) */}
+      <div className="px-4 pb-3">
+        <h2
+          className="text-3xl font-medium text-wrap"
+          style={{ color: colors.textColor }}
+        >
+          {design.description || "Loyalty Card"}
+        </h2>
+      </div>
 
-        {/* Points Balance - Large Display */}
-        <div className="px-4 py-4 bg-white border-b border-gray-100">
-          <div className="flex items-baseline justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                Stamps
+      {/* Stamps Row */}
+      <div className="px-4 py-2">
+        <p
+          className="text-xs uppercase tracking-wider font-medium mb-1"
+          style={{ color: colors.mutedTextColor }}
+        >
+          Stamps
+        </p>
+        <p
+          className="text-base font-normal"
+          style={{ color: colors.textColor }}
+        >
+          {stamps} / {totalStamps}
+        </p>
+      </div>
+
+      {/* Secondary Fields Row - 2 Column Grid */}
+      {secondaryFields.length > 0 && (
+        <div
+          className="px-4 py-3 grid grid-cols-2 gap-4"
+          style={{ borderColor: `${colors.textColor}15` }}
+        >
+          {secondaryFields.slice(0, 4).map((field, i) => (
+            <div key={field.key || i}>
+              <p
+                className="text-xs uppercase tracking-wider font-medium mb-0.5"
+                style={{ color: colors.mutedTextColor }}
+              >
+                {field.label}
               </p>
-              <p className="text-3xl font-bold text-gray-900">
-                {stamps}
-                <span className="text-lg text-gray-400 font-normal">
-                  {" "}
-                  / {totalStamps}
-                </span>
+              <p
+                className="text-sm font-medium"
+                style={{ color: colors.textColor }}
+              >
+                {field.value}
               </p>
             </div>
-            {stamps >= totalStamps && (
-              <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                Reward Ready!
-              </div>
-            )}
-          </div>
+          ))}
         </div>
+      )}
 
-        {/* Info Section */}
-        {secondaryFields.length > 0 && (
-          <div className="px-4 py-3 bg-white border-b border-gray-100">
-            {secondaryFields.slice(0, 3).map((field, i) => (
-              <div key={field.key || i} className="mb-2 last:mb-0">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">
-                  {field.label}
-                </p>
-                <p className="text-sm text-gray-900">{field.value}</p>
-              </div>
-            ))}
+      {/* Auxiliary Fields Row - 2 Column Grid */}
+      {auxiliaryFields.length > 0 && (
+        <div
+          className="px-4 py-3 grid grid-cols-2 gap-4"
+          style={{ borderColor: `${colors.textColor}15` }}
+        >
+          {auxiliaryFields.slice(0, 4).map((field, i) => (
+            <div key={field.key || i}>
+              <p
+                className="text-xs uppercase tracking-wider font-medium mb-0.5"
+                style={{ color: colors.mutedTextColor }}
+              >
+                {field.label}
+              </p>
+              <p
+                className="text-sm font-medium"
+                style={{ color: colors.textColor }}
+              >
+                {field.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* QR Code Section - Large, Centered */}
+      <div
+        className="px-4 pt-4 pb-2 flex flex-col items-center"
+        style={{ borderColor: `${colors.textColor}15` }}
+      >
+        <div className="bg-white p-3 rounded-xl">
+          <FakeQRCode size={120} />
+        </div>
+      </div>
+
+      {/* Stamp Grid at Bottom */}
+      <div
+        className="relative pb-1"
+        style={{ borderColor: `${colors.textColor}15` }}
+      >
+        {/* Strip background layer */}
+        {design.strip_background_url && (
+          <div className="absolute inset-0 overflow-hidden rounded-b-[28px]">
+            <Image
+              src={design.strip_background_url}
+              alt=""
+              fill
+              className="object-cover opacity-30"
+              unoptimized
+            />
           </div>
         )}
 
-        {/* QR Code Section */}
-        <div className="px-4 py-4 bg-white flex flex-col items-center">
-          <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">
-            Scan to add stamp
-          </p>
-          <div className="bg-white p-2 rounded-lg border border-gray-200">
-            <FakeQRCode size={100} />
-          </div>
-        </div>
-
-        {/* Google Wallet Branding */}
-        <div className="px-4 py-3 bg-gray-50 flex items-center justify-center gap-2">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 2L2 7L12 12L22 7L12 2Z"
-              stroke="#5f6368"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        {/* Stamps */}
+        <div className="relative">
+          {heroWidth > 0 && (
+            <GoogleStampGrid
+              totalStamps={totalStamps}
+              filledCount={stamps}
+              colors={colors}
+              stampIcon={stampIcon}
+              rewardIcon={rewardIcon}
+              containerWidth={heroWidth
+              }
+              containerHeight={heroHeight}
             />
-            <path
-              d="M2 17L12 22L22 17"
-              stroke="#5f6368"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M2 12L12 17L22 12"
-              stroke="#5f6368"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span className="text-xs text-gray-500 font-medium">
-            Google Wallet
-          </span>
+          )}
         </div>
       </div>
     </div>
