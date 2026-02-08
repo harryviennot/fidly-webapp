@@ -51,7 +51,7 @@ export default function LoyaltyProgramPage() {
   const baseUrl = globalThis.window === undefined ? "" : globalThis.window.location.origin;
   const slug = currentBusiness?.url_slug || "";
   const fullUrl = `${baseUrl}/${slug}`;
-  const showTemplatesSection = designs.length > 1;
+  const showTemplatesSection = designs.length > 1 || !activeDesign;
 
   // Load designs
   const loadDesigns = useCallback(async () => {
