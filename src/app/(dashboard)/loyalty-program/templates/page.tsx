@@ -42,7 +42,7 @@ export default function TemplatesPage() {
         </div>
         {canCreateDesign ? (
           <Button asChild className="rounded-full">
-            <Link href="/loyalty-program/design/new">
+            <Link href="/design/new">
               <PlusIcon className="w-4 h-4 mr-2" />
               New Card
             </Link>

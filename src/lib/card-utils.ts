@@ -1,25 +1,10 @@
 import { CardDesign } from "@/types";
+export { rgbToHex } from "@/lib/color-utils";
+import { rgbToHex } from "@/lib/color-utils";
 
 // ============================================================================
 // Color Utilities
 // ============================================================================
-
-/**
- * Convert rgb(r, g, b) string to hex format
- */
-export function rgbToHex(rgb: string): string {
-  if (!rgb) return "#1c1c1e";
-  if (rgb.startsWith("#")) return rgb;
-
-  const match = rgb.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
-  if (!match) return "#1c1c1e";
-
-  const r = parseInt(match[1], 10);
-  const g = parseInt(match[2], 10);
-  const b = parseInt(match[3], 10);
-
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
-}
 
 /**
  * Determine if a color is light (luminance > 0.5)
@@ -250,10 +235,17 @@ export function computeCardColors(
     ? rgbToHex(design.label_color)
     : autoMutedColor;
 
-  const emptyStampBg = isLightBg ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
-  const emptyStampBorder = isLightBg
+  // Use stamp_empty_color if set, otherwise auto-calculate from background
+  const autoEmptyBg = isLightBg ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
+  const autoEmptyBorder = isLightBg
     ? "rgba(0,0,0,0.2)"
     : "rgba(255,255,255,0.2)";
+  const emptyStampBg = design.stamp_empty_color
+    ? rgbToHex(design.stamp_empty_color)
+    : autoEmptyBg;
+  const emptyStampBorder = design.stamp_border_color
+    ? rgbToHex(design.stamp_border_color)
+    : autoEmptyBorder;
 
   return {
     bgHex,

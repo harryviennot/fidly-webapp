@@ -1,6 +1,9 @@
 'use client';
 
 import { PassField } from '@/types';
+import { ArrowUp, ArrowDown, Trash, Plus } from '@phosphor-icons/react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface FieldEditorProps {
   title: string;
@@ -40,59 +43,63 @@ export default function FieldEditor({
   };
 
   return (
-    <div className="field-editor">
-      <div className="field-editor-header">
-        <span className="field-editor-title">{title}</span>
-        <span className="field-editor-count">{fields.length} / {maxFields}</span>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">{title}</span>
+        <span className="text-xs text-muted-foreground">{fields.length} / {maxFields}</span>
       </div>
 
       {fields.length > 0 && (
-        <div className="field-editor-list">
+        <div className="space-y-2">
           {fields.map((field, index) => (
-            <div key={field.key} className="field-editor-item">
-              <div className="field-inputs">
-                <input
-                  type="text"
+            <div key={field.key} className="flex items-center gap-2">
+              <div className="flex-1 grid grid-cols-2 gap-2">
+                <Input
                   placeholder="Label"
                   value={field.label}
                   onChange={(e) => updateField(index, { label: e.target.value })}
-                  className="field-input-label"
+                  className="h-9 text-sm"
                 />
-                <input
-                  type="text"
+                <Input
                   placeholder="Value"
                   value={field.value}
                   onChange={(e) => updateField(index, { value: e.target.value })}
-                  className="field-input-value"
+                  className="h-9 text-sm"
                 />
               </div>
-              <div className="field-actions">
-                <button
+              <div className="flex items-center gap-0.5">
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
                   onClick={() => moveField(index, 'up')}
                   disabled={index === 0}
-                  className="btn-move"
                   title="Move up"
                 >
-                  ^
-                </button>
-                <button
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </Button>
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
                   onClick={() => moveField(index, 'down')}
                   disabled={index === fields.length - 1}
-                  className="btn-move"
                   title="Move down"
                 >
-                  v
-                </button>
-                <button
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </Button>
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={() => removeField(index)}
-                  className="btn-remove"
                   title="Remove"
                 >
-                  x
-                </button>
+                  <Trash className="w-3.5 h-3.5" />
+                </Button>
               </div>
             </div>
           ))}
@@ -100,9 +107,16 @@ export default function FieldEditor({
       )}
 
       {fields.length < maxFields && (
-        <button type="button" onClick={addField} className="btn-add-field">
-          + Add {title.replace(/s$/, '')}
-        </button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={addField}
+        >
+          <Plus className="w-3.5 h-3.5 mr-1.5" />
+          Add {title.replace(/s$/, '')}
+        </Button>
       )}
     </div>
   );
