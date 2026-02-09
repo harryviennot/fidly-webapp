@@ -4,6 +4,7 @@ import React, { useRef, useState, useCallback } from "react";
 import { CardDesign, PassField } from "@/types";
 import { WalletCard } from "./WalletCard";
 import { computeCardColors, rgbToHex } from "@/lib/card-utils";
+import { ScaledCardWrapper } from "@/components/design/ScaledCardWrapper";
 
 // ============================================================================
 // Types
@@ -88,126 +89,127 @@ function CardBack({ design, organizationName }: CardBackProps) {
   const backFields = design.back_fields ?? [];
 
   return (
-    <div
-      className="relative w-full max-w-[340px] mx-auto aspect-[1/1.282]"
-      style={{ perspective: "1200px" }}
-    >
+    <ScaledCardWrapper baseWidth={280} targetWidth={440}>
       <div
-        ref={cardRef}
-        className="relative w-full h-full rounded-2xl cursor-pointer"
-        style={{
-          transformStyle: "preserve-3d",
-          transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
-          transition:
-            "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease",
-          boxShadow: `
-            ${-rotate.y * 1.5}px ${rotate.x * 1.5 + 8}px 24px rgba(0,0,0,0.12),
-            0 20px 50px rgba(0,0,0,0.08)
-          `,
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        className="w-full h-full"
+        style={{ perspective: "1200px" }}
       >
-        {/* Card Content Layer */}
         <div
-          className="absolute inset-0 rounded-2xl overflow-hidden transition-all duration-300"
+          ref={cardRef}
+          className="relative w-full h-full rounded-2xl cursor-pointer"
           style={{
-            background: `linear-gradient(135deg, ${colors.bgGradientFrom}, ${colors.bgGradientTo})`,
+            transformStyle: "preserve-3d",
+            transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
+            transition:
+              "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease",
+            boxShadow: `
+              ${-rotate.y * 1.5}px ${rotate.x * 1.5 + 8}px 24px rgba(0,0,0,0.12),
+              0 20px 50px rgba(0,0,0,0.08)
+            `,
           }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
-          {/* Subtle gradient overlay */}
+          {/* Card Content Layer */}
           <div
-            className="absolute inset-0 transition-opacity duration-300"
+            className="absolute inset-0 rounded-2xl overflow-hidden transition-all duration-300"
             style={{
-              background: colors.isLightBg
-                ? "linear-gradient(to bottom right, rgba(255,255,255,0.4), transparent, rgba(0,0,0,0.05))"
-                : "linear-gradient(to bottom right, rgba(255,255,255,0.1), transparent, rgba(0,0,0,0.2))",
+              background: `linear-gradient(135deg, ${colors.bgGradientFrom}, ${colors.bgGradientTo})`,
+            }}
+          >
+            {/* Subtle gradient overlay */}
+            <div
+              className="absolute inset-0 transition-opacity duration-300"
+              style={{
+                background: colors.isLightBg
+                  ? "linear-gradient(to bottom right, rgba(255,255,255,0.4), transparent, rgba(0,0,0,0.05))"
+                  : "linear-gradient(to bottom right, rgba(255,255,255,0.1), transparent, rgba(0,0,0,0.2))",
+              }}
+            />
+
+            {/* Content Layout */}
+            <div className="relative h-full px-5 py-5 flex flex-col z-10">
+              {/* Header: Organization Name */}
+              <div
+                className="text-center pb-4 mb-4 border-b"
+                style={{ borderColor: dividerColor }}
+              >
+                <h3
+                  className="font-semibold text-lg tracking-tight"
+                  style={{ color: foregroundColor }}
+                >
+                  {displayName}
+                </h3>
+              </div>
+
+              {/* Back Fields */}
+              <div className="flex-1 overflow-y-auto space-y-4">
+                {backFields.length > 0 ? (
+                  backFields.map((field: PassField, index: number) => (
+                    <div key={field.key || index} className="space-y-1">
+                      <p
+                        className="text-[11px] font-bold uppercase tracking-wider"
+                        style={{ color: labelColor, opacity: 0.7 }}
+                      >
+                        {field.label}
+                      </p>
+                      <p
+                        className="text-sm whitespace-pre-wrap"
+                        style={{ color: foregroundColor }}
+                      >
+                        {field.value}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <div
+                    className="text-center py-8"
+                    style={{ color: foregroundColor, opacity: 0.5 }}
+                  >
+                    <p className="text-sm">No back fields configured</p>
+                    <p className="text-xs mt-1">
+                      Add terms, contact info, or other details
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div
+                className="mt-auto pt-4 border-t text-center"
+                style={{ borderColor: dividerColor }}
+              >
+                <p
+                  className="text-[10px] uppercase tracking-wider"
+                  style={{ color: labelColor, opacity: 0.5 }}
+                >
+                  Powered by Stampeo
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Glare Effect */}
+          <div
+            className="absolute inset-0 rounded-2xl pointer-events-none z-20"
+            style={{
+              background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%)`,
+              opacity: glare.opacity,
+              transition: "opacity 0.5s ease",
             }}
           />
 
-          {/* Content Layout */}
-          <div className="relative h-full px-5 py-5 flex flex-col z-10">
-            {/* Header: Organization Name */}
-            <div
-              className="text-center pb-4 mb-4 border-b"
-              style={{ borderColor: dividerColor }}
-            >
-              <h3
-                className="font-semibold text-lg tracking-tight"
-                style={{ color: foregroundColor }}
-              >
-                {displayName}
-              </h3>
-            </div>
-
-            {/* Back Fields */}
-            <div className="flex-1 overflow-y-auto space-y-4">
-              {backFields.length > 0 ? (
-                backFields.map((field: PassField, index: number) => (
-                  <div key={field.key || index} className="space-y-1">
-                    <p
-                      className="text-[11px] font-bold uppercase tracking-wider"
-                      style={{ color: labelColor, opacity: 0.7 }}
-                    >
-                      {field.label}
-                    </p>
-                    <p
-                      className="text-sm whitespace-pre-wrap"
-                      style={{ color: foregroundColor }}
-                    >
-                      {field.value}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <div
-                  className="text-center py-8"
-                  style={{ color: foregroundColor, opacity: 0.5 }}
-                >
-                  <p className="text-sm">No back fields configured</p>
-                  <p className="text-xs mt-1">
-                    Add terms, contact info, or other details
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div
-              className="mt-auto pt-4 border-t text-center"
-              style={{ borderColor: dividerColor }}
-            >
-              <p
-                className="text-[10px] uppercase tracking-wider"
-                style={{ color: labelColor, opacity: 0.5 }}
-              >
-                Powered by Fidelity
-              </p>
-            </div>
-          </div>
+          {/* Border */}
+          <div
+            className="absolute inset-0 rounded-2xl pointer-events-none z-30"
+            style={{
+              boxShadow: `inset 0 0 0 1px ${colors.isLightBg ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)"
+                }`,
+            }}
+          />
         </div>
-
-        {/* Glare Effect */}
-        <div
-          className="absolute inset-0 rounded-2xl pointer-events-none z-20"
-          style={{
-            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%)`,
-            opacity: glare.opacity,
-            transition: "opacity 0.5s ease",
-          }}
-        />
-
-        {/* Border */}
-        <div
-          className="absolute inset-0 rounded-2xl pointer-events-none z-30"
-          style={{
-            boxShadow: `inset 0 0 0 1px ${
-              colors.isLightBg ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)"
-            }`,
-          }}
-        />
       </div>
-    </div>
+    </ScaledCardWrapper>
   );
 }
 
@@ -226,7 +228,7 @@ export function EditorCard({
   }
 
   return (
-    <div className="relative w-full max-w-[340px] mx-auto aspect-[1/1.282]">
+    <ScaledCardWrapper baseWidth={280} targetWidth={440}>
       <WalletCard
         design={design}
         stamps={previewStamps}
@@ -235,7 +237,7 @@ export function EditorCard({
         showSecondaryFields={true}
         interactive3D={true}
       />
-    </div>
+    </ScaledCardWrapper>
   );
 }
 

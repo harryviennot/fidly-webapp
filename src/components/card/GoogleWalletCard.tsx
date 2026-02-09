@@ -26,6 +26,8 @@ export interface GoogleWalletCardProps {
   organizationName?: string;
   /** Additional class names */
   className?: string;
+  /** Show back view with details instead of front */
+  showBack?: boolean;
 }
 
 // ============================================================================
@@ -216,6 +218,7 @@ export function GoogleWalletCard({
   stamps = 3,
   organizationName,
   className = "",
+  showBack = false,
 }: GoogleWalletCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [heroWidth, setHeroWidth] = useState(0);
@@ -252,6 +255,7 @@ export function GoogleWalletCard({
   }, []);
 
   const auxiliaryFields = design.auxiliary_fields || [];
+  const backFields = design.back_fields || [];
 
   return (
     <div
@@ -268,8 +272,8 @@ export function GoogleWalletCard({
       <div className="px-4 py-4 flex items-center gap-3">
         {design.logo_url ? (
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
-            style={{ backgroundColor: colors.accentHex }}
+            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+          // style={{ backgroundColor: colors.accentHex }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -280,7 +284,7 @@ export function GoogleWalletCard({
           </div>
         ) : (
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
             style={{ backgroundColor: colors.accentHex }}
           >
             <span className="text-white font-bold text-base">{initials}</span>
@@ -294,126 +298,163 @@ export function GoogleWalletCard({
         </h3>
       </div>
 
-      {/* Header Title - Description (Large) */}
-      <div className="px-4 pb-3">
-        <h2
-          className="text-3xl font-medium text-wrap"
-          style={{ color: colors.textColor }}
-        >
-          {design.description || "Loyalty Card"}
-        </h2>
-      </div>
-
-      {/* Stamps Row */}
-      <div className="px-4 py-2">
-        <p
-          className="text-xs uppercase tracking-wider font-medium mb-1"
-          style={{ color: colors.mutedTextColor }}
-        >
-          Stamps
-        </p>
-        <p
-          className="text-base font-normal"
-          style={{ color: colors.textColor }}
-        >
-          {stamps} / {totalStamps}
-        </p>
-      </div>
-
-      {/* Secondary Fields Row - 2 Column Grid */}
-      {secondaryFields.length > 0 && (
-        <div
-          className="px-4 py-3 grid grid-cols-2 gap-4"
-          style={{ borderColor: `${colors.textColor}15` }}
-        >
-          {secondaryFields.slice(0, 4).map((field, i) => (
-            <div key={field.key || i}>
-              <p
-                className="text-xs uppercase tracking-wider font-medium mb-0.5"
-                style={{ color: colors.mutedTextColor }}
-              >
-                {field.label}
-              </p>
-              <p
-                className="text-sm font-medium"
-                style={{ color: colors.textColor }}
-              >
-                {field.value}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Auxiliary Fields Row - 2 Column Grid */}
-      {auxiliaryFields.length > 0 && (
-        <div
-          className="px-4 py-3 grid grid-cols-2 gap-4"
-          style={{ borderColor: `${colors.textColor}15` }}
-        >
-          {auxiliaryFields.slice(0, 4).map((field, i) => (
-            <div key={field.key || i}>
-              <p
-                className="text-xs uppercase tracking-wider font-medium mb-0.5"
-                style={{ color: colors.mutedTextColor }}
-              >
-                {field.label}
-              </p>
-              <p
-                className="text-sm font-medium"
-                style={{ color: colors.textColor }}
-              >
-                {field.value}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* QR Code Section - Large, Centered */}
-      <div
-        className="px-4 pt-4 pb-2 flex flex-col items-center"
-        style={{ borderColor: `${colors.textColor}15` }}
-      >
-        <div className="bg-white p-3 rounded-xl">
-          <FakeQRCode size={120} />
-        </div>
-      </div>
-
-      {/* Stamp Grid at Bottom */}
-      <div
-        className="relative pb-1"
-        style={{ borderColor: `${colors.textColor}15` }}
-      >
-        {/* Strip background layer */}
-        {design.strip_background_url && (
-          <div className="absolute inset-0 overflow-hidden rounded-b-[28px]">
-            <Image
-              src={design.strip_background_url}
-              alt=""
-              fill
-              className="object-cover opacity-30"
-              unoptimized
-            />
+      {showBack ? (
+        /* Back view: details / back fields */
+        backFields.length > 0 ? (
+          <div className="px-4 py-3 space-y-3">
+            <p
+              className="text-xs uppercase tracking-wider font-medium"
+              style={{ color: colors.mutedTextColor }}
+            >
+              Details
+            </p>
+            {backFields.map((field, i) => (
+              <div key={field.key || i}>
+                <p
+                  className="text-xs uppercase tracking-wider font-medium mb-0.5"
+                  style={{ color: colors.mutedTextColor }}
+                >
+                  {field.label}
+                </p>
+                <p
+                  className="text-sm whitespace-pre-wrap"
+                  style={{ color: colors.textColor }}
+                >
+                  {field.value}
+                </p>
+              </div>
+            ))}
           </div>
-        )}
+        ) : (
+          <div className="px-4 py-8 text-center">
+            <p className="text-sm" style={{ color: colors.mutedTextColor }}>No back fields added yet</p>
+          </div>
+        )
+      ) : (
+        /* Front view */
+        <>
+          {/* Header Title - Description (Large) */}
+          <div className="px-4 pb-3">
+            <h2
+              className="text-2xl font-light text-wrap"
+              style={{ color: colors.textColor }}
+            >
+              {design.description || "Loyalty Card"}
+            </h2>
+          </div>
 
-        {/* Stamps */}
-        <div className="relative">
-          {heroWidth > 0 && (
-            <GoogleStampGrid
-              totalStamps={totalStamps}
-              filledCount={stamps}
-              colors={colors}
-              stampIcon={stampIcon}
-              rewardIcon={rewardIcon}
-              containerWidth={heroWidth
-              }
-              containerHeight={heroHeight}
-            />
+          {/* Stamps Row */}
+          <div className="px-4 py-2">
+            <p
+              className="text-xs uppercase font-medium mb-1"
+              style={{ color: colors.mutedTextColor }}
+            >
+              Stamps
+            </p>
+            <p
+              className="text-sm font-normal"
+              style={{ color: colors.textColor }}
+            >
+              {stamps} / {totalStamps}
+            </p>
+          </div>
+
+          {/* Secondary Fields Row - 2 Column Grid */}
+          {secondaryFields.length > 0 && (
+            <div
+              className="px-4 py-3 grid grid-cols-2 gap-4"
+              style={{ borderColor: `${colors.textColor}15` }}
+            >
+              {secondaryFields.slice(0, 4).map((field, i) => (
+                <div key={field.key || i}>
+                  <p
+                    className="text-xs font-medium mb-0.5"
+                    style={{ color: colors.mutedTextColor }}
+                  >
+                    {field.label}
+                  </p>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: colors.textColor }}
+                  >
+                    {field.value}
+                  </p>
+                </div>
+              ))}
+            </div>
           )}
-        </div>
-      </div>
+
+          {/* Auxiliary Fields Row - 2 Column Grid */}
+          {auxiliaryFields.length > 0 && (
+            <div
+              className="px-4 py-3 grid grid-cols-2 gap-4"
+              style={{ borderColor: `${colors.textColor}15` }}
+            >
+              {auxiliaryFields.slice(0, 4).map((field, i) => (
+                <div key={field.key || i}>
+                  <p
+                    className="text-xs uppercase tracking-wider font-medium mb-0.5"
+                    style={{ color: colors.mutedTextColor }}
+                  >
+                    {field.label}
+                  </p>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: colors.textColor }}
+                  >
+                    {field.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* QR Code Section - Large, Centered */}
+          <div
+            className="px-4 pt-4 pb-2 flex flex-col items-center"
+            style={{ borderColor: `${colors.textColor}15` }}
+          >
+            <div className="bg-white p-3 rounded-xl">
+              <FakeQRCode size={100} />
+            </div>
+          </div>
+
+          {/* Stamp Grid at Bottom */}
+          <div
+            className="relative pb-1"
+            style={{ borderColor: `${colors.textColor}15` }}
+          >
+            {/* Strip background layer */}
+            {design.strip_background_url && (
+              <div className="absolute inset-0 overflow-hidden rounded-b-[28px]">
+                <Image
+                  src={design.strip_background_url}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  style={{ opacity: (design.strip_background_opacity ?? 40) / 100 }}
+                  unoptimized
+                />
+              </div>
+            )}
+
+            {/* Stamps */}
+            <div className="relative">
+              {heroWidth > 0 && (
+                <GoogleStampGrid
+                  totalStamps={totalStamps}
+                  filledCount={stamps}
+                  colors={colors}
+                  stampIcon={stampIcon}
+                  rewardIcon={rewardIcon}
+                  containerWidth={heroWidth}
+                  containerHeight={heroHeight}
+                />
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

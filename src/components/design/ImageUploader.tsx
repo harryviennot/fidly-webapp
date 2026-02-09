@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
+import { LogoCropper } from './LogoCropper';
 
 interface ImageUploaderProps {
   label: string;
@@ -10,6 +11,8 @@ interface ImageUploaderProps {
   onClear?: () => void;
   accept?: string;
   hint?: string;
+  /** When true, opens a crop dialog before uploading */
+  enableCrop?: boolean;
 }
 
 export default function ImageUploader({
@@ -19,47 +22,83 @@ export default function ImageUploader({
   onClear,
   accept = 'image/png',
   hint,
+  enableCrop = false,
 }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
 
   const handleClick = () => {
     inputRef.current?.click();
   };
 
-  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processUpload = async (file: File) => {
     setError(null);
     setIsUploading(true);
-
     try {
       await onUpload(file);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setIsUploading(false);
-      // Reset input so same file can be selected again
       if (inputRef.current) {
         inputRef.current.value = '';
       }
     }
   };
 
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (enableCrop) {
+      const url = URL.createObjectURL(file);
+      setCropSrc(url);
+      // Reset input so same file can be selected again
+      if (inputRef.current) inputRef.current.value = '';
+    } else {
+      await processUpload(file);
+    }
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    if (cropSrc) {
+      URL.revokeObjectURL(cropSrc);
+      setCropSrc(null);
+    }
+    await processUpload(croppedFile);
+  };
+
+  const handleCropClose = (open: boolean) => {
+    if (!open && cropSrc) {
+      URL.revokeObjectURL(cropSrc);
+      setCropSrc(null);
+    }
+  };
+
+  const fileInput = (
+    <input
+      ref={inputRef}
+      type="file"
+      accept={accept}
+      onChange={handleChange}
+      className="hidden"
+    />
+  );
+
   return (
-    <div className="space-y-2">
-      {label && <label className="text-sm font-medium text-[var(--foreground)]">{label}</label>}
+    <div>
+      {label && <label className="text-sm font-medium text-[var(--foreground)] mb-2 block">{label}</label>}
 
       {value ? (
         <div className="relative inline-block">
           <Image
             src={value}
             alt={label || 'Uploaded image'}
-            width={96}
-            height={96}
-            className="w-24 h-24 object-cover rounded-xl border border-[var(--border)]"
+            width={160}
+            height={50}
+            className="max-w-40 h-auto object-contain rounded-xl border border-[var(--border)]"
             unoptimized
           />
           <div className="flex gap-2 mt-2">
@@ -80,10 +119,11 @@ export default function ImageUploader({
               </button>
             )}
           </div>
+          {fileInput}
         </div>
       ) : (
         <div
-          className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+          className={`relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
           onClick={handleClick}
         >
           {isUploading ? (
@@ -95,18 +135,20 @@ export default function ImageUploader({
               {hint && <span className="text-xs text-[var(--muted-foreground)] mt-1">{hint}</span>}
             </>
           )}
+          {fileInput}
         </div>
       )}
 
       {error && <div className="text-sm text-red-600 mt-1">{error}</div>}
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        onChange={handleChange}
-        style={{ display: 'none' }}
-      />
+      {enableCrop && cropSrc && (
+        <LogoCropper
+          open={!!cropSrc}
+          onOpenChange={handleCropClose}
+          imageSrc={cropSrc}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }

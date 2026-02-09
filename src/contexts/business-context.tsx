@@ -104,6 +104,36 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Subscribe to realtime business status changes
+  useEffect(() => {
+    if (!currentBusiness?.id) return;
+
+    const channel = supabase
+      .channel(`business-status-${currentBusiness.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "businesses",
+          filter: `id=eq.${currentBusiness.id}`,
+        },
+        (payload) => {
+          const newStatus = (payload.new as Record<string, unknown>).status;
+          if (newStatus && newStatus !== currentBusiness.status) {
+            // Status changed — reload memberships to get fresh data
+            loadMemberships();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentBusiness?.id, currentBusiness?.status]);
+
   const setCurrentBusiness = (business: Business) => {
     setCurrentBusinessState(business);
     localStorage.setItem("currentBusinessId", business.id);

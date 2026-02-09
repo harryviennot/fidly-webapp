@@ -83,7 +83,7 @@ export default function InviteAcceptPage() {
       );
       setAccepting(false);
     }
-  }, [invitation, token, router]);
+  }, [invitation, token]);
 
   // Handle auth success - auto-accept invitation
   const handleAuthSuccess = useCallback(() => {
