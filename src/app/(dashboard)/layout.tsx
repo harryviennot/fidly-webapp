@@ -43,7 +43,7 @@ export default function AdminLayout({
     <RoleGuard>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset className="bg-[var(--background)]">
+        <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
           <DashboardHeader />
           <main className="p-6">{children}</main>
         </SidebarInset>

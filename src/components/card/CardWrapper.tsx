@@ -55,6 +55,7 @@ export interface CardWrapperProps {
   /** Responsive scaling config */
   scaling?: {
     baseWidth?: number;
+    targetWidth?: number;
     aspectRatio?: number;
     minScale?: number;
   };
@@ -131,6 +132,7 @@ export function CardWrapper({
   const cardContent = (
     <ScaledCardWrapper
       baseWidth={scaling.baseWidth}
+      targetWidth={scaling.targetWidth}
       aspectRatio={scaling.aspectRatio}
       minScale={scaling.minScale}
     >

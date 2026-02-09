@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useBusiness } from '@/contexts/business-context';
 import { updateBusiness } from '@/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -76,25 +76,21 @@ const notificationTypes: Array<{
 
 export default function NotificationsPage() {
   const { currentBusiness, refetch } = useBusiness();
-  const [templates, setTemplates] = useState<NotificationTemplates>(defaultTemplates);
+  const [templates, setTemplates] = useState<NotificationTemplates>(() => {
+    if (currentBusiness?.settings?.notification_templates) {
+      return {
+        ...defaultTemplates,
+        ...(currentBusiness.settings.notification_templates as NotificationTemplates),
+      };
+    }
+    return defaultTemplates;
+  });
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isProPlan = currentBusiness?.subscription_tier === 'pro';
-
-  useEffect(() => {
-    if (currentBusiness) {
-      if (currentBusiness.settings?.notification_templates) {
-        setTemplates({
-          ...defaultTemplates,
-          ...(currentBusiness.settings.notification_templates as NotificationTemplates),
-        });
-      }
-      setLoading(false);
-    }
-  }, [currentBusiness]);
+  const loading = !currentBusiness;
 
   // Autosave with debounce
   const saveTemplates = useCallback(
