@@ -272,8 +272,8 @@ export function GoogleWalletCard({
       <div className="px-4 py-4 flex items-center gap-3">
         {design.logo_url ? (
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
-            style={{ backgroundColor: colors.accentHex }}
+            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+          // style={{ backgroundColor: colors.accentHex }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -284,7 +284,7 @@ export function GoogleWalletCard({
           </div>
         ) : (
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
             style={{ backgroundColor: colors.accentHex }}
           >
             <span className="text-white font-bold text-base">{initials}</span>
@@ -336,7 +336,7 @@ export function GoogleWalletCard({
           {/* Header Title - Description (Large) */}
           <div className="px-4 pb-3">
             <h2
-              className="text-3xl font-medium text-wrap"
+              className="text-2xl font-light text-wrap"
               style={{ color: colors.textColor }}
             >
               {design.description || "Loyalty Card"}
@@ -346,13 +346,13 @@ export function GoogleWalletCard({
           {/* Stamps Row */}
           <div className="px-4 py-2">
             <p
-              className="text-xs uppercase tracking-wider font-medium mb-1"
+              className="text-xs uppercase font-medium mb-1"
               style={{ color: colors.mutedTextColor }}
             >
               Stamps
             </p>
             <p
-              className="text-base font-normal"
+              className="text-sm font-normal"
               style={{ color: colors.textColor }}
             >
               {stamps} / {totalStamps}
@@ -368,7 +368,7 @@ export function GoogleWalletCard({
               {secondaryFields.slice(0, 4).map((field, i) => (
                 <div key={field.key || i}>
                   <p
-                    className="text-xs uppercase tracking-wider font-medium mb-0.5"
+                    className="text-xs font-medium mb-0.5"
                     style={{ color: colors.mutedTextColor }}
                   >
                     {field.label}
@@ -415,7 +415,7 @@ export function GoogleWalletCard({
             style={{ borderColor: `${colors.textColor}15` }}
           >
             <div className="bg-white p-3 rounded-xl">
-              <FakeQRCode size={120} />
+              <FakeQRCode size={100} />
             </div>
           </div>
 

@@ -376,10 +376,12 @@ html {
 /* ===== Wallet Switch Animation ===== */
 
 .wallet-card-container {
-  position: relative;
+  display: grid;
+  grid-template-areas: "card";
 }
 
 .wallet-card {
+  grid-area: card;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
               scale 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -393,8 +395,6 @@ html {
 }
 
 .wallet-card-left {
-  position: absolute;
-  inset: 0;
   transform: translateX(-30%);
   scale: 0.92;
   opacity: 0;
@@ -403,8 +403,6 @@ html {
 }
 
 .wallet-card-right {
-  position: absolute;
-  inset: 0;
   transform: translateX(30%);
   scale: 0.92;
   opacity: 0;

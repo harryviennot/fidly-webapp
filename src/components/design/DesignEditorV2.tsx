@@ -7,6 +7,7 @@ import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activate
 import { useBusiness } from '@/contexts/business-context';
 import { EditorCard } from '@/components/card';
 import { GoogleWalletCard } from '@/components/card/GoogleWalletCard';
+import { ScaledCardWrapper } from './ScaledCardWrapper';
 import ImageUploader from './ImageUploader';
 import FieldEditor from './FieldEditor';
 import { StampIconPicker, RewardIconPicker, StampIconType } from './StampIconPicker';
@@ -18,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowsClockwise, FlipHorizontal, Check, Minus, Plus, Eye, SlidersHorizontal, CaretDown } from '@phosphor-icons/react';
+import { FlipHorizontal, Minus, Plus, Eye, SlidersHorizontal, CaretDown } from '@phosphor-icons/react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import {
@@ -96,7 +97,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const [previewWallet, setPreviewWallet] = useState<'apple' | 'google'>('apple');
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [mobileShowPreview, setMobileShowPreview] = useState(false);
     const [showAdvancedStamps, setShowAdvancedStamps] = useState(false);
     const [iconColorOverridden, setIconColorOverridden] = useState(false);
@@ -144,8 +144,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           router.push(`/design/${created.id}`);
         } else if (design) {
           await updateDesign(currentBusiness.id, design.id, data);
-          setSuccessMessage('Design saved successfully!');
-          setTimeout(() => setSuccessMessage(null), 3000);
           onSave?.();
         }
       } catch (err) {
@@ -258,11 +256,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
       setSaving(true);
       setError(null);
-      setSuccessMessage(null);
       try {
         await activateDesign(currentBusiness.id, design.id);
         setIsActive(true);
-        setSuccessMessage('Design activated! All customers have been notified.');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to activate');
       } finally {
@@ -315,18 +311,19 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Preview Panel ----
     const previewPanel = (
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center flex-1 h-full">
         {/* Wallet Type Toggle + Flip Button */}
         <div className="mb-4 flex items-center gap-3">
           <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
-            <TabsList>
-              <TabsTrigger value="apple">Apple Wallet</TabsTrigger>
-              <TabsTrigger value="google">Google Wallet</TabsTrigger>
+            <TabsList className="rounded-full">
+              <TabsTrigger value="apple" className="rounded-full">Apple Wallet</TabsTrigger>
+              <TabsTrigger value="google" className="rounded-full">Google Wallet</TabsTrigger>
             </TabsList>
           </Tabs>
           <Button
             variant="outline"
             size="sm"
+            className="rounded-full"
             onClick={() => setShowBack(!showBack)}
           >
             <FlipHorizontal className="w-4 h-4 mr-2" />
@@ -334,8 +331,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           </Button>
         </div>
 
-        {/* Card Preview with wallet switch animation — fixed height container */}
-        <div className="w-full max-w-sm wallet-card-container aspect-[1/1.282]">
+        {/* Card Preview with wallet switch animation */}
+        <div className="flex-1 flex items-center justify-center w-full">
+        <div className="w-full max-w-2xs md:max-w-xs lg:max-w-sm 2xl:max-w-lg wallet-card-container ">
           {/* Apple Wallet with flip */}
           <div className={`wallet-card ${previewWallet === 'apple' ? 'wallet-card-active' : 'wallet-card-left'}`}>
             <div className="card-flip-container">
@@ -360,79 +358,69 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             </div>
           </div>
           {/* Google Wallet with flip */}
-          <div className={`wallet-card h-full ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
-            <div className="card-flip-container h-full">
-              <div className={`card-flip-inner h-full ${showBack ? 'flipped' : ''}`}>
-                <div className="card-flip-front h-full overflow-y-auto hide-scrollbar">
-                  <GoogleWalletCard
-                    design={formData}
-                    stamps={previewStamps}
-                    organizationName={formData.organization_name}
-                  />
+          <div className={`wallet-card ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
+            <div className="card-flip-container">
+              <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
+                <div className="card-flip-front">
+                  <ScaledCardWrapper baseWidth={320} dynamicHeight>
+                    <GoogleWalletCard
+                      design={formData}
+                      stamps={previewStamps}
+                      organizationName={formData.organization_name}
+                    />
+                  </ScaledCardWrapper>
                 </div>
                 <div className="card-flip-back">
-                  <GoogleWalletCard
-                    design={formData}
-                    stamps={previewStamps}
-                    organizationName={formData.organization_name}
-                    showBack
-                  />
+                  <ScaledCardWrapper baseWidth={320} dynamicHeight>
+                    <GoogleWalletCard
+                      design={formData}
+                      stamps={previewStamps}
+                      organizationName={formData.organization_name}
+                      showBack
+                    />
+                  </ScaledCardWrapper>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        </div>
 
-        {/* Stamp Slider */}
-        {!showBack && (
-          <div className="w-full max-w-sm mt-6 px-4">
-            <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm text-muted-foreground">Preview Stamps</Label>
-              <span className="text-sm font-medium">
-                {previewStamps} / {formData.total_stamps || 10}
-              </span>
+        {/* Slider + action buttons pinned to bottom */}
+        <div className="mt-auto w-full flex flex-col items-center pb-6">
+          {/* Stamp Slider */}
+          {!showBack && (
+            <div className="w-full max-w-md px-4">
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-sm text-muted-foreground">Preview Stamps</Label>
+                <span className="text-sm font-medium">
+                  {previewStamps} / {formData.total_stamps || 10}
+                </span>
+              </div>
+              <input
+                type="range"
+                className="styled-slider w-full"
+                min={0}
+                max={formData.total_stamps || 10}
+                value={previewStamps}
+                onChange={(e) => setPreviewStamps(parseInt(e.target.value))}
+              />
             </div>
-            <input
-              type="range"
-              className="styled-slider w-full"
-              min={0}
-              max={formData.total_stamps || 10}
-              value={previewStamps}
-              onChange={(e) => setPreviewStamps(parseInt(e.target.value))}
-            />
+          )}
+
+          {/* Desktop: Action buttons below preview */}
+          <div className={`${isCompact ? 'hidden' : 'flex'} flex-col gap-3 mt-6 w-full max-w-md`}>
+            {design && !isActive && (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleActivate}
+                disabled={saving}
+              >
+                Activate Design
+              </Button>
+            )}
           </div>
-        )}
-
-        {/* Desktop: Action buttons below preview */}
-        <div className={`${isCompact ? 'hidden' : 'flex'} flex-col gap-3 mt-8 w-full max-w-sm`}>
-          {design && !isActive && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleActivate}
-              disabled={saving}
-            >
-              Activate Design
-            </Button>
-          )}
-
-          {design && isActive && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleActivate}
-              disabled={saving}
-            >
-              <ArrowsClockwise className="w-4 h-4 mr-2" />
-              Update Customer Cards
-            </Button>
-          )}
-
-          {isActive && (
-            <p className="text-center text-sm text-muted-foreground">
-              This design is currently active
-            </p>
-          )}
         </div>
       </div>
     );
@@ -616,6 +604,10 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                       label=""
                       value={formData.strip_background_url}
                       onUpload={handleStripBackgroundUpload}
+                      onClear={() => {
+                        updateField('strip_background_url', null as unknown as string);
+                        setPendingStripFile(null);
+                      }}
                       hint="Pattern behind stamps. 1125x432px recommended"
                     />
                     {formData.strip_background_url && (
@@ -693,12 +685,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             {error}
           </div>
         )}
-        {successMessage && (
-          <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-600 text-sm flex items-center gap-2">
-            <Check className="w-4 h-4" />
-            {successMessage}
-          </div>
-        )}
 
         {/* Compact: Activate button at bottom of form */}
         {design && !isActive && isCompact && (
@@ -733,12 +719,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         ) : (
           <div className="flex flex-row gap-8 h-[calc(100dvh-64px)]">
             {/* Left column: title + form, scrolls internally */}
-            <div className="w-[420px] flex-shrink-0 overflow-y-auto hide-scrollbar pt-6 pb-6">
+            <div className="w-[35%] flex-shrink-0 overflow-y-auto hide-scrollbar pt-6 pb-6">
               {headerLeft && <div className="mb-6">{headerLeft}</div>}
               {formPanel}
             </div>
             {/* Right column: save button + preview, fixed */}
-            <div className="flex-1 flex flex-col items-center pt-6">
+            <div className="flex-1 flex flex-col pt-6">
               {headerRight && <div className="self-end mb-4">{headerRight}</div>}
               {previewPanel}
             </div>

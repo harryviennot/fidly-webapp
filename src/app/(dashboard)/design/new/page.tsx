@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ArrowsClockwise, PencilSimple } from '@phosphor-icons/react';
+import { ArrowsClockwise, PencilSimple, FloppyDisk } from '@phosphor-icons/react';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,14 +47,17 @@ export default function NewDesignPage() {
         )
       }
       headerRight={
-        <Button onClick={handleSave} disabled={saving}>
+        <Button className="rounded-full bg-black text-white hover:bg-black/80" onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
               <ArrowsClockwise className="w-4 h-4 mr-2 animate-spin" />
               Saving...
             </>
           ) : (
-            'Save Design'
+            <>
+              <FloppyDisk className="w-4 h-4 mr-2" weight="bold" />
+              Save Design
+            </>
           )}
         </Button>
       }

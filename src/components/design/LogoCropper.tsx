@@ -152,10 +152,10 @@ export function LogoCropper({
           </ReactCrop>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={!completedCrop}>
+          <Button className="rounded-full" onClick={handleConfirm} disabled={!completedCrop}>
             Apply Crop
           </Button>
         </DialogFooter>

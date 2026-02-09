@@ -52,19 +52,21 @@ export default function FieldEditor({
       {fields.length > 0 && (
         <div className="space-y-2">
           {fields.map((field, index) => (
-            <div key={field.key} className="flex items-center gap-2">
-              <div className="flex-1 grid grid-cols-2 gap-2">
+            <div key={field.key} className="flex items-start gap-2">
+              <div className="flex-1 flex flex-col gap-1.5">
                 <Input
                   placeholder="Label"
                   value={field.label}
                   onChange={(e) => updateField(index, { label: e.target.value })}
                   className="h-9 text-sm"
                 />
-                <Input
+                <textarea
                   placeholder="Value"
                   value={field.value}
                   onChange={(e) => updateField(index, { value: e.target.value })}
-                  className="h-9 text-sm"
+                  rows={1}
+                  className="min-h-[36px] border border-input bg-background text-sm rounded-md px-3 py-2 w-full resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  style={{ fieldSizing: 'content' } as React.CSSProperties}
                 />
               </div>
               <div className="flex items-center gap-0.5">
