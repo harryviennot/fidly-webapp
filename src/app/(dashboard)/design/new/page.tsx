@@ -17,9 +17,13 @@ export default function NewDesignPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        {editingName ? (
+    <DesignEditorV2
+      ref={editorRef}
+      isNew
+      onSavingChange={setSaving}
+      designName={designName}
+      headerLeft={
+        editingName ? (
           <Input
             value={designName}
             onChange={(e) => setDesignName(e.target.value)}
@@ -40,7 +44,9 @@ export default function NewDesignPage() {
               weight="bold"
             />
           </div>
-        )}
+        )
+      }
+      headerRight={
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
@@ -51,8 +57,7 @@ export default function NewDesignPage() {
             'Save Design'
           )}
         </Button>
-      </div>
-      <DesignEditorV2 ref={editorRef} isNew onSavingChange={setSaving} designName={designName} />
-    </div>
+      }
+    />
   );
 }

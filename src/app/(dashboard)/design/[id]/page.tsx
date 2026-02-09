@@ -68,8 +68,12 @@ export default function EditDesignPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <DesignEditorV2
+      ref={editorRef}
+      design={design}
+      onSavingChange={setSaving}
+      designName={designName}
+      headerLeft={
         <div className="flex items-center gap-3">
           {editingName ? (
             <Input
@@ -97,6 +101,8 @@ export default function EditDesignPage() {
             <Badge variant="default">Active</Badge>
           )}
         </div>
+      }
+      headerRight={
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
@@ -107,8 +113,7 @@ export default function EditDesignPage() {
             'Save Design'
           )}
         </Button>
-      </div>
-      <DesignEditorV2 ref={editorRef} design={design} onSavingChange={setSaving} designName={designName} />
-    </div>
+      }
+    />
   );
 }

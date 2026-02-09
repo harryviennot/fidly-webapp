@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useImperativeHandle, forwardRef, useRef, useCallback, useEffect } from 'react';
+import { useState, useImperativeHandle, forwardRef, useRef, useCallback, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { CardDesign, CardDesignCreate } from '@/types';
 import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activateDesign } from '@/api';
@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowsClockwise, FlipHorizontal, Check, Minus, Plus, Eye, SlidersHorizontal, CaretDown } from '@phosphor-icons/react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import {
   rgbToHex, hexToRgb, autoIconColor, contrastRatio,
   backgroundColors, accentColors, iconColors, textColors, emptyStampColors,
@@ -36,6 +37,8 @@ interface DesignEditorV2Props {
   onSave?: () => void;
   onSavingChange?: (saving: boolean) => void;
   designName?: string;
+  headerLeft?: ReactNode;
+  headerRight?: ReactNode;
 }
 
 const DEFAULT_DESIGN: CardDesignCreate = {
@@ -78,10 +81,12 @@ function isBackComplete(d: CardDesignCreate) {
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const { currentBusiness } = useBusiness();
     const isMobile = useIsMobile();
+    const isWideEnough = useMediaQuery('(min-width: 1280px)');
+    const isCompact = !isWideEnough;
     const [formData, setFormData] = useState<CardDesignCreate>(
       design ? { ...design } : { ...DEFAULT_DESIGN }
     );
@@ -310,7 +315,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Preview Panel ----
     const previewPanel = (
-      <div className="flex-1 lg:sticky lg:top-6 lg:self-start flex flex-col items-center min-h-[500px]">
+      <div className="flex flex-col items-center">
         {/* Wallet Type Toggle + Flip Button */}
         <div className="mb-4 flex items-center gap-3">
           <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
@@ -319,20 +324,19 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               <TabsTrigger value="google">Google Wallet</TabsTrigger>
             </TabsList>
           </Tabs>
-          {previewWallet === 'apple' && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowBack(!showBack)}
-            >
-              <FlipHorizontal className="w-4 h-4 mr-2" />
-              {showBack ? 'Front' : 'Back'}
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowBack(!showBack)}
+          >
+            <FlipHorizontal className="w-4 h-4 mr-2" />
+            {showBack ? 'Front' : 'Back'}
+          </Button>
         </div>
 
         {/* Card Preview with wallet switch animation — fixed height container */}
         <div className="w-full max-w-sm wallet-card-container aspect-[1/1.282]">
+          {/* Apple Wallet with flip */}
           <div className={`wallet-card ${previewWallet === 'apple' ? 'wallet-card-active' : 'wallet-card-left'}`}>
             <div className="card-flip-container">
               <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
@@ -355,17 +359,32 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               </div>
             </div>
           </div>
-          <div className={`wallet-card h-full overflow-y-auto hide-scrollbar ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
-            <GoogleWalletCard
-              design={formData}
-              stamps={previewStamps}
-              organizationName={formData.organization_name}
-            />
+          {/* Google Wallet with flip */}
+          <div className={`wallet-card h-full ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
+            <div className="card-flip-container h-full">
+              <div className={`card-flip-inner h-full ${showBack ? 'flipped' : ''}`}>
+                <div className="card-flip-front h-full overflow-y-auto hide-scrollbar">
+                  <GoogleWalletCard
+                    design={formData}
+                    stamps={previewStamps}
+                    organizationName={formData.organization_name}
+                  />
+                </div>
+                <div className="card-flip-back">
+                  <GoogleWalletCard
+                    design={formData}
+                    stamps={previewStamps}
+                    organizationName={formData.organization_name}
+                    showBack
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Stamp Slider */}
-        {!(previewWallet === 'apple' && showBack) && (
+        {!showBack && (
           <div className="w-full max-w-sm mt-6 px-4">
             <div className="flex items-center justify-between mb-2">
               <Label className="text-sm text-muted-foreground">Preview Stamps</Label>
@@ -385,7 +404,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         )}
 
         {/* Desktop: Action buttons below preview */}
-        <div className="hidden lg:flex flex-col gap-3 mt-8 w-full max-w-sm">
+        <div className={`${isCompact ? 'hidden' : 'flex'} flex-col gap-3 mt-8 w-full max-w-sm`}>
           {design && !isActive && (
             <Button
               variant="outline"
@@ -420,7 +439,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Form Panel ----
     const formPanel = (
-      <div className="lg:w-[420px] flex-shrink-0 space-y-4">
+      <div className="space-y-4">
         {/* Branding Section */}
         <CollapsibleSection
           title="Branding"
@@ -681,9 +700,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           </div>
         )}
 
-        {/* Mobile: Activate button at bottom of form */}
-        {design && !isActive && (
-          <div className="lg:hidden pt-4">
+        {/* Compact: Activate button at bottom of form */}
+        {design && !isActive && isCompact && (
+          <div className="pt-4">
             <Button
               variant="outline"
               className="w-full"
@@ -698,21 +717,36 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     );
 
     return (
-      <div className="relative">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Mobile: show form or preview based on toggle */}
-          {isMobile ? (
-            mobileShowPreview ? previewPanel : formPanel
-          ) : (
-            <>
-              {formPanel}
-              {previewPanel}
-            </>
-          )}
-        </div>
+      <div className="relative -mt-6 -mb-6">
+        {/* Compact/mobile: header row */}
+        {isCompact && (
+          <div className="flex items-center justify-between pt-6 mb-6 px-px">
+            {headerLeft}
+            {headerRight}
+          </div>
+        )}
 
-        {/* Mobile: floating toggle button */}
-        {isMobile && (
+        {isCompact ? (
+          <div className="px-px">
+            {mobileShowPreview ? previewPanel : formPanel}
+          </div>
+        ) : (
+          <div className="flex flex-row gap-8 h-[calc(100dvh-64px)]">
+            {/* Left column: title + form, scrolls internally */}
+            <div className="w-[420px] flex-shrink-0 overflow-y-auto hide-scrollbar pt-6 pb-6">
+              {headerLeft && <div className="mb-6">{headerLeft}</div>}
+              {formPanel}
+            </div>
+            {/* Right column: save button + preview, fixed */}
+            <div className="flex-1 flex flex-col items-center pt-6">
+              {headerRight && <div className="self-end mb-4">{headerRight}</div>}
+              {previewPanel}
+            </div>
+          </div>
+        )}
+
+        {/* Compact/mobile: floating toggle button */}
+        {isCompact && (
           <Button
             size="icon"
             className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg"
