@@ -33,6 +33,7 @@ export interface CardDesign {
   custom_filled_stamp_url?: string;
   custom_empty_stamp_url?: string;
   strip_background_url?: string;
+  strip_background_opacity?: number;
 
   // Pass fields
   secondary_fields: PassField[];
@@ -60,6 +61,7 @@ export interface CardDesignCreate {
   stamp_icon?: string;
   reward_icon?: string;
   icon_color?: string;
+  strip_background_opacity?: number;
 
   secondary_fields?: PassField[];
   auxiliary_fields?: PassField[];

@@ -566,7 +566,8 @@ export function WalletCard({
                     src={design.strip_background_url}
                     alt=""
                     fill
-                    className="object-cover opacity-40"
+                    className="object-cover"
+                    style={{ opacity: (design.strip_background_opacity ?? 40) / 100 }}
                     unoptimized
                   />
                 </div>

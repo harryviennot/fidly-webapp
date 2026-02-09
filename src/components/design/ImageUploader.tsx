@@ -48,9 +48,19 @@ export default function ImageUploader({
     }
   };
 
+  const fileInput = (
+    <input
+      ref={inputRef}
+      type="file"
+      accept={accept}
+      onChange={handleChange}
+      className="hidden"
+    />
+  );
+
   return (
-    <div className="space-y-2">
-      {label && <label className="text-sm font-medium text-[var(--foreground)]">{label}</label>}
+    <div>
+      {label && <label className="text-sm font-medium text-[var(--foreground)] mb-2 block">{label}</label>}
 
       {value ? (
         <div className="relative inline-block">
@@ -80,10 +90,11 @@ export default function ImageUploader({
               </button>
             )}
           </div>
+          {fileInput}
         </div>
       ) : (
         <div
-          className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+          className={`relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
           onClick={handleClick}
         >
           {isUploading ? (
@@ -95,18 +106,11 @@ export default function ImageUploader({
               {hint && <span className="text-xs text-[var(--muted-foreground)] mt-1">{hint}</span>}
             </>
           )}
+          {fileInput}
         </div>
       )}
 
       {error && <div className="text-sm text-red-600 mt-1">{error}</div>}
-
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        onChange={handleChange}
-        style={{ display: 'none' }}
-      />
     </div>
   );
 }

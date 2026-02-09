@@ -392,7 +392,8 @@ export function GoogleWalletCard({
               src={design.strip_background_url}
               alt=""
               fill
-              className="object-cover opacity-30"
+              className="object-cover"
+              style={{ opacity: (design.strip_background_opacity ?? 40) / 100 }}
               unoptimized
             />
           </div>

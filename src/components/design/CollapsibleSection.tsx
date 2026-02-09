@@ -15,6 +15,7 @@ interface CollapsibleSectionProps {
   children: React.ReactNode;
   icon?: React.ReactNode;
   badge?: 'complete' | null;
+  annotation?: string;
 }
 
 export function CollapsibleSection({
@@ -24,6 +25,7 @@ export function CollapsibleSection({
   children,
   icon,
   badge,
+  annotation,
 }: CollapsibleSectionProps) {
   return (
     <Collapsible open={isOpen} onOpenChange={onToggle}>
@@ -36,6 +38,9 @@ export function CollapsibleSection({
             <div className="flex items-center gap-2">
               {icon}
               <span className="font-medium">{title}</span>
+              {annotation && (
+                <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{annotation}</span>
+              )}
               {badge === 'complete' && (
                 <Check className="w-4 h-4 text-green-600" weight="bold" />
               )}

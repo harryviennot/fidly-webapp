@@ -10,14 +10,20 @@ interface ColorPickerProps {
   colors: ColorPreset[];
   value: string; // hex
   onChange: (hex: string) => void;
+  annotation?: string;
 }
 
-export function ColorPicker({ label, tooltip, colors, value, onChange }: ColorPickerProps) {
+export function ColorPicker({ label, tooltip, colors, value, onChange, annotation }: ColorPickerProps) {
   const isCustom = !colors.some(c => c.value.toLowerCase() === value.toLowerCase());
 
   return (
     <div className="space-y-2">
-      <LabelWithTooltip tooltip={tooltip}>{label}</LabelWithTooltip>
+      <div className="flex items-center gap-2">
+        <LabelWithTooltip tooltip={tooltip}>{label}</LabelWithTooltip>
+        {annotation && (
+          <span className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{annotation}</span>
+        )}
+      </div>
       <div className="grid grid-cols-8 gap-2">
         {colors.map((color) => (
           <button
@@ -37,14 +43,14 @@ export function ColorPicker({ label, tooltip, colors, value, onChange }: ColorPi
           />
         ))}
         <div
-          className={`w-10 h-10 rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center bg-white relative ${
+          className={`w-10 h-10 rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center bg-white relative overflow-hidden ${
             isCustom ? 'ring-2 ring-primary ring-offset-2' : 'ring-1 ring-black/20'
           }`}
           title="Custom color"
         >
           <input
             type="color"
-            value={value}
+            value={value.length > 7 ? value.slice(0, 7) : value}
             onChange={(e) => onChange(e.target.value)}
             className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
           />

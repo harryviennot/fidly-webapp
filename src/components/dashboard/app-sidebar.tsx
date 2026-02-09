@@ -78,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const canSeeLoyaltyProgram = canSeeNavItem(currentRole, '/loyalty-program');
 
   return (
-    <Sidebar variant="floating" {...props}>
+    <Sidebar variant="floating" {...props} className="pr-0">
       <SidebarHeader className="p-2">
         <BusinessSwitcher />
       </SidebarHeader>

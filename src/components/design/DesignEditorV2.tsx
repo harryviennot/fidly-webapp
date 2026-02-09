@@ -13,14 +13,15 @@ import { StampIconPicker, RewardIconPicker, StampIconType } from './StampIconPic
 import { LabelWithTooltip } from './FieldTooltip';
 import { ColorPicker } from './ColorPicker';
 import { CollapsibleSection } from './CollapsibleSection';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowsClockwise, FlipHorizontal, Check, Minus, Plus, Eye, SlidersHorizontal } from '@phosphor-icons/react';
+import { ArrowsClockwise, FlipHorizontal, Check, Minus, Plus, Eye, SlidersHorizontal, CaretDown } from '@phosphor-icons/react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
-  rgbToHex, hexToRgb,
+  rgbToHex, hexToRgb, autoIconColor, contrastRatio,
   backgroundColors, accentColors, iconColors, textColors, emptyStampColors,
 } from '@/lib/color-utils';
 
@@ -81,7 +82,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const router = useRouter();
     const { currentBusiness } = useBusiness();
     const isMobile = useIsMobile();
-    const [formData, setFormData] = useState<CardDesignCreate & { logo_url?: string; strip_background_url?: string }>(
+    const [formData, setFormData] = useState<CardDesignCreate & { logo_url?: string; strip_background_url?: string; strip_background_opacity?: number }>(
       design ? { ...design } : { ...DEFAULT_DESIGN }
     );
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
@@ -92,6 +93,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [mobileShowPreview, setMobileShowPreview] = useState(false);
+    const [showAdvancedStamps, setShowAdvancedStamps] = useState(false);
+    const [iconColorOverridden, setIconColorOverridden] = useState(false);
 
     // Use ref to always have access to latest form data for save
     const formDataRef = useRef(formData);
@@ -164,21 +167,42 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       const contentNow = isContentComplete(formData);
 
       if (brandingNow && !prevCompleteRef.current.branding) {
-        setTimeout(() => setOpenSections(s => ({ ...s, stamps: true })), 300);
+        setTimeout(() => setOpenSections({ branding: false, stamps: true, content: false, back: false }), 300);
       }
       if (stampsNow && !prevCompleteRef.current.stamps) {
-        setTimeout(() => setOpenSections(s => ({ ...s, content: true })), 300);
+        setTimeout(() => setOpenSections({ branding: false, stamps: false, content: true, back: false }), 300);
       }
       if (contentNow && !prevCompleteRef.current.content) {
-        setTimeout(() => setOpenSections(s => ({ ...s, back: true })), 300);
+        setTimeout(() => setOpenSections({ branding: false, stamps: false, content: false, back: true }), 300);
       }
 
       prevCompleteRef.current = { branding: brandingNow, stamps: stampsNow, content: contentNow };
     }, [formData]);
 
     const toggleSection = (section: keyof typeof openSections) => {
-      setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+      setOpenSections((prev) => {
+        const isOpening = !prev[section];
+        if (isOpening) {
+          // Close all others, open this one
+          return { branding: false, stamps: false, content: false, back: false, [section]: true };
+        }
+        // Just close this one
+        return { ...prev, [section]: false };
+      });
     };
+
+    // Auto-calculate icon color from stamp brightness (unless user overrode it)
+    useEffect(() => {
+      if (!iconColorOverridden && formData.stamp_filled_color) {
+        const stampHex = rgbToHex(formData.stamp_filled_color);
+        const autoColor = autoIconColor(stampHex);
+        const currentIconHex = rgbToHex(formData.icon_color || 'rgb(255, 255, 255)');
+        if (autoColor !== currentIconHex) {
+          setFormData((prev) => ({ ...prev, icon_color: hexToRgb(autoColor) }));
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formData.stamp_filled_color, iconColorOverridden]);
 
     const updateField = <K extends keyof typeof formData>(key: K, value: (typeof formData)[K]) => {
       setFormData((prev) => ({ ...prev, [key]: value }));
@@ -229,6 +253,11 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const labelHex = rgbToHex(formData.label_color || 'rgb(255, 255, 255)');
     const textHex = rgbToHex(formData.foreground_color || 'rgb(255, 255, 255)');
     const emptyStampHex = rgbToHex(formData.stamp_empty_color || 'rgb(255, 255, 255)');
+    const borderColorHex = rgbToHex(formData.stamp_border_color || 'rgb(255, 255, 255)');
+
+    // Contrast warnings
+    const labelContrast = contrastRatio(labelHex, bgHex);
+    const textContrast = contrastRatio(textHex, bgHex);
 
     // Section badges
     const brandingBadge = isBrandingComplete(formData) ? 'complete' as const : null;
@@ -371,7 +400,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             </div>
 
             <div className="space-y-2">
-              <LabelWithTooltip htmlFor="description" tooltip="Subtitle shown below your business name">Card Description *</LabelWithTooltip>
+              <LabelWithTooltip htmlFor="description" tooltip="On Apple Wallet, shown as the title on the info page. On Google Wallet, shown as the card header.">Card Description *</LabelWithTooltip>
               <Input
                 id="description"
                 placeholder="e.g., Loyalty Card"
@@ -397,19 +426,27 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
             <ColorPicker
               label="Label Color"
-              tooltip="Color for labels like 'STAMPS' and 'REWARD' on the pass"
+              tooltip="Color for labels like 'STAMPS' and 'REWARD'. Apple Wallet only — Google Wallet uses its own text colors."
               colors={textColors}
               value={labelHex}
               onChange={(hex) => updateColorField('label_color', hex)}
+              annotation="Apple Wallet only"
             />
+            {labelContrast < 3 && (
+              <p className="text-xs text-amber-600 -mt-1">Low contrast — labels may be hard to read on this background.</p>
+            )}
 
             <ColorPicker
               label="Text Color"
-              tooltip="Color for stamps count and main text on the pass"
+              tooltip="Color for stamps count and main text. Apple Wallet only — Google Wallet uses its own text colors."
               colors={textColors}
               value={textHex}
               onChange={(hex) => updateColorField('foreground_color', hex)}
+              annotation="Apple Wallet only"
             />
+            {textContrast < 3 && (
+              <p className="text-xs text-amber-600 -mt-1">Low contrast — text may be hard to read on this background.</p>
+            )}
           </div>
         </CollapsibleSection>
 
@@ -421,6 +458,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           badge={stampsBadge}
         >
           <div className="space-y-4">
+            {/* Basic controls — always visible */}
             <div className="space-y-2">
               <LabelWithTooltip tooltip="Stamps needed to earn the reward (2-20)">Total Stamps</LabelWithTooltip>
               <div className="flex items-center justify-between w-full">
@@ -477,26 +515,69 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               tooltip="Color for icons inside filled stamps"
               colors={iconColors}
               value={iconHex}
-              onChange={(hex) => updateColorField('icon_color', hex)}
+              onChange={(hex) => {
+                setIconColorOverridden(true);
+                updateColorField('icon_color', hex);
+              }}
             />
 
-            <ColorPicker
-              label="Empty Stamp Color"
-              tooltip="Color for empty stamp circles (unfilled stamps)"
-              colors={emptyStampColors}
-              value={emptyStampHex}
-              onChange={(hex) => updateColorField('stamp_empty_color', hex)}
-            />
+            {/* Advanced controls — collapsed by default */}
+            <Collapsible open={showAdvancedStamps} onOpenChange={setShowAdvancedStamps}>
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors pt-1"
+                >
+                  <CaretDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvancedStamps ? 'rotate-180' : ''}`} weight="bold" />
+                  Advanced options
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="collapsible-content px-1 -mx-1 pt-2">
+                <div className="space-y-4 pt-2">
+                  <ColorPicker
+                    label="Empty Stamp Color"
+                    tooltip="Color for empty stamp circles (unfilled stamps)"
+                    colors={emptyStampColors}
+                    value={emptyStampHex}
+                    onChange={(hex) => updateColorField('stamp_empty_color', hex)}
+                  />
 
-            <div className="space-y-2 pt-2 border-t">
-              <LabelWithTooltip tooltip="Optional pattern or texture displayed behind the stamps">Strip Background</LabelWithTooltip>
-              <ImageUploader
-                label=""
-                value={formData.strip_background_url}
-                onUpload={handleStripBackgroundUpload}
-                hint="Pattern behind stamps. 1125x432px recommended"
-              />
-            </div>
+                  <ColorPicker
+                    label="Stamp Border Color"
+                    tooltip="Border color for empty stamp circles"
+                    colors={emptyStampColors}
+                    value={borderColorHex}
+                    onChange={(hex) => updateColorField('stamp_border_color', hex)}
+                  />
+
+                  <div className="space-y-2">
+                    <LabelWithTooltip tooltip="Optional pattern or texture displayed behind the stamps">Strip Background</LabelWithTooltip>
+                    <ImageUploader
+                      label=""
+                      value={formData.strip_background_url}
+                      onUpload={handleStripBackgroundUpload}
+                      hint="Pattern behind stamps. 1125x432px recommended"
+                    />
+                    {formData.strip_background_url && (
+                      <div className="space-y-2 pt-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">Opacity</Label>
+                          <span className="text-sm text-muted-foreground">{formData.strip_background_opacity ?? 40}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          className="styled-slider w-full"
+                          min={0}
+                          max={100}
+                          value={formData.strip_background_opacity ?? 40}
+                          onChange={(e) => updateField('strip_background_opacity', parseInt(e.target.value))}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </CollapsibleSection>
 
@@ -509,16 +590,16 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         >
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Fields displayed on the front of the pass below the stamps.
+              On Apple Wallet, these appear below the stamps. On Google Wallet, they appear above the QR code.
             </p>
             <FieldEditor
-              title="Secondary Fields"
+              title="Front Details"
               fields={formData.secondary_fields || []}
               onChange={(f) => updateField('secondary_fields', f)}
               maxFields={3}
             />
             <FieldEditor
-              title="Auxiliary Fields"
+              title="Additional Info"
               fields={formData.auxiliary_fields || []}
               onChange={(f) => updateField('auxiliary_fields', f)}
               maxFields={3}
@@ -535,7 +616,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         >
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Information shown when the customer taps the pass. Use this for terms, contact info, or instructions.
+              Information shown when the customer taps the pass. On Apple Wallet, these appear on the back of the card. On Google Wallet, they appear in the details section.
             </p>
             <FieldEditor
               title="Back Fields"
