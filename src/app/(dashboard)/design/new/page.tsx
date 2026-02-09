@@ -10,7 +10,7 @@ export default function NewDesignPage() {
   const editorRef = useRef<DesignEditorRef>(null);
   const [saving, setSaving] = useState(false);
   const [editingName, setEditingName] = useState(false);
-  const [designName, setDesignName] = useState('');
+  const [designName, setDesignName] = useState('Untitled Design');
 
   const handleSave = () => {
     editorRef.current?.handleSave();
@@ -18,7 +18,7 @@ export default function NewDesignPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between sticky top-0 z-30 bg-[var(--background)] py-2 -mt-2">
         {editingName ? (
           <Input
             value={designName}
@@ -36,7 +36,7 @@ export default function NewDesignPage() {
           >
             <h2 className="text-2xl font-bold">{designName || 'Untitled Design'}</h2>
             <PencilSimple
-              className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+              className="w-4 h-4 text-muted-foreground/60"
               weight="bold"
             />
           </div>

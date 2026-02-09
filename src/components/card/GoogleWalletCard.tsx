@@ -252,6 +252,7 @@ export function GoogleWalletCard({
   }, []);
 
   const auxiliaryFields = design.auxiliary_fields || [];
+  const backFields = design.back_fields || [];
 
   return (
     <div
@@ -408,13 +409,43 @@ export function GoogleWalletCard({
               colors={colors}
               stampIcon={stampIcon}
               rewardIcon={rewardIcon}
-              containerWidth={heroWidth
-              }
+              containerWidth={heroWidth}
               containerHeight={heroHeight}
             />
           )}
         </div>
       </div>
+
+      {/* Details Section (Back Fields) */}
+      {backFields.length > 0 && (
+        <div
+          className="px-4 py-3 space-y-3"
+          style={{ borderTop: `1px solid ${colors.textColor}15` }}
+        >
+          <p
+            className="text-xs uppercase tracking-wider font-medium"
+            style={{ color: colors.mutedTextColor }}
+          >
+            Details
+          </p>
+          {backFields.map((field, i) => (
+            <div key={field.key || i}>
+              <p
+                className="text-xs uppercase tracking-wider font-medium mb-0.5"
+                style={{ color: colors.mutedTextColor }}
+              >
+                {field.label}
+              </p>
+              <p
+                className="text-sm whitespace-pre-wrap"
+                style={{ color: colors.textColor }}
+              >
+                {field.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

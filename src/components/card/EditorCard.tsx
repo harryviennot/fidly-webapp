@@ -181,7 +181,7 @@ function CardBack({ design, organizationName }: CardBackProps) {
                 className="text-[10px] uppercase tracking-wider"
                 style={{ color: labelColor, opacity: 0.5 }}
               >
-                Powered by Fidelity
+                Powered by Stampio
               </p>
             </div>
           </div>

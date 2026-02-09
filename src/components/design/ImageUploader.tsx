@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
+import { LogoCropper } from './LogoCropper';
 
 interface ImageUploaderProps {
   label: string;
@@ -10,6 +11,8 @@ interface ImageUploaderProps {
   onClear?: () => void;
   accept?: string;
   hint?: string;
+  /** When true, opens a crop dialog before uploading */
+  enableCrop?: boolean;
 }
 
 export default function ImageUploader({
@@ -19,32 +22,58 @@ export default function ImageUploader({
   onClear,
   accept = 'image/png',
   hint,
+  enableCrop = false,
 }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
 
   const handleClick = () => {
     inputRef.current?.click();
   };
 
-  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processUpload = async (file: File) => {
     setError(null);
     setIsUploading(true);
-
     try {
       await onUpload(file);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setIsUploading(false);
-      // Reset input so same file can be selected again
       if (inputRef.current) {
         inputRef.current.value = '';
       }
+    }
+  };
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (enableCrop) {
+      const url = URL.createObjectURL(file);
+      setCropSrc(url);
+      // Reset input so same file can be selected again
+      if (inputRef.current) inputRef.current.value = '';
+    } else {
+      await processUpload(file);
+    }
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    if (cropSrc) {
+      URL.revokeObjectURL(cropSrc);
+      setCropSrc(null);
+    }
+    await processUpload(croppedFile);
+  };
+
+  const handleCropClose = (open: boolean) => {
+    if (!open && cropSrc) {
+      URL.revokeObjectURL(cropSrc);
+      setCropSrc(null);
     }
   };
 
@@ -111,6 +140,15 @@ export default function ImageUploader({
       )}
 
       {error && <div className="text-sm text-red-600 mt-1">{error}</div>}
+
+      {enableCrop && cropSrc && (
+        <LogoCropper
+          open={!!cropSrc}
+          onOpenChange={handleCropClose}
+          imageSrc={cropSrc}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }

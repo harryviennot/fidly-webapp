@@ -82,7 +82,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const router = useRouter();
     const { currentBusiness } = useBusiness();
     const isMobile = useIsMobile();
-    const [formData, setFormData] = useState<CardDesignCreate & { logo_url?: string; strip_background_url?: string; strip_background_opacity?: number }>(
+    const [formData, setFormData] = useState<CardDesignCreate>(
       design ? { ...design } : { ...DEFAULT_DESIGN }
     );
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
@@ -95,6 +95,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const [mobileShowPreview, setMobileShowPreview] = useState(false);
     const [showAdvancedStamps, setShowAdvancedStamps] = useState(false);
     const [iconColorOverridden, setIconColorOverridden] = useState(false);
+    const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
+    const [pendingStripFile, setPendingStripFile] = useState<File | null>(null);
 
     // Use ref to always have access to latest form data for save
     const formDataRef = useRef(formData);
@@ -102,10 +104,18 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleSave = useCallback(async () => {
       if (!currentBusiness?.id) return;
-      const data = formDataRef.current;
+      const data = { ...formDataRef.current };
       if (!data.name || !data.organization_name || !data.description) {
         setError('Please fill in all required fields (Name, Organization, Description)');
         return;
+      }
+
+      // Strip blob URLs before sending to API
+      if (data.logo_url?.startsWith('blob:')) {
+        delete data.logo_url;
+      }
+      if (data.strip_background_url?.startsWith('blob:')) {
+        delete data.strip_background_url;
       }
 
       setSaving(true);
@@ -115,6 +125,17 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       try {
         if (isNew) {
           const created = await createDesign(currentBusiness.id, data);
+          // Upload pending files with the new design ID
+          if (pendingLogoFile) {
+            const result = await uploadLogo(currentBusiness.id, created.id, pendingLogoFile);
+            await updateDesign(currentBusiness.id, created.id, { ...data, logo_url: result.url });
+            setPendingLogoFile(null);
+          }
+          if (pendingStripFile) {
+            const result = await uploadStripBackground(currentBusiness.id, created.id, pendingStripFile);
+            await updateDesign(currentBusiness.id, created.id, { ...data, strip_background_url: result.url });
+            setPendingStripFile(null);
+          }
           router.push(`/design/${created.id}`);
         } else if (design) {
           await updateDesign(currentBusiness.id, design.id, data);
@@ -128,12 +149,22 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         setSaving(false);
         onSavingChange?.(false);
       }
-    }, [currentBusiness?.id, isNew, design, router, onSave, onSavingChange]);
+    }, [currentBusiness?.id, isNew, design, router, onSave, onSavingChange, pendingLogoFile, pendingStripFile]);
 
     useImperativeHandle(ref, () => ({
       handleSave,
       saving,
     }), [handleSave, saving]);
+
+    // Cleanup blob URLs on unmount
+    useEffect(() => {
+      return () => {
+        const logoUrl = formDataRef.current.logo_url;
+        const stripUrl = formDataRef.current.strip_background_url;
+        if (logoUrl?.startsWith('blob:')) URL.revokeObjectURL(logoUrl);
+        if (stripUrl?.startsWith('blob:')) URL.revokeObjectURL(stripUrl);
+      };
+    }, []);
 
     // Collapsed sections state — only branding open by default
     const [openSections, setOpenSections] = useState({
@@ -236,7 +267,11 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleLogoUpload = async (file: File) => {
       if (!design || !currentBusiness?.id) {
-        throw new Error('Please save the design first before uploading images');
+        // Deferred upload for new designs: store file and use blob URL for preview
+        setPendingLogoFile(file);
+        const blobUrl = URL.createObjectURL(file);
+        updateField('logo_url', blobUrl);
+        return;
       }
       const result = await uploadLogo(currentBusiness.id, design.id, file);
       updateField('logo_url', result.url);
@@ -244,7 +279,11 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleStripBackgroundUpload = async (file: File) => {
       if (!design || !currentBusiness?.id) {
-        throw new Error('Please save the design first before uploading images');
+        // Deferred upload for new designs
+        setPendingStripFile(file);
+        const blobUrl = URL.createObjectURL(file);
+        updateField('strip_background_url', blobUrl);
+        return;
       }
       const result = await uploadStripBackground(currentBusiness.id, design.id, file);
       updateField('strip_background_url', result.url);
@@ -271,7 +310,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Preview Panel ----
     const previewPanel = (
-      <div className="flex-1 lg:sticky lg:top-6 lg:self-start flex flex-col items-center justify-center min-h-[500px]">
+      <div className="flex-1 lg:overflow-y-auto flex flex-col items-center justify-center min-h-[500px]">
         {/* Wallet Type Toggle */}
         <div className="mb-4">
           <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
@@ -296,9 +335,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           </div>
         )}
 
-        {/* Card Preview with 3D flip */}
-        <div className="w-full max-w-sm preview-transition">
-          {previewWallet === 'apple' ? (
+        {/* Card Preview with wallet switch animation */}
+        <div className="w-full max-w-sm wallet-card-container">
+          <div className={`wallet-card ${previewWallet === 'apple' ? 'wallet-card-active' : 'wallet-card-left'}`}>
             <div className="card-flip-container">
               <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
                 <div className="card-flip-front">
@@ -319,13 +358,14 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                 </div>
               </div>
             </div>
-          ) : (
+          </div>
+          <div className={`wallet-card ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
             <GoogleWalletCard
               design={formData}
               stamps={previewStamps}
               organizationName={formData.organization_name}
             />
-          )}
+          </div>
         </div>
 
         {/* Stamp Slider */}
@@ -384,7 +424,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Form Panel ----
     const formPanel = (
-      <div className="lg:w-[420px] flex-shrink-0 overflow-y-auto pb-6 space-y-4">
+      <div className="lg:w-[420px] flex-shrink-0 overflow-y-auto lg:max-h-full pb-6 space-y-4">
         {/* Branding Section */}
         <CollapsibleSection
           title="Branding"
@@ -418,6 +458,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               value={formData.logo_url}
               onUpload={handleLogoUpload}
               hint="Appears in top-left of pass. PNG, 160x50pt max"
+              enableCrop
             />
 
             <ColorPicker
@@ -662,7 +703,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     return (
       <div className="relative">
-        <div className="flex flex-col lg:flex-row gap-8 min-h-[calc(100vh-200px)]">
+        <div className="flex flex-col lg:flex-row gap-8 lg:h-[calc(100vh-180px)]">
           {/* Mobile: show form or preview based on toggle */}
           {isMobile ? (
             mobileShowPreview ? previewPanel : formPanel

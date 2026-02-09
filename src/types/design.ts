@@ -63,6 +63,9 @@ export interface CardDesignCreate {
   icon_color?: string;
   strip_background_opacity?: number;
 
+  logo_url?: string;
+  strip_background_url?: string;
+
   secondary_fields?: PassField[];
   auxiliary_fields?: PassField[];
   back_fields?: PassField[];
