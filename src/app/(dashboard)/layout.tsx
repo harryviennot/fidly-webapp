@@ -5,6 +5,8 @@ import { RoleGuard } from "@/components/auth/role-guard";
 import { useBusiness } from "../../contexts/business-context";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { PendingActivationPage } from "@/components/pending-activation-page";
+import { SuspendedPage } from "@/components/suspended-page";
 
 export default function AdminLayout({
   children,
@@ -37,6 +39,16 @@ export default function AdminLayout({
         </div>
       </div>
     );
+  }
+
+  // Show pending activation page
+  if (currentBusiness.status === "pending") {
+    return <PendingActivationPage business={currentBusiness} />;
+  }
+
+  // Show suspended page
+  if (currentBusiness.status === "suspended") {
+    return <SuspendedPage />;
   }
 
   return (

@@ -3,6 +3,8 @@ export interface Business {
   name: string;
   url_slug: string;
   subscription_tier: "pay" | "pro";
+  status: "pending" | "active" | "suspended";
+  activated_at?: string | null;
   settings: BusinessSettings;
   logo_url?: string | null;
   created_at?: string;
