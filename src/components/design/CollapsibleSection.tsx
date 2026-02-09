@@ -37,7 +37,7 @@ export function CollapsibleSection({
           >
             <div className="flex items-center gap-2">
               {icon}
-              <span className="font-medium">{title}</span>
+              <span className="text-base font-medium">{title}</span>
               {annotation && (
                 <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{annotation}</span>
               )}

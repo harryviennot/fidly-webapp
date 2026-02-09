@@ -45,7 +45,7 @@ export default function FieldEditor({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">{title}</span>
+        <span className="text-[15px] font-medium">{title}</span>
         <span className="text-xs text-muted-foreground">{fields.length} / {maxFields}</span>
       </div>
 

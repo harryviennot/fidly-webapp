@@ -160,7 +160,11 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     }, [currentBusiness?.name, isNew]);
 
     // Progressive disclosure: auto-open next section when current becomes complete
-    const prevCompleteRef = useRef({ branding: false, stamps: false, content: false });
+    const prevCompleteRef = useRef({
+      branding: isBrandingComplete(formData),
+      stamps: isStampsComplete(formData),
+      content: isContentComplete(formData),
+    });
     useEffect(() => {
       const brandingNow = isBrandingComplete(formData);
       const stampsNow = isStampsComplete(formData);
