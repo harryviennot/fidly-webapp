@@ -6,11 +6,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { BusinessSwitcher } from "./business-switcher";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -18,27 +13,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
 import { NavUser } from "./nav-user";
 import {
-  HouseIcon,
   UsersIcon,
   HeartIcon,
   UserPlusIcon,
   GearIcon,
-  CaretRightIcon,
-  CreditCardIcon,
-  BellIcon,
-  CalendarIcon,
-  MapPinIcon,
-  ChartBarIcon,
-  Crown,
 } from "@phosphor-icons/react";
 
 const navItems = [
@@ -48,20 +32,9 @@ const navItems = [
   { href: "/settings", label: "Settings", icon: GearIcon },
 ];
 
-const loyaltyProgramSubItems = [
-  { href: '/loyalty-program/overview', label: 'Overview', icon: ChartBarIcon },
-  { href: '/loyalty-program/templates', label: 'Card Templates', icon: CreditCardIcon },
-  { href: '/loyalty-program/notifications', label: 'Notifications', icon: BellIcon },
-  { href: '/loyalty-program/settings', label: 'Settings', icon: GearIcon },
-  { href: '/loyalty-program/scheduling', label: 'Scheduling', icon: CalendarIcon, proOnly: true },
-  { href: '/loyalty-program/geofencing', label: 'Geofencing', icon: MapPinIcon, proOnly: true },
-];
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { currentRole, currentBusiness } = useBusiness();
-
-  const isProPlan = currentBusiness?.subscription_tier === 'pro';
+  const { currentRole } = useBusiness();
 
   const filteredNavItems = navItems.filter((item) =>
     canSeeNavItem(currentRole, item.href)
@@ -73,9 +46,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
     return pathname.startsWith(href);
   };
-
-  const isLoyaltyProgramActive = pathname.startsWith('/loyalty-program');
-  const canSeeLoyaltyProgram = canSeeNavItem(currentRole, '/loyalty-program');
 
   return (
     <Sidebar variant="floating" {...props} className="pr-0">

@@ -39,7 +39,7 @@ function getCroppedCanvas(
   const srcH = crop.height * scaleY;
 
   // Scale to fixed OUTPUT_HEIGHT, maintaining aspect ratio
-  let outH = OUTPUT_HEIGHT;
+  const outH = OUTPUT_HEIGHT;
   let outW = Math.round((srcW / srcH) * outH);
 
   // Cap width at MAX_OUTPUT_WIDTH
@@ -79,7 +79,6 @@ export function LogoCropper({
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height, naturalWidth, naturalHeight } = e.currentTarget;
-    const displayScale = width / naturalWidth;
 
     // Locked height: OUTPUT_HEIGHT in natural px, converted to display px
     const lockedDisplayHeight = Math.min((OUTPUT_HEIGHT / naturalHeight) * height, height);

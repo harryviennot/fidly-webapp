@@ -3,9 +3,8 @@
 import { useLoyaltyProgram } from '../layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, PlusIcon, RocketLaunchIcon } from '@phosphor-icons/react';
+import { CalendarIcon, PlusIcon } from '@phosphor-icons/react';
 import { ProFeatureGate } from '@/components/loyalty-program/ProFeatureGate';
-import Link from 'next/link';
 
 export default function SchedulingPage() {
   const { isProPlan } = useLoyaltyProgram();
