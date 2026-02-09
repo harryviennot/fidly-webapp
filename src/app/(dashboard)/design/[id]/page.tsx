@@ -69,7 +69,7 @@ export default function EditDesignPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between sticky top-0 z-30 bg-[var(--background)] py-2 -mt-2">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {editingName ? (
             <Input

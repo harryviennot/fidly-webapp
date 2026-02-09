@@ -310,33 +310,29 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Preview Panel ----
     const previewPanel = (
-      <div className="flex-1 lg:overflow-y-auto flex flex-col items-center justify-center min-h-[500px]">
-        {/* Wallet Type Toggle */}
-        <div className="mb-4">
+      <div className="flex-1 lg:sticky lg:top-6 lg:self-start flex flex-col items-center min-h-[500px]">
+        {/* Wallet Type Toggle + Flip Button */}
+        <div className="mb-4 flex items-center gap-3">
           <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
             <TabsList>
               <TabsTrigger value="apple">Apple Wallet</TabsTrigger>
               <TabsTrigger value="google">Google Wallet</TabsTrigger>
             </TabsList>
           </Tabs>
-        </div>
-
-        {/* Flip Toggle (Apple only) */}
-        {previewWallet === 'apple' && (
-          <div className="mb-4">
+          {previewWallet === 'apple' && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowBack(!showBack)}
             >
               <FlipHorizontal className="w-4 h-4 mr-2" />
-              {showBack ? 'Show Front' : 'Show Back'}
+              {showBack ? 'Front' : 'Back'}
             </Button>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Card Preview with wallet switch animation */}
-        <div className="w-full max-w-sm wallet-card-container">
+        {/* Card Preview with wallet switch animation — fixed height container */}
+        <div className="w-full max-w-sm wallet-card-container aspect-[1/1.282]">
           <div className={`wallet-card ${previewWallet === 'apple' ? 'wallet-card-active' : 'wallet-card-left'}`}>
             <div className="card-flip-container">
               <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
@@ -359,7 +355,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               </div>
             </div>
           </div>
-          <div className={`wallet-card ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
+          <div className={`wallet-card h-full overflow-y-auto hide-scrollbar ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
             <GoogleWalletCard
               design={formData}
               stamps={previewStamps}
@@ -424,7 +420,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Form Panel ----
     const formPanel = (
-      <div className="lg:w-[420px] flex-shrink-0 overflow-y-auto lg:max-h-full pb-6 space-y-4">
+      <div className="lg:w-[420px] flex-shrink-0 space-y-4">
         {/* Branding Section */}
         <CollapsibleSection
           title="Branding"
@@ -577,7 +573,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                   Advanced options
                 </button>
               </CollapsibleTrigger>
-              <CollapsibleContent className="collapsible-content px-1 -mx-1 pt-2">
+              <CollapsibleContent className="collapsible-content px-2 -mx-2 pt-2">
                 <div className="space-y-4 pt-2">
                   <ColorPicker
                     label="Empty Stamp Color"
@@ -703,7 +699,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     return (
       <div className="relative">
-        <div className="flex flex-col lg:flex-row gap-8 lg:h-[calc(100vh-180px)]">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Mobile: show form or preview based on toggle */}
           {isMobile ? (
             mobileShowPreview ? previewPanel : formPanel

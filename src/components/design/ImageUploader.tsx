@@ -96,9 +96,9 @@ export default function ImageUploader({
           <Image
             src={value}
             alt={label || 'Uploaded image'}
-            width={96}
-            height={96}
-            className="w-24 h-24 object-cover rounded-xl border border-[var(--border)]"
+            width={160}
+            height={50}
+            className="max-w-40 h-auto object-contain rounded-xl border border-[var(--border)]"
             unoptimized
           />
           <div className="flex gap-2 mt-2">

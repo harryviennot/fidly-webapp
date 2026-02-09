@@ -19,6 +19,10 @@ interface LogoCropperProps {
   onCropComplete: (croppedFile: File) => void;
 }
 
+// Apple Wallet logo: max 160x50pt @3x = 480x150px
+const OUTPUT_HEIGHT = 150;
+const MAX_OUTPUT_WIDTH = 480;
+
 function getCroppedCanvas(
   image: HTMLImageElement,
   crop: PixelCrop
@@ -30,19 +34,32 @@ function getCroppedCanvas(
   const scaleX = image.naturalWidth / image.width;
   const scaleY = image.naturalHeight / image.height;
 
-  canvas.width = crop.width * scaleX;
-  canvas.height = crop.height * scaleY;
+  // Source dimensions in natural pixels
+  const srcW = crop.width * scaleX;
+  const srcH = crop.height * scaleY;
+
+  // Scale to fixed OUTPUT_HEIGHT, maintaining aspect ratio
+  let outH = OUTPUT_HEIGHT;
+  let outW = Math.round((srcW / srcH) * outH);
+
+  // Cap width at MAX_OUTPUT_WIDTH
+  if (outW > MAX_OUTPUT_WIDTH) {
+    outW = MAX_OUTPUT_WIDTH;
+  }
+
+  canvas.width = outW;
+  canvas.height = outH;
 
   ctx.drawImage(
     image,
     crop.x * scaleX,
     crop.y * scaleY,
-    crop.width * scaleX,
-    crop.height * scaleY,
+    srcW,
+    srcH,
     0,
     0,
-    canvas.width,
-    canvas.height
+    outW,
+    outH
   );
 
   return canvas;
@@ -57,19 +74,43 @@ export function LogoCropper({
   const imgRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  // Store the locked crop height in display pixels
+  const lockedHeightRef = useRef<number>(0);
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget;
-    // Default crop: center, 80% width, constrained height
-    const cropWidth = Math.min(width * 0.8, width);
-    const cropHeight = Math.min(cropWidth * (50 / 160), height * 0.8);
+    const { width, height, naturalWidth, naturalHeight } = e.currentTarget;
+    const displayScale = width / naturalWidth;
+
+    // Locked height: OUTPUT_HEIGHT in natural px, converted to display px
+    const lockedDisplayHeight = Math.min((OUTPUT_HEIGHT / naturalHeight) * height, height);
+    lockedHeightRef.current = lockedDisplayHeight;
+
+    // Default crop: full width (up to MAX_OUTPUT_WIDTH equivalent), locked height, centered
+    const maxDisplayWidth = Math.min((MAX_OUTPUT_WIDTH / naturalWidth) * width, width);
+    const cropWidth = maxDisplayWidth;
+
     setCrop({
       unit: 'px',
       x: (width - cropWidth) / 2,
-      y: (height - cropHeight) / 2,
+      y: (height - lockedDisplayHeight) / 2,
       width: cropWidth,
-      height: cropHeight,
+      height: lockedDisplayHeight,
     });
+  }, []);
+
+  const handleCropChange = useCallback((c: Crop) => {
+    if (lockedHeightRef.current > 0) {
+      // Lock height — user can only adjust width and position
+      c.height = lockedHeightRef.current;
+    }
+    setCrop(c);
+  }, []);
+
+  const handleCropComplete = useCallback((c: PixelCrop) => {
+    if (lockedHeightRef.current > 0) {
+      c.height = lockedHeightRef.current;
+    }
+    setCompletedCrop(c);
   }, []);
 
   const handleConfirm = useCallback(() => {
@@ -90,13 +131,15 @@ export function LogoCropper({
         <DialogHeader>
           <DialogTitle>Crop Logo</DialogTitle>
         </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          Adjust the width and position. Height is fixed to match Apple Wallet dimensions.
+        </p>
         <div className="flex items-center justify-center max-h-[60vh] overflow-auto">
           <ReactCrop
             crop={crop}
-            onChange={(c) => setCrop(c)}
-            onComplete={(c) => setCompletedCrop(c)}
+            onChange={handleCropChange}
+            onComplete={handleCropComplete}
             minWidth={50}
-            minHeight={20}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
