@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { PassField } from '@/types';
 import { ArrowUp, ArrowDown, Trash, Plus } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ export default function FieldEditor({
   onChange,
   maxFields = 10,
 }: FieldEditorProps) {
+  const t = useTranslations('designEditor.fieldEditor');
   const addField = () => {
     if (fields.length >= maxFields) return;
     const newKey = `field_${Date.now()}`;
@@ -55,13 +57,13 @@ export default function FieldEditor({
             <div key={field.key} className="flex items-start gap-2">
               <div className="flex-1 flex flex-col gap-1.5">
                 <Input
-                  placeholder="Label"
+                  placeholder={t('label')}
                   value={field.label}
                   onChange={(e) => updateField(index, { label: e.target.value })}
                   className="h-9 text-sm"
                 />
                 <textarea
-                  placeholder="Value"
+                  placeholder={t('value')}
                   value={field.value}
                   onChange={(e) => updateField(index, { value: e.target.value })}
                   rows={1}
@@ -77,7 +79,7 @@ export default function FieldEditor({
                   className="h-8 w-8"
                   onClick={() => moveField(index, 'up')}
                   disabled={index === 0}
-                  title="Move up"
+                  title={t('moveUp')}
                 >
                   <ArrowUp className="w-3.5 h-3.5" />
                 </Button>
@@ -88,7 +90,7 @@ export default function FieldEditor({
                   className="h-8 w-8"
                   onClick={() => moveField(index, 'down')}
                   disabled={index === fields.length - 1}
-                  title="Move down"
+                  title={t('moveDown')}
                 >
                   <ArrowDown className="w-3.5 h-3.5" />
                 </Button>
@@ -98,7 +100,7 @@ export default function FieldEditor({
                   size="icon"
                   className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={() => removeField(index)}
-                  title="Remove"
+                  title={t('remove')}
                 >
                   <Trash className="w-3.5 h-3.5" />
                 </Button>
@@ -117,7 +119,7 @@ export default function FieldEditor({
           onClick={addField}
         >
           <Plus className="w-3.5 h-3.5 mr-1.5" />
-          Add {title.replace(/s$/, '')}
+          {t('addField')}
         </Button>
       )}
     </div>

@@ -1,0 +1,49 @@
+{
+  "account": {
+    "sections": {
+      "profilePicture": "Photo de profil",
+      "password": "Mot de passe",
+      "accountInfo": "Informations du compte",
+      "language": "Langue"
+    },
+    "profilePicture": {
+      "title": "Photo de profil",
+      "description": "Votre photo de profil est visible par tous les membres de l'équipe dans toutes les entreprises auxquelles vous appartenez.",
+      "updated": "Photo de profil mise à jour",
+      "removed": "Photo de profil supprimée",
+      "hint": "PNG ou JPG, max 2 Mo. Les images carrées fonctionnent le mieux.",
+      "sharedInfo": "Votre photo de profil est partagée dans toutes les entreprises dont vous êtes membre."
+    },
+    "password": {
+      "title": "Changer le mot de passe",
+      "description": "Mettre à jour le mot de passe de votre compte",
+      "newPassword": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "Entrez le nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez le nouveau mot de passe",
+      "mismatch": "Les mots de passe ne correspondent pas",
+      "tooShort": "Le mot de passe doit contenir au moins 8 caractères",
+      "success": "Mot de passe modifié avec succès !",
+      "changing": "Modification...",
+      "changePassword": "Changer le mot de passe"
+    },
+    "accountInfo": {
+      "title": "Informations du compte",
+      "description": "Mettre à jour vos informations personnelles",
+      "name": "Nom",
+      "namePlaceholder": "Votre nom",
+      "email": "Email"
+    },
+    "language": {
+      "title": "Langue",
+      "description": "Choisissez la langue de l'interface de votre tableau de bord.",
+      "label": "Langue d'affichage"
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger le profil",
+      "saveFailed": "Impossible d'enregistrer le nom",
+      "uploadFailed": "Échec de l'envoi",
+      "deleteFailed": "Échec de la suppression"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   UsersIcon,
   UserCheckIcon,
@@ -20,6 +21,8 @@ export function TeamStats({
   invitations,
   subscriptionTier = "pro",
 }: TeamStatsProps) {
+  const t = useTranslations('team.stats');
+
   // Count members by role
   const roleCounts = members.reduce(
     (acc, member) => {
@@ -49,21 +52,21 @@ export function TeamStats({
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCardSmall
         icon={<UsersIcon size={20} weight="duotone" />}
-        label="Team members"
+        label={t('teamMembers')}
         value={members.length}
       />
 
       <StatCardSmall
         icon={<DeviceMobileIcon size={20} weight="duotone" />}
-        label="Scanners"
+        label={t('scanners')}
         value={
           scannerLimit ? `${scannerCount}/${scannerLimit}` : scannerCount
         }
         subtext={
           activeScannersCount > 0
-            ? `${activeScannersCount} active this week`
+            ? t('activeCount', { count: activeScannersCount })
             : scannerCount > 0
-              ? "No activity this week"
+              ? t('noActivity')
               : undefined
         }
         highlight={isNearLimit}
@@ -71,18 +74,18 @@ export function TeamStats({
 
       <StatCardSmall
         icon={<UserCheckIcon size={20} weight="duotone" />}
-        label="Active this week"
+        label={t('activeThisWeek')}
         value={activeScannersCount}
         subtext={
           scannerCount > 0
-            ? `of ${scannerCount} scanner${scannerCount !== 1 ? "s" : ""}`
+            ? t('ofScanners', { count: scannerCount })
             : undefined
         }
       />
 
       <StatCardSmall
         icon={<EnvelopeSimpleIcon size={20} weight="duotone" />}
-        label="Pending invites"
+        label={t('pendingInvites')}
         value={invitations.length}
         highlight={invitations.length > 0}
       />

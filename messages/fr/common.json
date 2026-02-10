@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "loyaltyProgram": "Programme de fidélité",
+    "customers": "Clients",
+    "team": "Équipe",
+    "settings": "Paramètres"
+  },
+  "header": {
+    "loyaltyProgram": "Programme de fidélité",
+    "customers": "Clients",
+    "design": "Design de carte",
+    "team": "Équipe",
+    "settings": "Paramètres",
+    "account": "Compte",
+    "new": "Nouveau design",
+    "edit": "Modifier"
+  },
+  "userMenu": {
+    "account": "Compte",
+    "logOut": "Se déconnecter"
+  },
+  "businessSwitcher": {
+    "yourBusinesses": "Vos entreprises"
+  },
+  "roles": {
+    "owner": "Propriétaire",
+    "admin": "Administrateur",
+    "scanner": "Scanner"
+  },
+  "status": {
+    "loading": "Chargement...",
+    "saving": "Enregistrement...",
+    "saved": "Enregistré"
+  },
+  "layout": {
+    "noBusinessFound": "Aucune entreprise trouvée",
+    "noBusinessAccess": "Vous n'avez pas encore accès à une entreprise."
+  },
+  "poweredBy": "Propulsé par"
+}

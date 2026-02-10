@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { getAllCustomers, getActiveDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { CustomerResponse } from '@/types';
@@ -8,6 +9,7 @@ import CustomerRow from './customer-row';
 
 export default function CustomerTable() {
   const { currentBusiness } = useBusiness();
+  const t = useTranslations('customers');
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
   const [totalStamps, setTotalStamps] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,11 +29,11 @@ export default function CustomerTable() {
       }
       setError(null);
     } catch {
-      setError('Failed to load customers. Make sure the backend is running.');
+      setError(t('loadFailed'));
     } finally {
       setIsLoading(false);
     }
-  }, [currentBusiness?.id]);
+  }, [currentBusiness?.id, t]);
 
   useEffect(() => {
     loadCustomers();
@@ -54,7 +56,7 @@ export default function CustomerTable() {
   }, [customers, searchTerm]);
 
   if (isLoading) {
-    return <div className="loading-state">Loading customers...</div>;
+    return <div className="loading-state">{t('loading')}</div>;
   }
 
   if (error) {
@@ -67,7 +69,7 @@ export default function CustomerTable() {
         <input
           type="text"
           className="search-input"
-          placeholder="Search by name or email..."
+          placeholder={t('searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -75,16 +77,16 @@ export default function CustomerTable() {
 
       {filteredCustomers.length === 0 ? (
         <div className="empty-state">
-          {searchTerm ? 'No customers found matching your search.' : 'No customers yet.'}
+          {searchTerm ? t('noResults') : t('empty')}
         </div>
       ) : (
         <table className="customer-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Stamps</th>
-              <th>Action</th>
+              <th>{t('table.name')}</th>
+              <th>{t('table.email')}</th>
+              <th>{t('table.stamps')}</th>
+              <th>{t('table.action')}</th>
             </tr>
           </thead>
           <tbody>

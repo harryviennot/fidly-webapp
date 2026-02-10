@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { DotsThreeIcon } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -30,26 +31,6 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-function getActivityStatus(lastActive: string | undefined): {
-  status: "active" | "inactive" | "never";
-  label: string;
-} {
-  if (!lastActive) {
-    return { status: "never", label: "Never active" };
-  }
-
-  const now = new Date();
-  const lastActiveDate = new Date(lastActive);
-  const diffDays = Math.floor(
-    (now.getTime() - lastActiveDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  if (diffDays <= 7) {
-    return { status: "active", label: "Active this week" };
-  }
-  return { status: "inactive", label: `${diffDays} days ago` };
-}
-
 const ROLE_VARIANTS: Record<MembershipRole, "default" | "secondary" | "outline"> = {
   owner: "default",
   admin: "secondary",
@@ -70,6 +51,29 @@ export function TeamMemberCard({
   onChangeRole,
   onRemove,
 }: TeamMemberCardProps) {
+  const t = useTranslations('team.memberCard');
+  const tRoles = useTranslations('roles');
+
+  function getActivityStatus(lastActive: string | undefined): {
+    status: "active" | "inactive" | "never";
+    label: string;
+  } {
+    if (!lastActive) {
+      return { status: "never", label: t('neverActive') };
+    }
+
+    const now = new Date();
+    const lastActiveDate = new Date(lastActive);
+    const diffDays = Math.floor(
+      (now.getTime() - lastActiveDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays <= 7) {
+      return { status: "active", label: t('activeThisWeek') };
+    }
+    return { status: "inactive", label: t('daysAgo', { days: diffDays }) };
+  }
+
   const activity = getActivityStatus(member.last_active_at);
 
   return (
@@ -94,11 +98,11 @@ export function TeamMemberCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <h4 className="font-medium text-[var(--foreground)] truncate">
-            {member.user.name || "Unnamed"}
+            {member.user.name || t('unnamed')}
           </h4>
           {isCurrentUser && (
             <span className="text-xs text-[var(--muted-foreground)] flex-shrink-0">
-              (you)
+              {t('you')}
             </span>
           )}
         </div>
@@ -107,7 +111,7 @@ export function TeamMemberCard({
         </p>
         <div className="flex items-center gap-2">
           <Badge variant={ROLE_VARIANTS[member.role]} className="capitalize">
-            {member.role}
+            {tRoles(member.role)}
           </Badge>
           {member.role === "scanner" && (
             <span
@@ -138,13 +142,13 @@ export function TeamMemberCard({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onChangeRole}>
-              Change Role
+              {t('changeRole')}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={onRemove}
               className="text-destructive"
             >
-              Remove
+              {t('remove')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/contexts/auth-provider";
 import { useBusiness } from "@/contexts/business-context";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import { DeviceMobileIcon, CheckCircleIcon } from "@phosphor-icons/react";
 export default function ScannerWelcomePage() {
   const { signOut } = useAuth();
   const { currentRole, currentBusiness, loading } = useBusiness();
+  const t = useTranslations('auth.scannerWelcome');
+  const tAuth = useTranslations('auth');
 
   // If user is not a scanner, redirect them to dashboard
   useEffect(() => {
@@ -43,14 +46,12 @@ export default function ScannerWelcomePage() {
           <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
             <CheckCircleIcon className="h-10 w-10 text-green-600" weight="fill" />
           </div>
-          <CardTitle className="text-green-600">You&rsquo;re All Set!</CardTitle>
+          <CardTitle className="text-green-600">{t('allSet')}</CardTitle>
           <CardDescription>
             {currentBusiness ? (
-              <>
-                You&rsquo;ve joined <span className="font-semibold">{currentBusiness.name}</span> as a scanner.
-              </>
+              t('joinedAs', { business: currentBusiness.name })
             ) : (
-              "You've been set up as a scanner."
+              t('setupComplete')
             )}
           </CardDescription>
         </CardHeader>
@@ -58,23 +59,23 @@ export default function ScannerWelcomePage() {
         <CardContent className="space-y-6">
           <div className="bg-gray-100 rounded-lg p-6 text-center">
             <DeviceMobileIcon className="h-12 w-12 mx-auto mb-3 text-gray-600" />
-            <h3 className="font-medium mb-2">Download the Scanner App</h3>
+            <h3 className="font-medium mb-2">{t('downloadApp')}</h3>
             <p className="text-sm text-gray-600 mb-4">
-              Use the Stampeo Scanner app to scan customer passes and add stamps.
+              {t('downloadDescription')}
             </p>
             <div className="space-y-2">
               <Button variant="outline" className="w-full" disabled>
-                App Store (Coming Soon)
+                {t('appStore')}
               </Button>
               <Button variant="outline" className="w-full" disabled>
-                Google Play (Coming Soon)
+                {t('googlePlay')}
               </Button>
             </div>
           </div>
 
           <div className="text-center text-sm text-gray-500">
-            <p>The scanner app is currently in development.</p>
-            <p>You&rsquo;ll be notified when it&rsquo;s available.</p>
+            <p>{t('inDevelopment')}</p>
+            <p>{t('notified')}</p>
           </div>
 
           <Button
@@ -82,7 +83,7 @@ export default function ScannerWelcomePage() {
             onClick={() => signOut()}
             className="w-full text-gray-600"
           >
-            Sign Out
+            {tAuth('signOut')}
           </Button>
         </CardContent>
       </Card>

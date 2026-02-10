@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/contexts/auth-provider";
 import { getInvitationByToken, acceptInvitation } from "@/api";
 import type { InvitationPublic } from "@/types";
@@ -16,22 +17,11 @@ import {
 import { StampeoLogo } from "@/components/ui/stampeo-logo";
 import { InviteAuthForm } from "@/components/invite/invite-auth-form";
 
-const ROLE_LABELS: Record<string, string> = {
-  owner: "Owner",
-  admin: "Admin",
-  scanner: "Scanner",
-};
-
-const ROLE_DESCRIPTIONS: Record<string, string> = {
-  owner: "Full access to all features including billing and settings",
-  admin: "Manage team members and access all business features",
-  scanner: "Scan customer passes and add stamps via the mobile app",
-};
-
 export default function InviteAcceptPage() {
   const params = useParams();
   const router = useRouter();
   const token = params.token as string;
+  const t = useTranslations('auth.invite');
 
   const { user, session, loading: authLoading } = useAuth();
   const [invitation, setInvitation] = useState<InvitationPublic | null>(null);
@@ -117,7 +107,7 @@ export default function InviteAcceptPage() {
             <div className="flex justify-center mb-4">
               <StampeoLogo className="h-8" />
             </div>
-            <CardTitle className="text-red-600">Invalid Invitation</CardTitle>
+            <CardTitle className="text-red-600">{t('invalidInvitation')}</CardTitle>
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -126,7 +116,7 @@ export default function InviteAcceptPage() {
               variant="outline"
               className="w-full"
             >
-              Go to Dashboard
+              {t('goToDashboard')}
             </Button>
           </CardContent>
         </Card>
@@ -148,29 +138,27 @@ export default function InviteAcceptPage() {
             <div className="flex justify-center mb-4">
               <StampeoLogo className="h-8" />
             </div>
-            <CardTitle>You&apos;re Invited!</CardTitle>
+            <CardTitle>{t('youreInvited')}</CardTitle>
             <CardDescription>
-              <span className="font-medium">{invitation.inviter_name}</span>{" "}
-              has invited you to join{" "}
-              <span className="font-semibold">{invitation.business_name}</span>
+              {t('invitedBy', { inviter: invitation.inviter_name, business: invitation.business_name })}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Invitation details */}
             <div className="bg-gray-100 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-start">
-                <span className="text-gray-600 text-sm">Role</span>
+                <span className="text-gray-600 text-sm">{t('role')}</span>
                 <div className="text-right">
                   <span className="font-medium">
-                    {ROLE_LABELS[invitation.role]}
+                    {invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)}
                   </span>
                   <p className="text-xs text-gray-500 mt-0.5 max-w-[200px]">
-                    {ROLE_DESCRIPTIONS[invitation.role]}
+                    {t(`roleDescriptions.${invitation.role}`)}
                   </p>
                 </div>
               </div>
               <div className="border-t border-gray-200 pt-3 flex justify-between">
-                <span className="text-gray-600 text-sm">Email</span>
+                <span className="text-gray-600 text-sm">{t('email')}</span>
                 <span className="font-medium text-sm">{invitation.email}</span>
               </div>
             </div>
@@ -179,13 +167,13 @@ export default function InviteAcceptPage() {
             {isExpiredOrUsed ? (
               <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                 {invitation.is_expired
-                  ? "This invitation has expired. Please ask the sender for a new invitation."
-                  : `This invitation has already been ${invitation.status}.`}
+                  ? t('expired')
+                  : t('alreadyUsed', { status: invitation.status })}
               </div>
             ) : (
               <div className="border-t pt-4">
                 <p className="text-sm text-gray-600 mb-4 text-center">
-                  Create an account or sign in to accept this invitation
+                  {t('createOrSignIn')}
                 </p>
                 <InviteAuthForm
                   invitation={invitation}
@@ -211,19 +199,16 @@ export default function InviteAcceptPage() {
           </div>
           {success ? (
             <>
-              <CardTitle className="text-green-600">Welcome aboard!</CardTitle>
+              <CardTitle className="text-green-600">{t('welcomeAboard')}</CardTitle>
               <CardDescription>
-                You&apos;ve successfully joined {invitation.business_name}.
-                Redirecting to dashboard...
+                {t('joinedSuccess', { business: invitation.business_name })}
               </CardDescription>
             </>
           ) : (
             <>
-              <CardTitle>You&apos;re Invited!</CardTitle>
+              <CardTitle>{t('youreInvited')}</CardTitle>
               <CardDescription>
-                <span className="font-medium">{invitation.inviter_name}</span>{" "}
-                has invited you to join{" "}
-                <span className="font-semibold">{invitation.business_name}</span>
+                {t('invitedBy', { inviter: invitation.inviter_name, business: invitation.business_name })}
               </CardDescription>
             </>
           )}
@@ -234,18 +219,18 @@ export default function InviteAcceptPage() {
             {/* Invitation details */}
             <div className="bg-gray-100 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-start">
-                <span className="text-gray-600 text-sm">Role</span>
+                <span className="text-gray-600 text-sm">{t('role')}</span>
                 <div className="text-right">
                   <span className="font-medium">
-                    {ROLE_LABELS[invitation.role]}
+                    {invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)}
                   </span>
                   <p className="text-xs text-gray-500 mt-0.5 max-w-[200px]">
-                    {ROLE_DESCRIPTIONS[invitation.role]}
+                    {t(`roleDescriptions.${invitation.role}`)}
                   </p>
                 </div>
               </div>
               <div className="border-t border-gray-200 pt-3 flex justify-between">
-                <span className="text-gray-600 text-sm">Email</span>
+                <span className="text-gray-600 text-sm">{t('email')}</span>
                 <span className="font-medium text-sm">{invitation.email}</span>
               </div>
             </div>
@@ -254,21 +239,15 @@ export default function InviteAcceptPage() {
             {isExpiredOrUsed && (
               <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                 {invitation.is_expired
-                  ? "This invitation has expired. Please ask the sender for a new invitation."
-                  : `This invitation has already been ${invitation.status}.`}
+                  ? t('expired')
+                  : t('alreadyUsed', { status: invitation.status })}
               </div>
             )}
 
             {emailMismatch && !isExpiredOrUsed && (
               <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm">
-                <p>
-                  This invitation was sent to{" "}
-                  <span className="font-semibold">{invitation.email}</span>.
-                </p>
-                <p className="mt-1">
-                  You&apos;re signed in as{" "}
-                  <span className="font-semibold">{user?.email}</span>.
-                </p>
+                <p>{t('sentTo', { email: invitation.email })}</p>
+                <p className="mt-1">{t('signedInAs', { email: user?.email || '' })}</p>
               </div>
             )}
 
@@ -285,7 +264,7 @@ export default function InviteAcceptPage() {
                 disabled={accepting || isExpiredOrUsed || !!emailMismatch}
                 className="w-full"
               >
-                {accepting ? "Accepting..." : "Accept Invitation"}
+                {accepting ? t('accepting') : t('acceptInvitation')}
               </Button>
 
               {emailMismatch && !isExpiredOrUsed && (
@@ -294,7 +273,7 @@ export default function InviteAcceptPage() {
                   onClick={handleSignInDifferentAccount}
                   className="w-full"
                 >
-                  Sign in with different account
+                  {t('signInDifferent')}
                 </Button>
               )}
             </div>

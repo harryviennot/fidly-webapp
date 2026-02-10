@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useTranslations } from "next-intl";
 import { StampeoLogo } from "@/components/ui/stampeo-logo";
 import { canSeeNavItem } from "@/lib/rbac";
 import { useBusiness } from "@/contexts/business-context";
@@ -26,15 +27,16 @@ import {
 } from "@phosphor-icons/react";
 
 const navItems = [
-  { href: "/", label: "Loyalty Program", icon: HeartIcon },
-  { href: "/customers", label: "Customers", icon: UsersIcon },
-  { href: "/team", label: "Team", icon: UserPlusIcon },
-  { href: "/settings", label: "Settings", icon: GearIcon },
+  { href: "/", labelKey: "nav.loyaltyProgram" as const, icon: HeartIcon },
+  { href: "/customers", labelKey: "nav.customers" as const, icon: UsersIcon },
+  { href: "/team", labelKey: "nav.team" as const, icon: UserPlusIcon },
+  { href: "/settings", labelKey: "nav.settings" as const, icon: GearIcon },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { currentRole } = useBusiness();
+  const t = useTranslations();
 
   const filteredNavItems = navItems.filter((item) =>
     canSeeNavItem(currentRole, item.href)
@@ -77,7 +79,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         className="h-5 w-5"
                         weight={active ? "fill" : "regular"}
                       />
-                      <span>{item.label}</span>
+                      <span>{t(item.labelKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -105,79 +107,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         className="h-5 w-5"
                         weight={active ? "fill" : "regular"}
                       />
-                      <span>{item.label}</span>
+                      <span>{t(item.labelKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )
             })}
-
-            {/* HIDDEN FOR MVP: Loyalty Program collapsible submenu
-                Pages are still accessible via direct URL.
-                Re-enable when adding back advanced features. */}
-            {/* {canSeeLoyaltyProgram && (
-              <Collapsible
-                asChild
-                defaultOpen={isLoyaltyProgramActive}
-                className="group/collapsible"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
-                      tooltip="Loyalty Program"
-                      className={cn(
-                        "transition-all duration-200",
-                        isLoyaltyProgramActive
-                          ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white"
-                          : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
-                      )}
-                    >
-                      <HeartIcon
-                        className="h-5 w-5"
-                        weight={isLoyaltyProgramActive ? "fill" : "regular"}
-                      />
-                      <span>Loyalty Program</span>
-                      <CaretRightIcon
-                        className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
-                        weight="bold"
-                      />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {loyaltyProgramSubItems.map((subItem) => {
-                        const SubIcon = subItem.icon;
-                        const subActive = pathname === subItem.href || pathname.startsWith(subItem.href + '/');
-                        const isLocked = subItem.proOnly && !isProPlan;
-
-                        return (
-                          <SidebarMenuSubItem key={subItem.href}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={subActive}
-                              className={cn(
-                                "transition-all duration-200",
-                                subActive
-                                  ? "bg-[var(--accent)]/10 text-[var(--accent)] font-medium"
-                                  : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
-                              )}
-                            >
-                              <Link href={subItem.href}>
-                                <SubIcon className="h-4 w-4" weight={subActive ? "fill" : "regular"} />
-                                <span>{subItem.label}</span>
-                                {isLocked && (
-                                  <Crown className="ml-auto h-3 w-3 text-amber-500" weight="fill" />
-                                )}
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            )} */}
 
             {/* Rest of nav items (Team, Settings) */}
             {filteredNavItems.filter(item => item.href !== "/" && item.href !== "/customers").map((item) => {
@@ -200,7 +135,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         className="h-5 w-5"
                         weight={active ? "fill" : "regular"}
                       />
-                      <span>{item.label}</span>
+                      <span>{t(item.labelKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -214,7 +149,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* Powered by Stampeo */}
         <div className="px-4">
           <div className="flex items-start flex-col gap-1 text-xs text-muted-foreground">
-            <span>Powered by</span>
+            <span>{t("poweredBy")}</span>
             <div className="flex items-center gap-2">
               <StampeoLogo className="w-5 h-5" />
               <span className="text-lg font-bold gradient-text">Stampeo</span>

@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { StampeoLogo } from "@/components/ui/stampeo-logo";
 import { useAuth } from "@/contexts/auth-provider";
 
 export function SuspendedPage() {
   const { signOut } = useAuth();
+  const t = useTranslations('auth');
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--background)] px-4">
@@ -18,7 +20,7 @@ export function SuspendedPage() {
           onClick={signOut}
           className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
         >
-          Sign out
+          {t('signOut')}
         </button>
       </div>
 
@@ -33,19 +35,18 @@ export function SuspendedPage() {
         </div>
 
         <h1 className="text-2xl font-bold text-[var(--foreground)] mb-3">
-          Account Suspended
+          {t('suspended.title')}
         </h1>
 
         <p className="text-[var(--muted-foreground)] mb-8">
-          Your business account has been suspended. If you believe this is an error,
-          please contact our support team.
+          {t('suspended.description')}
         </p>
 
         <a
           href="mailto:support@stampeo.app"
           className="inline-flex items-center justify-center px-6 py-3 bg-[var(--accent)] text-white font-semibold rounded-full hover:bg-[var(--accent-hover)] transition-colors"
         >
-          Contact Support
+          {t('suspended.contactSupport')}
         </a>
       </div>
     </div>

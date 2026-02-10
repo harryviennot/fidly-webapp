@@ -1,6 +1,12 @@
 import { createClient } from '@/utils/supabase/client';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+
+if (!API_BASE_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL is not defined");
+} else {
+  console.log(`[API] API_BASE_URL: ${API_BASE_URL}`);
+}
 
 export async function getAuthHeaders(): Promise<HeadersInit> {
   const supabase = createClient();

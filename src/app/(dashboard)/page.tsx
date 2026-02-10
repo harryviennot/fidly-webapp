@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   PlusIcon,
   CopyIcon,
@@ -31,6 +32,8 @@ interface DataCollectionSettings {
 
 export default function LoyaltyProgramPage() {
   const { currentBusiness, refetch } = useBusiness();
+  const t = useTranslations('loyaltyProgram');
+  const tDesign = useTranslations('designEditor');
 
   // Design state
   const [designs, setDesigns] = useState<CardDesign[]>([]);
@@ -85,7 +88,7 @@ export default function LoyaltyProgramPage() {
   const handleCopy = async () => {
     await navigator.clipboard.writeText(fullUrl);
     setCopied(true);
-    toast.success("Link copied to clipboard");
+    toast.success(t('linkCopied'));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -108,7 +111,7 @@ export default function LoyaltyProgramPage() {
       console.error("Failed to update settings:", error);
       // Revert to previous settings on error
       setSettings((prev) => ({ ...prev, [field]: !prev[field] }));
-      toast.error("Failed to update settings");
+      toast.error(t('toasts.settingsFailed'));
     } finally {
       setSaving(false);
     }
@@ -116,15 +119,15 @@ export default function LoyaltyProgramPage() {
 
   const handleDelete = async (designId: string) => {
     if (!currentBusiness?.id) return;
-    if (!confirm("Are you sure you want to delete this card design?")) return;
+    if (!confirm(tDesign('deleteConfirm'))) return;
 
     try {
       await deleteDesign(currentBusiness.id, designId);
       await loadDesigns();
-      toast.success("Card deleted");
+      toast.success(tDesign('toasts.cardDeleted'));
     } catch (error) {
       console.error("Failed to delete design:", error);
-      toast.error("Failed to delete card");
+      toast.error(tDesign('toasts.deleteFailed'));
     }
   };
 
@@ -134,10 +137,10 @@ export default function LoyaltyProgramPage() {
     try {
       await activateDesign(currentBusiness.id, designId);
       await loadDesigns();
-      toast.success("Card activated");
+      toast.success(tDesign('toasts.cardActivated'));
     } catch (error) {
       console.error("Failed to activate design:", error);
-      toast.error("Failed to activate card");
+      toast.error(tDesign('toasts.activateFailed'));
     }
   };
 
@@ -147,30 +150,30 @@ export default function LoyaltyProgramPage() {
     try {
       await duplicateDesign(currentBusiness.id, designId);
       await loadDesigns();
-      toast.success("Card duplicated");
+      toast.success(tDesign('toasts.cardDuplicated'));
     } catch (error) {
       console.error("Failed to duplicate design:", error);
-      toast.error("Failed to duplicate card");
+      toast.error(tDesign('toasts.duplicateFailed'));
     }
   };
 
   const dataFields = [
     {
       key: "collect_name" as const,
-      label: "Name",
-      description: "Personalize their card and help you identify customers",
+      label: t('dataFields.name'),
+      description: t('dataFields.nameDescription'),
       icon: UserIcon,
     },
     {
       key: "collect_email" as const,
-      label: "Email",
-      description: "Enable pass recovery, email campaigns, and customer lookup",
+      label: t('dataFields.email'),
+      description: t('dataFields.emailDescription'),
       icon: EnvelopeIcon,
     },
     {
       key: "collect_phone" as const,
-      label: "Phone",
-      description: "Enable SMS notifications and campaigns (coming soon)",
+      label: t('dataFields.phone'),
+      description: t('dataFields.phoneDescription'),
       icon: PhoneIcon,
     },
   ];
@@ -188,16 +191,16 @@ export default function LoyaltyProgramPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Loyalty Program</h2>
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Manage your loyalty card and program settings
+            {t('subtitle')}
           </p>
         </div>
         {!showTemplatesSection && (
           <Button asChild className="rounded-full">
             <Link href="/design/new">
               <PlusIcon className="w-4 h-4 mr-2" />
-              New Card
+              {t('newCard')}
             </Link>
           </Button>
         )}
@@ -209,22 +212,22 @@ export default function LoyaltyProgramPage() {
         <div className="lg:col-span-2 order-1 lg:order-2">
           <Card className="h-full max-w-2xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Program Settings</CardTitle>
+              <CardTitle className="text-base">{t('programSettings')}</CardTitle>
               <CardDescription>
-                Configure your loyalty program
+                {t('configureProgram')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="url">
                 <TabsList className="mb-4">
-                  <TabsTrigger value="url">Business URL</TabsTrigger>
-                  <TabsTrigger value="data">Data Collection</TabsTrigger>
+                  <TabsTrigger value="url">{t('businessUrl')}</TabsTrigger>
+                  <TabsTrigger value="data">{t('dataCollection')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="url" className="space-y-4">
                   <div className="p-4 bg-muted/50 rounded-lg space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">Your signup link</p>
+                      <p className="text-sm font-medium">{t('signupLink')}</p>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -245,13 +248,13 @@ export default function LoyaltyProgramPage() {
 
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <QrCodeIcon className="h-4 w-4" />
-                    <span>QR code downloads are available in the scanner app</span>
+                    <span>{t('qrCodeHint')}</span>
                   </div>
                 </TabsContent>
 
                 <TabsContent value="data" className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Collect this information when customers sign up for their loyalty card.
+                    {t('dataCollectionDescription')}
                   </p>
 
                   {dataFields.map((field) => {
@@ -282,8 +285,7 @@ export default function LoyaltyProgramPage() {
                   })}
 
                   <p className="text-xs text-muted-foreground pt-2">
-                    Note: Collecting no data enables anonymous mode - customers can
-                    sign up without providing any information.
+                    {t('anonymousModeNote')}
                   </p>
                 </TabsContent>
               </Tabs>
@@ -301,11 +303,11 @@ export default function LoyaltyProgramPage() {
       {showTemplatesSection && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Card Templates</h3>
+            <h3 className="text-lg font-semibold">{t('cardTemplates')}</h3>
             <Button asChild className="rounded-full">
               <Link href="/design/new">
                 <PlusIcon className="w-4 h-4 mr-2" />
-                New Card
+                {t('newCard')}
               </Link>
             </Button>
           </div>

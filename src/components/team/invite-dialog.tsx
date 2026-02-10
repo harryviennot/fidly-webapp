@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -28,25 +29,6 @@ interface InviteDialogProps {
   onInvited: () => void;
 }
 
-interface RoleOption {
-  value: InvitableRole;
-  label: string;
-  description: string;
-}
-
-const ALL_ROLES: RoleOption[] = [
-  {
-    value: "scanner",
-    label: "Scanner",
-    description: "Can scan customer passes and add stamps via mobile app",
-  },
-  {
-    value: "admin",
-    label: "Admin",
-    description: "Can manage team members and access all business features",
-  },
-];
-
 export function InviteDialog({
   open,
   onOpenChange,
@@ -54,6 +36,7 @@ export function InviteDialog({
   onInvited,
 }: InviteDialogProps) {
   const { currentRole } = useBusiness();
+  const t = useTranslations('team.invite');
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<InvitableRole>("scanner");
@@ -63,9 +46,23 @@ export function InviteDialog({
 
   // Owners can invite admins and scanners, admins can only invite scanners
   const isAdmin = currentRole !== "owner";
+
+  const allRoles = [
+    {
+      value: "scanner" as InvitableRole,
+      label: "Scanner",
+      description: t('scannerDescription'),
+    },
+    {
+      value: "admin" as InvitableRole,
+      label: "Admin",
+      description: t('adminDescription'),
+    },
+  ];
+
   const availableRoles = isAdmin
-    ? ALL_ROLES.filter((r) => r.value === "scanner")
-    : ALL_ROLES;
+    ? allRoles.filter((r) => r.value === "scanner")
+    : allRoles;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,9 +109,9 @@ export function InviteDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite Team Member</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            Send an invitation email. They&apos;ll create an account when they accept.
+            {t('description')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -126,16 +123,16 @@ export function InviteDialog({
 
           {success && (
             <div className="p-4 rounded-2xl bg-green-50 text-green-600 text-sm border border-green-100 dark:bg-green-950/50 dark:border-green-900/50 dark:text-green-400">
-              Invitation sent successfully!
+              {t('success')}
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
+            <Label htmlFor="email">{t('email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="colleague@example.com"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -144,29 +141,29 @@ export function InviteDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Name (optional)</Label>
+            <Label htmlFor="name">{t('name')}</Label>
             <Input
               id="name"
               type="text"
-              placeholder="John Doe"
+              placeholder={t('namePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={success}
             />
             <p className="text-xs text-muted-foreground">
-              Used to personalize the invitation email
+              {t('nameHint')}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Role</Label>
+            <Label>{t('role')}</Label>
             <Select
               value={role}
               onValueChange={(value) => setRole(value as InvitableRole)}
               disabled={success || isAdmin}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder={t('selectRole')} />
               </SelectTrigger>
               <SelectContent>
                 {availableRoles.map((r) => (
@@ -181,7 +178,7 @@ export function InviteDialog({
             </Select>
             {isAdmin && (
               <p className="text-xs text-muted-foreground">
-                As an admin, you can only invite scanners
+                {t('adminOnlyScanner')}
               </p>
             )}
           </div>
@@ -192,7 +189,7 @@ export function InviteDialog({
               onClick={handleClose}
               className="flex-1 py-3.5 px-4 border border-[var(--border)] text-[var(--foreground)] font-semibold rounded-full hover:bg-[var(--muted)] transition-all duration-200"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -213,7 +210,7 @@ export function InviteDialog({
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              {loading ? "Sending..." : "Send Invitation"}
+              {loading ? t('sending') : t('sendInvitation')}
             </button>
           </div>
         </form>
