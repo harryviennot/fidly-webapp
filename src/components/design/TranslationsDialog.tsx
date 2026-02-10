@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Dialog,
@@ -68,20 +68,22 @@ export default function TranslationsDialog({
     back_fields: [],
   });
 
-  // Initialize both drafts when dialog opens
-  useEffect(() => {
-    if (open) {
-      setDraft(translations[targetLocale] || {});
-      setPrimary({
-        organization_name: design.organization_name,
-        description: design.description,
-        logo_text: design.logo_text || design.organization_name,
-        secondary_fields: design.secondary_fields.map((f) => ({ ...f })),
-        auxiliary_fields: design.auxiliary_fields.map((f) => ({ ...f })),
-        back_fields: design.back_fields.map((f) => ({ ...f })),
-      });
-    }
-  }, [open, translations, targetLocale, design]);
+  // Re-initialize drafts when dialog opens (adjust state during render)
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (open && !prevOpen) {
+    setDraft(translations[targetLocale] || {});
+    setPrimary({
+      organization_name: design.organization_name,
+      description: design.description,
+      logo_text: design.logo_text || design.organization_name,
+      secondary_fields: design.secondary_fields.map((f) => ({ ...f })),
+      auxiliary_fields: design.auxiliary_fields.map((f) => ({ ...f })),
+      back_fields: design.back_fields.map((f) => ({ ...f })),
+    });
+  }
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+  }
 
   // --- Translation draft helpers ---
 

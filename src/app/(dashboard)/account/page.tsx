@@ -27,10 +27,10 @@ export default function AccountPage() {
   const [avatarKey, setAvatarKey] = useState(Date.now());
 
   const sections = [
-    { id: 'profile-picture', label: t('sections.profilePicture') },
-    { id: 'password', label: t('sections.password') },
-    { id: 'account-info', label: t('sections.accountInfo') },
-    { id: 'language', label: t('sections.language') },
+    { id: 'profile-picture' as const, label: t('sections.profilePicture') },
+    { id: 'password' as const, label: t('sections.password') },
+    { id: 'account-info' as const, label: t('sections.accountInfo') },
+    { id: 'language' as const, label: t('sections.language') },
   ];
 
   // Name editing state
@@ -48,7 +48,7 @@ export default function AccountPage() {
 
   useEffect(() => {
     loadProfile();
-  }, []);
+  }, [loadProfile]);
 
   // IntersectionObserver for scroll tracking
   useEffect(() => {
@@ -63,7 +63,8 @@ export default function AccountPage() {
       { rootMargin: '-20% 0px -80% 0px' }
     );
 
-    sections.forEach(({ id }) => {
+    const ids = ['profile-picture', 'password', 'account-info', 'language'];
+    ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
@@ -78,7 +79,7 @@ export default function AccountPage() {
     }
   };
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       const data = await getMyProfile();
       setProfile(data);
@@ -88,7 +89,7 @@ export default function AccountPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   // Save name (debounced)
   const saveName = useCallback(async (newName: string) => {

@@ -109,7 +109,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleSave = useCallback(async () => {
       if (!currentBusiness?.id) return;
-      const { translations: _translations, ...data } = formDataRef.current;
+      const { translations, ...data } = formDataRef.current;
+      void translations;
       if (!data.name || !data.organization_name || !data.description) {
         setError(t('requiredFields'));
         return;
@@ -152,7 +153,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         setSaving(false);
         onSavingChange?.(false);
       }
-    }, [currentBusiness?.id, isNew, design, router, onSave, onSavingChange, pendingLogoFile, pendingStripFile]);
+    }, [currentBusiness?.id, isNew, design, router, onSave, onSavingChange, pendingLogoFile, pendingStripFile, t]);
 
     useImperativeHandle(ref, () => ({
       handleSave,
