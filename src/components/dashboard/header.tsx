@@ -20,6 +20,7 @@ const routeSegmentKeys: Record<string, string> = {
   "": "header.loyaltyProgram",
   customers: "header.customers",
   design: "header.design",
+  activity: "header.activity",
   team: "header.team",
   settings: "header.settings",
   account: "header.account",

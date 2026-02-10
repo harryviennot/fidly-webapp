@@ -3,3 +3,4 @@ export * from './customer';
 export * from './design';
 export * from './invitation';
 export * from './membership';
+export * from './transaction';
