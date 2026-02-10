@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { CaretUpIcon, CaretDownIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
-import { getAllCustomers, getActiveDesign, getTransactions } from "@/api";
 import { useBusiness } from "@/contexts/business-context";
-import type { CustomerResponse, TransactionResponse } from "@/types";
+import { useCustomers, useAddStamp } from "@/hooks/use-customers";
+import { useTransactions } from "@/hooks/use-transactions";
+import { useActiveDesign } from "@/hooks/use-designs";
+import type { CustomerResponse } from "@/types";
 import type { CustomerSegment } from "@/lib/customer-segments";
 import { classifyCustomer, countBySegment } from "@/lib/customer-segments";
 import { calculateCustomerStats } from "@/lib/customer-stats";
@@ -25,7 +27,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import StampsDisplay from "./stamps-display";
-import { addStamp } from "@/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getSegmentConfig } from "@/lib/customer-segments";
@@ -36,65 +37,33 @@ type SortDir = "asc" | "desc";
 export default function CustomerTable() {
   const { currentBusiness } = useBusiness();
   const t = useTranslations("customers");
-  const [customers, setCustomers] = useState<CustomerResponse[]>([]);
-  const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
-  const [totalStamps, setTotalStamps] = useState(10);
+  const businessId = currentBusiness?.id;
+
+  const { data: customers = [], isLoading: customersLoading } = useCustomers(businessId);
+  const { data: txnData } = useTransactions(businessId);
+  const { data: design } = useActiveDesign(businessId);
+  const addStampMutation = useAddStamp(businessId);
+
+  const transactions = txnData?.transactions ?? [];
+  const totalStamps = design?.total_stamps ?? 10;
+  const isLoading = customersLoading;
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedSegment, setSelectedSegment] = useState<CustomerSegment | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerResponse | null>(null);
-  const [stampLoading, setStampLoading] = useState<string | null>(null);
-
-  const loadData = useCallback(async () => {
-    if (!currentBusiness?.id) return;
-    try {
-      const [data, design, txnData] = await Promise.all([
-        getAllCustomers(currentBusiness.id),
-        getActiveDesign(currentBusiness.id),
-        getTransactions(currentBusiness.id, { limit: 200 }).catch(() => ({
-          transactions: [],
-          total_count: 0,
-          has_more: false,
-        })),
-      ]);
-      setCustomers(data);
-      setTransactions(txnData.transactions);
-      if (design?.total_stamps) {
-        setTotalStamps(design.total_stamps);
-      }
-    } catch {
-      toast.error(t("loadFailed"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentBusiness?.id, t]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   const handleAddStamp = async (e: React.MouseEvent, customer: CustomerResponse) => {
     e.stopPropagation();
-    if (!currentBusiness?.id) return;
-    setStampLoading(customer.id);
+    if (!businessId) return;
     try {
-      const result = await addStamp(currentBusiness.id, customer.id);
-      setCustomers((prev) =>
-        prev.map((c) => (c.id === customer.id ? { ...c, stamps: result.stamps } : c))
-      );
+      await addStampMutation.mutateAsync(customer.id);
       toast.success(t("toasts.stampAdded", { name: customer.name }));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("toasts.stampFailed"));
-    } finally {
-      setStampLoading(null);
     }
   };
-
-  const handleCustomerUpdated = useCallback(() => {
-    loadData();
-  }, [loadData]);
 
   const stats = useMemo(
     () => calculateCustomerStats(customers, transactions),
@@ -278,7 +247,7 @@ export default function CustomerTable() {
                 const segment = classifyCustomer(customer, totalStamps);
                 const segmentConfig = getSegmentConfig(segment);
                 const isMaxed = customer.stamps >= totalStamps;
-                const isStamping = stampLoading === customer.id;
+                const isStamping = addStampMutation.isPending && addStampMutation.variables === customer.id;
 
                 return (
                   <TableRow
@@ -336,7 +305,6 @@ export default function CustomerTable() {
           if (!open) setSelectedCustomer(null);
         }}
         maxStamps={totalStamps}
-        onCustomerUpdated={handleCustomerUpdated}
       />
     </div>
   );

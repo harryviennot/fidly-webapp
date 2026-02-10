@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { StampIcon, GiftIcon, ProhibitIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { addStamp, redeemReward, voidStamp } from "@/api";
+import { useAddStamp, useRedeemReward, useVoidStamp } from "@/hooks/use-customers";
 import { toast } from "sonner";
 import type { CustomerResponse, TransactionResponse } from "@/types";
 
@@ -25,9 +25,9 @@ export function CustomerQuickActions({
   onActionComplete,
 }: CustomerQuickActionsProps) {
   const t = useTranslations("customers.actions");
-  const [stampLoading, setStampLoading] = useState(false);
-  const [redeemLoading, setRedeemLoading] = useState(false);
-  const [voidLoading, setVoidLoading] = useState(false);
+  const addStampMutation = useAddStamp(businessId);
+  const redeemMutation = useRedeemReward(businessId);
+  const voidMutation = useVoidStamp(businessId);
   const [showVoidForm, setShowVoidForm] = useState(false);
   const [voidReason, setVoidReason] = useState("");
 
@@ -43,44 +43,39 @@ export function CustomerQuickActions({
   );
 
   const handleAddStamp = async () => {
-    setStampLoading(true);
     try {
-      await addStamp(businessId, customer.id);
+      await addStampMutation.mutateAsync(customer.id);
       toast.success(t("stampAddedToast"));
       onActionComplete();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("stampFailedToast"));
-    } finally {
-      setStampLoading(false);
     }
   };
 
   const handleRedeem = async () => {
-    setRedeemLoading(true);
     try {
-      await redeemReward(businessId, customer.id);
+      await redeemMutation.mutateAsync(customer.id);
       toast.success(t("redeemSuccessToast"));
       onActionComplete();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("redeemFailedToast"));
-    } finally {
-      setRedeemLoading(false);
     }
   };
 
   const handleVoid = async () => {
     if (!lastVoidable || !voidReason.trim()) return;
-    setVoidLoading(true);
     try {
-      await voidStamp(businessId, customer.id, lastVoidable.id, voidReason.trim());
+      await voidMutation.mutateAsync({
+        customerId: customer.id,
+        transactionId: lastVoidable.id,
+        reason: voidReason.trim(),
+      });
       toast.success(t("voidSuccessToast"));
       setShowVoidForm(false);
       setVoidReason("");
       onActionComplete();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("voidFailedToast"));
-    } finally {
-      setVoidLoading(false);
     }
   };
 
@@ -92,7 +87,7 @@ export function CustomerQuickActions({
           size="sm"
           className="flex-1"
           onClick={handleAddStamp}
-          disabled={stampLoading}
+          disabled={addStampMutation.isPending}
         >
           <StampIcon className="mr-1.5 h-4 w-4" />
           {t("addStamp")}
@@ -102,7 +97,7 @@ export function CustomerQuickActions({
           size="sm"
           className="flex-1 bg-green-600 hover:bg-green-700 text-white"
           onClick={handleRedeem}
-          disabled={redeemLoading || !canRedeem}
+          disabled={redeemMutation.isPending || !canRedeem}
         >
           <GiftIcon className="mr-1.5 h-4 w-4" />
           {t("redeem")}
@@ -134,9 +129,9 @@ export function CustomerQuickActions({
             variant="outline"
             className="text-red-600 border-red-200 hover:bg-red-50"
             onClick={handleVoid}
-            disabled={voidLoading || !voidReason.trim()}
+            disabled={voidMutation.isPending || !voidReason.trim()}
           >
-            {voidLoading ? t("voiding") : t("confirmVoid")}
+            {voidMutation.isPending ? t("voiding") : t("confirmVoid")}
           </Button>
         </div>
       )}

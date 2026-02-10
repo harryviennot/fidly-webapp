@@ -25,7 +25,6 @@ interface CustomerDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   maxStamps: number;
-  onCustomerUpdated: () => void;
 }
 
 const LIMIT = 20;
@@ -35,7 +34,6 @@ export function CustomerDetailSheet({
   open,
   onOpenChange,
   maxStamps,
-  onCustomerUpdated,
 }: CustomerDetailSheetProps) {
   const { currentBusiness } = useBusiness();
   const t = useTranslations("customers.detail");
@@ -88,7 +86,6 @@ export function CustomerDetailSheet({
 
   const handleActionComplete = () => {
     fetchTransactions();
-    onCustomerUpdated();
   };
 
   if (!customer) return null;

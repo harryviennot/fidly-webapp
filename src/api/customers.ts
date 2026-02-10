@@ -1,20 +1,5 @@
 import { API_BASE_URL, getAuthHeaders } from './client';
-import type { CustomerCreate, CustomerResponse, StampResponse } from '@/types';
-
-export async function createCustomer(businessId: string, data: CustomerCreate): Promise<CustomerResponse> {
-  const response = await fetch(`${API_BASE_URL}/customers/${businessId}`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to create customer');
-  }
-
-  return response.json();
-}
+import type { CustomerResponse, StampResponse } from '@/types';
 
 export async function getCustomer(businessId: string, customerId: string): Promise<CustomerResponse> {
   const response = await fetch(`${API_BASE_URL}/customers/${businessId}/${customerId}`, {
