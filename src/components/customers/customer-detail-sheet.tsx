@@ -1,12 +1,17 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  CalendarBlankIcon,
+  ClockIcon,
+  FootprintsIcon,
+  TrophyIcon,
+} from "@phosphor-icons/react";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
@@ -17,7 +22,6 @@ import { getCustomerTransactions } from "@/api";
 import { classifyCustomer, getSegmentConfig } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
 import { TransactionTimeline } from "./transaction-timeline";
-import StampsDisplay from "@/components/stamps-display";
 import {
   useCustomerTransactions,
   transactionKeys,
@@ -34,6 +38,24 @@ interface CustomerDetailSheetProps {
 
 const LIMIT = 20;
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+const SEGMENT_AVATAR_COLORS: Record<string, string> = {
+  new: "from-blue-500 to-blue-600",
+  regular: "from-slate-500 to-slate-600",
+  vip: "from-amber-500 to-orange-500",
+  close_to_reward: "from-emerald-500 to-green-600",
+  at_risk: "from-red-400 to-red-500",
+};
+
 export function CustomerDetailSheet({
   customer,
   open,
@@ -42,6 +64,7 @@ export function CustomerDetailSheet({
 }: CustomerDetailSheetProps) {
   const { currentBusiness } = useBusiness();
   const t = useTranslations("customers.detail");
+  const locale = useLocale();
   const queryClient = useQueryClient();
 
   const query = useCustomerTransactions(
@@ -56,7 +79,6 @@ export function CustomerDetailSheet({
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Reset extra pages when the customer changes or query refetches
   const queryDataRef = query.data;
   useMemo(() => {
     setExtraTransactions([]);
@@ -100,81 +122,109 @@ export function CustomerDetailSheet({
   const segmentConfig = getSegmentConfig(segment);
 
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "—";
-    return new Date(dateStr).toLocaleDateString();
+    if (!dateStr) return "\u2014";
+    return new Date(dateStr).toLocaleDateString(locale, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  // Calculate quick stats
   const totalVisits = transactions.filter(
     (t) => t.stamp_delta > 0
   ).length;
 
   const firstVisit = customer.created_at;
   const lastVisit = customer.updated_at;
+  const stampProgress = maxStamps > 0 ? (customer.stamps / maxStamps) * 100 : 0;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md overflow-y-auto">
-        <SheetHeader className="pb-0">
-          <div className="flex items-center gap-2">
-            <SheetTitle className="text-lg">{customer.name}</SheetTitle>
-            <Badge
-              variant="outline"
+      <SheetContent
+        side="right"
+        className="sm:max-w-lg overflow-y-auto p-0 gap-0"
+      >
+        {/* Visually-hidden accessible title */}
+        <SheetTitle className="sr-only">{customer.name}</SheetTitle>
+        <SheetDescription className="sr-only">{customer.email}</SheetDescription>
+
+        {/* ── Header ── */}
+        <div className="px-6 pt-8 pb-5">
+          <div className="flex items-start gap-4">
+            <div
               className={cn(
-                "text-xs border",
-                segmentConfig.color,
-                segmentConfig.bgColor
+                "flex items-center justify-center w-12 h-12 rounded-full text-white font-semibold text-base shrink-0 bg-gradient-to-br shadow-sm",
+                SEGMENT_AVATAR_COLORS[segment] ?? "from-slate-500 to-slate-600"
               )}
             >
-              {t(`segments.${segment}`)}
-            </Badge>
-          </div>
-          <SheetDescription>{customer.email}</SheetDescription>
-        </SheetHeader>
-
-        <div className="px-4 space-y-5">
-          {/* Stamp Progress */}
-          <div>
-            <p className="text-sm font-medium text-[var(--foreground)] mb-2">
-              {t("stampProgress")}
-            </p>
-            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--cream)]">
-              <StampsDisplay count={customer.stamps} total={maxStamps} />
+              {getInitials(customer.name)}
             </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--cream)]">
-              <p className="text-xs text-[var(--muted-foreground)]">
-                {t("firstVisit")}
-              </p>
-              <p className="text-sm font-medium">{formatDate(firstVisit)}</p>
-            </div>
-            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--cream)]">
-              <p className="text-xs text-[var(--muted-foreground)]">
-                {t("lastVisit")}
-              </p>
-              <p className="text-sm font-medium">{formatDate(lastVisit)}</p>
-            </div>
-            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--cream)]">
-              <p className="text-xs text-[var(--muted-foreground)]">
-                {t("totalVisits")}
-              </p>
-              <p className="text-sm font-medium">{totalVisits}</p>
-            </div>
-            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--cream)]">
-              <p className="text-xs text-[var(--muted-foreground)]">
-                {t("redemptions")}
-              </p>
-              <p className="text-sm font-medium">
-                {customer.total_redemptions ?? 0}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-[var(--foreground)] truncate">
+                  {customer.name}
+                </h2>
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "text-[11px] font-medium shrink-0",
+                    segmentConfig.color,
+                    segmentConfig.bgColor
+                  )}
+                >
+                  {t(`segments.${segment}`)}
+                </Badge>
+              </div>
+              <p className="text-sm text-[var(--muted-foreground)] truncate mt-0.5">
+                {customer.email}
               </p>
             </div>
           </div>
+        </div>
 
-          {/* Quick Actions */}
-          {currentBusiness && (
+        {/* ── Stamp Progress ── */}
+        <div className="px-6 pb-5">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--paper)] p-4">
+            <div className="flex items-baseline justify-between mb-3">
+              <p className="text-sm font-medium text-[var(--foreground)]">
+                {t("stampProgress")}
+              </p>
+              <p className="text-sm tabular-nums">
+                <span className="text-lg font-bold text-[var(--foreground)]">
+                  {customer.stamps}
+                </span>
+                <span className="text-[var(--muted-foreground)]">
+                  /{maxStamps}
+                </span>
+              </p>
+            </div>
+            {/* Progress bar */}
+            <div className="h-2.5 bg-[var(--muted)] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[var(--accent)] transition-all duration-500 ease-out"
+                style={{ width: `${Math.min(stampProgress, 100)}%` }}
+              />
+            </div>
+            {/* Stamp dots */}
+            <div className="flex items-center gap-1.5 mt-3">
+              {Array.from({ length: maxStamps }, (_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "h-3.5 flex-1 rounded-full transition-colors duration-300",
+                    i < customer.stamps
+                      ? "bg-[var(--accent)]"
+                      : "bg-[var(--muted)]"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Quick Actions ── */}
+        {currentBusiness && (
+          <div className="px-6 pb-5">
             <CustomerQuickActions
               customer={customer}
               businessId={currentBusiness.id}
@@ -182,25 +232,81 @@ export function CustomerDetailSheet({
               transactions={transactions}
               onActionComplete={handleActionComplete}
             />
-          )}
+          </div>
+        )}
 
+        <div className="px-6">
           <Separator />
+        </div>
 
-          {/* Recent Activity */}
-          <div>
-            <p className="text-sm font-medium text-[var(--foreground)] mb-3">
-              {t("recentActivity")}
-            </p>
-            <TransactionTimeline
-              transactions={transactions}
-              loading={query.isLoading}
-              hasMore={hasMore}
-              onLoadMore={loadMore}
-              loadingMore={loadingMore}
+        {/* ── Stats ── */}
+        <div className="px-6 py-6">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+            <StatItem
+              icon={<CalendarBlankIcon size={18} weight="duotone" />}
+              label={t("firstVisit")}
+              value={formatDate(firstVisit)}
+            />
+            <StatItem
+              icon={<ClockIcon size={18} weight="duotone" />}
+              label={t("lastVisit")}
+              value={formatDate(lastVisit)}
+            />
+            <StatItem
+              icon={<FootprintsIcon size={18} weight="duotone" />}
+              label={t("totalVisits")}
+              value={String(totalVisits)}
+            />
+            <StatItem
+              icon={<TrophyIcon size={18} weight="duotone" />}
+              label={t("redemptions")}
+              value={String(customer.total_redemptions ?? 0)}
             />
           </div>
         </div>
+
+        <div className="px-6">
+          <Separator />
+        </div>
+
+        {/* ── Recent Activity ── */}
+        <div className="px-6 py-6">
+          <p className="text-sm font-medium text-[var(--foreground)] mb-5">
+            {t("recentActivity")}
+          </p>
+          <TransactionTimeline
+            transactions={transactions}
+            loading={query.isLoading}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            loadingMore={loadingMore}
+          />
+        </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function StatItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--background-subtle)] text-[var(--muted-foreground)] shrink-0">
+        {icon}
+      </div>
+      <div className="min-w-0 pt-0.5">
+        <p className="text-xs text-[var(--muted-foreground)] mb-0.5">{label}</p>
+        <p className="text-base font-semibold text-[var(--foreground)] tabular-nums leading-tight">
+          {value}
+        </p>
+      </div>
+    </div>
   );
 }

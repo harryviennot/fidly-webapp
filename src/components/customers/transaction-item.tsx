@@ -8,47 +8,47 @@ import {
   StarIcon,
   SlidersHorizontalIcon,
 } from "@phosphor-icons/react";
-import { Badge } from "@/components/ui/badge";
 import type { TransactionResponse, TransactionType } from "@/types";
 import { cn } from "@/lib/utils";
 
 const TYPE_CONFIG: Record<
   TransactionType,
-  { icon: typeof StampIcon; color: string; bgColor: string }
+  { icon: typeof StampIcon; iconColor: string; bgColor: string }
 > = {
   stamp_added: {
     icon: StampIcon,
-    color: "text-green-600",
-    bgColor: "bg-green-50",
+    iconColor: "text-[var(--accent)]",
+    bgColor: "bg-[var(--accent-light)]",
   },
   reward_redeemed: {
     icon: GiftIcon,
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
+    iconColor: "text-[var(--stamp-sand)]",
+    bgColor: "bg-[var(--accent-light)]",
   },
   stamp_voided: {
     icon: ProhibitIcon,
-    color: "text-red-600",
-    bgColor: "bg-red-50",
+    iconColor: "text-[var(--stamp-coral)]",
+    bgColor: "bg-[var(--accent-light)]",
   },
   bonus_stamp: {
     icon: StarIcon,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
+    iconColor: "text-[var(--stamp-sage)]",
+    bgColor: "bg-[var(--accent-light)]",
   },
   stamps_adjusted: {
     icon: SlidersHorizontalIcon,
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
+    iconColor: "text-[var(--muted-foreground)]",
+    bgColor: "bg-[var(--background-subtle)]",
   },
 };
 
 interface TransactionItemProps {
   transaction: TransactionResponse;
   showCustomerName?: boolean;
+  isLast?: boolean;
 }
 
-export function TransactionItem({ transaction, showCustomerName }: TransactionItemProps) {
+export function TransactionItem({ transaction, showCustomerName, isLast }: TransactionItemProps) {
   const t = useTranslations("customers.transaction");
   const config = TYPE_CONFIG[transaction.type];
   const Icon = config.icon;
@@ -77,40 +77,37 @@ export function TransactionItem({ transaction, showCustomerName }: TransactionIt
   const metadata = transaction.metadata as Record<string, string> | null;
 
   return (
-    <div className="flex gap-3 relative">
-      {/* Timeline dot */}
+    <div className="flex gap-3.5 relative">
+      {/* Timeline dot + line */}
       <div className="flex flex-col items-center">
         <div
           className={cn(
-            "flex items-center justify-center w-8 h-8 rounded-full shrink-0",
+            "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
             config.bgColor
           )}
         >
-          <Icon size={16} weight="fill" className={config.color} />
+          <Icon size={16} weight="duotone" className={config.iconColor} />
         </div>
-        <div className="w-px flex-1 bg-[var(--border)] mt-1" />
+        {!isLast && <div className="w-px flex-1 bg-[var(--border-light)]" />}
       </div>
 
       {/* Content */}
-      <div className="pb-4 flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="pb-5 flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-sm font-medium text-[var(--foreground)]">
             {t(`types.${transaction.type}`)}
           </span>
           <span
             className={cn(
-              "text-xs font-semibold px-1.5 py-0.5 rounded",
+              "text-xs font-semibold tabular-nums",
               transaction.stamp_delta > 0
-                ? "bg-green-50 text-green-700"
+                ? "text-[var(--accent)]"
                 : transaction.stamp_delta < 0
-                  ? "bg-red-50 text-red-700"
-                  : "bg-gray-50 text-gray-700"
+                  ? "text-[var(--stamp-coral)]"
+                  : "text-[var(--muted-foreground)]"
             )}
           >
             {deltaText}
-          </span>
-          <span className="text-xs text-[var(--muted-foreground)]">
-            {transaction.stamps_before} → {transaction.stamps_after}
           </span>
         </div>
 
@@ -126,13 +123,18 @@ export function TransactionItem({ transaction, showCustomerName }: TransactionIt
           </p>
         )}
 
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-1.5">
           <span className="text-xs text-[var(--muted-foreground)]">
             {formatRelativeTime(transaction.created_at)}
           </span>
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+          <span className="text-[var(--border)]">&middot;</span>
+          <span className="text-xs text-[var(--muted-foreground)] tabular-nums">
+            {transaction.stamps_before} &rarr; {transaction.stamps_after}
+          </span>
+          <span className="text-[var(--border)]">&middot;</span>
+          <span className="text-xs text-[var(--muted-foreground)]">
             {transaction.source}
-          </Badge>
+          </span>
         </div>
       </div>
     </div>

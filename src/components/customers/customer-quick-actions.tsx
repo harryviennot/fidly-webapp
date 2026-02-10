@@ -33,7 +33,6 @@ export function CustomerQuickActions({
 
   const canRedeem = customer.stamps >= maxStamps;
 
-  // Find the most recent voidable transaction
   const lastVoidable = transactions.find(
     (t) =>
       (t.type === "stamp_added" || t.type === "bonus_stamp") &&
@@ -80,22 +79,25 @@ export function CustomerQuickActions({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
+      {/* Primary action — full width */}
+      <Button
+        variant="gradient"
+        size="sm"
+        className="w-full"
+        onClick={handleAddStamp}
+        disabled={addStampMutation.isPending}
+      >
+        <StampIcon className="mr-1.5 h-4 w-4" />
+        {t("addStamp")}
+      </Button>
+
+      {/* Secondary actions — side by side, muted */}
       <div className="flex gap-2">
         <Button
-          variant="gradient"
+          variant="outline"
           size="sm"
-          className="flex-1"
-          onClick={handleAddStamp}
-          disabled={addStampMutation.isPending}
-        >
-          <StampIcon className="mr-1.5 h-4 w-4" />
-          {t("addStamp")}
-        </Button>
-
-        <Button
-          size="sm"
-          className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+          className="flex-1 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800"
           onClick={handleRedeem}
           disabled={redeemMutation.isPending || !canRedeem}
         >
@@ -106,7 +108,7 @@ export function CustomerQuickActions({
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+          className="flex-1 text-[var(--muted-foreground)] hover:text-red-600 hover:border-red-200 hover:bg-red-50"
           onClick={() => setShowVoidForm(!showVoidForm)}
           disabled={!lastVoidable}
         >

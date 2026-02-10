@@ -31,11 +31,11 @@ export function TransactionTimeline({
 
   if (transactions.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center py-8">
+      <div className="flex flex-col items-center text-center py-10">
         <ClockCounterClockwiseIcon
-          size={32}
+          size={36}
           weight="duotone"
-          className="text-[var(--muted-foreground)] mb-2"
+          className="text-[var(--muted-foreground)] mb-3"
         />
         <p className="text-sm text-[var(--muted-foreground)]">{t("empty")}</p>
       </div>
@@ -44,16 +44,17 @@ export function TransactionTimeline({
 
   return (
     <div>
-      {transactions.map((txn) => (
+      {transactions.map((txn, i) => (
         <TransactionItem
           key={txn.id}
           transaction={txn}
           showCustomerName={showCustomerName}
+          isLast={i === transactions.length - 1}
         />
       ))}
 
       {hasMore && onLoadMore && (
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center pt-3">
           <Button
             variant="outline"
             size="sm"
@@ -70,13 +71,13 @@ export function TransactionTimeline({
 
 export function TransactionTimelineSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="flex gap-3">
-          <div className="w-8 h-8 rounded-full bg-[var(--muted)] animate-pulse shrink-0" />
-          <div className="flex-1 space-y-2 pb-4">
-            <div className="h-4 w-32 bg-[var(--muted)] rounded animate-pulse" />
-            <div className="h-3 w-20 bg-[var(--muted)] rounded animate-pulse" />
+        <div key={i} className="flex items-start gap-3.5 py-3">
+          <div className="w-9 h-9 rounded-full bg-[var(--muted)] animate-pulse shrink-0" />
+          <div className="flex-1 space-y-2 pt-1">
+            <div className="h-4 w-36 bg-[var(--muted)] rounded animate-pulse" />
+            <div className="h-3 w-24 bg-[var(--muted)] rounded animate-pulse" />
           </div>
         </div>
       ))}
