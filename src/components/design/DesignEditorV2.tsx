@@ -109,7 +109,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleSave = useCallback(async () => {
       if (!currentBusiness?.id) return;
-      const data = { ...formDataRef.current };
+      const { translations: _translations, ...data } = formDataRef.current;
       if (!data.name || !data.organization_name || !data.description) {
         setError(t('requiredFields'));
         return;
