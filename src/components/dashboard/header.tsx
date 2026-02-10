@@ -2,6 +2,7 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -14,15 +15,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-// Route configuration for breadcrumb labels
-const routeLabels: Record<string, string> = {
-  "": "Loyalty Program",
-  customers: "Customers",
-  design: "Card Design",
-  team: "Team",
-  settings: "Settings",
-  account: "Account",
-  new: "New Design",
+// Route segment keys for breadcrumb labels
+const routeSegmentKeys: Record<string, string> = {
+  "": "header.loyaltyProgram",
+  customers: "header.customers",
+  design: "header.design",
+  team: "header.team",
+  settings: "header.settings",
+  account: "header.account",
+  new: "header.new",
 };
 
 interface Crumb {
@@ -31,16 +32,17 @@ interface Crumb {
   isLast: boolean;
 }
 
-function generateBreadcrumbs(pathname: string): Crumb[] {
+function useGenerateBreadcrumbs(pathname: string): Crumb[] {
+  const t = useTranslations();
   const segments = pathname.split("/").filter(Boolean);
 
   // If we're at root (Loyalty Program page)
   if (segments.length === 0) {
-    return [{ label: "Loyalty Program", href: "/", isLast: true }];
+    return [{ label: t("header.loyaltyProgram"), href: "/", isLast: true }];
   }
 
   const breadcrumbs: Crumb[] = [
-    { label: "Loyalty Program", href: "/", isLast: false },
+    { label: t("header.loyaltyProgram"), href: "/", isLast: false },
   ];
 
   let currentPath = "";
@@ -49,14 +51,14 @@ function generateBreadcrumbs(pathname: string): Crumb[] {
     const isLast = index === segments.length - 1;
 
     // Get label from config or derive it
-    let label = routeLabels[segment];
-    if (!label) {
-      // Check if it's a UUID/ID (dynamic segment)
-      if (segment.match(/^[a-f0-9-]{8,}$/i)) {
-        label = "Edit";
-      } else {
-        label = segment.charAt(0).toUpperCase() + segment.slice(1);
-      }
+    const key = routeSegmentKeys[segment];
+    let label: string;
+    if (key) {
+      label = t(key);
+    } else if (segment.match(/^[a-f0-9-]{8,}$/i)) {
+      label = t("header.edit");
+    } else {
+      label = segment.charAt(0).toUpperCase() + segment.slice(1);
     }
 
     breadcrumbs.push({
@@ -71,7 +73,7 @@ function generateBreadcrumbs(pathname: string): Crumb[] {
 
 export function DashboardHeader() {
   const pathname = usePathname();
-  const breadcrumbs = generateBreadcrumbs(pathname);
+  const breadcrumbs = useGenerateBreadcrumbs(pathname);
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--cream)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--cream)]/60 pt-2">

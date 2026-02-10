@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { CardDesign } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,6 +30,7 @@ export function TemplateGrid({
   onActivate,
   onDuplicate,
 }: TemplateGridProps) {
+  const t = useTranslations('designEditor');
   const canCreateNew = isProPlan || (!activeDesign && inactiveDesigns.length === 0);
 
   // Combine all cards with active first
@@ -45,28 +47,28 @@ export function TemplateGrid({
             <CardWrapper
               key={design.id}
               href={`/design/${design.id}`}
-              title={design.organization_name || 'Your Business'}
+              title={design.organization_name || t('yourBusiness')}
               badge={
                 design.is_active
-                  ? { label: 'Active', variant: 'success' }
+                  ? { label: t('active'), variant: 'success' }
                   : undefined
               }
-              metadata={`${design.total_stamps} stamps`}
+              metadata={t('stamps', { count: design.total_stamps })}
               actions={[
                 {
-                  label: 'Edit',
+                  label: t('edit'),
                   icon: <PencilIcon className="h-4 w-4" />,
                   href: `/design/${design.id}`,
                 },
                 {
-                  label: 'Duplicate',
+                  label: t('duplicate'),
                   icon: <CopyIcon className="h-4 w-4" />,
                   onClick: () => onDuplicate(design.id),
                 },
                 ...(!design.is_active
                   ? [
                     {
-                      label: 'Set as Active',
+                      label: t('setAsActive'),
                       icon: <CheckCircleIcon className="h-4 w-4" />,
                       onClick: () => onActivate(design.id),
                     },
@@ -75,7 +77,7 @@ export function TemplateGrid({
                 ...(!design.is_active
                   ? [
                     {
-                      label: 'Delete',
+                      label: t('delete'),
                       icon: <TrashIcon className="h-4 w-4" />,
                       onClick: () => onDelete(design.id),
                       destructive: true,
@@ -98,13 +100,13 @@ export function TemplateGrid({
             <PlusIcon className="w-6 h-6 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            Create your first loyalty card design
+            {t('createFirstDesign')}
           </p>
           {canCreateNew && (
             <Button asChild variant="outline" className="rounded-full">
               <Link href="/design/new">
                 <PlusIcon className="w-4 h-4 mr-2" />
-                Create Card
+                {t('createCard')}
               </Link>
             </Button>
           )}
@@ -115,12 +117,12 @@ export function TemplateGrid({
       {!isProPlan && activeDesign && (
         <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--cream)] p-4">
           <p className="text-sm">
-            <span className="font-medium">Want more card designs?</span>
-            <span className="text-muted-foreground ml-1">Upgrade to create unlimited templates.</span>
+            <span className="font-medium">{t('pro.wantMore')}</span>
+            <span className="text-muted-foreground ml-1">{t('pro.upgradeHint')}</span>
           </p>
           <Button asChild variant="outline" size="sm" className="rounded-full shrink-0 ml-4">
             <Link href="/settings/billing">
-              Upgrade to Pro
+              {t('pro.upgradeToPro')}
             </Link>
           </Button>
         </div>

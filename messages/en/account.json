@@ -1,0 +1,49 @@
+{
+  "account": {
+    "sections": {
+      "profilePicture": "Profile Picture",
+      "password": "Password",
+      "accountInfo": "Account Info",
+      "language": "Language"
+    },
+    "profilePicture": {
+      "title": "Profile Picture",
+      "description": "Your profile picture is visible to all team members across all businesses you belong to.",
+      "updated": "Profile picture updated",
+      "removed": "Profile picture removed",
+      "hint": "PNG or JPG, max 2MB. Square images work best.",
+      "sharedInfo": "Your profile picture is shared across all businesses you are a member of."
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Update your account password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "mismatch": "New passwords do not match",
+      "tooShort": "Password must be at least 8 characters",
+      "success": "Password changed successfully!",
+      "changing": "Changing...",
+      "changePassword": "Change Password"
+    },
+    "accountInfo": {
+      "title": "Account Information",
+      "description": "Update your personal information",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email"
+    },
+    "language": {
+      "title": "Language",
+      "description": "Choose the language for your dashboard interface.",
+      "label": "Display Language"
+    },
+    "errors": {
+      "loadFailed": "Failed to load profile",
+      "saveFailed": "Failed to save name",
+      "uploadFailed": "Upload failed",
+      "deleteFailed": "Delete failed"
+    }
+  }
+}

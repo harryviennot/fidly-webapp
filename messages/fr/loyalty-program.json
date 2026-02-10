@@ -1,0 +1,28 @@
+{
+  "loyaltyProgram": {
+    "title": "Programme de fidélité",
+    "subtitle": "Gérez votre carte de fidélité et les paramètres du programme",
+    "newCard": "Nouvelle carte",
+    "cardTemplates": "Modèles de cartes",
+    "programSettings": "Paramètres du programme",
+    "configureProgram": "Configurez votre programme de fidélité",
+    "businessUrl": "URL de l'entreprise",
+    "dataCollection": "Collecte de données",
+    "signupLink": "Votre lien d'inscription",
+    "linkCopied": "Lien copié dans le presse-papiers",
+    "qrCodeHint": "Les QR codes sont disponibles dans l'application scanner",
+    "dataCollectionDescription": "Collectez ces informations lorsque les clients s'inscrivent à leur carte de fidélité.",
+    "anonymousModeNote": "Note : Ne collecter aucune donnée active le mode anonyme — les clients peuvent s'inscrire sans fournir aucune information.",
+    "dataFields": {
+      "name": "Nom",
+      "nameDescription": "Personnalisez leur carte et identifiez vos clients",
+      "email": "Email",
+      "emailDescription": "Récupération de passe, campagnes email et recherche de clients",
+      "phone": "Téléphone",
+      "phoneDescription": "Notifications SMS et campagnes (bientôt disponible)"
+    },
+    "toasts": {
+      "settingsFailed": "Échec de la mise à jour des paramètres"
+    }
+  }
+}

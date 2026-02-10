@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { DotsThreeIcon } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,8 @@ interface TeamTableProps {
 
 export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTableProps) {
   const { user } = useAuth();
+  const t = useTranslations('team');
+  const tRoles = useTranslations('roles');
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MembershipWithUser | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -67,10 +70,10 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
     setRemoveDialogOpen(false);
     try {
       await deleteMembership(selectedMember.id);
-      toast.success(`${selectedMember.user.name || selectedMember.user.email} has been removed from the team`);
+      toast.success(t('toasts.memberRemoved', { name: selectedMember.user.name || selectedMember.user.email }));
       onMemberUpdated();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to remove member");
+      toast.error(error instanceof Error ? error.message : t('toasts.removeFailed'));
     } finally {
       setLoading(null);
       setSelectedMember(null);
@@ -83,7 +86,7 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
   if (members.length === 0) {
     return (
       <p className="text-sm text-muted-foreground text-center py-8">
-        No team members yet.
+        {t('noMembers')}
       </p>
     );
   }
@@ -93,9 +96,9 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Member</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead>Joined</TableHead>
+          <TableHead>{t('table.member')}</TableHead>
+          <TableHead>{t('table.role')}</TableHead>
+          <TableHead>{t('table.joined')}</TableHead>
           {(currentRole === "owner" || currentRole === "admin") && <TableHead className="w-[50px]"></TableHead>}
         </TableRow>
       </TableHeader>
@@ -118,9 +121,9 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
                   </Avatar>
                   <div>
                     <p className="font-medium text-sm">
-                      {member.user.name || "Unnamed"}
+                      {member.user.name || t('memberCard.unnamed')}
                       {isCurrentUser && (
-                        <span className="text-muted-foreground ml-1">(you)</span>
+                        <span className="text-muted-foreground ml-1">{t('memberCard.you')}</span>
                       )}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -134,7 +137,7 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
                   variant={member.role === "owner" ? "default" : "secondary"}
                   className="capitalize"
                 >
-                  {member.role}
+                  {tRoles(member.role)}
                 </Badge>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
@@ -160,7 +163,7 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
                           onClick={() => handleRemoveClick(member)}
                           className="text-destructive"
                         >
-                          Remove
+                          {t('memberCard.remove')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -176,22 +179,18 @@ export function TeamTable({ members, currentRole, onMemberUpdated }: TeamTablePr
     <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Remove team member?</AlertDialogTitle>
+          <AlertDialogTitle>{t('removeDialog.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to remove{" "}
-            <span className="font-medium text-[var(--foreground)]">
-              {selectedMember?.user.name || selectedMember?.user.email}
-            </span>{" "}
-            from the team? They will lose access to this business.
+            {t('removeDialog.description', { name: selectedMember?.user.name || selectedMember?.user.email || '' })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t('removeDialog.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleRemoveConfirm}
             className="bg-destructive text-white hover:bg-destructive/90"
           >
-            Remove
+            {t('removeDialog.remove')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

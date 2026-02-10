@@ -1,0 +1,15 @@
+{
+  "customers": {
+    "loading": "Chargement des clients...",
+    "loadFailed": "Impossible de charger les clients. Vérifiez que le serveur est en cours d'exécution.",
+    "searchPlaceholder": "Rechercher par nom ou email...",
+    "noResults": "Aucun client trouvé correspondant à votre recherche.",
+    "empty": "Aucun client pour le moment.",
+    "table": {
+      "name": "Nom",
+      "email": "Email",
+      "stamps": "Tampons",
+      "action": "Action"
+    }
+  }
+}

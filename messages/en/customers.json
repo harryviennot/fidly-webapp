@@ -1,0 +1,15 @@
+{
+  "customers": {
+    "loading": "Loading customers...",
+    "loadFailed": "Failed to load customers. Make sure the backend is running.",
+    "searchPlaceholder": "Search by name or email...",
+    "noResults": "No customers found matching your search.",
+    "empty": "No customers yet.",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "stamps": "Stamps",
+      "action": "Action"
+    }
+  }
+}

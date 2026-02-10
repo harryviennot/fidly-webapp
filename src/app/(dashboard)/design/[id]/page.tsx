@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { PencilSimple, FloppyDisk, ArrowsClockwise } from '@phosphor-icons/react';
 import { CardDesign } from '@/types';
@@ -29,6 +30,8 @@ export default function EditDesignPage() {
   const designId = params.id as string;
   const { currentBusiness } = useBusiness();
   const editorRef = useRef<DesignEditorRef>(null);
+  const t = useTranslations('designEditor.pages');
+  const tDesign = useTranslations('designEditor');
 
   const [design, setDesign] = useState<CardDesign | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,14 +49,14 @@ export default function EditDesignPage() {
         setDesign(data);
         setDesignName(data.name);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load design');
+        setError(err instanceof Error ? err.message : t('failedToLoad'));
       } finally {
         setLoading(false);
       }
     }
 
     loadDesign();
-  }, [designId, currentBusiness?.id]);
+  }, [designId, currentBusiness?.id, t]);
 
   const handleSaveClick = () => {
     if (design?.is_active) {
@@ -70,8 +73,8 @@ export default function EditDesignPage() {
 
   const handleSaveComplete = () => {
     toast.success(design?.is_active
-      ? 'Design saved! Your customers\' cards will update shortly.'
-      : 'Design saved successfully.'
+      ? t('savedActive')
+      : t('savedDraft')
     );
     router.push('/');
   };
@@ -88,10 +91,10 @@ export default function EditDesignPage() {
     return (
       <div className="space-y-6">
         <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-4">
-          {error || 'Design not found'}
+          {error || t('designNotFound')}
         </div>
         <Button variant="outline" asChild>
-          <Link href="/">Back to Loyalty Program</Link>
+          <Link href="/">{t('backToLoyaltyProgram')}</Link>
         </Button>
       </div>
     );
@@ -115,14 +118,14 @@ export default function EditDesignPage() {
                 onKeyDown={(e) => e.key === 'Enter' && setEditingName(false)}
                 autoFocus
                 className="text-2xl font-bold h-auto py-1 w-64"
-                placeholder="Design name..."
+                placeholder={t('designNamePlaceholder')}
               />
             ) : (
               <div
                 className="group flex items-center gap-2 cursor-pointer"
                 onClick={() => setEditingName(true)}
               >
-                <h2 className="text-2xl font-bold">{designName || 'Untitled Design'}</h2>
+                <h2 className="text-2xl font-bold">{designName || t('untitledDesign')}</h2>
                 <PencilSimple
                   className="w-4 h-4 text-muted-foreground/60"
                   weight="bold"
@@ -130,7 +133,7 @@ export default function EditDesignPage() {
               </div>
             )}
             {design.is_active && (
-              <Badge variant="default">Active</Badge>
+              <Badge variant="default">{tDesign('active')}</Badge>
             )}
           </div>
         }
@@ -139,12 +142,12 @@ export default function EditDesignPage() {
             {saving ? (
               <>
                 <ArrowsClockwise className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                {t('saving')}
               </>
             ) : (
               <>
                 <FloppyDisk className="w-4 h-4 mr-2" weight="bold" />
-                Save Design
+                {t('saveDesign')}
               </>
             )}
           </Button>
@@ -154,15 +157,15 @@ export default function EditDesignPage() {
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Update active design?</AlertDialogTitle>
+            <AlertDialogTitle>{t('updateActiveTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will automatically update all of your customers&apos; cards to reflect this design.
+              {t('updateActiveDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-full">{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction className="rounded-full bg-[var(--accent)] hover:bg-[var(--accent)]/90" onClick={handleConfirmSave}>
-              Save & Update
+              {t('saveAndUpdate')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

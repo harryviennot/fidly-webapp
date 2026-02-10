@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   BadgeCheck,
   ChevronsUpDown,
@@ -35,6 +36,7 @@ export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<User | null>(null);
+  const t = useTranslations("userMenu");
 
   useEffect(() => {
     getMyProfile().then(setProfile).catch(console.error);
@@ -100,14 +102,14 @@ export function NavUser() {
               <Link href="/account">
                 <DropdownMenuItem>
                   <BadgeCheck />
-                  Account
+                  {t("account")}
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut()}>
               <LogOut />
-              Log out
+              {t("logOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

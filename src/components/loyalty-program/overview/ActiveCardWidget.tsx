@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { CardDesign } from '@/types';
 import {
   PencilIcon,
@@ -13,31 +14,33 @@ interface ActiveCardWidgetProps {
 }
 
 export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
+  const t = useTranslations('designEditor');
+
   return (
     <CardWrapper
       isEmpty={!design}
       emptyState={{
-        title: 'No card design yet',
-        description: 'Create your first loyalty card.',
-        actionLabel: 'Create Card',
+        title: t('noCardYet'),
+        description: t('createFirst'),
+        actionLabel: t('createCard'),
         actionHref: '/design/new',
       }}
       href={design ? `/design/${design.id}` : undefined}
-      title="Active Card"
-      badge={{ label: 'Live', variant: 'success' }}
+      title={t('activeCard')}
+      badge={{ label: t('live'), variant: 'success' }}
       showEditOverlay
       actions={
         design
           ? [
             {
-              label: 'Edit Design',
+              label: t('editDesign'),
               icon: <PencilIcon className="h-4 w-4" />,
               href: `/design/${design.id}`,
             },
             ...(isProPlan
               ? [
                 {
-                  label: 'Switch Card',
+                  label: t('switchCard'),
                   icon: <ArrowsLeftRightIcon className="h-4 w-4" />,
                   href: '/loyalty-program/templates',
                 },

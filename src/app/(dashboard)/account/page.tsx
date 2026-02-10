@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImageUploader from '@/components/design/ImageUploader';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { getMyProfile, uploadAvatar, deleteAvatar, updateProfile } from '@/api';
 import { useAuth } from '@/contexts/auth-provider';
 import { createClient } from '@/utils/supabase/client';
@@ -14,20 +16,22 @@ import { cn } from '@/lib/utils';
 import type { User } from '@/types';
 import { Info } from 'lucide-react';
 
-const sections = [
-  { id: 'profile-picture', label: 'Profile Picture' },
-  { id: 'password', label: 'Password' },
-  { id: 'account-info', label: 'Account Info' },
-];
-
 export default function AccountPage() {
   const { user: authUser } = useAuth();
+  const t = useTranslations('account');
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState('profile-picture');
   const [avatarKey, setAvatarKey] = useState(Date.now());
+
+  const sections = [
+    { id: 'profile-picture', label: t('sections.profilePicture') },
+    { id: 'password', label: t('sections.password') },
+    { id: 'account-info', label: t('sections.accountInfo') },
+    { id: 'language', label: t('sections.language') },
+  ];
 
   // Name editing state
   const [name, setName] = useState('');
@@ -80,7 +84,7 @@ export default function AccountPage() {
       setProfile(data);
       setName(data.name || '');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load profile');
+      setError(err instanceof Error ? err.message : t('errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -96,11 +100,11 @@ export default function AccountPage() {
       setNameSaved(true);
       setTimeout(() => setNameSaved(false), 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save name');
+      setError(err instanceof Error ? err.message : t('errors.saveFailed'));
     } finally {
       setSavingName(false);
     }
-  }, []);
+  }, [t]);
 
   // Handle name change with debounced auto-save
   const handleNameChange = (value: string) => {
@@ -135,10 +139,10 @@ export default function AccountPage() {
       const urlWithCacheBust = `${result.url}?t=${Date.now()}`;
       setProfile(prev => prev ? { ...prev, avatar_url: urlWithCacheBust } : null);
       setAvatarKey(Date.now());
-      setSuccess('Profile picture updated');
+      setSuccess(t('profilePicture.updated'));
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      setError(err instanceof Error ? err.message : t('errors.uploadFailed'));
     }
   };
 
@@ -148,10 +152,10 @@ export default function AccountPage() {
       await deleteAvatar();
       setProfile(prev => prev ? { ...prev, avatar_url: undefined } : null);
       setAvatarKey(Date.now());
-      setSuccess('Profile picture removed');
+      setSuccess(t('profilePicture.removed'));
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed');
+      setError(err instanceof Error ? err.message : t('errors.deleteFailed'));
     }
   };
 
@@ -161,12 +165,12 @@ export default function AccountPage() {
     setPasswordSuccess(false);
 
     if (newPassword !== confirmPassword) {
-      setPasswordError('New passwords do not match');
+      setPasswordError(t('password.mismatch'));
       return;
     }
 
     if (newPassword.length < 8) {
-      setPasswordError('Password must be at least 8 characters');
+      setPasswordError(t('password.tooShort'));
       return;
     }
 
@@ -186,7 +190,7 @@ export default function AccountPage() {
       setConfirmPassword('');
       setTimeout(() => setPasswordSuccess(false), 5000);
     } catch (err) {
-      setPasswordError(err instanceof Error ? err.message : 'Failed to change password');
+      setPasswordError(err instanceof Error ? err.message : t('password.changePassword'));
     } finally {
       setChangingPassword(false);
     }
@@ -208,6 +212,8 @@ export default function AccountPage() {
     if (profile.avatar_url.includes('?')) return profile.avatar_url;
     return `${profile.avatar_url}?t=${avatarKey}`;
   };
+
+  const tStatus = useTranslations('status');
 
   if (loading) {
     return (
@@ -256,9 +262,9 @@ export default function AccountPage() {
         {/* Profile Picture Section */}
         <Card id="profile-picture" className="scroll-mt-24">
           <CardHeader>
-            <CardTitle className="text-lg">Profile Picture</CardTitle>
+            <CardTitle className="text-lg">{t('profilePicture.title')}</CardTitle>
             <CardDescription>
-              Your profile picture is visible to all team members across all businesses you belong to.
+              {t('profilePicture.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -276,7 +282,7 @@ export default function AccountPage() {
                   onUpload={handleAvatarUpload}
                   onClear={handleAvatarDelete}
                   accept="image/png,image/jpeg"
-                  hint="PNG or JPG, max 2MB. Square images work best."
+                  hint={t('profilePicture.hint')}
                 />
               </div>
             </div>
@@ -284,7 +290,7 @@ export default function AccountPage() {
             <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
               <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-blue-700">
-                Your profile picture is shared across all businesses you are a member of.
+                {t('profilePicture.sharedInfo')}
               </p>
             </div>
           </CardContent>
@@ -293,33 +299,33 @@ export default function AccountPage() {
         {/* Password Change Section */}
         <Card id="password" className="scroll-mt-24">
           <CardHeader>
-            <CardTitle className="text-lg">Change Password</CardTitle>
+            <CardTitle className="text-lg">{t('password.title')}</CardTitle>
             <CardDescription>
-              Update your account password
+              {t('password.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">{t('password.newPassword')}</Label>
                 <Input
                   id="newPassword"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
+                  placeholder={t('password.newPasswordPlaceholder')}
                   minLength={8}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword">{t('password.confirmPassword')}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
+                  placeholder={t('password.confirmPasswordPlaceholder')}
                 />
               </div>
 
@@ -328,7 +334,7 @@ export default function AccountPage() {
               )}
 
               {passwordSuccess && (
-                <p className="text-sm text-green-600">Password changed successfully!</p>
+                <p className="text-sm text-green-600">{t('password.success')}</p>
               )}
 
               <Button
@@ -336,7 +342,7 @@ export default function AccountPage() {
                 disabled={changingPassword || !newPassword || !confirmPassword}
                 variant="gradient"
               >
-                {changingPassword ? 'Changing...' : 'Change Password'}
+                {changingPassword ? t('password.changing') : t('password.changePassword')}
               </Button>
             </form>
           </CardContent>
@@ -345,26 +351,42 @@ export default function AccountPage() {
         {/* Account Info Section */}
         <Card id="account-info" className="scroll-mt-24">
           <CardHeader>
-            <CardTitle className="text-lg">Account Information</CardTitle>
+            <CardTitle className="text-lg">{t('accountInfo.title')}</CardTitle>
             <CardDescription>
-              Update your personal information
-              {savingName && <span className="ml-2 text-[var(--accent)]">Saving...</span>}
-              {nameSaved && <span className="ml-2 text-green-600">Saved</span>}
+              {t('accountInfo.description')}
+              {savingName && <span className="ml-2 text-[var(--accent)]">{tStatus('saving')}</span>}
+              {nameSaved && <span className="ml-2 text-green-600">{tStatus('saved')}</span>}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t('accountInfo.name')}</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="Your name"
+                placeholder={t('accountInfo.namePlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-muted-foreground">Email</Label>
+              <Label className="text-muted-foreground">{t('accountInfo.email')}</Label>
               <p className="font-medium text-sm">{profile?.email || authUser?.email}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Language Section */}
+        <Card id="language" className="scroll-mt-24">
+          <CardHeader>
+            <CardTitle className="text-lg">{t('language.title')}</CardTitle>
+            <CardDescription>
+              {t('language.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label>{t('language.label')}</Label>
+              <LanguageSwitcher />
             </div>
           </CardContent>
         </Card>

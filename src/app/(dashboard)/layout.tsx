@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { AppSidebar, DashboardHeader } from "@/components/dashboard";
 import { RoleGuard } from "@/components/auth/role-guard";
 import { useBusiness } from "../../contexts/business-context";
@@ -14,6 +15,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { loading, currentBusiness, error } = useBusiness();
+  const t = useTranslations();
 
   // Show loading state
   if (loading) {
@@ -21,7 +23,7 @@ export default function AdminLayout({
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
-          <p className="mt-4 text-sm text-[var(--muted-foreground)]">Loading...</p>
+          <p className="mt-4 text-sm text-[var(--muted-foreground)]">{t("status.loading")}</p>
         </div>
       </div>
     );
@@ -32,9 +34,9 @@ export default function AdminLayout({
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center max-w-md mx-auto p-6">
-          <h2 className="text-lg font-semibold mb-2">No Business Found</h2>
+          <h2 className="text-lg font-semibold mb-2">{t("layout.noBusinessFound")}</h2>
           <p className="text-sm text-[var(--muted-foreground)] mb-4">
-            {error || "You don't have access to any business yet."}
+            {error || t("layout.noBusinessAccess")}
           </p>
         </div>
       </div>

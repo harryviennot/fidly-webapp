@@ -1,0 +1,29 @@
+{
+  "settings": {
+    "sidebar": {
+      "businessInfo": "Informations de l'entreprise",
+      "theme": "Thème"
+    },
+    "businessInfo": {
+      "title": "Informations de l'entreprise",
+      "description": "Modifier le nom et le logo de votre entreprise",
+      "businessName": "Nom de l'entreprise",
+      "businessNamePlaceholder": "Mon entreprise",
+      "businessLogo": "Logo de l'entreprise",
+      "logoHint": "PNG ou JPG, max 2 Mo"
+    },
+    "theme": {
+      "title": "Personnalisation du thème",
+      "description": "Personnalisez les couleurs de votre tableau de bord",
+      "accentColor": "Couleur d'accentuation",
+      "backgroundColor": "Couleur d'arrière-plan",
+      "unsavedChanges": "Vous avez des modifications non enregistrées",
+      "upToDate": "Le thème est à jour",
+      "saveTheme": "Enregistrer le thème"
+    },
+    "errors": {
+      "saveFailed": "Échec de l'enregistrement",
+      "themeSaveFailed": "Échec de l'enregistrement du thème"
+    }
+  }
+}
