@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Sheet,
   SheetContent,
@@ -17,6 +18,10 @@ import { classifyCustomer, getSegmentConfig } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
 import { TransactionTimeline } from "./transaction-timeline";
 import StampsDisplay from "@/components/stamps-display";
+import {
+  useCustomerTransactions,
+  transactionKeys,
+} from "@/hooks/use-transactions";
 import type { CustomerResponse, TransactionResponse } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -37,55 +42,56 @@ export function CustomerDetailSheet({
 }: CustomerDetailSheetProps) {
   const { currentBusiness } = useBusiness();
   const t = useTranslations("customers.detail");
-  const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const query = useCustomerTransactions(
+    currentBusiness?.id,
+    customer?.id,
+    open && !!customer
+  );
+
+  const [extraTransactions, setExtraTransactions] = useState<
+    TransactionResponse[]
+  >([]);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const fetchTransactions = useCallback(
-    async (append = false) => {
-      if (!currentBusiness?.id || !customer) return;
+  // Reset extra pages when the customer changes or query refetches
+  const queryDataRef = query.data;
+  useMemo(() => {
+    setExtraTransactions([]);
+    setHasMore(queryDataRef?.has_more ?? false);
+  }, [queryDataRef]);
 
-      if (append) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
-
-      try {
-        const offset = append ? transactions.length : 0;
-        const data = await getCustomerTransactions(
-          currentBusiness.id,
-          customer.id,
-          { limit: LIMIT, offset }
-        );
-
-        if (append) {
-          setTransactions((prev) => [...prev, ...data.transactions]);
-        } else {
-          setTransactions(data.transactions);
-        }
-        setHasMore(data.has_more);
-      } catch {
-        // Silently fail — empty timeline shown
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [currentBusiness?.id, customer, transactions.length]
+  const transactions = useMemo(
+    () => [...(query.data?.transactions ?? []), ...extraTransactions],
+    [query.data?.transactions, extraTransactions]
   );
 
-  useEffect(() => {
-    if (open && customer) {
-      setTransactions([]);
-      fetchTransactions();
+  const loadMore = async () => {
+    if (!currentBusiness?.id || !customer) return;
+    setLoadingMore(true);
+    try {
+      const data = await getCustomerTransactions(
+        currentBusiness.id,
+        customer.id,
+        { limit: LIMIT, offset: transactions.length }
+      );
+      setExtraTransactions((prev) => [...prev, ...data.transactions]);
+      setHasMore(data.has_more);
+    } catch {
+      // Silently fail
+    } finally {
+      setLoadingMore(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, customer?.id]);
+  };
 
   const handleActionComplete = () => {
-    fetchTransactions();
+    if (currentBusiness?.id && customer?.id) {
+      queryClient.invalidateQueries({
+        queryKey: transactionKeys.customer(currentBusiness.id, customer.id),
+      });
+    }
   };
 
   if (!customer) return null;
@@ -187,9 +193,9 @@ export function CustomerDetailSheet({
             </p>
             <TransactionTimeline
               transactions={transactions}
-              loading={loading}
+              loading={query.isLoading}
               hasMore={hasMore}
-              onLoadMore={() => fetchTransactions(true)}
+              onLoadMore={loadMore}
               loadingMore={loadingMore}
             />
           </div>
