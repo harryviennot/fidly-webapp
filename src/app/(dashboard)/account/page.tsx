@@ -46,10 +46,6 @@ export default function AccountPage() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
-  useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
-
   // IntersectionObserver for scroll tracking
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -90,6 +86,10 @@ export default function AccountPage() {
       setLoading(false);
     }
   }, [t]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   // Save name (debounced)
   const saveName = useCallback(async (newName: string) => {
