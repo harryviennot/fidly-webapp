@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -51,17 +52,15 @@ const ROLE_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
   scanner: "outline",
 };
 
-const ROLE_LABELS: Record<string, string> = {
-  owner: "Owner",
-  admin: "Admin",
-  scanner: "Scanner",
-};
-
 export function PendingInvitationsTable({
   invitations,
   onCancel,
   onResend,
 }: PendingInvitationsTableProps) {
+  const t = useTranslations('team.pendingTable');
+  const tRoles = useTranslations('roles');
+  const tToasts = useTranslations('team.toasts');
+  const tDialog = useTranslations('team.cancelInviteDialog');
   const [loadingStates, setLoadingStates] = useState<Record<string, string>>({});
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedInvitation, setSelectedInvitation] = useState<Invitation | null>(null);
@@ -70,9 +69,9 @@ export function PendingInvitationsTable({
     setLoadingStates((prev) => ({ ...prev, [invitation.id]: "resending" }));
     try {
       await onResend(invitation.id);
-      toast.success(`Invitation resent to ${invitation.email}`);
+      toast.success(tToasts('invitationResent', { email: invitation.email }));
     } catch {
-      toast.error("Failed to resend invitation");
+      toast.error(tToasts('resendFailed'));
     } finally {
       setLoadingStates((prev) => {
         const next = { ...prev };
@@ -94,9 +93,9 @@ export function PendingInvitationsTable({
     setLoadingStates((prev) => ({ ...prev, [selectedInvitation.id]: "cancelling" }));
     try {
       await onCancel(selectedInvitation.id);
-      toast.success(`Invitation to ${selectedInvitation.email} cancelled`);
+      toast.success(tToasts('invitationCancelled', { email: selectedInvitation.email }));
     } catch {
-      toast.error("Failed to cancel invitation");
+      toast.error(tToasts('cancelFailed'));
     } finally {
       setLoadingStates((prev) => {
         const next = { ...prev };
@@ -107,10 +106,12 @@ export function PendingInvitationsTable({
     }
   };
 
+  const tTeam = useTranslations('team');
+
   if (invitations.length === 0) {
     return (
       <p className="text-muted-foreground text-sm py-4 text-center">
-        No pending invitations
+        {tTeam('noPendingInvitations')}
       </p>
     );
   }
@@ -120,11 +121,11 @@ export function PendingInvitationsTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Email</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead>Invited</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead>{t('email')}</TableHead>
+          <TableHead>{t('name')}</TableHead>
+          <TableHead>{t('role')}</TableHead>
+          <TableHead>{t('invited')}</TableHead>
+          <TableHead className="text-right">{t('actions')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -140,7 +141,7 @@ export function PendingInvitationsTable({
               </TableCell>
               <TableCell>
                 <Badge variant={ROLE_VARIANTS[invitation.role] || "outline"}>
-                  {ROLE_LABELS[invitation.role] || invitation.role}
+                  {tRoles(invitation.role)}
                 </Badge>
               </TableCell>
               <TableCell className="text-muted-foreground">
@@ -155,7 +156,7 @@ export function PendingInvitationsTable({
                   onClick={() => handleResend(invitation)}
                   disabled={isLoading}
                 >
-                  {loadingAction === "resending" ? "Sending..." : "Resend"}
+                  {loadingAction === "resending" ? t('sending') : t('resend')}
                 </Button>
                 <Button
                   variant="ghost"
@@ -164,7 +165,7 @@ export function PendingInvitationsTable({
                   onClick={() => handleCancelClick(invitation)}
                   disabled={isLoading}
                 >
-                  {loadingAction === "cancelling" ? "Cancelling..." : "Cancel"}
+                  {loadingAction === "cancelling" ? t('cancelling') : t('cancel')}
                 </Button>
               </TableCell>
             </TableRow>
@@ -176,22 +177,18 @@ export function PendingInvitationsTable({
     <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Cancel invitation?</AlertDialogTitle>
+          <AlertDialogTitle>{tDialog('title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to cancel the invitation to{" "}
-            <span className="font-medium text-[var(--foreground)]">
-              {selectedInvitation?.email}
-            </span>
-            ? They will no longer be able to join your team with this invite.
+            {tDialog('description', { email: selectedInvitation?.email || '' })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Keep Invitation</AlertDialogCancel>
+          <AlertDialogCancel>{tDialog('keep')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleCancelConfirm}
             className="bg-destructive text-white hover:bg-destructive/90"
           >
-            Cancel Invitation
+            {tDialog('cancel')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

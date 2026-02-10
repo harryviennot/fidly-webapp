@@ -3,6 +3,7 @@
 import * as React from "react"
 import { ChevronDown } from "lucide-react"
 import { CheckIcon } from "@phosphor-icons/react"
+import { useTranslations } from "next-intl"
 import { StampeoLogo } from "@/components/ui/stampeo-logo"
 import {
   DropdownMenu,
@@ -22,6 +23,7 @@ import Image from "next/image"
 
 export function BusinessSwitcher() {
   const { memberships, currentBusiness, setCurrentBusiness } = useBusiness()
+  const t = useTranslations()
 
   const hasMultipleMemberships = memberships.length > 1
 
@@ -32,8 +34,10 @@ export function BusinessSwitcher() {
   const textColor = bgColor ? getContrastTextColor(bgColor) : "dark"
 
   // Format role for display
-  const formatRole = (role: string) =>
-    role.charAt(0).toUpperCase() + role.slice(1)
+  const formatRole = (role: string) => {
+    const key = `roles.${role}` as const;
+    return t(key);
+  }
 
   // The trigger content (existing header appearance)
   const triggerContent = (
@@ -120,7 +124,7 @@ export function BusinessSwitcher() {
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Your businesses
+              {t("businessSwitcher.yourBusinesses")}
             </DropdownMenuLabel>
             {memberships.map((membership) => {
               const isSelected = membership.business.id === currentBusiness?.id

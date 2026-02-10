@@ -1,0 +1,94 @@
+{
+  "team": {
+    "title": "Membres de l'équipe",
+    "inviteMember": "Inviter un membre",
+    "pendingInvitations": "Invitations en attente",
+    "memberCount": "{count, plural, one {# Membre} other {# Membres}}",
+    "noMembers": "Aucun membre dans l'équipe.",
+    "noPendingInvitations": "Aucune invitation en attente",
+    "loadFailed": "Impossible de charger les données de l'équipe",
+    "stats": {
+      "teamMembers": "Membres de l'équipe",
+      "scanners": "Scanners",
+      "activeThisWeek": "Actifs cette semaine",
+      "pendingInvites": "Invitations en attente",
+      "activeCount": "{count} actifs cette semaine",
+      "noActivity": "Aucune activité cette semaine",
+      "ofScanners": "sur {count} scanner{count, plural, one {} other {s}}"
+    },
+    "memberCard": {
+      "you": "(vous)",
+      "unnamed": "Sans nom",
+      "neverActive": "Jamais actif",
+      "activeThisWeek": "Actif cette semaine",
+      "daysAgo": "il y a {days} jours",
+      "changeRole": "Changer le rôle",
+      "remove": "Supprimer"
+    },
+    "table": {
+      "member": "Membre",
+      "role": "Rôle",
+      "joined": "Rejoint le"
+    },
+    "invite": {
+      "title": "Inviter un membre",
+      "description": "Envoyez un email d'invitation. Ils créeront un compte en acceptant.",
+      "email": "Adresse email",
+      "emailPlaceholder": "collegue@exemple.com",
+      "name": "Nom (optionnel)",
+      "namePlaceholder": "Jean Dupont",
+      "nameHint": "Utilisé pour personnaliser l'email d'invitation",
+      "role": "Rôle",
+      "selectRole": "Sélectionner un rôle",
+      "scannerDescription": "Peut scanner les passes clients et ajouter des tampons via l'application mobile",
+      "adminDescription": "Peut gérer les membres de l'équipe et accéder à toutes les fonctionnalités",
+      "adminOnlyScanner": "En tant qu'administrateur, vous ne pouvez inviter que des scanners",
+      "cancel": "Annuler",
+      "sending": "Envoi...",
+      "sendInvitation": "Envoyer l'invitation",
+      "success": "Invitation envoyée avec succès !"
+    },
+    "pendingTable": {
+      "email": "Email",
+      "name": "Nom",
+      "role": "Rôle",
+      "invited": "Invité le",
+      "actions": "Actions",
+      "resend": "Renvoyer",
+      "sending": "Envoi...",
+      "cancel": "Annuler",
+      "cancelling": "Annulation..."
+    },
+    "removeDialog": {
+      "title": "Supprimer le membre ?",
+      "description": "Êtes-vous sûr de vouloir supprimer {name} de l'équipe ? Cette personne perdra l'accès à cette entreprise.",
+      "cancel": "Annuler",
+      "remove": "Supprimer"
+    },
+    "cancelInviteDialog": {
+      "title": "Annuler l'invitation ?",
+      "description": "Êtes-vous sûr de vouloir annuler l'invitation envoyée à {email} ? Cette personne ne pourra plus rejoindre votre équipe avec cette invitation.",
+      "keep": "Garder l'invitation",
+      "cancel": "Annuler l'invitation"
+    },
+    "emptyState": {
+      "title": "Constituez votre équipe",
+      "description": "Ajoutez des membres pour que vos employés puissent scanner les cartes de fidélité et aider à gérer votre entreprise.",
+      "adminRole": "Administrateur",
+      "adminDescription": "Gérer les membres de l'équipe, voir les analyses et configurer les paramètres",
+      "scannerRole": "Scanner",
+      "scannerDescription": "Scanner les passes clients et ajouter des tampons via l'application mobile",
+      "inviteFirst": "Invitez votre premier membre"
+    },
+    "toasts": {
+      "roleUpdated": "Rôle mis à jour : {role}",
+      "memberRemoved": "{name} a été supprimé",
+      "removeFailed": "Échec de la suppression du membre",
+      "roleUpdateFailed": "Échec de la mise à jour du rôle",
+      "invitationResent": "Invitation renvoyée à {email}",
+      "resendFailed": "Échec du renvoi de l'invitation",
+      "invitationCancelled": "Invitation à {email} annulée",
+      "cancelFailed": "Échec de l'annulation de l'invitation"
+    }
+  }
+}

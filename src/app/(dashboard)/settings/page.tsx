@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useBusiness } from '@/contexts/business-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SettingsSidebar, HexColorPicker } from '@/components/settings';
 import ImageUploader from '@/components/design/ImageUploader';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { updateBusiness, uploadBusinessLogo, deleteBusinessLogo } from '@/api';
 import { DEFAULT_ACCENT, applyTheme } from '@/utils/theme';
 
@@ -20,6 +22,8 @@ interface FormData {
 
 export default function SettingsPage() {
   const { currentBusiness, refetch } = useBusiness();
+  const t = useTranslations('settings');
+  const tStatus = useTranslations('status');
   const [activeSection, setActiveSection] = useState('business-info');
   const [savingTheme, setSavingTheme] = useState(false);
   const [savingInfo, setSavingInfo] = useState(false);
@@ -60,7 +64,7 @@ export default function SettingsPage() {
 
   // IntersectionObserver for scroll tracking
   useEffect(() => {
-    const sections = ['business-info', 'theme'];
+    const sections = ['business-info', 'language', 'theme'];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -99,11 +103,11 @@ export default function SettingsPage() {
       setInfoSaved(true);
       setTimeout(() => setInfoSaved(false), 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save');
+      setError(err instanceof Error ? err.message : t('errors.saveFailed'));
     } finally {
       setSavingInfo(false);
     }
-  }, [currentBusiness, formData.name, formData.accentColor, formData.backgroundColor]);
+  }, [currentBusiness, formData.name, formData.accentColor, formData.backgroundColor, t]);
 
   // Handle name change with debounced auto-save
   const handleNameChange = (value: string) => {
@@ -165,7 +169,7 @@ export default function SettingsPage() {
       // Refresh context
       await refetch();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save theme');
+      setError(err instanceof Error ? err.message : t('errors.themeSaveFailed'));
     } finally {
       setSavingTheme(false);
     }
@@ -212,34 +216,69 @@ export default function SettingsPage() {
         {/* Business Information Section */}
         <Card id="business-info" className="scroll-mt-24">
           <CardHeader>
-            <CardTitle className="text-lg">Business Information</CardTitle>
+            <CardTitle className="text-lg">{t('businessInfo.title')}</CardTitle>
             <CardDescription>
-              Update your business name and logo
-              {savingInfo && <span className="ml-2 text-[var(--accent)]">Saving...</span>}
-              {infoSaved && <span className="ml-2 text-green-600">Saved</span>}
+              {t('businessInfo.description')}
+              {savingInfo && <span className="ml-2 text-[var(--accent)]">{tStatus('saving')}</span>}
+              {infoSaved && <span className="ml-2 text-green-600">{tStatus('saved')}</span>}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Business Name</Label>
+              <Label htmlFor="name">{t('businessInfo.businessName')}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="My Business"
+                placeholder={t('businessInfo.businessNamePlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Business Logo</Label>
+              <Label>{t('businessInfo.businessLogo')}</Label>
               <ImageUploader
                 label=""
                 value={formData.logo_url || undefined}
                 onUpload={handleLogoUpload}
                 onClear={handleLogoDelete}
                 accept="image/png,image/jpeg"
-                hint="PNG or JPG, max 2MB"
+                hint={t('businessInfo.logoHint')}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Language Section */}
+        <Card id="language" className="scroll-mt-24">
+          <CardHeader>
+            <CardTitle className="text-lg">{t('language.title')}</CardTitle>
+            <CardDescription>{t('language.description')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('language.passLocale')}</Label>
+              <Select
+                value={currentBusiness.primary_locale || 'fr'}
+                onValueChange={async (value: string) => {
+                  try {
+                    await updateBusiness(currentBusiness.id, {
+                      primary_locale: value as 'fr' | 'en',
+                    });
+                    await refetch();
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : t('errors.saveFailed'));
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full max-w-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fr">Français</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground">{t('language.passLocaleHint')}</p>
             </div>
           </CardContent>
         </Card>
@@ -247,17 +286,17 @@ export default function SettingsPage() {
         {/* Theme Section */}
         <Card id="theme" className="scroll-mt-24">
           <CardHeader>
-            <CardTitle className="text-lg">Theme Customization</CardTitle>
-            <CardDescription>Customize the colors of your dashboard</CardDescription>
+            <CardTitle className="text-lg">{t('theme.title')}</CardTitle>
+            <CardDescription>{t('theme.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <HexColorPicker
-              label="Accent Color"
+              label={t('theme.accentColor')}
               value={formData.accentColor}
               onChange={(c) => handleColorChange('accentColor', c)}
             />
             <HexColorPicker
-              label="Background Color"
+              label={t('theme.backgroundColor')}
               value={formData.backgroundColor}
               onChange={(c) => handleColorChange('backgroundColor', c)}
             />
@@ -265,14 +304,14 @@ export default function SettingsPage() {
             {/* Save Theme Button */}
             <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
               <p className="text-sm text-[var(--muted-foreground)]">
-                {themeChanged ? 'You have unsaved changes' : 'Theme is up to date'}
+                {themeChanged ? t('theme.unsavedChanges') : t('theme.upToDate')}
               </p>
               <Button
                 onClick={handleSaveTheme}
                 disabled={savingTheme || !themeChanged}
                 variant="gradient"
               >
-                {savingTheme ? 'Saving...' : 'Save Theme'}
+                {savingTheme ? tStatus('saving') : t('theme.saveTheme')}
               </Button>
             </div>
           </CardContent>

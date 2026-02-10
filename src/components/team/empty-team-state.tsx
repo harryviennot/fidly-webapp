@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   UserPlusIcon,
   DeviceMobileIcon,
@@ -12,20 +13,22 @@ interface EmptyTeamStateProps {
   onInvite: () => void;
 }
 
-const ROLES = [
-  {
-    icon: ShieldCheckIcon,
-    title: "Admin",
-    description: "Manage team members, view analytics, and configure settings",
-  },
-  {
-    icon: DeviceMobileIcon,
-    title: "Scanner",
-    description: "Scan customer passes and add stamps via the mobile app",
-  },
-];
-
 export function EmptyTeamState({ onInvite }: EmptyTeamStateProps) {
+  const t = useTranslations('team.emptyState');
+
+  const ROLES = [
+    {
+      icon: ShieldCheckIcon,
+      title: t('adminRole'),
+      description: t('adminDescription'),
+    },
+    {
+      icon: DeviceMobileIcon,
+      title: t('scannerRole'),
+      description: t('scannerDescription'),
+    },
+  ];
+
   return (
     <div className="flex flex-col items-center text-center py-12 px-4">
       {/* Icon composition */}
@@ -44,10 +47,10 @@ export function EmptyTeamState({ onInvite }: EmptyTeamStateProps) {
 
       {/* Headline */}
       <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">
-        Build your team
+        {t('title')}
       </h3>
       <p className="text-[var(--muted-foreground)] max-w-md mb-8">
-        Add team members so your employees can scan loyalty cards and help manage your business.
+        {t('description')}
       </p>
 
       {/* Role cards */}
@@ -84,7 +87,7 @@ export function EmptyTeamState({ onInvite }: EmptyTeamStateProps) {
         }}
       >
         <UserPlusIcon className="mr-2 h-4 w-4" />
-        Invite your first team member
+        {t('inviteFirst')}
       </Button>
     </div>
   );

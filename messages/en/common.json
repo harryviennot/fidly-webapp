@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "loyaltyProgram": "Loyalty Program",
+    "customers": "Customers",
+    "team": "Team",
+    "settings": "Settings"
+  },
+  "header": {
+    "loyaltyProgram": "Loyalty Program",
+    "customers": "Customers",
+    "design": "Card Design",
+    "team": "Team",
+    "settings": "Settings",
+    "account": "Account",
+    "new": "New Design",
+    "edit": "Edit"
+  },
+  "userMenu": {
+    "account": "Account",
+    "logOut": "Log out"
+  },
+  "businessSwitcher": {
+    "yourBusinesses": "Your businesses"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "scanner": "Scanner"
+  },
+  "status": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved"
+  },
+  "layout": {
+    "noBusinessFound": "No Business Found",
+    "noBusinessAccess": "You don't have access to any business yet."
+  },
+  "poweredBy": "Powered by"
+}

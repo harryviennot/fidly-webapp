@@ -1,0 +1,94 @@
+{
+  "team": {
+    "title": "Team Members",
+    "inviteMember": "Invite Member",
+    "pendingInvitations": "Pending Invitations",
+    "memberCount": "{count, plural, one {# Member} other {# Members}}",
+    "noMembers": "No team members yet.",
+    "noPendingInvitations": "No pending invitations",
+    "loadFailed": "Failed to load team data",
+    "stats": {
+      "teamMembers": "Team members",
+      "scanners": "Scanners",
+      "activeThisWeek": "Active this week",
+      "pendingInvites": "Pending invites",
+      "activeCount": "{count} active this week",
+      "noActivity": "No activity this week",
+      "ofScanners": "of {count} scanner{count, plural, one {} other {s}}"
+    },
+    "memberCard": {
+      "you": "(you)",
+      "unnamed": "Unnamed",
+      "neverActive": "Never active",
+      "activeThisWeek": "Active this week",
+      "daysAgo": "{days} days ago",
+      "changeRole": "Change Role",
+      "remove": "Remove"
+    },
+    "table": {
+      "member": "Member",
+      "role": "Role",
+      "joined": "Joined"
+    },
+    "invite": {
+      "title": "Invite Team Member",
+      "description": "Send an invitation email. They'll create an account when they accept.",
+      "email": "Email address",
+      "emailPlaceholder": "colleague@example.com",
+      "name": "Name (optional)",
+      "namePlaceholder": "John Doe",
+      "nameHint": "Used to personalize the invitation email",
+      "role": "Role",
+      "selectRole": "Select a role",
+      "scannerDescription": "Can scan customer passes and add stamps via mobile app",
+      "adminDescription": "Can manage team members and access all business features",
+      "adminOnlyScanner": "As an admin, you can only invite scanners",
+      "cancel": "Cancel",
+      "sending": "Sending...",
+      "sendInvitation": "Send Invitation",
+      "success": "Invitation sent successfully!"
+    },
+    "pendingTable": {
+      "email": "Email",
+      "name": "Name",
+      "role": "Role",
+      "invited": "Invited",
+      "actions": "Actions",
+      "resend": "Resend",
+      "sending": "Sending...",
+      "cancel": "Cancel",
+      "cancelling": "Cancelling..."
+    },
+    "removeDialog": {
+      "title": "Remove team member?",
+      "description": "Are you sure you want to remove {name} from the team? They will lose access to this business.",
+      "cancel": "Cancel",
+      "remove": "Remove"
+    },
+    "cancelInviteDialog": {
+      "title": "Cancel invitation?",
+      "description": "Are you sure you want to cancel the invitation to {email}? They will no longer be able to join your team with this invite.",
+      "keep": "Keep Invitation",
+      "cancel": "Cancel Invitation"
+    },
+    "emptyState": {
+      "title": "Build your team",
+      "description": "Add team members so your employees can scan loyalty cards and help manage your business.",
+      "adminRole": "Admin",
+      "adminDescription": "Manage team members, view analytics, and configure settings",
+      "scannerRole": "Scanner",
+      "scannerDescription": "Scan customer passes and add stamps via the mobile app",
+      "inviteFirst": "Invite your first team member"
+    },
+    "toasts": {
+      "roleUpdated": "Role updated to {role}",
+      "memberRemoved": "{name} has been removed",
+      "removeFailed": "Failed to remove member",
+      "roleUpdateFailed": "Failed to update role",
+      "invitationResent": "Invitation resent to {email}",
+      "resendFailed": "Failed to resend invitation",
+      "invitationCancelled": "Invitation to {email} cancelled",
+      "cancelFailed": "Failed to cancel invitation"
+    }
+  }
+}

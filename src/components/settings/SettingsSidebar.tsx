@@ -1,22 +1,21 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-
-interface Section {
-  id: string;
-  label: string;
-}
-
-const sections: Section[] = [
-  { id: 'business-info', label: 'Business Information' },
-  { id: 'theme', label: 'Theme' },
-];
 
 interface SettingsSidebarProps {
   activeSection: string;
 }
 
 export function SettingsSidebar({ activeSection }: SettingsSidebarProps) {
+  const t = useTranslations('settings.sidebar');
+
+  const sections = [
+    { id: 'business-info', label: t('businessInfo') },
+    { id: 'language', label: t('language') },
+    { id: 'theme', label: t('theme') },
+  ];
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {

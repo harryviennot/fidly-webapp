@@ -1,0 +1,36 @@
+{
+  "settings": {
+    "sidebar": {
+      "businessInfo": "Business Information",
+      "language": "Language",
+      "theme": "Theme"
+    },
+    "businessInfo": {
+      "title": "Business Information",
+      "description": "Update your business name and logo",
+      "businessName": "Business Name",
+      "businessNamePlaceholder": "My Business",
+      "businessLogo": "Business Logo",
+      "logoHint": "PNG or JPG, max 2MB"
+    },
+    "language": {
+      "title": "Your Business Language",
+      "description": "This is your main business language, and will be used for your loyalty program",
+      "passLocale": "Language",
+      "passLocaleHint": "You can always add translations for other languages in the design editor."
+    },
+    "theme": {
+      "title": "Theme Customization",
+      "description": "Customize the colors of your dashboard",
+      "accentColor": "Accent Color",
+      "backgroundColor": "Background Color",
+      "unsavedChanges": "You have unsaved changes",
+      "upToDate": "Theme is up to date",
+      "saveTheme": "Save Theme"
+    },
+    "errors": {
+      "saveFailed": "Failed to save",
+      "themeSaveFailed": "Failed to save theme"
+    }
+  }
+}

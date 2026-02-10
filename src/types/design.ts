@@ -4,6 +4,15 @@ export interface PassField {
   value: string;
 }
 
+export interface DesignTranslation {
+  organization_name?: string;
+  description?: string;
+  logo_text?: string;
+  secondary_fields?: PassField[];
+  auxiliary_fields?: PassField[];
+  back_fields?: PassField[];
+}
+
 export interface CardDesign {
   id: string;
   name: string;
@@ -40,6 +49,9 @@ export interface CardDesign {
   auxiliary_fields: PassField[];
   back_fields: PassField[];
 
+  // Translations
+  translations?: Record<string, DesignTranslation>;
+
   created_at?: string;
   updated_at?: string;
 }
@@ -69,6 +81,8 @@ export interface CardDesignCreate {
   secondary_fields?: PassField[];
   auxiliary_fields?: PassField[];
   back_fields?: PassField[];
+
+  translations?: Record<string, DesignTranslation>;
 }
 
 export type CardDesignUpdate = Partial<CardDesignCreate>;

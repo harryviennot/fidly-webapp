@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { UserPlusIcon, EnvelopeSimpleIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,7 @@ const CARD_LAYOUT_THRESHOLD = 6;
 export default function TeamPage() {
   const { currentBusiness, currentRole } = useBusiness();
   const { user } = useAuth();
+  const t = useTranslations('team');
   const [members, setMembers] = useState<MembershipWithUser[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,11 +49,11 @@ export default function TeamPage() {
       setInvitations(invitationsData);
     } catch (error) {
       console.error("Failed to load team data:", error);
-      toast.error("Failed to load team data");
+      toast.error(t('loadFailed'));
     } finally {
       if (showLoading) setLoading(false);
     }
-  }, [currentBusiness?.id]);
+  }, [currentBusiness?.id, t]);
 
   const refreshData = useCallback(() => loadData(false), [loadData]);
 
@@ -75,10 +77,10 @@ export default function TeamPage() {
     setCardLoading(member.id);
     try {
       await updateMembershipRole(member.id, { role: newRole });
-      toast.success(`Role updated to ${newRole}`);
+      toast.success(t('toasts.roleUpdated', { role: newRole }));
       loadData(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to update role");
+      toast.error(error instanceof Error ? error.message : t('toasts.roleUpdateFailed'));
     } finally {
       setCardLoading(null);
     }
@@ -88,10 +90,10 @@ export default function TeamPage() {
     setCardLoading(member.id);
     try {
       await deleteMembership(member.id);
-      toast.success(`${member.user.name || member.user.email} has been removed`);
+      toast.success(t('toasts.memberRemoved', { name: member.user.name || member.user.email }));
       loadData(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to remove member");
+      toast.error(error instanceof Error ? error.message : t('toasts.removeFailed'));
     } finally {
       setCardLoading(null);
     }
@@ -105,10 +107,10 @@ export default function TeamPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Team Members</h2>
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
           <Button disabled>
             <UserPlusIcon className="mr-2 h-4 w-4" />
-            Invite Member
+            {t('inviteMember')}
           </Button>
         </div>
 
@@ -135,10 +137,10 @@ export default function TeamPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Team Members</h2>
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
           <Button onClick={() => setInviteOpen(true)} variant="gradient" size="lg">
             <UserPlusIcon className="mr-2 h-4 w-4" />
-            Invite Member
+            {t('inviteMember')}
           </Button>
         </div>
 
@@ -163,10 +165,10 @@ export default function TeamPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Team Members</h2>
+        <h2 className="text-2xl font-bold">{t('title')}</h2>
         <Button onClick={() => setInviteOpen(true)} variant="gradient">
           <UserPlusIcon className="mr-2 h-4 w-4" />
-          Invite Member
+          {t('inviteMember')}
         </Button>
       </div>
 
@@ -181,7 +183,7 @@ export default function TeamPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <EnvelopeSimpleIcon className="h-5 w-5" />
-              Pending Invitations
+              {t('pendingInvitations')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -197,7 +199,7 @@ export default function TeamPage() {
       <Card hover={false}>
         <CardHeader>
           <CardTitle className="text-lg">
-            {members.length} {members.length === 1 ? "Member" : "Members"}
+            {t('memberCount', { count: members.length })}
           </CardTitle>
         </CardHeader>
         <CardContent>

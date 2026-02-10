@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { AuthProvider } from "@/contexts/auth-provider";
 import { BusinessProvider } from "@/contexts/business-context";
 import "./globals.css";
@@ -19,17 +21,22 @@ export const metadata: Metadata = {
   description: "Manage your loyalty card program",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AuthProvider>
-          <BusinessProvider>{children}</BusinessProvider>
-        </AuthProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AuthProvider>
+            <BusinessProvider>{children}</BusinessProvider>
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

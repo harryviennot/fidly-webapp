@@ -2,6 +2,7 @@
 
 import { useState, useImperativeHandle, forwardRef, useRef, useCallback, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { CardDesign, CardDesignCreate } from '@/types';
 import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activateDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
@@ -84,6 +85,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
   function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const { currentBusiness } = useBusiness();
+    const t = useTranslations('designEditor.editor');
     const isWideEnough = useMediaQuery('(min-width: 1280px)');
     const isCompact = !isWideEnough;
     const [formData, setFormData] = useState<CardDesignCreate>(
@@ -107,9 +109,10 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleSave = useCallback(async () => {
       if (!currentBusiness?.id) return;
-      const data = { ...formDataRef.current };
+      const { translations, ...data } = formDataRef.current;
+      void translations;
       if (!data.name || !data.organization_name || !data.description) {
-        setError('Please fill in all required fields (Name, Organization, Description)');
+        setError(t('requiredFields'));
         return;
       }
 
@@ -145,12 +148,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           onSave?.();
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to save design');
+        setError(err instanceof Error ? err.message : t('failedToSave'));
       } finally {
         setSaving(false);
         onSavingChange?.(false);
       }
-    }, [currentBusiness?.id, isNew, design, router, onSave, onSavingChange, pendingLogoFile, pendingStripFile]);
+    }, [currentBusiness?.id, isNew, design, router, onSave, onSavingChange, pendingLogoFile, pendingStripFile, t]);
 
     useImperativeHandle(ref, () => ({
       handleSave,
@@ -250,7 +253,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleActivate = async () => {
       if (!design || !currentBusiness?.id) return;
-      if (!confirm('Activate this design? All customers will receive the updated card.')) return;
+      if (!confirm(t('activateConfirm'))) return;
 
       setSaving(true);
       setError(null);
@@ -258,7 +261,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         await activateDesign(currentBusiness.id, design.id);
         setIsActive(true);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to activate');
+        setError(err instanceof Error ? err.message : t('failedToActivate'));
       } finally {
         setSaving(false);
       }
@@ -314,8 +317,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         <div className="mb-4 flex items-center gap-3">
           <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
             <TabsList className="rounded-full">
-              <TabsTrigger value="apple" className="rounded-full">Apple Wallet</TabsTrigger>
-              <TabsTrigger value="google" className="rounded-full">Google Wallet</TabsTrigger>
+              <TabsTrigger value="apple" className="rounded-full">{t('appleWallet')}</TabsTrigger>
+              <TabsTrigger value="google" className="rounded-full">{t('googleWallet')}</TabsTrigger>
             </TabsList>
           </Tabs>
           <Button
@@ -325,7 +328,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             onClick={() => setShowBack(!showBack)}
           >
             <FlipHorizontal className="w-4 h-4 mr-2" />
-            {showBack ? 'Front' : 'Back'}
+            {showBack ? t('front') : t('back')}
           </Button>
         </div>
 
@@ -390,7 +393,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           {!showBack && (
             <div className="w-full max-w-md px-4">
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-sm text-muted-foreground">Preview Stamps</Label>
+                <Label className="text-sm text-muted-foreground">{t('previewStamps')}</Label>
                 <span className="text-sm font-medium">
                   {previewStamps} / {formData.total_stamps || 10}
                 </span>
@@ -415,7 +418,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                 onClick={handleActivate}
                 disabled={saving}
               >
-                Activate Design
+                {t('activateDesign')}
               </Button>
             )}
           </div>
@@ -428,77 +431,77 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       <div className="space-y-4">
         {/* Branding Section */}
         <CollapsibleSection
-          title="Branding"
+          title={t('branding')}
           isOpen={openSections.branding}
           onToggle={() => toggleSection('branding')}
           badge={brandingBadge}
         >
           <div className="space-y-5">
             <div className="space-y-2">
-              <LabelWithTooltip htmlFor="organization_name" tooltip="Your business name - shown at the top of the pass">Organization Name *</LabelWithTooltip>
+              <LabelWithTooltip htmlFor="organization_name" tooltip={t('organizationTooltip')}>{t('organizationName')}</LabelWithTooltip>
               <Input
                 id="organization_name"
-                placeholder="e.g., Coffee Shop"
+                placeholder={t('organizationPlaceholder')}
                 value={formData.organization_name}
                 onChange={(e) => updateField('organization_name', e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
-              <LabelWithTooltip htmlFor="description" tooltip="On Apple Wallet, shown as the title on the info page. On Google Wallet, shown as the card header.">Card Description *</LabelWithTooltip>
+              <LabelWithTooltip htmlFor="description" tooltip={t('cardDescriptionTooltip')}>{t('cardDescription')}</LabelWithTooltip>
               <Input
                 id="description"
-                placeholder="e.g., Loyalty Card"
+                placeholder={t('cardDescriptionPlaceholder')}
                 value={formData.description}
                 onChange={(e) => updateField('description', e.target.value)}
               />
             </div>
 
             <ImageUploader
-              label="Logo"
+              label={t('logo')}
               value={formData.logo_url}
               onUpload={handleLogoUpload}
-              hint="Appears in top-left of pass. PNG, 160x50pt max"
+              hint={t('logoHint')}
               enableCrop
             />
 
             <ColorPicker
-              label="Background Color"
-              tooltip="Main background of your wallet pass"
+              label={t('backgroundColor')}
+              tooltip={t('backgroundTooltip')}
               colors={backgroundColors}
               value={bgHex}
               onChange={(hex) => updateColorField('background_color', hex)}
             />
 
             <ColorPicker
-              label="Label Color"
-              tooltip="Color for labels like 'STAMPS' and 'REWARD'. Apple Wallet only — Google Wallet uses its own text colors."
+              label={t('labelColor')}
+              tooltip={t('labelTooltip')}
               colors={textColors}
               value={labelHex}
               onChange={(hex) => updateColorField('label_color', hex)}
-              annotation="Apple Wallet only"
+              annotation={t('appleOnly')}
             />
             {labelContrast < 3 && (
-              <p className="text-xs text-amber-600 -mt-1">Low contrast — labels may be hard to read on this background.</p>
+              <p className="text-xs text-amber-600 -mt-1">{t('lowContrastLabel')}</p>
             )}
 
             <ColorPicker
-              label="Text Color"
-              tooltip="Color for stamps count and main text. Apple Wallet only — Google Wallet uses its own text colors."
+              label={t('textColor')}
+              tooltip={t('textTooltip')}
               colors={textColors}
               value={textHex}
               onChange={(hex) => updateColorField('foreground_color', hex)}
-              annotation="Apple Wallet only"
+              annotation={t('appleOnly')}
             />
             {textContrast < 3 && (
-              <p className="text-xs text-amber-600 -mt-1">Low contrast — text may be hard to read on this background.</p>
+              <p className="text-xs text-amber-600 -mt-1">{t('lowContrastText')}</p>
             )}
           </div>
         </CollapsibleSection>
 
         {/* Stamps Section */}
         <CollapsibleSection
-          title="Stamps"
+          title={t('stampsSection')}
           isOpen={openSections.stamps}
           onToggle={() => toggleSection('stamps')}
           badge={stampsBadge}
@@ -506,7 +509,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           <div className="space-y-4">
             {/* Basic controls — always visible */}
             <div className="space-y-2">
-              <LabelWithTooltip tooltip="Stamps needed to earn the reward (2-20)">Total Stamps</LabelWithTooltip>
+              <LabelWithTooltip tooltip={t('totalStampsTooltip')}>{t('totalStamps')}</LabelWithTooltip>
               <div className="flex items-center justify-between w-full">
                 <button
                   type="button"
@@ -531,7 +534,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             </div>
 
             <div className="space-y-2">
-              <LabelWithTooltip tooltip="Icon shown inside each filled stamp">Stamp Icon</LabelWithTooltip>
+              <LabelWithTooltip tooltip={t('stampIconTooltip')}>{t('stampIcon')}</LabelWithTooltip>
               <StampIconPicker
                 value={(formData.stamp_icon || 'checkmark') as StampIconType}
                 onChange={(icon) => updateField('stamp_icon', icon)}
@@ -540,7 +543,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             </div>
 
             <div className="space-y-2">
-              <LabelWithTooltip tooltip="Special icon for the final stamp (the reward)">Reward Icon</LabelWithTooltip>
+              <LabelWithTooltip tooltip={t('rewardIconTooltip')}>{t('rewardIcon')}</LabelWithTooltip>
               <RewardIconPicker
                 value={(formData.reward_icon || 'gift') as StampIconType}
                 onChange={(icon) => updateField('reward_icon', icon)}
@@ -549,16 +552,16 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             </div>
 
             <ColorPicker
-              label="Stamp Color"
-              tooltip="Color for filled stamp circles"
+              label={t('stampColor')}
+              tooltip={t('stampColorTooltip')}
               colors={accentColors}
               value={accentHex}
               onChange={(hex) => updateColorField('stamp_filled_color', hex)}
             />
 
             <ColorPicker
-              label="Icon Color"
-              tooltip="Color for icons inside filled stamps"
+              label={t('iconColor')}
+              tooltip={t('iconColorTooltip')}
               colors={iconColors}
               value={iconHex}
               onChange={(hex) => {
@@ -575,29 +578,29 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors pt-1"
                 >
                   <CaretDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvancedStamps ? 'rotate-180' : ''}`} weight="bold" />
-                  Advanced options
+                  {t('advancedOptions')}
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="collapsible-content px-2 -mx-2 pt-2">
                 <div className="space-y-4 pt-2">
                   <ColorPicker
-                    label="Empty Stamp Color"
-                    tooltip="Color for empty stamp circles (unfilled stamps)"
+                    label={t('emptyStampColor')}
+                    tooltip={t('emptyStampTooltip')}
                     colors={emptyStampColors}
                     value={emptyStampHex}
                     onChange={(hex) => updateColorField('stamp_empty_color', hex)}
                   />
 
                   <ColorPicker
-                    label="Stamp Border Color"
-                    tooltip="Border color for empty stamp circles"
+                    label={t('stampBorderColor')}
+                    tooltip={t('stampBorderTooltip')}
                     colors={emptyStampColors}
                     value={borderColorHex}
                     onChange={(hex) => updateColorField('stamp_border_color', hex)}
                   />
 
                   <div className="space-y-2">
-                    <LabelWithTooltip tooltip="Optional pattern or texture displayed behind the stamps">Strip Background</LabelWithTooltip>
+                    <LabelWithTooltip tooltip={t('stripBackgroundTooltip')}>{t('stripBackground')}</LabelWithTooltip>
                     <ImageUploader
                       label=""
                       value={formData.strip_background_url}
@@ -606,12 +609,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                         updateField('strip_background_url', null as unknown as string);
                         setPendingStripFile(null);
                       }}
-                      hint="Pattern behind stamps. 1125x432px recommended"
+                      hint={t('stripHint')}
                     />
                     {formData.strip_background_url && (
                       <div className="space-y-2 pt-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-sm">Opacity</Label>
+                          <Label className="text-sm">{t('opacity')}</Label>
                           <span className="text-sm text-muted-foreground">{formData.strip_background_opacity ?? 40}%</span>
                         </div>
                         <input
@@ -633,23 +636,23 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
         {/* Content Section */}
         <CollapsibleSection
-          title="Content"
+          title={t('content')}
           isOpen={openSections.content}
           onToggle={() => toggleSection('content')}
           badge={contentBadge}
         >
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              On Apple Wallet, these appear below the stamps. On Google Wallet, they appear above the QR code.
+              {t('contentDescription')}
             </p>
             <FieldEditor
-              title="Front Details"
+              title={t('frontDetails')}
               fields={formData.secondary_fields || []}
               onChange={(f) => updateField('secondary_fields', f)}
               maxFields={3}
             />
             <FieldEditor
-              title="Additional Info"
+              title={t('additionalInfo')}
               fields={formData.auxiliary_fields || []}
               onChange={(f) => updateField('auxiliary_fields', f)}
               maxFields={3}
@@ -659,17 +662,17 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
         {/* Back Section */}
         <CollapsibleSection
-          title="Back"
+          title={t('backSection')}
           isOpen={openSections.back}
           onToggle={() => toggleSection('back')}
           badge={backBadge}
         >
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Information shown when the customer taps the pass. On Apple Wallet, these appear on the back of the card. On Google Wallet, they appear in the details section.
+              {t('backDescription')}
             </p>
             <FieldEditor
-              title="Back Fields"
+              title={t('backFields')}
               fields={formData.back_fields || []}
               onChange={(f) => updateField('back_fields', f)}
               maxFields={10}
@@ -693,7 +696,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               onClick={handleActivate}
               disabled={saving}
             >
-              Activate Design
+              {t('activateDesign')}
             </Button>
           </div>
         )}
