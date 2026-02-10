@@ -22,11 +22,15 @@ import { getCustomerTransactions } from "@/api";
 import { classifyCustomer, getSegmentConfig } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
 import { TransactionTimeline } from "./transaction-timeline";
+import { StampProgress } from "./stamp-progress";
+import { computeCardColors } from "@/lib/card-utils";
 import {
   useCustomerTransactions,
   transactionKeys,
 } from "@/hooks/use-transactions";
 import type { CustomerResponse, TransactionResponse } from "@/types";
+import type { CardDesign } from "@/types/design";
+import type { StampIconType } from "@/components/design/StampIconPicker";
 import { cn } from "@/lib/utils";
 
 interface CustomerDetailSheetProps {
@@ -34,6 +38,7 @@ interface CustomerDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   maxStamps: number;
+  design?: CardDesign;
 }
 
 const LIMIT = 20;
@@ -61,6 +66,7 @@ export function CustomerDetailSheet({
   open,
   onOpenChange,
   maxStamps,
+  design,
 }: CustomerDetailSheetProps) {
   const { currentBusiness } = useBusiness();
   const t = useTranslations("customers.detail");
@@ -137,6 +143,9 @@ export function CustomerDetailSheet({
   const firstVisit = customer.created_at;
   const lastVisit = customer.updated_at;
   const stampProgress = maxStamps > 0 ? (customer.stamps / maxStamps) * 100 : 0;
+  const colors = design ? computeCardColors(design) : null;
+  const stampIcon = (design?.stamp_icon as StampIconType) ?? undefined;
+  const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -206,18 +215,8 @@ export function CustomerDetailSheet({
               />
             </div>
             {/* Stamp dots */}
-            <div className="flex items-center gap-1.5 mt-3">
-              {Array.from({ length: maxStamps }, (_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "h-3.5 flex-1 rounded-full transition-colors duration-300",
-                    i < customer.stamps
-                      ? "bg-[var(--accent)]"
-                      : "bg-[var(--muted)]"
-                  )}
-                />
-              ))}
+            <div className="mt-3">
+              <StampProgress count={customer.stamps} total={maxStamps} design={design} size="md" />
             </div>
           </div>
         </div>
@@ -280,6 +279,10 @@ export function CustomerDetailSheet({
             hasMore={hasMore}
             onLoadMore={loadMore}
             loadingMore={loadingMore}
+            stampIcon={stampIcon}
+            rewardIcon={rewardIcon}
+            stampFilledColor={colors?.accentHex}
+            iconColor={colors?.iconColorHex}
           />
         </div>
       </SheetContent>

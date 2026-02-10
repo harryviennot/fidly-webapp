@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import StampsDisplay from "./stamps-display";
+import { StampProgress } from "./customers/stamp-progress";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getSegmentConfig } from "@/lib/customer-segments";
@@ -260,7 +260,7 @@ export default function CustomerTable() {
                       {customer.email}
                     </TableCell>
                     <TableCell>
-                      <StampsDisplay count={customer.stamps} total={totalStamps} />
+                      <StampProgress count={customer.stamps} total={totalStamps} design={design} size="sm" />
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -305,6 +305,7 @@ export default function CustomerTable() {
           if (!open) setSelectedCustomer(null);
         }}
         maxStamps={totalStamps}
+        design={design}
       />
     </div>
   );

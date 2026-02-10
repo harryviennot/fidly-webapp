@@ -8,6 +8,7 @@ import {
   StarIcon,
   SlidersHorizontalIcon,
 } from "@phosphor-icons/react";
+import { StampIconSvg, type StampIconType } from "@/components/design/StampIconPicker";
 import type { TransactionResponse, TransactionType } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -46,12 +47,24 @@ interface TransactionItemProps {
   transaction: TransactionResponse;
   showCustomerName?: boolean;
   isLast?: boolean;
+  stampIcon?: string;
+  rewardIcon?: string;
+  stampFilledColor?: string;
+  iconColor?: string;
 }
 
-export function TransactionItem({ transaction, showCustomerName, isLast }: TransactionItemProps) {
+export function TransactionItem({
+  transaction,
+  showCustomerName,
+  isLast,
+  stampIcon: designStampIcon,
+  rewardIcon: designRewardIcon,
+  stampFilledColor,
+  iconColor,
+}: TransactionItemProps) {
   const t = useTranslations("customers.transaction");
   const config = TYPE_CONFIG[transaction.type];
-  const Icon = config.icon;
+  const hasDesignIcons = !!designStampIcon;
 
   const formatRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -76,18 +89,68 @@ export function TransactionItem({ transaction, showCustomerName, isLast }: Trans
 
   const metadata = transaction.metadata as Record<string, string> | null;
 
+  // Determine icon rendering based on transaction type + design availability
+  const renderIcon = () => {
+    const type = transaction.type;
+
+    if (hasDesignIcons && (type === "stamp_added" || type === "bonus_stamp")) {
+      return (
+        <div
+          className="flex items-center justify-center w-9 h-9 rounded-full shrink-0"
+          style={{ backgroundColor: stampFilledColor }}
+        >
+          <StampIconSvg
+            icon={designStampIcon as StampIconType}
+            className="w-4 h-4"
+            color={iconColor}
+          />
+        </div>
+      );
+    }
+
+    if (hasDesignIcons && type === "reward_redeemed") {
+      return (
+        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-emerald-500/15">
+          <StampIconSvg
+            icon={(designRewardIcon as StampIconType) ?? "gift"}
+            className="w-4 h-4"
+            color="#10b981"
+          />
+        </div>
+      );
+    }
+
+    if (hasDesignIcons && type === "stamp_voided") {
+      return (
+        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-red-500/15">
+          <StampIconSvg
+            icon={designStampIcon as StampIconType}
+            className="w-4 h-4"
+            color="#ef4444"
+          />
+        </div>
+      );
+    }
+
+    // Default: stamps_adjusted or no design icons
+    const Icon = config.icon;
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
+          config.bgColor
+        )}
+      >
+        <Icon size={16} weight="duotone" className={config.iconColor} />
+      </div>
+    );
+  };
+
   return (
     <div className="flex gap-3.5 relative">
       {/* Timeline dot + line */}
       <div className="flex flex-col items-center">
-        <div
-          className={cn(
-            "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
-            config.bgColor
-          )}
-        >
-          <Icon size={16} weight="duotone" className={config.iconColor} />
-        </div>
+        {renderIcon()}
         {!isLast && <div className="w-px flex-1 bg-[var(--border-light)]" />}
       </div>
 

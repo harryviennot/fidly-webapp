@@ -13,6 +13,10 @@ interface TransactionTimelineProps {
   onLoadMore?: () => void;
   loadingMore?: boolean;
   showCustomerName?: boolean;
+  stampIcon?: string;
+  rewardIcon?: string;
+  stampFilledColor?: string;
+  iconColor?: string;
 }
 
 export function TransactionTimeline({
@@ -22,6 +26,10 @@ export function TransactionTimeline({
   onLoadMore,
   loadingMore,
   showCustomerName,
+  stampIcon,
+  rewardIcon,
+  stampFilledColor,
+  iconColor,
 }: TransactionTimelineProps) {
   const t = useTranslations("customers.transaction");
 
@@ -50,6 +58,10 @@ export function TransactionTimeline({
           transaction={txn}
           showCustomerName={showCustomerName}
           isLast={i === transactions.length - 1}
+          stampIcon={stampIcon}
+          rewardIcon={rewardIcon}
+          stampFilledColor={stampFilledColor}
+          iconColor={iconColor}
         />
       ))}
 
