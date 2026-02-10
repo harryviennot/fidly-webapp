@@ -2,6 +2,7 @@
   "settings": {
     "sidebar": {
       "businessInfo": "Business Information",
+      "language": "Language",
       "theme": "Theme"
     },
     "businessInfo": {
@@ -11,6 +12,12 @@
       "businessNamePlaceholder": "My Business",
       "businessLogo": "Business Logo",
       "logoHint": "PNG or JPG, max 2MB"
+    },
+    "language": {
+      "title": "Your Business Language",
+      "description": "This is your main business language, and will be used for your loyalty program",
+      "passLocale": "Language",
+      "passLocaleHint": "You can always add translations for other languages in the design editor."
     },
     "theme": {
       "title": "Theme Customization",

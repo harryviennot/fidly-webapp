@@ -108,6 +108,22 @@
       "moveDown": "Descendre",
       "remove": "Supprimer",
       "addField": "Ajouter un champ"
+    },
+    "translations": {
+      "button": "Traductions",
+      "title": "Traductions — {language}",
+      "primaryContent": "Contenu principal",
+      "translatedContent": "Contenu traduit",
+      "saveTranslations": "Enregistrer les traductions",
+      "sameAsPrimary": "Identique au principal",
+      "organizationName": "Nom de l'organisation",
+      "cardDescription": "Description de la carte",
+      "logoText": "Texte du logo",
+      "frontDetails": "Détails avant",
+      "additionalInfo": "Informations supplémentaires",
+      "backFields": "Champs du dos",
+      "saved": "Traductions enregistrées",
+      "saveFailed": "Échec de l'enregistrement des traductions"
     }
   }
 }

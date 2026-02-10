@@ -2,6 +2,7 @@
   "settings": {
     "sidebar": {
       "businessInfo": "Informations de l'entreprise",
+      "language": "Langue",
       "theme": "Thème"
     },
     "businessInfo": {
@@ -11,6 +12,12 @@
       "businessNamePlaceholder": "Mon entreprise",
       "businessLogo": "Logo de l'entreprise",
       "logoHint": "PNG ou JPG, max 2 Mo"
+    },
+    "language": {
+      "title": "Langue de votre entreprise",
+      "description": "C'est la langue principale de votre entreprise, utilisée pour votre programme de fidélité",
+      "passLocale": "Langue",
+      "passLocaleHint": "Vous pouvez toujours ajouter des traductions pour d'autres langues dans l'éditeur de design."
     },
     "theme": {
       "title": "Personnalisation du thème",

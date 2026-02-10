@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SettingsSidebar, HexColorPicker } from '@/components/settings';
 import ImageUploader from '@/components/design/ImageUploader';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { updateBusiness, uploadBusinessLogo, deleteBusinessLogo } from '@/api';
 import { DEFAULT_ACCENT, applyTheme } from '@/utils/theme';
 
@@ -63,7 +64,7 @@ export default function SettingsPage() {
 
   // IntersectionObserver for scroll tracking
   useEffect(() => {
-    const sections = ['business-info', 'theme'];
+    const sections = ['business-info', 'language', 'theme'];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -243,6 +244,41 @@ export default function SettingsPage() {
                 accept="image/png,image/jpeg"
                 hint={t('businessInfo.logoHint')}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Language Section */}
+        <Card id="language" className="scroll-mt-24">
+          <CardHeader>
+            <CardTitle className="text-lg">{t('language.title')}</CardTitle>
+            <CardDescription>{t('language.description')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('language.passLocale')}</Label>
+              <Select
+                value={currentBusiness.primary_locale || 'fr'}
+                onValueChange={async (value: string) => {
+                  try {
+                    await updateBusiness(currentBusiness.id, {
+                      primary_locale: value as 'fr' | 'en',
+                    });
+                    await refetch();
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : t('errors.saveFailed'));
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full max-w-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fr">Français</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground">{t('language.passLocaleHint')}</p>
             </div>
           </CardContent>
         </Card>

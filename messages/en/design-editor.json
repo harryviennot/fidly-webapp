@@ -108,6 +108,22 @@
       "moveDown": "Move down",
       "remove": "Remove",
       "addField": "Add Field"
+    },
+    "translations": {
+      "button": "Translations",
+      "title": "Translations — {language}",
+      "primaryContent": "Primary Content",
+      "translatedContent": "Translated Content",
+      "saveTranslations": "Save Translations",
+      "sameAsPrimary": "Same as primary",
+      "organizationName": "Organization Name",
+      "cardDescription": "Card Description",
+      "logoText": "Logo Text",
+      "frontDetails": "Front Details",
+      "additionalInfo": "Additional Info",
+      "backFields": "Back Fields",
+      "saved": "Translations saved",
+      "saveFailed": "Failed to save translations"
     }
   }
 }

@@ -7,6 +7,7 @@ export interface Business {
   activated_at?: string | null;
   settings: BusinessSettings;
   logo_url?: string | null;
+  primary_locale: "fr" | "en";
   created_at?: string;
   updated_at?: string;
 }
@@ -43,4 +44,5 @@ export interface BusinessUpdate {
   name?: string;
   settings?: BusinessSettings;
   logo_url?: string | null;
+  primary_locale?: "fr" | "en";
 }

@@ -4,11 +4,12 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { PencilSimple, FloppyDisk, ArrowsClockwise } from '@phosphor-icons/react';
-import { CardDesign } from '@/types';
-import { getDesign } from '@/api';
+import { PencilSimple, FloppyDisk, ArrowsClockwise, Translate } from '@phosphor-icons/react';
+import { CardDesign, CardDesignUpdate } from '@/types';
+import { getDesign, updateDesign } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
+import TranslationsDialog from '@/components/design/TranslationsDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,7 @@ export default function EditDesignPage() {
   const editorRef = useRef<DesignEditorRef>(null);
   const t = useTranslations('designEditor.pages');
   const tDesign = useTranslations('designEditor');
+  const tTranslations = useTranslations('designEditor.translations');
 
   const [design, setDesign] = useState<CardDesign | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +42,7 @@ export default function EditDesignPage() {
   const [editingName, setEditingName] = useState(false);
   const [designName, setDesignName] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [translationsOpen, setTranslationsOpen] = useState(false);
 
   useEffect(() => {
     async function loadDesign() {
@@ -77,6 +80,21 @@ export default function EditDesignPage() {
       : t('savedDraft')
     );
     router.push('/');
+  };
+
+  // Target locale is the opposite of the business's primary locale
+  const primaryLocale = currentBusiness?.primary_locale || 'fr';
+  const targetLocale = primaryLocale === 'fr' ? 'en' : 'fr';
+
+  const handleSaveTranslations = async (update: CardDesignUpdate) => {
+    if (!currentBusiness?.id || !design) return;
+    try {
+      const updated = await updateDesign(currentBusiness.id, designId, update);
+      setDesign(updated);
+      toast.success(tTranslations('saved'));
+    } catch {
+      toast.error(tTranslations('saveFailed'));
+    }
   };
 
   if (loading) {
@@ -138,19 +156,29 @@ export default function EditDesignPage() {
           </div>
         }
         headerRight={
-          <Button className="rounded-full bg-black text-white hover:bg-black/80" onClick={handleSaveClick} disabled={saving}>
-            {saving ? (
-              <>
-                <ArrowsClockwise className="w-4 h-4 mr-2 animate-spin" />
-                {t('saving')}
-              </>
-            ) : (
-              <>
-                <FloppyDisk className="w-4 h-4 mr-2" weight="bold" />
-                {t('saveDesign')}
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setTranslationsOpen(true)}
+            >
+              <Translate className="w-4 h-4 mr-2" weight="bold" />
+              {tTranslations('button')}
+            </Button>
+            <Button className="rounded-full bg-black text-white hover:bg-black/80" onClick={handleSaveClick} disabled={saving}>
+              {saving ? (
+                <>
+                  <ArrowsClockwise className="w-4 h-4 mr-2 animate-spin" />
+                  {t('saving')}
+                </>
+              ) : (
+                <>
+                  <FloppyDisk className="w-4 h-4 mr-2" weight="bold" />
+                  {t('saveDesign')}
+                </>
+              )}
+            </Button>
+          </div>
         }
       />
 
@@ -170,6 +198,16 @@ export default function EditDesignPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <TranslationsDialog
+        open={translationsOpen}
+        onOpenChange={setTranslationsOpen}
+        design={design}
+        translations={design.translations || {}}
+        primaryLocale={primaryLocale}
+        targetLocale={targetLocale}
+        onSave={handleSaveTranslations}
+      />
     </>
   );
 }

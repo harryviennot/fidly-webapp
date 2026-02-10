@@ -12,6 +12,7 @@ export function SettingsSidebar({ activeSection }: SettingsSidebarProps) {
 
   const sections = [
     { id: 'business-info', label: t('businessInfo') },
+    { id: 'language', label: t('language') },
     { id: 'theme', label: t('theme') },
   ];
 
