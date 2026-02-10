@@ -142,7 +142,6 @@ export function CustomerDetailSheet({
 
   const firstVisit = customer.created_at;
   const lastVisit = customer.updated_at;
-  const stampProgress = maxStamps > 0 ? (customer.stamps / maxStamps) * 100 : 0;
   const colors = design ? computeCardColors(design) : null;
   const stampIcon = (design?.stamp_icon as StampIconType) ?? undefined;
   const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
@@ -193,32 +192,7 @@ export function CustomerDetailSheet({
 
         {/* ── Stamp Progress ── */}
         <div className="px-6 pb-5">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--paper)] p-4">
-            <div className="flex items-baseline justify-between mb-3">
-              <p className="text-sm font-medium text-[var(--foreground)]">
-                {t("stampProgress")}
-              </p>
-              <p className="text-sm tabular-nums">
-                <span className="text-lg font-bold text-[var(--foreground)]">
-                  {customer.stamps}
-                </span>
-                <span className="text-[var(--muted-foreground)]">
-                  /{maxStamps}
-                </span>
-              </p>
-            </div>
-            {/* Progress bar */}
-            <div className="h-2.5 bg-[var(--muted)] rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[var(--accent)] transition-all duration-500 ease-out"
-                style={{ width: `${Math.min(stampProgress, 100)}%` }}
-              />
-            </div>
-            {/* Stamp dots */}
-            <div className="mt-3">
-              <StampProgress count={customer.stamps} total={maxStamps} design={design} size="md" />
-            </div>
-          </div>
+          <StampProgress count={customer.stamps} total={maxStamps} design={design} size="md" />
         </div>
 
         {/* ── Quick Actions ── */}

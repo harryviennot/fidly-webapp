@@ -101,7 +101,7 @@ export function TransactionItem({
         >
           <StampIconSvg
             icon={designStampIcon as StampIconType}
-            className="w-4 h-4"
+            className="w-5 h-5"
             color={iconColor}
           />
         </div>
@@ -113,7 +113,7 @@ export function TransactionItem({
         <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-emerald-500/15">
           <StampIconSvg
             icon={(designRewardIcon as StampIconType) ?? "gift"}
-            className="w-4 h-4"
+            className="w-5 h-5"
             color="#10b981"
           />
         </div>
@@ -125,7 +125,7 @@ export function TransactionItem({
         <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-red-500/15">
           <StampIconSvg
             icon={designStampIcon as StampIconType}
-            className="w-4 h-4"
+            className="w-5 h-5"
             color="#ef4444"
           />
         </div>

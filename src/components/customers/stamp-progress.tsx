@@ -34,11 +34,11 @@ export function StampProgress({ count, total, design, size = "sm" }: StampProgre
                 filled
                   ? { backgroundColor: colors?.accentHex ?? "var(--accent)" }
                   : {
-                      backgroundColor: colors?.emptyStampBg ?? "var(--muted)",
-                      border: colors
-                        ? `1px solid ${colors.emptyStampBorder}`
-                        : undefined,
-                    }
+                    backgroundColor: colors?.emptyStampBg ?? "var(--muted)",
+                    border: colors
+                      ? `1px solid ${colors.emptyStampBorder}`
+                      : undefined,
+                  }
               }
             />
           );
@@ -61,27 +61,27 @@ export function StampProgress({ count, total, design, size = "sm" }: StampProgre
         return (
           <div
             key={i}
-            className="h-8 flex-1 rounded-full flex items-center justify-center transition-colors duration-300"
+            className="flex-1 aspect-square max-h-10 rounded-full flex items-center justify-center transition-colors duration-300"
             style={
               filled
                 ? {
-                    backgroundColor: colors?.accentHex ?? "var(--accent)",
-                    boxShadow: colors
-                      ? `0 0 6px ${colors.accentHex}40`
-                      : undefined,
-                  }
+                  backgroundColor: colors?.accentHex ?? "var(--accent)",
+                  boxShadow: colors
+                    ? `0 0 6px ${colors.accentHex}40`
+                    : undefined,
+                }
                 : {
-                    backgroundColor: colors?.emptyStampBg ?? "var(--muted)",
-                    border: colors
-                      ? `1px solid ${colors.emptyStampBorder}`
-                      : undefined,
-                  }
+                  backgroundColor: colors?.emptyStampBg ?? "var(--muted)",
+                  border: colors
+                    ? `1px solid ${colors.emptyStampBorder}`
+                    : undefined,
+                }
             }
           >
             {filled && (
               <StampIconSvg
                 icon={icon}
-                className="w-3.5 h-3.5"
+                className="w-3/5 h-3/5"
                 color={colors?.iconColorHex ?? "white"}
               />
             )}
