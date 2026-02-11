@@ -10,6 +10,7 @@ import {
 } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import type { TransactionResponse, TransactionType } from "@/types";
+import { useAuth } from "@/contexts/auth-provider";
 import { cn } from "@/lib/utils";
 
 const TYPE_CONFIG: Record<
@@ -54,6 +55,7 @@ interface ActivityItemProps {
 
 export function ActivityItem({ transaction }: ActivityItemProps) {
   const t = useTranslations("activity");
+  const { user } = useAuth();
   const config = TYPE_CONFIG[transaction.type];
   const Icon = config.icon;
 
@@ -132,9 +134,9 @@ export function ActivityItem({ transaction }: ActivityItemProps) {
           <Badge variant="outline" className="text-[10px] px-1.5 py-0">
             {transaction.source}
           </Badge>
-          {metadata?.employee_name && (
+          {transaction.employee_name && (
             <span className="text-xs text-[var(--muted-foreground)]">
-              {t("by")} {metadata.employee_name}
+              {t("by")} {transaction.employee_id === user?.id ? t("you") : transaction.employee_name}
             </span>
           )}
         </div>

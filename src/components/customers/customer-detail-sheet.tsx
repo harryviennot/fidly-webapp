@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useBusiness } from "@/contexts/business-context";
+import { useAuth } from "@/contexts/auth-provider";
 import { getCustomerTransactions } from "@/api";
 import { classifyCustomer, getSegmentConfig } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
@@ -69,6 +70,7 @@ export function CustomerDetailSheet({
   design,
 }: CustomerDetailSheetProps) {
   const { currentBusiness } = useBusiness();
+  const { user } = useAuth();
   const t = useTranslations("customers.detail");
   const locale = useLocale();
   const queryClient = useQueryClient();
@@ -253,6 +255,7 @@ export function CustomerDetailSheet({
             hasMore={hasMore}
             onLoadMore={loadMore}
             loadingMore={loadingMore}
+            currentUserId={user?.id}
             stampIcon={stampIcon}
             rewardIcon={rewardIcon}
             stampFilledColor={colors?.accentHex}

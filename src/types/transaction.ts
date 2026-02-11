@@ -12,6 +12,7 @@ export interface TransactionResponse {
   business_id: string;
   customer_id: string;
   employee_id: string | null;
+  employee_name: string | null;
   type: TransactionType;
   stamp_delta: number;
   stamps_before: number;

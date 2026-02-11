@@ -88,6 +88,8 @@
         "bonus_stamp": "Bonus Stamp",
         "stamps_adjusted": "Stamps Adjusted"
       },
+      "by": "by",
+      "you": "You",
       "voidReason": "Reason",
       "time": {
         "justNow": "Just now",

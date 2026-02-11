@@ -62,6 +62,7 @@ const TYPE_CONFIG: Record<
 
 interface TransactionItemProps {
   transaction: TransactionResponse;
+  currentUserId?: string;
   showCustomerName?: boolean;
   isLast?: boolean;
   stampIcon?: string;
@@ -72,6 +73,7 @@ interface TransactionItemProps {
 
 export function TransactionItem({
   transaction,
+  currentUserId,
   showCustomerName,
   isLast,
   stampIcon: designStampIcon,
@@ -200,7 +202,7 @@ export function TransactionItem({
             </p>
           )}
 
-          {/* Bottom row: stamp transition + source */}
+          {/* Bottom row: stamp transition + source + employee */}
           <div className="flex items-center gap-1.5 mt-1.5">
             <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums">
               {transaction.stamps_before} &rarr; {transaction.stamps_after}
@@ -209,6 +211,14 @@ export function TransactionItem({
             <span className="text-[11px] text-[var(--muted-foreground)]">
               {transaction.source}
             </span>
+            {transaction.employee_name && (
+              <>
+                <span className="text-[var(--border)] text-[10px]">&middot;</span>
+                <span className="text-[11px] text-[var(--muted-foreground)]">
+                  {t("by")} {transaction.employee_id === currentUserId ? t("you") : transaction.employee_name}
+                </span>
+              </>
+            )}
           </div>
 
           {/* Expandable void reason */}

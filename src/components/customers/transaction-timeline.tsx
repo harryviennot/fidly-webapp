@@ -12,6 +12,7 @@ interface TransactionTimelineProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   loadingMore?: boolean;
+  currentUserId?: string;
   showCustomerName?: boolean;
   stampIcon?: string;
   rewardIcon?: string;
@@ -25,6 +26,7 @@ export function TransactionTimeline({
   hasMore,
   onLoadMore,
   loadingMore,
+  currentUserId,
   showCustomerName,
   stampIcon,
   rewardIcon,
@@ -56,6 +58,7 @@ export function TransactionTimeline({
         <TransactionItem
           key={txn.id}
           transaction={txn}
+          currentUserId={currentUserId}
           showCustomerName={showCustomerName}
           isLast={i === transactions.length - 1}
           stampIcon={stampIcon}
