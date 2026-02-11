@@ -1,0 +1,52 @@
+{
+  "activity": {
+    "title": "Activity",
+    "loadFailed": "Failed to load activity feed.",
+    "empty": "No activity yet. Stamps and rewards will appear here.",
+    "loadMore": "Load More",
+    "loadingMore": "Loading...",
+    "by": "by",
+    "you": "You",
+    "live": "Live",
+    "stampProgress": "{current}/{total} stamps",
+    "filters": {
+      "all": "All",
+      "stampAdded": "Stamps Added",
+      "rewardRedeemed": "Rewards Redeemed",
+      "stampVoided": "Stamps Voided",
+      "bonusStamp": "Bonus Stamps",
+      "stampsAdjusted": "Adjustments"
+    },
+    "itemVerbs": {
+      "stamp_added": "received a stamp",
+      "reward_redeemed": "redeemed a reward",
+      "stamp_voided": "had a stamp voided",
+      "bonus_stamp": "received a bonus stamp",
+      "stamps_adjusted": "had stamps adjusted"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "yesterday": "Yesterday",
+      "daysAgo": "{count}d ago"
+    },
+    "dateGroups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisWeek": "This Week",
+      "older": "Older"
+    },
+    "stats": {
+      "stampsToday": "Stamps Today",
+      "rewardsToday": "Rewards Today",
+      "totalThisWeek": "Total This Week",
+      "activeCustomersToday": "Active Customers"
+    },
+    "emptyState": {
+      "title": "No activity yet",
+      "description": "Stamps and rewards will appear here as customers interact with your loyalty program."
+    },
+    "emptyFiltered": "No activity matches your filters."
+  }
+}
