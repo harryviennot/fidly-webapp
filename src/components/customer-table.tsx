@@ -160,6 +160,7 @@ export default function CustomerTable() {
   if (isLoading) {
     return (
       <div className="space-y-6">
+        <h2 className="text-2xl font-bold">{t("title")}</h2>
         <CustomerStatsCardsSkeleton />
         <CustomerSegmentFiltersSkeleton />
         <CustomerTableSkeleton />
@@ -170,6 +171,7 @@ export default function CustomerTable() {
   if (customers.length === 0) {
     return (
       <div className="space-y-6">
+        <h2 className="text-2xl font-bold">{t("title")}</h2>
         <CustomerStatsCards stats={stats} />
         <EmptyCustomersState />
       </div>
@@ -178,6 +180,7 @@ export default function CustomerTable() {
 
   return (
     <div className="space-y-6">
+      <h2 className="text-2xl font-bold">{t("title")}</h2>
       <CustomerStatsCards stats={stats} />
 
       <CustomerSegmentFilters

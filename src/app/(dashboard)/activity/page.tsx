@@ -12,7 +12,6 @@ import type { TransactionResponse, TransactionType, CustomerResponse } from "@/t
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ActivityStatsBar } from "@/components/activity/activity-stats-bar";
 import { ActivityFilters, ActivityFiltersSkeleton } from "@/components/activity/activity-filters";
-import { ActivitySearch } from "@/components/activity/activity-search";
 import { ActivityFeed, ActivityFeedSkeleton } from "@/components/activity/activity-feed";
 import { ActivityLiveIndicator } from "@/components/activity/activity-live-indicator";
 import { CustomerDetailSheet } from "@/components/customers/customer-detail-sheet";
@@ -26,7 +25,6 @@ export default function ActivityPage() {
   const businessId = currentBusiness?.id;
 
   const [typeFilter, setTypeFilter] = useState<TransactionType | "all">("all");
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerResponse | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -41,9 +39,8 @@ export default function ActivityPage() {
   const feedFilters = useMemo(
     () => ({
       type: typeFilter === "all" ? undefined : typeFilter,
-      search: searchQuery || undefined,
     }),
-    [typeFilter, searchQuery]
+    [typeFilter]
   );
 
   const feed = useActivityFeed(businessId, feedFilters);
@@ -60,7 +57,6 @@ export default function ActivityPage() {
     if (!serverLatest) return;
 
     if (latestRef.current && serverLatest > latestRef.current) {
-      // New activity detected — refresh the feed
       queryClient.invalidateQueries({
         queryKey: activityKeys.feed(businessId!, feedFilters),
       });
@@ -87,7 +83,7 @@ export default function ActivityPage() {
     return newIds;
   }, [feed.data?.pages]);
 
-  const hasActiveFilters = typeFilter !== "all" || !!searchQuery;
+  const hasActiveFilters = typeFilter !== "all";
 
   const handleItemClick = async (txn: TransactionResponse) => {
     if (!businessId) return;
@@ -113,19 +109,14 @@ export default function ActivityPage() {
       <Card>
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <ActivityLiveIndicator />
+            <ActivityLiveIndicator />
+            <div>
+              {feed.isLoading ? (
+                <ActivityFiltersSkeleton />
+              ) : (
+                <ActivityFilters selected={typeFilter} onSelect={setTypeFilter} />
+              )}
             </div>
-            <div className="w-64">
-              <ActivitySearch value={searchQuery} onChange={setSearchQuery} />
-            </div>
-          </div>
-          <div className="pt-3">
-            {feed.isLoading ? (
-              <ActivityFiltersSkeleton />
-            ) : (
-              <ActivityFilters selected={typeFilter} onSelect={setTypeFilter} />
-            )}
           </div>
         </CardHeader>
 

@@ -6,14 +6,13 @@ const PAGE_SIZE = 50;
 
 export function useActivityFeed(
   businessId: string | undefined,
-  filters: { type?: string; search?: string }
+  filters: { type?: string }
 ) {
   return useInfiniteQuery({
     queryKey: activityKeys.feed(businessId!, filters),
     queryFn: ({ pageParam = 0 }) =>
       getTransactions(businessId!, {
         type: filters.type,
-        search: filters.search,
         limit: PAGE_SIZE,
         offset: pageParam,
       }),

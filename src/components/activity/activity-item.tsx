@@ -105,7 +105,13 @@ export function ActivityItem({
   };
 
   const metadata = transaction.metadata as Record<string, string> | null;
-  const customerName = metadata?.customer_name || transaction.customer_id.slice(0, 8);
+  const rawName = metadata?.customer_name;
+  const isGenericName = !rawName || rawName.toLowerCase() === "customer";
+  const customerLabel = isGenericName
+    ? (metadata?.customer_email && !metadata.customer_email.includes("@placeholder.local")
+        ? metadata.customer_email
+        : transaction.customer_id.slice(0, 8))
+    : rawName;
 
   const deltaText =
     transaction.stamp_delta > 0
@@ -194,7 +200,7 @@ export function ActivityItem({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0 flex-wrap">
               <span className="text-[13px] font-medium text-[var(--foreground)] truncate">
-                {customerName}
+                {customerLabel}
               </span>
               <span className="text-[13px] text-[var(--muted-foreground)]">
                 {t(`itemVerbs.${transaction.type}`)}

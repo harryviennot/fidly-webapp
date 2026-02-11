@@ -1,5 +1,6 @@
 {
   "customers": {
+    "title": "Clients",
     "loading": "Chargement des clients...",
     "loadFailed": "Impossible de charger les clients. V\u00e9rifiez que le serveur est en cours d'ex\u00e9cution.",
     "searchPlaceholder": "Rechercher par nom ou email...",

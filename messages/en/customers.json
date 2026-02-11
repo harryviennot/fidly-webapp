@@ -1,5 +1,6 @@
 {
   "customers": {
+    "title": "Customers",
     "loading": "Loading customers...",
     "loadFailed": "Failed to load customers. Make sure the backend is running.",
     "searchPlaceholder": "Search by name or email...",

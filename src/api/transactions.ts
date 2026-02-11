@@ -4,7 +4,6 @@ import type { ActivityStatsResponse, TransactionListResponse } from '@/types/tra
 interface TransactionParams {
   customer_id?: string;
   type?: string;
-  search?: string;
   limit?: number;
   offset?: number;
 }
@@ -14,7 +13,6 @@ function buildQuery(params?: TransactionParams): string {
   const qs = new URLSearchParams();
   if (params.customer_id) qs.set('customer_id', params.customer_id);
   if (params.type) qs.set('type', params.type);
-  if (params.search) qs.set('search', params.search);
   if (params.limit != null) qs.set('limit', String(params.limit));
   if (params.offset != null) qs.set('offset', String(params.offset));
   const str = qs.toString();

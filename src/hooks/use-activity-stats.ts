@@ -3,7 +3,7 @@ import { getActivityStats } from "@/api";
 
 export const activityKeys = {
   stats: (businessId: string) => ["activity", businessId, "stats"] as const,
-  feed: (businessId: string, filters: { type?: string; search?: string }) =>
+  feed: (businessId: string, filters: { type?: string }) =>
     ["activity", businessId, "feed", filters] as const,
 };
 
