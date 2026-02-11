@@ -119,9 +119,9 @@ export function ActivityItem({ transaction }: ActivityItemProps) {
           </span>
         </div>
 
-        {metadata?.reason && (
+        {metadata?.void_reason && (
           <p className="text-xs text-[var(--muted-foreground)] mt-1 italic">
-            {metadata.reason}
+            {metadata.void_reason}
           </p>
         )}
 

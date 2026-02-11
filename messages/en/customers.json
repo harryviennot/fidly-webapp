@@ -36,6 +36,10 @@
       "voidReasonPlaceholder": "Reason for voiding...",
       "voiding": "Voiding...",
       "confirmVoid": "Confirm",
+      "voidDialogTitle": "Void Last Stamp",
+      "voidDialogDescription": "This will remove the last stamp. Please provide a reason.",
+      "voidReasonLabel": "Reason",
+      "cancel": "Cancel",
       "stampAddedToast": "Stamp added!",
       "stampFailedToast": "Failed to add stamp",
       "redeemSuccessToast": "Reward redeemed!",
@@ -84,6 +88,7 @@
         "bonus_stamp": "Bonus Stamp",
         "stamps_adjusted": "Stamps Adjusted"
       },
+      "voidReason": "Reason",
       "time": {
         "justNow": "Just now",
         "minutesAgo": "{count}m ago",

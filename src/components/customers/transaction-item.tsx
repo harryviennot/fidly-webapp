@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   StampIcon,
@@ -14,32 +15,48 @@ import { cn } from "@/lib/utils";
 
 const TYPE_CONFIG: Record<
   TransactionType,
-  { icon: typeof StampIcon; iconColor: string; bgColor: string }
+  {
+    icon: typeof StampIcon;
+    iconColor: string;
+    bgColor: string;
+    deltaBg: string;
+    deltaText: string;
+  }
 > = {
   stamp_added: {
     icon: StampIcon,
     iconColor: "text-[var(--accent)]",
     bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-emerald-50",
+    deltaText: "text-emerald-700",
   },
   reward_redeemed: {
     icon: GiftIcon,
     iconColor: "text-[var(--stamp-sand)]",
     bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-amber-50",
+    deltaText: "text-amber-700",
   },
   stamp_voided: {
     icon: ProhibitIcon,
     iconColor: "text-[var(--stamp-coral)]",
     bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-red-50",
+    deltaText: "text-red-600",
   },
   bonus_stamp: {
     icon: StarIcon,
     iconColor: "text-[var(--stamp-sage)]",
     bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-blue-50",
+    deltaText: "text-blue-700",
   },
   stamps_adjusted: {
     icon: SlidersHorizontalIcon,
     iconColor: "text-[var(--muted-foreground)]",
     bgColor: "bg-[var(--background-subtle)]",
+    deltaBg: "bg-[var(--background-subtle)]",
+    deltaText: "text-[var(--muted-foreground)]",
   },
 };
 
@@ -65,6 +82,7 @@ export function TransactionItem({
   const t = useTranslations("customers.transaction");
   const config = TYPE_CONFIG[transaction.type];
   const hasDesignIcons = !!designStampIcon;
+  const [reasonExpanded, setReasonExpanded] = useState(false);
 
   const formatRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -89,19 +107,18 @@ export function TransactionItem({
 
   const metadata = transaction.metadata as Record<string, string> | null;
 
-  // Determine icon rendering based on transaction type + design availability
   const renderIcon = () => {
     const type = transaction.type;
 
     if (hasDesignIcons && (type === "stamp_added" || type === "bonus_stamp")) {
       return (
         <div
-          className="flex items-center justify-center w-9 h-9 rounded-full shrink-0"
+          className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
           style={{ backgroundColor: stampFilledColor }}
         >
           <StampIconSvg
             icon={designStampIcon as StampIconType}
-            className="w-5 h-5"
+            className="w-4.5 h-4.5"
             color={iconColor}
           />
         </div>
@@ -110,10 +127,10 @@ export function TransactionItem({
 
     if (hasDesignIcons && type === "reward_redeemed") {
       return (
-        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-emerald-500/15">
+        <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-emerald-500/15">
           <StampIconSvg
             icon={(designRewardIcon as StampIconType) ?? "gift"}
-            className="w-5 h-5"
+            className="w-4.5 h-4.5"
             color="#10b981"
           />
         </div>
@@ -122,82 +139,91 @@ export function TransactionItem({
 
     if (hasDesignIcons && type === "stamp_voided") {
       return (
-        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-red-500/15">
+        <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-red-500/15">
           <StampIconSvg
             icon={designStampIcon as StampIconType}
-            className="w-5 h-5"
+            className="w-4.5 h-4.5"
             color="#ef4444"
           />
         </div>
       );
     }
 
-    // Default: stamps_adjusted or no design icons
     const Icon = config.icon;
     return (
       <div
         className={cn(
-          "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
+          "flex items-center justify-center w-8 h-8 rounded-full shrink-0",
           config.bgColor
         )}
       >
-        <Icon size={16} weight="duotone" className={config.iconColor} />
+        <Icon size={15} weight="duotone" className={config.iconColor} />
       </div>
     );
   };
 
   return (
-    <div className="flex gap-3.5 relative">
+    <div className="flex gap-3 relative">
       {/* Timeline dot + line */}
       <div className="flex flex-col items-center">
         {renderIcon()}
         {!isLast && <div className="w-px flex-1 bg-[var(--border-light)]" />}
       </div>
 
-      {/* Content */}
-      <div className="pb-5 flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-medium text-[var(--foreground)]">
-            {t(`types.${transaction.type}`)}
-          </span>
-          <span
-            className={cn(
-              "text-xs font-semibold tabular-nums",
-              transaction.stamp_delta > 0
-                ? "text-[var(--accent)]"
-                : transaction.stamp_delta < 0
-                  ? "text-[var(--stamp-coral)]"
-                  : "text-[var(--muted-foreground)]"
-            )}
-          >
-            {deltaText}
-          </span>
-        </div>
+      {/* Content card */}
+      <div className="pb-3 flex-1 min-w-0 -mt-0.5">
+        <div className="rounded-xl bg-[var(--background-subtle)]/60 px-3.5 py-2.5">
+          {/* Top row: type + time */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[13px] font-medium text-[var(--foreground)] truncate">
+                {t(`types.${transaction.type}`)}
+              </span>
+              <span
+                className={cn(
+                  "text-[11px] font-semibold tabular-nums px-1.5 py-0.5 rounded-full shrink-0",
+                  config.deltaBg,
+                  config.deltaText
+                )}
+              >
+                {deltaText}
+              </span>
+            </div>
+            <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums shrink-0">
+              {formatRelativeTime(transaction.created_at)}
+            </span>
+          </div>
 
-        {showCustomerName && metadata?.customer_name && (
-          <p className="text-sm text-[var(--foreground)] mt-0.5">
-            {metadata.customer_name}
-          </p>
-        )}
+          {showCustomerName && metadata?.customer_name && (
+            <p className="text-xs text-[var(--foreground)] mt-1">
+              {metadata.customer_name}
+            </p>
+          )}
 
-        {metadata?.reason && (
-          <p className="text-xs text-[var(--muted-foreground)] mt-1 italic">
-            {metadata.reason}
-          </p>
-        )}
+          {/* Bottom row: stamp transition + source */}
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums">
+              {transaction.stamps_before} &rarr; {transaction.stamps_after}
+            </span>
+            <span className="text-[var(--border)] text-[10px]">&middot;</span>
+            <span className="text-[11px] text-[var(--muted-foreground)]">
+              {transaction.source}
+            </span>
+          </div>
 
-        <div className="flex items-center gap-2 mt-1.5">
-          <span className="text-xs text-[var(--muted-foreground)]">
-            {formatRelativeTime(transaction.created_at)}
-          </span>
-          <span className="text-[var(--border)]">&middot;</span>
-          <span className="text-xs text-[var(--muted-foreground)] tabular-nums">
-            {transaction.stamps_before} &rarr; {transaction.stamps_after}
-          </span>
-          <span className="text-[var(--border)]">&middot;</span>
-          <span className="text-xs text-[var(--muted-foreground)]">
-            {transaction.source}
-          </span>
+          {/* Expandable void reason */}
+          {metadata?.void_reason && (
+            <button
+              type="button"
+              onClick={() => setReasonExpanded(!reasonExpanded)}
+              className={cn(
+                "text-[11px] text-[var(--muted-foreground)] mt-1.5 italic text-left w-full transition-colors hover:text-[var(--foreground)]",
+                !reasonExpanded && "line-clamp-1"
+              )}
+            >
+              {t("voidReason")}: {metadata.void_reason}
+            </button>
+          )}
         </div>
       </div>
     </div>

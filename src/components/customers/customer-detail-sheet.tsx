@@ -157,11 +157,11 @@ export function CustomerDetailSheet({
         <SheetDescription className="sr-only">{customer.email}</SheetDescription>
 
         {/* ── Header ── */}
-        <div className="px-6 pt-8 pb-5">
+        <div className="px-6 pt-8 pb-6">
           <div className="flex items-start gap-4">
             <div
               className={cn(
-                "flex items-center justify-center w-12 h-12 rounded-full text-white font-semibold text-base shrink-0 bg-gradient-to-br shadow-sm",
+                "flex items-center justify-center w-14 h-14 rounded-full text-white font-semibold text-lg shrink-0 bg-gradient-to-br shadow-sm",
                 SEGMENT_AVATAR_COLORS[segment] ?? "from-slate-500 to-slate-600"
               )}
             >
@@ -191,13 +191,13 @@ export function CustomerDetailSheet({
         </div>
 
         {/* ── Stamp Progress ── */}
-        <div className="px-6 pb-5">
+        <div className="px-6 pb-6">
           <StampProgress count={customer.stamps} total={maxStamps} design={design} size="md" />
         </div>
 
         {/* ── Quick Actions ── */}
         {currentBusiness && (
-          <div className="px-6 pb-5">
+          <div className="px-6 pb-6">
             <CustomerQuickActions
               customer={customer}
               businessId={currentBusiness.id}
@@ -213,8 +213,8 @@ export function CustomerDetailSheet({
         </div>
 
         {/* ── Stats ── */}
-        <div className="px-6 py-6">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+        <div className="px-6 py-7">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
             <StatItem
               icon={<CalendarBlankIcon size={18} weight="duotone" />}
               label={t("firstVisit")}
@@ -243,8 +243,8 @@ export function CustomerDetailSheet({
         </div>
 
         {/* ── Recent Activity ── */}
-        <div className="px-6 py-6">
-          <p className="text-sm font-medium text-[var(--foreground)] mb-5">
+        <div className="px-6 py-7">
+          <p className="text-sm font-medium text-[var(--foreground)] mb-6">
             {t("recentActivity")}
           </p>
           <TransactionTimeline

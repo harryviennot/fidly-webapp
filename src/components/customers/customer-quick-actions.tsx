@@ -4,7 +4,15 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { StampIcon, GiftIcon, ProhibitIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAddStamp, useRedeemReward, useVoidStamp } from "@/hooks/use-customers";
 import { toast } from "sonner";
 import type { CustomerResponse, TransactionResponse } from "@/types";
@@ -28,7 +36,7 @@ export function CustomerQuickActions({
   const addStampMutation = useAddStamp(businessId);
   const redeemMutation = useRedeemReward(businessId);
   const voidMutation = useVoidStamp(businessId);
-  const [showVoidForm, setShowVoidForm] = useState(false);
+  const [voidDialogOpen, setVoidDialogOpen] = useState(false);
   const [voidReason, setVoidReason] = useState("");
 
   const canRedeem = customer.stamps >= maxStamps;
@@ -70,7 +78,7 @@ export function CustomerQuickActions({
         reason: voidReason.trim(),
       });
       toast.success(t("voidSuccessToast"));
-      setShowVoidForm(false);
+      setVoidDialogOpen(false);
       setVoidReason("");
       onActionComplete();
     } catch (error) {
@@ -79,12 +87,12 @@ export function CustomerQuickActions({
   };
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       {/* Primary action — full width */}
       <Button
         variant="gradient"
         size="sm"
-        className="w-full"
+        className="w-full rounded-full"
         onClick={handleAddStamp}
         disabled={addStampMutation.isPending}
       >
@@ -97,7 +105,7 @@ export function CustomerQuickActions({
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800"
+          className="flex-1 rounded-full bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800"
           onClick={handleRedeem}
           disabled={redeemMutation.isPending || !canRedeem}
         >
@@ -108,8 +116,8 @@ export function CustomerQuickActions({
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 text-[var(--muted-foreground)] hover:text-red-600 hover:border-red-200 hover:bg-red-50"
-          onClick={() => setShowVoidForm(!showVoidForm)}
+          className="flex-1 rounded-full text-[var(--muted-foreground)] hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+          onClick={() => setVoidDialogOpen(true)}
           disabled={!lastVoidable}
         >
           <ProhibitIcon className="mr-1.5 h-4 w-4" />
@@ -117,26 +125,49 @@ export function CustomerQuickActions({
         </Button>
       </div>
 
-      {showVoidForm && lastVoidable && (
-        <div className="flex gap-2">
-          <Input
-            value={voidReason}
-            onChange={(e) => setVoidReason(e.target.value)}
-            placeholder={t("voidReasonPlaceholder")}
-            className="flex-1 text-sm"
-            maxLength={500}
-          />
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-red-600 border-red-200 hover:bg-red-50"
-            onClick={handleVoid}
-            disabled={voidMutation.isPending || !voidReason.trim()}
-          >
-            {voidMutation.isPending ? t("voiding") : t("confirmVoid")}
-          </Button>
-        </div>
-      )}
+      <Dialog open={voidDialogOpen} onOpenChange={(open) => {
+        setVoidDialogOpen(open);
+        if (!open) setVoidReason("");
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("voidDialogTitle")}</DialogTitle>
+            <DialogDescription>{t("voidDialogDescription")}</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <label className="text-sm font-medium text-[var(--foreground)] mb-1.5 block">
+              {t("voidReasonLabel")}
+            </label>
+            <Textarea
+              value={voidReason}
+              onChange={(e) => setVoidReason(e.target.value)}
+              placeholder={t("voidReasonPlaceholder")}
+              maxLength={500}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                setVoidDialogOpen(false);
+                setVoidReason("");
+              }}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-full text-red-600 border-red-200 hover:bg-red-50"
+              onClick={handleVoid}
+              disabled={voidMutation.isPending || !voidReason.trim()}
+            >
+              {voidMutation.isPending ? t("voiding") : t("confirmVoid")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -36,6 +36,10 @@
       "voidReasonPlaceholder": "Raison de l'annulation...",
       "voiding": "Annulation...",
       "confirmVoid": "Confirmer",
+      "voidDialogTitle": "Annuler le dernier tampon",
+      "voidDialogDescription": "Cette action supprimera le dernier tampon. Veuillez indiquer la raison.",
+      "voidReasonLabel": "Raison",
+      "cancel": "Annuler",
       "stampAddedToast": "Tampon ajout\u00e9 !",
       "stampFailedToast": "\u00c9chec de l'ajout du tampon",
       "redeemSuccessToast": "R\u00e9compense \u00e9chang\u00e9e !",
@@ -84,6 +88,7 @@
         "bonus_stamp": "Tampon bonus",
         "stamps_adjusted": "Tampons ajust\u00e9s"
       },
+      "voidReason": "Raison",
       "time": {
         "justNow": "\u00c0 l'instant",
         "minutesAgo": "il y a {count} min",

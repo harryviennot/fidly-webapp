@@ -52,7 +52,11 @@ export default function CustomerTable() {
   const [selectedSegment, setSelectedSegment] = useState<CustomerSegment | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerResponse | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+
+  const selectedCustomer = selectedCustomerId
+    ? customers.find((c) => c.id === selectedCustomerId) ?? null
+    : null;
 
   const handleAddStamp = async (e: React.MouseEvent, customer: CustomerResponse) => {
     e.stopPropagation();
@@ -253,14 +257,14 @@ export default function CustomerTable() {
                   <TableRow
                     key={customer.id}
                     className="cursor-pointer hover:bg-[var(--muted)]/50"
-                    onClick={() => setSelectedCustomer(customer)}
+                    onClick={() => setSelectedCustomerId(customer.id)}
                   >
                     <TableCell className="font-medium">{customer.name}</TableCell>
                     <TableCell className="hidden md:table-cell text-[var(--muted-foreground)]">
                       {customer.email}
                     </TableCell>
                     <TableCell>
-                      <StampProgress count={customer.stamps} total={totalStamps} design={design} size="sm" />
+                      <StampProgress count={customer.stamps} total={totalStamps} design={design ?? undefined} size="sm" />
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -284,6 +288,7 @@ export default function CustomerTable() {
                       <Button
                         size="sm"
                         variant="gradient"
+                        className="rounded-full"
                         onClick={(e) => handleAddStamp(e, customer)}
                         disabled={isStamping || isMaxed}
                       >
@@ -300,12 +305,12 @@ export default function CustomerTable() {
 
       <CustomerDetailSheet
         customer={selectedCustomer}
-        open={!!selectedCustomer}
+        open={!!selectedCustomerId}
         onOpenChange={(open) => {
-          if (!open) setSelectedCustomer(null);
+          if (!open) setSelectedCustomerId(null);
         }}
         maxStamps={totalStamps}
-        design={design}
+        design={design ?? undefined}
       />
     </div>
   );

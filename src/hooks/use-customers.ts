@@ -62,6 +62,33 @@ export function useRedeemReward(businessId: string | undefined) {
 
   return useMutation({
     mutationFn: (customerId: string) => redeemReward(businessId!, customerId),
+    onMutate: async (customerId) => {
+      await queryClient.cancelQueries({
+        queryKey: customerKeys.all(businessId!),
+      });
+      const previous = queryClient.getQueryData<CustomerResponse[]>(
+        customerKeys.all(businessId!)
+      );
+      if (previous) {
+        queryClient.setQueryData<CustomerResponse[]>(
+          customerKeys.all(businessId!),
+          previous.map((c) =>
+            c.id === customerId
+              ? { ...c, stamps: 0, total_redemptions: (c.total_redemptions ?? 0) + 1 }
+              : c
+          )
+        );
+      }
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(
+          customerKeys.all(businessId!),
+          context.previous
+        );
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: customerKeys.all(businessId!),
@@ -86,6 +113,33 @@ export function useVoidStamp(businessId: string | undefined) {
       transactionId: string;
       reason: string;
     }) => voidStamp(businessId!, customerId, transactionId, reason),
+    onMutate: async ({ customerId }) => {
+      await queryClient.cancelQueries({
+        queryKey: customerKeys.all(businessId!),
+      });
+      const previous = queryClient.getQueryData<CustomerResponse[]>(
+        customerKeys.all(businessId!)
+      );
+      if (previous) {
+        queryClient.setQueryData<CustomerResponse[]>(
+          customerKeys.all(businessId!),
+          previous.map((c) =>
+            c.id === customerId
+              ? { ...c, stamps: Math.max(0, c.stamps - 1) }
+              : c
+          )
+        );
+      }
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(
+          customerKeys.all(businessId!),
+          context.previous
+        );
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: customerKeys.all(businessId!),
