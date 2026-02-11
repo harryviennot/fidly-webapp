@@ -34,6 +34,15 @@ import { getSegmentConfig } from "@/lib/customer-segments";
 type SortKey = "name" | "email" | "stamps" | "updated_at" | "total_redemptions";
 type SortDir = "asc" | "desc";
 
+function SortIndicator({ column, sortKey, sortDir }: { column: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (sortKey !== column) return null;
+  return sortDir === "asc" ? (
+    <CaretUpIcon className="inline h-3.5 w-3.5 ml-1" />
+  ) : (
+    <CaretDownIcon className="inline h-3.5 w-3.5 ml-1" />
+  );
+}
+
 export default function CustomerTable() {
   const { currentBusiness } = useBusiness();
   const t = useTranslations("customers");
@@ -44,7 +53,7 @@ export default function CustomerTable() {
   const { data: design } = useActiveDesign(businessId);
   const addStampMutation = useAddStamp(businessId);
 
-  const transactions = txnData?.transactions ?? [];
+  const transactions = useMemo(() => txnData?.transactions ?? [], [txnData]);
   const totalStamps = design?.total_stamps ?? 10;
   const isLoading = customersLoading;
 
@@ -148,15 +157,6 @@ export default function CustomerTable() {
     return t("time.monthsAgo", { count: Math.floor(diffDays / 30) });
   };
 
-  const SortIndicator = ({ column }: { column: SortKey }) => {
-    if (sortKey !== column) return null;
-    return sortDir === "asc" ? (
-      <CaretUpIcon className="inline h-3.5 w-3.5 ml-1" />
-    ) : (
-      <CaretDownIcon className="inline h-3.5 w-3.5 ml-1" />
-    );
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -215,21 +215,21 @@ export default function CustomerTable() {
                   onClick={() => handleSort("name")}
                 >
                   {t("table.name")}
-                  <SortIndicator column="name" />
+                  <SortIndicator sortKey={sortKey} sortDir={sortDir} column="name" />
                 </TableHead>
                 <TableHead
                   className="cursor-pointer select-none hidden md:table-cell"
                   onClick={() => handleSort("email")}
                 >
                   {t("table.email")}
-                  <SortIndicator column="email" />
+                  <SortIndicator sortKey={sortKey} sortDir={sortDir} column="email" />
                 </TableHead>
                 <TableHead
                   className="cursor-pointer select-none"
                   onClick={() => handleSort("stamps")}
                 >
                   {t("table.stamps")}
-                  <SortIndicator column="stamps" />
+                  <SortIndicator sortKey={sortKey} sortDir={sortDir} column="stamps" />
                 </TableHead>
                 <TableHead>{t("table.segment")}</TableHead>
                 <TableHead
@@ -237,14 +237,14 @@ export default function CustomerTable() {
                   onClick={() => handleSort("updated_at")}
                 >
                   {t("table.lastVisit")}
-                  <SortIndicator column="updated_at" />
+                  <SortIndicator sortKey={sortKey} sortDir={sortDir} column="updated_at" />
                 </TableHead>
                 <TableHead
                   className="cursor-pointer select-none hidden lg:table-cell"
                   onClick={() => handleSort("total_redemptions")}
                 >
                   {t("table.redemptions")}
-                  <SortIndicator column="total_redemptions" />
+                  <SortIndicator sortKey={sortKey} sortDir={sortDir} column="total_redemptions" />
                 </TableHead>
                 <TableHead>{t("table.action")}</TableHead>
               </TableRow>

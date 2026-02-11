@@ -64,25 +64,6 @@ export default function ActivityPage() {
     latestRef.current = serverLatest;
   }, [stats.data?.latest_transaction_at, businessId, feedFilters, queryClient]);
 
-  // Track new transaction IDs for animation
-  const prevFirstPageRef = useRef<Set<string>>(new Set());
-  const newTransactionIds = useMemo(() => {
-    const firstPage = feed.data?.pages[0]?.transactions ?? [];
-    const currentIds = new Set(firstPage.map((t) => t.id));
-    const newIds = new Set<string>();
-
-    if (prevFirstPageRef.current.size > 0) {
-      for (const id of currentIds) {
-        if (!prevFirstPageRef.current.has(id)) {
-          newIds.add(id);
-        }
-      }
-    }
-
-    prevFirstPageRef.current = currentIds;
-    return newIds;
-  }, [feed.data?.pages]);
-
   const hasActiveFilters = typeFilter !== "all";
 
   const handleItemClick = async (txn: TransactionResponse) => {
@@ -132,7 +113,6 @@ export default function ActivityPage() {
               fetchNextPage={feed.fetchNextPage}
               totalStamps={totalStamps}
               onItemClick={handleItemClick}
-              newTransactionIds={newTransactionIds}
               hasActiveFilters={hasActiveFilters}
               stampIcon={stampIcon}
               rewardIcon={rewardIcon}
