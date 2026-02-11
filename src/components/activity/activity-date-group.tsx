@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Separator } from "@/components/ui/separator";
 import type { TransactionResponse } from "@/types";
 
 export type DateGroup = "today" | "yesterday" | "thisWeek" | "older";
@@ -10,12 +9,10 @@ export function ActivityDateGroupHeader({ group }: { group: DateGroup }) {
   const t = useTranslations("activity");
 
   return (
-    <div className="flex items-center gap-3 py-2">
-      <Separator className="flex-1" />
-      <span className="text-xs font-medium text-[var(--muted-foreground)] whitespace-nowrap">
+    <div className="pt-5 pb-2 first:pt-0">
+      <h3 className="text-lg font-bold text-[var(--foreground)]">
         {t(`dateGroups.${group}`)}
-      </span>
-      <Separator className="flex-1" />
+      </h3>
     </div>
   );
 }

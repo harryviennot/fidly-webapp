@@ -8,44 +8,55 @@ import {
   StarIcon,
   SlidersHorizontalIcon,
 } from "@phosphor-icons/react";
-import { Badge } from "@/components/ui/badge";
+import { StampIconSvg, type StampIconType } from "@/components/design/StampIconPicker";
 import type { TransactionResponse, TransactionType } from "@/types";
 import { useAuth } from "@/contexts/auth-provider";
 import { cn } from "@/lib/utils";
 
 const TYPE_CONFIG: Record<
   TransactionType,
-  { icon: typeof StampIcon; color: string; bgColor: string; borderColor: string }
+  {
+    icon: typeof StampIcon;
+    iconColor: string;
+    bgColor: string;
+    deltaBg: string;
+    deltaText: string;
+  }
 > = {
   stamp_added: {
     icon: StampIcon,
-    color: "text-green-600",
-    bgColor: "bg-green-50",
-    borderColor: "border-l-green-500",
+    iconColor: "text-[var(--accent)]",
+    bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-emerald-50",
+    deltaText: "text-emerald-700",
   },
   reward_redeemed: {
     icon: GiftIcon,
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
-    borderColor: "border-l-amber-500",
+    iconColor: "text-[var(--stamp-sand)]",
+    bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-amber-50",
+    deltaText: "text-amber-700",
   },
   stamp_voided: {
     icon: ProhibitIcon,
-    color: "text-red-600",
-    bgColor: "bg-red-50",
-    borderColor: "border-l-red-500",
+    iconColor: "text-[var(--stamp-coral)]",
+    bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-red-50",
+    deltaText: "text-red-600",
   },
   bonus_stamp: {
     icon: StarIcon,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-l-blue-500",
+    iconColor: "text-[var(--stamp-sage)]",
+    bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-blue-50",
+    deltaText: "text-blue-700",
   },
   stamps_adjusted: {
     icon: SlidersHorizontalIcon,
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
-    borderColor: "border-l-purple-500",
+    iconColor: "text-[var(--muted-foreground)]",
+    bgColor: "bg-[var(--background-subtle)]",
+    deltaBg: "bg-[var(--background-subtle)]",
+    deltaText: "text-[var(--muted-foreground)]",
   },
 };
 
@@ -54,13 +65,28 @@ interface ActivityItemProps {
   totalStamps?: number;
   onClick?: () => void;
   isNew?: boolean;
+  isLast?: boolean;
+  stampIcon?: string;
+  rewardIcon?: string;
+  stampFilledColor?: string;
+  iconColor?: string;
 }
 
-export function ActivityItem({ transaction, totalStamps, onClick, isNew }: ActivityItemProps) {
+export function ActivityItem({
+  transaction,
+  totalStamps,
+  onClick,
+  isNew,
+  isLast,
+  stampIcon: designStampIcon,
+  rewardIcon: designRewardIcon,
+  stampFilledColor,
+  iconColor,
+}: ActivityItemProps) {
   const t = useTranslations("activity");
   const { user } = useAuth();
   const config = TYPE_CONFIG[transaction.type];
-  const Icon = config.icon;
+  const hasDesignIcons = !!designStampIcon;
 
   const formatRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -86,78 +112,143 @@ export function ActivityItem({ transaction, totalStamps, onClick, isNew }: Activ
       ? `+${transaction.stamp_delta}`
       : String(transaction.stamp_delta);
 
-  const isReward = transaction.type === "reward_redeemed";
-  const isVoided = transaction.type === "stamp_voided";
+  const renderIcon = () => {
+    const type = transaction.type;
+
+    if (hasDesignIcons && (type === "stamp_added" || type === "bonus_stamp")) {
+      return (
+        <div
+          className="flex items-center justify-center w-9 h-9 rounded-full shrink-0"
+          style={{ backgroundColor: stampFilledColor }}
+        >
+          <StampIconSvg
+            icon={designStampIcon as StampIconType}
+            className="w-4.5 h-4.5"
+            color={iconColor}
+          />
+        </div>
+      );
+    }
+
+    if (hasDesignIcons && type === "reward_redeemed") {
+      return (
+        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-emerald-500/15">
+          <StampIconSvg
+            icon={(designRewardIcon as StampIconType) ?? "gift"}
+            className="w-4.5 h-4.5"
+            color="#10b981"
+          />
+        </div>
+      );
+    }
+
+    if (hasDesignIcons && type === "stamp_voided") {
+      return (
+        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-red-500/15">
+          <StampIconSvg
+            icon={designStampIcon as StampIconType}
+            className="w-4.5 h-4.5"
+            color="#ef4444"
+          />
+        </div>
+      );
+    }
+
+    const Icon = config.icon;
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
+          config.bgColor
+        )}
+      >
+        <Icon size={16} weight="duotone" className={config.iconColor} />
+      </div>
+    );
+  };
 
   return (
     <div
       onClick={onClick}
       className={cn(
-        "flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] bg-[var(--cream)] border-l-4 transition-all duration-200",
-        config.borderColor,
-        onClick && "cursor-pointer hover:shadow-md hover:-translate-y-0.5",
-        isReward && "border-l-[5px]",
-        isVoided && "bg-red-50/30",
+        "flex gap-3 relative",
+        onClick && "cursor-pointer",
         isNew && "animate-[slide-in-top_0.3s_ease-out]"
       )}
     >
-      <div
-        className={cn(
-          "flex items-center justify-center rounded-full shrink-0",
-          config.bgColor,
-          isReward ? "w-10 h-10" : "w-9 h-9"
-        )}
-      >
-        <Icon size={isReward ? 20 : 18} weight="fill" className={config.color} />
+      {/* Timeline dot + connecting line */}
+      <div className="flex flex-col items-center">
+        {renderIcon()}
+        {!isLast && <div className="w-px flex-1 bg-[var(--border-light)]" />}
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-medium text-[var(--foreground)]">
-            {customerName}
-          </span>
-          <span className="text-sm text-[var(--muted-foreground)]">
-            {t(`itemVerbs.${transaction.type}`)}
-          </span>
-          <span
-            className={cn(
-              "text-xs font-semibold px-1.5 py-0.5 rounded",
-              transaction.stamp_delta > 0
-                ? "bg-green-50 text-green-700"
-                : transaction.stamp_delta < 0
-                  ? "bg-red-50 text-red-700"
-                  : "bg-gray-50 text-gray-700"
-            )}
-          >
-            {deltaText}
-          </span>
-          {totalStamps != null && totalStamps > 0 && (
-            <span className="text-xs text-[var(--muted-foreground)]">
-              {t("stampProgress", {
-                current: transaction.stamps_after,
-                total: totalStamps,
-              })}
-            </span>
+      {/* Content card */}
+      <div className="pb-3 flex-1 min-w-0 -mt-0.5">
+        <div
+          className={cn(
+            "rounded-xl bg-[var(--background-subtle)]/60 px-3.5 py-2.5 transition-all duration-200",
+            onClick && "hover:bg-[var(--background-subtle)] hover:shadow-sm"
           )}
-        </div>
-
-        {metadata?.void_reason && (
-          <p className="text-xs text-[var(--muted-foreground)] mt-1 italic">
-            {metadata.void_reason}
-          </p>
-        )}
-
-        <div className="flex items-center gap-2 mt-1.5">
-          <span className="text-xs text-[var(--muted-foreground)]">
-            {formatRelativeTime(transaction.created_at)}
-          </span>
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-            {transaction.source}
-          </Badge>
-          {transaction.employee_name && (
-            <span className="text-xs text-[var(--muted-foreground)]">
-              {t("by")} {transaction.employee_id === user?.id ? t("you") : transaction.employee_name}
+        >
+          {/* Top row: customer name + verb + delta */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-wrap">
+              <span className="text-[13px] font-medium text-[var(--foreground)] truncate">
+                {customerName}
+              </span>
+              <span className="text-[13px] text-[var(--muted-foreground)]">
+                {t(`itemVerbs.${transaction.type}`)}
+              </span>
+              <span
+                className={cn(
+                  "text-[11px] font-semibold tabular-nums px-1.5 py-0.5 rounded-full shrink-0",
+                  config.deltaBg,
+                  config.deltaText
+                )}
+              >
+                {deltaText}
+              </span>
+            </div>
+            <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums shrink-0">
+              {formatRelativeTime(transaction.created_at)}
             </span>
+          </div>
+
+          {/* Bottom row: stamp progress + source + employee */}
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums">
+              {transaction.stamps_before} &rarr; {transaction.stamps_after}
+            </span>
+            {totalStamps != null && totalStamps > 0 && (
+              <>
+                <span className="text-[var(--border)] text-[10px]">&middot;</span>
+                <span className="text-[11px] text-[var(--muted-foreground)]">
+                  {t("stampProgress", {
+                    current: transaction.stamps_after,
+                    total: totalStamps,
+                  })}
+                </span>
+              </>
+            )}
+            <span className="text-[var(--border)] text-[10px]">&middot;</span>
+            <span className="text-[11px] text-[var(--muted-foreground)]">
+              {transaction.source}
+            </span>
+            {transaction.employee_name && (
+              <>
+                <span className="text-[var(--border)] text-[10px]">&middot;</span>
+                <span className="text-[11px] text-[var(--muted-foreground)]">
+                  {t("by")} {transaction.employee_id === user?.id ? t("you") : transaction.employee_name}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Void reason */}
+          {metadata?.void_reason && (
+            <p className="text-[11px] text-[var(--muted-foreground)] mt-1.5 italic">
+              {metadata.void_reason}
+            </p>
           )}
         </div>
       </div>
@@ -167,11 +258,16 @@ export function ActivityItem({ transaction, totalStamps, onClick, isNew }: Activ
 
 export function ActivityItemSkeleton() {
   return (
-    <div className="flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] bg-[var(--cream)] border-l-4 border-l-[var(--muted)]">
-      <div className="w-9 h-9 rounded-full bg-[var(--muted)] animate-pulse shrink-0" />
-      <div className="flex-1 space-y-2">
-        <div className="h-4 w-48 bg-[var(--muted)] rounded animate-pulse" />
-        <div className="h-3 w-24 bg-[var(--muted)] rounded animate-pulse" />
+    <div className="flex gap-3 relative">
+      <div className="flex flex-col items-center">
+        <div className="w-9 h-9 rounded-full bg-[var(--muted)] animate-pulse shrink-0" />
+        <div className="w-px flex-1 bg-[var(--border-light)]" />
+      </div>
+      <div className="pb-3 flex-1 min-w-0 -mt-0.5">
+        <div className="rounded-xl bg-[var(--background-subtle)]/60 px-3.5 py-2.5">
+          <div className="h-4 w-48 bg-[var(--muted)] rounded animate-pulse" />
+          <div className="h-3 w-32 bg-[var(--muted)] rounded animate-pulse mt-2" />
+        </div>
       </div>
     </div>
   );

@@ -16,6 +16,8 @@ import { ActivitySearch } from "@/components/activity/activity-search";
 import { ActivityFeed, ActivityFeedSkeleton } from "@/components/activity/activity-feed";
 import { ActivityLiveIndicator } from "@/components/activity/activity-live-indicator";
 import { CustomerDetailSheet } from "@/components/customers/customer-detail-sheet";
+import { computeCardColors } from "@/lib/card-utils";
+import type { StampIconType } from "@/components/design/StampIconPicker";
 
 export default function ActivityPage() {
   const { currentBusiness } = useBusiness();
@@ -30,6 +32,9 @@ export default function ActivityPage() {
 
   const { data: design } = useActiveDesign(businessId);
   const totalStamps = design?.total_stamps ?? 0;
+  const colors = design ? computeCardColors(design) : null;
+  const stampIcon = (design?.stamp_icon as StampIconType) ?? undefined;
+  const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
 
   const stats = useActivityStats(businessId);
 
@@ -138,6 +143,10 @@ export default function ActivityPage() {
               onItemClick={handleItemClick}
               newTransactionIds={newTransactionIds}
               hasActiveFilters={hasActiveFilters}
+              stampIcon={stampIcon}
+              rewardIcon={rewardIcon}
+              stampFilledColor={colors?.accentHex}
+              iconColor={colors?.iconColorHex}
             />
           )}
         </CardContent>

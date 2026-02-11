@@ -16,6 +16,10 @@ interface ActivityFeedProps {
   onItemClick?: (transaction: TransactionResponse) => void;
   newTransactionIds?: Set<string>;
   hasActiveFilters?: boolean;
+  stampIcon?: string;
+  rewardIcon?: string;
+  stampFilledColor?: string;
+  iconColor?: string;
 }
 
 export function ActivityFeed({
@@ -28,6 +32,10 @@ export function ActivityFeed({
   onItemClick,
   newTransactionIds,
   hasActiveFilters,
+  stampIcon,
+  rewardIcon,
+  stampFilledColor,
+  iconColor,
 }: ActivityFeedProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -59,18 +67,23 @@ export function ActivityFeed({
   }
 
   return (
-    <div className="space-y-1">
+    <div>
       {Array.from(grouped.entries()).map(([group, items]) => (
         <div key={group}>
           <ActivityDateGroupHeader group={group} />
-          <div className="space-y-3 py-1">
-            {items.map((txn) => (
+          <div>
+            {items.map((txn, i) => (
               <ActivityItem
                 key={txn.id}
                 transaction={txn}
                 totalStamps={totalStamps}
                 onClick={onItemClick ? () => onItemClick(txn) : undefined}
                 isNew={newTransactionIds?.has(txn.id)}
+                isLast={i === items.length - 1}
+                stampIcon={stampIcon}
+                rewardIcon={rewardIcon}
+                stampFilledColor={stampFilledColor}
+                iconColor={iconColor}
               />
             ))}
           </div>
@@ -81,7 +94,7 @@ export function ActivityFeed({
       <div ref={sentinelRef} className="h-1" />
 
       {isFetchingNextPage && (
-        <div className="space-y-3 pt-2">
+        <div className="pt-2">
           {[1, 2, 3].map((i) => (
             <ActivityItemSkeleton key={i} />
           ))}
@@ -93,7 +106,7 @@ export function ActivityFeed({
 
 export function ActivityFeedSkeleton() {
   return (
-    <div className="space-y-3">
+    <div>
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <ActivityItemSkeleton key={i} />
       ))}
