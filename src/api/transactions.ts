@@ -1,22 +1,24 @@
 import { API_BASE_URL, getAuthHeaders } from './client';
-import type { TransactionListResponse } from '@/types/transaction';
+import type { ActivityStatsResponse, TransactionListResponse } from '@/types/transaction';
 
 interface TransactionParams {
   customer_id?: string;
   type?: string;
+  search?: string;
   limit?: number;
   offset?: number;
 }
 
 function buildQuery(params?: TransactionParams): string {
   if (!params) return '';
-  const search = new URLSearchParams();
-  if (params.customer_id) search.set('customer_id', params.customer_id);
-  if (params.type) search.set('type', params.type);
-  if (params.limit != null) search.set('limit', String(params.limit));
-  if (params.offset != null) search.set('offset', String(params.offset));
-  const qs = search.toString();
-  return qs ? `?${qs}` : '';
+  const qs = new URLSearchParams();
+  if (params.customer_id) qs.set('customer_id', params.customer_id);
+  if (params.type) qs.set('type', params.type);
+  if (params.search) qs.set('search', params.search);
+  if (params.limit != null) qs.set('limit', String(params.limit));
+  if (params.offset != null) qs.set('offset', String(params.offset));
+  const str = qs.toString();
+  return str ? `?${str}` : '';
 }
 
 export async function getTransactions(
@@ -47,6 +49,21 @@ export async function getCustomerTransactions(
 
   if (!response.ok) {
     throw new Error('Failed to fetch customer transactions');
+  }
+
+  return response.json();
+}
+
+export async function getActivityStats(
+  businessId: string
+): Promise<ActivityStatsResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/transactions/${businessId}/stats`,
+    { headers: await getAuthHeaders() }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch activity stats');
   }
 
   return response.json();

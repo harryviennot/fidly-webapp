@@ -29,6 +29,14 @@ export interface TransactionListResponse {
   has_more: boolean;
 }
 
+export interface ActivityStatsResponse {
+  stamps_today: number;
+  rewards_today: number;
+  total_this_week: number;
+  active_customers_today: number;
+  latest_transaction_at: string | null;
+}
+
 export interface StampResponse {
   customer_id: string;
   name: string;

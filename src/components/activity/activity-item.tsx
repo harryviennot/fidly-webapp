@@ -51,9 +51,12 @@ const TYPE_CONFIG: Record<
 
 interface ActivityItemProps {
   transaction: TransactionResponse;
+  totalStamps?: number;
+  onClick?: () => void;
+  isNew?: boolean;
 }
 
-export function ActivityItem({ transaction }: ActivityItemProps) {
+export function ActivityItem({ transaction, totalStamps, onClick, isNew }: ActivityItemProps) {
   const t = useTranslations("activity");
   const { user } = useAuth();
   const config = TYPE_CONFIG[transaction.type];
@@ -83,20 +86,29 @@ export function ActivityItem({ transaction }: ActivityItemProps) {
       ? `+${transaction.stamp_delta}`
       : String(transaction.stamp_delta);
 
+  const isReward = transaction.type === "reward_redeemed";
+  const isVoided = transaction.type === "stamp_voided";
+
   return (
     <div
+      onClick={onClick}
       className={cn(
         "flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] bg-[var(--cream)] border-l-4 transition-all duration-200",
-        config.borderColor
+        config.borderColor,
+        onClick && "cursor-pointer hover:shadow-md hover:-translate-y-0.5",
+        isReward && "border-l-[5px]",
+        isVoided && "bg-red-50/30",
+        isNew && "animate-[slide-in-top_0.3s_ease-out]"
       )}
     >
       <div
         className={cn(
-          "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
-          config.bgColor
+          "flex items-center justify-center rounded-full shrink-0",
+          config.bgColor,
+          isReward ? "w-10 h-10" : "w-9 h-9"
         )}
       >
-        <Icon size={18} weight="fill" className={config.color} />
+        <Icon size={isReward ? 20 : 18} weight="fill" className={config.color} />
       </div>
 
       <div className="flex-1 min-w-0">
@@ -119,6 +131,14 @@ export function ActivityItem({ transaction }: ActivityItemProps) {
           >
             {deltaText}
           </span>
+          {totalStamps != null && totalStamps > 0 && (
+            <span className="text-xs text-[var(--muted-foreground)]">
+              {t("stampProgress", {
+                current: transaction.stamps_after,
+                total: totalStamps,
+              })}
+            </span>
+          )}
         </div>
 
         {metadata?.void_reason && (

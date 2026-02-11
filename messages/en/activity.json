@@ -7,6 +7,9 @@
     "loadingMore": "Loading...",
     "by": "by",
     "you": "You",
+    "live": "Live",
+    "searchPlaceholder": "Search by customer name...",
+    "stampProgress": "{current}/{total} stamps",
     "filters": {
       "all": "All",
       "stampAdded": "Stamps Added",
@@ -28,6 +31,23 @@
       "hoursAgo": "{count}h ago",
       "yesterday": "Yesterday",
       "daysAgo": "{count}d ago"
-    }
+    },
+    "dateGroups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisWeek": "This Week",
+      "older": "Older"
+    },
+    "stats": {
+      "stampsToday": "Stamps Today",
+      "rewardsToday": "Rewards Today",
+      "totalThisWeek": "Total This Week",
+      "activeCustomersToday": "Active Customers"
+    },
+    "emptyState": {
+      "title": "No activity yet",
+      "description": "Stamps and rewards will appear here as customers interact with your loyalty program."
+    },
+    "emptyFiltered": "No activity matches your filters."
   }
 }

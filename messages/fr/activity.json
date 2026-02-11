@@ -7,6 +7,9 @@
     "loadingMore": "Chargement...",
     "by": "par",
     "you": "Vous",
+    "live": "En direct",
+    "searchPlaceholder": "Rechercher par nom de client...",
+    "stampProgress": "{current}/{total} tampons",
     "filters": {
       "all": "Tout",
       "stampAdded": "Tampons ajout\u00e9s",
@@ -28,6 +31,23 @@
       "hoursAgo": "il y a {count}h",
       "yesterday": "Hier",
       "daysAgo": "il y a {count}j"
-    }
+    },
+    "dateGroups": {
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "thisWeek": "Cette semaine",
+      "older": "Plus ancien"
+    },
+    "stats": {
+      "stampsToday": "Tampons aujourd'hui",
+      "rewardsToday": "R\u00e9compenses aujourd'hui",
+      "totalThisWeek": "Total cette semaine",
+      "activeCustomersToday": "Clients actifs"
+    },
+    "emptyState": {
+      "title": "Aucune activit\u00e9",
+      "description": "Les tampons et r\u00e9compenses appara\u00eetront ici lorsque vos clients interagiront avec votre programme de fid\u00e9lit\u00e9."
+    },
+    "emptyFiltered": "Aucune activit\u00e9 ne correspond \u00e0 vos filtres."
   }
 }
