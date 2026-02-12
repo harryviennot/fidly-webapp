@@ -1,15 +1,104 @@
 {
   "customers": {
+    "title": "Clients",
     "loading": "Chargement des clients...",
-    "loadFailed": "Impossible de charger les clients. Vérifiez que le serveur est en cours d'exécution.",
+    "loadFailed": "Impossible de charger les clients. V\u00e9rifiez que le serveur est en cours d'ex\u00e9cution.",
     "searchPlaceholder": "Rechercher par nom ou email...",
-    "noResults": "Aucun client trouvé correspondant à votre recherche.",
+    "noResults": "Aucun client trouv\u00e9 correspondant \u00e0 votre recherche.",
     "empty": "Aucun client pour le moment.",
     "table": {
       "name": "Nom",
       "email": "Email",
       "stamps": "Tampons",
+      "segment": "Segment",
+      "lastVisit": "Derni\u00e8re visite",
+      "redemptions": "\u00c9changes",
       "action": "Action"
+    },
+    "stats": {
+      "totalCustomers": "Total Clients",
+      "newThisWeek": "Nouveaux cette semaine",
+      "stampsToday": "Tampons aujourd'hui",
+      "redemptionsThisMonth": "\u00c9changes ce mois"
+    },
+    "segments": {
+      "all": "Tous",
+      "new": "Nouveau",
+      "regular": "R\u00e9gulier",
+      "vip": "VIP",
+      "closeToReward": "Proche de la r\u00e9compense",
+      "atRisk": "\u00c0 risque"
+    },
+    "actions": {
+      "addStamp": "Ajouter tampon",
+      "maxed": "Max !",
+      "redeem": "\u00c9changer",
+      "voidLast": "Annuler dernier",
+      "voidReasonPlaceholder": "Raison de l'annulation...",
+      "voiding": "Annulation...",
+      "confirmVoid": "Confirmer",
+      "voidDialogTitle": "Annuler le dernier tampon",
+      "voidDialogDescription": "Cette action supprimera le dernier tampon. Veuillez indiquer la raison.",
+      "voidReasonLabel": "Raison",
+      "cancel": "Annuler",
+      "stampAddedToast": "Tampon ajout\u00e9 !",
+      "stampFailedToast": "\u00c9chec de l'ajout du tampon",
+      "redeemSuccessToast": "R\u00e9compense \u00e9chang\u00e9e !",
+      "redeemFailedToast": "\u00c9chec de l'\u00e9change",
+      "voidSuccessToast": "Tampon annul\u00e9",
+      "voidFailedToast": "\u00c9chec de l'annulation"
+    },
+    "toasts": {
+      "stampAdded": "Tampon ajout\u00e9 pour {name}",
+      "stampFailed": "\u00c9chec de l'ajout du tampon"
+    },
+    "time": {
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "daysAgo": "il y a {count}j",
+      "weeksAgo": "il y a {count} sem.",
+      "monthsAgo": "il y a {count} mois"
+    },
+    "emptyState": {
+      "title": "Aucun client pour le moment",
+      "description": "Les clients appara\u00eetront ici une fois qu'ils se seront inscrits via votre lien de fid\u00e9lit\u00e9."
+    },
+    "detail": {
+      "stampProgress": "Progression des tampons",
+      "firstVisit": "Premi\u00e8re visite",
+      "lastVisit": "Derni\u00e8re visite",
+      "totalVisits": "Visites totales",
+      "redemptions": "\u00c9changes",
+      "recentActivity": "Activit\u00e9 r\u00e9cente",
+      "segments": {
+        "new": "Nouveau",
+        "regular": "R\u00e9gulier",
+        "vip": "VIP",
+        "close_to_reward": "Proche de la r\u00e9compense",
+        "at_risk": "\u00c0 risque"
+      }
+    },
+    "transaction": {
+      "empty": "Aucune transaction",
+      "loadMore": "Charger plus",
+      "loadingMore": "Chargement...",
+      "types": {
+        "stamp_added": "Tampon ajout\u00e9",
+        "reward_redeemed": "R\u00e9compense \u00e9chang\u00e9e",
+        "stamp_voided": "Tampon annul\u00e9",
+        "bonus_stamp": "Tampon bonus",
+        "stamps_adjusted": "Tampons ajust\u00e9s"
+      },
+      "by": "par",
+      "you": "Vous",
+      "voidReason": "Raison",
+      "time": {
+        "justNow": "\u00c0 l'instant",
+        "minutesAgo": "il y a {count} min",
+        "hoursAgo": "il y a {count}h",
+        "yesterday": "Hier",
+        "daysAgo": "il y a {count}j"
+      }
     }
   }
 }

@@ -2,12 +2,14 @@
   "nav": {
     "loyaltyProgram": "Programme de fidélité",
     "customers": "Clients",
+    "activity": "Activité",
     "team": "Équipe",
     "settings": "Paramètres"
   },
   "header": {
     "loyaltyProgram": "Programme de fidélité",
     "customers": "Clients",
+    "activity": "Activité",
     "design": "Design de carte",
     "team": "Équipe",
     "settings": "Paramètres",

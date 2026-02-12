@@ -2,12 +2,14 @@
   "nav": {
     "loyaltyProgram": "Loyalty Program",
     "customers": "Customers",
+    "activity": "Activity",
     "team": "Team",
     "settings": "Settings"
   },
   "header": {
     "loyaltyProgram": "Loyalty Program",
     "customers": "Customers",
+    "activity": "Activity",
     "design": "Card Design",
     "team": "Team",
     "settings": "Settings",

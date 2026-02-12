@@ -24,11 +24,13 @@ import {
   HeartIcon,
   UserPlusIcon,
   GearIcon,
+  ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 
 const navItems = [
   { href: "/", labelKey: "nav.loyaltyProgram" as const, icon: HeartIcon },
   { href: "/customers", labelKey: "nav.customers" as const, icon: UsersIcon },
+  { href: "/activity", labelKey: "nav.activity" as const, icon: ClockCounterClockwiseIcon },
   { href: "/team", labelKey: "nav.team" as const, icon: UserPlusIcon },
   { href: "/settings", labelKey: "nav.settings" as const, icon: GearIcon },
 ];

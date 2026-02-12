@@ -17,6 +17,7 @@ export default getRequestConfig(async () => {
       ...(await import(`../../messages/${locale}/design-editor.json`)).default,
       ...(await import(`../../messages/${locale}/loyalty-program.json`)).default,
       ...(await import(`../../messages/${locale}/auth.json`)).default,
+      ...(await import(`../../messages/${locale}/activity.json`)).default,
     },
   };
 });

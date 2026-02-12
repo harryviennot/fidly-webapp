@@ -1,5 +1,6 @@
 {
   "customers": {
+    "title": "Customers",
     "loading": "Loading customers...",
     "loadFailed": "Failed to load customers. Make sure the backend is running.",
     "searchPlaceholder": "Search by name or email...",
@@ -9,7 +10,95 @@
       "name": "Name",
       "email": "Email",
       "stamps": "Stamps",
+      "segment": "Segment",
+      "lastVisit": "Last Visit",
+      "redemptions": "Redemptions",
       "action": "Action"
+    },
+    "stats": {
+      "totalCustomers": "Total Customers",
+      "newThisWeek": "New This Week",
+      "stampsToday": "Stamps Today",
+      "redemptionsThisMonth": "Redemptions This Month"
+    },
+    "segments": {
+      "all": "All",
+      "new": "New",
+      "regular": "Regular",
+      "vip": "VIP",
+      "closeToReward": "Close to Reward",
+      "atRisk": "At Risk"
+    },
+    "actions": {
+      "addStamp": "Add Stamp",
+      "maxed": "Max!",
+      "redeem": "Redeem",
+      "voidLast": "Void Last",
+      "voidReasonPlaceholder": "Reason for voiding...",
+      "voiding": "Voiding...",
+      "confirmVoid": "Confirm",
+      "voidDialogTitle": "Void Last Stamp",
+      "voidDialogDescription": "This will remove the last stamp. Please provide a reason.",
+      "voidReasonLabel": "Reason",
+      "cancel": "Cancel",
+      "stampAddedToast": "Stamp added!",
+      "stampFailedToast": "Failed to add stamp",
+      "redeemSuccessToast": "Reward redeemed!",
+      "redeemFailedToast": "Failed to redeem reward",
+      "voidSuccessToast": "Stamp voided",
+      "voidFailedToast": "Failed to void stamp"
+    },
+    "toasts": {
+      "stampAdded": "Stamp added for {name}",
+      "stampFailed": "Failed to add stamp"
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{count}d ago",
+      "weeksAgo": "{count}w ago",
+      "monthsAgo": "{count}mo ago"
+    },
+    "emptyState": {
+      "title": "No Customers Yet",
+      "description": "Customers will appear here once they register through your loyalty program link."
+    },
+    "detail": {
+      "stampProgress": "Stamp Progress",
+      "firstVisit": "First Visit",
+      "lastVisit": "Last Visit",
+      "totalVisits": "Total Visits",
+      "redemptions": "Redemptions",
+      "recentActivity": "Recent Activity",
+      "segments": {
+        "new": "New",
+        "regular": "Regular",
+        "vip": "VIP",
+        "close_to_reward": "Close to Reward",
+        "at_risk": "At Risk"
+      }
+    },
+    "transaction": {
+      "empty": "No transactions yet",
+      "loadMore": "Load More",
+      "loadingMore": "Loading...",
+      "types": {
+        "stamp_added": "Stamp Added",
+        "reward_redeemed": "Reward Redeemed",
+        "stamp_voided": "Stamp Voided",
+        "bonus_stamp": "Bonus Stamp",
+        "stamps_adjusted": "Stamps Adjusted"
+      },
+      "by": "by",
+      "you": "You",
+      "voidReason": "Reason",
+      "time": {
+        "justNow": "Just now",
+        "minutesAgo": "{count}m ago",
+        "hoursAgo": "{count}h ago",
+        "yesterday": "Yesterday",
+        "daysAgo": "{count}d ago"
+      }
     }
   }
 }

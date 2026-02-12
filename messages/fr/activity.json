@@ -1,0 +1,52 @@
+{
+  "activity": {
+    "title": "Activit\u00e9",
+    "loadFailed": "Impossible de charger le fil d'activit\u00e9.",
+    "empty": "Aucune activit\u00e9 pour le moment. Les tampons et r\u00e9compenses appara\u00eetront ici.",
+    "loadMore": "Charger plus",
+    "loadingMore": "Chargement...",
+    "by": "par",
+    "you": "Vous",
+    "live": "En direct",
+    "stampProgress": "{current}/{total} tampons",
+    "filters": {
+      "all": "Tout",
+      "stampAdded": "Tampons ajout\u00e9s",
+      "rewardRedeemed": "R\u00e9compenses",
+      "stampVoided": "Tampons annul\u00e9s",
+      "bonusStamp": "Tampons bonus",
+      "stampsAdjusted": "Ajustements"
+    },
+    "itemVerbs": {
+      "stamp_added": "a re\u00e7u un tampon",
+      "reward_redeemed": "a \u00e9chang\u00e9 une r\u00e9compense",
+      "stamp_voided": "a eu un tampon annul\u00e9",
+      "bonus_stamp": "a re\u00e7u un tampon bonus",
+      "stamps_adjusted": "a eu ses tampons ajust\u00e9s"
+    },
+    "time": {
+      "justNow": "\u00c0 l'instant",
+      "minutesAgo": "il y a {count} min",
+      "hoursAgo": "il y a {count}h",
+      "yesterday": "Hier",
+      "daysAgo": "il y a {count}j"
+    },
+    "dateGroups": {
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "thisWeek": "Cette semaine",
+      "older": "Plus ancien"
+    },
+    "stats": {
+      "stampsToday": "Tampons aujourd'hui",
+      "rewardsToday": "R\u00e9compenses aujourd'hui",
+      "totalThisWeek": "Total cette semaine",
+      "activeCustomersToday": "Clients actifs"
+    },
+    "emptyState": {
+      "title": "Aucune activit\u00e9",
+      "description": "Les tampons et r\u00e9compenses appara\u00eetront ici lorsque vos clients interagiront avec votre programme de fid\u00e9lit\u00e9."
+    },
+    "emptyFiltered": "Aucune activit\u00e9 ne correspond \u00e0 vos filtres."
+  }
+}

@@ -1,20 +1,5 @@
 import { API_BASE_URL, getAuthHeaders } from './client';
-import type { CustomerCreate, CustomerResponse, StampResponse } from '@/types';
-
-export async function createCustomer(businessId: string, data: CustomerCreate): Promise<CustomerResponse> {
-  const response = await fetch(`${API_BASE_URL}/customers/${businessId}`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to create customer');
-  }
-
-  return response.json();
-}
+import type { CustomerResponse, StampResponse } from '@/types';
 
 export async function getCustomer(businessId: string, customerId: string): Promise<CustomerResponse> {
   const response = await fetch(`${API_BASE_URL}/customers/${businessId}/${customerId}`, {
@@ -57,6 +42,49 @@ export async function addStamp(businessId: string, customerId: string): Promise<
       throw new Error('Customer not found');
     }
     throw new Error('Failed to add stamp');
+  }
+
+  return response.json();
+}
+
+export async function redeemReward(
+  businessId: string,
+  customerId: string
+): Promise<StampResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/stamps/${businessId}/${customerId}/redeem`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to redeem reward');
+  }
+
+  return response.json();
+}
+
+export async function voidStamp(
+  businessId: string,
+  customerId: string,
+  transactionId: string,
+  reason: string
+): Promise<StampResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/stamps/${businessId}/${customerId}/void`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ transaction_id: transactionId, reason }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to void stamp');
   }
 
   return response.json();
