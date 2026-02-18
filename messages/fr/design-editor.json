@@ -53,6 +53,7 @@
       "activateDesign": "Activer le design",
       "activateConfirm": "Activer ce design ? Tous les clients recevront la carte mise à jour.",
       "failedToActivate": "Échec de l'activation",
+      "stripsGenerating": "Les images des tampons sont en cours de génération. Veuillez patienter quelques secondes et réessayer.",
       "failedToSave": "Échec de l'enregistrement du design",
       "requiredFields": "Veuillez remplir tous les champs obligatoires (Nom, Organisation, Description)",
       "branding": "Identité visuelle",

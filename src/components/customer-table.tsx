@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { CaretUpIcon, CaretDownIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { CaretUpIcon, CaretDownIcon, CaretLeftIcon, CaretRightIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useBusiness } from "@/contexts/business-context";
-import { useCustomers, useAddStamp } from "@/hooks/use-customers";
+import { useCustomers, useAddStamp, PAGE_SIZE } from "@/hooks/use-customers";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useActiveDesign } from "@/hooks/use-designs";
 import type { CustomerResponse } from "@/types";
@@ -48,10 +48,15 @@ export default function CustomerTable() {
   const t = useTranslations("customers");
   const businessId = currentBusiness?.id;
 
-  const { data: customers = [], isLoading: customersLoading } = useCustomers(businessId);
+  const [page, setPage] = useState(0);
+  const { data: paginatedData, isLoading: customersLoading } = useCustomers(businessId, page);
   const { data: txnData } = useTransactions(businessId);
   const { data: design } = useActiveDesign(businessId);
   const addStampMutation = useAddStamp(businessId);
+
+  const customers = useMemo(() => paginatedData?.data ?? [], [paginatedData]);
+  const totalCustomers = paginatedData?.total ?? 0;
+  const totalPages = Math.ceil(totalCustomers / PAGE_SIZE);
 
   const transactions = useMemo(() => txnData?.transactions ?? [], [txnData]);
   const totalStamps = design?.total_stamps ?? 10;
@@ -168,7 +173,7 @@ export default function CustomerTable() {
     );
   }
 
-  if (customers.length === 0) {
+  if (customers.length === 0 && page === 0) {
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-bold">{t("title")}</h2>
@@ -185,7 +190,7 @@ export default function CustomerTable() {
 
       <CustomerSegmentFilters
         segments={segmentCounts}
-        totalCount={customers.length}
+        totalCount={totalCustomers}
         selected={selectedSegment}
         onSelect={setSelectedSegment}
       />
@@ -303,6 +308,41 @@ export default function CustomerTable() {
               })}
             </TableBody>
           </Table>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-[var(--muted-foreground)]">
+            {t("pagination.showing", {
+              from: page * PAGE_SIZE + 1,
+              to: Math.min((page + 1) * PAGE_SIZE, totalCustomers),
+              total: totalCustomers,
+            })}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p - 1)}
+              disabled={page === 0}
+            >
+              <CaretLeftIcon className="h-4 w-4" />
+              {t("pagination.previous")}
+            </Button>
+            <span className="text-sm text-[var(--muted-foreground)] px-2">
+              {page + 1} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page >= totalPages - 1}
+            >
+              {t("pagination.next")}
+              <CaretRightIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
 

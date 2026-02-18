@@ -261,7 +261,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         await activateDesign(currentBusiness.id, design.id);
         setIsActive(true);
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('failedToActivate'));
+        const message = err instanceof Error ? err.message : t('failedToActivate');
+        if (message.includes('regenerat')) {
+          setError('__generating__');
+        } else {
+          setError(message);
+        }
       } finally {
         setSaving(false);
       }
@@ -681,7 +686,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         </CollapsibleSection>
 
         {/* Messages */}
-        {error && (
+        {error === '__generating__' && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200">
+            {t('stripsGenerating')}
+          </div>
+        )}
+        {error && error !== '__generating__' && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
             {error}
           </div>

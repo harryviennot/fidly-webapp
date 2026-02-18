@@ -59,6 +59,11 @@
       "weeksAgo": "{count}w ago",
       "monthsAgo": "{count}mo ago"
     },
+    "pagination": {
+      "showing": "Showing {from}-{to} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
     "emptyState": {
       "title": "No Customers Yet",
       "description": "Customers will appear here once they register through your loyalty program link."

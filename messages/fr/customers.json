@@ -59,6 +59,11 @@
       "weeksAgo": "il y a {count} sem.",
       "monthsAgo": "il y a {count} mois"
     },
+    "pagination": {
+      "showing": "{from}-{to} sur {total}",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
     "emptyState": {
       "title": "Aucun client pour le moment",
       "description": "Les clients appara\u00eetront ici une fois qu'ils se seront inscrits via votre lien de fid\u00e9lit\u00e9."

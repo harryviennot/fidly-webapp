@@ -7,3 +7,10 @@ export interface CustomerResponse {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface PaginatedCustomerResponse {
+  data: CustomerResponse[];
+  total: number;
+  limit: number;
+  offset: number;
+}
