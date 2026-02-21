@@ -5,8 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { PencilSimple, FloppyDisk, ArrowsClockwise, Translate } from '@phosphor-icons/react';
-import { CardDesign, CardDesignUpdate } from '@/types';
-import { getDesign, updateDesign } from '@/api';
+import { CardDesign, CardDesignUpdate, LoyaltyProgram } from '@/types';
+import { getDesign, updateDesign, getPrograms } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
 import TranslationsDialog from '@/components/design/TranslationsDialog';
@@ -43,14 +43,20 @@ export default function EditDesignPage() {
   const [designName, setDesignName] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [translationsOpen, setTranslationsOpen] = useState(false);
+  const [program, setProgram] = useState<LoyaltyProgram | null>(null);
 
   useEffect(() => {
     async function loadDesign() {
       if (!currentBusiness?.id) return;
       try {
-        const data = await getDesign(currentBusiness.id, designId);
+        const [data, programs] = await Promise.all([
+          getDesign(currentBusiness.id, designId),
+          getPrograms(currentBusiness.id),
+        ]);
         setDesign(data);
         setDesignName(data.name);
+        const p = programs.find((p) => p.is_default) || programs[0];
+        if (p) setProgram(p);
       } catch (err) {
         setError(err instanceof Error ? err.message : t('failedToLoad'));
       } finally {
@@ -79,7 +85,7 @@ export default function EditDesignPage() {
       ? t('savedActive')
       : t('savedDraft')
     );
-    router.push('/');
+    router.push('/program/design');
   };
 
   // Target locale is the opposite of the business's primary locale
@@ -126,6 +132,8 @@ export default function EditDesignPage() {
         onSavingChange={setSaving}
         onSave={handleSaveComplete}
         designName={designName}
+        programTotalStamps={program?.config?.total_stamps}
+        programName={program?.name}
         headerLeft={
           <div className="flex items-center gap-3">
             {editingName ? (

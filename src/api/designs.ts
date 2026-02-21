@@ -104,7 +104,6 @@ export async function duplicateDesign(businessId: string, designId: string): Pro
     foreground_color: original.foreground_color,
     background_color: original.background_color,
     label_color: original.label_color,
-    total_stamps: original.total_stamps,
     stamp_filled_color: original.stamp_filled_color,
     stamp_empty_color: original.stamp_empty_color,
     stamp_border_color: original.stamp_border_color,

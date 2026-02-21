@@ -100,7 +100,11 @@
       "additionalInfo": "Additional Info",
       "backSection": "Back",
       "backDescription": "Information shown when the customer taps the pass. On Apple Wallet, these appear on the back of the card. On Google Wallet, they appear in the details section.",
-      "backFields": "Back Fields"
+      "backFields": "Back Fields",
+      "fromBusinessSettings": "From Business Settings",
+      "cardSpecific": "Card-Specific",
+      "noBusinessInfo": "Add business info in Settings to show it on all cards.",
+      "goToSettings": "Go to Settings"
     },
     "fieldEditor": {
       "label": "Label",

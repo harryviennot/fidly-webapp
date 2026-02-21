@@ -22,6 +22,8 @@ export interface WalletCardProps {
   design: Partial<CardDesign>;
   /** Number of filled stamps (default: 3 for preview) */
   stamps?: number;
+  /** Override total stamps from program (instead of design) */
+  totalStamps?: number;
   /** Override organization name from design */
   organizationName?: string;
   /** Show QR code at bottom */
@@ -333,7 +335,7 @@ function use3DEffect(enabled: boolean) {
 
 const STRIP_ASPECT_RATIO = 1125 / 432;
 
-function StampGridContainer({
+export function StampGridContainer({
   totalStamps,
   filledCount,
   colors,
@@ -395,6 +397,7 @@ function StampGridContainer({
 export function WalletCard({
   design,
   stamps = 3,
+  totalStamps: totalStampsProp,
   organizationName,
   showQR = true,
   showSecondaryFields = true,
@@ -407,7 +410,7 @@ export function WalletCard({
   const displayName =
     organizationName || design.organization_name || "Your Business";
   const initials = getInitials(displayName);
-  const totalStamps = design.total_stamps ?? 10;
+  const totalStamps = totalStampsProp ?? design.total_stamps ?? 10;
   const colors = computeCardColors(design);
 
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;

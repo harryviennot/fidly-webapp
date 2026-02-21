@@ -2,9 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-provider";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { FormField } from "@/components/form/form-field";
 import type { InvitationPublic } from "@/types";
 
 interface InviteAuthFormProps {
@@ -93,65 +92,51 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={invitation.email}
-          required
-        />
-        {!emailMatches && email.length > 0 && (
-          <p className="text-xs text-red-500">
-            Email must match: {invitation.email}
-          </p>
-        )}
-      </div>
+      <FormField
+        label="Email"
+        id="email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder={invitation.email}
+        required
+        error={!emailMatches && email.length > 0 ? `Email must match: ${invitation.email}` : undefined}
+      />
 
       {mode === "register" && (
-        <div className="space-y-2">
-          <Label htmlFor="name">Your Name</Label>
-          <Input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your full name"
-            required
-          />
-        </div>
+        <FormField
+          label="Your Name"
+          id="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter your full name"
+          required
+        />
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder={mode === "register" ? "At least 6 characters" : "Enter your password"}
-          minLength={6}
-          required
-        />
-      </div>
+      <FormField
+        label="Password"
+        id="password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder={mode === "register" ? "At least 6 characters" : "Enter your password"}
+        minLength={6}
+        required
+      />
 
       {mode === "register" && (
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm your password"
-            required
-          />
-          {password && confirmPassword && !passwordsMatch && (
-            <p className="text-xs text-red-500">Passwords do not match</p>
-          )}
-        </div>
+        <FormField
+          label="Confirm Password"
+          id="confirmPassword"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Confirm your password"
+          required
+          error={password && confirmPassword && !passwordsMatch ? "Passwords do not match" : undefined}
+        />
       )}
 
       <Button type="submit" disabled={!isValid || loading} className="w-full">

@@ -22,6 +22,8 @@ export interface GoogleWalletCardProps {
   design: Partial<CardDesign>;
   /** Number of filled stamps (default: 3 for preview) */
   stamps?: number;
+  /** Override total stamps from program (instead of design) */
+  totalStamps?: number;
   /** Override organization name from design */
   organizationName?: string;
   /** Additional class names */
@@ -216,6 +218,7 @@ function GoogleStampGrid({
 export function GoogleWalletCard({
   design,
   stamps = 3,
+  totalStamps: totalStampsProp,
   organizationName,
   className = "",
   showBack = false,
@@ -226,7 +229,7 @@ export function GoogleWalletCard({
   const displayName =
     organizationName || design.organization_name || "Your Business";
   const initials = getInitials(displayName);
-  const totalStamps = design.total_stamps ?? 10;
+  const totalStamps = totalStampsProp ?? design.total_stamps ?? 10;
   const colors = computeCardColors(design);
 
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;

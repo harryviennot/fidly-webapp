@@ -20,7 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FlipHorizontal, Minus, Plus, Eye, SlidersHorizontal, CaretDown } from '@phosphor-icons/react';
+import { FlipHorizontal, Eye, SlidersHorizontal, CaretDown, GearSix } from '@phosphor-icons/react';
+import Link from 'next/link';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import {
   rgbToHex, hexToRgb, autoIconColor, contrastRatio,
@@ -38,6 +39,8 @@ interface DesignEditorV2Props {
   onSave?: () => void;
   onSavingChange?: (saving: boolean) => void;
   designName?: string;
+  programTotalStamps?: number;
+  programName?: string;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
 }
@@ -50,7 +53,6 @@ const DEFAULT_DESIGN: CardDesignCreate = {
   foreground_color: 'rgb(255, 255, 255)',
   background_color: 'rgb(28, 28, 30)',
   label_color: 'rgb(255, 255, 255)',
-  total_stamps: 10,
   stamp_filled_color: 'rgb(249, 115, 22)',
   stamp_empty_color: 'rgb(255, 255, 255)',
   stamp_border_color: 'rgb(255, 255, 255)',
@@ -82,7 +84,7 @@ function isBackComplete(d: CardDesignCreate) {
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, headerLeft, headerRight }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, programTotalStamps, programName, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const { currentBusiness } = useBusiness();
     const t = useTranslations('designEditor.editor');
@@ -93,6 +95,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     );
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
     const [previewStamps, setPreviewStamps] = useState(3);
+    const totalStamps = programTotalStamps ?? 10;
     const [showBack, setShowBack] = useState(false);
     const [previewWallet, setPreviewWallet] = useState<'apple' | 'google'>('apple');
     const [saving, setSaving] = useState(false);
@@ -193,6 +196,14 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBusiness?.name, isNew]);
+
+    // Auto-fill description from program name
+    useEffect(() => {
+      if (programName && isNew && !formData.description) {
+        updateField('description', programName);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [programName, isNew]);
 
     // Progressive disclosure: auto-open next section when current becomes complete
     const prevCompleteRef = useRef({
@@ -400,14 +411,14 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-sm text-muted-foreground">{t('previewStamps')}</Label>
                 <span className="text-sm font-medium">
-                  {previewStamps} / {formData.total_stamps || 10}
+                  {previewStamps} / {totalStamps}
                 </span>
               </div>
               <input
                 type="range"
                 className="styled-slider w-full"
                 min={0}
-                max={formData.total_stamps || 10}
+                max={totalStamps}
                 value={previewStamps}
                 onChange={(e) => setPreviewStamps(parseInt(e.target.value))}
               />
@@ -512,32 +523,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           badge={stampsBadge}
         >
           <div className="space-y-4">
-            {/* Basic controls — always visible */}
-            <div className="space-y-2">
-              <LabelWithTooltip tooltip={t('totalStampsTooltip')}>{t('totalStamps')}</LabelWithTooltip>
-              <div className="flex items-center justify-between w-full">
-                <button
-                  type="button"
-                  onClick={() => updateField('total_stamps', Math.max(2, (formData.total_stamps || 10) - 1))}
-                  className="w-10 h-10 rounded-full border border-input flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={(formData.total_stamps || 10) <= 2}
-                >
-                  <Minus className="w-4 h-4" weight="bold" />
-                </button>
-                <span className="text-xl font-semibold">
-                  {formData.total_stamps || 10}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => updateField('total_stamps', Math.min(20, (formData.total_stamps || 10) + 1))}
-                  className="w-10 h-10 rounded-full border border-input flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={(formData.total_stamps || 10) >= 20}
-                >
-                  <Plus className="w-4 h-4" weight="bold" />
-                </button>
-              </div>
-            </div>
-
             <div className="space-y-2">
               <LabelWithTooltip tooltip={t('stampIconTooltip')}>{t('stampIcon')}</LabelWithTooltip>
               <StampIconPicker
@@ -676,8 +661,22 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             <p className="text-sm text-muted-foreground">
               {t('backDescription')}
             </p>
+
+            {/* Inherited business info fields */}
+            <BusinessInfoFields
+              businessInfo={(currentBusiness?.settings?.business_info as Array<{ type: string; key: string; data: Record<string, unknown> }>) || []}
+              hiddenKeys={formData.hidden_business_info_keys || []}
+              onToggleKey={(key) => {
+                const current = formData.hidden_business_info_keys || [];
+                const next = current.includes(key)
+                  ? current.filter((k) => k !== key)
+                  : [...current, key];
+                updateField('hidden_business_info_keys', next);
+              }}
+            />
+
             <FieldEditor
-              title={t('backFields')}
+              title={t('cardSpecific')}
               fields={formData.back_fields || []}
               onChange={(f) => updateField('back_fields', f)}
               maxFields={10}
@@ -759,5 +758,86 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       </div>
     );
   });
+
+/** Inline component: shows inherited business info with visibility toggles */
+function BusinessInfoFields({
+  businessInfo,
+  hiddenKeys,
+  onToggleKey,
+}: {
+  businessInfo: Array<{ type: string; key: string; data: Record<string, unknown> }>;
+  hiddenKeys: string[];
+  onToggleKey: (key: string) => void;
+}) {
+  const t = useTranslations('designEditor.editor');
+
+  const TYPE_LABELS: Record<string, string> = {
+    hours: 'Store Hours',
+    website: 'Website',
+    phone: 'Phone',
+    email: 'Email',
+    address: 'Address',
+    custom: 'Custom',
+  };
+
+  if (businessInfo.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-border p-3 space-y-2">
+        <p className="text-xs text-muted-foreground">{t('fromBusinessSettings')}</p>
+        <p className="text-xs text-muted-foreground">{t('noBusinessInfo')}</p>
+        <Link href="/settings" className="text-xs text-[var(--accent)] hover:underline inline-flex items-center gap-1">
+          <GearSix className="w-3 h-3" />
+          {t('goToSettings')}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-border p-3 space-y-2">
+      <p className="text-xs font-medium text-muted-foreground">{t('fromBusinessSettings')}</p>
+      {businessInfo.map((entry) => {
+        const isHidden = hiddenKeys.includes(entry.key);
+        const preview = getEntryPreview(entry);
+        return (
+          <label
+            key={entry.key}
+            className="flex items-center gap-3 py-1.5 cursor-pointer group"
+          >
+            <input
+              type="checkbox"
+              checked={!isHidden}
+              onChange={() => onToggleKey(entry.key)}
+              className="rounded border-border text-[var(--accent)] focus:ring-[var(--accent)]"
+            />
+            <div className={`flex-1 min-w-0 ${isHidden ? 'opacity-40' : ''}`}>
+              <span className="text-sm font-medium">
+                {entry.type === 'custom' ? ((entry.data.label as string) || TYPE_LABELS.custom) : (TYPE_LABELS[entry.type] || entry.type)}
+              </span>
+              {preview && (
+                <p className="text-xs text-muted-foreground truncate">{preview}</p>
+              )}
+            </div>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+function getEntryPreview(entry: { type: string; data: Record<string, unknown> }): string {
+  switch (entry.type) {
+    case 'website': return (entry.data.url as string) || '';
+    case 'phone': return (entry.data.number as string) || '';
+    case 'email': return (entry.data.email as string) || '';
+    case 'address': return (entry.data.address as string) || '';
+    case 'hours': {
+      const schedule = (entry.data.schedule as Array<{ days: string; closed?: boolean }>) || [];
+      return schedule.map((s) => s.days).join(', ');
+    }
+    case 'custom': return (entry.data.value as string) || '';
+    default: return '';
+  }
+}
 
 export default DesignEditorV2;

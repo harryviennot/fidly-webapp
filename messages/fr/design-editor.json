@@ -100,7 +100,11 @@
       "additionalInfo": "Informations supplémentaires",
       "backSection": "Dos",
       "backDescription": "Informations affichées quand le client appuie sur le pass. Sur Apple Wallet, elles apparaissent au dos de la carte. Sur Google Wallet, dans la section détails.",
-      "backFields": "Champs du dos"
+      "backFields": "Champs du dos",
+      "fromBusinessSettings": "Depuis les paramètres",
+      "cardSpecific": "Spécifique à la carte",
+      "noBusinessInfo": "Ajoutez les infos de votre entreprise dans les Paramètres pour les afficher sur toutes les cartes.",
+      "goToSettings": "Aller aux Paramètres"
     },
     "fieldEditor": {
       "label": "Libellé",

@@ -4,4 +4,5 @@ export * from './designs';
 export * from './invitations';
 export * from './memberships';
 export * from './profile';
+export * from './programs';
 export * from './transactions';

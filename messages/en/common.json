@@ -1,5 +1,6 @@
 {
   "nav": {
+    "program": "Program",
     "loyaltyProgram": "Loyalty Program",
     "customers": "Customers",
     "activity": "Activity",

@@ -1,15 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useLoyaltyProgram } from '../layout';
-import { TemplateGrid } from '@/components/loyalty-program/templates/TemplateGrid';
-import { TemplatesPageSkeleton } from '@/components/loyalty-program/skeletons/TemplatesPageSkeleton';
-import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 import { PlusIcon, Crown } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
+import { TemplateGrid } from '@/components/loyalty-program/templates/TemplateGrid';
 import { useDesignEntitlements } from '@/hooks/useEntitlements';
-import { LimitBadge } from '@/components/loyalty-program/ProFeatureGate';
+import { useProgram } from '../layout';
 
-export default function TemplatesPage() {
+export default function ProgramTemplatesPage() {
   const {
     designs,
     activeDesign,
@@ -19,32 +18,30 @@ export default function TemplatesPage() {
     handleDelete,
     handleActivate,
     handleDuplicate,
-  } = useLoyaltyProgram();
+  } = useProgram();
 
-  const { canCreateDesign, limits } = useDesignEntitlements(designs.length);
+  const t = useTranslations('designEditor');
+  const tProgram = useTranslations('loyaltyProgram');
+  const { canCreateDesign } = useDesignEntitlements(designs.length);
 
   if (loading) {
-    return <TemplatesPageSkeleton />;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      {/* Page header with button */}
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Card Templates</h1>
-          <p className="text-muted-foreground mt-1 flex items-center gap-2">
-            Manage your loyalty card designs
-            {!isProPlan && limits.max_card_designs !== null && (
-              <LimitBadge current={designs.length} limit={limits.max_card_designs} />
-            )}
-          </p>
-        </div>
+        <h2 className="text-2xl font-bold">{tProgram('cardTemplates')}</h2>
         {canCreateDesign ? (
           <Button asChild className="rounded-full">
             <Link href="/design/new">
               <PlusIcon className="w-4 h-4 mr-2" />
-              New Card
+              {t('createCard')}
             </Link>
           </Button>
         ) : (
@@ -57,7 +54,6 @@ export default function TemplatesPage() {
         )}
       </div>
 
-      {/* Template Grid */}
       <TemplateGrid
         activeDesign={activeDesign}
         inactiveDesigns={inactiveDesigns}

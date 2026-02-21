@@ -1,18 +1,31 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowsClockwise, PencilSimple, FloppyDisk } from '@phosphor-icons/react';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useBusiness } from '@/contexts/business-context';
+import { getPrograms } from '@/api';
+import type { LoyaltyProgram } from '@/types';
 
 export default function NewDesignPage() {
   const editorRef = useRef<DesignEditorRef>(null);
+  const { currentBusiness } = useBusiness();
   const t = useTranslations('designEditor.pages');
   const [saving, setSaving] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [designName, setDesignName] = useState(t('untitledDesign'));
+  const [program, setProgram] = useState<LoyaltyProgram | null>(null);
+
+  useEffect(() => {
+    if (!currentBusiness?.id) return;
+    getPrograms(currentBusiness.id).then((programs) => {
+      const p = programs.find((p) => p.is_default) || programs[0];
+      if (p) setProgram(p);
+    }).catch(() => {});
+  }, [currentBusiness?.id]);
 
   const handleSave = () => {
     editorRef.current?.handleSave();
@@ -24,6 +37,8 @@ export default function NewDesignPage() {
       isNew
       onSavingChange={setSaving}
       designName={designName}
+      programTotalStamps={program?.config?.total_stamps}
+      programName={program?.name}
       headerLeft={
         editingName ? (
           <Input

@@ -29,6 +29,12 @@ export interface NotificationTemplates {
   reward?: NotificationTemplate;
 }
 
+export interface BusinessInfoEntry {
+  type: "hours" | "website" | "phone" | "email" | "address" | "custom";
+  key: string;
+  data: Record<string, unknown>;
+}
+
 export interface BusinessSettings {
   accentColor?: string;
   backgroundColor?: string;
@@ -37,6 +43,7 @@ export interface BusinessSettings {
   customer_data_collection?: CustomerDataCollection;
   notification_templates?: NotificationTemplates;
   onboarding_complete?: boolean;
+  business_info?: BusinessInfoEntry[];
   [key: string]: unknown;
 }
 

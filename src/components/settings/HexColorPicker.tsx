@@ -69,11 +69,10 @@ export function HexColorPicker({ label, value, onChange }: HexColorPickerProps) 
               <button
                 key={preset}
                 type="button"
-                className={`w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110 ${
-                  normalizedValue.toLowerCase() === preset.toLowerCase()
+                className={`w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110 ${normalizedValue.toLowerCase() === preset.toLowerCase()
                     ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30'
                     : 'border-transparent'
-                }`}
+                  }`}
                 style={{ backgroundColor: preset }}
                 onClick={() => {
                   onChange(preset);
