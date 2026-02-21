@@ -1,20 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAllCustomers, addStamp, redeemReward, voidStamp } from "@/api";
-import type { CustomerResponse } from "@/types";
+import { getCustomers, addStamp, redeemReward, voidStamp } from "@/api";
+import type { PaginatedCustomerResponse } from "@/types";
+
+const PAGE_SIZE = 50;
 
 export const customerKeys = {
   all: (businessId: string) => ["customers", businessId] as const,
+  page: (businessId: string, page: number) =>
+    ["customers", businessId, page] as const,
   detail: (businessId: string, customerId: string) =>
     ["customers", businessId, customerId] as const,
 };
 
-export function useCustomers(businessId: string | undefined) {
+export function useCustomers(businessId: string | undefined, page: number = 0) {
   return useQuery({
-    queryKey: customerKeys.all(businessId!),
-    queryFn: () => getAllCustomers(businessId!),
+    queryKey: customerKeys.page(businessId!, page),
+    queryFn: () =>
+      getCustomers(businessId!, PAGE_SIZE, page * PAGE_SIZE),
     enabled: !!businessId,
   });
 }
+
+export { PAGE_SIZE };
 
 export function useAddStamp(businessId: string | undefined) {
   const queryClient = useQueryClient();
@@ -25,25 +32,28 @@ export function useAddStamp(businessId: string | undefined) {
       await queryClient.cancelQueries({
         queryKey: customerKeys.all(businessId!),
       });
-      const previous = queryClient.getQueryData<CustomerResponse[]>(
-        customerKeys.all(businessId!)
-      );
-      if (previous) {
-        queryClient.setQueryData<CustomerResponse[]>(
-          customerKeys.all(businessId!),
-          previous.map((c) =>
-            c.id === customerId ? { ...c, stamps: c.stamps + 1 } : c
-          )
-        );
+      // Optimistically update across all cached pages
+      const queries = queryClient.getQueriesData<PaginatedCustomerResponse>({
+        queryKey: customerKeys.all(businessId!),
+      });
+      const previousMap = new Map(queries);
+      for (const [key, data] of queries) {
+        if (data) {
+          queryClient.setQueryData<PaginatedCustomerResponse>(key, {
+            ...data,
+            data: data.data.map((c) =>
+              c.id === customerId ? { ...c, stamps: c.stamps + 1 } : c
+            ),
+          });
+        }
       }
-      return { previous };
+      return { previousMap };
     },
     onError: (_err, _vars, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(
-          customerKeys.all(businessId!),
-          context.previous
-        );
+      if (context?.previousMap) {
+        for (const [key, data] of context.previousMap) {
+          queryClient.setQueryData(key, data);
+        }
       }
     },
     onSettled: () => {
@@ -66,27 +76,29 @@ export function useRedeemReward(businessId: string | undefined) {
       await queryClient.cancelQueries({
         queryKey: customerKeys.all(businessId!),
       });
-      const previous = queryClient.getQueryData<CustomerResponse[]>(
-        customerKeys.all(businessId!)
-      );
-      if (previous) {
-        queryClient.setQueryData<CustomerResponse[]>(
-          customerKeys.all(businessId!),
-          previous.map((c) =>
-            c.id === customerId
-              ? { ...c, stamps: 0, total_redemptions: (c.total_redemptions ?? 0) + 1 }
-              : c
-          )
-        );
+      const queries = queryClient.getQueriesData<PaginatedCustomerResponse>({
+        queryKey: customerKeys.all(businessId!),
+      });
+      const previousMap = new Map(queries);
+      for (const [key, data] of queries) {
+        if (data) {
+          queryClient.setQueryData<PaginatedCustomerResponse>(key, {
+            ...data,
+            data: data.data.map((c) =>
+              c.id === customerId
+                ? { ...c, stamps: 0, total_redemptions: (c.total_redemptions ?? 0) + 1 }
+                : c
+            ),
+          });
+        }
       }
-      return { previous };
+      return { previousMap };
     },
     onError: (_err, _vars, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(
-          customerKeys.all(businessId!),
-          context.previous
-        );
+      if (context?.previousMap) {
+        for (const [key, data] of context.previousMap) {
+          queryClient.setQueryData(key, data);
+        }
       }
     },
     onSettled: () => {
@@ -117,27 +129,29 @@ export function useVoidStamp(businessId: string | undefined) {
       await queryClient.cancelQueries({
         queryKey: customerKeys.all(businessId!),
       });
-      const previous = queryClient.getQueryData<CustomerResponse[]>(
-        customerKeys.all(businessId!)
-      );
-      if (previous) {
-        queryClient.setQueryData<CustomerResponse[]>(
-          customerKeys.all(businessId!),
-          previous.map((c) =>
-            c.id === customerId
-              ? { ...c, stamps: Math.max(0, c.stamps - 1) }
-              : c
-          )
-        );
+      const queries = queryClient.getQueriesData<PaginatedCustomerResponse>({
+        queryKey: customerKeys.all(businessId!),
+      });
+      const previousMap = new Map(queries);
+      for (const [key, data] of queries) {
+        if (data) {
+          queryClient.setQueryData<PaginatedCustomerResponse>(key, {
+            ...data,
+            data: data.data.map((c) =>
+              c.id === customerId
+                ? { ...c, stamps: Math.max(0, c.stamps - 1) }
+                : c
+            ),
+          });
+        }
       }
-      return { previous };
+      return { previousMap };
     },
     onError: (_err, _vars, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(
-          customerKeys.all(businessId!),
-          context.previous
-        );
+      if (context?.previousMap) {
+        for (const [key, data] of context.previousMap) {
+          queryClient.setQueryData(key, data);
+        }
       }
     },
     onSettled: () => {

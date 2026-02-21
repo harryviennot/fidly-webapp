@@ -1,5 +1,5 @@
 import { API_BASE_URL, getAuthHeaders } from './client';
-import type { CustomerResponse, StampResponse } from '@/types';
+import type { CustomerResponse, PaginatedCustomerResponse, StampResponse } from '@/types';
 
 export async function getCustomer(businessId: string, customerId: string): Promise<CustomerResponse> {
   const response = await fetch(`${API_BASE_URL}/customers/${businessId}/${customerId}`, {
@@ -13,10 +13,15 @@ export async function getCustomer(businessId: string, customerId: string): Promi
   return response.json();
 }
 
-export async function getAllCustomers(businessId: string): Promise<CustomerResponse[]> {
-  const response = await fetch(`${API_BASE_URL}/customers/${businessId}`, {
-    headers: await getAuthHeaders(),
-  });
+export async function getCustomers(
+  businessId: string,
+  limit: number = 50,
+  offset: number = 0,
+): Promise<PaginatedCustomerResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/customers/${businessId}?limit=${limit}&offset=${offset}`,
+    { headers: await getAuthHeaders() },
+  );
 
   if (!response.ok) {
     throw new Error('Failed to fetch customers');

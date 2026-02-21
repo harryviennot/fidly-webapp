@@ -53,6 +53,7 @@
       "activateDesign": "Activate Design",
       "activateConfirm": "Activate this design? All customers will receive the updated card.",
       "failedToActivate": "Failed to activate",
+      "stripsGenerating": "Stamp images are still being generated. Please wait a few seconds and try again.",
       "failedToSave": "Failed to save design",
       "requiredFields": "Please fill in all required fields (Name, Organization, Description)",
       "branding": "Branding",
