@@ -354,57 +354,57 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
         {/* Card Preview with wallet switch animation */}
         <div className="flex-1 flex items-center justify-center w-full">
-        <div className="w-full max-w-2xs md:max-w-xs lg:max-w-sm 2xl:max-w-lg wallet-card-container ">
-          {/* Apple Wallet with flip */}
-          <div className={`wallet-card ${previewWallet === 'apple' ? 'wallet-card-active' : 'wallet-card-left'}`}>
-            <div className="card-flip-container">
-              <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
-                <div className="card-flip-front">
-                  <EditorCard
-                    design={formData}
-                    previewStamps={previewStamps}
-                    organizationName={formData.organization_name}
-                    showBack={false}
-                  />
+          <div className="w-full max-w-md wallet-card-container ">
+            {/* Apple Wallet with flip */}
+            <div className={`wallet-card ${previewWallet === 'apple' ? 'wallet-card-active' : 'wallet-card-left'}`}>
+              <div className="card-flip-container">
+                <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
+                  <div className="card-flip-front">
+                    <EditorCard
+                      design={formData}
+                      previewStamps={previewStamps}
+                      organizationName={formData.organization_name}
+                      showBack={false}
+                    />
+                  </div>
+                  <div className="card-flip-back">
+                    <EditorCard
+                      design={formData}
+                      previewStamps={previewStamps}
+                      organizationName={formData.organization_name}
+                      showBack={true}
+                    />
+                  </div>
                 </div>
-                <div className="card-flip-back">
-                  <EditorCard
-                    design={formData}
-                    previewStamps={previewStamps}
-                    organizationName={formData.organization_name}
-                    showBack={true}
-                  />
+              </div>
+            </div>
+            {/* Google Wallet with flip */}
+            <div className={`wallet-card ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
+              <div className="card-flip-container">
+                <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
+                  <div className="card-flip-front">
+                    <ScaledCardWrapper baseWidth={320} dynamicHeight>
+                      <GoogleWalletCard
+                        design={formData}
+                        stamps={previewStamps}
+                        organizationName={formData.organization_name}
+                      />
+                    </ScaledCardWrapper>
+                  </div>
+                  <div className="card-flip-back">
+                    <ScaledCardWrapper baseWidth={320} dynamicHeight>
+                      <GoogleWalletCard
+                        design={formData}
+                        stamps={previewStamps}
+                        organizationName={formData.organization_name}
+                        showBack
+                      />
+                    </ScaledCardWrapper>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          {/* Google Wallet with flip */}
-          <div className={`wallet-card ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
-            <div className="card-flip-container">
-              <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
-                <div className="card-flip-front">
-                  <ScaledCardWrapper baseWidth={320} dynamicHeight>
-                    <GoogleWalletCard
-                      design={formData}
-                      stamps={previewStamps}
-                      organizationName={formData.organization_name}
-                    />
-                  </ScaledCardWrapper>
-                </div>
-                <div className="card-flip-back">
-                  <ScaledCardWrapper baseWidth={320} dynamicHeight>
-                    <GoogleWalletCard
-                      design={formData}
-                      stamps={previewStamps}
-                      organizationName={formData.organization_name}
-                      showBack
-                    />
-                  </ScaledCardWrapper>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         </div>
 
         {/* Slider + action buttons pinned to bottom */}
