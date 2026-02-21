@@ -2,7 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import {
+  StampIcon,
+  TrophyIcon,
+  CalendarIcon,
+  StackIcon,
+} from '@phosphor-icons/react';
 import type { LoyaltyProgram } from '@/types';
 
 interface ProgramSummaryCardProps {
@@ -15,36 +20,58 @@ export function ProgramSummaryCard({ program }: ProgramSummaryCardProps) {
 
   if (!program) return null;
 
-  const rows = [
-    { label: t('type'), value: tProgram('stampCard') },
-    { label: t('stamps'), value: String(program.config?.total_stamps ?? 10) },
-    { label: t('reward'), value: program.reward_name || t('noRewardSet') },
+  const items = [
     {
+      icon: StackIcon,
+      label: t('type'),
+      value: tProgram('stampCard'),
+      color: 'text-blue-600 bg-blue-100',
+    },
+    {
+      icon: StampIcon,
+      label: t('stamps'),
+      value: String(program.config?.total_stamps ?? 10),
+      color: 'text-violet-600 bg-violet-100',
+    },
+    {
+      icon: TrophyIcon,
+      label: t('reward'),
+      value: program.reward_name || t('noRewardSet'),
+      color: 'text-amber-600 bg-amber-100',
+    },
+    {
+      icon: CalendarIcon,
       label: t('activeSince'),
       value: new Date(program.created_at).toLocaleDateString(undefined, {
         month: 'short',
         year: 'numeric',
       }),
+      color: 'text-green-600 bg-green-100',
     },
   ];
 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{t('programSummary')}</CardTitle>
-          <Badge variant="secondary">{tProgram('stampCard')}</Badge>
-        </div>
+        <CardTitle className="text-base">{t('programSummary')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <dl className="space-y-3">
-          {rows.map((row) => (
-            <div key={row.label} className="flex items-center justify-between text-sm">
-              <dt className="text-muted-foreground">{row.label}</dt>
-              <dd className="font-medium">{row.value}</dd>
-            </div>
-          ))}
-        </dl>
+        <div className="grid grid-cols-2 gap-4">
+          {items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="flex items-start gap-3">
+                <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${item.color}`}>
+                  <Icon className="w-4.5 h-4.5" weight="duotone" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                  <p className="text-sm font-medium truncate">{item.value}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </CardContent>
     </Card>
   );

@@ -3,9 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  CopyIcon,
-  CheckIcon,
-  QrCodeIcon,
   UserIcon,
   EnvelopeIcon,
   PhoneIcon,
@@ -42,9 +39,6 @@ export default function ProgramDetailsPage() {
   const [rewardDescription, setRewardDescription] = useState('');
   const [savingProgram, setSavingProgram] = useState(false);
 
-  // URL state
-  const [copied, setCopied] = useState(false);
-
   // Data collection state
   const [settings, setSettings] = useState<DataCollectionSettings>({
     collect_name: false,
@@ -52,10 +46,6 @@ export default function ProgramDetailsPage() {
     collect_phone: false,
   });
   const [savingSettings, setSavingSettings] = useState(false);
-
-  const baseUrl = globalThis.window === undefined ? '' : globalThis.window.location.origin;
-  const slug = currentBusiness?.url_slug || '';
-  const fullUrl = `${baseUrl}/${slug}`;
 
   // Sync program data
   useEffect(() => {
@@ -92,13 +82,6 @@ export default function ProgramDetailsPage() {
     } finally {
       setSavingProgram(false);
     }
-  };
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(fullUrl);
-    setCopied(true);
-    toast.success(t('linkCopied'));
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleToggle = async (field: keyof DataCollectionSettings) => {
@@ -237,39 +220,6 @@ export default function ProgramDetailsPage() {
               <FloppyDiskIcon className="w-4 h-4 mr-2" />
               {savingProgram ? t('saving') : t('saveProgram')}
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Business URL Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('businessUrl')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">{t('signupLink')}</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-                className="rounded-full"
-              >
-                {copied ? (
-                  <CheckIcon className="h-4 w-4 text-green-600" />
-                ) : (
-                  <CopyIcon className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground break-all font-mono bg-background/50 p-2 rounded">
-              {fullUrl}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
-            <QrCodeIcon className="h-4 w-4" />
-            <span>{t('qrCodeHint')}</span>
           </div>
         </CardContent>
       </Card>
