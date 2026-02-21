@@ -19,6 +19,8 @@
       "description": "Ces informations apparaîtront au dos des cartes de fidélité de vos clients",
       "addInfo": "Ajouter une info",
       "noInfoYet": "Aucune info ajoutée. Ajoutez les détails de votre entreprise pour les afficher au dos des cartes de fidélité.",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
       "types": {
         "hours": "Horaires d'ouverture",
         "website": "Site web",

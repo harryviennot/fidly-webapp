@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Plus, Trash, Clock, Globe, Phone, Envelope, MapPin, TextT } from '@phosphor-icons/react';
+import { Plus, Trash, Clock, Globe, Phone, Envelope, MapPin, TextT, ArrowUp, ArrowDown } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -58,6 +58,14 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
     onChange(value.filter((_, i) => i !== index));
   };
 
+  const moveEntry = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= value.length) return;
+    const updated = [...value];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    onChange(updated);
+  };
+
   return (
     <div className="space-y-4">
       {value.length === 0 && (
@@ -68,8 +76,11 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
         <InfoEntryEditor
           key={entry.key}
           entry={entry}
+          index={index}
+          total={value.length}
           onUpdate={(data) => updateEntry(index, data)}
           onRemove={() => removeEntry(index)}
+          onMove={(direction) => moveEntry(index, direction)}
         />
       ))}
 
@@ -100,12 +111,18 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
 
 function InfoEntryEditor({
   entry,
+  index,
+  total,
   onUpdate,
   onRemove,
+  onMove,
 }: {
   entry: BusinessInfoEntry;
+  index: number;
+  total: number;
   onUpdate: (data: Record<string, unknown>) => void;
   onRemove: () => void;
+  onMove: (direction: 'up' | 'down') => void;
 }) {
   const t = useTranslations('settings.cardInfo');
   const Icon = INFO_TYPE_ICONS[entry.type] || TextT;
@@ -120,14 +137,42 @@ function InfoEntryEditor({
           <Icon className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium">{title}</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={onRemove}
-        >
-          <Trash className="w-3.5 h-3.5" />
-        </Button>
+        <div className="flex items-center gap-0.5">
+          {total > 1 && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => onMove('up')}
+                disabled={index === 0}
+                title={t('moveUp')}
+              >
+                <ArrowUp className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => onMove('down')}
+                disabled={index === total - 1}
+                title={t('moveDown')}
+              >
+                <ArrowDown className="w-3.5 h-3.5" />
+              </Button>
+            </>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={onRemove}
+          >
+            <Trash className="w-3.5 h-3.5" />
+          </Button>
+        </div>
       </div>
 
       {entry.type === 'hours' && (

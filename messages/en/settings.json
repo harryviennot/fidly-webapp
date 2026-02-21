@@ -19,6 +19,8 @@
       "description": "This information will appear on the back of your customers' loyalty cards",
       "addInfo": "Add info",
       "noInfoYet": "No card info added yet. Add your business details to display on the back of loyalty cards.",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
       "types": {
         "hours": "Store Hours",
         "website": "Website",
