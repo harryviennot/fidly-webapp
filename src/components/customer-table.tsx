@@ -54,11 +54,11 @@ export default function CustomerTable() {
   const { data: design } = useActiveDesign(businessId);
   const addStampMutation = useAddStamp(businessId);
 
-  const customers = useMemo(() => paginatedData?.data ?? [], [paginatedData]);
+  const customers = useMemo(() => Array.isArray(paginatedData?.data) ? paginatedData.data : [], [paginatedData]);
   const totalCustomers = paginatedData?.total ?? 0;
   const totalPages = Math.ceil(totalCustomers / PAGE_SIZE);
 
-  const transactions = useMemo(() => txnData?.transactions ?? [], [txnData]);
+  const transactions = useMemo(() => Array.isArray(txnData?.transactions) ? txnData.transactions : [], [txnData]);
   const totalStamps = design?.total_stamps ?? 10;
   const isLoading = customersLoading;
 
