@@ -14,6 +14,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
@@ -25,10 +28,26 @@ import {
   UserPlusIcon,
   GearIcon,
   ClockCounterClockwiseIcon,
+  Crown,
 } from "@phosphor-icons/react";
 
+interface SubItem {
+  href: string;
+  labelKey: string;
+  pro?: boolean;
+}
+
+const programSubItems: SubItem[] = [
+  { href: "/program", labelKey: "loyaltyProgram.nav.overview" },
+  { href: "/program/settings", labelKey: "loyaltyProgram.nav.settings" },
+  { href: "/program/templates", labelKey: "loyaltyProgram.nav.templates" },
+  { href: "/program/notifications", labelKey: "loyaltyProgram.nav.notifications" },
+  { href: "/program/promotions", labelKey: "loyaltyProgram.nav.promotions", pro: true },
+  { href: "/program/locations", labelKey: "loyaltyProgram.nav.locations", pro: true },
+];
+
 const navItems = [
-  { href: "/program", labelKey: "nav.program" as const, icon: HeartIcon },
+  { href: "/program", labelKey: "nav.program" as const, icon: HeartIcon, subItems: programSubItems },
   { href: "/customers", labelKey: "nav.customers" as const, icon: UsersIcon },
   { href: "/activity", labelKey: "nav.activity" as const, icon: ClockCounterClockwiseIcon },
   { href: "/team", labelKey: "nav.team" as const, icon: UserPlusIcon },
@@ -46,6 +65,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const isActive = (href: string) => {
     return pathname === href || pathname.startsWith(href + '/');
+  };
+
+  const isExactActive = (href: string) => {
+    return pathname === href;
   };
 
   return (
@@ -80,6 +103,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <span>{t(item.labelKey)}</span>
                     </Link>
                   </SidebarMenuButton>
+                  {item.subItems && active && (
+                    <SidebarMenuSub>
+                      {item.subItems.map((sub) => (
+                        <SidebarMenuSubItem key={sub.href}>
+                          <SidebarMenuSubButton
+                            asChild
+                            size="sm"
+                            isActive={isExactActive(sub.href)}
+                          >
+                            <Link href={sub.href}>
+                              <span>{t(sub.labelKey)}</span>
+                              {sub.pro && (
+                                <Crown className="ml-auto h-3 w-3 text-amber-500" weight="fill" />
+                              )}
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
                 </SidebarMenuItem>
               );
             })}

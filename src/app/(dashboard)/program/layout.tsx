@@ -8,7 +8,6 @@ import type { LoyaltyProgramUpdate } from '@/types';
 import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { getPlanLimits, isLimitExceededError } from '@/lib/features';
-import { ProgramNav } from '@/components/program/program-nav';
 
 interface ProgramContextType {
   program: LoyaltyProgram | undefined;
@@ -173,19 +172,12 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
         handleDuplicate,
       }}
     >
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold">{t('title')}</h2>
-          <p className="text-muted-foreground">{t('subtitle')}</p>
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-4 mb-6">
+          {error}
         </div>
-        <ProgramNav />
-        {error && (
-          <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-4">
-            {error}
-          </div>
-        )}
-        {children}
-      </div>
+      )}
+      {children}
     </ProgramContext.Provider>
   );
 }
