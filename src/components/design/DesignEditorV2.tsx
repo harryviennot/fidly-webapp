@@ -3,8 +3,10 @@
 import { useState, useImperativeHandle, forwardRef, useRef, useCallback, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 import { CardDesign, CardDesignCreate } from '@/types';
 import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activateDesign } from '@/api';
+import { designKeys } from '@/hooks/use-designs';
 import { useBusiness } from '@/contexts/business-context';
 import { EditorCard } from '@/components/card';
 import { GoogleWalletCard } from '@/components/card/GoogleWalletCard';
@@ -45,30 +47,30 @@ interface DesignEditorV2Props {
   headerRight?: ReactNode;
 }
 
-const DEFAULT_DESIGN: CardDesignCreate = {
-  name: '',
-  organization_name: '',
-  description: '',
-  logo_text: '',
-  foreground_color: 'rgb(255, 255, 255)',
-  background_color: 'rgb(28, 28, 30)',
-  label_color: 'rgb(255, 255, 255)',
-  stamp_filled_color: 'rgb(249, 115, 22)',
-  stamp_empty_color: 'rgb(255, 255, 255)',
-  stamp_border_color: 'rgb(255, 255, 255)',
-  stamp_icon: 'checkmark',
-  reward_icon: 'gift',
-  icon_color: 'rgb(255, 255, 255)',
-  secondary_fields: [{ key: 'reward', label: 'REWARD', value: 'Free item at 10 stamps!' }],
-  auxiliary_fields: [],
-  back_fields: [
-    { key: 'terms', label: 'Terms & Conditions', value: 'Earn 1 stamp per purchase. Stamps expire after 1 year.' },
-  ],
-};
+function getDefaultDesign(t: ReturnType<typeof useTranslations>, totalStamps: number): CardDesignCreate {
+  return {
+    name: '',
+    organization_name: '',
+    description: '',
+    logo_text: '',
+    foreground_color: 'rgb(255, 255, 255)',
+    background_color: 'rgb(28, 28, 30)',
+    label_color: 'rgb(255, 255, 255)',
+    stamp_filled_color: 'rgb(249, 115, 22)',
+    stamp_empty_color: 'rgb(255, 255, 255)',
+    stamp_border_color: 'rgb(255, 255, 255)',
+    stamp_icon: 'checkmark',
+    reward_icon: 'gift',
+    icon_color: 'rgb(255, 255, 255)',
+    secondary_fields: [{ key: 'reward', label: t('defaultRewardLabel'), value: t('defaultRewardValue', { count: totalStamps }) }],
+    auxiliary_fields: [],
+    back_fields: [],
+  };
+}
 
 // Section completion heuristics
 function isBrandingComplete(d: CardDesignCreate & { logo_url?: string }) {
-  return !!(d.organization_name && d.description && d.background_color);
+  return !!(d.description && d.background_color);
 }
 
 function isStampsComplete(d: CardDesignCreate) {
@@ -79,23 +81,24 @@ function isContentComplete(d: CardDesignCreate) {
   return (d.secondary_fields?.length ?? 0) > 0;
 }
 
-function isBackComplete(d: CardDesignCreate) {
-  return (d.back_fields?.length ?? 0) > 0;
+function isBackComplete(_d: CardDesignCreate) {
+  return true;
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
   function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, programTotalStamps, programName, headerLeft, headerRight }, ref) {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { currentBusiness } = useBusiness();
     const t = useTranslations('designEditor.editor');
     const isWideEnough = useMediaQuery('(min-width: 1280px)');
     const isCompact = !isWideEnough;
+    const totalStamps = programTotalStamps ?? 10;
     const [formData, setFormData] = useState<CardDesignCreate>(
-      design ? { ...design } : { ...DEFAULT_DESIGN }
+      design ? { ...design } : getDefaultDesign(t, totalStamps)
     );
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
     const [previewStamps, setPreviewStamps] = useState(3);
-    const totalStamps = programTotalStamps ?? 10;
     const [showBack, setShowBack] = useState(false);
     const [previewWallet, setPreviewWallet] = useState<'apple' | 'google'>('apple');
     const [saving, setSaving] = useState(false);
@@ -114,7 +117,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       if (!currentBusiness?.id) return;
       const { translations, ...data } = formDataRef.current;
       void translations;
-      if (!data.name || !data.organization_name || !data.description) {
+      if (!data.name || !data.description) {
         setError(t('requiredFields'));
         return;
       }
@@ -145,6 +148,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             await updateDesign(currentBusiness.id, created.id, { ...data, strip_background_url: result.url });
             setPendingStripFile(null);
           }
+          queryClient.invalidateQueries({ queryKey: designKeys.all(currentBusiness.id) });
           router.push(`/design/${created.id}`);
         } else if (design) {
           await updateDesign(currentBusiness.id, design.id, data);
@@ -156,7 +160,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         setSaving(false);
         onSavingChange?.(false);
       }
-    }, [currentBusiness?.id, isNew, design, router, onSave, onSavingChange, pendingLogoFile, pendingStripFile, t]);
+    }, [currentBusiness?.id, isNew, design, router, queryClient, onSave, onSavingChange, pendingLogoFile, pendingStripFile, t]);
 
     useImperativeHandle(ref, () => ({
       handleSave,

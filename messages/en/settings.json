@@ -36,7 +36,10 @@
         "open": "Open",
         "close": "Close",
         "closed": "Closed",
-        "addRow": "Add time slot"
+        "addRow": "Add time slot",
+        "defaultMonFri": "Mon-Fri",
+        "defaultSat": "Sat",
+        "defaultSun": "Sun"
       },
       "website": {
         "title": "Website",

@@ -36,7 +36,10 @@
         "open": "Ouverture",
         "close": "Fermeture",
         "closed": "Fermé",
-        "addRow": "Ajouter un créneau"
+        "addRow": "Ajouter un créneau",
+        "defaultMonFri": "Lun-Ven",
+        "defaultSat": "Sam",
+        "defaultSun": "Dim"
       },
       "website": {
         "title": "Site web",

@@ -44,7 +44,7 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
   const availableTypes = ALL_TYPES.filter((type) => type === 'custom' || !usedPresetTypes.has(type));
 
   const addEntry = (type: InfoType) => {
-    const defaultData = getDefaultData(type);
+    const defaultData = getDefaultData(type, t);
     const key = type === 'custom' ? `biz_custom_${crypto.randomUUID()}` : `biz_${type}`;
     onChange([...value, { type, key, data: defaultData }]);
   };
@@ -356,14 +356,14 @@ function CustomFieldEditor({
   );
 }
 
-function getDefaultData(type: InfoType): Record<string, unknown> {
+function getDefaultData(type: InfoType, t: ReturnType<typeof useTranslations>): Record<string, unknown> {
   switch (type) {
     case 'hours':
       return {
         schedule: [
-          { days: 'Mon-Fri', open: '09:00', close: '18:00', closed: false },
-          { days: 'Sat', open: '10:00', close: '16:00', closed: false },
-          { days: 'Sun', open: '', close: '', closed: true },
+          { days: t('hours.defaultMonFri'), open: '09:00', close: '18:00', closed: false },
+          { days: t('hours.defaultSat'), open: '10:00', close: '16:00', closed: false },
+          { days: t('hours.defaultSun'), open: '', close: '', closed: true },
         ],
       };
     case 'website':

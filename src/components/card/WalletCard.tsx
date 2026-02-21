@@ -408,7 +408,7 @@ export function WalletCard({
     use3DEffect(interactive3D);
 
   const displayName =
-    organizationName || design.organization_name || "Your Business";
+    organizationName || design.organization_name || "";
   const initials = getInitials(displayName);
   const totalStamps = totalStampsProp ?? design.total_stamps ?? 10;
   const colors = computeCardColors(design);

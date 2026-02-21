@@ -49,12 +49,11 @@ export function BusinessSwitcher() {
             alt={currentBusiness.name}
             width={100}
             height={36}
-            className="object-contain"
-            style={{ height: 36, maxWidth: 100 }}
+            className="h-9 w-auto shrink-0 object-contain"
             unoptimized
           />
           <span
-            className="truncate font-bold text-lg"
+            className={`truncate font-bold ${(currentBusiness.name?.length ?? 0) > 15 ? 'text-base' : 'text-lg'}`}
             style={{
               color: textColor === "white" ? "#ffffff" : "var(--foreground)",
             }}
