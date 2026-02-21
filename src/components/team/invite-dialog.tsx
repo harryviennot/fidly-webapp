@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/form/form-field";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -127,33 +127,27 @@ export function InviteDialog({
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">{t('email')}</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder={t('emailPlaceholder')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={success}
-            />
-          </div>
+          <FormField
+            label={t('email')}
+            id="email"
+            type="email"
+            placeholder={t('emailPlaceholder')}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={success}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="name">{t('name')}</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder={t('namePlaceholder')}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={success}
-            />
-            <p className="text-xs text-muted-foreground">
-              {t('nameHint')}
-            </p>
-          </div>
+          <FormField
+            label={t('name')}
+            id="name"
+            type="text"
+            placeholder={t('namePlaceholder')}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={success}
+            hint={t('nameHint')}
+          />
 
           <div className="space-y-2">
             <Label>{t('role')}</Label>

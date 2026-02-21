@@ -5,13 +5,14 @@ import { useTranslations } from 'next-intl';
 import { useBusiness } from '@/contexts/business-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { FormField } from '@/components/form/form-field';
 import { Label } from '@/components/ui/label';
-import { SettingsSidebar, HexColorPicker } from '@/components/settings';
+import { SettingsSidebar, HexColorPicker, BusinessInfoEditor } from '@/components/settings';
 import ImageUploader from '@/components/design/ImageUploader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { updateBusiness, uploadBusinessLogo, deleteBusinessLogo } from '@/api';
 import { DEFAULT_ACCENT, applyTheme } from '@/utils/theme';
+import type { BusinessInfoEntry } from '@/types/business';
 
 interface FormData {
   name: string;
@@ -30,6 +31,9 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [themeChanged, setThemeChanged] = useState(false);
   const [infoSaved, setInfoSaved] = useState(false);
+  const [savingCardInfo, setSavingCardInfo] = useState(false);
+  const [cardInfoSaved, setCardInfoSaved] = useState(false);
+  const [businessInfo, setBusinessInfo] = useState<BusinessInfoEntry[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -59,12 +63,13 @@ export default function SettingsPage() {
       });
 
       originalTheme.current = { accentColor, backgroundColor };
+      setBusinessInfo((settings.business_info as BusinessInfoEntry[]) || []);
     }
   }, [currentBusiness]);
 
   // IntersectionObserver for scroll tracking
   useEffect(() => {
-    const sections = ['business-info', 'language', 'theme'];
+    const sections = ['business-info', 'card-info', 'language', 'theme'];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -191,6 +196,28 @@ export default function SettingsPage() {
     await refetch();
   };
 
+  // Save card info
+  const handleSaveCardInfo = async () => {
+    if (!currentBusiness?.id) return;
+    setSavingCardInfo(true);
+    setError(null);
+    try {
+      await updateBusiness(currentBusiness.id, {
+        settings: {
+          ...currentBusiness.settings,
+          business_info: businessInfo,
+        },
+      });
+      setCardInfoSaved(true);
+      setTimeout(() => setCardInfoSaved(false), 2000);
+      await refetch();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('cardInfo.saveFailed'));
+    } finally {
+      setSavingCardInfo(false);
+    }
+  };
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -224,15 +251,13 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">{t('businessInfo.businessName')}</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder={t('businessInfo.businessNamePlaceholder')}
-              />
-            </div>
+            <FormField
+              label={t('businessInfo.businessName')}
+              id="name"
+              value={formData.name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder={t('businessInfo.businessNamePlaceholder')}
+            />
 
             <div className="space-y-2">
               <Label>{t('businessInfo.businessLogo')}</Label>
@@ -244,6 +269,32 @@ export default function SettingsPage() {
                 accept="image/png,image/jpeg"
                 hint={t('businessInfo.logoHint')}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card Info Section */}
+        <Card id="card-info" className="scroll-mt-24">
+          <CardHeader>
+            <CardTitle className="text-lg">{t('cardInfo.title')}</CardTitle>
+            <CardDescription>{t('cardInfo.description')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <BusinessInfoEditor
+              value={businessInfo}
+              onChange={setBusinessInfo}
+            />
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
+              <p className="text-sm text-muted-foreground">
+                {cardInfoSaved && <span className="text-green-600">{t('cardInfo.saved')}</span>}
+              </p>
+              <Button
+                onClick={handleSaveCardInfo}
+                disabled={savingCardInfo}
+                variant="gradient"
+              >
+                {savingCardInfo ? t('cardInfo.saving') : t('cardInfo.save')}
+              </Button>
             </div>
           </CardContent>
         </Card>

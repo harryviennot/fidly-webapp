@@ -49,6 +49,9 @@ export interface CardDesign {
   auxiliary_fields: PassField[];
   back_fields: PassField[];
 
+  // Business info visibility
+  hidden_business_info_keys?: string[];
+
   // Translations
   translations?: Record<string, DesignTranslation>;
 
@@ -80,6 +83,8 @@ export interface CardDesignCreate {
   secondary_fields?: PassField[];
   auxiliary_fields?: PassField[];
   back_fields?: PassField[];
+
+  hidden_business_info_keys?: string[];
 
   translations?: Record<string, DesignTranslation>;
 }

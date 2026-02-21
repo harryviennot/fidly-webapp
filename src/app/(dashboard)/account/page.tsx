@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { FormField } from '@/components/form/form-field';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImageUploader from '@/components/design/ImageUploader';
@@ -307,28 +307,24 @@ export default function AccountPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordChange} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">{t('password.newPassword')}</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder={t('password.newPasswordPlaceholder')}
-                  minLength={8}
-                />
-              </div>
+              <FormField
+                label={t('password.newPassword')}
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder={t('password.newPasswordPlaceholder')}
+                minLength={8}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">{t('password.confirmPassword')}</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder={t('password.confirmPasswordPlaceholder')}
-                />
-              </div>
+              <FormField
+                label={t('password.confirmPassword')}
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder={t('password.confirmPasswordPlaceholder')}
+              />
 
               {passwordError && (
                 <p className="text-sm text-red-600">{passwordError}</p>
@@ -360,15 +356,13 @@ export default function AccountPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">{t('accountInfo.name')}</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder={t('accountInfo.namePlaceholder')}
-              />
-            </div>
+            <FormField
+              label={t('accountInfo.name')}
+              id="name"
+              value={name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder={t('accountInfo.namePlaceholder')}
+            />
             <div className="space-y-2">
               <Label className="text-muted-foreground">{t('accountInfo.email')}</Label>
               <p className="font-medium text-sm">{profile?.email || authUser?.email}</p>

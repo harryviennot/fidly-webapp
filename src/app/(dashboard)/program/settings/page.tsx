@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
+import { FormField } from '@/components/form/form-field';
 import { Badge } from '@/components/ui/badge';
 import { StampProgress } from '@/components/customers/stamp-progress';
 import { useBusiness } from '@/contexts/business-context';
@@ -175,15 +175,14 @@ export default function ProgramSettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="flex-1 space-y-5">
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">{t('programName')}</Label>
-              <Input
-                value={programName}
-                onChange={(e) => setProgramName(e.target.value)}
-                placeholder={t('programNamePlaceholder')}
-                className="h-11 text-base"
-              />
-            </div>
+            <FormField
+              label={t('programName')}
+              labelClassName="text-sm text-muted-foreground"
+              value={programName}
+              onChange={(e) => setProgramName(e.target.value)}
+              placeholder={t('programNamePlaceholder')}
+              className="h-11 text-base"
+            />
             <div className="space-y-2">
               <Label className="text-sm text-muted-foreground">{t('programType')}</Label>
               <div className="flex items-center h-11">
@@ -267,24 +266,22 @@ export default function ProgramSettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">{t('rewardName')}</Label>
-                <Input
-                  value={rewardName}
-                  onChange={(e) => setRewardName(e.target.value)}
-                  placeholder={t('rewardNamePlaceholder')}
-                  className="h-11 text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">{t('rewardDescription')}</Label>
-                <Input
-                  value={rewardDescription}
-                  onChange={(e) => setRewardDescription(e.target.value)}
-                  placeholder={t('rewardDescriptionPlaceholder')}
-                  className="h-11 text-base"
-                />
-              </div>
+              <FormField
+                label={t('rewardName')}
+                labelClassName="text-sm text-muted-foreground"
+                value={rewardName}
+                onChange={(e) => setRewardName(e.target.value)}
+                placeholder={t('rewardNamePlaceholder')}
+                className="h-11 text-base"
+              />
+              <FormField
+                label={t('rewardDescription')}
+                labelClassName="text-sm text-muted-foreground"
+                value={rewardDescription}
+                onChange={(e) => setRewardDescription(e.target.value)}
+                placeholder={t('rewardDescriptionPlaceholder')}
+                className="h-11 text-base"
+              />
             </div>
           </CardContent>
         </Card>
@@ -342,11 +339,10 @@ export default function ProgramSettingsPage() {
 
       {/* Sticky save bar */}
       <div
-        className={`sticky bottom-0 -mx-4 px-4 transition-all duration-300 ${
-          isDirty
+        className={`sticky bottom-0 -mx-4 px-4 transition-all duration-300 ${isDirty
             ? 'opacity-100 translate-y-0'
             : 'opacity-0 translate-y-2 pointer-events-none'
-        }`}
+          }`}
       >
         <div className="flex items-center justify-between gap-4 rounded-xl border bg-background/95 backdrop-blur-sm shadow-lg px-5 py-3">
           <div className="flex items-center gap-2 text-sm">

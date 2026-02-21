@@ -20,7 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FlipHorizontal, Eye, SlidersHorizontal, CaretDown } from '@phosphor-icons/react';
+import { FlipHorizontal, Eye, SlidersHorizontal, CaretDown, GearSix } from '@phosphor-icons/react';
+import Link from 'next/link';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import {
   rgbToHex, hexToRgb, autoIconColor, contrastRatio,
@@ -660,8 +661,22 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             <p className="text-sm text-muted-foreground">
               {t('backDescription')}
             </p>
+
+            {/* Inherited business info fields */}
+            <BusinessInfoFields
+              businessInfo={(currentBusiness?.settings?.business_info as Array<{ type: string; key: string; data: Record<string, unknown> }>) || []}
+              hiddenKeys={formData.hidden_business_info_keys || []}
+              onToggleKey={(key) => {
+                const current = formData.hidden_business_info_keys || [];
+                const next = current.includes(key)
+                  ? current.filter((k) => k !== key)
+                  : [...current, key];
+                updateField('hidden_business_info_keys', next);
+              }}
+            />
+
             <FieldEditor
-              title={t('backFields')}
+              title={t('cardSpecific')}
               fields={formData.back_fields || []}
               onChange={(f) => updateField('back_fields', f)}
               maxFields={10}
@@ -743,5 +758,86 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       </div>
     );
   });
+
+/** Inline component: shows inherited business info with visibility toggles */
+function BusinessInfoFields({
+  businessInfo,
+  hiddenKeys,
+  onToggleKey,
+}: {
+  businessInfo: Array<{ type: string; key: string; data: Record<string, unknown> }>;
+  hiddenKeys: string[];
+  onToggleKey: (key: string) => void;
+}) {
+  const t = useTranslations('designEditor.editor');
+
+  const TYPE_LABELS: Record<string, string> = {
+    hours: 'Store Hours',
+    website: 'Website',
+    phone: 'Phone',
+    email: 'Email',
+    address: 'Address',
+    custom: 'Custom',
+  };
+
+  if (businessInfo.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-border p-3 space-y-2">
+        <p className="text-xs text-muted-foreground">{t('fromBusinessSettings')}</p>
+        <p className="text-xs text-muted-foreground">{t('noBusinessInfo')}</p>
+        <Link href="/settings" className="text-xs text-[var(--accent)] hover:underline inline-flex items-center gap-1">
+          <GearSix className="w-3 h-3" />
+          {t('goToSettings')}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-border p-3 space-y-2">
+      <p className="text-xs font-medium text-muted-foreground">{t('fromBusinessSettings')}</p>
+      {businessInfo.map((entry) => {
+        const isHidden = hiddenKeys.includes(entry.key);
+        const preview = getEntryPreview(entry);
+        return (
+          <label
+            key={entry.key}
+            className="flex items-center gap-3 py-1.5 cursor-pointer group"
+          >
+            <input
+              type="checkbox"
+              checked={!isHidden}
+              onChange={() => onToggleKey(entry.key)}
+              className="rounded border-border text-[var(--accent)] focus:ring-[var(--accent)]"
+            />
+            <div className={`flex-1 min-w-0 ${isHidden ? 'opacity-40' : ''}`}>
+              <span className="text-sm font-medium">
+                {entry.type === 'custom' ? ((entry.data.label as string) || TYPE_LABELS.custom) : (TYPE_LABELS[entry.type] || entry.type)}
+              </span>
+              {preview && (
+                <p className="text-xs text-muted-foreground truncate">{preview}</p>
+              )}
+            </div>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+function getEntryPreview(entry: { type: string; data: Record<string, unknown> }): string {
+  switch (entry.type) {
+    case 'website': return (entry.data.url as string) || '';
+    case 'phone': return (entry.data.number as string) || '';
+    case 'email': return (entry.data.email as string) || '';
+    case 'address': return (entry.data.address as string) || '';
+    case 'hours': {
+      const schedule = (entry.data.schedule as Array<{ days: string; closed?: boolean }>) || [];
+      return schedule.map((s) => s.days).join(', ');
+    }
+    case 'custom': return (entry.data.value as string) || '';
+    default: return '';
+  }
+}
 
 export default DesignEditorV2;
