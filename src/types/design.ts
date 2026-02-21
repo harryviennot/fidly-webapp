@@ -66,7 +66,6 @@ export interface CardDesignCreate {
   background_color?: string;
   label_color?: string;
 
-  total_stamps?: number;
   stamp_filled_color?: string;
   stamp_empty_color?: string;
   stamp_border_color?: string;

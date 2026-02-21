@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useProgram } from './layout';
 import { useBusiness } from '@/contexts/business-context';
-import { getCustomers } from '@/api';
+import { useCustomers } from '@/hooks/use-customers';
 import { ActiveCardWidget } from '@/components/loyalty-program/overview/ActiveCardWidget';
 import { ProgramSummaryCard } from '@/components/program/ProgramSummaryCard';
 import { EnrollmentSnapshot } from '@/components/program/EnrollmentSnapshot';
@@ -16,18 +15,10 @@ export default function ProgramOverviewPage() {
   const { program, designs, activeDesign, loading, isProPlan } = useProgram();
   const { currentBusiness } = useBusiness();
   const t = useTranslations('loyaltyProgram.overview');
-  const [totalCustomers, setTotalCustomers] = useState(0);
 
-  useEffect(() => {
-    if (!currentBusiness?.id) return;
-    let cancelled = false;
-    getCustomers(currentBusiness.id, 1, 0)
-      .then((data) => {
-        if (!cancelled) setTotalCustomers(data.total);
-      })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [currentBusiness?.id]);
+  // Reuse cached customer data (page 0) for total count
+  const { data: customerData } = useCustomers(currentBusiness?.id, 0);
+  const totalCustomers = customerData?.total ?? 0;
 
   if (loading) {
     return <OverviewPageSkeleton />;
@@ -58,11 +49,10 @@ export default function ProgramOverviewPage() {
           <EnrollmentSnapshot totalStamps={program?.config?.total_stamps ?? 10} />
         </div>
 
-        {/* Right column: Active card + Quick actions — fixed width, sticky */}
+        {/* Right column: Active card — fixed width, sticky */}
         <div className="w-full max-w-[400px] max-lg:max-w-[400px] flex-shrink-0">
-          <div className="lg:sticky lg:top-6 space-y-4">
+          <div className="lg:sticky lg:top-6">
             <ActiveCardWidget design={activeDesign} isProPlan={isProPlan} />
-            <QuickActions activeDesign={activeDesign} />
           </div>
         </div>
       </div>

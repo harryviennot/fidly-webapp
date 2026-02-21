@@ -52,7 +52,6 @@ const DEFAULT_DESIGN: CardDesignCreate = {
   foreground_color: 'rgb(255, 255, 255)',
   background_color: 'rgb(28, 28, 30)',
   label_color: 'rgb(255, 255, 255)',
-  total_stamps: 10,
   stamp_filled_color: 'rgb(249, 115, 22)',
   stamp_empty_color: 'rgb(255, 255, 255)',
   stamp_border_color: 'rgb(255, 255, 255)',
@@ -95,6 +94,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     );
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
     const [previewStamps, setPreviewStamps] = useState(3);
+    const totalStamps = programTotalStamps ?? 10;
     const [showBack, setShowBack] = useState(false);
     const [previewWallet, setPreviewWallet] = useState<'apple' | 'google'>('apple');
     const [saving, setSaving] = useState(false);
@@ -195,14 +195,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBusiness?.name, isNew]);
-
-    // Sync total_stamps from program
-    useEffect(() => {
-      if (programTotalStamps && programTotalStamps !== formData.total_stamps) {
-        updateField('total_stamps', programTotalStamps);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [programTotalStamps]);
 
     // Auto-fill description from program name
     useEffect(() => {
@@ -418,14 +410,14 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-sm text-muted-foreground">{t('previewStamps')}</Label>
                 <span className="text-sm font-medium">
-                  {previewStamps} / {formData.total_stamps || 10}
+                  {previewStamps} / {totalStamps}
                 </span>
               </div>
               <input
                 type="range"
                 className="styled-slider w-full"
                 min={0}
-                max={formData.total_stamps || 10}
+                max={totalStamps}
                 value={previewStamps}
                 onChange={(e) => setPreviewStamps(parseInt(e.target.value))}
               />

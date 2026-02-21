@@ -1,17 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UsersIcon } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { getCustomers } from '@/api';
-
-interface StampBucket {
-  label: string;
-  percentage: number;
-  count: number;
-}
+import { customerKeys } from '@/hooks/use-customers';
 
 interface EnrollmentSnapshotProps {
   totalStamps: number;
@@ -20,47 +16,33 @@ interface EnrollmentSnapshotProps {
 export function EnrollmentSnapshot({ totalStamps }: EnrollmentSnapshotProps) {
   const t = useTranslations('loyaltyProgram.overview');
   const { currentBusiness } = useBusiness();
-  const [totalCustomers, setTotalCustomers] = useState<number>(0);
-  const [buckets, setBuckets] = useState<StampBucket[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const businessId = currentBusiness?.id;
 
-  useEffect(() => {
-    if (!currentBusiness?.id) return;
-    let cancelled = false;
+  const { data, isLoading } = useQuery({
+    queryKey: [...customerKeys.all(businessId!), 'enrollment'] as const,
+    queryFn: () => getCustomers(businessId!, 200, 0),
+    enabled: !!businessId,
+  });
 
-    async function load() {
-      try {
-        const data = await getCustomers(currentBusiness!.id, 200, 0);
-        if (cancelled) return;
+  const totalCustomers = data?.total ?? 0;
 
-        const total = data.total;
-        setTotalCustomers(total);
-
-        // Compute stamp distribution from fetched customers
-        const third = Math.ceil(totalStamps / 3);
-        let low = 0, mid = 0, high = 0;
-        for (const c of data.data) {
-          const stamps = c.stamps ?? 0;
-          if (stamps < third) low++;
-          else if (stamps < third * 2) mid++;
-          else high++;
-        }
-        const count = data.data.length || 1;
-        setBuckets([
-          { label: `${t('low')} (0-${third - 1})`, percentage: Math.round((low / count) * 100), count: low },
-          { label: `${t('mid')} (${third}-${third * 2 - 1})`, percentage: Math.round((mid / count) * 100), count: mid },
-          { label: `${t('high')} (${third * 2}-${totalStamps})`, percentage: Math.round((high / count) * 100), count: high },
-        ]);
-      } catch {
-        // Silently fail — not critical
-      } finally {
-        if (!cancelled) setLoaded(true);
-      }
+  const buckets = useMemo(() => {
+    if (!data?.data.length) return [];
+    const third = Math.ceil(totalStamps / 3);
+    let low = 0, mid = 0, high = 0;
+    for (const c of data.data) {
+      const stamps = c.stamps ?? 0;
+      if (stamps < third) low++;
+      else if (stamps < third * 2) mid++;
+      else high++;
     }
-
-    load();
-    return () => { cancelled = true; };
-  }, [currentBusiness?.id, totalStamps, t]);
+    const count = data.data.length;
+    return [
+      { label: `${t('low')} (0-${third - 1})`, percentage: Math.round((low / count) * 100) },
+      { label: `${t('mid')} (${third}-${third * 2 - 1})`, percentage: Math.round((mid / count) * 100) },
+      { label: `${t('high')} (${third * 2}-${totalStamps})`, percentage: Math.round((high / count) * 100) },
+    ];
+  }, [data, totalStamps, t]);
 
   return (
     <Card>
@@ -74,13 +56,13 @@ export function EnrollmentSnapshot({ totalStamps }: EnrollmentSnapshotProps) {
             <UsersIcon className="w-5 h-5 text-[var(--accent)]" weight="duotone" />
           </div>
           <div>
-            <p className="text-2xl font-bold">{loaded ? totalCustomers : '—'}</p>
+            <p className="text-2xl font-bold">{isLoading ? '—' : totalCustomers}</p>
             <p className="text-sm text-muted-foreground">{t('enrolled')}</p>
           </div>
         </div>
 
         {/* Stamp distribution */}
-        {loaded && totalCustomers > 0 && (
+        {!isLoading && totalCustomers > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               {t('stampDistribution')}

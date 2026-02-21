@@ -1,13 +1,20 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import type { CardDesign, LoyaltyProgram } from '@/types';
-import { getDesigns, deleteDesign, activateDesign, duplicateDesign, getPrograms, updateProgram as updateProgramApi } from '@/api';
-import type { LoyaltyProgramUpdate } from '@/types';
+import { useQueryClient } from '@tanstack/react-query';
+import type { CardDesign, LoyaltyProgram, LoyaltyProgramUpdate } from '@/types';
 import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { getPlanLimits, isLimitExceededError } from '@/lib/features';
+import { useDefaultProgram, useUpdateProgram, programKeys } from '@/hooks/use-programs';
+import {
+  useDesigns,
+  useDeleteDesign,
+  useActivateDesign,
+  useDuplicateDesign,
+  designKeys,
+} from '@/hooks/use-designs';
 
 interface ProgramContextType {
   program: LoyaltyProgram | undefined;
@@ -39,70 +46,40 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
   const { currentBusiness } = useBusiness();
   const t = useTranslations('loyaltyProgram');
   const tDesign = useTranslations('designEditor');
-
-  const [program, setProgram] = useState<LoyaltyProgram | undefined>();
-  const [designs, setDesigns] = useState<CardDesign[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const businessId = currentBusiness?.id;
 
   const isProPlan = currentBusiness?.subscription_tier === 'pro';
-  const activeDesign = designs.find((d) => d.is_active);
-  const inactiveDesigns = designs.filter((d) => !d.is_active);
 
-  useEffect(() => {
-    if (!currentBusiness?.id) return;
-    let cancelled = false;
+  // Queries
+  const {
+    data: program,
+    isLoading: programLoading,
+    error: programError,
+  } = useDefaultProgram(businessId);
 
-    async function load() {
-      try {
-        const [programs, designData] = await Promise.all([
-          getPrograms(currentBusiness!.id),
-          getDesigns(currentBusiness!.id),
-        ]);
-        if (cancelled) return;
-        const defaultProgram = programs.find((p) => p.is_default) || programs[0];
-        setProgram(defaultProgram);
-        setDesigns(designData);
-        setError(null);
-      } catch (err) {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Failed to load data');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
+  const {
+    data: designs = [],
+    isLoading: designsLoading,
+    error: designsError,
+  } = useDesigns(businessId);
 
-    load();
-    return () => { cancelled = true; };
-  }, [currentBusiness?.id]);
+  // Derived
+  const activeDesign = useMemo(() => designs.find((d) => d.is_active), [designs]);
+  const inactiveDesigns = useMemo(() => designs.filter((d) => !d.is_active), [designs]);
+  const loading = programLoading || designsLoading;
+  const error = programError?.message || designsError?.message || null;
 
-  const loadProgram = async () => {
-    if (!currentBusiness?.id) return;
-    try {
-      const programs = await getPrograms(currentBusiness.id);
-      const defaultProgram = programs.find((p) => p.is_default) || programs[0];
-      setProgram(defaultProgram);
-    } catch (err) {
-      console.error('Failed to load program:', err);
-    }
-  };
-
-  const loadDesigns = async () => {
-    if (!currentBusiness?.id) return;
-    try {
-      const data = await getDesigns(currentBusiness.id);
-      setDesigns(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load designs');
-    }
-  };
+  // Mutations
+  const updateProgramMutation = useUpdateProgram(businessId);
+  const deleteMutation = useDeleteDesign(businessId);
+  const activateMutation = useActivateDesign(businessId);
+  const duplicateMutation = useDuplicateDesign(businessId);
 
   const handleUpdateProgram = async (data: LoyaltyProgramUpdate) => {
-    if (!currentBusiness?.id || !program?.id) return;
+    if (!businessId || !program?.id) return;
     try {
-      const updated = await updateProgramApi(currentBusiness.id, program.id, data);
-      setProgram(updated);
+      await updateProgramMutation.mutateAsync({ programId: program.id, data });
       toast.success(t('toasts.programUpdated'));
     } catch (err) {
       console.error('Failed to update program:', err);
@@ -112,60 +89,67 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
   };
 
   const handleDelete = async (designId: string) => {
-    if (!currentBusiness?.id) return;
+    if (!businessId) return;
     if (!confirm(tDesign('deleteConfirm'))) return;
     try {
-      await deleteDesign(currentBusiness.id, designId);
-      await loadDesigns();
+      await deleteMutation.mutateAsync(designId);
       toast.success(tDesign('toasts.cardDeleted'));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete design');
+      toast.error(err instanceof Error ? err.message : 'Failed to delete design');
     }
   };
 
   const handleActivate = async (designId: string) => {
-    if (!currentBusiness?.id) return;
+    if (!businessId) return;
     try {
-      await activateDesign(currentBusiness.id, designId);
-      await loadDesigns();
+      await activateMutation.mutateAsync(designId);
       toast.success(tDesign('toasts.cardActivated'));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to activate design');
+      toast.error(err instanceof Error ? err.message : 'Failed to activate design');
     }
   };
 
   const handleDuplicate = async (designId: string) => {
-    if (!currentBusiness?.id) return;
-    const limits = getPlanLimits(currentBusiness.subscription_tier || 'pay');
+    if (!businessId) return;
+    const limits = getPlanLimits(currentBusiness?.subscription_tier || 'pay');
     if (limits.max_card_designs !== null && designs.length >= limits.max_card_designs) {
       toast.error(`Design limit reached. Your plan allows ${limits.max_card_designs} design(s). Upgrade to Pro for unlimited designs.`);
       return;
     }
     try {
-      await duplicateDesign(currentBusiness.id, designId);
-      await loadDesigns();
+      await duplicateMutation.mutateAsync(designId);
       toast.success(tDesign('toasts.cardDuplicated'));
     } catch (err: unknown) {
       if (isLimitExceededError(err)) {
         toast.error(err.detail.message || 'Design limit reached. Upgrade to Pro for more designs.');
         return;
       }
-      setError(err instanceof Error ? err.message : 'Failed to duplicate design');
+      toast.error(err instanceof Error ? err.message : 'Failed to duplicate design');
     }
+  };
+
+  const refreshProgram = async () => {
+    if (!businessId) return;
+    await queryClient.invalidateQueries({ queryKey: programKeys.default(businessId) });
+  };
+
+  const refreshDesigns = async () => {
+    if (!businessId) return;
+    await queryClient.invalidateQueries({ queryKey: designKeys.all(businessId) });
   };
 
   return (
     <ProgramContext.Provider
       value={{
-        program,
+        program: program ?? undefined,
         designs,
         activeDesign,
         inactiveDesigns,
         loading,
         error,
         isProPlan,
-        refreshProgram: loadProgram,
-        refreshDesigns: loadDesigns,
+        refreshProgram,
+        refreshDesigns,
         updateProgram: handleUpdateProgram,
         handleDelete,
         handleActivate,
