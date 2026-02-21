@@ -4,6 +4,8 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis } from 'recharts';
 import { UsersIcon } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { getCustomers } from '@/api';
@@ -12,6 +14,10 @@ import { customerKeys } from '@/hooks/use-customers';
 interface EnrollmentSnapshotProps {
   totalStamps: number;
 }
+
+const chartConfig = {
+  customers: { label: 'Customers', color: 'var(--accent)' },
+};
 
 export function EnrollmentSnapshot({ totalStamps }: EnrollmentSnapshotProps) {
   const t = useTranslations('loyaltyProgram.overview');
@@ -26,23 +32,13 @@ export function EnrollmentSnapshot({ totalStamps }: EnrollmentSnapshotProps) {
 
   const totalCustomers = data?.total ?? 0;
 
-  const buckets = useMemo(() => {
+  const histogram = useMemo(() => {
     if (!data?.data.length) return [];
-    const third = Math.ceil(totalStamps / 3);
-    let low = 0, mid = 0, high = 0;
-    for (const c of data.data) {
-      const stamps = c.stamps ?? 0;
-      if (stamps < third) low++;
-      else if (stamps < third * 2) mid++;
-      else high++;
-    }
-    const count = data.data.length;
-    return [
-      { label: `${t('low')} (0-${third - 1})`, percentage: Math.round((low / count) * 100) },
-      { label: `${t('mid')} (${third}-${third * 2 - 1})`, percentage: Math.round((mid / count) * 100) },
-      { label: `${t('high')} (${third * 2}-${totalStamps})`, percentage: Math.round((high / count) * 100) },
-    ];
-  }, [data, totalStamps, t]);
+    return Array.from({ length: totalStamps + 1 }, (_, stamp) => ({
+      stamp: String(stamp),
+      customers: data.data.filter((c) => (c.stamps ?? 0) === stamp).length,
+    }));
+  }, [data, totalStamps]);
 
   return (
     <Card>
@@ -61,26 +57,19 @@ export function EnrollmentSnapshot({ totalStamps }: EnrollmentSnapshotProps) {
           </div>
         </div>
 
-        {/* Stamp distribution */}
-        {!isLoading && totalCustomers > 0 && (
+        {/* Stamp distribution bar chart */}
+        {!isLoading && totalCustomers > 0 && histogram.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               {t('stampDistribution')}
             </p>
-            {buckets.map((bucket) => (
-              <div key={bucket.label} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">{bucket.label}</span>
-                  <span className="font-medium">{bucket.percentage}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[var(--accent)] transition-all duration-500"
-                    style={{ width: `${bucket.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+            <ChartContainer config={chartConfig} className="h-[120px] w-full">
+              <BarChart data={histogram}>
+                <XAxis dataKey="stamp" tickLine={false} axisLine={false} fontSize={12} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="customers" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ChartContainer>
           </div>
         )}
       </CardContent>
