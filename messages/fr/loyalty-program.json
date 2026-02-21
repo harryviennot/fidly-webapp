@@ -13,6 +13,22 @@
     "qrCodeHint": "Les QR codes sont disponibles dans l'application scanner",
     "dataCollectionDescription": "Collectez ces informations lorsque les clients s'inscrivent à leur carte de fidélité.",
     "anonymousModeNote": "Note : Ne collecter aucune donnée active le mode anonyme — les clients peuvent s'inscrire sans fournir aucune information.",
+    "nav": {
+      "details": "Détails",
+      "design": "Design de carte"
+    },
+    "programInfo": "Infos du programme",
+    "programName": "Nom du programme",
+    "programNamePlaceholder": "Mon programme de fidélité",
+    "programType": "Type de programme",
+    "stampCard": "Carte à tampons",
+    "totalStamps": "Nombre de tampons",
+    "rewardName": "Nom de la récompense",
+    "rewardNamePlaceholder": "Café offert",
+    "rewardDescription": "Description de la récompense",
+    "rewardDescriptionPlaceholder": "Obtenez un café gratuit après avoir collecté tous les tampons",
+    "saveProgram": "Enregistrer",
+    "saving": "Enregistrement...",
     "dataFields": {
       "name": "Nom",
       "nameDescription": "Personnalisez leur carte et identifiez vos clients",
@@ -22,7 +38,9 @@
       "phoneDescription": "Notifications SMS et campagnes (bientôt disponible)"
     },
     "toasts": {
-      "settingsFailed": "Échec de la mise à jour des paramètres"
+      "settingsFailed": "Échec de la mise à jour des paramètres",
+      "programUpdated": "Programme mis à jour",
+      "programUpdateFailed": "Échec de la mise à jour du programme"
     }
   }
 }

@@ -136,7 +136,7 @@ export default function CustomerTable() {
           cmp = a.stamps - b.stamps;
           break;
         case "updated_at":
-          cmp = (a.updated_at ?? "").localeCompare(b.updated_at ?? "");
+          cmp = (a.last_activity_at ?? a.updated_at ?? "").localeCompare(b.last_activity_at ?? b.updated_at ?? "");
           break;
         case "total_redemptions":
           cmp = (a.total_redemptions ?? 0) - (b.total_redemptions ?? 0);
@@ -287,7 +287,7 @@ export default function CustomerTable() {
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-[var(--muted-foreground)]">
-                      {formatRelativeTime(customer.updated_at)}
+                      {formatRelativeTime(customer.last_activity_at ?? customer.updated_at)}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-center">
                       {customer.total_redemptions ?? 0}

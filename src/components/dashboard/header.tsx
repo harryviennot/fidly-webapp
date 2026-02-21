@@ -18,6 +18,8 @@ import {
 // Route segment keys for breadcrumb labels
 const routeSegmentKeys: Record<string, string> = {
   "": "header.loyaltyProgram",
+  program: "header.loyaltyProgram",
+  details: "loyaltyProgram.nav.details",
   customers: "header.customers",
   design: "header.design",
   activity: "header.activity",
@@ -37,14 +39,12 @@ function useGenerateBreadcrumbs(pathname: string): Crumb[] {
   const t = useTranslations();
   const segments = pathname.split("/").filter(Boolean);
 
-  // If we're at root (Loyalty Program page)
+  // If we're at root, redirect happens so just show program
   if (segments.length === 0) {
-    return [{ label: t("header.loyaltyProgram"), href: "/", isLast: true }];
+    return [{ label: t("header.loyaltyProgram"), href: "/program", isLast: true }];
   }
 
-  const breadcrumbs: Crumb[] = [
-    { label: t("header.loyaltyProgram"), href: "/", isLast: false },
-  ];
+  const breadcrumbs: Crumb[] = [];
 
   let currentPath = "";
   segments.forEach((segment, index) => {

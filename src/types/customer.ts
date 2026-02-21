@@ -4,6 +4,7 @@ export interface CustomerResponse {
   email: string;
   stamps: number;
   total_redemptions?: number;
+  last_activity_at?: string;
   created_at?: string;
   updated_at?: string;
 }

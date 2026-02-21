@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FlipHorizontal, Minus, Plus, Eye, SlidersHorizontal, CaretDown } from '@phosphor-icons/react';
+import { FlipHorizontal, Eye, SlidersHorizontal, CaretDown } from '@phosphor-icons/react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import {
   rgbToHex, hexToRgb, autoIconColor, contrastRatio,
@@ -38,6 +38,8 @@ interface DesignEditorV2Props {
   onSave?: () => void;
   onSavingChange?: (saving: boolean) => void;
   designName?: string;
+  programTotalStamps?: number;
+  programName?: string;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
 }
@@ -82,7 +84,7 @@ function isBackComplete(d: CardDesignCreate) {
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, headerLeft, headerRight }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, programTotalStamps, programName, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const { currentBusiness } = useBusiness();
     const t = useTranslations('designEditor.editor');
@@ -193,6 +195,22 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBusiness?.name, isNew]);
+
+    // Sync total_stamps from program
+    useEffect(() => {
+      if (programTotalStamps && programTotalStamps !== formData.total_stamps) {
+        updateField('total_stamps', programTotalStamps);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [programTotalStamps]);
+
+    // Auto-fill description from program name
+    useEffect(() => {
+      if (programName && isNew && !formData.description) {
+        updateField('description', programName);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [programName, isNew]);
 
     // Progressive disclosure: auto-open next section when current becomes complete
     const prevCompleteRef = useRef({
@@ -512,32 +530,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           badge={stampsBadge}
         >
           <div className="space-y-4">
-            {/* Basic controls — always visible */}
-            <div className="space-y-2">
-              <LabelWithTooltip tooltip={t('totalStampsTooltip')}>{t('totalStamps')}</LabelWithTooltip>
-              <div className="flex items-center justify-between w-full">
-                <button
-                  type="button"
-                  onClick={() => updateField('total_stamps', Math.max(2, (formData.total_stamps || 10) - 1))}
-                  className="w-10 h-10 rounded-full border border-input flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={(formData.total_stamps || 10) <= 2}
-                >
-                  <Minus className="w-4 h-4" weight="bold" />
-                </button>
-                <span className="text-xl font-semibold">
-                  {formData.total_stamps || 10}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => updateField('total_stamps', Math.min(20, (formData.total_stamps || 10) + 1))}
-                  className="w-10 h-10 rounded-full border border-input flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={(formData.total_stamps || 10) >= 20}
-                >
-                  <Plus className="w-4 h-4" weight="bold" />
-                </button>
-              </div>
-            </div>
-
             <div className="space-y-2">
               <LabelWithTooltip tooltip={t('stampIconTooltip')}>{t('stampIcon')}</LabelWithTooltip>
               <StampIconPicker

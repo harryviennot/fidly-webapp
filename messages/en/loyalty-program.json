@@ -13,6 +13,22 @@
     "qrCodeHint": "QR code downloads are available in the scanner app",
     "dataCollectionDescription": "Collect this information when customers sign up for their loyalty card.",
     "anonymousModeNote": "Note: Collecting no data enables anonymous mode - customers can sign up without providing any information.",
+    "nav": {
+      "details": "Details",
+      "design": "Card Design"
+    },
+    "programInfo": "Program Info",
+    "programName": "Program Name",
+    "programNamePlaceholder": "My Loyalty Program",
+    "programType": "Program Type",
+    "stampCard": "Stamp Card",
+    "totalStamps": "Total Stamps",
+    "rewardName": "Reward Name",
+    "rewardNamePlaceholder": "Free Coffee",
+    "rewardDescription": "Reward Description",
+    "rewardDescriptionPlaceholder": "Get a free coffee after collecting all stamps",
+    "saveProgram": "Save",
+    "saving": "Saving...",
     "dataFields": {
       "name": "Name",
       "nameDescription": "Personalize their card and help you identify customers",
@@ -22,7 +38,9 @@
       "phoneDescription": "Enable SMS notifications and campaigns (coming soon)"
     },
     "toasts": {
-      "settingsFailed": "Failed to update settings"
+      "settingsFailed": "Failed to update settings",
+      "programUpdated": "Program updated",
+      "programUpdateFailed": "Failed to update program"
     }
   }
 }

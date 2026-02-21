@@ -28,7 +28,7 @@ import {
 } from "@phosphor-icons/react";
 
 const navItems = [
-  { href: "/", labelKey: "nav.loyaltyProgram" as const, icon: HeartIcon },
+  { href: "/program", labelKey: "nav.program" as const, icon: HeartIcon },
   { href: "/customers", labelKey: "nav.customers" as const, icon: UsersIcon },
   { href: "/activity", labelKey: "nav.activity" as const, icon: ClockCounterClockwiseIcon },
   { href: "/team", labelKey: "nav.team" as const, icon: UserPlusIcon },
@@ -45,10 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   );
 
   const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
-    }
-    return pathname.startsWith(href);
+    return pathname === href || pathname.startsWith(href + '/');
   };
 
   return (
@@ -60,8 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu className="gap-2 pt-2">
-            {/* Dashboard nav item */}
-            {filteredNavItems.filter(item => item.href === "/").map((item) => {
+            {filteredNavItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
               return (
@@ -85,63 +81,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              )
-            })}
-
-            {/* Customers nav item */}
-            {filteredNavItems.filter(item => item.href === "/customers").map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={active}
-                    className={cn(
-                      "transition-all duration-200",
-                      active
-                        ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white"
-                        : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <Icon
-                        className="h-5 w-5"
-                        weight={active ? "fill" : "regular"}
-                      />
-                      <span>{t(item.labelKey)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            })}
-
-            {/* Rest of nav items (Team, Settings) */}
-            {filteredNavItems.filter(item => item.href !== "/" && item.href !== "/customers").map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={active}
-                    className={cn(
-                      "transition-all duration-200",
-                      active
-                        ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white"
-                        : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <Icon
-                        className="h-5 w-5"
-                        weight={active ? "fill" : "regular"}
-                      />
-                      <span>{t(item.labelKey)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
+              );
             })}
           </SidebarMenu>
         </SidebarGroup>

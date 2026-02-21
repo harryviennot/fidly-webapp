@@ -13,10 +13,10 @@ export type Role = "owner" | "admin" | "scanner";
  */
 export const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/": ["owner", "admin"],
+  "/program": ["owner", "admin"],
   "/customers": ["owner", "admin"],
   "/activity": ["owner", "admin"],
   "/team": ["owner", "admin"],
-  "/loyalty-program": ["owner"],
   "/design": ["owner"],
   "/settings": ["owner"],
   "/account": ["owner", "admin"],

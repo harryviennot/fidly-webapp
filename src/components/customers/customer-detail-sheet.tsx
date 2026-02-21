@@ -143,7 +143,7 @@ export function CustomerDetailSheet({
   ).length;
 
   const firstVisit = customer.created_at;
-  const lastVisit = customer.updated_at;
+  const lastVisit = customer.last_activity_at ?? customer.updated_at;
   const colors = design ? computeCardColors(design) : null;
   const stampIcon = (design?.stamp_icon as StampIconType) ?? undefined;
   const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;

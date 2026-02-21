@@ -9,7 +9,8 @@ export function classifyCustomer(
 ): CustomerSegment {
   const stamps = customer.stamps;
   const createdAt = customer.created_at ? new Date(customer.created_at) : null;
-  const updatedAt = customer.updated_at ? new Date(customer.updated_at) : null;
+  const lastActivity = customer.last_activity_at ?? customer.updated_at;
+  const updatedAt = lastActivity ? new Date(lastActivity) : null;
 
   // Close to reward: within 2 stamps of max
   if (stamps >= maxStamps - 2 && stamps < maxStamps) {
