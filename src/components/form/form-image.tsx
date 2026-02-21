@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from "react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -24,9 +26,6 @@ function FormField({ label, error, hint, id, labelClassName, ...inputProps }: Fo
 }
 
 export { FormField }
-
-
-'use client';
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';

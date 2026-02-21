@@ -45,7 +45,7 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
 
   const addEntry = (type: InfoType) => {
     const defaultData = getDefaultData(type);
-    const key = type === 'custom' ? `biz_custom_${Date.now()}` : `biz_${type}`;
+    const key = type === 'custom' ? `biz_custom_${crypto.randomUUID()}` : `biz_${type}`;
     onChange([...value, { type, key, data: defaultData }]);
   };
 
