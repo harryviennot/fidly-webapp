@@ -1,5 +1,5 @@
 // Card Components
-export { WalletCard } from "./WalletCard";
+export { WalletCard, StampGrid, StampGridContainer } from "./WalletCard";
 export type { WalletCardProps } from "./WalletCard";
 
 export { CardWrapper } from "./CardWrapper";

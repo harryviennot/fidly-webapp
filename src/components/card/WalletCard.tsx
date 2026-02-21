@@ -335,7 +335,7 @@ function use3DEffect(enabled: boolean) {
 
 const STRIP_ASPECT_RATIO = 1125 / 432;
 
-function StampGridContainer({
+export function StampGridContainer({
   totalStamps,
   filledCount,
   colors,
