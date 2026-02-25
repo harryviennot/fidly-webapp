@@ -10,10 +10,12 @@ import {
   MagnifyingGlass,
   Export,
   UserPlus,
-  DotsThree,
+  Stamp,
+  Gift,
+  Prohibit,
 } from "@phosphor-icons/react";
 import { useBusiness } from "@/contexts/business-context";
-import { useCustomers, useAddStamp, PAGE_SIZE } from "@/hooks/use-customers";
+import { useCustomers, useAddStamp, useRedeemReward, useVoidStamp, PAGE_SIZE } from "@/hooks/use-customers";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useActiveDesign } from "@/hooks/use-designs";
 import type { CustomerResponse } from "@/types";
@@ -92,6 +94,8 @@ export default function CustomerTable() {
   const { data: txnData } = useTransactions(businessId);
   const { data: design } = useActiveDesign(businessId);
   const addStampMutation = useAddStamp(businessId);
+  const redeemMutation = useRedeemReward(businessId);
+  const voidMutation = useVoidStamp(businessId);
 
   const customers = useMemo(
     () => (Array.isArray(paginatedData?.data) ? paginatedData.data : []),
@@ -134,6 +138,57 @@ export default function CustomerTable() {
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : t("toasts.stampFailed")
+      );
+    }
+  };
+
+  const handleRedeem = async (
+    e: React.MouseEvent,
+    customer: CustomerResponse
+  ) => {
+    e.stopPropagation();
+    if (!businessId) return;
+    try {
+      await redeemMutation.mutateAsync(customer.id);
+      toast.success(t("actions.redeemSuccessToast"));
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : t("actions.redeemFailedToast")
+      );
+    }
+  };
+
+  const handleVoid = async (
+    e: React.MouseEvent,
+    customer: CustomerResponse
+  ) => {
+    e.stopPropagation();
+    if (!businessId) return;
+    // Find last voidable transaction for this customer
+    const customerTxns = transactions.filter(
+      (txn) => txn.customer_id === customer.id
+    );
+    const lastVoidable = customerTxns.find(
+      (txn) =>
+        (txn.type === "stamp_added" || txn.type === "bonus_stamp") &&
+        !customerTxns.some(
+          (v) => v.type === "stamp_voided" && v.voided_transaction_id === txn.id
+        )
+    );
+    if (!lastVoidable) {
+      toast.error(t("actions.noVoidableStamp"));
+      return;
+    }
+    try {
+      await voidMutation.mutateAsync({
+        customerId: customer.id,
+        transactionId: lastVoidable.id,
+        reason: "Voided from table",
+      });
+      toast.success(t("actions.voidSuccessToast"));
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : t("actions.voidFailedToast")
       );
     }
   };
@@ -345,7 +400,9 @@ export default function CustomerTable() {
                     {t("table.redemptions")}
                     <SortIndicator sortKey={sortKey} sortDir={sortDir} column="total_redemptions" />
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider w-[50px] px-4" />
+                  <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 text-right">
+                    {t("table.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -422,16 +479,54 @@ export default function CustomerTable() {
                       </TableCell>
 
                       {/* Actions */}
-                      <TableCell className="py-3 px-4 text-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddStamp(e, customer);
-                          }}
-                          className="text-[#BBB] hover:text-[#888] p-1 rounded-md bg-transparent border-none cursor-pointer flex"
-                        >
-                          <DotsThree className="w-5 h-5" weight="bold" />
-                        </button>
+                      <TableCell className="py-3 px-4">
+                        <div className="flex items-center justify-end gap-1">
+                          {customer.stamps >= totalStamps ? (
+                            <button
+                              onClick={(e) => handleRedeem(e, customer)}
+                              disabled={redeemMutation.isPending}
+                              className="flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                              style={{
+                                background: "#FFF3E0",
+                                color: "#C4883D",
+                                border: "1px solid #F0DFC0",
+                              }}
+                              title={t("actions.redeem")}
+                            >
+                              <Gift className="w-3 h-3" weight="bold" />
+                              {t("actions.redeem")}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={(e) => handleAddStamp(e, customer)}
+                              disabled={addStampMutation.isPending}
+                              className="flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                              style={{
+                                background: "#E8F5E4",
+                                color: "#4A7C59",
+                                border: "1px solid #C8E6C4",
+                              }}
+                              title={t("actions.addStamp")}
+                            >
+                              <Stamp className="w-3 h-3" weight="bold" />
+                              {t("actions.addStamp")}
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => handleVoid(e, customer)}
+                            disabled={voidMutation.isPending}
+                            className="flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            style={{
+                              background: "#fff",
+                              color: "#C75050",
+                              border: "1px solid #DEDBD5",
+                            }}
+                            title={t("actions.voidLast")}
+                          >
+                            <Prohibit className="w-3 h-3" weight="bold" />
+                            {t("actions.voidLast")}
+                          </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

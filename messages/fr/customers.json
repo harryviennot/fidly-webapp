@@ -17,7 +17,8 @@
       "segment": "Segment",
       "lastVisit": "Derni\u00e8re visite",
       "redemptions": "\u00c9changes",
-      "action": "Action"
+      "action": "Action",
+      "actions": "Actions"
     },
     "stats": {
       "totalCustomers": "Total Clients",
@@ -50,7 +51,8 @@
       "redeemSuccessToast": "R\u00e9compense \u00e9chang\u00e9e !",
       "redeemFailedToast": "\u00c9chec de l'\u00e9change",
       "voidSuccessToast": "Tampon annul\u00e9",
-      "voidFailedToast": "\u00c9chec de l'annulation"
+      "voidFailedToast": "\u00c9chec de l'annulation",
+      "noVoidableStamp": "Aucun tampon à annuler"
     },
     "toasts": {
       "stampAdded": "Tampon ajout\u00e9 pour {name}",

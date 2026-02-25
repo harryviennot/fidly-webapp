@@ -26,7 +26,7 @@ import {
 } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
 import { TransactionTimeline } from "./transaction-timeline";
-import { StampProgress } from "./stamp-progress";
+import { StampGridContainer } from "@/components/card";
 import { computeCardColors } from "@/lib/card-utils";
 import {
   useCustomerTransactions,
@@ -148,7 +148,7 @@ export function CustomerDetailSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="sm:max-w-[380px] overflow-y-auto p-0 gap-0"
+        className="sm:max-w-[440px] overflow-y-auto p-0 gap-0"
       >
         <SheetTitle className="sr-only">{customer.name}</SheetTitle>
         <SheetDescription className="sr-only">{customer.email}</SheetDescription>
@@ -189,23 +189,15 @@ export function CustomerDetailSheet({
             <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2.5">
               {t("stampProgress")}
             </p>
-            <StampProgress
-              count={customer.stamps}
-              total={maxStamps}
-              design={design}
-              size="md"
-            />
-            <p
-              className="text-center text-[12px] mt-2"
-              style={{
-                color: isMax ? "#4A7C59" : "#8A8A8A",
-                fontWeight: isMax ? 600 : 400,
-              }}
-            >
-              {isMax
-                ? "🎉 Reward ready!"
-                : `${customer.stamps}/${maxStamps} stamps — ${maxStamps - customer.stamps} more to go`}
-            </p>
+            {colors && (
+              <StampGridContainer
+                totalStamps={maxStamps}
+                filledCount={customer.stamps}
+                colors={colors}
+                stampIcon={stampIcon ?? "checkmark"}
+                rewardIcon={rewardIcon ?? "gift"}
+              />
+            )}
           </div>
         </div>
 
