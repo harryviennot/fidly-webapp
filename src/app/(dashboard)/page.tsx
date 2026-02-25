@@ -78,54 +78,58 @@ export default function DashboardPage() {
         subtitle={t("dashboard.welcome", { name: displayName })}
       />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-[14px]">
-        <StatCard
-          title={t("dashboard.totalCustomers")}
-          value={totalCustomers}
-          icon={<Users className="w-4 h-4" weight="bold" />}
-          iconBg="#E8F5E4"
-          subtitle={t("dashboard.vsLastMonth")}
-          change="+18%"
-          positive
-          delay={0}
-        />
-        <StatCard
-          title={t("dashboard.scansToday")}
-          value={activeCustomersToday}
-          icon={<QrCode className="w-4 h-4" weight="bold" />}
-          iconBg="#E4F0E4"
-          subtitle={t("dashboard.vsYesterday")}
-          change="+12%"
-          positive
-          delay={80}
-        />
-        <StatCard
-          title={t("dashboard.activeCards")}
-          value={totalCustomers}
-          icon={<CreditCard className="w-4 h-4" weight="bold" />}
-          iconBg="#F0EDE7"
-          subtitle={t("dashboard.installRate87")}
-          change="+8%"
-          positive
-          delay={160}
-        />
-        <StatCard
-          title={t("dashboard.redemptions")}
-          value={rewardsToday}
-          icon={<Gift className="w-4 h-4" weight="bold" />}
-          iconBg="#FFF3E0"
-          subtitle={t("dashboard.thisWeek")}
-          change="+23%"
-          positive
-          delay={240}
-        />
-      </div>
-
-      {/* Two-column layout */}
-      <div className="flex gap-[14px] flex-col lg:flex-row">
+      {/* Two-column layout — right column starts at top alongside stat cards */}
+      <div className="flex gap-[14px] flex-col min-[1080px]:flex-row min-[1080px]:items-start">
         {/* Left column */}
         <div className="flex-1 flex flex-col gap-[14px] min-w-0">
+          {/* Stat cards — inside left column so right panel aligns from top */}
+          <div className="flex flex-wrap gap-[14px]">
+            <StatCard
+              className="flex-1 basis-0 min-w-[140px]"
+              title={t("dashboard.totalCustomers")}
+              value={totalCustomers}
+              icon={<Users className="w-4 h-4" weight="bold" />}
+              iconBg="#E8F5E4"
+              subtitle={t("dashboard.vsLastMonth")}
+              change="+18%"
+              positive
+              delay={0}
+            />
+            <StatCard
+              className="flex-1 basis-0 min-w-[140px]"
+              title={t("dashboard.scansToday")}
+              value={activeCustomersToday}
+              icon={<QrCode className="w-4 h-4" weight="bold" />}
+              iconBg="#E4F0E4"
+              subtitle={t("dashboard.vsYesterday")}
+              change="+12%"
+              positive
+              delay={80}
+            />
+            <StatCard
+              className="flex-1 basis-0 min-w-[140px]"
+              title={t("dashboard.activeCards")}
+              value={totalCustomers}
+              icon={<CreditCard className="w-4 h-4" weight="bold" />}
+              iconBg="#F0EDE7"
+              subtitle={t("dashboard.installRate87")}
+              change="+8%"
+              positive
+              delay={160}
+            />
+            <StatCard
+              className="flex-1 basis-0 min-w-[140px]"
+              title={t("dashboard.redemptions")}
+              value={rewardsToday}
+              icon={<Gift className="w-4 h-4" weight="bold" />}
+              iconBg="#FFF3E0"
+              subtitle={t("dashboard.thisWeek")}
+              change="+23%"
+              positive
+              delay={240}
+            />
+          </div>
+
           {/* Scan Activity Chart */}
           <ChartCard
             title={t("dashboard.scanActivity")}
@@ -192,9 +196,9 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Right column */}
+        {/* Right column — starts at top */}
         <div
-          className="w-full lg:w-[290px] lg:min-w-[290px] flex flex-col gap-[14px] animate-slide-up"
+          className="w-full min-[1080px]:w-[290px] min-[1080px]:min-w-[290px] flex flex-col gap-[14px] animate-slide-up"
           style={{ animationDelay: "350ms" }}
         >
           <ActiveCardWidget

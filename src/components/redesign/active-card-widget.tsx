@@ -28,6 +28,62 @@ export function ActiveCardWidget({
     ? ((activeCards / totalCustomers) * 100).toFixed(1)
     : "0.0";
 
+  const stats = [
+    { label: t("cardsIssued"), value: totalCustomers.toLocaleString(), color: "#555" },
+    { label: t("activePasses"), value: activeCards.toLocaleString(), color: "#555" },
+    { label: t("installRate"), value: `${installRate}%`, color: "#4A7C59" },
+  ];
+
+  /* Compact row layout for lg+ sidebar column */
+  const statsCompact = (
+    <div className="flex flex-col text-[11px]">
+      {stats.map((s) => (
+        <div key={s.label} className="flex justify-between mt-1.5">
+          <span className="text-[var(--muted-foreground)]">{s.label}</span>
+          <span className="font-semibold" style={{ color: s.color }}>{s.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+
+  /* Stacked blocks for mobile/tablet horizontal layout */
+  const statsExpanded = (
+    <div className="flex flex-col gap-2.5">
+      {stats.map((s) => (
+        <div
+          key={s.label}
+          className="flex items-center justify-between rounded-lg bg-[var(--background)] px-3 py-2"
+        >
+          <span className="text-[12px] text-[var(--muted-foreground)]">{s.label}</span>
+          <span className="text-[16px] font-semibold tracking-tight" style={{ color: s.color }}>
+            {s.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
+  const cardPreview = design ? (
+    <Link href={`/design/${design.id}`} className="block">
+      <ScaledCardWrapper
+        baseWidth={280}
+        aspectRatio={1.282}
+        minScale={0.6}
+      >
+        <WalletCard
+          design={design}
+          showQR
+          showSecondaryFields={false}
+          className="[&>div]:[box-shadow:none_!important]"
+        />
+      </ScaledCardWrapper>
+    </Link>
+  ) : (
+    <div className="flex items-center justify-center h-[160px] rounded-xl bg-[var(--muted)] border border-dashed border-[var(--border-dark)]">
+      <p className="text-xs text-[#A5A5A5]">{t("noCardYet")}</p>
+    </div>
+  );
+
   return (
     <div
       className={cn(
@@ -51,47 +107,17 @@ export function ActiveCardWidget({
         )}
       </div>
 
-      {/* WalletCard preview */}
-      {design ? (
-        <Link href={`/design/${design.id}`} className="block">
-          <ScaledCardWrapper
-            baseWidth={280}
-            aspectRatio={1.282}
-            minScale={0.6}
-          >
-            <WalletCard
-              design={design}
-              showQR
-              showSecondaryFields={false}
-              className="[&>div]:[box-shadow:none_!important]"
-            />
-          </ScaledCardWrapper>
-        </Link>
-      ) : (
-        <div className="flex items-center justify-center h-[160px] rounded-xl bg-[var(--muted)] border border-dashed border-[var(--border-dark)]">
-          <p className="text-xs text-[#A5A5A5]">{t("noCardYet")}</p>
+      {/* Horizontal layout when stacked (below lg), vertical when in sidebar column (lg+) */}
+      <div className="flex flex-row gap-4 lg:flex-col lg:gap-0">
+        {/* Card preview — 1/3 width when horizontal, full width when vertical */}
+        <div className="w-1/2 md:w-1/3 shrink-0 lg:w-full">
+          {cardPreview}
         </div>
-      )}
 
-      {/* Stats column below card */}
-      <div className="flex flex-col text-[11px] mt-4">
-        <div className="flex justify-between mt-1.5">
-          <span className="text-[var(--muted-foreground)]">{t("cardsIssued")}</span>
-          <span className="text-[#555] font-semibold">
-            {totalCustomers.toLocaleString()}
-          </span>
-        </div>
-        <div className="flex justify-between mt-1.5">
-          <span className="text-[var(--muted-foreground)]">{t("activePasses")}</span>
-          <span className="text-[#555] font-semibold">
-            {activeCards.toLocaleString()}
-          </span>
-        </div>
-        <div className="flex justify-between mt-1.5">
-          <span className="text-[var(--muted-foreground)]">{t("installRate")}</span>
-          <span className="text-[#4A7C59] font-semibold">
-            {installRate}%
-          </span>
+        {/* Stats — expanded blocks when horizontal, compact rows when in sidebar */}
+        <div className="flex-1 flex flex-col justify-center lg:mt-4">
+          <div className="hidden lg:block">{statsCompact}</div>
+          <div className="block lg:hidden">{statsExpanded}</div>
         </div>
       </div>
     </div>
