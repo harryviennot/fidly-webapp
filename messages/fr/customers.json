@@ -1,6 +1,10 @@
 {
   "customers": {
     "title": "Clients",
+    "subtitle": "Gérez et suivez tous vos porteurs de carte de fidélité",
+    "export": "Exporter",
+    "addCustomer": "Ajouter un client",
+    "customerProfile": "Profil client",
     "loading": "Chargement des clients...",
     "loadFailed": "Impossible de charger les clients. V\u00e9rifiez que le serveur est en cours d'ex\u00e9cution.",
     "searchPlaceholder": "Rechercher par nom ou email...",

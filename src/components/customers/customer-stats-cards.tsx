@@ -2,12 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import {
-  UsersIcon,
-  UserPlusIcon,
-  StampIcon,
-  GiftIcon,
+  Users,
+  ChartBar,
+  UserPlus,
+  Gift,
 } from "@phosphor-icons/react";
-import { StatCardSmall } from "@/components/reusables/stats/StatCardSmall";
+import { StatCard } from "@/components/redesign";
 import type { CustomerPageStats } from "@/lib/customer-stats";
 
 interface CustomerStatsCardsProps {
@@ -18,28 +18,34 @@ export function CustomerStatsCards({ stats }: CustomerStatsCardsProps) {
   const t = useTranslations("customers.stats");
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCardSmall
-        icon={<UsersIcon size={20} weight="duotone" />}
-        label={t("totalCustomers")}
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-[14px]">
+      <StatCard
+        title={t("totalCustomers")}
         value={stats.totalCustomers}
+        icon={<Users className="w-4 h-4" weight="bold" />}
+        iconBg="#E8F5E4"
+        delay={0}
       />
-      <StatCardSmall
-        icon={<UserPlusIcon size={20} weight="duotone" />}
-        label={t("newThisWeek")}
+      <StatCard
+        title={t("newThisWeek")}
         value={stats.newThisWeek}
-        highlight={stats.newThisWeek > 0}
+        icon={<UserPlus className="w-4 h-4" weight="bold" />}
+        iconBg="#E4F0F8"
+        delay={80}
       />
-      <StatCardSmall
-        icon={<StampIcon size={20} weight="duotone" />}
-        label={t("stampsToday")}
+      <StatCard
+        title={t("stampsToday")}
         value={stats.stampsToday}
+        icon={<ChartBar className="w-4 h-4" weight="bold" />}
+        iconBg="#E4F0E4"
+        delay={160}
       />
-      <StatCardSmall
-        icon={<GiftIcon size={20} weight="duotone" />}
-        label={t("redemptionsThisMonth")}
+      <StatCard
+        title={t("redemptionsThisMonth")}
         value={stats.redemptionsThisMonth}
-        highlight={stats.redemptionsThisMonth > 0}
+        icon={<Gift className="w-4 h-4" weight="bold" />}
+        iconBg="#FFF3E0"
+        delay={240}
       />
     </div>
   );
@@ -47,17 +53,17 @@ export function CustomerStatsCards({ stats }: CustomerStatsCardsProps) {
 
 export function CustomerStatsCardsSkeleton() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-[14px]">
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--cream)]"
+          className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-[16px_18px]"
         >
-          <div className="w-10 h-10 rounded-lg bg-[var(--muted)] animate-pulse" />
-          <div className="flex-1 space-y-2">
-            <div className="h-6 w-12 bg-[var(--muted)] rounded animate-pulse" />
-            <div className="h-4 w-20 bg-[var(--muted)] rounded animate-pulse" />
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-[var(--muted)] animate-pulse" />
+            <div className="h-3 w-20 bg-[var(--muted)] rounded animate-pulse" />
           </div>
+          <div className="h-7 w-14 bg-[var(--muted)] rounded animate-pulse" />
         </div>
       ))}
     </div>

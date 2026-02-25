@@ -1,6 +1,10 @@
 {
   "customers": {
     "title": "Customers",
+    "subtitle": "Manage and track all your loyalty card holders",
+    "export": "Export",
+    "addCustomer": "Add Customer",
+    "customerProfile": "Customer Profile",
     "loading": "Loading customers...",
     "loadFailed": "Failed to load customers. Make sure the backend is running.",
     "searchPlaceholder": "Search by name or email...",

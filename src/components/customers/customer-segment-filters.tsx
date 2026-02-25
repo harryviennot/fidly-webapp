@@ -1,16 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
 import type { CustomerSegment } from "@/lib/customer-segments";
 
 const SEGMENTS: (CustomerSegment | "all")[] = [
   "all",
   "new",
+  "regular",
   "vip",
   "close_to_reward",
   "at_risk",
-  "regular",
 ];
 
 const SEGMENT_LABEL_KEYS: Record<CustomerSegment | "all", string> = {
@@ -38,7 +37,7 @@ export function CustomerSegmentFilters({
   const t = useTranslations("customers");
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {SEGMENTS.map((segment) => {
         const count = segment === "all" ? totalCount : segments[segment];
         const isActive = selected === segment;
@@ -50,23 +49,30 @@ export function CustomerSegmentFilters({
           <button
             key={segment}
             onClick={() => onSelect(segment)}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 border",
+            className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-150 whitespace-nowrap"
+            style={
               isActive
-                ? "bg-[var(--accent)] text-white border-[var(--accent)]"
-                : "bg-[var(--cream)] text-[var(--muted-foreground)] border-[var(--border)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
-            )}
+                ? {
+                    border: "1.5px solid #4A7C59",
+                    background: "#E8F5E4",
+                    color: "#3D6B3D",
+                    fontWeight: 600,
+                  }
+                : {
+                    border: "1px solid #DEDBD5",
+                    background: "#fff",
+                    color: "#777",
+                  }
+            }
           >
             {t(SEGMENT_LABEL_KEYS[segment])}
             <span
-              className={cn(
-                "text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center",
-                isActive
-                  ? "bg-white/20 text-white"
-                  : "bg-[var(--muted)] text-[var(--muted-foreground)]"
-              )}
+              style={{
+                color: isActive ? "#4A7C59" : "#BBB",
+                fontSize: 10,
+              }}
             >
-              {count}
+              ({count})
             </span>
           </button>
         );
@@ -77,12 +83,12 @@ export function CustomerSegmentFilters({
 
 export function CustomerSegmentFiltersSkeleton() {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1.5">
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="h-8 rounded-lg bg-[var(--muted)] animate-pulse"
-          style={{ width: `${60 + i * 20}px` }}
+          className="h-7 rounded-full bg-[var(--muted)] animate-pulse"
+          style={{ width: `${50 + i * 15}px` }}
         />
       ))}
     </div>
