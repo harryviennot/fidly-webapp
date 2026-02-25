@@ -4,86 +4,99 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Base - Soft warm gray (professional, appeals to all businesses) */
-  --background: #f7f7f5;
-  --background-subtle: #f0efe9;
-  --foreground: #1a1a1a;
-  --near-black: #191210;
+  /* Base - Warm beige (from redesign palette) */
+  --background: #F4F2EE;
+  --background-subtle: #E8E5DE;
+  --foreground: #1A1A1A;
+  --near-black: #1A1A1A;
 
-  /* Paper feel - Light cream (evokes physical loyalty cards) */
-  --paper: #faf9f6;
-  --paper-hover: #f5f4f0;
-  --cream: #faf9f6;
+  /* Paper feel - Off-white cream */
+  --paper: #FAFAF8;
+  --paper-hover: #F0EDE7;
+  --cream: #FAFAF8;
 
   /* Primary - Dark slate */
-  --primary: #2d3436;
-  --primary-hover: #1e2324;
+  --primary: #1A1A1A;
+  --primary-hover: #333333;
   --primary-foreground: #ffffff;
 
-  /* Accent - Terracotta/Burnt orange (CTAs, stamps, highlights) */
-  --accent: #f97316;
-  --accent-hover: #ea580c;
-  --accent-light: #f5ebe7;
-  --accent-muted: rgba(199, 91, 57, 0.1);
+  /* Accent - Earthy green (CTAs, stamps, highlights) */
+  --accent: #4A7C59;
+  --accent-hover: #3D6B4A;
+  --accent-light: #E8F5E4;
+  --accent-muted: #E8F5E4;
   --accent-foreground: #ffffff;
-  --terracotta: #f97316;
+  --accent-dark: #3D5A3D;
 
   /* Decorative stamp colors */
-  --stamp-terracotta: #f97316;
-  --stamp-coral: #e07b5d;
-  --stamp-sand: #d4a574;
-  --stamp-sage: #7d9f7d;
+  --stamp-green: #4A7C59;
+  --stamp-gold: #C4A67D;
+  --stamp-sage: #A8C5A8;
+  --stamp-lime: #8DB83E;
 
   /* Neutrals */
-  --muted: #e8e6e1;
-  --muted-foreground: #6b7280;
-  --muted-gray: #8c655a;
-  --border: #ddd9d0;
-  --border-light: #e8e6e1;
-  --input: #ddd9d0;
-  --ring: #f97316;
+  --muted: #F0EDE7;
+  --muted-foreground: #8A8A8A;
+  --muted-gray: #5A5A5A;
+  --border: #EEEDEA;
+  --border-light: #F8F7F5;
+  --border-medium: #DEDBD5;
+  --border-dark: #E0DDD6;
+  --input: #DEDBD5;
+  --ring: #4A7C59;
 
   /* Card styles */
-  --card: var(--cream);
+  --card: #ffffff;
   --card-foreground: var(--foreground);
-  --card-bg: var(--cream);
-  --card-border: rgba(255, 255, 255, 0.5);
-  --card-shadow: 0 2px 8px rgba(45, 52, 54, 0.06), 0 8px 24px rgba(45, 52, 54, 0.04);
-  --card-shadow-hover: 0 8px 32px rgba(45, 52, 54, 0.1);
+  --card-bg: #ffffff;
+  --card-border: #EEEDEA;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.06);
 
   /* Popover */
-  --popover: var(--cream);
+  --popover: #ffffff;
   --popover-foreground: var(--foreground);
 
   /* Secondary */
-  --secondary: #e8e6e1;
-  --secondary-foreground: #2d3436;
+  --secondary: #F0EDE7;
+  --secondary-foreground: #1A1A1A;
 
-  /* Semantic colors */
-  --success: #7d9f7d;
-  --error: #f97316;
-  --warning: #d4a574;
-  --destructive: #dc2626;
+  /* Semantic / Segment colors */
+  --success: #4A7C59;
+  --success-light: #E8F5E4;
+  --success-dark: #3D6B3D;
+  --error: #C75050;
+  --error-light: #FDE8E4;
+  --warning: #C4883D;
+  --warning-light: #FFF3E0;
+  --info: #3D7CAF;
+  --info-light: #E4F0F8;
+  --destructive: #C75050;
+  --inactive: #8A8A8A;
+  --inactive-light: #F0EDE7;
+
+  /* Notification badge */
+  --badge-red: #E8453C;
 
   /* Radius */
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 
-  /* Sidebar - mapped to our design system */
+  /* Sidebar */
   --sidebar: var(--cream);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--accent);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: var(--accent-muted);
-  --sidebar-accent-foreground: var(--accent);
-  --sidebar-border: var(--border);
+  --sidebar-accent: var(--muted);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: #EEECE8;
   --sidebar-ring: var(--accent);
 
   /* Chart colors */
-  --chart-1: var(--accent);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --chart-1: #4A7C59;
+  --chart-2: #A8C5A8;
+  --chart-3: #C4A67D;
+  --chart-4: #8DB83E;
+  --chart-5: #5B5BC0;
 }
 
 @theme inline {
@@ -110,8 +123,23 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-border-medium: var(--border-medium);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Semantic colors */
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-error: var(--error);
+  --color-error-light: var(--error-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-info: var(--info);
+  --color-info-light: var(--info-light);
+  --color-destructive: var(--destructive);
+  --color-inactive: var(--inactive);
+  --color-inactive-light: var(--inactive-light);
 
   /* Sidebar */
   --color-sidebar: var(--sidebar);
@@ -146,7 +174,7 @@ html {
 
 /* Paper-textured card style */
 .paper-card {
-  background: var(--cream);
+  background: var(--card);
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
@@ -155,6 +183,37 @@ html {
 .paper-card:hover {
   box-shadow: var(--card-shadow-hover);
   transform: translateY(-2px);
+}
+
+/* ===== Redesign: Slide-up entrance animation ===== */
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger delay utilities */
+.delay-0 { animation-delay: 0ms; }
+.delay-80 { animation-delay: 80ms; }
+.delay-160 { animation-delay: 160ms; }
+.delay-240 { animation-delay: 240ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Redesign easing curve */
+.ease-spring {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Float animation for geometric elements */

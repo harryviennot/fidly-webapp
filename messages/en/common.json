@@ -1,11 +1,16 @@
 {
   "nav": {
+    "dashboard": "Dashboard",
     "program": "Program",
     "loyaltyProgram": "Loyalty Program",
     "customers": "Customers",
     "activity": "Activity",
     "team": "Team",
-    "settings": "Settings"
+    "settings": "Settings",
+    "support": "Support",
+    "notifications": "Notifications",
+    "sectionLoyaltyProgram": "Loyalty Program",
+    "sectionManage": "Manage"
   },
   "header": {
     "loyaltyProgram": "Loyalty Program",
