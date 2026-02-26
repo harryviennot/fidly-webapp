@@ -9,8 +9,8 @@ export function ActivityDateGroupHeader({ group }: { group: DateGroup }) {
   const t = useTranslations("activity");
 
   return (
-    <div className="pt-5 pb-2 first:pt-0">
-      <h3 className="text-lg font-bold text-[var(--foreground)]">
+    <div className="pt-5 pb-2.5 first:pt-3">
+      <h3 className="text-[18px] font-bold text-[#1A1A1A]">
         {t(`dateGroups.${group}`)}
       </h3>
     </div>

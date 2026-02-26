@@ -2,12 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import {
-  StampIcon,
-  GiftIcon,
-  ChartLineUpIcon,
-  UsersIcon,
+  Stamp,
+  Gift,
+  ChartBar,
+  DeviceMobileCamera,
 } from "@phosphor-icons/react";
-import { StatCardSmall } from "@/components/reusables/stats/StatCardSmall";
+import { StatCard } from "@/components/redesign";
 import type { ActivityStatsResponse } from "@/types";
 
 interface ActivityStatsBarProps {
@@ -23,46 +23,54 @@ export function ActivityStatsBar({ stats, isLoading }: ActivityStatsBarProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <StatCardSmall
-        icon={<StampIcon size={20} weight="duotone" />}
-        label={t("stats.stampsToday")}
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[14px]">
+      <StatCard
+        title={t("stats.stampsToday")}
         value={stats?.stamps_today ?? 0}
-        highlight={!!stats?.stamps_today}
+        icon={<Stamp className="w-4 h-4" weight="bold" />}
+        iconBg="#E8F5E4"
+        delay={0}
       />
-      <StatCardSmall
-        icon={<GiftIcon size={20} weight="duotone" />}
-        label={t("stats.rewardsToday")}
+      <StatCard
+        title={t("stats.rewardsToday")}
         value={stats?.rewards_today ?? 0}
-        highlight={!!stats?.rewards_today}
+        icon={<Gift className="w-4 h-4" weight="bold" />}
+        iconBg="#FFF3E0"
+        delay={80}
       />
-      <StatCardSmall
-        icon={<ChartLineUpIcon size={20} weight="duotone" />}
-        label={t("stats.totalThisWeek")}
+      <StatCard
+        title={t("stats.totalThisWeek")}
         value={stats?.total_this_week ?? 0}
+        icon={<ChartBar className="w-4 h-4" weight="bold" />}
+        iconBg="#E4F0E4"
+        delay={160}
       />
-      <StatCardSmall
-        icon={<UsersIcon size={20} weight="duotone" />}
-        label={t("stats.activeCustomersToday")}
-        value={stats?.active_customers_today ?? 0}
-      />
+      <div className="md:col-span-3 lg:col-span-1">
+        <StatCard
+          title={t("stats.activeCustomersToday")}
+          value={stats?.active_customers_today ?? 0}
+          icon={<DeviceMobileCamera className="w-4 h-4" weight="bold" />}
+          iconBg="#E4F0F8"
+          delay={240}
+        />
+      </div>
     </div>
   );
 }
 
 function ActivityStatsBarSkeleton() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[14px]">
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--cream)]"
+          className={`rounded-xl border border-[var(--border)] bg-[var(--card)] p-[16px_18px] ${i === 4 ? "md:col-span-3 lg:col-span-1" : ""}`}
         >
-          <div className="w-10 h-10 rounded-lg bg-[var(--muted)] animate-pulse" />
-          <div className="flex-1 space-y-2">
-            <div className="h-6 w-12 bg-[var(--muted)] rounded animate-pulse" />
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-[var(--muted)] animate-pulse" />
             <div className="h-3 w-20 bg-[var(--muted)] rounded animate-pulse" />
           </div>
+          <div className="h-7 w-14 bg-[var(--muted)] rounded animate-pulse" />
         </div>
       ))}
     </div>

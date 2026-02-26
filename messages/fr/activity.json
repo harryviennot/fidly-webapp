@@ -1,6 +1,9 @@
 {
   "activity": {
-    "title": "Activit\u00e9",
+    "title": "Activité",
+    "subtitle": "Historique des transactions en temps réel de votre programme de fidélité",
+    "export": "Exporter",
+    "searchPlaceholder": "Rechercher un client...",
     "loadFailed": "Impossible de charger le fil d'activit\u00e9.",
     "empty": "Aucune activit\u00e9 pour le moment. Les tampons et r\u00e9compenses appara\u00eetront ici.",
     "loadMore": "Charger plus",
