@@ -34,6 +34,8 @@ import {
   ChartCard,
   LegendItem,
 } from "@/components/redesign";
+import { computeCardColors } from "@/lib/card-utils";
+import type { StampIconType } from "@/components/design/StampIconPicker";
 
 // Placeholder chart data (will be wired to real analytics later)
 const SCAN_CHART_DATA = [
@@ -67,6 +69,9 @@ export default function DashboardPage() {
   const rewardsToday = stats?.rewards_today ?? 0;
   const activeCustomersToday = stats?.active_customers_today ?? 0;
   const recentTransactions = txns?.transactions?.slice(0, 6) ?? [];
+  const colors = activeDesign ? computeCardColors(activeDesign) : null;
+  const stampIcon = (activeDesign?.stamp_icon as StampIconType) ?? undefined;
+  const rewardIcon = (activeDesign?.reward_icon as StampIconType) ?? undefined;
 
   const displayName = profile?.name || "there";
 
@@ -193,6 +198,10 @@ export default function DashboardPage() {
           <RecentScans
             transactions={recentTransactions}
             delay={400}
+            stampIcon={stampIcon}
+            rewardIcon={rewardIcon}
+            stampFilledColor={colors?.accentHex}
+            iconColor={colors?.iconColorHex}
           />
         </div>
 

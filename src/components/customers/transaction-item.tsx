@@ -27,36 +27,36 @@ const TYPE_CONFIG: Record<
     icon: StampIcon,
     iconColor: "text-[var(--accent)]",
     bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-emerald-50",
-    deltaText: "text-emerald-700",
+    deltaBg: "bg-[#E8F5E4]",
+    deltaText: "text-[#4A7C59]",
   },
   reward_redeemed: {
     icon: GiftIcon,
     iconColor: "text-[var(--stamp-sand)]",
     bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-amber-50",
-    deltaText: "text-amber-700",
+    deltaBg: "bg-[#E8F5E4]",
+    deltaText: "text-[#4A7C59]",
   },
   stamp_voided: {
     icon: ProhibitIcon,
     iconColor: "text-[var(--stamp-coral)]",
     bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-red-50",
-    deltaText: "text-red-600",
+    deltaBg: "bg-[#FDE8E4]",
+    deltaText: "text-[#C75050]",
   },
   bonus_stamp: {
     icon: StarIcon,
     iconColor: "text-[var(--stamp-sage)]",
     bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-blue-50",
-    deltaText: "text-blue-700",
+    deltaBg: "bg-[#E4F0F8]",
+    deltaText: "text-[#3D7CAF]",
   },
   stamps_adjusted: {
     icon: SlidersHorizontalIcon,
     iconColor: "text-[var(--muted-foreground)]",
     bgColor: "bg-[var(--background-subtle)]",
-    deltaBg: "bg-[var(--background-subtle)]",
-    deltaText: "text-[var(--muted-foreground)]",
+    deltaBg: "bg-[#F0EDE7]",
+    deltaText: "text-[#8A8A8A]",
   },
 };
 
@@ -115,7 +115,7 @@ export function TransactionItem({
     if (hasDesignIcons && (type === "stamp_added" || type === "bonus_stamp")) {
       return (
         <div
-          className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
+          className="flex items-center justify-center w-9 h-9 rounded-full shrink-0"
           style={{ backgroundColor: stampFilledColor }}
         >
           <StampIconSvg
@@ -129,7 +129,7 @@ export function TransactionItem({
 
     if (hasDesignIcons && type === "reward_redeemed") {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-emerald-500/15">
+        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-emerald-500/15">
           <StampIconSvg
             icon={(designRewardIcon as StampIconType) ?? "gift"}
             className="w-4.5 h-4.5"
@@ -141,7 +141,7 @@ export function TransactionItem({
 
     if (hasDesignIcons && type === "stamp_voided") {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-red-500/15">
+        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-red-500/15">
           <StampIconSvg
             icon={designStampIcon as StampIconType}
             className="w-4.5 h-4.5"
@@ -155,35 +155,35 @@ export function TransactionItem({
     return (
       <div
         className={cn(
-          "flex items-center justify-center w-8 h-8 rounded-full shrink-0",
+          "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
           config.bgColor
         )}
       >
-        <Icon size={15} weight="duotone" className={config.iconColor} />
+        <Icon size={16} weight="duotone" className={config.iconColor} />
       </div>
     );
   };
 
   return (
     <div className="flex gap-3 relative">
-      {/* Timeline dot + line */}
+      {/* Timeline dot + connecting line */}
       <div className="flex flex-col items-center">
         {renderIcon()}
-        {!isLast && <div className="w-px flex-1 bg-[var(--border-light)]" />}
+        {!isLast && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
       </div>
 
       {/* Content card */}
-      <div className="pb-3 flex-1 min-w-0 -mt-0.5">
-        <div className="rounded-xl bg-[var(--background-subtle)]/60 px-3.5 py-2.5">
-          {/* Top row: type + time */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-[13px] font-medium text-[var(--foreground)] truncate">
+      <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
+        <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-4 py-3">
+          {/* Top row: type + delta + time */}
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <div className="flex-1 min-w-0">
+              <span className="text-[13px] font-semibold text-[#1A1A1A]">
                 {t(`types.${transaction.type}`)}
               </span>
               <span
                 className={cn(
-                  "text-[11px] font-semibold tabular-nums px-1.5 py-0.5 rounded-full shrink-0",
+                  "text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1.5 inline-block",
                   config.deltaBg,
                   config.deltaText
                 )}
@@ -191,30 +191,32 @@ export function TransactionItem({
                 {deltaText}
               </span>
             </div>
-            <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums shrink-0">
+            <span className="text-[11px] text-[#B0B0B0] tabular-nums shrink-0 mt-0.5">
               {formatRelativeTime(transaction.created_at)}
             </span>
           </div>
 
           {showCustomerName && metadata?.customer_name && (
-            <p className="text-xs text-[var(--foreground)] mt-1">
+            <p className="text-[12px] text-[#555] mb-1">
               {metadata.customer_name}
             </p>
           )}
 
-          {/* Bottom row: stamp transition + source + employee */}
-          <div className="flex items-center gap-1.5 mt-1.5">
-            <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums">
-              {transaction.stamps_before} &rarr; {transaction.stamps_after}
+          {/* Bottom row: stamp transition · source · employee */}
+          <div className="flex items-center gap-1.5 flex-wrap text-[12px] text-[#8A8A8A]">
+            <span className="font-semibold text-[#555] tabular-nums">
+              {transaction.stamps_before}
             </span>
-            <span className="text-[var(--border)] text-[10px]">&middot;</span>
-            <span className="text-[11px] text-[var(--muted-foreground)]">
-              {transaction.source}
+            <span>→</span>
+            <span className="font-semibold tabular-nums text-[#555]">
+              {transaction.stamps_after}
             </span>
+            <span className="text-[#D8D5CE]">·</span>
+            <span>{transaction.source}</span>
             {transaction.employee_name && (
               <>
-                <span className="text-[var(--border)] text-[10px]">&middot;</span>
-                <span className="text-[11px] text-[var(--muted-foreground)]">
+                <span className="text-[#D8D5CE]">·</span>
+                <span>
                   {t("by")} {transaction.employee_id === currentUserId ? t("you") : transaction.employee_name}
                 </span>
               </>
@@ -227,7 +229,7 @@ export function TransactionItem({
               type="button"
               onClick={() => setReasonExpanded(!reasonExpanded)}
               className={cn(
-                "text-[11px] text-[var(--muted-foreground)] mt-1.5 italic text-left w-full transition-colors hover:text-[var(--foreground)]",
+                "text-[11px] text-[#8A8A8A] mt-1.5 italic text-left w-full transition-colors hover:text-[#1A1A1A]",
                 !reasonExpanded && "line-clamp-1"
               )}
             >
