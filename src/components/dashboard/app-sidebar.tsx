@@ -51,7 +51,7 @@ const mainItems: NavItem[] = [
 // "LOYALTY PROGRAM" section
 const programItems: NavItem[] = [
   { href: "/program", labelKey: "loyaltyProgram.nav.overview", icon: QrCode },
-  { href: "/program/settings", labelKey: "loyaltyProgram.nav.settings", icon: GearSix },
+  { href: "/program/settings", labelKey: "loyaltyProgram.nav.configuration", icon: GearSix },
   { href: "/program/templates", labelKey: "loyaltyProgram.nav.templates", icon: CreditCard },
   { href: "/program/notifications", labelKey: "loyaltyProgram.nav.notifications", icon: Bell },
   { href: "/program/promotions", labelKey: "loyaltyProgram.nav.promotions", icon: Megaphone, pro: true },
