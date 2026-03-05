@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import {
   getDesigns,
   getActiveDesign,
@@ -18,6 +18,7 @@ export function useDesigns(businessId: string | undefined) {
     queryKey: designKeys.all(businessId!),
     queryFn: () => getDesigns(businessId!),
     enabled: !!businessId,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -26,6 +27,7 @@ export function useActiveDesign(businessId: string | undefined) {
     queryKey: designKeys.active(businessId!),
     queryFn: () => getActiveDesign(businessId!),
     enabled: !!businessId,
+    placeholderData: keepPreviousData,
   });
 }
 

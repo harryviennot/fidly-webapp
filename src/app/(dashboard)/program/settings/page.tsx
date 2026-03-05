@@ -8,11 +8,15 @@ import {
   PhoneIcon,
   WarningIcon,
   CheckIcon,
+  FloppyDiskIcon,
 } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { WalletCard } from '@/components/card';
 import { ScaledCardWrapper } from '@/components/design/ScaledCardWrapper';
+import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
+import { computeCardColors } from '@/lib/card-utils';
 import { PageHeader } from '@/components/redesign';
 import { useBusiness } from '@/contexts/business-context';
 import { updateBusiness } from '@/api';
@@ -148,7 +152,7 @@ export default function ProgramSettingsPage() {
     { id: 'tiered', label: t('tieredType'), emoji: '🏆', desc: t('tieredTypeDesc'), tag: t('comingSoonBadge') },
   ];
 
-  if (loading) {
+  if (loading && !program) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -163,20 +167,23 @@ export default function ProgramSettingsPage() {
         title={t('programSettings')}
         subtitle={t('configureProgram')}
         action={
-          <button
-            onClick={handleSaveProgram}
-            disabled={!isDirty && !saved}
-            className={cn(
-              'px-[22px] py-[9px] rounded-lg border-none text-[13px] font-semibold cursor-pointer flex items-center gap-1.5 transition-all duration-200',
-              saved
-                ? 'bg-[var(--success-light)] text-[#3D6B3D]'
-                : isDirty
-                  ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]'
-                  : 'bg-[var(--paper-hover)] text-[#999] cursor-not-allowed'
-            )}
-          >
-            {saved ? <><CheckIcon className="w-3.5 h-3.5" /> {t('saving').replace('...', '')}</> : savingProgram ? t('saving') : t('saveProgram')}
-          </button>
+          (isDirty || saved) && (
+            <Button
+              onClick={handleSaveProgram}
+              disabled={savingProgram}
+              variant={saved ? 'outline' : 'gradient'}
+              className={cn(
+                'transition-all duration-300 animate-slide-up',
+                saved && 'border-[var(--accent)] text-[var(--accent)] rounded-full hover:bg-[var(--accent-light)]'
+              )}
+            >
+              {saved ? (
+                <><CheckIcon className="w-4 h-4" weight="bold" /> {t('saving').replace('...', '')}</>
+              ) : (
+                <><FloppyDiskIcon className="w-4 h-4" /> {savingProgram ? t('saving') : t('saveProgram')}</>
+              )}
+            </Button>
+          )
         }
       />
 
@@ -247,37 +254,103 @@ export default function ProgramSettingsPage() {
               </div>
             </div>
 
-            {/* Stamps & Reward */}
-            <div className="flex gap-3.5 flex-wrap mb-4">
-              <div className="flex-[1_1_180px]">
-                <label className="block text-[12px] font-semibold text-[#555] mb-1.5">{t('stampsToEarn')}</label>
-                <div className="flex items-center">
+            {/* Stamps to Earn */}
+            {(() => {
+              const stampIcon = (activeDesign?.stamp_icon || 'checkmark') as StampIconType;
+              const rewardIcon = (activeDesign?.reward_icon || 'gift') as StampIconType;
+              const colors = activeDesign ? computeCardColors(activeDesign) : null;
+              const accentHex = colors?.accentHex ?? 'var(--accent)';
+              const iconColorHex = colors?.iconColorHex ?? '#fff';
+
+              return (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-[12px] font-semibold text-[#555]">{t('stampsToEarn')}</label>
+                    <span className="text-[22px] font-bold tabular-nums leading-none" style={{ color: accentHex }}>{totalStamps}</span>
+                  </div>
+
+                  {/* Visual stamp dots — click to select */}
+                  <div className="flex flex-wrap gap-[6px] mb-3">
+                    {Array.from({ length: 21 }, (_, i) => {
+                      const n = i + 1;
+                      const isActive = n <= totalStamps;
+                      const isLast = n === totalStamps;
+                      return (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => { if (n >= 2) setTotalStamps(n); }}
+                          className={cn(
+                            'w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer border-none',
+                            !isActive && 'scale-[0.85] hover:scale-95',
+                          )}
+                          style={{
+                            backgroundColor: isActive ? accentHex : 'var(--border)',
+                            boxShadow: isActive ? `0 2px 8px ${accentHex}40` : 'none',
+                            transitionDelay: isActive ? `${Math.min(i * 15, 150)}ms` : '0ms',
+                          }}
+                        >
+                          {isActive ? (
+                            <StampIconSvg
+                              icon={isLast ? rewardIcon : stampIcon}
+                              className="w-3.5 h-3.5"
+                              color={iconColorHex}
+                            />
+                          ) : (
+                            <span className="text-[9px] font-bold text-[#BBB]">{n}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Slider */}
                   <input
-                    type="number"
+                    type="range"
                     min={2}
-                    max={20}
+                    max={21}
                     value={totalStamps}
-                    onChange={(e) => {
-                      const v = parseInt(e.target.value);
-                      if (!isNaN(v)) setTotalStamps(Math.max(2, Math.min(20, v)));
+                    onChange={(e) => setTotalStamps(parseInt(e.target.value))}
+                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:transition-shadow [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-grab"
+                    style={{
+                      background: `linear-gradient(to right, ${accentHex} ${((totalStamps - 2) / 19) * 100}%, var(--border) ${((totalStamps - 2) / 19) * 100}%)`,
+                      // Thumb color via CSS custom property workaround
+                      // @ts-expect-error -- CSS custom property for slider thumb
+                      '--thumb-color': accentHex,
+                      WebkitAppearance: 'none',
                     }}
-                    className="flex-1 px-3.5 py-2.5 rounded-l-lg border border-r-0 border-[var(--border-medium)] bg-white text-[13px] text-[#1A1A1A] outline-none focus:border-[var(--accent)] transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
-                  <div className="px-3.5 py-2.5 rounded-r-lg border border-[var(--border-medium)] bg-[var(--paper)] text-[12px] text-[#8A8A8A] font-medium whitespace-nowrap">
-                    {t('stampsLabel')}
+                  <style>{`
+                    input[type="range"]::-webkit-slider-thumb {
+                      background: ${accentHex} !important;
+                      box-shadow: 0 2px 6px ${accentHex}50;
+                    }
+                    input[type="range"]::-webkit-slider-thumb:hover {
+                      box-shadow: 0 2px 10px ${accentHex}70;
+                    }
+                    input[type="range"]::-moz-range-thumb {
+                      background: ${accentHex} !important;
+                      box-shadow: 0 2px 6px ${accentHex}50;
+                    }
+                  `}</style>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[10px] text-[#BBB]">2</span>
+                    <span className="text-[10px] text-[#BBB]">21</span>
                   </div>
                 </div>
-              </div>
-              <div className="flex-[1_1_220px]">
-                <label className="block text-[12px] font-semibold text-[#555] mb-1.5">{t('rewardLabel')}</label>
-                <input
-                  type="text"
-                  value={rewardName}
-                  onChange={(e) => setRewardName(e.target.value)}
-                  placeholder={t('rewardNamePlaceholder')}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border-medium)] bg-white text-[13px] text-[#1A1A1A] outline-none focus:border-[var(--accent)] transition-colors"
-                />
-              </div>
+              );
+            })()}
+
+            {/* Reward */}
+            <div className="mb-4">
+              <label className="block text-[12px] font-semibold text-[#555] mb-1.5">{t('rewardLabel')}</label>
+              <input
+                type="text"
+                value={rewardName}
+                onChange={(e) => setRewardName(e.target.value)}
+                placeholder={t('rewardNamePlaceholder')}
+                className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border-medium)] bg-white text-[13px] text-[#1A1A1A] outline-none focus:border-[var(--accent)] transition-colors"
+              />
             </div>
 
             {/* Preview sentence */}
@@ -355,7 +428,7 @@ export default function ProgramSettingsPage() {
         </div>
 
         {/* Right column — sticky live preview */}
-        <div className="w-full min-[1080px]:w-[290px] min-[1080px]:min-w-[290px] flex-shrink-0 animate-slide-up" style={{ animationDelay: '350ms' }}>
+        <div className="hidden min-[1080px]:flex w-[290px] min-w-[290px] flex-shrink-0 flex-col animate-slide-up" style={{ animationDelay: '350ms' }}>
           <div className="min-[1080px]:sticky min-[1080px]:top-5">
             <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px] overflow-hidden">
               <div className="text-[15px] font-semibold text-[#1A1A1A] mb-3.5">{t('livePreview')}</div>
@@ -367,11 +440,11 @@ export default function ProgramSettingsPage() {
                     <WalletCard
                       design={{
                         ...activeDesign,
-                        organization_name: programName || activeDesign.organization_name,
                         total_stamps: totalStamps,
                       }}
+                      stamps={6}
                       showQR={false}
-                      showSecondaryFields={false}
+                      showSecondaryFields
                       className="[&>div]:[box-shadow:none_!important]"
                     />
                   </ScaledCardWrapper>

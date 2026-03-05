@@ -3,16 +3,11 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  CheckCircleIcon,
-  GearIcon,
-  PaletteIcon,
-  RocketLaunchIcon,
-  BellIcon,
-  UsersIcon,
   XIcon,
   CopyIcon,
   CheckIcon,
 } from '@phosphor-icons/react';
+import { StepIllustration } from './StepIllustration';
 import Link from 'next/link';
 import { useBusiness } from '@/contexts/business-context';
 import { toast } from 'sonner';
@@ -65,7 +60,6 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     {
       id: 1,
       done: !!program?.name && !!program?.config?.total_stamps,
-      icon: GearIcon,
       title: t('steps.configureProgram'),
       description: t('steps.configureDescription'),
       cta: t('steps.configureCta'),
@@ -74,7 +68,6 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     {
       id: 2,
       done: designs.length > 0,
-      icon: PaletteIcon,
       title: t('steps.createDesign'),
       description: t('steps.createDescription'),
       cta: t('steps.createCta'),
@@ -83,7 +76,6 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     {
       id: 3,
       done: !!activeDesign,
-      icon: RocketLaunchIcon,
       title: t('steps.activateCard'),
       description: t('steps.activateDescription'),
       cta: t('steps.activateCta'),
@@ -92,7 +84,6 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     {
       id: 4,
       done: false,
-      icon: BellIcon,
       title: t('steps.customizeNotifications'),
       description: t('steps.customizeDescription'),
       cta: t('steps.customizeCta'),
@@ -101,7 +92,6 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     {
       id: 5,
       done: totalCustomers > 0,
-      icon: UsersIcon,
       title: t('steps.firstCustomer'),
       description: t('steps.firstCustomerDescription'),
       cta: t('steps.firstCustomerCta'),
@@ -155,8 +145,6 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
         {steps.map((step) => {
           const isActive = step.id === selectedStep;
           const isCurrent = nextStepIndex >= 0 && steps[nextStepIndex].id === step.id;
-          const Icon = step.done ? CheckCircleIcon : step.icon;
-
           return (
             <div
               key={step.id}
@@ -174,16 +162,11 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
             >
               <div
                 className={cn(
-                  'flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center mb-2 transition-opacity',
-                  step.done
-                    ? 'bg-[var(--success-light)] text-[var(--accent)]'
-                    : isCurrent
-                      ? 'bg-[var(--warning-light)] text-[var(--warning)]'
-                      : 'bg-[var(--muted)] text-[var(--muted-foreground)]',
-                  !step.done && !isCurrent && 'opacity-45'
+                  'flex-shrink-0 w-20 h-20 flex items-center justify-center mb-1 transition-all duration-300',
+                  (!step.done && !isCurrent) && 'opacity-60 scale-95 grayscale-[30%]'
                 )}
               >
-                <Icon className="w-5 h-5" weight={step.done ? 'fill' : 'duotone'} />
+                <StepIllustration step={step.id} done={step.done} active={isCurrent} className="w-full h-full" />
               </div>
 
               <div className="text-center min-w-0">
@@ -272,8 +255,6 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
         {steps.map((step) => {
           const isActive = step.id === selectedStep;
           const isCurrent = nextStepIndex >= 0 && steps[nextStepIndex].id === step.id;
-          const Icon = step.done ? CheckCircleIcon : step.icon;
-
           return (
             <div
               key={step.id}
@@ -292,16 +273,12 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
             >
               <div
                 className={cn(
-                  'flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-250',
-                  isActive ? 'w-10 h-10' : 'w-8 h-8',
-                  step.done
-                    ? 'bg-[var(--success-light)] text-[var(--accent)] opacity-85'
-                    : isCurrent
-                      ? 'bg-[var(--warning-light)] text-[var(--warning)]'
-                      : 'bg-[var(--muted)] text-[var(--muted-foreground)] opacity-40'
+                  'flex-shrink-0 flex items-center justify-center transition-all duration-300',
+                  isActive ? 'w-16 h-16' : 'w-12 h-12',
+                  (!step.done && !isCurrent) && 'opacity-60 scale-95 grayscale-[30%]'
                 )}
               >
-                <Icon className={cn(isActive ? 'w-5 h-5' : 'w-4 h-4')} weight={step.done ? 'fill' : 'duotone'} />
+                <StepIllustration step={step.id} done={step.done} active={isCurrent} className="w-full h-full" />
               </div>
 
               <div className="flex-1 min-w-0">

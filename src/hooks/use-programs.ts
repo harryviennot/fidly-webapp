@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { getPrograms, updateProgram } from "@/api";
 import type { LoyaltyProgram, LoyaltyProgramUpdate } from "@/types";
 import { designKeys } from "./use-designs";
@@ -16,6 +16,7 @@ export function useDefaultProgram(businessId: string | undefined) {
       return programs.find((p) => p.is_default) || programs[0] || null;
     },
     enabled: !!businessId,
+    placeholderData: keepPreviousData,
   });
 }
 
