@@ -222,7 +222,7 @@ export default function ProgramSettingsPage() {
                         'flex-1 min-w-0 min-[1080px]:min-w-[140px] p-3.5 px-4 rounded-[10px] text-left transition-all duration-150 cursor-pointer',
                         'max-[767px]:min-w-full',
                         isActive
-                          ? 'border-2 border-[var(--accent)] bg-[#F6FBF6]'
+                          ? 'border-2 border-[var(--accent)] bg-[var(--accent-light)]'
                           : 'border-[1.5px] border-[var(--border)]',
                         isDisabled && 'bg-[var(--paper)] opacity-60 cursor-not-allowed'
                       )}
@@ -372,7 +372,7 @@ export default function ProgramSettingsPage() {
                   className={cn(
                     'flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] transition-all duration-200',
                     settings[field.key]
-                      ? 'bg-[#F6FBF6] border-[1.5px] border-[#D4ECD4]'
+                      ? 'bg-[var(--accent-light)] border-[1.5px] border-[var(--accent-200)]'
                       : 'bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]'
                   )}
                 >

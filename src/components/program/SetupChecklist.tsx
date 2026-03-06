@@ -116,7 +116,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
       <div
         className="absolute top-0 left-0 right-0 h-[3px]"
         style={{
-          background: `linear-gradient(90deg, #4A7C59 ${progressPercent}%, #EEEDEA ${progressPercent}%)`,
+          background: `linear-gradient(90deg, var(--accent) ${progressPercent}%, var(--border) ${progressPercent}%)`,
         }}
       />
 
@@ -153,7 +153,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
                 'flex-1 flex flex-col items-center px-2 py-3 pb-4 rounded-xl cursor-pointer transition-all duration-200',
                 isActive
                   ? step.done
-                    ? 'bg-[#F6FBF6] border-[1.5px] border-[#D4ECD4]'
+                    ? 'bg-[var(--accent-light)] border-[1.5px] border-[var(--accent-200)]'
                     : isCurrent
                       ? 'bg-[#FFFBF5] border-[1.5px] border-[#F0DFC0]'
                       : 'bg-[#FAFAFA] border-[1.5px] border-[var(--border)]'
@@ -191,7 +191,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
                 <div
                   className={cn(
                     'text-[12.5px] font-semibold mb-0.5',
-                    step.done ? 'text-[#3D6B3D]' : isCurrent ? 'text-[#1A1A1A]' : 'text-[#AAA]'
+                    step.done ? 'text-[var(--accent)]' : isCurrent ? 'text-[#1A1A1A]' : 'text-[#AAA]'
                   )}
                 >
                   {step.title}
@@ -242,7 +242,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
 
                 {/* Completed label */}
                 {isActive && step.done && (
-                  <span className="text-[11px] text-[#A8C5A8] font-medium">Completed</span>
+                  <span className="text-[11px] text-[var(--accent-300)] font-medium">Completed</span>
                 )}
               </div>
             </div>
@@ -264,7 +264,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
                 isActive ? 'py-2.5 px-3' : 'py-2 px-3',
                 isActive
                   ? step.done
-                    ? 'bg-[#F6FBF6] border-[1.5px] border-[#D4ECD4]'
+                    ? 'bg-[var(--accent-light)] border-[1.5px] border-[var(--accent-200)]'
                     : isCurrent
                       ? 'bg-[#FFFBF5] border-[1.5px] border-[#F0DFC0]'
                       : 'bg-[#FAFAFA] border-[1.5px] border-[var(--border)]'
@@ -286,7 +286,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
                   <span
                     className={cn(
                       'text-[13px] font-semibold',
-                      step.done ? 'text-[#3D6B3D]' : isCurrent ? 'text-[#1A1A1A]' : 'text-[#AAA]'
+                      step.done ? 'text-[var(--accent)]' : isCurrent ? 'text-[#1A1A1A]' : 'text-[#AAA]'
                     )}
                   >
                     {step.title}
@@ -335,7 +335,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
               )}
 
               {isActive && step.done && (
-                <span className="flex-shrink-0 text-[11px] text-[#A8C5A8] font-medium">Completed</span>
+                <span className="flex-shrink-0 text-[11px] text-[var(--accent-300)] font-medium">Completed</span>
               )}
             </div>
           );

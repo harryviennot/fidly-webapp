@@ -54,7 +54,7 @@ export function TeamStats({
         value={members.length}
         subtitle={t('activeCount', { count: activeScannersCount })}
         icon={<Users className="w-4 h-4" weight="bold" />}
-        iconBg="#E8F5E4"
+        iconBg="var(--accent-light)"
         delay={0}
       />
 
@@ -83,7 +83,7 @@ export function TeamStats({
             : undefined
         }
         icon={<UserCheck className="w-4 h-4" weight="bold" />}
-        iconBg="#E4F0E4"
+        iconBg="var(--accent-light)"
         delay={160}
       />
 

@@ -23,7 +23,7 @@ export function CustomerStatsCards({ stats }: CustomerStatsCardsProps) {
         title={t("totalCustomers")}
         value={stats.totalCustomers}
         icon={<Users className="w-4 h-4" weight="bold" />}
-        iconBg="#E8F5E4"
+        iconBg="var(--accent-light)"
         delay={0}
       />
       <StatCard
@@ -37,7 +37,7 @@ export function CustomerStatsCards({ stats }: CustomerStatsCardsProps) {
         title={t("stampsToday")}
         value={stats.stampsToday}
         icon={<ChartBar className="w-4 h-4" weight="bold" />}
-        iconBg="#E4F0E4"
+        iconBg="var(--accent-light)"
         delay={160}
       />
       <div className="md:col-span-3 lg:col-span-1">

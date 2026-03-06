@@ -17,11 +17,6 @@ const PLACEHOLDER_DATA = [
   { h: "5", v: 18 }, { h: "6", v: 14 }, { h: "7", v: 8 },
 ];
 
-function getBarColor(value: number) {
-  if (value > 55) return "#4A7C59";
-  if (value > 35) return "#A8C5A8";
-  return "#E4F0E4";
-}
 
 interface PeakHoursChartProps {
   data?: { h: string; v: number }[];
@@ -35,6 +30,18 @@ export function PeakHoursChart({
   delay = 0,
 }: PeakHoursChartProps) {
   const t = useTranslations("dashboard");
+
+  // Read accent palette from CSS vars (resolved at render time after applyTheme)
+  const style = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
+  const accent = style?.getPropertyValue("--accent").trim() || "#f97316";
+  const accent300 = style?.getPropertyValue("--accent-300").trim() || "#fdba74";
+  const accent100 = style?.getPropertyValue("--accent-100").trim() || "#ffedd5";
+
+  function getBarColor(value: number) {
+    if (value > 55) return accent;
+    if (value > 35) return accent300;
+    return accent100;
+  }
 
   // Find peak hour
   const peak = data.reduce((max, d) => (d.v > max.v ? d : max), data[0]);

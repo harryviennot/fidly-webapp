@@ -7,8 +7,8 @@ interface FilterPillProps {
   activeBg?: string;
 }
 
-const DEFAULT_ACTIVE_COLOR = "#4A7C59";
-const DEFAULT_ACTIVE_BG = "#E8F5E4";
+const DEFAULT_ACTIVE_COLOR = "var(--accent)";
+const DEFAULT_ACTIVE_BG = "var(--accent-light)";
 
 export function FilterPill({
   label,

@@ -75,6 +75,11 @@ export default function DashboardPage() {
 
   const displayName = profile?.name || "there";
 
+  // Read accent palette from CSS vars for Recharts (SVG attrs don't support CSS vars directly)
+  const cssStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
+  const accentColor = cssStyle?.getPropertyValue("--accent").trim() || "#f97316";
+  const accent300 = cssStyle?.getPropertyValue("--accent-300").trim() || "#fdba74";
+
   return (
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
       {/* Header */}
@@ -94,7 +99,7 @@ export default function DashboardPage() {
               title={t("dashboard.totalCustomers")}
               value={totalCustomers}
               icon={<Users className="w-4 h-4" weight="bold" />}
-              iconBg="#E8F5E4"
+              iconBg="var(--accent-light)"
               subtitle={t("dashboard.vsLastMonth")}
               change="+18%"
               positive
@@ -105,7 +110,7 @@ export default function DashboardPage() {
               title={t("dashboard.scansToday")}
               value={activeCustomersToday}
               icon={<QrCode className="w-4 h-4" weight="bold" />}
-              iconBg="#E4F0E4"
+              iconBg="var(--accent-light)"
               subtitle={t("dashboard.vsYesterday")}
               change="+12%"
               positive
@@ -141,8 +146,8 @@ export default function DashboardPage() {
             delay={300}
             legend={
               <div className="flex items-center gap-3">
-                <LegendItem color="#A8C5A8" label={t("dashboard.scans")} />
-                <LegendItem color="#4A6B4A" label={t("dashboard.stamps")} />
+                <LegendItem color={accent300} label={t("dashboard.scans")} />
+                <LegendItem color={accentColor} label={t("dashboard.stamps")} />
                 <LegendItem color="#C4A67D" label={t("dashboard.redemptions")} />
               </div>
             }
@@ -172,13 +177,13 @@ export default function DashboardPage() {
                 />
                 <Bar
                   dataKey="scans"
-                  fill="#A8C5A8"
+                  fill={accent300}
                   radius={[3, 3, 0, 0]}
                   animationDuration={800}
                 />
                 <Bar
                   dataKey="stamps"
-                  fill="#4A6B4A"
+                  fill={accentColor}
                   radius={[3, 3, 0, 0]}
                   animationDuration={800}
                   animationBegin={150}

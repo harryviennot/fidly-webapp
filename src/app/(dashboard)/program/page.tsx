@@ -61,7 +61,7 @@ export default function ProgramOverviewPage() {
               title={t('totalStampsGiven')}
               value={stats?.stamps_today ?? 0}
               icon={<StampIcon className="w-4 h-4" weight="bold" />}
-              iconBg="#E8F5E4"
+              iconBg="var(--accent-light)"
               subtitle={t('allTime')}
               change="+22%"
               positive
@@ -127,9 +127,9 @@ function ProgramHealthCard({ delay = 0 }: { delay?: number }) {
   const t = useTranslations('loyaltyProgram.overview');
 
   const metrics = [
-    { label: t('avgStampsPerCustomer'), value: '3.9', color: '#4A7C59' },
+    { label: t('avgStampsPerCustomer'), value: '3.9', color: 'var(--accent)' },
     { label: t('rewardCompletionRate'), value: '15%', color: '#C4883D' },
-    { label: t('thirtyDayRetention'), value: '72%', color: '#4A7C59' },
+    { label: t('thirtyDayRetention'), value: '72%', color: 'var(--accent)' },
     { label: t('avgTimeToReward'), value: '18 days', color: '#555' },
   ];
 

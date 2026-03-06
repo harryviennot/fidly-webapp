@@ -28,7 +28,7 @@ export function ActivityStatsBar({ stats, isLoading }: ActivityStatsBarProps) {
         title={t("stats.stampsToday")}
         value={stats?.stamps_today ?? 0}
         icon={<Stamp className="w-4 h-4" weight="bold" />}
-        iconBg="#E8F5E4"
+        iconBg="var(--accent-light)"
         delay={0}
       />
       <StatCard
@@ -42,7 +42,7 @@ export function ActivityStatsBar({ stats, isLoading }: ActivityStatsBarProps) {
         title={t("stats.totalThisWeek")}
         value={stats?.total_this_week ?? 0}
         icon={<ChartBar className="w-4 h-4" weight="bold" />}
-        iconBg="#E4F0E4"
+        iconBg="var(--accent-light)"
         delay={160}
       />
       <div className="md:col-span-3 lg:col-span-1">

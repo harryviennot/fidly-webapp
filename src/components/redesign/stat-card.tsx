@@ -41,8 +41,8 @@ export function StatCard({
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-[#8A8A8A]">{title}</span>
         <div
-          className="w-8 h-8 rounded-md flex items-center justify-center text-[#4A7C3F]"
-          style={{ background: iconBg || "#E8F5E4" }}
+          className="w-8 h-8 rounded-md flex items-center justify-center text-[var(--accent)]"
+          style={{ background: iconBg || "var(--accent-light)" }}
         >
           {icon}
         </div>
@@ -58,7 +58,7 @@ export function StatCard({
           <span
             className={cn(
               "font-semibold flex items-center gap-0.5",
-              positive ? "text-[#4A7C59]" : "text-[#C75050]"
+              positive ? "text-[var(--accent)]" : "text-[#C75050]"
             )}
           >
             <span className="text-[8px]">{positive ? "▲" : "▼"}</span>

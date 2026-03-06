@@ -26,8 +26,8 @@ const FILTER_COLORS: Record<
   TransactionType | "all",
   { color: string; bg: string }
 > = {
-  all: { color: "#4A7C59", bg: "#E8F5E4" },
-  stamp_added: { color: "#4A7C59", bg: "#E8F5E4" },
+  all: { color: "var(--accent)", bg: "var(--accent-light)" },
+  stamp_added: { color: "var(--accent)", bg: "var(--accent-light)" },
   stamp_voided: { color: "#C75050", bg: "#FDE8E4" },
   reward_redeemed: { color: "#C4883D", bg: "#FFF3E0" },
   bonus_stamp: { color: "#3D7CAF", bg: "#E4F0F8" },

@@ -31,7 +31,7 @@ export function ActiveCardWidget({
   const stats = [
     { label: t("cardsIssued"), value: totalCustomers.toLocaleString(), color: "#555" },
     { label: t("activePasses"), value: activeCards.toLocaleString(), color: "#555" },
-    { label: t("installRate"), value: `${installRate}%`, color: "#4A7C59" },
+    { label: t("installRate"), value: `${installRate}%`, color: "var(--accent)" },
   ];
 
   /* Compact row layout for lg+ sidebar column */
