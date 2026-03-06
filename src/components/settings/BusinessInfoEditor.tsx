@@ -1,16 +1,10 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Plus, Trash, Clock, Globe, Phone, Envelope, MapPin, TextT, ArrowUp, ArrowDown } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
+import { useRef, useState, useEffect } from 'react';
+import { Plus, Clock, Globe, Phone, Envelope, MapPin, TextT } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import type { BusinessInfoEntry } from '@/types/business';
 
 const INFO_TYPE_ICONS = {
@@ -43,9 +37,26 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
   const usedPresetTypes = new Set(value.map((e) => e.type).filter((t) => t !== 'custom'));
   const availableTypes = ALL_TYPES.filter((type) => type === 'custom' || !usedPresetTypes.has(type));
 
+  const [animatingId, setAnimatingId] = useState<string | null>(null);
+  const [animDir, setAnimDir] = useState<'up' | 'down' | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!addMenuOpen) return;
+    const close = (e: MouseEvent) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) setAddMenuOpen(false);
+    };
+    window.addEventListener('mousedown', close);
+    return () => window.removeEventListener('mousedown', close);
+  }, [addMenuOpen]);
+
   const addEntry = (type: InfoType) => {
     const defaultData = getDefaultData(type, t);
-    const key = type === 'custom' ? `biz_custom_${crypto.randomUUID()}` : `biz_${type}`;
+    const uid = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+    const key = type === 'custom' ? `biz_custom_${uid}` : `biz_${type}`;
     onChange([...value, { type, key, data: defaultData }]);
   };
 
@@ -66,10 +77,34 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
     onChange(updated);
   };
 
+  const animateMove = (index: number, direction: 'up' | 'down') => {
+    const entry = value[index];
+    if (!entry) return;
+    setAnimatingId(entry.key);
+    setAnimDir(direction);
+    setTimeout(() => {
+      moveEntry(index, direction);
+      setAnimatingId(null);
+      setAnimDir(null);
+    }, 280);
+  };
+
+  const animateRemove = (index: number) => {
+    const entry = value[index];
+    if (!entry) return;
+    setRemovingId(entry.key);
+    setTimeout(() => {
+      removeEntry(index);
+      setRemovingId(null);
+    }, 300);
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {value.length === 0 && (
-        <p className="text-sm text-muted-foreground py-2">{t('noInfoYet')}</p>
+        <div className="px-4 py-7 rounded-xl border-2 border-dashed border-[#DEDBD5] bg-[#FAFAF8] text-center">
+          <div className="text-sm text-[#AAA]">{t('noInfoYet')}</div>
+        </div>
       )}
 
       {value.map((entry, index) => (
@@ -79,31 +114,52 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
           index={index}
           total={value.length}
           onUpdate={(data) => updateEntry(index, data)}
-          onRemove={() => removeEntry(index)}
-          onMove={(direction) => moveEntry(index, direction)}
+          onRemove={() => animateRemove(index)}
+          onMove={(direction) => animateMove(index, direction)}
+          isAnimating={animatingId === entry.key}
+          animDir={animatingId === entry.key ? animDir : null}
+          isRemoving={removingId === entry.key}
         />
       ))}
 
       {availableTypes.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full">
-              <Plus className="w-3.5 h-3.5 mr-1.5" />
-              {t('addInfo')}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="w-56">
-            {availableTypes.map((type) => {
-              const Icon = INFO_TYPE_ICONS[type];
-              return (
-                <DropdownMenuItem key={type} onClick={() => addEntry(type)}>
-                  <Icon className="w-4 h-4 mr-2" />
-                  {t(`types.${type}`)}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="relative" ref={addMenuRef}>
+          <button
+            onClick={() => setAddMenuOpen(!addMenuOpen)}
+            className="w-full py-3 rounded-xl border-2 border-dashed border-[#D0CDC6] bg-[#FAFAF8] text-[#777] text-sm font-medium flex items-center justify-center gap-2 transition-all hover:bg-[#F0EDE7] hover:border-[#C0BDB6] hover:text-[#555]"
+          >
+            <Plus className="w-3.5 h-3.5" /> {t('addInfo')}
+          </button>
+          {addMenuOpen && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 z-50 bg-white rounded-xl border border-[#EEEDEA] shadow-lg overflow-hidden p-1.5">
+              <div className="px-3 py-1.5 text-[10px] font-semibold text-[#AAA] uppercase tracking-wider">
+                Choose field type
+              </div>
+              {availableTypes.map((type) => {
+                const Icon = INFO_TYPE_ICONS[type];
+                const alreadyAdded = type !== 'custom' && usedPresetTypes.has(type);
+                return (
+                  <button
+                    key={type}
+                    onClick={() => { if (!alreadyAdded) { addEntry(type); setAddMenuOpen(false); } }}
+                    disabled={alreadyAdded}
+                    className={`w-full px-3 py-2.5 rounded-lg border-none text-left flex items-center gap-3 transition-colors ${alreadyAdded ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-[#FAFAF8]'}`}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-[#F0EDE7] flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-[#777]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-[#333]">{t(`types.${type}`)}</div>
+                    </div>
+                    {alreadyAdded && (
+                      <span className="text-[9px] font-bold text-[#BBB] px-1.5 py-0.5 rounded bg-[#F0EDE7]">ADDED</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -116,6 +172,9 @@ function InfoEntryEditor({
   onUpdate,
   onRemove,
   onMove,
+  isAnimating,
+  animDir,
+  isRemoving,
 }: {
   entry: BusinessInfoEntry;
   index: number;
@@ -123,6 +182,9 @@ function InfoEntryEditor({
   onUpdate: (data: Record<string, unknown>) => void;
   onRemove: () => void;
   onMove: (direction: 'up' | 'down') => void;
+  isAnimating: boolean;
+  animDir: 'up' | 'down' | null;
+  isRemoving: boolean;
 }) {
   const t = useTranslations('settings.cardInfo');
   const Icon = INFO_TYPE_ICONS[entry.type] || TextT;
@@ -130,91 +192,89 @@ function InfoEntryEditor({
     ? ((entry.data.label as string) || t('custom.title'))
     : t(`${entry.type}.title`);
 
+  let transform = 'translateY(0)';
+  let opacity = 1;
+  const transition = 'all 0.28s cubic-bezier(.16,1,.3,1)';
+  if (isAnimating && animDir === 'up') transform = 'translateY(-8px)';
+  else if (isAnimating && animDir === 'down') transform = 'translateY(8px)';
+  if (isRemoving) { transform = 'translateX(40px)'; opacity = 0; }
+
   return (
-    <div className="border border-border rounded-lg p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium">{title}</span>
-        </div>
-        <div className="flex items-center gap-0.5">
-          {total > 1 && (
-            <>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => onMove('up')}
-                disabled={index === 0}
-                title={t('moveUp')}
-              >
-                <ArrowUp className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => onMove('down')}
-                disabled={index === total - 1}
-                title={t('moveDown')}
-              >
-                <ArrowDown className="w-3.5 h-3.5" />
-              </Button>
-            </>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={onRemove}
-          >
-            <Trash className="w-3.5 h-3.5" />
-          </Button>
-        </div>
+    <div style={{ transform, opacity, transition }} className="flex items-start gap-3 p-4 rounded-xl bg-[#FAFAF8] border border-[#F0EFEB]">
+      {/* Up/down buttons */}
+      <div className="flex flex-col gap-1 pt-1 shrink-0">
+        <button
+          onClick={() => onMove('up')} disabled={index === 0}
+          className="w-6 h-6 rounded-md border border-[#E8E5DE] bg-white flex items-center justify-center text-[#999] disabled:text-[#DDD] disabled:bg-[#F8F7F5] disabled:cursor-default hover:enabled:bg-[#F0EDE7] hover:enabled:text-[#555] transition-all"
+        >
+          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 8l4-4 4 4"/></svg>
+        </button>
+        <button
+          onClick={() => onMove('down')} disabled={index === total - 1}
+          className="w-6 h-6 rounded-md border border-[#E8E5DE] bg-white flex items-center justify-center text-[#999] disabled:text-[#DDD] disabled:bg-[#F8F7F5] disabled:cursor-default hover:enabled:bg-[#F0EDE7] hover:enabled:text-[#555] transition-all"
+        >
+          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 4l4 4 4-4"/></svg>
+        </button>
       </div>
 
-      {entry.type === 'hours' && (
-        <HoursEditor data={entry.data} onChange={onUpdate} />
-      )}
-      {entry.type === 'website' && (
-        <SimpleFieldEditor
-          value={(entry.data.url as string) || ''}
-          onChange={(url) => onUpdate({ url })}
-          placeholder={t('website.urlPlaceholder')}
-          type="url"
-        />
-      )}
-      {entry.type === 'phone' && (
-        <SimpleFieldEditor
-          value={(entry.data.number as string) || ''}
-          onChange={(number) => onUpdate({ number })}
-          placeholder={t('phone.numberPlaceholder')}
-          type="tel"
-        />
-      )}
-      {entry.type === 'email' && (
-        <SimpleFieldEditor
-          value={(entry.data.email as string) || ''}
-          onChange={(email) => onUpdate({ email })}
-          placeholder={t('email.emailPlaceholder')}
-          type="email"
-        />
-      )}
-      {entry.type === 'address' && (
-        <SimpleFieldEditor
-          value={(entry.data.address as string) || ''}
-          onChange={(address) => onUpdate({ address })}
-          placeholder={t('address.addressPlaceholder')}
-        />
-      )}
-      {entry.type === 'custom' && (
-        <CustomFieldEditor
-          data={entry.data}
-          onChange={onUpdate}
-        />
-      )}
+      {/* Icon */}
+      <div className="w-9 h-9 rounded-lg bg-white border border-[#E8E5DE] flex items-center justify-center shrink-0 mt-0.5">
+        <Icon className="w-4 h-4 text-[#777]" />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-semibold text-[#1A1A1A] mb-2">{title}</div>
+
+        {entry.type === 'hours' && (
+          <HoursEditor data={entry.data} onChange={onUpdate} />
+        )}
+        {entry.type === 'website' && (
+          <SimpleFieldEditor
+            value={(entry.data.url as string) || ''}
+            onChange={(url) => onUpdate({ url })}
+            placeholder={t('website.urlPlaceholder')}
+            type="url"
+          />
+        )}
+        {entry.type === 'phone' && (
+          <SimpleFieldEditor
+            value={(entry.data.number as string) || ''}
+            onChange={(number) => onUpdate({ number })}
+            placeholder={t('phone.numberPlaceholder')}
+            type="tel"
+          />
+        )}
+        {entry.type === 'email' && (
+          <SimpleFieldEditor
+            value={(entry.data.email as string) || ''}
+            onChange={(email) => onUpdate({ email })}
+            placeholder={t('email.emailPlaceholder')}
+            type="email"
+          />
+        )}
+        {entry.type === 'address' && (
+          <SimpleFieldEditor
+            value={(entry.data.address as string) || ''}
+            onChange={(address) => onUpdate({ address })}
+            placeholder={t('address.addressPlaceholder')}
+          />
+        )}
+        {entry.type === 'custom' && (
+          <CustomFieldEditor
+            data={entry.data}
+            onChange={onUpdate}
+          />
+        )}
+      </div>
+
+      {/* Remove button */}
+      <button
+        onClick={onRemove}
+        className="w-7 h-7 rounded-lg border border-transparent bg-transparent flex items-center justify-center text-[#CCC] shrink-0 mt-0.5 transition-all hover:text-red-500 hover:bg-red-50 hover:border-red-200"
+      >
+        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4l6 6M10 4l-6 6"/></svg>
+      </button>
     </div>
   );
 }
@@ -276,54 +336,60 @@ function HoursEditor({
   return (
     <div className="space-y-2">
       {schedule.map((row, index) => (
-        <div key={index} className="flex items-center gap-2">
-          <Input
-            value={row.days}
-            onChange={(e) => updateRow(index, { days: e.target.value })}
-            placeholder={t('daysPlaceholder')}
-            className="h-8 text-sm w-28 shrink-0"
-          />
+        <div key={index} className="space-y-1.5">
+          {/* Line 1: days + closed toggle + remove */}
+          <div className="flex items-center gap-2">
+            <Input
+              value={row.days}
+              onChange={(e) => updateRow(index, { days: e.target.value })}
+              placeholder={t('daysPlaceholder')}
+              className="h-8 text-xs flex-1 min-w-0"
+            />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Switch
+                checked={row.closed}
+                onCheckedChange={(closed) => updateRow(index, { closed })}
+                className="scale-75"
+              />
+              <span className="text-[10px] text-[#AAA] w-8 shrink-0">{t('closed')}</span>
+            </div>
+            <button
+              onClick={() => removeRow(index)}
+              className="w-6 h-6 rounded-md border-none bg-transparent flex items-center justify-center text-[#CCC] shrink-0 hover:text-red-500 hover:bg-red-50 transition-all"
+            >
+              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 2l8 8M10 2l-8 8"/></svg>
+            </button>
+          </div>
+          {/* Line 2: time range (only when open) */}
           {row.closed ? (
-            <span className="text-sm text-muted-foreground flex-1 text-center">{t('closed')}</span>
+            <div className="flex items-center justify-center py-1 px-2 rounded-lg bg-red-50 border border-red-200">
+              <span className="text-xs text-red-500 font-medium">{t('closed')}</span>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center gap-1.5">
               <Input
                 type="time"
                 value={row.open}
                 onChange={(e) => updateRow(index, { open: e.target.value })}
-                className="h-8 text-sm w-[110px]"
+                className="h-8 text-xs flex-1 min-w-0"
               />
-              <span className="text-muted-foreground text-xs">–</span>
+              <span className="text-[#CCC] text-xs shrink-0">–</span>
               <Input
                 type="time"
                 value={row.close}
                 onChange={(e) => updateRow(index, { close: e.target.value })}
-                className="h-8 text-sm w-[110px]"
+                className="h-8 text-xs flex-1 min-w-0"
               />
-            </>
+            </div>
           )}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Switch
-              checked={row.closed}
-              onCheckedChange={(closed) => updateRow(index, { closed })}
-              className="scale-75"
-            />
-            <span className="text-xs text-muted-foreground w-10">{t('closed')}</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={() => removeRow(index)}
-          >
-            <Trash className="w-3 h-3" />
-          </Button>
         </div>
       ))}
-      <Button variant="outline" size="sm" onClick={addRow} className="w-full">
-        <Plus className="w-3.5 h-3.5 mr-1.5" />
-        {t('addRow')}
-      </Button>
+      <button
+        onClick={addRow}
+        className="w-full py-2 rounded-lg border-2 border-dashed border-[#D8D5CE] bg-[#FAFAF8] text-[#999] text-xs font-medium flex items-center justify-center gap-1.5 transition-all hover:bg-[#F0EDE7] hover:border-[#C0BDB6] hover:text-[#666]"
+      >
+        <Plus className="w-3 h-3" /> {t('addRow')}
+      </button>
     </div>
   );
 }

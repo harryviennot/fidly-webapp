@@ -1,26 +1,29 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { DotsThreeIcon } from "@phosphor-icons/react";
+import { TrashIcon } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { MembershipWithUser, MembershipRole } from "@/types";
+import type { TeamRow } from "./team-table";
 
 interface TeamMemberCardProps {
-  member: MembershipWithUser;
-  isCurrentUser: boolean;
-  canModify: boolean;
+  row: TeamRow;
   loading: boolean;
-  onChangeRole: () => void;
   onRemove: () => void;
+  onResend?: () => void;
 }
+
+const ROLE_CONFIG: Record<string, { bg: string; color: string }> = {
+  owner: { bg: "bg-green-50 dark:bg-green-950/30", color: "text-green-700 dark:text-green-400" },
+  admin: { bg: "bg-orange-50 dark:bg-orange-950/30", color: "text-orange-700 dark:text-orange-400" },
+  scanner: { bg: "bg-blue-50 dark:bg-blue-950/30", color: "text-blue-700 dark:text-blue-400" },
+};
+
+const STATUS_COLORS = {
+  online: "bg-green-500",
+  invited: "bg-amber-500",
+  offline: "bg-gray-400",
+};
 
 function getInitials(name: string) {
   return name
@@ -31,140 +34,101 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-const ROLE_VARIANTS: Record<MembershipRole, "default" | "secondary" | "outline"> = {
-  owner: "default",
-  admin: "secondary",
-  scanner: "outline",
-};
-
-const STATUS_COLORS = {
-  active: "bg-green-500",
-  inactive: "bg-amber-500",
-  never: "bg-gray-400",
-};
-
 export function TeamMemberCard({
-  member,
-  isCurrentUser,
-  canModify,
+  row,
   loading,
-  onChangeRole,
   onRemove,
+  onResend,
 }: TeamMemberCardProps) {
   const t = useTranslations('team.memberCard');
   const tRoles = useTranslations('roles');
-
-  function getActivityStatus(lastActive: string | undefined): {
-    status: "active" | "inactive" | "never";
-    label: string;
-  } {
-    if (!lastActive) {
-      return { status: "never", label: t('neverActive') };
-    }
-
-    const now = new Date();
-    const lastActiveDate = new Date(lastActive);
-    const diffDays = Math.floor(
-      (now.getTime() - lastActiveDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    if (diffDays <= 7) {
-      return { status: "active", label: t('activeThisWeek') };
-    }
-    return { status: "inactive", label: t('daysAgo', { days: diffDays }) };
-  }
-
-  const activity = getActivityStatus(member.last_active_at);
+  const rc = ROLE_CONFIG[row.role] || ROLE_CONFIG.scanner;
 
   return (
-    <div className="flex items-start gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--cream)] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-      {/* Avatar with activity indicator */}
-      <div className="relative flex-shrink-0">
-        <Avatar className="h-12 w-12">
-          <AvatarImage src={member.user.avatar_url} className="object-cover" />
-          <AvatarFallback className="bg-[var(--muted)] text-base font-medium">
-            {getInitials(member.user.name || member.user.email)}
-          </AvatarFallback>
-        </Avatar>
-        {member.role === "scanner" && (
+    <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--card)] transition-all duration-200 hover:shadow-sm">
+      {/* Top row: avatar, name, role, delete */}
+      <div className="flex items-center gap-2.5 mb-2">
+        <div className="relative flex-shrink-0">
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={row.avatarUrl} className="object-cover" />
+            <AvatarFallback className="bg-[var(--muted)] text-xs font-semibold">
+              {row.initials || getInitials(row.name || row.email)}
+            </AvatarFallback>
+          </Avatar>
           <span
-            className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-[var(--cream)] ${STATUS_COLORS[activity.status]}`}
-            title={activity.label}
+            className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--card)] ${STATUS_COLORS[row.status]}`}
           />
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <h4 className="font-medium text-[var(--foreground)] truncate">
-            {member.user.name || t('unnamed')}
-          </h4>
-          {isCurrentUser && (
-            <span className="text-xs text-[var(--muted-foreground)] flex-shrink-0">
-              {t('you')}
-            </span>
-          )}
         </div>
-        <p className="text-sm text-[var(--muted-foreground)] truncate mb-2">
-          {member.user.email}
-        </p>
-        <div className="flex items-center gap-2">
-          <Badge variant={ROLE_VARIANTS[member.role]} className="capitalize">
-            {tRoles(member.role)}
-          </Badge>
-          {member.role === "scanner" && (
-            <span
-              className={`text-xs ${
-                activity.status === "active"
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-[var(--muted-foreground)]"
-              }`}
-            >
-              {activity.label}
-            </span>
-          )}
-        </div>
-      </div>
 
-      {/* Actions menu */}
-      {canModify && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-semibold text-[var(--foreground)] truncate">
+              {row.name || t('unnamed')}
+            </span>
+            {row.isCurrentUser && (
+              <span className="text-[9px] py-0.5 px-1.5 rounded bg-[var(--muted)] text-[var(--muted-foreground)] font-semibold flex-shrink-0">
+                YOU
+              </span>
+            )}
+            <span className={`text-[10px] py-0.5 px-2 rounded-xl font-semibold flex-shrink-0 ${rc.bg} ${rc.color}`}>
+              {tRoles(row.role)}
+            </span>
+          </div>
+          <p className="text-[11px] text-[var(--muted-foreground)] truncate mt-0.5">{row.email}</p>
+        </div>
+
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {row.type === "invitation" && onResend && (
             <Button
               variant="ghost"
-              size="icon"
-              className="h-8 w-8 flex-shrink-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              size="sm"
+              className="text-xs h-7 px-2"
+              onClick={onResend}
               disabled={loading}
             >
-              <DotsThreeIcon size={18} weight="bold" />
+              Resend
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onChangeRole}>
-              {t('changeRole')}
-            </DropdownMenuItem>
-            <DropdownMenuItem
+          )}
+          {row.canModify && (
+            <button
               onClick={onRemove}
-              className="text-destructive"
+              disabled={loading}
+              className="p-1.5 rounded-md text-[var(--muted-foreground)] opacity-40 hover:opacity-100 hover:text-red-500 transition-all duration-150 disabled:opacity-20"
             >
-              {t('remove')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+              <TrashIcon size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom row: stamps + status */}
+      <div className="flex justify-between items-center text-[11px] text-[var(--muted-foreground)]">
+        <span>{t('stampsGiven', { count: row.stampsGiven })}</span>
+        <span className={`font-medium ${
+          row.status === "online" ? "text-green-600 dark:text-green-400" :
+          row.status === "invited" ? "text-amber-600 dark:text-amber-400" :
+          "text-[var(--muted-foreground)]"
+        }`}>
+          {row.statusLabel}
+        </span>
+      </div>
     </div>
   );
 }
 
 export function TeamMemberCardSkeleton() {
   return (
-    <div className="flex items-start gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--cream)]">
-      <div className="w-12 h-12 rounded-full bg-[var(--muted)] animate-pulse flex-shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="h-5 w-32 bg-[var(--muted)] rounded animate-pulse mb-2" />
-        <div className="h-4 w-40 bg-[var(--muted)] rounded animate-pulse mb-3" />
-        <div className="h-5 w-16 bg-[var(--muted)] rounded-full animate-pulse" />
+    <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--card)]">
+      <div className="flex items-center gap-2.5 mb-2">
+        <div className="w-9 h-9 rounded-full bg-[var(--muted)] animate-pulse flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="h-4 w-32 bg-[var(--muted)] rounded animate-pulse mb-1.5" />
+          <div className="h-3 w-40 bg-[var(--muted)] rounded animate-pulse" />
+        </div>
+      </div>
+      <div className="flex justify-between">
+        <div className="h-3 w-16 bg-[var(--muted)] rounded animate-pulse" />
+        <div className="h-3 w-12 bg-[var(--muted)] rounded animate-pulse" />
       </div>
     </div>
   );

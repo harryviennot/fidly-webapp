@@ -1,12 +1,20 @@
 {
   "team": {
-    "title": "Team Members",
+    "title": "Team",
+    "subtitle": "Manage who can access your loyalty program",
+    "addMember": "Add Member",
     "inviteMember": "Invite Member",
     "pendingInvitations": "Pending Invitations",
     "memberCount": "{count, plural, one {# Member} other {# Members}}",
     "noMembers": "No team members yet.",
     "noPendingInvitations": "No pending invitations",
     "loadFailed": "Failed to load team data",
+    "searchPlaceholder": "Search by name or email...",
+    "filterAll": "All",
+    "filterOwner": "Owner",
+    "filterAdmin": "Admin",
+    "filterScanner": "Scanner",
+    "showingCount": "Showing {filtered} of {total} members",
     "stats": {
       "teamMembers": "Team members",
       "scanners": "Scanners",
@@ -23,25 +31,38 @@
       "activeThisWeek": "Active this week",
       "daysAgo": "{days} days ago",
       "changeRole": "Change Role",
-      "remove": "Remove"
+      "remove": "Remove",
+      "stampsGiven": "{count} stamps",
+      "statusOnline": "Online",
+      "statusInvited": "Invited",
+      "statusOffline": "Offline"
     },
     "table": {
       "member": "Member",
+      "email": "Email",
       "role": "Role",
-      "joined": "Joined"
+      "status": "Status",
+      "stampsGiven": "Stamps Given",
+      "joined": "Joined",
+      "added": "Added {date}",
+      "resend": "Resend",
+      "roleAdmin": "Admin",
+      "roleScanner": "Scanner",
+      "roleAdminDesc": "Limited access to the web dashboard",
+      "roleScannerDesc": "Access to the scanner app only"
     },
     "invite": {
-      "title": "Invite Team Member",
-      "description": "Send an invitation email. They'll create an account when they accept.",
-      "email": "Email address",
-      "emailPlaceholder": "colleague@example.com",
-      "name": "Name (optional)",
-      "namePlaceholder": "John Doe",
+      "title": "Add Team Member",
+      "description": "They'll receive an email invitation to join",
+      "email": "Email Address",
+      "emailPlaceholder": "e.g. alex@business.com",
+      "name": "Full Name",
+      "namePlaceholder": "e.g. Alex Rivera",
       "nameHint": "Used to personalize the invitation email",
       "role": "Role",
       "selectRole": "Select a role",
-      "scannerDescription": "Can scan customer passes and add stamps via mobile app",
-      "adminDescription": "Can manage team members and access all business features",
+      "scannerDescription": "Scanner app access only",
+      "adminDescription": "Limited web dashboard access",
       "adminOnlyScanner": "As an admin, you can only invite scanners",
       "cancel": "Cancel",
       "sending": "Sending...",
@@ -60,8 +81,8 @@
       "cancelling": "Cancelling..."
     },
     "removeDialog": {
-      "title": "Remove team member?",
-      "description": "Are you sure you want to remove {name} from the team? They will lose access to this business.",
+      "title": "Remove {name}?",
+      "description": "They will lose access to the scanner app and any associated permissions. This action cannot be undone.",
       "cancel": "Cancel",
       "remove": "Remove"
     },
@@ -73,12 +94,13 @@
     },
     "emptyState": {
       "title": "Build your team",
-      "description": "Add team members so your employees can scan loyalty cards and help manage your business.",
+      "description": "Invite employees to help manage your loyalty program. Admins get limited dashboard access, while scanners can stamp cards from the mobile app.",
+      "onlyMember": "You're currently the only team member.",
       "adminRole": "Admin",
-      "adminDescription": "Manage team members, view analytics, and configure settings",
+      "adminDescription": "Dashboard access",
       "scannerRole": "Scanner",
-      "scannerDescription": "Scan customer passes and add stamps via the mobile app",
-      "inviteFirst": "Invite your first team member"
+      "scannerDescription": "Stamp cards on mobile",
+      "inviteFirst": "Invite Your First Employee"
     },
     "toasts": {
       "roleUpdated": "Role updated to {role}",

@@ -2,13 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import {
-  UsersIcon,
-  UserCheckIcon,
-  EnvelopeSimpleIcon,
-  DeviceMobileIcon,
+  Users,
+  UserCheck,
+  EnvelopeSimple,
+  DeviceMobile,
 } from "@phosphor-icons/react";
 import type { MembershipWithUser, Invitation } from "@/types";
-import { StatCardSmall } from "@/components/reusables/stats/StatCardSmall";
+import { StatCard } from "@/components/redesign";
 
 interface TeamStatsProps {
   members: MembershipWithUser[];
@@ -36,7 +36,6 @@ export function TeamStats({
 
   // Pay tier has scanner limit
   const scannerLimit = subscriptionTier === "pay" ? 3 : null;
-  const isNearLimit = scannerLimit ? scannerCount >= scannerLimit - 1 : false;
 
   // Count active scanners (active in last 7 days)
   const now = new Date();
@@ -49,63 +48,72 @@ export function TeamStats({
   }).length;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCardSmall
-        icon={<UsersIcon size={20} weight="duotone" />}
-        label={t('teamMembers')}
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[14px]">
+      <StatCard
+        title={t('teamMembers')}
         value={members.length}
+        subtitle={t('activeCount', { count: activeScannersCount })}
+        icon={<Users className="w-4 h-4" weight="bold" />}
+        iconBg="#E8F5E4"
+        delay={0}
       />
 
-      <StatCardSmall
-        icon={<DeviceMobileIcon size={20} weight="duotone" />}
-        label={t('scanners')}
-        value={
-          scannerLimit ? `${scannerCount}/${scannerLimit}` : scannerCount
-        }
-        subtext={
+      <StatCard
+        title={t('scanners')}
+        value={scannerLimit ? scannerCount : scannerCount}
+        suffix={scannerLimit ? `/${scannerLimit}` : undefined}
+        subtitle={
           activeScannersCount > 0
             ? t('activeCount', { count: activeScannersCount })
             : scannerCount > 0
               ? t('noActivity')
               : undefined
         }
-        highlight={isNearLimit}
+        icon={<DeviceMobile className="w-4 h-4" weight="bold" />}
+        iconBg="#E4F0F8"
+        delay={80}
       />
 
-      <StatCardSmall
-        icon={<UserCheckIcon size={20} weight="duotone" />}
-        label={t('activeThisWeek')}
+      <StatCard
+        title={t('activeThisWeek')}
         value={activeScannersCount}
-        subtext={
+        subtitle={
           scannerCount > 0
             ? t('ofScanners', { count: scannerCount })
             : undefined
         }
+        icon={<UserCheck className="w-4 h-4" weight="bold" />}
+        iconBg="#E4F0E4"
+        delay={160}
       />
 
-      <StatCardSmall
-        icon={<EnvelopeSimpleIcon size={20} weight="duotone" />}
-        label={t('pendingInvites')}
-        value={invitations.length}
-        highlight={invitations.length > 0}
-      />
+      <div className="md:col-span-3 lg:col-span-1 flex">
+        <StatCard
+          title={t('pendingInvites')}
+          value={invitations.length}
+          icon={<EnvelopeSimple className="w-4 h-4" weight="bold" />}
+          iconBg="#FFF3E0"
+          delay={240}
+          className="flex-1"
+        />
+      </div>
     </div>
   );
 }
 
 export function TeamStatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[14px]">
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--cream)]"
+          className={`rounded-xl border border-[var(--border)] bg-[var(--card)] p-[16px_18px] ${i === 4 ? "md:col-span-3 lg:col-span-1" : ""}`}
         >
-          <div className="w-10 h-10 rounded-lg bg-[var(--muted)] animate-pulse" />
-          <div className="flex-1 space-y-2">
-            <div className="h-6 w-12 bg-[var(--muted)] rounded animate-pulse" />
-            <div className="h-4 w-20 bg-[var(--muted)] rounded animate-pulse" />
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-[var(--muted)] animate-pulse" />
+            <div className="h-3 w-20 bg-[var(--muted)] rounded animate-pulse" />
           </div>
+          <div className="h-7 w-14 bg-[var(--muted)] rounded animate-pulse" />
         </div>
       ))}
     </div>

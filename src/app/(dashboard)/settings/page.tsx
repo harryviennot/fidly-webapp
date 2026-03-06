@@ -3,12 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useBusiness } from '@/contexts/business-context';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FormField } from '@/components/form/form-field';
 import { Label } from '@/components/ui/label';
-import { SettingsSidebar, HexColorPicker, BusinessInfoEditor } from '@/components/settings';
-import ImageUploader from '@/components/design/ImageUploader';
+import { HexColorPicker, BusinessInfoEditor } from '@/components/settings';
+import { CardBackPreview } from '@/components/settings/CardBackPreview';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { updateBusiness, uploadBusinessLogo, deleteBusinessLogo } from '@/api';
 import { DEFAULT_ACCENT, applyTheme } from '@/utils/theme';
@@ -25,7 +23,7 @@ export default function SettingsPage() {
   const { currentBusiness, refetch } = useBusiness();
   const t = useTranslations('settings');
   const tStatus = useTranslations('status');
-  const [activeSection, setActiveSection] = useState('business-info');
+
   const [savingTheme, setSavingTheme] = useState(false);
   const [savingInfo, setSavingInfo] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +32,7 @@ export default function SettingsPage() {
   const [savingCardInfo, setSavingCardInfo] = useState(false);
   const [cardInfoSaved, setCardInfoSaved] = useState(false);
   const [businessInfo, setBusinessInfo] = useState<BusinessInfoEntry[]>([]);
+  const [logoHover, setLogoHover] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -42,13 +41,10 @@ export default function SettingsPage() {
     backgroundColor: '#1c1c1e',
   });
 
-  // Track original theme values to detect changes
   const originalTheme = useRef({ accentColor: DEFAULT_ACCENT, backgroundColor: '#1c1c1e' });
-
-  // Debounce timer for auto-save
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize form data when business loads
   useEffect(() => {
     if (currentBusiness) {
       const settings = currentBusiness.settings || {};
@@ -67,35 +63,10 @@ export default function SettingsPage() {
     }
   }, [currentBusiness]);
 
-  // IntersectionObserver for scroll tracking
-  useEffect(() => {
-    const sections = ['business-info', 'card-info', 'language', 'theme'];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-20% 0px -80% 0px' }
-    );
-
-    sections.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Auto-save business info (debounced)
   const saveBusinessInfo = useCallback(async () => {
     if (!currentBusiness?.id) return;
-
     setSavingInfo(true);
     setError(null);
-
     try {
       await updateBusiness(currentBusiness.id, {
         name: formData.name,
@@ -114,47 +85,28 @@ export default function SettingsPage() {
     }
   }, [currentBusiness, formData.name, formData.accentColor, formData.backgroundColor, t]);
 
-  // Handle name change with debounced auto-save
   const handleNameChange = (value: string) => {
     setFormData((prev) => ({ ...prev, name: value }));
     setInfoSaved(false);
-
-    // Clear existing timer
-    if (saveTimer.current) {
-      clearTimeout(saveTimer.current);
-    }
-
-    // Set new timer for auto-save after 3 seconds
-    saveTimer.current = setTimeout(() => {
-      saveBusinessInfo();
-    }, 3000);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => saveBusinessInfo(), 3000);
   };
 
-  // Handle color change with real-time preview
   const handleColorChange = (key: 'accentColor' | 'backgroundColor', value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
-
-    // Apply theme in real-time for preview
-    if (key === 'accentColor') {
-      applyTheme(value);
-    }
-
-    // Check if theme has changed from original
+    if (key === 'accentColor') applyTheme(value);
     const newAccent = key === 'accentColor' ? value : formData.accentColor;
     const newBg = key === 'backgroundColor' ? value : formData.backgroundColor;
-    const hasChanged =
+    setThemeChanged(
       newAccent !== originalTheme.current.accentColor ||
-      newBg !== originalTheme.current.backgroundColor;
-    setThemeChanged(hasChanged);
+        newBg !== originalTheme.current.backgroundColor
+    );
   };
 
-  // Save theme to database
   const handleSaveTheme = async () => {
     if (!currentBusiness?.id) return;
-
     setSavingTheme(true);
     setError(null);
-
     try {
       await updateBusiness(currentBusiness.id, {
         settings: {
@@ -163,15 +115,8 @@ export default function SettingsPage() {
           backgroundColor: formData.backgroundColor,
         },
       });
-
-      // Update original values
-      originalTheme.current = {
-        accentColor: formData.accentColor,
-        backgroundColor: formData.backgroundColor,
-      };
+      originalTheme.current = { accentColor: formData.accentColor, backgroundColor: formData.backgroundColor };
       setThemeChanged(false);
-
-      // Refresh context
       await refetch();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.themeSaveFailed'));
@@ -180,33 +125,13 @@ export default function SettingsPage() {
     }
   };
 
-  // Handle logo upload (auto-saves)
-  const handleLogoUpload = async (file: File) => {
-    if (!currentBusiness?.id) return;
-    const result = await uploadBusinessLogo(currentBusiness.id, file);
-    setFormData((prev) => ({ ...prev, logo_url: result.url }));
-    await refetch();
-  };
-
-  // Handle logo delete (auto-saves)
-  const handleLogoDelete = async () => {
-    if (!currentBusiness?.id) return;
-    await deleteBusinessLogo(currentBusiness.id);
-    setFormData((prev) => ({ ...prev, logo_url: null }));
-    await refetch();
-  };
-
-  // Save card info
   const handleSaveCardInfo = async () => {
     if (!currentBusiness?.id) return;
     setSavingCardInfo(true);
     setError(null);
     try {
       await updateBusiness(currentBusiness.id, {
-        settings: {
-          ...currentBusiness.settings,
-          business_info: businessInfo,
-        },
+        settings: { ...currentBusiness.settings, business_info: businessInfo },
       });
       setCardInfoSaved(true);
       setTimeout(() => setCardInfoSaved(false), 2000);
@@ -218,12 +143,25 @@ export default function SettingsPage() {
     }
   };
 
-  // Cleanup timer on unmount
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentBusiness?.id) return;
+    const result = await uploadBusinessLogo(currentBusiness.id, file);
+    setFormData((prev) => ({ ...prev, logo_url: result.url }));
+    await refetch();
+    e.target.value = '';
+  };
+
+  const handleLogoDelete = async () => {
+    if (!currentBusiness?.id) return;
+    await deleteBusinessLogo(currentBusiness.id);
+    setFormData((prev) => ({ ...prev, logo_url: null }));
+    await refetch();
+  };
+
   useEffect(() => {
     return () => {
-      if (saveTimer.current) {
-        clearTimeout(saveTimer.current);
-      }
+      if (saveTimer.current) clearTimeout(saveTimer.current);
     };
   }, []);
 
@@ -236,78 +174,176 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex gap-6">
-      <SettingsSidebar activeSection={activeSection} />
+    <div
+      style={{
+        opacity: 1,
+        transition: 'opacity 0.4s ease, transform 0.4s ease',
+      }}
+    >
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
-      <div className="flex-1 space-y-6 pb-10 max-w-2xl">
-        {/* Business Information Section */}
-        <Card id="business-info" className="scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="text-lg">{t('businessInfo.title')}</CardTitle>
-            <CardDescription>
-              {t('businessInfo.description')}
-              {savingInfo && <span className="ml-2 text-[var(--accent)]">{tStatus('saving')}</span>}
-              {infoSaved && <span className="ml-2 text-green-600">{tStatus('saved')}</span>}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <FormField
-              label={t('businessInfo.businessName')}
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder={t('businessInfo.businessNamePlaceholder')}
-            />
+      {/* Page Header */}
+      <div className="mb-5">
+        <h1 className="text-2xl font-bold text-[#1A1A1A] tracking-tight">
+          {t('businessInfo.title').split(' ')[0] === 'Business' ? 'Settings' : t('businessInfo.title')}
+        </h1>
+        <p className="text-xs text-[#A0A0A0] mt-0.5">
+          Business details, card configuration, and branding
+        </p>
+      </div>
 
-            <div className="space-y-2">
-              <Label>{t('businessInfo.businessLogo')}</Label>
-              <ImageUploader
-                label=""
-                value={formData.logo_url || undefined}
-                onUpload={handleLogoUpload}
-                onClear={handleLogoDelete}
-                accept="image/png,image/jpeg"
-                hint={t('businessInfo.logoHint')}
-              />
+      <div className="flex gap-3.5 flex-col lg:flex-row items-start">
+        {/* Left column */}
+        <div className="flex-1 flex flex-col gap-3.5 min-w-0 w-full">
+
+          {/* ── Business Information ── */}
+          <div className="bg-white rounded-xl border border-[#EEEDEA] px-6 py-5">
+            <div className="text-base font-semibold text-[#1A1A1A] mb-1">
+              {t('businessInfo.title')}
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-xs text-[#A0A0A0] mb-5">
+              {t('businessInfo.description')}
+              {savingInfo && (
+                <span className="ml-2 text-[var(--accent)]">{tStatus('saving')}</span>
+              )}
+              {infoSaved && <span className="ml-2 text-green-600">{tStatus('saved')}</span>}
+            </div>
 
-        {/* Card Info Section */}
-        <Card id="card-info" className="scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="text-lg">{t('cardInfo.title')}</CardTitle>
-            <CardDescription>{t('cardInfo.description')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <BusinessInfoEditor
-              value={businessInfo}
-              onChange={setBusinessInfo}
-            />
-            <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
-              <p className="text-sm text-muted-foreground">
-                {cardInfoSaved && <span className="text-green-600">{t('cardInfo.saved')}</span>}
+            <div className="flex gap-5 items-start sm:items-center flex-col sm:flex-row">
+              {/* Logo */}
+              <div className="flex flex-col items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  className="relative w-20 h-20 rounded-2xl overflow-hidden cursor-pointer p-0 border-0"
+                  style={{ boxShadow: `0 4px 16px ${formData.accentColor}30` }}
+                  onMouseEnter={() => setLogoHover(true)}
+                  onMouseLeave={() => setLogoHover(false)}
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label="Change business logo"
+                >
+                  {formData.logo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={formData.logo_url}
+                      alt={formData.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full flex items-center justify-center text-white text-3xl font-bold"
+                      style={{
+                        background: `linear-gradient(135deg, ${formData.accentColor}, ${formData.accentColor}CC)`,
+                      }}
+                    >
+                      {formData.name.charAt(0).toUpperCase() || '?'}
+                    </div>
+                  )}
+                  {/* Hover overlay */}
+                  <div
+                    className="absolute inset-0 bg-black/45 flex flex-col items-center justify-center gap-1 transition-opacity duration-200"
+                    style={{ opacity: logoHover ? 1 : 0 }}
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      fill="none"
+                      stroke="#fff"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="10" cy="10" r="3.5" />
+                      <path d="M2 10a8 8 0 1016 0A8 8 0 002 10" />
+                      <path d="M10 6v1M10 13v1M6 10H5M15 10h-1" strokeWidth="1" />
+                    </svg>
+                    <span className="text-white text-[9px] font-semibold">
+                      {t('businessInfo.businessLogo')}
+                    </span>
+                  </div>
+                </button>
+                {formData.logo_url && (
+                  <button
+                    onClick={handleLogoDelete}
+                    className="text-[10px] text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+                {!formData.logo_url && (
+                  <span className="text-[10px] text-[#AAA]">Logo</span>
+                )}
+              </div>
+
+              {/* Business name */}
+              <div className="flex-1 w-full">
+                <label className="block text-xs font-semibold text-[#555] mb-1.5">
+                  {t('businessInfo.businessName')}
+                </label>
+                <input
+                  value={formData.name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder={t('businessInfo.businessNamePlaceholder')}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[#DEDBD5] bg-white text-sm text-[#1A1A1A] outline-none transition-colors focus:border-[var(--accent)]"
+                />
+                <div className="text-[11px] text-[#B0B0B0] mt-1">
+                  Displayed on all wallet cards and communications
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Card Back Fields ── */}
+          <div className="bg-white rounded-xl border border-[#EEEDEA] px-6 py-5">
+            <div className="text-base font-semibold text-[#1A1A1A] mb-1">
+              {t('cardInfo.title')}
+            </div>
+            <div className="text-xs text-[#A0A0A0] mb-4">
+              {t('cardInfo.description')}
+            </div>
+
+            <BusinessInfoEditor value={businessInfo} onChange={setBusinessInfo} />
+
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#F0EFEB]">
+              <p className="text-sm">
+                {cardInfoSaved && (
+                  <span className="text-green-600 text-xs">{t('cardInfo.saved')}</span>
+                )}
               </p>
               <Button
                 onClick={handleSaveCardInfo}
                 disabled={savingCardInfo}
-                variant="gradient"
+                style={{
+                  background: 'linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 80%, #000))',
+                  color: '#fff',
+                  border: 'none',
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium"
               >
                 {savingCardInfo ? t('cardInfo.saving') : t('cardInfo.save')}
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Language Section */}
-        <Card id="language" className="scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="text-lg">{t('language.title')}</CardTitle>
-            <CardDescription>{t('language.description')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>{t('language.passLocale')}</Label>
+          {/* ── Language ── */}
+          <div className="bg-white rounded-xl border border-[#EEEDEA] px-6 py-5">
+            <div className="text-base font-semibold text-[#1A1A1A] mb-1">
+              {t('language.title')}
+            </div>
+            <div className="text-xs text-[#A0A0A0] mb-4">
+              {t('language.description')}
+            </div>
+
+            <div className="max-w-xs">
+              <Label className="text-xs font-semibold text-[#555] mb-1.5 block">
+                {t('language.passLocale')}
+              </Label>
               <Select
                 value={currentBusiness.primary_locale || 'fr'}
                 onValueChange={async (value: string) => {
@@ -321,59 +357,118 @@ export default function SettingsPage() {
                   }
                 }}
               >
-                <SelectTrigger className="w-full max-w-xs">
+                <SelectTrigger className="w-full border-[#DEDBD5] rounded-lg h-10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fr">Français</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">{t('language.passLocaleHint')}</p>
+              <p className="text-[11px] text-[#B0B0B0] mt-1.5">{t('language.passLocaleHint')}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Theme Section */}
-        <Card id="theme" className="scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="text-lg">{t('theme.title')}</CardTitle>
-            <CardDescription>{t('theme.description')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <HexColorPicker
-              label={t('theme.accentColor')}
-              value={formData.accentColor}
-              onChange={(c) => handleColorChange('accentColor', c)}
-            />
-            <HexColorPicker
-              label={t('theme.backgroundColor')}
-              value={formData.backgroundColor}
-              onChange={(c) => handleColorChange('backgroundColor', c)}
-            />
+          {/* ── Branding ── */}
+          <div className="bg-white rounded-xl border border-[#EEEDEA] px-6 py-5">
+            <div className="text-base font-semibold text-[#1A1A1A] mb-1">
+              {t('theme.title')}
+            </div>
+            <div className="text-xs text-[#A0A0A0] mb-5">
+              {t('theme.description')}
+            </div>
 
-            {/* Save Theme Button */}
-            <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
-              <p className="text-sm text-[var(--muted-foreground)]">
+            <div className="flex gap-6 flex-col sm:flex-row">
+              <div className="flex-1">
+                <HexColorPicker
+                  label={t('theme.accentColor')}
+                  value={formData.accentColor}
+                  onChange={(c) => handleColorChange('accentColor', c)}
+                />
+                <div className="text-[11px] text-[#B0B0B0] mt-2">
+                  Used for card background, buttons, and highlights
+                </div>
+              </div>
+              <div className="flex-1">
+                <HexColorPicker
+                  label={t('theme.backgroundColor')}
+                  value={formData.backgroundColor}
+                  onChange={(c) => handleColorChange('backgroundColor', c)}
+                />
+                <div className="text-[11px] text-[#B0B0B0] mt-2">
+                  Used for card background and dark areas
+                </div>
+              </div>
+            </div>
+
+            {/* Gradient preview */}
+            <div className="mt-5 px-4 py-3 rounded-lg bg-[#FAFAF8] border border-[#F0EFEB] flex items-center gap-3">
+              <span className="text-[11px] text-[#AAA] shrink-0">Preview</span>
+              <div
+                className="flex-1 h-2 rounded-full transition-all duration-300"
+                style={{
+                  background: `linear-gradient(90deg, ${formData.accentColor}, ${formData.accentColor}80, ${formData.backgroundColor}80, ${formData.backgroundColor})`,
+                }}
+              />
+              <div className="flex gap-3">
+                {[
+                  { color: formData.accentColor, label: 'Accent' },
+                  { color: formData.backgroundColor, label: 'Background' },
+                ].map(({ color, label }) => (
+                  <div key={label} className="flex items-center gap-1">
+                    <div
+                      className="w-3 h-3 rounded"
+                      style={{ backgroundColor: color, border: '1px solid rgba(0,0,0,0.1)' }}
+                    />
+                    <span className="text-[10px] text-[#888] font-mono">{color}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#F0EFEB]">
+              <p className="text-xs text-[#A0A0A0]">
                 {themeChanged ? t('theme.unsavedChanges') : t('theme.upToDate')}
               </p>
               <Button
                 onClick={handleSaveTheme}
                 disabled={savingTheme || !themeChanged}
-                variant="gradient"
+                style={{
+                  background: themeChanged
+                    ? 'linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 80%, #000))'
+                    : undefined,
+                  color: themeChanged ? '#fff' : undefined,
+                  border: themeChanged ? 'none' : undefined,
+                }}
+                variant={themeChanged ? 'default' : 'outline'}
+                className="px-4 py-2 rounded-lg text-sm font-medium"
               >
                 {savingTheme ? tStatus('saving') : t('theme.saveTheme')}
               </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Error Message */}
-        {error && (
-          <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-            {error}
           </div>
-        )}
+
+          {/* Error */}
+          {error && (
+            <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+        </div>
+
+        {/* Right column — sticky preview */}
+        <div className="w-full lg:w-[290px] lg:shrink-0">
+          <div className="lg:sticky lg:top-6">
+            <CardBackPreview
+              businessName={formData.name}
+              logoUrl={formData.logo_url}
+              fields={businessInfo}
+              accentColor={formData.accentColor}
+              backgroundColor={formData.backgroundColor}
+              locale={currentBusiness.primary_locale || 'fr'}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
