@@ -14,7 +14,10 @@ import { useAuth } from '@/contexts/auth-provider';
 import { createClient } from '@/utils/supabase/client';
 import { cn } from '@/lib/utils';
 import type { User } from '@/types';
-import { Info } from 'lucide-react';
+import { Info } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/reusables/loading-spinner';
+import { InfoBox } from '@/components/reusables/info-box';
+import { PageHeader } from '@/components/redesign/page-header';
 
 export default function AccountPage() {
   const { user: authUser } = useAuth();
@@ -217,18 +220,20 @@ export default function AccountPage() {
   const tStatus = useTranslations('status');
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col gap-[14px] animate-slide-up">
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
+
+      {error && <InfoBox variant="error" message={error} />}
+      {success && <InfoBox variant="success" message={success} />}
+
+      <div className="flex gap-[14px]">
       {/* Sidebar - hidden on mobile */}
       <nav className="hidden md:block w-48 shrink-0">
-        <div className="sticky top-[92px] space-y-1 pr-4">
+        <div className="sticky top-6 space-y-1 pr-4">
           {sections.map((section) => (
             <button
               key={section.id}
@@ -247,19 +252,7 @@ export default function AccountPage() {
       </nav>
 
       {/* Main Content */}
-      <div className="flex-1 space-y-6 pb-10 max-w-2xl">
-        {error && (
-          <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
-            {success}
-          </div>
-        )}
-
+      <div className="flex-1 flex flex-col gap-[14px] pb-10 max-w-2xl">
         {/* Profile Picture Section */}
         <Card id="profile-picture" className="scroll-mt-24">
           <CardHeader>
@@ -288,12 +281,11 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
-              <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-blue-700">
-                {t('profilePicture.sharedInfo')}
-              </p>
-            </div>
+            <InfoBox
+              variant="info"
+              icon={<Info size={16} weight="fill" className="text-[var(--info)]" />}
+              message={t('profilePicture.sharedInfo')}
+            />
           </CardContent>
         </Card>
 
@@ -327,11 +319,11 @@ export default function AccountPage() {
               />
 
               {passwordError && (
-                <p className="text-sm text-red-600">{passwordError}</p>
+                <p className="text-sm text-[var(--error)]">{passwordError}</p>
               )}
 
               {passwordSuccess && (
-                <p className="text-sm text-green-600">{t('password.success')}</p>
+                <p className="text-sm text-[var(--success)]">{t('password.success')}</p>
               )}
 
               <Button
@@ -352,7 +344,7 @@ export default function AccountPage() {
             <CardDescription>
               {t('accountInfo.description')}
               {savingName && <span className="ml-2 text-[var(--accent)]">{tStatus('saving')}</span>}
-              {nameSaved && <span className="ml-2 text-green-600">{tStatus('saved')}</span>}
+              {nameSaved && <span className="ml-2 text-[var(--success)]">{tStatus('saved')}</span>}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -385,6 +377,7 @@ export default function AccountPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );

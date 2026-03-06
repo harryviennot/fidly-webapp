@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { UserPlusIcon, MagnifyingGlassIcon, TrashIcon } from "@phosphor-icons/react";
+import { UserPlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { SearchInput } from "@/components/reusables/search-input";
+import { FilterPill } from "@/components/reusables/filter-pill";
 import { Button } from "@/components/ui/button";
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
@@ -292,45 +294,23 @@ export default function TeamPage() {
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5">
         <div className="flex gap-2.5 items-center flex-wrap">
           {/* Search input */}
-          <div className="flex-1 min-w-[180px] flex items-center gap-2 px-3 py-2 rounded-lg border border-[#DEDBD5] bg-[#FAFAF8]">
-            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-[#B0B0B0] shrink-0" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('searchPlaceholder')}
-              className="border-none bg-transparent outline-none text-[12.5px] text-[#333] w-full font-[inherit] placeholder:text-[#B0B0B0]"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="text-[#BBB] hover:text-[#666] transition-colors text-sm"
-              >
-                ×
-              </button>
-            )}
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder={t('searchPlaceholder')}
+          />
 
           {/* Filter pills */}
           <div className="flex flex-wrap gap-1.5">
-            {filterButtons.map((f) => {
-              const isActive = roleFilter === f.key;
-              return (
-                <button
-                  key={f.key}
-                  onClick={() => setRoleFilter(f.key)}
-                  className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-150 whitespace-nowrap"
-                  style={isActive
-                    ? { border: "1.5px solid #4A7C59", background: "#E8F5E4", color: "#3D6B3D", fontWeight: 600 }
-                    : { border: "1px solid #DEDBD5", background: "#fff", color: "#777" }
-                  }
-                >
-                  {f.label}
-                  <span style={{ color: isActive ? "#4A7C59" : "#BBB", fontSize: 10 }}>
-                    ({roleCounts[f.key] || 0})
-                  </span>
-                </button>
-              );
-            })}
+            {filterButtons.map((f) => (
+              <FilterPill
+                key={f.key}
+                label={f.label}
+                count={roleCounts[f.key] || 0}
+                isActive={roleFilter === f.key}
+                onClick={() => setRoleFilter(f.key)}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -394,7 +374,7 @@ export default function TeamPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex gap-2.5 sm:flex-row">
-            <AlertDialogCancel className="flex-1">
+            <AlertDialogCancel className="flex-1 rounded-full">
               {mobileRemoveRow?.type === "invitation" ? t('cancelInviteDialog.keep') : t('removeDialog.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction

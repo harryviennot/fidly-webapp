@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { FilterPill } from "@/components/reusables/filter-pill";
 import type { TransactionType } from "@/types";
 
 const FILTER_OPTIONS: (TransactionType | "all")[] = [
@@ -44,33 +45,16 @@ export function ActivityFilters({ selected, onSelect }: ActivityFiltersProps) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {FILTER_OPTIONS.map((filter) => {
-        const isActive = selected === filter;
         const colors = FILTER_COLORS[filter];
         return (
-          <button
+          <FilterPill
             key={filter}
+            label={t(FILTER_LABEL_KEYS[filter])}
+            isActive={selected === filter}
             onClick={() => onSelect(filter)}
-            className="rounded-full text-[11px] cursor-pointer font-[inherit] whitespace-nowrap transition-colors"
-            style={
-              isActive
-                ? {
-                    border: `1.5px solid ${colors.color}`,
-                    background: colors.bg,
-                    color: colors.color,
-                    fontWeight: 600,
-                    padding: "5px 12px",
-                  }
-                : {
-                    border: "1px solid #DEDBD5",
-                    background: "#fff",
-                    color: "#777",
-                    fontWeight: 400,
-                    padding: "5px 12px",
-                  }
-            }
-          >
-            {t(FILTER_LABEL_KEYS[filter])}
-          </button>
+            activeColor={colors.color}
+            activeBg={colors.bg}
+          />
         );
       })}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { FilterPill } from "@/components/reusables/filter-pill";
 import type { CustomerSegment } from "@/lib/customer-segments";
 
 const SEGMENTS: (CustomerSegment | "all")[] = [
@@ -40,41 +41,18 @@ export function CustomerSegmentFilters({
     <div className="flex flex-wrap gap-1.5">
       {SEGMENTS.map((segment) => {
         const count = segment === "all" ? totalCount : segments[segment];
-        const isActive = selected === segment;
 
         // Don't show segment if count is 0 (except "all")
         if (segment !== "all" && count === 0) return null;
 
         return (
-          <button
+          <FilterPill
             key={segment}
+            label={t(SEGMENT_LABEL_KEYS[segment])}
+            count={count}
+            isActive={selected === segment}
             onClick={() => onSelect(segment)}
-            className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-150 whitespace-nowrap"
-            style={
-              isActive
-                ? {
-                    border: "1.5px solid #4A7C59",
-                    background: "#E8F5E4",
-                    color: "#3D6B3D",
-                    fontWeight: 600,
-                  }
-                : {
-                    border: "1px solid #DEDBD5",
-                    background: "#fff",
-                    color: "#777",
-                  }
-            }
-          >
-            {t(SEGMENT_LABEL_KEYS[segment])}
-            <span
-              style={{
-                color: isActive ? "#4A7C59" : "#BBB",
-                fontSize: 10,
-              }}
-            >
-              ({count})
-            </span>
-          </button>
+          />
         );
       })}
     </div>

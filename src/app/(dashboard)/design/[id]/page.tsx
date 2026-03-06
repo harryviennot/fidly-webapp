@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { PencilSimple, FloppyDisk, ArrowsClockwise, Translate } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/reusables/loading-spinner';
 import { CardDesign, CardDesignUpdate, LoyaltyProgram } from '@/types';
 import { getDesign, updateDesign, getPrograms } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
@@ -104,11 +105,7 @@ export default function EditDesignPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !design) {

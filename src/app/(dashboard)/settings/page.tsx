@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { updateBusiness, uploadBusinessLogo, deleteBusinessLogo } from '@/api';
 import { DEFAULT_ACCENT, applyTheme } from '@/utils/theme';
 import type { BusinessInfoEntry } from '@/types/business';
+import { PageHeader } from '@/components/redesign';
 
 interface FormData {
   name: string;
@@ -203,22 +204,18 @@ export default function SettingsPage() {
         onChange={handleFileChange}
       />
 
-      {/* Page Header */}
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold text-[#1A1A1A] tracking-tight">
-          {t('businessInfo.title').split(' ')[0] === 'Business' ? 'Settings' : t('businessInfo.title')}
-        </h1>
-        <p className="text-xs text-[#A0A0A0] mt-0.5">
-          Business details, card configuration, and branding
-        </p>
-      </div>
+      <PageHeader
+        title={t('businessInfo.title').split(' ')[0] === 'Business' ? 'Settings' : t('businessInfo.title')}
+        subtitle="Business details, card configuration, and branding"
+        className="mb-5"
+      />
 
       <div className="flex gap-3.5 flex-col lg:flex-row items-start">
         {/* Left column */}
         <div className="flex-1 flex flex-col gap-3.5 min-w-0 w-full">
 
           {/* ── Business Information ── */}
-          <div className="bg-white rounded-xl border border-[#EEEDEA] px-6 py-5">
+          <div className="bg-[var(--card)] rounded-xl border border-[var(--card-border)] px-6 py-5">
             <div className="text-base font-semibold text-[#1A1A1A] mb-1">
               {t('businessInfo.title')}
             </div>
@@ -313,7 +310,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Card Back Fields ── */}
-          <div className={`bg-white rounded-xl border border-[#EEEDEA] px-6 py-5 transition-shadow${pulsing === 'cardInfo' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
+          <div className={`bg-[var(--card)] rounded-xl border border-[var(--card-border)] px-6 py-5 transition-shadow${pulsing === 'cardInfo' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
             <div className="text-base font-semibold text-[#1A1A1A] mb-1">
               {t('cardInfo.title')}
             </div>
@@ -326,7 +323,7 @@ export default function SettingsPage() {
               onChange={(v) => { setBusinessInfo(v); setBusinessInfoDirty(true); }}
             />
 
-            <div className="flex items-center justify-end pt-4 mt-4 border-t border-[#F0EFEB]">
+            <div className="flex items-center justify-end pt-4 mt-4 border-t border-[var(--border)]">
               <Button
                 onClick={handleSaveCardInfo}
                 disabled={savingCardInfo || !businessInfoDirty}
@@ -340,7 +337,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Language ── */}
-          <div className={`bg-white rounded-xl border border-[#EEEDEA] px-6 py-5 transition-shadow${pulsing === 'language' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
+          <div className={`bg-[var(--card)] rounded-xl border border-[var(--card-border)] px-6 py-5 transition-shadow${pulsing === 'language' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
             <div className="text-base font-semibold text-[#1A1A1A] mb-1">
               {t('language.title')}
             </div>
@@ -369,7 +366,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Branding ── */}
-          <div className={`bg-white rounded-xl border border-[#EEEDEA] px-6 py-5 transition-shadow${pulsing === 'theme' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
+          <div className={`bg-[var(--card)] rounded-xl border border-[var(--card-border)] px-6 py-5 transition-shadow${pulsing === 'theme' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
             <div className="text-base font-semibold text-[#1A1A1A] mb-1">
               {t('theme.title')}
             </div>
@@ -400,7 +397,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#F0EFEB]">
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-[var(--border)]">
               <p className="text-xs text-[#A0A0A0]">
                 {themeChanged ? t('theme.unsavedChanges') : t('theme.upToDate')}
               </p>

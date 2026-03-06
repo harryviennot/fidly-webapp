@@ -3,7 +3,6 @@ export { ProFeatureGate, ProBadge } from './ProFeatureGate';
 
 // Overview components
 export { ActiveCardWidget } from './overview/ActiveCardWidget';
-export { QuickStatsGrid } from './overview/QuickStatsGrid';
 export { StatusIndicators } from './overview/StatusIndicators';
 
 // Templates components

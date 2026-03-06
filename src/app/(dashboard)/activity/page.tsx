@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
-import { MagnifyingGlass } from "@phosphor-icons/react";
+import { SearchInput } from "@/components/reusables/search-input";
 import { useBusiness } from "@/contexts/business-context";
 import { useActiveDesign } from "@/hooks/use-designs";
 import { useActivityStats, activityKeys } from "@/hooks/use-activity-stats";
@@ -110,23 +110,11 @@ export default function ActivityPage() {
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5 shrink-0">
         <div className="flex gap-2.5 items-center flex-wrap">
           {/* Search input */}
-          <div className="flex-1 min-w-[180px] flex items-center gap-2 px-3 py-2 rounded-lg border border-[#DEDBD5] bg-[#FAFAF8]">
-            <MagnifyingGlass className="w-3.5 h-3.5 text-[#B0B0B0] shrink-0" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("searchPlaceholder")}
-              className="border-none bg-transparent outline-none text-[12.5px] text-[#333] w-full font-[inherit] placeholder:text-[#B0B0B0]"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="text-[#BBB] text-sm hover:text-[#888] p-0 bg-transparent border-none cursor-pointer"
-              >
-                ×
-              </button>
-            )}
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder={t("searchPlaceholder")}
+          />
 
           {/* Type filters */}
           {feed.isLoading ? (

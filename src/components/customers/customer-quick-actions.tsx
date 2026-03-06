@@ -150,7 +150,7 @@ export function CustomerQuickActions({
           <DialogFooter>
             <Button
               variant="outline"
-              className="rounded-lg"
+              className="rounded-full"
               onClick={() => {
                 setVoidDialogOpen(false);
                 setVoidReason("");

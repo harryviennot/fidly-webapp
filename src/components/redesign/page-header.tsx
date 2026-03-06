@@ -13,11 +13,11 @@ export function PageHeader({ title, subtitle, action, className }: PageHeaderPro
   return (
     <div className={cn("flex items-start justify-between gap-4", className)}>
       <div>
-        <h1 className="text-[22px] md:text-[26px] font-bold text-[#1A1A1A] tracking-tight leading-tight" style={{ letterSpacing: -0.5 }}>
+        <h1 className="text-[24px] md:text-[28px] font-bold text-[#1A1A1A] tracking-tight leading-tight" style={{ letterSpacing: -0.5 }}>
           {title}
         </h1>
         {subtitle && (
-          <p className="text-xs text-[#A0A0A0] mt-0.5">{subtitle}</p>
+          <p className="text-md text-[#A0A0A0] mt-0.5">{subtitle}</p>
         )}
       </div>
       {action && <div className="shrink-0">{action}</div>}

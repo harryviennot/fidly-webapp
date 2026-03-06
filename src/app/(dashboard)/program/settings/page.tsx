@@ -18,6 +18,8 @@ import { ScaledCardWrapper } from '@/components/design/ScaledCardWrapper';
 import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
 import { computeCardColors } from '@/lib/card-utils';
 import { PageHeader } from '@/components/redesign';
+import { LoadingSpinner } from '@/components/reusables/loading-spinner';
+import { InfoBox } from '@/components/reusables/info-box';
 import { useBusiness } from '@/contexts/business-context';
 import { updateBusiness } from '@/api';
 import { useProgram } from '../layout';
@@ -153,11 +155,7 @@ export default function ProgramSettingsPage() {
   ];
 
   if (loading && !program) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
@@ -412,17 +410,19 @@ export default function ProgramSettingsPage() {
 
             {/* Anonymous mode warning */}
             {isAnonymousMode ? (
-              <div className="flex items-start gap-2.5 mt-3 p-3.5 rounded-lg bg-[#FFF8F0] border border-[#F0DFC0]">
-                <WarningIcon className="w-4 h-4 text-[var(--warning)] flex-shrink-0 mt-0.5" weight="fill" />
-                <div>
-                  <div className="text-[13px] font-semibold text-[var(--warning)] mb-0.5">Anonymous Mode Active</div>
-                  <div className="text-[12px] text-[#A08060] leading-[1.4]">{t('anonymousModeWarning')}</div>
-                </div>
-              </div>
+              <InfoBox
+                variant="warning"
+                icon={<WarningIcon className="w-4 h-4 text-[var(--warning)]" weight="fill" />}
+                title="Anonymous Mode Active"
+                message={t('anonymousModeWarning')}
+                className="mt-3"
+              />
             ) : (
-              <div className="mt-3 px-3.5 py-2.5 rounded-lg bg-[var(--paper)] border border-[var(--border-light)] text-[12px] text-[#8A8A8A] leading-[1.5]">
-                {t('anonymousModeNote')}
-              </div>
+              <InfoBox
+                variant="note"
+                message={t('anonymousModeNote')}
+                className="mt-3 px-3.5 py-2.5 text-[12px] leading-[1.5]"
+              />
             )}
           </div>
         </div>
