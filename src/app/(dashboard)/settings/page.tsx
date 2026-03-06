@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -20,19 +21,19 @@ interface FormData {
 }
 
 export default function SettingsPage() {
-  const { currentBusiness, refetch } = useBusiness();
+  const { currentBusiness } = useBusiness();
   const t = useTranslations('settings');
   const tStatus = useTranslations('status');
 
   const [savingTheme, setSavingTheme] = useState(false);
   const [savingInfo, setSavingInfo] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [themeChanged, setThemeChanged] = useState(false);
-  const [infoSaved, setInfoSaved] = useState(false);
   const [savingCardInfo, setSavingCardInfo] = useState(false);
-  const [cardInfoSaved, setCardInfoSaved] = useState(false);
   const [businessInfo, setBusinessInfo] = useState<BusinessInfoEntry[]>([]);
+  const [businessInfoDirty, setBusinessInfoDirty] = useState(false);
   const [logoHover, setLogoHover] = useState(false);
+  const [pulsing, setPulsing] = useState<'cardInfo' | 'theme' | 'language' | null>(null);
+  const [localLocale, setLocalLocale] = useState<string>('fr');
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -60,13 +61,14 @@ export default function SettingsPage() {
 
       originalTheme.current = { accentColor, backgroundColor };
       setBusinessInfo((settings.business_info as BusinessInfoEntry[]) || []);
+      setLocalLocale(currentBusiness.primary_locale || 'fr');
+      setBusinessInfoDirty(false);
     }
   }, [currentBusiness]);
 
   const saveBusinessInfo = useCallback(async () => {
     if (!currentBusiness?.id) return;
     setSavingInfo(true);
-    setError(null);
     try {
       await updateBusiness(currentBusiness.id, {
         name: formData.name,
@@ -76,10 +78,8 @@ export default function SettingsPage() {
           backgroundColor: formData.backgroundColor,
         },
       });
-      setInfoSaved(true);
-      setTimeout(() => setInfoSaved(false), 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.saveFailed'));
+      toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
     } finally {
       setSavingInfo(false);
     }
@@ -87,7 +87,6 @@ export default function SettingsPage() {
 
   const handleNameChange = (value: string) => {
     setFormData((prev) => ({ ...prev, name: value }));
-    setInfoSaved(false);
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => saveBusinessInfo(), 3000);
   };
@@ -106,7 +105,7 @@ export default function SettingsPage() {
   const handleSaveTheme = async () => {
     if (!currentBusiness?.id) return;
     setSavingTheme(true);
-    setError(null);
+    setPulsing('theme');
     try {
       await updateBusiness(currentBusiness.id, {
         settings: {
@@ -117,29 +116,46 @@ export default function SettingsPage() {
       });
       originalTheme.current = { accentColor: formData.accentColor, backgroundColor: formData.backgroundColor };
       setThemeChanged(false);
-      await refetch();
+      toast.success('Branding settings saved.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.themeSaveFailed'));
+      toast.error(err instanceof Error ? err.message : t('errors.themeSaveFailed'));
     } finally {
       setSavingTheme(false);
+      setPulsing(null);
     }
   };
 
   const handleSaveCardInfo = async () => {
     if (!currentBusiness?.id) return;
     setSavingCardInfo(true);
-    setError(null);
+    setPulsing('cardInfo');
     try {
       await updateBusiness(currentBusiness.id, {
         settings: { ...currentBusiness.settings, business_info: businessInfo },
       });
-      setCardInfoSaved(true);
-      setTimeout(() => setCardInfoSaved(false), 2000);
-      await refetch();
+      setBusinessInfoDirty(false);
+      toast.success("Back fields successfully updated. Your customers' cards will update shortly.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('cardInfo.saveFailed'));
+      toast.error(err instanceof Error ? err.message : t('cardInfo.saveFailed'));
     } finally {
       setSavingCardInfo(false);
+      setPulsing(null);
+    }
+  };
+
+  const handleSaveLanguage = async (value: string) => {
+    if (!currentBusiness?.id) return;
+    setLocalLocale(value);
+    setPulsing('language');
+    try {
+      await updateBusiness(currentBusiness.id, {
+        primary_locale: value as 'fr' | 'en',
+      });
+      toast.success('Your business language has been successfully updated.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
+    } finally {
+      setPulsing(null);
     }
   };
 
@@ -148,7 +164,6 @@ export default function SettingsPage() {
     if (!file || !currentBusiness?.id) return;
     const result = await uploadBusinessLogo(currentBusiness.id, file);
     setFormData((prev) => ({ ...prev, logo_url: result.url }));
-    await refetch();
     e.target.value = '';
   };
 
@@ -156,7 +171,6 @@ export default function SettingsPage() {
     if (!currentBusiness?.id) return;
     await deleteBusinessLogo(currentBusiness.id);
     setFormData((prev) => ({ ...prev, logo_url: null }));
-    await refetch();
   };
 
   useEffect(() => {
@@ -213,7 +227,6 @@ export default function SettingsPage() {
               {savingInfo && (
                 <span className="ml-2 text-[var(--accent)]">{tStatus('saving')}</span>
               )}
-              {infoSaved && <span className="ml-2 text-green-600">{tStatus('saved')}</span>}
             </div>
 
             <div className="flex gap-5 items-start sm:items-center flex-col sm:flex-row">
@@ -300,7 +313,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Card Back Fields ── */}
-          <div className="bg-white rounded-xl border border-[#EEEDEA] px-6 py-5">
+          <div className={`bg-white rounded-xl border border-[#EEEDEA] px-6 py-5 transition-shadow${pulsing === 'cardInfo' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
             <div className="text-base font-semibold text-[#1A1A1A] mb-1">
               {t('cardInfo.title')}
             </div>
@@ -308,22 +321,17 @@ export default function SettingsPage() {
               {t('cardInfo.description')}
             </div>
 
-            <BusinessInfoEditor value={businessInfo} onChange={setBusinessInfo} />
+            <BusinessInfoEditor
+              value={businessInfo}
+              onChange={(v) => { setBusinessInfo(v); setBusinessInfoDirty(true); }}
+            />
 
-            <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#F0EFEB]">
-              <p className="text-sm">
-                {cardInfoSaved && (
-                  <span className="text-green-600 text-xs">{t('cardInfo.saved')}</span>
-                )}
-              </p>
+            <div className="flex items-center justify-end pt-4 mt-4 border-t border-[#F0EFEB]">
               <Button
                 onClick={handleSaveCardInfo}
-                disabled={savingCardInfo}
-                style={{
-                  background: 'linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 80%, #000))',
-                  color: '#fff',
-                  border: 'none',
-                }}
+                disabled={savingCardInfo || !businessInfoDirty}
+                style={businessInfoDirty ? { background: 'var(--accent)', color: '#fff', border: 'none' } : undefined}
+                variant={businessInfoDirty ? 'default' : 'outline'}
                 className="px-4 py-2 rounded-lg text-sm font-medium"
               >
                 {savingCardInfo ? t('cardInfo.saving') : t('cardInfo.save')}
@@ -332,7 +340,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Language ── */}
-          <div className="bg-white rounded-xl border border-[#EEEDEA] px-6 py-5">
+          <div className={`bg-white rounded-xl border border-[#EEEDEA] px-6 py-5 transition-shadow${pulsing === 'language' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
             <div className="text-base font-semibold text-[#1A1A1A] mb-1">
               {t('language.title')}
             </div>
@@ -345,17 +353,8 @@ export default function SettingsPage() {
                 {t('language.passLocale')}
               </Label>
               <Select
-                value={currentBusiness.primary_locale || 'fr'}
-                onValueChange={async (value: string) => {
-                  try {
-                    await updateBusiness(currentBusiness.id, {
-                      primary_locale: value as 'fr' | 'en',
-                    });
-                    await refetch();
-                  } catch (err) {
-                    setError(err instanceof Error ? err.message : t('errors.saveFailed'));
-                  }
-                }}
+                value={localLocale}
+                onValueChange={handleSaveLanguage}
               >
                 <SelectTrigger className="w-full border-[#DEDBD5] rounded-lg h-10">
                   <SelectValue />
@@ -370,7 +369,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Branding ── */}
-          <div className="bg-white rounded-xl border border-[#EEEDEA] px-6 py-5">
+          <div className={`bg-white rounded-xl border border-[#EEEDEA] px-6 py-5 transition-shadow${pulsing === 'theme' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>
             <div className="text-base font-semibold text-[#1A1A1A] mb-1">
               {t('theme.title')}
             </div>
@@ -401,31 +400,6 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Gradient preview */}
-            <div className="mt-5 px-4 py-3 rounded-lg bg-[#FAFAF8] border border-[#F0EFEB] flex items-center gap-3">
-              <span className="text-[11px] text-[#AAA] shrink-0">Preview</span>
-              <div
-                className="flex-1 h-2 rounded-full transition-all duration-300"
-                style={{
-                  background: `linear-gradient(90deg, ${formData.accentColor}, ${formData.accentColor}80, ${formData.backgroundColor}80, ${formData.backgroundColor})`,
-                }}
-              />
-              <div className="flex gap-3">
-                {[
-                  { color: formData.accentColor, label: 'Accent' },
-                  { color: formData.backgroundColor, label: 'Background' },
-                ].map(({ color, label }) => (
-                  <div key={label} className="flex items-center gap-1">
-                    <div
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: color, border: '1px solid rgba(0,0,0,0.1)' }}
-                    />
-                    <span className="text-[10px] text-[#888] font-mono">{color}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#F0EFEB]">
               <p className="text-xs text-[#A0A0A0]">
                 {themeChanged ? t('theme.unsavedChanges') : t('theme.upToDate')}
@@ -433,13 +407,7 @@ export default function SettingsPage() {
               <Button
                 onClick={handleSaveTheme}
                 disabled={savingTheme || !themeChanged}
-                style={{
-                  background: themeChanged
-                    ? 'linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 80%, #000))'
-                    : undefined,
-                  color: themeChanged ? '#fff' : undefined,
-                  border: themeChanged ? 'none' : undefined,
-                }}
+                style={themeChanged ? { background: 'var(--accent)', color: '#fff', border: 'none' } : undefined}
                 variant={themeChanged ? 'default' : 'outline'}
                 className="px-4 py-2 rounded-lg text-sm font-medium"
               >
@@ -448,12 +416,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Error */}
-          {error && (
-            <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-              {error}
-            </div>
-          )}
         </div>
 
         {/* Right column — sticky preview */}

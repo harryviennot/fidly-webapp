@@ -77,7 +77,7 @@
       "title": "Theme Customization",
       "description": "Customize the colors of your dashboard",
       "accentColor": "Accent Color",
-      "backgroundColor": "Background Color",
+      "backgroundColor": "Secondary Color",
       "unsavedChanges": "You have unsaved changes",
       "upToDate": "Theme is up to date",
       "saveTheme": "Save Theme"
