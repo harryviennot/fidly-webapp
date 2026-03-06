@@ -369,12 +369,7 @@ export default function ProgramSettingsPage() {
               {dataFields.map((field) => (
                 <div
                   key={field.key}
-                  className={cn(
-                    'flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] transition-all duration-200',
-                    settings[field.key]
-                      ? 'bg-[var(--accent-light)] border-[1.5px] border-[var(--accent-200)]'
-                      : 'bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]'
-                  )}
+                  className="flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
                 >
                   <span className="text-[22px] flex-shrink-0">{field.icon}</span>
                   <div className="flex-1 min-w-0">
@@ -386,7 +381,7 @@ export default function ProgramSettingsPage() {
                         {field.label}
                       </Label>
                       {field.recommended && (
-                        <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--success-light)] text-[var(--accent)]">
+                        <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
                           {t('recommended').toUpperCase()}
                         </span>
                       )}

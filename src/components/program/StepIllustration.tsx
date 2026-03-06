@@ -11,9 +11,16 @@ interface StepIllustrationProps {
 }
 
 export function StepIllustration({ step, done, active, className }: StepIllustrationProps) {
-    const base = done ? "#4A7C59" : active ? "#C4883D" : "#CCCCCC";
-    const bg = done ? "#E8F5E4" : active ? "#FFF8F0" : "#F5F5F5";
-    const accent = done ? "#6BAF6B" : active ? "#FDCB6E" : "#DDD";
+    const cssStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
+    const base = done
+        ? (cssStyle?.getPropertyValue("--accent").trim() || "#f97316")
+        : active ? "#C4883D" : "#CCCCCC";
+    const bg = done
+        ? (cssStyle?.getPropertyValue("--accent-light").trim() || "#ffedd5")
+        : active ? "#FFF8F0" : "#F5F5F5";
+    const accent = done
+        ? (cssStyle?.getPropertyValue("--accent-400").trim() || "#fb923c")
+        : active ? "#FDCB6E" : "#DDD";
 
     if (step === 1) return (
         <svg width="100%" height="100%" viewBox="0 0 80 80" fill="none" className={cn("overflow-visible", className)}>

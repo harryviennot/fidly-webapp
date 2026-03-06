@@ -79,6 +79,7 @@ export default function DashboardPage() {
   const cssStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
   const accentColor = cssStyle?.getPropertyValue("--accent").trim() || "#f97316";
   const accent300 = cssStyle?.getPropertyValue("--accent-300").trim() || "#fdba74";
+  const secondaryColor = cssStyle?.getPropertyValue("--business-secondary").trim() || "#C4A67D";
 
   return (
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
@@ -148,7 +149,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <LegendItem color={accent300} label={t("dashboard.scans")} />
                 <LegendItem color={accentColor} label={t("dashboard.stamps")} />
-                <LegendItem color="#C4A67D" label={t("dashboard.redemptions")} />
+                <LegendItem color={secondaryColor} label={t("dashboard.redemptions")} />
               </div>
             }
           >
@@ -190,7 +191,7 @@ export default function DashboardPage() {
                 />
                 <Bar
                   dataKey="redemptions"
-                  fill="#C4A67D"
+                  fill={secondaryColor}
                   radius={[3, 3, 0, 0]}
                   animationDuration={800}
                   animationBegin={300}

@@ -127,7 +127,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
             <span className="text-[15px] min-[1080px]:text-[17px] font-bold text-[#1A1A1A]">
               {t('getStarted')}
             </span>
-            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[var(--success-light)] text-[var(--accent)]">
+            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
               {completedCount}/{steps.length}
             </span>
           </div>
@@ -173,7 +173,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
                 {/* Status badge */}
                 <div className="mb-1">
                   {step.done ? (
-                    <span className="text-[10px] font-bold px-[7px] py-px rounded-lg bg-[var(--success-light)] text-[var(--accent)]">
+                    <span className="text-[10px] font-bold px-[7px] py-px rounded-lg bg-[var(--accent-light)] text-[var(--accent)]">
                       ✓ Done
                     </span>
                   ) : isCurrent ? (
@@ -292,7 +292,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
                     {step.title}
                   </span>
                   {step.done && (
-                    <span className="text-[9px] font-bold px-1.5 py-px rounded-lg bg-[var(--success-light)] text-[var(--accent)]">✓</span>
+                    <span className="text-[9px] font-bold px-1.5 py-px rounded-lg bg-[var(--accent-light)] text-[var(--accent)]">✓</span>
                   )}
                   {isCurrent && !step.done && (
                     <span className="text-[9px] font-bold px-1.5 py-px rounded-lg bg-[var(--warning-light)] text-[var(--warning)]">Next</span>
