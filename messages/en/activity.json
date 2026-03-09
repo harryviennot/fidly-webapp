@@ -1,6 +1,9 @@
 {
   "activity": {
     "title": "Activity",
+    "subtitle": "Real-time transaction history across your loyalty program",
+    "export": "Export",
+    "searchPlaceholder": "Search customer name...",
     "loadFailed": "Failed to load activity feed.",
     "empty": "No activity yet. Stamps and rewards will appear here.",
     "loadMore": "Load More",

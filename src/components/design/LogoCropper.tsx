@@ -11,6 +11,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 interface LogoCropperProps {
   open: boolean;
@@ -19,13 +20,16 @@ interface LogoCropperProps {
   onCropComplete: (croppedFile: File) => void;
 }
 
-// Apple Wallet logo: max 160x50pt @3x = 480x150px
-const OUTPUT_HEIGHT = 150;
-const MAX_OUTPUT_WIDTH = 480;
+// Apple Wallet logo constraints — easy to update
+const LOGO_MIN_ASPECT = 1;       // minimum width:height ratio (square)
+const LOGO_MAX_ASPECT = 3.2;     // maximum width:height ratio (~480/150)
+const LOGO_DEFAULT_ASPECT = 2;   // default crop aspect ratio
+const OUTPUT_HEIGHT = 150;       // output height in px (Apple Wallet @3x)
 
 function getCroppedCanvas(
   image: HTMLImageElement,
-  crop: PixelCrop
+  crop: PixelCrop,
+  targetAspect: number
 ): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -34,18 +38,11 @@ function getCroppedCanvas(
   const scaleX = image.naturalWidth / image.width;
   const scaleY = image.naturalHeight / image.height;
 
-  // Source dimensions in natural pixels
   const srcW = crop.width * scaleX;
   const srcH = crop.height * scaleY;
 
-  // Scale to fixed OUTPUT_HEIGHT, maintaining aspect ratio
   const outH = OUTPUT_HEIGHT;
-  let outW = Math.round((srcW / srcH) * outH);
-
-  // Cap width at MAX_OUTPUT_WIDTH
-  if (outW > MAX_OUTPUT_WIDTH) {
-    outW = MAX_OUTPUT_WIDTH;
-  }
+  const outW = Math.round(outH * targetAspect);
 
   canvas.width = outW;
   canvas.height = outH;
@@ -74,55 +71,53 @@ export function LogoCropper({
   const imgRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
-  // Store the locked crop height in display pixels
-  const lockedHeightRef = useRef<number>(0);
+  const [aspect, setAspect] = useState(LOGO_DEFAULT_ASPECT);
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height, naturalWidth, naturalHeight } = e.currentTarget;
+    const { width, height } = e.currentTarget;
 
-    // Locked height: OUTPUT_HEIGHT in natural px, converted to display px
-    const lockedDisplayHeight = Math.min((OUTPUT_HEIGHT / naturalHeight) * height, height);
-    lockedHeightRef.current = lockedDisplayHeight;
-
-    // Default crop: full width (up to MAX_OUTPUT_WIDTH equivalent), locked height, centered
-    const maxDisplayWidth = Math.min((MAX_OUTPUT_WIDTH / naturalWidth) * width, width);
-    const cropWidth = maxDisplayWidth;
+    // Default crop: centered, respecting current aspect ratio
+    const cropHeight = Math.min(height * 0.8, (width * 0.8) / aspect);
+    const cropWidth = cropHeight * aspect;
 
     setCrop({
       unit: 'px',
       x: (width - cropWidth) / 2,
-      y: (height - lockedDisplayHeight) / 2,
+      y: (height - cropHeight) / 2,
       width: cropWidth,
-      height: lockedDisplayHeight,
+      height: cropHeight,
     });
-  }, []);
+  }, [aspect]);
 
-  const handleCropChange = useCallback((c: Crop) => {
-    if (lockedHeightRef.current > 0) {
-      // Lock height — user can only adjust width and position
-      c.height = lockedHeightRef.current;
+  const handleAspectChange = useCallback((newAspect: number) => {
+    setAspect(newAspect);
+    // Re-center crop with new aspect ratio
+    if (imgRef.current) {
+      const { width, height } = imgRef.current;
+      const cropHeight = Math.min(height * 0.8, (width * 0.8) / newAspect);
+      const cropWidth = cropHeight * newAspect;
+      const newCrop: Crop = {
+        unit: 'px',
+        x: (width - cropWidth) / 2,
+        y: (height - cropHeight) / 2,
+        width: cropWidth,
+        height: cropHeight,
+      };
+      setCrop(newCrop);
     }
-    setCrop(c);
-  }, []);
-
-  const handleCropComplete = useCallback((c: PixelCrop) => {
-    if (lockedHeightRef.current > 0) {
-      c.height = lockedHeightRef.current;
-    }
-    setCompletedCrop(c);
   }, []);
 
   const handleConfirm = useCallback(() => {
     if (!imgRef.current || !completedCrop) return;
 
-    const canvas = getCroppedCanvas(imgRef.current, completedCrop);
+    const canvas = getCroppedCanvas(imgRef.current, completedCrop, aspect);
     canvas.toBlob((blob) => {
       if (!blob) return;
       const file = new File([blob], 'logo-cropped.png', { type: 'image/png' });
       onCropComplete(file);
       onOpenChange(false);
     }, 'image/png');
-  }, [completedCrop, onCropComplete, onOpenChange]);
+  }, [completedCrop, aspect, onCropComplete, onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,14 +126,16 @@ export function LogoCropper({
           <DialogTitle>Crop Logo</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Adjust the width and position. Height is fixed to match Apple Wallet dimensions.
+          Adjust the crop area and aspect ratio to fit your card design.
         </p>
-        <div className="flex items-center justify-center max-h-[60vh] overflow-auto">
+        <div className="flex items-center justify-center max-h-[50vh] overflow-auto">
           <ReactCrop
             crop={crop}
-            onChange={handleCropChange}
-            onComplete={handleCropComplete}
+            onChange={(c) => setCrop(c)}
+            onComplete={(c) => setCompletedCrop(c)}
+            aspect={aspect}
             minWidth={50}
+            minHeight={30}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -146,10 +143,31 @@ export function LogoCropper({
               src={imageSrc}
               alt="Crop preview"
               onLoad={onImageLoad}
-              style={{ maxHeight: '50vh', maxWidth: '100%' }}
+              style={{ maxHeight: '45vh', maxWidth: '100%' }}
             />
           </ReactCrop>
         </div>
+
+        {/* Aspect ratio slider */}
+        <div className="space-y-2 px-1">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm text-muted-foreground">Aspect Ratio</Label>
+            <span className="text-sm font-medium tabular-nums">{aspect.toFixed(1)}:1</span>
+          </div>
+          <input
+            type="range"
+            className="styled-slider w-full"
+            min={LOGO_MIN_ASPECT * 100}
+            max={LOGO_MAX_ASPECT * 100}
+            value={aspect * 100}
+            onChange={(e) => handleAspectChange(parseInt(e.target.value) / 100)}
+          />
+          <div className="flex justify-between text-[10px] text-muted-foreground">
+            <span>Square</span>
+            <span>Wide</span>
+          </div>
+        </div>
+
         <DialogFooter>
           <Button variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>
             Cancel

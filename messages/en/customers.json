@@ -1,6 +1,10 @@
 {
   "customers": {
     "title": "Customers",
+    "subtitle": "Manage and track all your loyalty card holders",
+    "export": "Export",
+    "addCustomer": "Add Customer",
+    "customerProfile": "Customer Profile",
     "loading": "Loading customers...",
     "loadFailed": "Failed to load customers. Make sure the backend is running.",
     "searchPlaceholder": "Search by name or email...",
@@ -13,7 +17,8 @@
       "segment": "Segment",
       "lastVisit": "Last Visit",
       "redemptions": "Redemptions",
-      "action": "Action"
+      "action": "Action",
+      "actions": "Actions"
     },
     "stats": {
       "totalCustomers": "Total Customers",
@@ -46,7 +51,8 @@
       "redeemSuccessToast": "Reward redeemed!",
       "redeemFailedToast": "Failed to redeem reward",
       "voidSuccessToast": "Stamp voided",
-      "voidFailedToast": "Failed to void stamp"
+      "voidFailedToast": "Failed to void stamp",
+      "noVoidableStamp": "No stamp to void"
     },
     "toasts": {
       "stampAdded": "Stamp added for {name}",

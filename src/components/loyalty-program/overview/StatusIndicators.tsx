@@ -30,7 +30,7 @@ export function StatusIndicators({
       href: '/loyalty-program/notifications',
       icon: BellIcon,
       status: hasCustomNotifications ? 'Custom' : 'Standard',
-      statusColor: hasCustomNotifications ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground',
+      statusColor: hasCustomNotifications ? 'bg-[var(--accent-light)] text-[var(--accent)]' : 'bg-muted text-muted-foreground',
       proOnly: false,
     },
     {

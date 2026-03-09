@@ -43,36 +43,47 @@ export function classifyCustomer(
 
 interface SegmentConfig {
   labelKey: string;
+  /** Hex text color */
   color: string;
-  bgColor: string;
+  /** Hex background color */
+  bg: string;
 }
 
 const SEGMENT_CONFIGS: Record<CustomerSegment, SegmentConfig> = {
   new: {
     labelKey: 'segments.new',
-    color: 'text-blue-700',
-    bgColor: 'bg-blue-50 border-blue-200',
+    color: '#3D7CAF',
+    bg: '#E4F0F8',
   },
   regular: {
     labelKey: 'segments.regular',
-    color: 'text-gray-700',
-    bgColor: 'bg-gray-50 border-gray-200',
+    color: '#3D6B3D',
+    bg: '#E8F5E4',
   },
   vip: {
     labelKey: 'segments.vip',
-    color: 'text-amber-700',
-    bgColor: 'bg-amber-50 border-amber-200',
+    color: '#C4883D',
+    bg: '#FFF3E0',
   },
   close_to_reward: {
     labelKey: 'segments.closeToReward',
-    color: 'text-green-700',
-    bgColor: 'bg-green-50 border-green-200',
+    color: '#3D6B3D',
+    bg: '#E8F5E4',
   },
   at_risk: {
     labelKey: 'segments.atRisk',
-    color: 'text-red-700',
-    bgColor: 'bg-red-50 border-red-200',
+    color: '#C75050',
+    bg: '#FDE8E4',
   },
+};
+
+/** Avatar background colors per segment */
+export const SEGMENT_AVATAR_COLORS: Record<CustomerSegment, string> = {
+  new: '#3D7CAF',
+  regular: '#5B8C5A',
+  vip: '#C4883D',
+  close_to_reward: '#4A7C59',
+  at_risk: '#C75050',
 };
 
 export function getSegmentConfig(segment: CustomerSegment): SegmentConfig {

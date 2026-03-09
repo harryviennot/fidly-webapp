@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { CheckIcon } from "@phosphor-icons/react";
 import {
   Dialog,
   DialogContent,
@@ -11,13 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { FormField } from "@/components/form/form-field";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { createInvitation } from "@/api";
 import { useBusiness } from "@/contexts/business-context";
 import type { InvitableRole } from "@/types";
@@ -47,16 +41,18 @@ export function InviteDialog({
   // Owners can invite admins and scanners, admins can only invite scanners
   const isAdmin = currentRole !== "owner";
 
-  const allRoles = [
+  const allRoles: { value: InvitableRole; emoji: string; label: string; description: string }[] = [
     {
-      value: "scanner" as InvitableRole,
-      label: "Scanner",
-      description: t('scannerDescription'),
-    },
-    {
-      value: "admin" as InvitableRole,
+      value: "admin",
+      emoji: "🔑",
       label: "Admin",
       description: t('adminDescription'),
+    },
+    {
+      value: "scanner",
+      emoji: "📱",
+      label: "Scanner",
+      description: t('scannerDescription'),
     },
   ];
 
@@ -97,7 +93,6 @@ export function InviteDialog({
 
   const handleClose = () => {
     onOpenChange(false);
-    // Reset state when closing
     setEmail("");
     setName("");
     setRole("scanner");
@@ -114,29 +109,19 @@ export function InviteDialog({
             {t('description')}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-sm border border-red-100 dark:bg-red-950/50 dark:border-red-900/50 dark:text-red-400">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-100 dark:bg-red-950/50 dark:border-red-900/50 dark:text-red-400">
+              <span className="text-sm">⚠</span>
               {error}
             </div>
           )}
 
           {success && (
-            <div className="p-4 rounded-2xl bg-green-50 text-green-600 text-sm border border-green-100 dark:bg-green-950/50 dark:border-green-900/50 dark:text-green-400">
+            <div className="p-3 rounded-lg bg-green-50 text-green-600 text-sm border border-green-100 dark:bg-green-950/50 dark:border-green-900/50 dark:text-green-400">
               {t('success')}
             </div>
           )}
-
-          <FormField
-            label={t('email')}
-            id="email"
-            type="email"
-            placeholder={t('emailPlaceholder')}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={success}
-          />
 
           <FormField
             label={t('name')}
@@ -144,32 +129,58 @@ export function InviteDialog({
             type="text"
             placeholder={t('namePlaceholder')}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); setError(null); }}
             disabled={success}
-            hint={t('nameHint')}
+          />
+
+          <FormField
+            label={t('email')}
+            id="email"
+            type="email"
+            placeholder={t('emailPlaceholder')}
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); setError(null); }}
+            required
+            disabled={success}
           />
 
           <div className="space-y-2">
             <Label>{t('role')}</Label>
-            <Select
-              value={role}
-              onValueChange={(value) => setRole(value as InvitableRole)}
-              disabled={success || isAdmin}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('selectRole')} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableRoles.map((r) => (
-                  <SelectItem key={r.value} value={r.value}>
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{r.label}</span>
-                      <span className="text-xs text-muted-foreground">{r.description}</span>
+            <div className="flex gap-2">
+              {availableRoles.map((r) => {
+                const isSelected = role === r.value;
+                return (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setRole(r.value)}
+                    disabled={success}
+                    className={`flex-1 p-3.5 rounded-xl text-left transition-all duration-150 border-2 ${
+                      isSelected
+                        ? "border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_5%,transparent)]"
+                        : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--muted-foreground)]/30"
+                    } disabled:opacity-50`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{r.emoji}</span>
+                        <span className={`text-sm font-semibold ${isSelected ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]"}`}>
+                          {r.label}
+                        </span>
+                      </div>
+                      {isSelected && (
+                        <div className="w-[18px] h-[18px] rounded-full bg-[var(--accent)] flex items-center justify-center">
+                          <CheckIcon size={10} weight="bold" className="text-white" />
+                        </div>
+                      )}
                     </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    <p className="text-[11.5px] text-[var(--muted-foreground)] leading-snug">
+                      {r.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
             {isAdmin && (
               <p className="text-xs text-muted-foreground">
                 {t('adminOnlyScanner')}

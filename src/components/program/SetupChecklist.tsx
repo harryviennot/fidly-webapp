@@ -2,22 +2,16 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
 import {
-  CheckCircleIcon,
-  GearIcon,
-  PaletteIcon,
-  RocketLaunchIcon,
-  BellIcon,
-  UsersIcon,
   XIcon,
-  ArrowRightIcon,
   CopyIcon,
   CheckIcon,
 } from '@phosphor-icons/react';
+import { StepIllustration } from './StepIllustration';
 import Link from 'next/link';
 import { useBusiness } from '@/contexts/business-context';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import type { LoyaltyProgram, CardDesign } from '@/types';
 
 interface SetupChecklistProps {
@@ -25,14 +19,16 @@ interface SetupChecklistProps {
   activeDesign: CardDesign | undefined;
   designs: CardDesign[];
   totalCustomers: number;
+  delay?: number;
 }
 
-export function SetupChecklist({ program, activeDesign, designs, totalCustomers }: SetupChecklistProps) {
+export function SetupChecklist({ program, activeDesign, designs, totalCustomers, delay = 0 }: SetupChecklistProps) {
   const t = useTranslations('loyaltyProgram.overview');
   const tProgram = useTranslations('loyaltyProgram');
   const { currentBusiness } = useBusiness();
   const [dismissed, setDismissed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [activeStep, setActiveStep] = useState<number | null>(null);
 
   const baseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || 'https://stampeo.app';
   const slug = currentBusiness?.url_slug || '';
@@ -62,55 +58,40 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers 
 
   const steps = [
     {
-      key: 'configure',
+      id: 1,
       done: !!program?.name && !!program?.config?.total_stamps,
-      icon: GearIcon,
-      color: 'text-blue-600 bg-blue-100',
-      doneColor: 'text-green-600 bg-green-100',
       title: t('steps.configureProgram'),
       description: t('steps.configureDescription'),
       cta: t('steps.configureCta'),
       href: '/program/settings',
     },
     {
-      key: 'design',
+      id: 2,
       done: designs.length > 0,
-      icon: PaletteIcon,
-      color: 'text-violet-600 bg-violet-100',
-      doneColor: 'text-green-600 bg-green-100',
       title: t('steps.createDesign'),
       description: t('steps.createDescription'),
       cta: t('steps.createCta'),
       href: '/design/new',
     },
     {
-      key: 'activate',
+      id: 3,
       done: !!activeDesign,
-      icon: RocketLaunchIcon,
-      color: 'text-orange-600 bg-orange-100',
-      doneColor: 'text-green-600 bg-green-100',
       title: t('steps.activateCard'),
       description: t('steps.activateDescription'),
       cta: t('steps.activateCta'),
       href: '/program/templates',
     },
     {
-      key: 'notifications',
+      id: 4,
       done: false,
-      icon: BellIcon,
-      color: 'text-pink-600 bg-pink-100',
-      doneColor: 'text-green-600 bg-green-100',
       title: t('steps.customizeNotifications'),
       description: t('steps.customizeDescription'),
       cta: t('steps.customizeCta'),
       href: '/program/notifications',
     },
     {
-      key: 'customer',
+      id: 5,
       done: totalCustomers > 0,
-      icon: UsersIcon,
-      color: 'text-teal-600 bg-teal-100',
-      doneColor: 'text-green-600 bg-green-100',
       title: t('steps.firstCustomer'),
       description: t('steps.firstCustomerDescription'),
       cta: t('steps.firstCustomerCta'),
@@ -121,125 +102,244 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers 
   const completedCount = steps.filter((s) => s.done).length;
   const allDone = completedCount === steps.length;
   const progressPercent = (completedCount / steps.length) * 100;
-
-  // Find first incomplete step to highlight
   const nextStepIndex = steps.findIndex((s) => !s.done);
+  const selectedStep = activeStep ?? (nextStepIndex >= 0 ? steps[nextStepIndex].id : steps[0].id);
 
   if (dismissed || allDone) return null;
 
   return (
-    <div className="rounded-xl border bg-gradient-to-br from-[var(--cream)] to-background overflow-hidden">
+    <div
+      className="bg-[var(--card)] rounded-[14px] border border-[var(--border)] overflow-hidden relative animate-slide-up"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {/* Top progress bar */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[3px]"
+        style={{
+          background: `linear-gradient(90deg, var(--accent) ${progressPercent}%, var(--border) ${progressPercent}%)`,
+        }}
+      />
+
       {/* Header */}
-      <div className="p-5 pb-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h3 className="text-lg font-semibold">{t('setupChecklist')}</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {t('setupSubtitle', { completed: completedCount, total: steps.length })}
-            </p>
+      <div className="px-4 pt-5 pb-3 min-[1080px]:px-6 min-[1080px]:pt-5">
+        <div className="flex items-center justify-between mb-3.5">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[15px] min-[1080px]:text-[17px] font-bold text-[#1A1A1A]">
+              {t('getStarted')}
+            </span>
+            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
+              {completedCount}/{steps.length}
+            </span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-muted-foreground -mt-1 -mr-1"
+          <button
             onClick={() => setDismissed(true)}
+            className="text-[#BBB] hover:text-[#888] p-1 rounded-md transition-colors"
           >
             <XIcon className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Progress bar */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full rounded-full bg-[var(--accent)] transition-all duration-700 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <span className="text-xs font-medium text-muted-foreground tabular-nums">
-            {completedCount}/{steps.length}
-          </span>
+          </button>
         </div>
       </div>
 
-      {/* Steps */}
-      <div className="px-5 pb-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {steps.map((step, index) => {
-            const Icon = step.done ? CheckCircleIcon : step.icon;
-            const isNext = index === nextStepIndex;
-            const colorClass = step.done ? step.doneColor : step.color;
-
-            return (
+      {/* Desktop: Horizontal row */}
+      <div className="hidden min-[1080px]:flex px-6 pb-5">
+        {steps.map((step) => {
+          const isActive = step.id === selectedStep;
+          const isCurrent = nextStepIndex >= 0 && steps[nextStepIndex].id === step.id;
+          return (
+            <div
+              key={step.id}
+              onClick={() => setActiveStep(step.id)}
+              className={cn(
+                'flex-1 flex flex-col items-center px-2 py-3 pb-4 rounded-xl cursor-pointer transition-all duration-200',
+                isActive
+                  ? step.done
+                    ? 'bg-[var(--accent-light)] border-[1.5px] border-[var(--accent-200)]'
+                    : isCurrent
+                      ? 'bg-[#FFFBF5] border-[1.5px] border-[#F0DFC0]'
+                      : 'bg-[#FAFAFA] border-[1.5px] border-[var(--border)]'
+                  : 'border-[1.5px] border-transparent'
+              )}
+            >
               <div
-                key={step.key}
-                className={`
-                  relative rounded-lg border p-4 transition-all duration-200
-                  ${step.done
-                    ? 'bg-background/50 border-green-200/50'
-                    : isNext
-                      ? 'bg-background border-[var(--accent)]/30 shadow-sm ring-1 ring-[var(--accent)]/10'
-                      : 'bg-background/50 border-border/50'
-                  }
-                `}
+                className={cn(
+                  'flex-shrink-0 w-20 h-20 flex items-center justify-center mb-1 transition-all duration-300',
+                  (!step.done && !isCurrent) && 'opacity-60 scale-95 grayscale-[30%]'
+                )}
               >
-                {/* Step number badge */}
-                <div className="flex items-center gap-2.5 mb-2.5">
-                  <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${colorClass}`}>
-                    <Icon className="w-4 h-4" weight={step.done ? 'fill' : 'duotone'} />
-                  </div>
-                  {isNext && (
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 px-1.5 py-0.5 rounded-full">
+                <StepIllustration step={step.id} done={step.done} active={isCurrent} className="w-full h-full" />
+              </div>
+
+              <div className="text-center min-w-0">
+                {/* Status badge */}
+                <div className="mb-1">
+                  {step.done ? (
+                    <span className="text-[10px] font-bold px-[7px] py-px rounded-lg bg-[var(--accent-light)] text-[var(--accent)]">
+                      ✓ Done
+                    </span>
+                  ) : isCurrent ? (
+                    <span className="text-[10px] font-bold px-[7px] py-px rounded-lg bg-[var(--warning-light)] text-[var(--warning)]">
                       Next
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-[#CCC]">
+                      Step {step.id}
                     </span>
                   )}
                 </div>
 
-                {/* Content */}
-                <h4 className={`text-sm font-medium mb-1 ${step.done ? 'text-muted-foreground' : ''}`}>
+                {/* Title */}
+                <div
+                  className={cn(
+                    'text-[12.5px] font-semibold mb-0.5',
+                    step.done ? 'text-[var(--accent)]' : isCurrent ? 'text-[#1A1A1A]' : 'text-[#AAA]'
+                  )}
+                >
                   {step.title}
-                </h4>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-3 line-clamp-2">
-                  {step.description}
-                </p>
+                </div>
 
-                {/* CTA */}
-                {step.done ? (
-                  <p className="text-xs font-medium text-green-600 flex items-center gap-1">
-                    <CheckCircleIcon className="w-3.5 h-3.5" weight="fill" />
-                    Done
-                  </p>
-                ) : step.action ? (
-                  <Button
-                    variant={isNext ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-7 text-xs rounded-full"
-                    onClick={step.action}
-                  >
-                    {step.key === 'customer' && copied ? (
-                      <CheckIcon className="w-3 h-3 mr-1" />
-                    ) : step.key === 'customer' ? (
-                      <CopyIcon className="w-3 h-3 mr-1" />
-                    ) : null}
-                    {step.cta}
-                  </Button>
-                ) : step.href ? (
-                  <Button
-                    asChild
-                    variant={isNext ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-7 text-xs rounded-full"
-                  >
-                    <Link href={step.href}>
-                      {step.cta}
-                      <ArrowRightIcon className="w-3 h-3 ml-1" />
+                {/* Description (only when active) */}
+                {isActive && (
+                  <div className="text-[11px] text-[#8A8A8A] leading-[1.4] mb-2">
+                    {step.description}
+                  </div>
+                )}
+
+                {/* CTA button (only when active and not done) */}
+                {isActive && !step.done && (
+                  step.action ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); step.action?.(); }}
+                      className={cn(
+                        'px-[18px] py-[7px] rounded-[7px] border-none text-[12px] font-semibold cursor-pointer transition-all duration-150',
+                        isCurrent
+                          ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]'
+                          : 'bg-[var(--paper-hover)] text-[#555] hover:bg-[var(--background-subtle)]'
+                      )}
+                    >
+                      {step.id === 5 && copied ? (
+                        <span className="flex items-center gap-1"><CheckIcon className="w-3 h-3" /> Copied</span>
+                      ) : step.id === 5 ? (
+                        <span className="flex items-center gap-1"><CopyIcon className="w-3 h-3" /> {step.cta}</span>
+                      ) : (
+                        <>{step.cta} →</>
+                      )}
+                    </button>
+                  ) : step.href ? (
+                    <Link
+                      href={step.href}
+                      onClick={(e) => e.stopPropagation()}
+                      className={cn(
+                        'inline-block px-[18px] py-[7px] rounded-[7px] text-[12px] font-semibold transition-all duration-150 no-underline',
+                        isCurrent
+                          ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]'
+                          : 'bg-[var(--paper-hover)] text-[#555] hover:bg-[var(--background-subtle)]'
+                      )}
+                    >
+                      {step.cta} →
                     </Link>
-                  </Button>
-                ) : null}
+                  ) : null
+                )}
+
+                {/* Completed label */}
+                {isActive && step.done && (
+                  <span className="text-[11px] text-[var(--accent-300)] font-medium">Completed</span>
+                )}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Mobile/Tablet: Vertical accordion */}
+      <div className="flex flex-col gap-1 px-4 pb-4 min-[1080px]:hidden">
+        {steps.map((step) => {
+          const isActive = step.id === selectedStep;
+          const isCurrent = nextStepIndex >= 0 && steps[nextStepIndex].id === step.id;
+          return (
+            <div
+              key={step.id}
+              onClick={() => setActiveStep(step.id)}
+              className={cn(
+                'flex items-center gap-3 rounded-[10px] cursor-pointer transition-all duration-200',
+                isActive ? 'py-2.5 px-3' : 'py-2 px-3',
+                isActive
+                  ? step.done
+                    ? 'bg-[var(--accent-light)] border-[1.5px] border-[var(--accent-200)]'
+                    : isCurrent
+                      ? 'bg-[#FFFBF5] border-[1.5px] border-[#F0DFC0]'
+                      : 'bg-[#FAFAFA] border-[1.5px] border-[var(--border)]'
+                  : 'border-[1.5px] border-transparent'
+              )}
+            >
+              <div
+                className={cn(
+                  'flex-shrink-0 flex items-center justify-center transition-all duration-300',
+                  isActive ? 'w-16 h-16' : 'w-12 h-12',
+                  (!step.done && !isCurrent) && 'opacity-60 scale-95 grayscale-[30%]'
+                )}
+              >
+                <StepIllustration step={step.id} done={step.done} active={isCurrent} className="w-full h-full" />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-px">
+                  <span
+                    className={cn(
+                      'text-[13px] font-semibold',
+                      step.done ? 'text-[var(--accent)]' : isCurrent ? 'text-[#1A1A1A]' : 'text-[#AAA]'
+                    )}
+                  >
+                    {step.title}
+                  </span>
+                  {step.done && (
+                    <span className="text-[9px] font-bold px-1.5 py-px rounded-lg bg-[var(--accent-light)] text-[var(--accent)]">✓</span>
+                  )}
+                  {isCurrent && !step.done && (
+                    <span className="text-[9px] font-bold px-1.5 py-px rounded-lg bg-[var(--warning-light)] text-[var(--warning)]">Next</span>
+                  )}
+                </div>
+                {isActive && (
+                  <div className="text-[11.5px] text-[#8A8A8A] leading-[1.4]">
+                    {step.description}
+                  </div>
+                )}
+              </div>
+
+              {isActive && !step.done && (
+                step.action ? (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); step.action?.(); }}
+                    className={cn(
+                      'flex-shrink-0 px-3.5 py-[7px] rounded-[7px] border-none text-[12px] font-semibold cursor-pointer',
+                      isCurrent
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'bg-[var(--paper-hover)] text-[#555]'
+                    )}
+                  >
+                    {step.id === 5 && copied ? '✓' : step.cta}
+                  </button>
+                ) : step.href ? (
+                  <Link
+                    href={step.href}
+                    onClick={(e) => e.stopPropagation()}
+                    className={cn(
+                      'flex-shrink-0 px-3.5 py-[7px] rounded-[7px] text-[12px] font-semibold no-underline',
+                      isCurrent
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'bg-[var(--paper-hover)] text-[#555]'
+                    )}
+                  >
+                    {step.cta} →
+                  </Link>
+                ) : null
+              )}
+
+              {isActive && step.done && (
+                <span className="flex-shrink-0 text-[11px] text-[var(--accent-300)] font-medium">Completed</span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

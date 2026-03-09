@@ -59,7 +59,7 @@ export default function AdminLayout({
         <AppSidebar />
         <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
           <DashboardHeader />
-          <main className="p-6">{children}</main>
+          <main className="p-4 md:p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>
       <Toaster position="bottom-right" />

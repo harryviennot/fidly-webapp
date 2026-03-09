@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { CardDesign } from "@/types";
 import {
@@ -30,8 +30,6 @@ export interface WalletCardProps {
   showQR?: boolean;
   /** Show secondary fields section */
   showSecondaryFields?: boolean;
-  /** Enable 3D mouse-tracking effect */
-  interactive3D?: boolean;
   /** Additional class names */
   className?: string;
 }
@@ -292,47 +290,6 @@ function FakeQRCode({ size = 80 }: { size?: number }) {
   );
 }
 
-// ============================================================================
-// 3D Effect Hook
-// ============================================================================
-
-function use3DEffect(enabled: boolean) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
-  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!enabled || !cardRef.current) return;
-
-      const rect = cardRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      const rotateY = ((x - centerX) / centerX) * 4;
-      const rotateX = ((centerY - y) / centerY) * 4;
-
-      const glareX = (x / rect.width) * 100;
-      const glareY = (y / rect.height) * 100;
-
-      setRotate({ x: rotateX, y: rotateY });
-      setGlare({ x: glareX, y: glareY, opacity: 1 });
-    },
-    [enabled]
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    if (!enabled) return;
-    setRotate({ x: 0, y: 0 });
-    setGlare((prev) => ({ ...prev, opacity: 0 }));
-  }, [enabled]);
-
-  return { cardRef, rotate, glare, handleMouseMove, handleMouseLeave };
-}
-
 const STRIP_ASPECT_RATIO = 1125 / 432;
 
 export function StampGridContainer({
@@ -401,14 +358,10 @@ export function WalletCard({
   organizationName,
   showQR = true,
   showSecondaryFields = true,
-  interactive3D = false,
   className = "",
 }: WalletCardProps) {
-  const { cardRef, rotate, glare, handleMouseMove, handleMouseLeave } =
-    use3DEffect(interactive3D);
-
   const displayName =
-    organizationName || design.organization_name || "Your Business";
+    organizationName || design.organization_name || "";
   const initials = getInitials(displayName);
   const totalStamps = totalStampsProp ?? design.total_stamps ?? 10;
   const colors = computeCardColors(design);
@@ -418,50 +371,21 @@ export function WalletCard({
 
   const secondaryFields = design.secondary_fields || [];
 
-  const cardStyle = interactive3D
-    ? {
-      transformStyle: "preserve-3d" as const,
-      transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
-      transition:
-        "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease",
-      boxShadow: `
-          ${-rotate.y * 1.5}px ${rotate.x * 1.5 + 8}px 24px rgba(0,0,0,0.12),
-          0 20px 50px rgba(0,0,0,0.08)
-        `,
-    }
-    : {
-      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
-    };
-
   return (
     <div
       className={`relative w-full h-full ${className}`}
-      style={interactive3D ? { perspective: "1200px" } : undefined}
     >
       <div
-        ref={cardRef}
-        className="relative w-full h-full cursor-pointer rounded-2xl"
-        style={cardStyle}
-        onMouseMove={interactive3D ? handleMouseMove : undefined}
-        onMouseLeave={interactive3D ? handleMouseLeave : undefined}
+        className="relative w-full h-full rounded-2xl"
+        style={{ boxShadow: "0 10px 40px rgba(0,0,0,0.12)" }}
       >
         {/* Card Content Layer */}
         <div
           className="absolute inset-0 rounded-2xl overflow-hidden transition-all duration-300"
           style={{
-            background: `linear-gradient(135deg, ${colors.bgGradientFrom}, ${colors.bgGradientTo})`,
+            backgroundColor: colors.bgHex,
           }}
         >
-          {/* Subtle gradient overlay */}
-          <div
-            className="absolute inset-0 transition-opacity duration-300"
-            style={{
-              background: colors.isLightBg
-                ? "linear-gradient(to bottom right, rgba(255,255,255,0.4), transparent, rgba(0,0,0,0.05))"
-                : "linear-gradient(to bottom right, rgba(255,255,255,0.1), transparent, rgba(0,0,0,0.2))",
-            }}
-          />
-
           {/* Content Layout */}
           <div className="relative h-full px-0 py-0 flex flex-col z-10">
             {/* Header: Logo + Business Name */}
@@ -558,18 +482,6 @@ export function WalletCard({
             )}
           </div>
         </div>
-
-        {/* Glare Effect (3D only) */}
-        {interactive3D && (
-          <div
-            className="absolute inset-0 rounded-2xl pointer-events-none z-20"
-            style={{
-              background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%)`,
-              opacity: glare.opacity,
-              transition: "opacity 0.5s ease",
-            }}
-          />
-        )}
 
         {/* Border */}
         <div

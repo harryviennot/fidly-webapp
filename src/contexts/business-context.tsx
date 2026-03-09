@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
-import { applyTheme, getAccentFromSettings } from "@/utils/theme";
+import { applyTheme, getAccentFromSettings, getBackgroundFromSettings } from "@/utils/theme";
 import { Business } from "@/types";
 
 type MembershipRole = "owner" | "admin" | "scanner";
@@ -85,7 +85,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
         // Apply theme from business settings
         const accentColor = getAccentFromSettings(defaultMembership.business.settings);
-        applyTheme(accentColor);
+        const secondaryColor = getBackgroundFromSettings(defaultMembership.business.settings);
+        applyTheme(accentColor, secondaryColor ?? undefined);
       } else {
         // No memberships - user needs to create a business
         setMemberships([]);
@@ -142,7 +143,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
     // Apply theme from business settings
     const accentColor = getAccentFromSettings(business.settings);
-    applyTheme(accentColor);
+    const secondaryColor = getBackgroundFromSettings(business.settings);
+    applyTheme(accentColor, secondaryColor ?? undefined);
   };
 
   return (

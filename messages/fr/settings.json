@@ -36,7 +36,10 @@
         "open": "Ouverture",
         "close": "Fermeture",
         "closed": "Fermé",
-        "addRow": "Ajouter un créneau"
+        "addRow": "Ajouter un créneau",
+        "defaultMonFri": "Lun-Ven",
+        "defaultSat": "Sam",
+        "defaultSun": "Dim"
       },
       "website": {
         "title": "Site web",
@@ -74,7 +77,7 @@
       "title": "Personnalisation du thème",
       "description": "Personnalisez les couleurs de votre tableau de bord",
       "accentColor": "Couleur d'accentuation",
-      "backgroundColor": "Couleur d'arrière-plan",
+      "backgroundColor": "Couleur secondaire",
       "unsavedChanges": "Vous avez des modifications non enregistrées",
       "upToDate": "Le thème est à jour",
       "saveTheme": "Enregistrer le thème"

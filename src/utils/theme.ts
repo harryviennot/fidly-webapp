@@ -177,7 +177,7 @@ export function generatePalette(hex: string): ColorPalette {
  * Apply a color palette as CSS variables on the document root.
  * Sets the user's exact color as --accent, and generates palette shades for variants.
  */
-export function applyTheme(accentColor: string): void {
+export function applyTheme(accentColor: string, secondaryColor?: string): void {
   if (typeof document === "undefined") return;
 
   const palette = generatePalette(accentColor);
@@ -202,6 +202,11 @@ export function applyTheme(accentColor: string): void {
   root.style.setProperty("--accent-hover", adjustBrightness(accentColor, -15));
   root.style.setProperty("--accent-light", palette[100]);
   root.style.setProperty("--accent-muted", palette[200]);
+
+  // Apply secondary/background color if provided
+  if (secondaryColor) {
+    root.style.setProperty("--business-secondary", secondaryColor);
+  }
 }
 
 /**
@@ -237,6 +242,7 @@ export function resetTheme(): void {
     "--accent-hover",
     "--accent-light",
     "--accent-muted",
+    "--business-secondary",
   ];
 
   for (const prop of properties) {

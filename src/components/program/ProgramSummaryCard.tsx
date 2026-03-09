@@ -1,78 +1,67 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  StampIcon,
-  TrophyIcon,
-  CalendarIcon,
-  StackIcon,
-} from '@phosphor-icons/react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import type { LoyaltyProgram } from '@/types';
 
 interface ProgramSummaryCardProps {
   program: LoyaltyProgram | undefined;
+  delay?: number;
 }
 
-export function ProgramSummaryCard({ program }: ProgramSummaryCardProps) {
+export function ProgramSummaryCard({ program, delay = 0 }: ProgramSummaryCardProps) {
   const t = useTranslations('loyaltyProgram.overview');
-  const tProgram = useTranslations('loyaltyProgram');
 
   if (!program) return null;
 
   const items = [
-    {
-      icon: StackIcon,
-      label: t('type'),
-      value: tProgram('stampCard'),
-      color: 'text-blue-600 bg-blue-100',
-    },
-    {
-      icon: StampIcon,
-      label: t('stamps'),
-      value: String(program.config?.total_stamps ?? 10),
-      color: 'text-violet-600 bg-violet-100',
-    },
-    {
-      icon: TrophyIcon,
-      label: t('reward'),
-      value: program.reward_name || t('noRewardSet'),
-      color: 'text-amber-600 bg-amber-100',
-    },
-    {
-      icon: CalendarIcon,
-      label: t('activeSince'),
-      value: new Date(program.created_at).toLocaleDateString(undefined, {
-        month: 'short',
-        year: 'numeric',
-      }),
-      color: 'text-green-600 bg-green-100',
-    },
+    { label: t('loyaltyType'), value: t('stampsValue'), icon: '☆' },
+    { label: t('stampsRequired'), value: `${program.config?.total_stamps ?? 10} stamps`, icon: '🎯' },
+    { label: t('reward'), value: program.reward_name || '—', icon: '☕' },
+    { label: t('dataCollected'), value: t('emailOnly'), icon: '📧' },
+    { label: t('cardStatus'), value: t('active'), icon: '✅', accent: true },
+    { label: t('passType'), value: t('appleAndGoogle'), icon: '📱' },
   ];
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">{t('programSummary')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          {items.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.label} className="flex items-start gap-3">
-                <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${item.color}`}>
-                  <Icon className="w-4.5 h-4.5" weight="duotone" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">{item.label}</p>
-                  <p className="text-sm font-medium truncate">{item.value}</p>
-                </div>
-              </div>
-            );
-          })}
+    <div
+      className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-[15px] font-semibold text-[#1A1A1A]">
+          {t('programConfiguration')}
         </div>
-      </CardContent>
-    </Card>
+        <Link
+          href="/program/settings"
+          className="text-[12px] text-[var(--accent)] font-medium hover:underline"
+        >
+          {t('edit')}
+        </Link>
+      </div>
+
+      {/* Config items grid */}
+      <div className={cn('grid gap-3', 'grid-cols-1 min-[1080px]:grid-cols-2')}>
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 px-3.5 py-3 rounded-lg bg-[var(--paper)] border border-[var(--border-light)]"
+          >
+            <span className="text-[18px]">{item.icon}</span>
+            <div>
+              <div className="text-[11px] text-[#8A8A8A]">{item.label}</div>
+              <div className={cn(
+                'text-[13px] font-semibold',
+                item.accent ? 'text-[var(--accent)]' : 'text-[#1A1A1A]'
+              )}>
+                {item.value}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

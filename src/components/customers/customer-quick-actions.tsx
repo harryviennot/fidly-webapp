@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { StampIcon, GiftIcon, ProhibitIcon } from "@phosphor-icons/react";
+import { Stamp, Gift, Prohibit } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -42,10 +42,10 @@ export function CustomerQuickActions({
   const canRedeem = customer.stamps >= maxStamps;
 
   const lastVoidable = transactions.find(
-    (t) =>
-      (t.type === "stamp_added" || t.type === "bonus_stamp") &&
+    (txn) =>
+      (txn.type === "stamp_added" || txn.type === "bonus_stamp") &&
       !transactions.some(
-        (v) => v.type === "stamp_voided" && v.voided_transaction_id === t.id
+        (v) => v.type === "stamp_voided" && v.voided_transaction_id === txn.id
       )
   );
 
@@ -87,48 +87,49 @@ export function CustomerQuickActions({
   };
 
   return (
-    <div className="space-y-3">
-      {/* Primary action — full width */}
-      <Button
-        variant="gradient"
-        size="sm"
-        className="w-full rounded-full"
-        onClick={handleAddStamp}
-        disabled={addStampMutation.isPending}
-      >
-        <StampIcon className="mr-1.5 h-4 w-4" />
-        {t("addStamp")}
-      </Button>
-
-      {/* Secondary actions — side by side, muted */}
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1 rounded-full bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800"
+    <div className="flex gap-1.5">
+      {/* Add Stamp / Redeem */}
+      {!canRedeem ? (
+        <ActionButton
+          icon={<Stamp className="w-4 h-4" />}
+          label={t("addStamp")}
+          color="#4A7C59"
+          bg="#E8F5E4"
+          border="#C8E6C4"
+          onClick={handleAddStamp}
+          disabled={addStampMutation.isPending}
+        />
+      ) : (
+        <ActionButton
+          icon={<Gift className="w-4 h-4" />}
+          label={t("redeem")}
+          color="#C4883D"
+          bg="#FFF3E0"
+          border="#F0DFC0"
           onClick={handleRedeem}
-          disabled={redeemMutation.isPending || !canRedeem}
-        >
-          <GiftIcon className="mr-1.5 h-4 w-4" />
-          {t("redeem")}
-        </Button>
+          disabled={redeemMutation.isPending}
+        />
+      )}
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1 rounded-full text-[var(--muted-foreground)] hover:text-red-600 hover:border-red-200 hover:bg-red-50"
-          onClick={() => setVoidDialogOpen(true)}
-          disabled={!lastVoidable}
-        >
-          <ProhibitIcon className="mr-1.5 h-4 w-4" />
-          {t("voidLast")}
-        </Button>
-      </div>
+      {/* Void Stamp */}
+      <ActionButton
+        icon={<Prohibit className="w-4 h-4" />}
+        label={t("voidLast")}
+        color="#C75050"
+        bg="#fff"
+        border="#DEDBD5"
+        onClick={() => setVoidDialogOpen(true)}
+        disabled={!lastVoidable}
+      />
 
-      <Dialog open={voidDialogOpen} onOpenChange={(open) => {
-        setVoidDialogOpen(open);
-        if (!open) setVoidReason("");
-      }}>
+      {/* Void dialog */}
+      <Dialog
+        open={voidDialogOpen}
+        onOpenChange={(open) => {
+          setVoidDialogOpen(open);
+          if (!open) setVoidReason("");
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("voidDialogTitle")}</DialogTitle>
@@ -159,7 +160,7 @@ export function CustomerQuickActions({
             </Button>
             <Button
               variant="outline"
-              className="rounded-full text-red-600 border-red-200 hover:bg-red-50"
+              className="rounded-lg text-[#C75050] border-[#FDE8E4] hover:bg-[#FDE8E4]"
               onClick={handleVoid}
               disabled={voidMutation.isPending || !voidReason.trim()}
             >
@@ -169,5 +170,46 @@ export function CustomerQuickActions({
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function ActionButton({
+  icon,
+  label,
+  color,
+  bg,
+  border,
+  onClick,
+  disabled,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  color: string;
+  bg: string;
+  border: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="flex-1 flex flex-col items-center gap-1 py-2.5 px-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:-translate-y-px hover:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+      style={{
+        border: `1px solid ${border}`,
+        background: bg,
+        fontFamily: "inherit",
+      }}
+    >
+      <span style={{ color }} className="flex">
+        {icon}
+      </span>
+      <span
+        className="text-[10px] font-medium whitespace-nowrap"
+        style={{ color }}
+      >
+        {label}
+      </span>
+    </button>
   );
 }

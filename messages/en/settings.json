@@ -36,7 +36,10 @@
         "open": "Open",
         "close": "Close",
         "closed": "Closed",
-        "addRow": "Add time slot"
+        "addRow": "Add time slot",
+        "defaultMonFri": "Mon-Fri",
+        "defaultSat": "Sat",
+        "defaultSun": "Sun"
       },
       "website": {
         "title": "Website",
@@ -74,7 +77,7 @@
       "title": "Theme Customization",
       "description": "Customize the colors of your dashboard",
       "accentColor": "Accent Color",
-      "backgroundColor": "Background Color",
+      "backgroundColor": "Secondary Color",
       "unsavedChanges": "You have unsaved changes",
       "upToDate": "Theme is up to date",
       "saveTheme": "Save Theme"

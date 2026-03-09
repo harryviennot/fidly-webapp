@@ -265,7 +265,7 @@ export function GoogleWalletCard({
       ref={containerRef}
       className={`relative w-full ${className}`}
       style={{
-        background: `linear-gradient(135deg, ${colors.bgGradientFrom}, ${colors.bgGradientTo})`,
+        backgroundColor: colors.bgHex,
         borderRadius: "28px",
         overflow: "hidden",
         boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
