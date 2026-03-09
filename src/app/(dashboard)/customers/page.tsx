@@ -28,6 +28,16 @@ import {
 } from "@/components/customers/customer-data-table";
 import { PageHeader } from "@/components/redesign";
 import { SearchInput } from "@/components/reusables/search-input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export default function CustomersPage() {
@@ -61,6 +71,9 @@ export default function CustomersPage() {
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [voidDialogOpen, setVoidDialogOpen] = useState(false);
+  const [voidReason, setVoidReason] = useState("");
+  const [voidTarget, setVoidTarget] = useState<{ customerId: string; transactionId: string } | null>(null);
 
   const selectedCustomer = selectedCustomerId
     ? customers.find((c) => c.id === selectedCustomerId) ?? null
@@ -88,7 +101,7 @@ export default function CustomersPage() {
     }
   };
 
-  const handleVoid = async (e: React.MouseEvent, customer: CustomerResponse) => {
+  const handleVoid = (e: React.MouseEvent, customer: CustomerResponse) => {
     e.stopPropagation();
     if (!businessId) return;
     const customerTxns = transactions.filter((txn) => txn.customer_id === customer.id);
@@ -103,17 +116,26 @@ export default function CustomersPage() {
       toast.error(t("actions.noVoidableStamp"));
       return;
     }
+    setVoidTarget({ customerId: customer.id, transactionId: lastVoidable.id });
+    setVoidDialogOpen(true);
+  };
+
+  const handleVoidConfirm = useCallback(async () => {
+    if (!voidTarget || !voidReason.trim()) return;
     try {
       await voidMutation.mutateAsync({
-        customerId: customer.id,
-        transactionId: lastVoidable.id,
-        reason: "Voided from table",
+        customerId: voidTarget.customerId,
+        transactionId: voidTarget.transactionId,
+        reason: voidReason.trim(),
       });
       toast.success(t("actions.voidSuccessToast"));
+      setVoidDialogOpen(false);
+      setVoidReason("");
+      setVoidTarget(null);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("actions.voidFailedToast"));
     }
-  };
+  }, [voidTarget, voidReason, voidMutation, t]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -242,6 +264,57 @@ export default function CustomersPage() {
         maxStamps={totalStamps}
         design={design ?? undefined}
       />
+
+      <Dialog
+        open={voidDialogOpen}
+        onOpenChange={(open) => {
+          setVoidDialogOpen(open);
+          if (!open) {
+            setVoidReason("");
+            setVoidTarget(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("actions.voidDialogTitle")}</DialogTitle>
+            <DialogDescription>{t("actions.voidDialogDescription")}</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <label className="text-sm font-medium text-[var(--foreground)] mb-1.5 block">
+              {t("actions.voidReasonLabel")}
+            </label>
+            <Textarea
+              value={voidReason}
+              onChange={(e) => setVoidReason(e.target.value)}
+              placeholder={t("actions.voidReasonPlaceholder")}
+              maxLength={500}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                setVoidDialogOpen(false);
+                setVoidReason("");
+                setVoidTarget(null);
+              }}
+            >
+              {t("actions.cancel")}
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-lg text-[#C75050] border-[#FDE8E4] hover:bg-[#FDE8E4]"
+              onClick={handleVoidConfirm}
+              disabled={voidMutation.isPending || !voidReason.trim()}
+            >
+              {voidMutation.isPending ? t("actions.voiding") : t("actions.confirmVoid")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
