@@ -503,7 +503,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         <CollapsibleSection
           title={t('branding')}
           subtitle={t('brandingSubtitle')}
-          icon={<Palette className="w-8 h-8 text-muted-foreground" weight='bold' />}
+          icon={<Palette className="w-8 h-8 text-foreground" weight='regular' />}
           isOpen={openSections.branding}
           onToggle={() => toggleSection('branding')}
           badge={brandingBadge}
@@ -581,7 +581,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         <CollapsibleSection
           title={t('stampsSection')}
           subtitle={t('stampsSectionSubtitle')}
-          icon={<Stamp className="w-8 h-8 text-muted-foreground" weight='bold' />}
+          icon={<Stamp className="w-8 h-8 text-foreground" weight='regular' />}
           isOpen={openSections.stamps}
           onToggle={() => toggleSection('stamps')}
           badge={stampsBadge}
@@ -700,7 +700,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         <CollapsibleSection
           title={t('content')}
           subtitle={t('contentSubtitle')}
-          icon={<TextT className="w-8 h-8 text-muted-foreground" weight='bold' />}
+          icon={<TextT className="w-8 h-8 text-foreground" weight='regular' />}
           isOpen={openSections.content}
           onToggle={() => toggleSection('content')}
           badge={contentBadge}
@@ -728,7 +728,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         <CollapsibleSection
           title={t('backSection')}
           subtitle={t('backSectionSubtitle')}
-          icon={<ArrowUDownLeft className="w-8 h-8 text-muted-foreground" weight='bold' />}
+          icon={<ArrowUDownLeft className="w-8 h-8 text-foreground" weight='regular' />}
           isOpen={openSections.back}
           onToggle={() => toggleSection('back')}
           badge={backBadge}
@@ -796,9 +796,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             {headerLeft}
             <div className="flex items-center gap-3">
               <span
-                className={`text-xs text-muted-foreground transition-opacity duration-300 ${
-                  draftStatus === 'saved' ? 'opacity-100' : 'opacity-0'
-                }`}
+                className={`text-xs text-muted-foreground transition-opacity duration-300 ${draftStatus === 'saved' ? 'opacity-100' : 'opacity-0'
+                  }`}
               >
                 {t('draftSaved')}
               </span>

@@ -95,7 +95,7 @@ export default function ActivityPage() {
       {/* Header */}
       <PageHeader
         title={
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-4">
             {t("title")}
             <ActivityLiveIndicator />
           </div>

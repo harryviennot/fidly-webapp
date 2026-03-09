@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { UserPlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { SearchInput } from "@/components/reusables/search-input";
 import { FilterPill } from "@/components/reusables/filter-pill";
-import { Button } from "@/components/ui/button";
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
 import {
@@ -21,6 +20,7 @@ import { TeamMemberCard, TeamMemberCardSkeleton } from "@/components/team/team-m
 import { InviteDialog } from "@/components/team/invite-dialog";
 import { TeamStats, TeamStatsSkeleton } from "@/components/team/team-stats";
 import { EmptyTeamState } from "@/components/team/empty-team-state";
+import { PageHeader } from "@/components/redesign";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -216,16 +216,11 @@ export default function TeamPage() {
   if (loading) {
     return (
       <div className="flex flex-col gap-[14px]">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">{t('title')}</h2>
-            <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{t('subtitle')}</p>
-          </div>
-          <Button disabled variant="gradient">
-            <UserPlusIcon className="mr-2 h-4 w-4" />
-            {t('addMember')}
-          </Button>
-        </div>
+        <PageHeader
+          title={t('title')}
+          subtitle={t('subtitle')}
+          actions={[{ label: t('addMember'), icon: <UserPlusIcon className="h-4 w-4" />, disabled: true }]}
+        />
 
         <TeamStatsSkeleton />
 
@@ -244,16 +239,11 @@ export default function TeamPage() {
   if (members.length <= 1 && invitations.length === 0) {
     return (
       <div className="flex flex-col gap-[14px]">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">{t('title')}</h2>
-            <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{t('subtitle')}</p>
-          </div>
-          <Button onClick={() => setInviteOpen(true)} variant="gradient" size="lg">
-            <UserPlusIcon className="mr-2 h-4 w-4" />
-            {t('addMember')}
-          </Button>
-        </div>
+        <PageHeader
+          title={t('title')}
+          subtitle={t('subtitle')}
+          actions={[{ label: t('addMember'), icon: <UserPlusIcon className="h-4 w-4" />, onClick: () => setInviteOpen(true) }]}
+        />
 
         <EmptyTeamState onInvite={() => setInviteOpen(true)} />
 
@@ -271,17 +261,11 @@ export default function TeamPage() {
 
   return (
     <div className="flex flex-col gap-[14px]">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-2xl font-bold">{t('title')}</h2>
-          <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{t('subtitle')}</p>
-        </div>
-        <Button onClick={() => setInviteOpen(true)} variant="gradient">
-          <UserPlusIcon className="mr-2 h-4 w-4" />
-          {t('addMember')}
-        </Button>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle={t('subtitle')}
+        actions={[{ label: t('addMember'), icon: <UserPlusIcon className="h-4 w-4" />, onClick: () => setInviteOpen(true) }]}
+      />
 
       {/* Stats */}
       <TeamStats
