@@ -113,7 +113,12 @@
       "goToSettings": "Aller aux Paramètres",
       "businessInfoExplanation": "Les informations sont tirées des paramètres de votre compte.",
       "viewFront": "Voir l'avant",
-      "viewBack": "Voir l'arrière"
+      "viewBack": "Voir l'arrière",
+      "draftSaved": "Brouillon enregistré",
+      "unsavedChangesTitle": "Modifications non enregistrées",
+      "unsavedChangesDescription": "Vous avez des modifications non enregistrées qui seront perdues si vous quittez cette page.",
+      "leaveWithoutSaving": "Quitter sans enregistrer",
+      "stayOnPage": "Rester sur la page"
     },
     "fieldEditor": {
       "label": "Libellé",

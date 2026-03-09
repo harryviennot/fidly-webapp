@@ -29,10 +29,13 @@ import {
   rgbToHex, hexToRgb, autoIconColor, contrastRatio,
   backgroundColors, accentColors, iconColors, textColors, emptyStampColors,
 } from '@/lib/color-utils';
+import { getDesignDraft, useDesignDraftPersistence } from '@/hooks/use-design-draft';
 
 export interface DesignEditorRef {
   handleSave: () => Promise<void>;
   saving: boolean;
+  isDirty: boolean;
+  clearDraft: () => void;
 }
 
 interface DesignEditorV2Props {
@@ -40,6 +43,7 @@ interface DesignEditorV2Props {
   isNew?: boolean;
   onSave?: () => void;
   onSavingChange?: (saving: boolean) => void;
+  onDirtyChange?: (dirty: boolean) => void;
   designName?: string;
   programTotalStamps?: number;
   programName?: string;
@@ -86,7 +90,7 @@ function isBackComplete(_d: CardDesignCreate) {
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, designName, programTotalStamps, programName, headerLeft, headerRight }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const queryClient = useQueryClient();
     const { currentBusiness } = useBusiness();
@@ -94,9 +98,20 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const isWideEnough = useMediaQuery('(min-width: 1280px)');
     const isCompact = !isWideEnough;
     const totalStamps = programTotalStamps ?? 10;
-    const [formData, setFormData] = useState<CardDesignCreate>(
-      design ? { ...design } : getDefaultDesign(t, totalStamps)
-    );
+
+    const draftId = design?.id ?? 'new';
+    const [formData, setFormData] = useState<CardDesignCreate>(() => {
+      const defaultData = design ? { ...design } : getDefaultDesign(t, totalStamps);
+      const draft = getDesignDraft(draftId);
+      if (draft) {
+        // Use draft if it's newer than the server data
+        const serverTime = design?.updated_at ? new Date(design.updated_at).getTime() : 0;
+        if (draft.lastModified > serverTime) {
+          return { ...defaultData, ...draft.data };
+        }
+      }
+      return defaultData;
+    });
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
     const [previewStamps, setPreviewStamps] = useState(3);
     const [showBack, setShowBack] = useState(false);
@@ -120,6 +135,19 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     // Use ref to always have access to latest form data for save
     const formDataRef = useRef(formData);
     formDataRef.current = formData;
+
+    // Draft persistence
+    const { draftStatus, clearDraft } = useDesignDraftPersistence(draftId, formData, design?.updated_at);
+
+    // Dirty state tracking
+    const lastSavedDataRef = useRef(
+      JSON.stringify(design ? { ...design } : getDefaultDesign(t, totalStamps))
+    );
+    const isDirty = JSON.stringify(formData) !== lastSavedDataRef.current;
+
+    useEffect(() => {
+      onDirtyChange?.(isDirty);
+    }, [isDirty, onDirtyChange]);
 
     const handleSave = useCallback(async () => {
       if (!currentBusiness?.id) return;
@@ -157,9 +185,13 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
             setPendingStripFile(null);
           }
           queryClient.invalidateQueries({ queryKey: designKeys.all(currentBusiness.id) });
+          clearDraft();
+          lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           router.push(`/design/${created.id}`);
         } else if (design) {
           await updateDesign(currentBusiness.id, design.id, data);
+          clearDraft();
+          lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           onSave?.();
         }
       } catch (err) {
@@ -168,12 +200,14 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         setSaving(false);
         onSavingChange?.(false);
       }
-    }, [currentBusiness?.id, isNew, design, router, queryClient, onSave, onSavingChange, pendingLogoFile, pendingStripFile, t]);
+    }, [currentBusiness?.id, isNew, design, router, queryClient, onSave, onSavingChange, pendingLogoFile, pendingStripFile, clearDraft, t]);
 
     useImperativeHandle(ref, () => ({
       handleSave,
       saving,
-    }), [handleSave, saving]);
+      isDirty,
+      clearDraft,
+    }), [handleSave, saving, isDirty, clearDraft]);
 
     // Cleanup blob URLs on unmount
     useEffect(() => {
@@ -759,7 +793,16 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         {(headerLeft || headerRight) && (
           <div className="flex items-center justify-between mb-5">
             {headerLeft}
-            {headerRight}
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-xs text-muted-foreground transition-opacity duration-300 ${
+                  draftStatus === 'saved' ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {t('draftSaved')}
+              </span>
+              {headerRight}
+            </div>
           </div>
         )}
 

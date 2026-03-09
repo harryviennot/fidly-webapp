@@ -113,7 +113,12 @@
       "goToSettings": "Go to Settings",
       "businessInfoExplanation": "Business information is pulled from your account settings.",
       "viewFront": "View Front",
-      "viewBack": "View Back"
+      "viewBack": "View Back",
+      "draftSaved": "Draft saved locally",
+      "unsavedChangesTitle": "Unsaved changes",
+      "unsavedChangesDescription": "You have unsaved changes that will be lost if you leave this page.",
+      "leaveWithoutSaving": "Leave without saving",
+      "stayOnPage": "Stay on page"
     },
     "fieldEditor": {
       "label": "Label",
