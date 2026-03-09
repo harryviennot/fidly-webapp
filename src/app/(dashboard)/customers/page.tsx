@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useBusiness } from "@/contexts/business-context";
 import { useCustomers, useAddStamp, useRedeemReward, useVoidStamp, PAGE_SIZE } from "@/hooks/use-customers";

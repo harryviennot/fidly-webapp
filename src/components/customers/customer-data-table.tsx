@@ -236,34 +236,34 @@ export function CustomerDataTable({
                         <button
                           onClick={(e) => onRedeem(e, customer)}
                           disabled={isPendingRedeem}
-                          className="flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="flex items-center justify-center gap-1 w-7 h-7 xl:w-auto xl:h-auto xl:px-2 xl:py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                           style={{ background: "#FFF3E0", color: "#C4883D", border: "1px solid #F0DFC0" }}
                           title={t("actions.redeem")}
                         >
-                          <Gift className="w-3 h-3" weight="bold" />
-                          {t("actions.redeem")}
+                          <Gift className="w-3 h-3 shrink-0" weight="bold" />
+                          <span className="hidden xl:inline">{t("actions.redeem")}</span>
                         </button>
                       ) : (
                         <button
                           onClick={(e) => onAddStamp(e, customer)}
                           disabled={isPendingAddStamp}
-                          className="flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="flex items-center justify-center gap-1 w-7 h-7 xl:w-auto xl:h-auto xl:px-2 xl:py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                           style={{ background: "#E8F5E4", color: "#4A7C59", border: "1px solid #C8E6C4" }}
                           title={t("actions.addStamp")}
                         >
-                          <Stamp className="w-3 h-3" weight="bold" />
-                          {t("actions.addStamp")}
+                          <Stamp className="w-3 h-3 shrink-0" weight="bold" />
+                          <span className="hidden xl:inline">{t("actions.addStamp")}</span>
                         </button>
                       )}
                       <button
                         onClick={(e) => onVoid(e, customer)}
                         disabled={isPendingVoid}
-                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="flex items-center justify-center gap-1 w-7 h-7 xl:w-auto xl:h-auto xl:px-2 xl:py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ background: "#fff", color: "#C75050", border: "1px solid #DEDBD5" }}
                         title={t("actions.voidLast")}
                       >
-                        <Prohibit className="w-3 h-3" weight="bold" />
-                        {t("actions.voidLast")}
+                        <Prohibit className="w-3 h-3 shrink-0" weight="bold" />
+                        <span className="hidden xl:inline">{t("actions.voidLast")}</span>
                       </button>
                     </div>
                   </TableCell>
