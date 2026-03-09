@@ -40,6 +40,25 @@ export async function uploadBusinessLogo(
   return response.json();
 }
 
+export interface SignupQRResponse {
+  qr_code: string;
+  signup_url: string;
+  business_name: string;
+}
+
+export async function getBusinessSignupQR(businessId: string): Promise<SignupQRResponse> {
+  const response = await fetch(`${API_BASE_URL}/businesses/${businessId}/signup-qr`, {
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to fetch QR code');
+  }
+
+  return response.json();
+}
+
 export async function deleteBusinessLogo(businessId: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/businesses/${businessId}/logo`, {
     method: 'DELETE',

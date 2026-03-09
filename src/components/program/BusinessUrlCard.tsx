@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { CheckIcon, GlobeIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
+import { CheckIcon, GlobeIcon, DownloadSimpleIcon, FilePdfIcon } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
+import { getBusinessSignupQR } from '@/api/businesses';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -17,10 +18,22 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
   const { currentBusiness } = useBusiness();
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(true);
 
   const baseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || 'https://stampeo.app';
   const slug = currentBusiness?.url_slug || '';
   const fullUrl = `${baseUrl}/${slug}`;
+  const businessName = currentBusiness?.name || 'business';
+
+  useEffect(() => {
+    if (!currentBusiness?.id) return;
+    setQrLoading(true);
+    getBusinessSignupQR(currentBusiness.id)
+      .then((data) => setQrCode(data.qr_code))
+      .catch(() => {/* QR will stay null, skeleton hidden */})
+      .finally(() => setQrLoading(false));
+  }, [currentBusiness?.id]);
 
   const handleCopy = async () => {
     try {
@@ -41,6 +54,38 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error('Failed to copy');
+    }
+  };
+
+  const handleDownloadPng = () => {
+    if (!qrCode) return;
+    const link = document.createElement('a');
+    link.href = qrCode;
+    link.download = `${businessName}-qr-code.png`;
+    link.click();
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!qrCode) return;
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      doc.setFontSize(20);
+      doc.text(businessName, 105, 40, { align: 'center' });
+
+      // Convert data URL to raw base64 for jsPDF compatibility
+      const base64Data = qrCode.includes(',') ? qrCode.split(',')[1] : qrCode;
+      doc.addImage(base64Data, 'PNG', 52.5, 60, 100, 100);
+
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(fullUrl, 105, 175, { align: 'center' });
+
+      doc.save(`${businessName}-qr-code.pdf`);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      toast.error('Failed to generate PDF');
     }
   };
 
@@ -115,34 +160,33 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
       ) : (
         /* QR Code view */
         <div className="flex flex-col items-center py-4">
-          <div className="w-[180px] h-[180px] rounded-xl bg-[var(--paper)] border border-[var(--border)] flex items-center justify-center mb-3.5 relative overflow-hidden">
-            <svg width="140" height="140" viewBox="0 0 140 140">
-              {Array.from({ length: 14 }, (_, r) =>
-                Array.from({ length: 14 }, (_, c) => {
-                  const isCorner = (r < 3 && c < 3) || (r < 3 && c > 10) || (r > 10 && c < 3);
-                  const isBorder = (r < 4 && c < 4) || (r < 4 && c > 9) || (r > 9 && c < 4);
-                  const s = Math.sin(r * 7 + c * 13) * 0.5 + 0.5;
-                  const fill = isCorner ? '#1A1A1A' : isBorder ? (s > 0.4 ? '#1A1A1A' : 'none') : (s > 0.55 ? '#1A1A1A' : 'none');
-                  return fill !== 'none' ? (
-                    <rect key={`${r}-${c}`} x={c * 10} y={r * 10} width="8" height="8" rx="1" fill={fill} />
-                  ) : null;
-                })
-              ).flat()}
-              <rect x="50" y="50" width="40" height="40" rx="8" fill="#fff" />
-              <rect x="53" y="53" width="34" height="34" rx="6" fill="#4A7C59" />
-              <text x="70" y="75" textAnchor="middle" fill="#fff" fontSize="16" fontWeight="700" fontFamily="inherit">S</text>
-            </svg>
+          <div className="w-[180px] h-[180px] rounded-xl bg-white border border-[var(--border)] flex items-center justify-center mb-3.5 relative overflow-hidden">
+            {qrLoading ? (
+              <div className="w-[140px] h-[140px] rounded-lg bg-[var(--paper)] animate-pulse" />
+            ) : qrCode ? (
+              /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL */
+              <img src={qrCode} alt="QR Code" className="w-[150px] h-[150px]" />
+            ) : (
+              <div className="text-[12px] text-[#8A8A8A] text-center px-4">
+                QR code unavailable
+              </div>
+            )}
           </div>
           <div className="text-[12px] text-[#8A8A8A] mb-3">{t('scanToAdd')}</div>
           <div className="flex gap-2">
             <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border-medium)] bg-white text-[12px] font-medium text-[#555] cursor-pointer hover:bg-[var(--paper)] transition-colors"
+              onClick={handleDownloadPng}
+              disabled={!qrCode}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border-medium)] bg-white text-[12px] font-medium text-[#555] cursor-pointer hover:bg-[var(--paper)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <DownloadSimpleIcon className="w-3.5 h-3.5" /> {t('downloadPng')}
             </button>
-            <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border-medium)] bg-white text-[12px] font-medium text-[#555] cursor-pointer hover:bg-[var(--paper)] transition-colors">
-              <DownloadSimpleIcon className="w-3.5 h-3.5" /> {t('downloadSvg')}
+            <button
+              onClick={handleDownloadPdf}
+              disabled={!qrCode}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border-medium)] bg-white text-[12px] font-medium text-[#555] cursor-pointer hover:bg-[var(--paper)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FilePdfIcon className="w-3.5 h-3.5" /> {t('downloadPdf')}
             </button>
           </div>
         </div>
