@@ -493,6 +493,22 @@ html {
   display: none;
 }
 
+/* Thin styled scrollbar for form panels */
+.styled-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #D8D5CE transparent;
+}
+.styled-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.styled-scrollbar::-webkit-scrollbar-thumb {
+  background: #D8D5CE;
+  border-radius: 4px;
+}
+.styled-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

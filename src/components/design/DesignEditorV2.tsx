@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FlipHorizontal, Eye, SlidersHorizontal, CaretDown, GearSix } from '@phosphor-icons/react';
+import { Eye, SlidersHorizontal, CaretDown, GearSix, Palette, Stamp, TextT, ArrowUDownLeft, MapPin, Globe, Phone, Envelope, Clock, NotePencil, Check } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import {
@@ -108,6 +108,14 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const [iconColorOverridden, setIconColorOverridden] = useState(false);
     const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
     const [pendingStripFile, setPendingStripFile] = useState<File | null>(null);
+    const [customColors, setCustomColors] = useState<string[]>([]);
+
+    const addCustomColor = useCallback((hex: string) => {
+      setCustomColors((prev) => {
+        if (prev.some((c) => c.toLowerCase() === hex.toLowerCase())) return prev;
+        return [...prev, hex];
+      });
+    }, []);
 
     // Use ref to always have access to latest form data for save
     const formDataRef = useRef(formData);
@@ -332,89 +340,96 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Preview Panel ----
     const previewPanel = (
-      <div className="flex flex-col items-center flex-1 h-full">
-        {/* Wallet Type Toggle + Flip Button */}
-        <div className="mb-4 flex items-center gap-3">
-          <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
-            <TabsList className="rounded-full">
-              <TabsTrigger value="apple" className="rounded-full">{t('appleWallet')}</TabsTrigger>
-              <TabsTrigger value="google" className="rounded-full">{t('googleWallet')}</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full"
-            onClick={() => setShowBack(!showBack)}
-          >
-            <FlipHorizontal className="w-4 h-4 mr-2" />
-            {showBack ? t('front') : t('back')}
-          </Button>
-        </div>
+      <div className="flex flex-col items-center">
+        {/* Live Preview Card */}
+        <div className="w-full bg-white border border-[#EEEDEA] rounded-[14px] p-[18px] overflow-hidden">
+          {/* Header: title + wallet toggle */}
+          <div className="flex items-center justify-between mb-3.5">
+            <span className="text-[15px] font-semibold text-foreground">Live Preview</span>
+            <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
+              <TabsList className="rounded-full bg-[#F4F2EE] p-0.5 h-auto">
+                <TabsTrigger value="apple" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1 text-[11px] font-semibold">{t('appleWallet')}</TabsTrigger>
+                <TabsTrigger value="google" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1 text-[11px] font-semibold">{t('googleWallet')}</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-        {/* Card Preview with wallet switch animation */}
-        <div className="flex-1 flex items-center justify-center w-full">
-          <div className="w-full max-w-md wallet-card-container ">
-            {/* Apple Wallet with flip */}
-            <div className={`wallet-card ${previewWallet === 'apple' ? 'wallet-card-active' : 'wallet-card-left'}`}>
-              <div className="card-flip-container">
-                <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
-                  <div className="card-flip-front">
-                    <EditorCard
-                      design={formData}
-                      previewStamps={previewStamps}
-                      organizationName={formData.organization_name}
-                      showBack={false}
-                    />
+          {/* Card Preview with wallet switch animation */}
+          <div className="flex items-center justify-center w-full">
+            <div className="w-full">
+              <div className="wallet-card-container">
+                {/* Apple Wallet with flip */}
+                <div className={`wallet-card ${previewWallet === 'apple' ? 'wallet-card-active' : 'wallet-card-left'}`}>
+                  <div className="card-flip-container">
+                    <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
+                      <div className="card-flip-front">
+                        <EditorCard
+                          design={formData}
+                          previewStamps={previewStamps}
+                          organizationName={formData.organization_name}
+                          showBack={false}
+                        />
+                      </div>
+                      <div className="card-flip-back">
+                        <EditorCard
+                          design={formData}
+                          previewStamps={previewStamps}
+                          organizationName={formData.organization_name}
+                          showBack={true}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="card-flip-back">
-                    <EditorCard
-                      design={formData}
-                      previewStamps={previewStamps}
-                      organizationName={formData.organization_name}
-                      showBack={true}
-                    />
+                </div>
+                {/* Google Wallet with flip */}
+                <div className={`wallet-card ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
+                  <div className="card-flip-container">
+                    <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
+                      <div className="card-flip-front">
+                        <ScaledCardWrapper baseWidth={320} dynamicHeight>
+                          <GoogleWalletCard
+                            design={formData}
+                            stamps={previewStamps}
+                            organizationName={formData.organization_name}
+                          />
+                        </ScaledCardWrapper>
+                      </div>
+                      <div className="card-flip-back">
+                        <ScaledCardWrapper baseWidth={320} dynamicHeight>
+                          <GoogleWalletCard
+                            design={formData}
+                            stamps={previewStamps}
+                            organizationName={formData.organization_name}
+                            showBack
+                          />
+                        </ScaledCardWrapper>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            {/* Google Wallet with flip */}
-            <div className={`wallet-card ${previewWallet === 'google' ? 'wallet-card-active' : 'wallet-card-right'}`}>
-              <div className="card-flip-container">
-                <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
-                  <div className="card-flip-front">
-                    <ScaledCardWrapper baseWidth={320} dynamicHeight>
-                      <GoogleWalletCard
-                        design={formData}
-                        stamps={previewStamps}
-                        organizationName={formData.organization_name}
-                      />
-                    </ScaledCardWrapper>
-                  </div>
-                  <div className="card-flip-back">
-                    <ScaledCardWrapper baseWidth={320} dynamicHeight>
-                      <GoogleWalletCard
-                        design={formData}
-                        stamps={previewStamps}
-                        organizationName={formData.organization_name}
-                        showBack
-                      />
-                    </ScaledCardWrapper>
-                  </div>
-                </div>
-              </div>
+
+              {/* View Front/Back toggle bar */}
+              <button
+                type="button"
+                onClick={() => setShowBack(!showBack)}
+                className="w-full py-2 mt-3 border-t border-[#EEEDEA] text-[11px] font-semibold text-muted-foreground flex items-center justify-center gap-1.5 hover:text-foreground transition-colors"
+              >
+                <Eye className="w-3.5 h-3.5" weight="bold" />
+                {showBack ? t('viewFront') : t('viewBack')}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Slider + action buttons pinned to bottom */}
-        <div className="mt-auto w-full flex flex-col items-center pb-6">
+        {/* Slider + action buttons below the card */}
+        <div className="mt-4 w-full flex flex-col items-center">
           {/* Stamp Slider */}
           {!showBack && (
-            <div className="w-full max-w-md px-4">
+            <div className="w-full">
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-sm text-muted-foreground">{t('previewStamps')}</Label>
-                <span className="text-sm font-medium">
+                <Label className="text-[11px] text-muted-foreground">{t('previewStamps')}</Label>
+                <span className="text-[11px] font-medium text-muted-foreground">
                   {previewStamps} / {totalStamps}
                 </span>
               </div>
@@ -430,7 +445,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           )}
 
           {/* Desktop: Action buttons below preview */}
-          <div className={`${isCompact ? 'hidden' : 'flex'} flex-col gap-3 mt-6 w-full max-w-md`}>
+          <div className={`${isCompact ? 'hidden' : 'flex'} flex-col gap-3 mt-5 w-full`}>
             {design && !isActive && (
               <Button
                 variant="outline"
@@ -448,10 +463,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // ---- Form Panel ----
     const formPanel = (
-      <div className="space-y-4">
-        {/* Branding Section */}
+      <div className="space-y-3">
+        {/* Visual Identity Section */}
         <CollapsibleSection
           title={t('branding')}
+          subtitle={t('brandingSubtitle')}
+          icon={<Palette className="w-8 h-8 text-muted-foreground" weight='bold' />}
           isOpen={openSections.branding}
           onToggle={() => toggleSection('branding')}
           badge={brandingBadge}
@@ -491,6 +508,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               colors={backgroundColors}
               value={bgHex}
               onChange={(hex) => updateColorField('background_color', hex)}
+              customColors={customColors}
+              onCustomColor={addCustomColor}
             />
 
             <ColorPicker
@@ -500,6 +519,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               value={labelHex}
               onChange={(hex) => updateColorField('label_color', hex)}
               annotation={t('appleOnly')}
+              customColors={customColors}
+              onCustomColor={addCustomColor}
             />
             {labelContrast < 3 && (
               <p className="text-xs text-amber-600 -mt-1">{t('lowContrastLabel')}</p>
@@ -512,6 +533,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               value={textHex}
               onChange={(hex) => updateColorField('foreground_color', hex)}
               annotation={t('appleOnly')}
+              customColors={customColors}
+              onCustomColor={addCustomColor}
             />
             {textContrast < 3 && (
               <p className="text-xs text-amber-600 -mt-1">{t('lowContrastText')}</p>
@@ -522,6 +545,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         {/* Stamps Section */}
         <CollapsibleSection
           title={t('stampsSection')}
+          subtitle={t('stampsSectionSubtitle')}
+          icon={<Stamp className="w-8 h-8 text-muted-foreground" weight='bold' />}
           isOpen={openSections.stamps}
           onToggle={() => toggleSection('stamps')}
           badge={stampsBadge}
@@ -551,6 +576,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               colors={accentColors}
               value={accentHex}
               onChange={(hex) => updateColorField('stamp_filled_color', hex)}
+              customColors={customColors}
+              onCustomColor={addCustomColor}
             />
 
             <ColorPicker
@@ -562,6 +589,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                 setIconColorOverridden(true);
                 updateColorField('icon_color', hex);
               }}
+              customColors={customColors}
+              onCustomColor={addCustomColor}
             />
 
             {/* Advanced controls — collapsed by default */}
@@ -583,6 +612,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                     colors={emptyStampColors}
                     value={emptyStampHex}
                     onChange={(hex) => updateColorField('stamp_empty_color', hex)}
+                    customColors={customColors}
+                    onCustomColor={addCustomColor}
                   />
 
                   <ColorPicker
@@ -591,6 +622,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                     colors={emptyStampColors}
                     value={borderColorHex}
                     onChange={(hex) => updateColorField('stamp_border_color', hex)}
+                    customColors={customColors}
+                    onCustomColor={addCustomColor}
                   />
 
                   <div className="space-y-2">
@@ -631,6 +664,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         {/* Content Section */}
         <CollapsibleSection
           title={t('content')}
+          subtitle={t('contentSubtitle')}
+          icon={<TextT className="w-8 h-8 text-muted-foreground" weight='bold' />}
           isOpen={openSections.content}
           onToggle={() => toggleSection('content')}
           badge={contentBadge}
@@ -657,6 +692,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         {/* Back Section */}
         <CollapsibleSection
           title={t('backSection')}
+          subtitle={t('backSectionSubtitle')}
+          icon={<ArrowUDownLeft className="w-8 h-8 text-muted-foreground" weight='bold' />}
           isOpen={openSections.back}
           onToggle={() => toggleSection('back')}
           badge={backBadge}
@@ -717,29 +754,27 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     );
 
     return (
-      <div className="relative -mt-6 -mb-6">
-        {/* Compact/mobile: header row */}
-        {isCompact && (
-          <div className="flex items-center justify-between pt-6 mb-6 px-px">
+      <div className="relative">
+        {/* Header row — always full-width above both columns */}
+        {(headerLeft || headerRight) && (
+          <div className="flex items-center justify-between mb-5">
             {headerLeft}
             {headerRight}
           </div>
         )}
 
         {isCompact ? (
-          <div className="px-px">
+          <div>
             {mobileShowPreview ? previewPanel : formPanel}
           </div>
         ) : (
-          <div className="flex flex-row gap-8 h-[calc(100dvh-64px)]">
-            {/* Left column: title + form, scrolls internally */}
-            <div className="w-[35%] flex-shrink-0 overflow-y-auto hide-scrollbar pt-6 pb-6">
-              {headerLeft && <div className="mb-6">{headerLeft}</div>}
+          <div className="flex flex-row gap-4 items-start">
+            {/* Left column: form flows naturally, parent handles scroll */}
+            <div className="flex-1 min-w-0 pb-12">
               {formPanel}
             </div>
-            {/* Right column: save button + preview, fixed */}
-            <div className="flex-1 flex flex-col pt-6">
-              {headerRight && <div className="self-end mb-4">{headerRight}</div>}
+            {/* Right column: sticky preview pinned to right edge */}
+            <div className="w-[380px] flex-shrink-0 sticky top-6">
               {previewPanel}
             </div>
           </div>
@@ -762,6 +797,16 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       </div>
     );
   });
+
+/** Type-specific icons for business info entries */
+const TYPE_ICONS: Record<string, typeof Clock> = {
+  hours: Clock,
+  website: Globe,
+  phone: Phone,
+  email: Envelope,
+  address: MapPin,
+  custom: NotePencil,
+};
 
 /** Inline component: shows inherited business info with visibility toggles */
 function BusinessInfoFields({
@@ -786,8 +831,7 @@ function BusinessInfoFields({
 
   if (businessInfo.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-border p-3 space-y-2">
-        <p className="text-xs text-muted-foreground">{t('fromBusinessSettings')}</p>
+      <div className="rounded-xl border border-dashed border-border p-4 space-y-2">
         <p className="text-xs text-muted-foreground">{t('noBusinessInfo')}</p>
         <Link href="/settings" className="text-xs text-[var(--accent)] hover:underline inline-flex items-center gap-1">
           <GearSix className="w-3 h-3" />
@@ -798,33 +842,44 @@ function BusinessInfoFields({
   }
 
   return (
-    <div className="rounded-lg border border-border p-3 space-y-2">
-      <p className="text-xs font-medium text-muted-foreground">{t('fromBusinessSettings')}</p>
+    <div className="space-y-1.5">
       {businessInfo.map((entry) => {
         const isHidden = hiddenKeys.includes(entry.key);
         const preview = getEntryPreview(entry);
+        const Icon = TYPE_ICONS[entry.type] || NotePencil;
         return (
-          <label
+          <button
             key={entry.key}
-            className="flex items-center gap-3 py-1.5 cursor-pointer group"
+            type="button"
+            onClick={() => onToggleKey(entry.key)}
+            className={`flex items-center gap-3 w-full p-3 rounded-xl cursor-pointer transition-all text-left ${isHidden
+              ? 'bg-muted/30 border border-border'
+              : 'bg-[var(--accent-light)]/50 border border-[var(--accent)]/20'
+              }`}
           >
-            <input
-              type="checkbox"
-              checked={!isHidden}
-              onChange={() => onToggleKey(entry.key)}
-              className="rounded border-border text-[var(--accent)] focus:ring-[var(--accent)]"
-            />
+            <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 transition-all ${isHidden ? 'bg-white border border-border' : 'bg-[var(--accent)]'
+              }`}>
+              {!isHidden && <Check className="w-3 h-3 text-white" weight="bold" />}
+            </div>
+            <Icon className={`w-4 h-4 flex-shrink-0 ${isHidden ? 'text-muted-foreground' : 'text-[var(--accent)]'}`} />
             <div className={`flex-1 min-w-0 ${isHidden ? 'opacity-40' : ''}`}>
-              <span className="text-sm font-medium">
+              <span className="text-sm font-semibold">
                 {entry.type === 'custom' ? ((entry.data.label as string) || TYPE_LABELS.custom) : (TYPE_LABELS[entry.type] || entry.type)}
               </span>
               {preview && (
                 <p className="text-xs text-muted-foreground truncate">{preview}</p>
               )}
             </div>
-          </label>
+          </button>
         );
       })}
+      <p className="text-xs text-muted-foreground mt-3">
+        {t('businessInfoExplanation')}{' '}
+        <Link href="/settings" className="text-[var(--accent)] hover:underline inline-flex items-center gap-1">
+          <GearSix className="w-3 h-3" />
+          {t('goToSettings')}
+        </Link>
+      </p>
     </div>
   );
 }
