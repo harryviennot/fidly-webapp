@@ -2,6 +2,7 @@
   "settings": {
     "sidebar": {
       "businessInfo": "Informations de l'entreprise",
+      "cardInfo": "Infos carte",
       "language": "Langue",
       "theme": "Thème"
     },
@@ -13,6 +14,59 @@
       "businessLogo": "Logo de l'entreprise",
       "logoHint": "PNG ou JPG, max 2 Mo"
     },
+    "cardInfo": {
+      "title": "Informations de la carte",
+      "description": "Ces informations apparaîtront au dos des cartes de fidélité de vos clients",
+      "addInfo": "Ajouter une info",
+      "noInfoYet": "Aucune info ajoutée. Ajoutez les détails de votre entreprise pour les afficher au dos des cartes de fidélité.",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "types": {
+        "hours": "Horaires d'ouverture",
+        "website": "Site web",
+        "phone": "Téléphone",
+        "email": "Email",
+        "address": "Adresse",
+        "custom": "Champ personnalisé"
+      },
+      "hours": {
+        "title": "Horaires d'ouverture",
+        "days": "Jours",
+        "daysPlaceholder": "ex. Lun-Ven",
+        "open": "Ouverture",
+        "close": "Fermeture",
+        "closed": "Fermé",
+        "addRow": "Ajouter un créneau",
+        "defaultMonFri": "Lun-Ven",
+        "defaultSat": "Sam",
+        "defaultSun": "Dim"
+      },
+      "website": {
+        "title": "Site web",
+        "urlPlaceholder": "https://exemple.com"
+      },
+      "phone": {
+        "title": "Téléphone",
+        "numberPlaceholder": "+33 1 23 45 67 89"
+      },
+      "email": {
+        "title": "Email",
+        "emailPlaceholder": "contact@exemple.com"
+      },
+      "address": {
+        "title": "Adresse",
+        "addressPlaceholder": "123 Rue de Paris, 75001 Paris"
+      },
+      "custom": {
+        "title": "Champ personnalisé",
+        "labelPlaceholder": "Titre du champ (ex. Conditions générales)",
+        "valuePlaceholder": "Contenu du champ..."
+      },
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "saved": "Informations enregistrées",
+      "saveFailed": "Échec de l'enregistrement des informations"
+    },
     "language": {
       "title": "Langue de votre entreprise",
       "description": "C'est la langue principale de votre entreprise, utilisée pour votre programme de fidélité",
@@ -23,7 +77,7 @@
       "title": "Personnalisation du thème",
       "description": "Personnalisez les couleurs de votre tableau de bord",
       "accentColor": "Couleur d'accentuation",
-      "backgroundColor": "Couleur d'arrière-plan",
+      "backgroundColor": "Couleur secondaire",
       "unsavedChanges": "Vous avez des modifications non enregistrées",
       "upToDate": "Le thème est à jour",
       "saveTheme": "Enregistrer le thème"

@@ -2,6 +2,7 @@
   "settings": {
     "sidebar": {
       "businessInfo": "Business Information",
+      "cardInfo": "Card Info",
       "language": "Language",
       "theme": "Theme"
     },
@@ -13,6 +14,59 @@
       "businessLogo": "Business Logo",
       "logoHint": "PNG or JPG, max 2MB"
     },
+    "cardInfo": {
+      "title": "Card Information",
+      "description": "This information will appear on the back of your customers' loyalty cards",
+      "addInfo": "Add info",
+      "noInfoYet": "No card info added yet. Add your business details to display on the back of loyalty cards.",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "types": {
+        "hours": "Store Hours",
+        "website": "Website",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "custom": "Custom Field"
+      },
+      "hours": {
+        "title": "Store Hours",
+        "days": "Days",
+        "daysPlaceholder": "e.g. Mon-Fri",
+        "open": "Open",
+        "close": "Close",
+        "closed": "Closed",
+        "addRow": "Add time slot",
+        "defaultMonFri": "Mon-Fri",
+        "defaultSat": "Sat",
+        "defaultSun": "Sun"
+      },
+      "website": {
+        "title": "Website",
+        "urlPlaceholder": "https://example.com"
+      },
+      "phone": {
+        "title": "Phone",
+        "numberPlaceholder": "+33 1 23 45 67 89"
+      },
+      "email": {
+        "title": "Email",
+        "emailPlaceholder": "contact@example.com"
+      },
+      "address": {
+        "title": "Address",
+        "addressPlaceholder": "123 Rue de Paris, 75001 Paris"
+      },
+      "custom": {
+        "title": "Custom Field",
+        "labelPlaceholder": "Field title (e.g. Terms & Conditions)",
+        "valuePlaceholder": "Field content..."
+      },
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Card info saved",
+      "saveFailed": "Failed to save card info"
+    },
     "language": {
       "title": "Your Business Language",
       "description": "This is your main business language, and will be used for your loyalty program",
@@ -23,7 +77,7 @@
       "title": "Theme Customization",
       "description": "Customize the colors of your dashboard",
       "accentColor": "Accent Color",
-      "backgroundColor": "Background Color",
+      "backgroundColor": "Secondary Color",
       "unsavedChanges": "You have unsaved changes",
       "upToDate": "Theme is up to date",
       "saveTheme": "Save Theme"

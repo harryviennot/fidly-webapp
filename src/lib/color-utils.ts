@@ -50,52 +50,28 @@ export interface ColorPreset {
   value: string;
 }
 
-export const backgroundColors: ColorPreset[] = [
-  { name: "Dark", value: "#1c1c1e" },
-  { name: "Black", value: "#000000" },
-  { name: "Navy", value: "#1a237e" },
-  { name: "Wine", value: "#4a1c40" },
-  { name: "Slate", value: "#37474f" },
-  { name: "Cream", value: "#f5f0e8" },
-  { name: "White", value: "#ffffff" },
+export const designColors: readonly ColorPreset[] = [
+  { name: "Sage", value: "#4A7C59" },
+  { name: "Forest", value: "#3D6B4A" },
+  { name: "Ocean", value: "#2D5F8A" },
+  { name: "Sky", value: "#3D7CAF" },
+  { name: "Amber", value: "#C4883D" },
+  { name: "Caramel", value: "#A06B2D" },
+  { name: "Plum", value: "#8B5A8B" },
+  { name: "Berry", value: "#6B3A6B" },
+  { name: "Coral", value: "#C75050" },
+  { name: "Crimson", value: "#A03D3D" },
+  { name: "Charcoal", value: "#2D2D2D" },
+  { name: "Black", value: "#1A1A1A" },
+  { name: "Gray", value: "#555555" },
+  { name: "Silver", value: "#888888" },
+  { name: "Linen", value: "#E8E5DE" },
+  { name: "White", value: "#FFFFFF" },
 ];
 
-export const accentColors: ColorPreset[] = [
-  { name: "Orange", value: "#f97316" },
-  { name: "Coral", value: "#e57373" },
-  { name: "Red", value: "#f44336" },
-  { name: "Teal", value: "#26a69a" },
-  { name: "Purple", value: "#7e57c2" },
-  { name: "Blue", value: "#42a5f5" },
-  { name: "Green", value: "#4caf50" },
-];
-
-export const iconColors: ColorPreset[] = [
-  { name: "White", value: "#ffffff" },
-  { name: "Black", value: "#000000" },
-  { name: "Blue", value: "#3b82f6" },
-  { name: "Emerald", value: "#10b981" },
-  { name: "Amber", value: "#f59e0b" },
-  { name: "Rose", value: "#f43f5e" },
-  { name: "Cyan", value: "#06b6d4" },
-];
-
-export const textColors: ColorPreset[] = [
-  { name: "White", value: "#ffffff" },
-  { name: "Black", value: "#000000" },
-  { name: "Dark Gray", value: "#374151" },
-  { name: "Light Gray", value: "#d1d5db" },
-  { name: "Cream", value: "#f5f5f0" },
-  { name: "Slate", value: "#64748b" },
-  { name: "Navy", value: "#1e3a5f" },
-];
-
-export const emptyStampColors: ColorPreset[] = [
-  { name: "White", value: "#ffffff" },
-  { name: "Light Gray", value: "#e5e7eb" },
-  { name: "Gray", value: "#9ca3af" },
-  { name: "Dark", value: "#374151" },
-  { name: "Soft Pink", value: "#fce4ec" },
-  { name: "Soft Blue", value: "#e3f2fd" },
-  { name: "Transparent", value: "#00000000" },
-];
+// Backwards-compatible aliases — all use the same rich palette
+export const backgroundColors = designColors;
+export const accentColors = designColors;
+export const iconColors = designColors;
+export const textColors = designColors;
+export const emptyStampColors = designColors;

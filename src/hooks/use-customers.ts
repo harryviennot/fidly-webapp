@@ -38,7 +38,7 @@ export function useAddStamp(businessId: string | undefined) {
       });
       const previousMap = new Map(queries);
       for (const [key, data] of queries) {
-        if (data) {
+        if (data && Array.isArray(data.data)) {
           queryClient.setQueryData<PaginatedCustomerResponse>(key, {
             ...data,
             data: data.data.map((c) =>
@@ -81,7 +81,7 @@ export function useRedeemReward(businessId: string | undefined) {
       });
       const previousMap = new Map(queries);
       for (const [key, data] of queries) {
-        if (data) {
+        if (data && Array.isArray(data.data)) {
           queryClient.setQueryData<PaginatedCustomerResponse>(key, {
             ...data,
             data: data.data.map((c) =>
@@ -134,7 +134,7 @@ export function useVoidStamp(businessId: string | undefined) {
       });
       const previousMap = new Map(queries);
       for (const [key, data] of queries) {
-        if (data) {
+        if (data && Array.isArray(data.data)) {
           queryClient.setQueryData<PaginatedCustomerResponse>(key, {
             ...data,
             data: data.data.map((c) =>

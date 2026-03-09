@@ -1,5 +1,7 @@
 {
   "account": {
+    "title": "My Account",
+    "subtitle": "Manage your profile and preferences",
     "sections": {
       "profilePicture": "Profile Picture",
       "password": "Password",

@@ -1,12 +1,20 @@
 {
   "team": {
-    "title": "Membres de l'équipe",
+    "title": "Équipe",
+    "subtitle": "Gérez qui peut accéder à votre programme de fidélité",
+    "addMember": "Ajouter un membre",
     "inviteMember": "Inviter un membre",
     "pendingInvitations": "Invitations en attente",
     "memberCount": "{count, plural, one {# Membre} other {# Membres}}",
     "noMembers": "Aucun membre dans l'équipe.",
     "noPendingInvitations": "Aucune invitation en attente",
     "loadFailed": "Impossible de charger les données de l'équipe",
+    "searchPlaceholder": "Rechercher par nom ou email...",
+    "filterAll": "Tous",
+    "filterOwner": "Propriétaire",
+    "filterAdmin": "Admin",
+    "filterScanner": "Scanner",
+    "showingCount": "{filtered} sur {total} membres affichés",
     "stats": {
       "teamMembers": "Membres de l'équipe",
       "scanners": "Scanners",
@@ -23,25 +31,38 @@
       "activeThisWeek": "Actif cette semaine",
       "daysAgo": "il y a {days} jours",
       "changeRole": "Changer le rôle",
-      "remove": "Supprimer"
+      "remove": "Supprimer",
+      "stampsGiven": "{count} tampons",
+      "statusOnline": "En ligne",
+      "statusInvited": "Invité",
+      "statusOffline": "Hors ligne"
     },
     "table": {
       "member": "Membre",
+      "email": "Email",
       "role": "Rôle",
-      "joined": "Rejoint le"
+      "status": "Statut",
+      "stampsGiven": "Tampons donnés",
+      "joined": "Rejoint le",
+      "added": "Ajouté {date}",
+      "resend": "Renvoyer",
+      "roleAdmin": "Admin",
+      "roleScanner": "Scanner",
+      "roleAdminDesc": "Accès limité au tableau de bord",
+      "roleScannerDesc": "Accès à l'application scanner uniquement"
     },
     "invite": {
-      "title": "Inviter un membre",
-      "description": "Envoyez un email d'invitation. Ils créeront un compte en acceptant.",
+      "title": "Ajouter un membre",
+      "description": "Cette personne recevra un email d'invitation",
       "email": "Adresse email",
-      "emailPlaceholder": "collegue@exemple.com",
-      "name": "Nom (optionnel)",
-      "namePlaceholder": "Jean Dupont",
+      "emailPlaceholder": "ex. alex@entreprise.com",
+      "name": "Nom complet",
+      "namePlaceholder": "ex. Alex Rivera",
       "nameHint": "Utilisé pour personnaliser l'email d'invitation",
       "role": "Rôle",
       "selectRole": "Sélectionner un rôle",
-      "scannerDescription": "Peut scanner les passes clients et ajouter des tampons via l'application mobile",
-      "adminDescription": "Peut gérer les membres de l'équipe et accéder à toutes les fonctionnalités",
+      "scannerDescription": "Accès à l'application scanner uniquement",
+      "adminDescription": "Accès limité au tableau de bord",
       "adminOnlyScanner": "En tant qu'administrateur, vous ne pouvez inviter que des scanners",
       "cancel": "Annuler",
       "sending": "Envoi...",
@@ -60,8 +81,8 @@
       "cancelling": "Annulation..."
     },
     "removeDialog": {
-      "title": "Supprimer le membre ?",
-      "description": "Êtes-vous sûr de vouloir supprimer {name} de l'équipe ? Cette personne perdra l'accès à cette entreprise.",
+      "title": "Supprimer {name} ?",
+      "description": "Cette personne perdra l'accès à l'application scanner et toutes les permissions associées. Cette action est irréversible.",
       "cancel": "Annuler",
       "remove": "Supprimer"
     },
@@ -73,12 +94,13 @@
     },
     "emptyState": {
       "title": "Constituez votre équipe",
-      "description": "Ajoutez des membres pour que vos employés puissent scanner les cartes de fidélité et aider à gérer votre entreprise.",
-      "adminRole": "Administrateur",
-      "adminDescription": "Gérer les membres de l'équipe, voir les analyses et configurer les paramètres",
+      "description": "Invitez des employés pour gérer votre programme de fidélité. Les admins ont un accès limité au tableau de bord, tandis que les scanners peuvent tamponner les cartes depuis l'application mobile.",
+      "onlyMember": "Vous êtes actuellement le seul membre de l'équipe.",
+      "adminRole": "Admin",
+      "adminDescription": "Accès au tableau de bord",
       "scannerRole": "Scanner",
-      "scannerDescription": "Scanner les passes clients et ajouter des tampons via l'application mobile",
-      "inviteFirst": "Invitez votre premier membre"
+      "scannerDescription": "Tamponner les cartes sur mobile",
+      "inviteFirst": "Invitez votre premier employé"
     },
     "toasts": {
       "roleUpdated": "Rôle mis à jour : {role}",

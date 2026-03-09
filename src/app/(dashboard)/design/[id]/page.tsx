@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { PencilSimple, FloppyDisk, ArrowsClockwise, Translate } from '@phosphor-icons/react';
-import { CardDesign, CardDesignUpdate } from '@/types';
-import { getDesign, updateDesign } from '@/api';
+import { CardDesign, CardDesignUpdate, LoyaltyProgram } from '@/types';
+import { getDesign, updateDesign, getPrograms } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
+import { DesignEditorSkeleton } from '@/components/design/DesignEditorSkeleton';
 import TranslationsDialog from '@/components/design/TranslationsDialog';
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -33,6 +35,7 @@ export default function EditDesignPage() {
   const editorRef = useRef<DesignEditorRef>(null);
   const t = useTranslations('designEditor.pages');
   const tDesign = useTranslations('designEditor');
+  const tEditor = useTranslations('designEditor.editor');
   const tTranslations = useTranslations('designEditor.translations');
 
   const [design, setDesign] = useState<CardDesign | null>(null);
@@ -43,14 +46,26 @@ export default function EditDesignPage() {
   const [designName, setDesignName] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [translationsOpen, setTranslationsOpen] = useState(false);
+  const [program, setProgram] = useState<LoyaltyProgram | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+
+  const handleConfirmLeave = useCallback(() => {
+    editorRef.current?.clearDraft();
+  }, []);
+  const { showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty, handleConfirmLeave);
 
   useEffect(() => {
     async function loadDesign() {
       if (!currentBusiness?.id) return;
       try {
-        const data = await getDesign(currentBusiness.id, designId);
+        const [data, programs] = await Promise.all([
+          getDesign(currentBusiness.id, designId),
+          getPrograms(currentBusiness.id),
+        ]);
         setDesign(data);
         setDesignName(data.name);
+        const p = programs.find((p) => p.is_default) || programs[0];
+        if (p) setProgram(p);
       } catch (err) {
         setError(err instanceof Error ? err.message : t('failedToLoad'));
       } finally {
@@ -79,7 +94,7 @@ export default function EditDesignPage() {
       ? t('savedActive')
       : t('savedDraft')
     );
-    router.push('/');
+    router.push('/program/design');
   };
 
   // Target locale is the opposite of the business's primary locale
@@ -98,11 +113,7 @@ export default function EditDesignPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <DesignEditorSkeleton />;
   }
 
   if (error || !design) {
@@ -124,8 +135,11 @@ export default function EditDesignPage() {
         ref={editorRef}
         design={design}
         onSavingChange={setSaving}
+        onDirtyChange={setIsDirty}
         onSave={handleSaveComplete}
         designName={designName}
+        programTotalStamps={program?.config?.total_stamps}
+        programName={program?.name}
         headerLeft={
           <div className="flex items-center gap-3">
             {editingName ? (
@@ -208,6 +222,21 @@ export default function EditDesignPage() {
         targetLocale={targetLocale}
         onSave={handleSaveTranslations}
       />
+
+      <AlertDialog open={showLeaveDialog} onOpenChange={(open) => !open && cancelLeave()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tEditor('unsavedChangesTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tEditor('unsavedChangesDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full" onClick={cancelLeave}>{tEditor('stayOnPage')}</AlertDialogCancel>
+            <AlertDialogAction className="rounded-full" onClick={confirmLeave}>{tEditor('leaveWithoutSaving')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

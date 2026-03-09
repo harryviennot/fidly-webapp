@@ -1,6 +1,10 @@
 {
   "customers": {
     "title": "Clients",
+    "subtitle": "Gérez et suivez tous vos porteurs de carte de fidélité",
+    "export": "Exporter",
+    "addCustomer": "Ajouter un client",
+    "customerProfile": "Profil client",
     "loading": "Chargement des clients...",
     "loadFailed": "Impossible de charger les clients. V\u00e9rifiez que le serveur est en cours d'ex\u00e9cution.",
     "searchPlaceholder": "Rechercher par nom ou email...",
@@ -13,7 +17,8 @@
       "segment": "Segment",
       "lastVisit": "Derni\u00e8re visite",
       "redemptions": "\u00c9changes",
-      "action": "Action"
+      "action": "Action",
+      "actions": "Actions"
     },
     "stats": {
       "totalCustomers": "Total Clients",
@@ -46,7 +51,8 @@
       "redeemSuccessToast": "R\u00e9compense \u00e9chang\u00e9e !",
       "redeemFailedToast": "\u00c9chec de l'\u00e9change",
       "voidSuccessToast": "Tampon annul\u00e9",
-      "voidFailedToast": "\u00c9chec de l'annulation"
+      "voidFailedToast": "\u00c9chec de l'annulation",
+      "noVoidableStamp": "Aucun tampon à annuler"
     },
     "toasts": {
       "stampAdded": "Tampon ajout\u00e9 pour {name}",

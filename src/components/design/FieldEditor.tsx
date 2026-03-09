@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { PassField } from '@/types';
-import { ArrowUp, ArrowDown, Trash, Plus } from '@phosphor-icons/react';
+import { CaretUp, CaretDown, Trash, Plus } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -45,66 +45,67 @@ export default function FieldEditor({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-[15px] font-medium">{title}</span>
         <span className="text-xs text-muted-foreground">{fields.length} / {maxFields}</span>
       </div>
 
       {fields.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {fields.map((field, index) => (
-            <div key={field.key} className="flex items-start gap-2">
-              <div className="flex-1 flex flex-col gap-1.5">
-                <Input
-                  placeholder={t('label')}
-                  value={field.label}
-                  onChange={(e) => updateField(index, { label: e.target.value })}
-                  className="h-9 text-sm"
-                />
-                <textarea
-                  placeholder={t('value')}
-                  value={field.value}
-                  onChange={(e) => updateField(index, { value: e.target.value })}
-                  rows={1}
-                  className="min-h-[36px] border border-input bg-background text-sm rounded-md px-3 py-2 w-full resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  style={{ fieldSizing: 'content' } as React.CSSProperties}
-                />
-              </div>
-              <div className="flex items-center gap-0.5">
-                <Button
+            <div
+              key={field.key}
+              data-field-id={field.key}
+              className="flex items-center gap-2 bg-muted/30 border border-border rounded-xl p-2.5"
+            >
+              {/* Reorder arrows */}
+              <div className="flex flex-col gap-0.5 flex-shrink-0">
+                <button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
                   onClick={() => moveField(index, 'up')}
                   disabled={index === 0}
+                  className="w-5 h-5 flex items-center justify-center rounded text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-default transition-colors"
                   title={t('moveUp')}
                 >
-                  <ArrowUp className="w-3.5 h-3.5" />
-                </Button>
-                <Button
+                  <CaretUp className="w-3 h-3" weight="bold" />
+                </button>
+                <button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
                   onClick={() => moveField(index, 'down')}
                   disabled={index === fields.length - 1}
+                  className="w-5 h-5 flex items-center justify-center rounded text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-default transition-colors"
                   title={t('moveDown')}
                 >
-                  <ArrowDown className="w-3.5 h-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => removeField(index)}
-                  title={t('remove')}
-                >
-                  <Trash className="w-3.5 h-3.5" />
-                </Button>
+                  <CaretDown className="w-3 h-3" weight="bold" />
+                </button>
               </div>
+
+              {/* Label input */}
+              <Input
+                placeholder={t('label')}
+                value={field.label}
+                onChange={(e) => updateField(index, { label: e.target.value })}
+                className="h-9 text-sm font-semibold w-[35%] flex-shrink-0"
+              />
+
+              {/* Value input */}
+              <Input
+                placeholder={t('value')}
+                value={field.value}
+                onChange={(e) => updateField(index, { value: e.target.value })}
+                className="h-9 text-sm flex-1 min-w-0"
+              />
+
+              {/* Delete button */}
+              <button
+                type="button"
+                onClick={() => removeField(index)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex-shrink-0 transition-colors"
+                title={t('remove')}
+              >
+                <Trash className="w-3.5 h-3.5" />
+              </button>
             </div>
           ))}
         </div>
@@ -115,7 +116,7 @@ export default function FieldEditor({
           type="button"
           variant="outline"
           size="sm"
-          className="w-full"
+          className="w-full border-dashed"
           onClick={addField}
         >
           <Plus className="w-3.5 h-3.5 mr-1.5" />

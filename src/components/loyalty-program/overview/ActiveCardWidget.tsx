@@ -42,7 +42,7 @@ export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
                 {
                   label: t('switchCard'),
                   icon: <ArrowsLeftRightIcon className="h-4 w-4" />,
-                  href: '/loyalty-program/templates',
+                  href: '/program/templates',
                 },
               ]
               : []),

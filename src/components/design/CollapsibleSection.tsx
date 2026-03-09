@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 
 interface CollapsibleSectionProps {
   title: string;
+  subtitle?: string;
   isOpen: boolean;
   onToggle: () => void;
   children: React.ReactNode;
@@ -20,6 +21,7 @@ interface CollapsibleSectionProps {
 
 export function CollapsibleSection({
   title,
+  subtitle,
   isOpen,
   onToggle,
   children,
@@ -29,25 +31,26 @@ export function CollapsibleSection({
 }: CollapsibleSectionProps) {
   return (
     <Collapsible open={isOpen} onOpenChange={onToggle}>
-      <div className="border rounded-2xl overflow-hidden">
+      <div className="bg-white border border-[#EEEDEA] rounded-xl overflow-hidden">
         <CollapsibleTrigger asChild>
           <button
             type="button"
-            className="w-full px-4 py-3 flex items-center justify-between bg-muted/50 hover:bg-muted transition-colors"
+            className="w-full px-4 py-4 flex items-center gap-2.5 cursor-pointer border-none bg-transparent hover:bg-muted/30 transition-colors text-left"
           >
-            <div className="flex items-center gap-2">
-              {icon}
-              <span className="text-base font-medium">{title}</span>
-              {annotation && (
-                <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{annotation}</span>
-              )}
-              {badge === 'complete' && (
-                <Check className="w-4 h-4 text-green-600" weight="bold" />
-              )}
+            {icon && <span className="flex-shrink-0">{icon}</span>}
+            <div className="flex-1 min-w-0">
+              <div className="text-[15px] font-semibold text-foreground">{title}</div>
+              {subtitle && <div className="text-[11px] text-muted-foreground mt-0.5">{subtitle}</div>}
             </div>
+            {annotation && (
+              <span className="text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full flex-shrink-0">{annotation}</span>
+            )}
+            {badge === 'complete' && (
+              <Check className="w-4 h-4 text-green-600 flex-shrink-0" weight="bold" />
+            )}
             <CaretDown
               className={cn(
-                'w-4 h-4 transition-transform duration-200',
+                'w-3.5 h-3.5 text-muted-foreground transition-transform duration-250 flex-shrink-0',
                 isOpen && 'rotate-180'
               )}
               weight="bold"
@@ -55,7 +58,7 @@ export function CollapsibleSection({
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="collapsible-content">
-          <div className="p-4 border-t">{children}</div>
+          <div className="px-5 pb-5">{children}</div>
         </CollapsibleContent>
       </div>
     </Collapsible>

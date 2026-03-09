@@ -27,36 +27,36 @@ const TYPE_CONFIG: Record<
     icon: StampIcon,
     iconColor: "text-[var(--accent)]",
     bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-emerald-50",
-    deltaText: "text-emerald-700",
+    deltaBg: "bg-[#E8F5E4]",
+    deltaText: "text-[#4A7C59]",
   },
   reward_redeemed: {
     icon: GiftIcon,
     iconColor: "text-[var(--stamp-sand)]",
     bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-amber-50",
-    deltaText: "text-amber-700",
+    deltaBg: "bg-[#E8F5E4]",
+    deltaText: "text-[#4A7C59]",
   },
   stamp_voided: {
     icon: ProhibitIcon,
     iconColor: "text-[var(--stamp-coral)]",
     bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-red-50",
-    deltaText: "text-red-600",
+    deltaBg: "bg-[#FDE8E4]",
+    deltaText: "text-[#C75050]",
   },
   bonus_stamp: {
     icon: StarIcon,
     iconColor: "text-[var(--stamp-sage)]",
     bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-blue-50",
-    deltaText: "text-blue-700",
+    deltaBg: "bg-[#E4F0F8]",
+    deltaText: "text-[#3D7CAF]",
   },
   stamps_adjusted: {
     icon: SlidersHorizontalIcon,
     iconColor: "text-[var(--muted-foreground)]",
     bgColor: "bg-[var(--background-subtle)]",
-    deltaBg: "bg-[var(--background-subtle)]",
-    deltaText: "text-[var(--muted-foreground)]",
+    deltaBg: "bg-[#F0EDE7]",
+    deltaText: "text-[#8A8A8A]",
   },
 };
 
@@ -185,29 +185,29 @@ export function ActivityItem({
       {/* Timeline dot + connecting line */}
       <div className="flex flex-col items-center">
         {renderIcon()}
-        {!isLast && <div className="w-px flex-1 bg-[var(--border-light)]" />}
+        {!isLast && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
       </div>
 
       {/* Content card */}
-      <div className="pb-3 flex-1 min-w-0 -mt-0.5">
+      <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
         <div
           className={cn(
-            "rounded-xl bg-[var(--background-subtle)]/60 px-3.5 py-2.5 transition-all duration-200",
-            onClick && "hover:bg-[var(--background-subtle)] hover:shadow-sm"
+            "rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-4 py-3 transition-all duration-150",
+            onClick && "hover:bg-[#F5F3EF] hover:border-[#E8E5DE]"
           )}
         >
-          {/* Top row: customer name + verb + delta */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0 flex-wrap">
-              <span className="text-[13px] font-medium text-[var(--foreground)] truncate">
+          {/* Top row: customer name + verb + delta + time */}
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <div className="flex-1 min-w-0">
+              <span className="text-[13px] font-semibold text-[#1A1A1A]">
                 {customerLabel}
               </span>
-              <span className="text-[13px] text-[var(--muted-foreground)]">
+              <span className="text-[13px] text-[#666] ml-1.5">
                 {t(`itemVerbs.${transaction.type}`)}
               </span>
               <span
                 className={cn(
-                  "text-[11px] font-semibold tabular-nums px-1.5 py-0.5 rounded-full shrink-0",
+                  "text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1 inline-block",
                   config.deltaBg,
                   config.deltaText
                 )}
@@ -215,20 +215,24 @@ export function ActivityItem({
                 {deltaText}
               </span>
             </div>
-            <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums shrink-0">
+            <span className="text-[11px] text-[#B0B0B0] tabular-nums shrink-0 mt-0.5">
               {formatRelativeTime(transaction.created_at)}
             </span>
           </div>
 
-          {/* Bottom row: stamp progress + source + employee */}
-          <div className="flex items-center gap-1.5 mt-1.5">
-            <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums">
-              {transaction.stamps_before} &rarr; {transaction.stamps_after}
+          {/* Bottom row: stamp transition · total · source · employee */}
+          <div className="flex items-center gap-1.5 flex-wrap text-[12px] text-[#8A8A8A]">
+            <span className="font-semibold text-[#555] tabular-nums">
+              {transaction.stamps_before}
+            </span>
+            <span>→</span>
+            <span className="font-semibold tabular-nums text-[#555]">
+              {transaction.stamps_after}
             </span>
             {totalStamps != null && totalStamps > 0 && (
               <>
-                <span className="text-[var(--border)] text-[10px]">&middot;</span>
-                <span className="text-[11px] text-[var(--muted-foreground)]">
+                <span className="text-[#D8D5CE]">·</span>
+                <span>
                   {t("stampProgress", {
                     current: transaction.stamps_after,
                     total: totalStamps,
@@ -236,14 +240,12 @@ export function ActivityItem({
                 </span>
               </>
             )}
-            <span className="text-[var(--border)] text-[10px]">&middot;</span>
-            <span className="text-[11px] text-[var(--muted-foreground)]">
-              {transaction.source}
-            </span>
+            <span className="text-[#D8D5CE]">·</span>
+            <span>{transaction.source}</span>
             {transaction.employee_name && (
               <>
-                <span className="text-[var(--border)] text-[10px]">&middot;</span>
-                <span className="text-[11px] text-[var(--muted-foreground)]">
+                <span className="text-[#D8D5CE]">·</span>
+                <span>
                   {t("by")} {transaction.employee_id === user?.id ? t("you") : transaction.employee_name}
                 </span>
               </>
@@ -252,7 +254,7 @@ export function ActivityItem({
 
           {/* Void reason */}
           {metadata?.void_reason && (
-            <p className="text-[11px] text-[var(--muted-foreground)] mt-1.5 italic">
+            <p className="text-[11px] text-[#8A8A8A] mt-1.5 italic">
               {metadata.void_reason}
             </p>
           )}
@@ -267,10 +269,10 @@ export function ActivityItemSkeleton() {
     <div className="flex gap-3 relative">
       <div className="flex flex-col items-center">
         <div className="w-9 h-9 rounded-full bg-[var(--muted)] animate-pulse shrink-0" />
-        <div className="w-px flex-1 bg-[var(--border-light)]" />
+        <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />
       </div>
-      <div className="pb-3 flex-1 min-w-0 -mt-0.5">
-        <div className="rounded-xl bg-[var(--background-subtle)]/60 px-3.5 py-2.5">
+      <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
+        <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-4 py-3">
           <div className="h-4 w-48 bg-[var(--muted)] rounded animate-pulse" />
           <div className="h-3 w-32 bg-[var(--muted)] rounded animate-pulse mt-2" />
         </div>

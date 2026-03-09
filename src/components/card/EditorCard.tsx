@@ -235,7 +235,6 @@ export function EditorCard({
         organizationName={organizationName}
         showQR={true}
         showSecondaryFields={true}
-        interactive3D={true}
       />
     </ScaledCardWrapper>
   );

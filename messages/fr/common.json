@@ -1,10 +1,16 @@
 {
   "nav": {
+    "dashboard": "Tableau de bord",
+    "program": "Programme",
     "loyaltyProgram": "Programme de fidélité",
     "customers": "Clients",
     "activity": "Activité",
     "team": "Équipe",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "support": "Support",
+    "notifications": "Notifications",
+    "sectionLoyaltyProgram": "Programme de fidélité",
+    "sectionManage": "Gestion"
   },
   "header": {
     "loyaltyProgram": "Programme de fidélité",

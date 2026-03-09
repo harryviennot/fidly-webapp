@@ -1,6 +1,5 @@
 import * as React from "react"
 import { useTranslations } from "next-intl";
-import { StampeoLogo } from "@/components/ui/stampeo-logo";
 import { canSeeNavItem } from "@/lib/rbac";
 import { useBusiness } from "@/contexts/business-context";
 import { usePathname } from "next/navigation";
@@ -10,6 +9,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -19,20 +19,54 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
 import { NavUser } from "./nav-user";
+import { Badge } from "@/components/ui/badge";
 import {
-  UsersIcon,
-  HeartIcon,
-  UserPlusIcon,
-  GearIcon,
-  ClockCounterClockwiseIcon,
+  SquaresFour,
+  Users,
+  ChartBar,
+  QrCode,
+  GearSix,
+  CreditCard,
+  Bell,
+  Megaphone,
+  MapPin,
+  UserCircle,
+  Question,
 } from "@phosphor-icons/react";
 
-const navItems = [
-  { href: "/", labelKey: "nav.loyaltyProgram" as const, icon: HeartIcon },
-  { href: "/customers", labelKey: "nav.customers" as const, icon: UsersIcon },
-  { href: "/activity", labelKey: "nav.activity" as const, icon: ClockCounterClockwiseIcon },
-  { href: "/team", labelKey: "nav.team" as const, icon: UserPlusIcon },
-  { href: "/settings", labelKey: "nav.settings" as const, icon: GearIcon },
+interface NavItem {
+  href: string;
+  labelKey: string;
+  icon: React.ComponentType<{ className?: string; weight?: "regular" | "fill" | "bold" }>;
+  pro?: boolean;
+}
+
+// Top section — no label
+const mainItems: NavItem[] = [
+  { href: "/", labelKey: "nav.dashboard", icon: SquaresFour },
+  { href: "/customers", labelKey: "nav.customers", icon: Users },
+  { href: "/activity", labelKey: "nav.activity", icon: ChartBar },
+];
+
+// "LOYALTY PROGRAM" section
+const programItems: NavItem[] = [
+  { href: "/program", labelKey: "loyaltyProgram.nav.overview", icon: QrCode },
+  { href: "/program/settings", labelKey: "loyaltyProgram.nav.configuration", icon: GearSix },
+  { href: "/program/templates", labelKey: "loyaltyProgram.nav.templates", icon: CreditCard },
+  { href: "/program/notifications", labelKey: "loyaltyProgram.nav.notifications", icon: Bell },
+  { href: "/program/promotions", labelKey: "loyaltyProgram.nav.promotions", icon: Megaphone, pro: true },
+  { href: "/program/locations", labelKey: "loyaltyProgram.nav.locations", icon: MapPin, pro: true },
+];
+
+// "MANAGE" section
+const manageItems: NavItem[] = [
+  { href: "/team", labelKey: "nav.team", icon: UserCircle },
+  { href: "/settings", labelKey: "nav.settings", icon: GearSix },
+];
+
+// Bottom utility links
+const bottomItems: NavItem[] = [
+  { href: "/support", labelKey: "nav.support", icon: Question },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -40,129 +74,103 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { currentRole } = useBusiness();
   const t = useTranslations();
 
-  const filteredNavItems = navItems.filter((item) =>
-    canSeeNavItem(currentRole, item.href)
-  );
-
   const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
-    }
-    return pathname.startsWith(href);
+    if (href === "/" || href === "/program") return pathname === href;
+    return pathname === href || pathname.startsWith(href + '/');
+  };
+
+  const filterItems = (items: NavItem[]) =>
+    items.filter((item) => canSeeNavItem(currentRole, item.href));
+
+  const filteredMain = filterItems(mainItems);
+  const filteredProgram = filterItems(programItems);
+  const filteredManage = filterItems(manageItems);
+
+  const renderNavItem = (item: NavItem) => {
+    const Icon = item.icon;
+    const active = isActive(item.href);
+    return (
+      <SidebarMenuItem key={item.href}>
+        <SidebarMenuButton
+          asChild
+          isActive={active}
+          className={cn(
+            "transition-all duration-200 h-9",
+            active
+              ? "bg-[var(--muted)] border border-[var(--border-dark)] text-[var(--foreground)] font-semibold"
+              : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+          )}
+        >
+          <Link href={item.href}>
+            <Icon
+              className="h-[18px] w-[18px]"
+              weight={active ? "fill" : "bold"}
+            />
+            <span className={cn(!active && "text-[#5A5A5A]")}>{t(item.labelKey)}</span>
+            {item.pro && (
+              <Badge variant="pro" className="ml-auto">
+                PRO
+              </Badge>
+            )}
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
   };
 
   return (
-    <Sidebar variant="floating" {...props} className="pr-0">
-      <SidebarHeader className="p-2">
+    <Sidebar variant="sidebar" {...props}>
+      <SidebarHeader className="p-3">
         <BusinessSwitcher />
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenu className="gap-2 pt-2">
-            {/* Dashboard nav item */}
-            {filteredNavItems.filter(item => item.href === "/").map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={active}
-                    className={cn(
-                      "transition-all duration-200",
-                      active
-                        ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white"
-                        : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <Icon
-                        className="h-5 w-5"
-                        weight={active ? "fill" : "regular"}
-                      />
-                      <span>{t(item.labelKey)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            })}
+        {/* Main nav — no section label */}
+        {filteredMain.length > 0 && (
+          <SidebarGroup>
+            <SidebarMenu className="gap-0.5">
+              {filteredMain.map(renderNavItem)}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
 
-            {/* Customers nav item */}
-            {filteredNavItems.filter(item => item.href === "/customers").map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={active}
-                    className={cn(
-                      "transition-all duration-200",
-                      active
-                        ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white"
-                        : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <Icon
-                        className="h-5 w-5"
-                        weight={active ? "fill" : "regular"}
-                      />
-                      <span>{t(item.labelKey)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            })}
+        {/* Loyalty Program section */}
+        {filteredProgram.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
+              {t("nav.sectionLoyaltyProgram")}
+            </SidebarGroupLabel>
+            <SidebarMenu className="gap-0.5">
+              {filteredProgram.map(renderNavItem)}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
 
-            {/* Rest of nav items (Team, Settings) */}
-            {filteredNavItems.filter(item => item.href !== "/" && item.href !== "/customers").map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={active}
-                    className={cn(
-                      "transition-all duration-200",
-                      active
-                        ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white"
-                        : "text-[var(--muted-foreground)] hover:bg-[var(--accent-muted)]/50 hover:text-[var(--accent)]"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <Icon
-                        className="h-5 w-5"
-                        weight={active ? "fill" : "regular"}
-                      />
-                      <span>{t(item.labelKey)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
+        {/* Manage section */}
+        {filteredManage.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
+              {t("nav.sectionManage")}
+            </SidebarGroupLabel>
+            <SidebarMenu className="gap-0.5">
+              {filteredManage.map(renderNavItem)}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
-      {/* Footer */}
+
       <SidebarFooter className="p-0">
-        {/* Powered by Stampeo */}
-        <div className="px-4">
-          <div className="flex items-start flex-col gap-1 text-xs text-muted-foreground">
-            <span>{t("poweredBy")}</span>
-            <div className="flex items-center gap-2">
-              <StampeoLogo className="w-5 h-5" />
-              <span className="text-lg font-bold gradient-text">Stampeo</span>
-            </div>
-          </div>
+        {/* Bottom utility links */}
+        <div className="px-3">
+          <SidebarMenu className="gap-0.5">
+            {bottomItems.map(renderNavItem)}
+          </SidebarMenu>
         </div>
 
-        <SidebarSeparator className="mx-0 my-0" />
+        <SidebarSeparator className="mx-3" />
 
-        {/* User Profile */}
-        <div className="px-2 pb-2">
+        {/* User footer */}
+        <div className="px-3 pb-3">
           <NavUser />
         </div>
       </SidebarFooter>
