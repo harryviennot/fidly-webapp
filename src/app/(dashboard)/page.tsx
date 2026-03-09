@@ -101,9 +101,9 @@ export default function DashboardPage() {
               value={totalCustomers}
               icon={<Users className="w-4 h-4" weight="bold" />}
               iconBg="var(--accent-light)"
-              subtitle={t("dashboard.vsLastMonth")}
-              change="+18%"
-              positive
+              // subtitle={t("dashboard.vsLastMonth")}
+              // change="+18%"
+              // positive
               delay={0}
             />
             <StatCard
@@ -112,9 +112,9 @@ export default function DashboardPage() {
               value={activeCustomersToday}
               icon={<QrCode className="w-4 h-4" weight="bold" />}
               iconBg="var(--accent-light)"
-              subtitle={t("dashboard.vsYesterday")}
-              change="+12%"
-              positive
+              // subtitle={t("dashboard.vsYesterday")}
+              // change="+12%"
+              // positive
               delay={80}
             />
             <StatCard
@@ -123,9 +123,9 @@ export default function DashboardPage() {
               value={totalCustomers}
               icon={<CreditCard className="w-4 h-4" weight="bold" />}
               iconBg="#F0EDE7"
-              subtitle={t("dashboard.installRate87")}
-              change="+8%"
-              positive
+              // subtitle={t("dashboard.installRate87")}
+              // change="+8%"
+              // positive
               delay={160}
             />
             <StatCard
@@ -134,15 +134,15 @@ export default function DashboardPage() {
               value={rewardsToday}
               icon={<Gift className="w-4 h-4" weight="bold" />}
               iconBg="#FFF3E0"
-              subtitle={t("dashboard.thisWeek")}
-              change="+23%"
-              positive
+              // subtitle={t("dashboard.thisWeek")}
+              // change="+23%"
+              // positive
               delay={240}
             />
           </div>
 
           {/* Scan Activity Chart */}
-          <ChartCard
+          {/* <ChartCard
             title={t("dashboard.scanActivity")}
             delay={300}
             legend={
@@ -198,7 +198,7 @@ export default function DashboardPage() {
                 />
               </BarChart>
             </ResponsiveContainer>
-          </ChartCard>
+          </ChartCard> */}
 
           {/* Recent Scans */}
           <RecentScans
@@ -222,7 +222,7 @@ export default function DashboardPage() {
             activeCards={totalCustomers}
             delay={0}
           />
-          <PeakHoursChart delay={100} />
+          {/* <PeakHoursChart delay={100} /> */}
           <QuickActions delay={200} />
         </div>
       </div>

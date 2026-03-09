@@ -101,7 +101,7 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
             className={cn(
               'px-4 py-2.5 rounded-lg border text-[12px] font-semibold cursor-pointer flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap',
               copied
-                ? 'bg-[var(--success-light)] border-[var(--success-light)] text-[var(--accent)]'
+                ? 'bg-[var(--accent-light)] border-[var(--accent-light)] text-[var(--accent)]'
                 : 'bg-white border-[var(--border-medium)] text-[#555] hover:bg-[var(--paper)]'
             )}
           >

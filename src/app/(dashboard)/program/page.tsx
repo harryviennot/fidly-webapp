@@ -62,9 +62,9 @@ export default function ProgramOverviewPage() {
               value={stats?.stamps_today ?? 0}
               icon={<StampIcon className="w-4 h-4" weight="bold" />}
               iconBg="var(--accent-light)"
-              subtitle={t('allTime')}
-              change="+22%"
-              positive
+              // subtitle={t('allTime')}
+              // change="+22%"
+              // positive
               delay={0}
             />
             <StatCard
@@ -73,9 +73,9 @@ export default function ProgramOverviewPage() {
               value={stats?.rewards_today ?? 0}
               icon={<GiftIcon className="w-4 h-4" weight="bold" />}
               iconBg="#FFF3E0"
-              subtitle={t('allTime')}
-              change="+15%"
-              positive
+              // subtitle={t('allTime')}
+              // change="+15%"
+              // positive
               delay={80}
             />
             <StatCard
@@ -84,9 +84,9 @@ export default function ProgramOverviewPage() {
               value={totalCustomers}
               icon={<CreditCardIcon className="w-4 h-4" weight="bold" />}
               iconBg="#E4F0F8"
-              subtitle={`87% ${t('installRate')}`}
-              change="+8%"
-              positive
+              // subtitle={`87% ${t('installRate')}`}
+              // change="+8%"
+              // positive
               delay={160}
             />
           </div>
@@ -112,10 +112,10 @@ export default function ProgramOverviewPage() {
           />
 
           {/* Program Health */}
-          <ProgramHealthCard delay={100} />
+          {/* <ProgramHealthCard delay={100} /> */}
 
           {/* Quick Actions */}
-          <OverviewQuickActions delay={200} />
+          {/* <OverviewQuickActions delay={200} /> */}
         </div>
       </div>
     </div>
