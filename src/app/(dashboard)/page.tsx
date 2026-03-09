@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
   Users,
-  QrCode,
+  QrCodeIcon,
   CreditCard,
   Gift,
 } from "@phosphor-icons/react";
@@ -87,6 +87,14 @@ export default function DashboardPage() {
       <PageHeader
         title={t("dashboard.title")}
         subtitle={t("dashboard.welcome", { name: displayName })}
+        actions={process.env.NEXT_PUBLIC_SCAN_URL ? [
+          {
+            label: t("dashboard.openScanner"),
+            icon: <QrCodeIcon className="w-4 h-4" weight="bold" />,
+            href: process.env.NEXT_PUBLIC_SCAN_URL,
+            variant: "secondary",
+          },
+        ] : undefined}
       />
 
       {/* Two-column layout — right column starts at top alongside stat cards */}
@@ -110,7 +118,7 @@ export default function DashboardPage() {
               className="flex-1 basis-0 min-w-[140px]"
               title={t("dashboard.scansToday")}
               value={activeCustomersToday}
-              icon={<QrCode className="w-4 h-4" weight="bold" />}
+              icon={<QrCodeIcon className="w-4 h-4" weight="bold" />}
               iconBg="var(--accent-light)"
               // subtitle={t("dashboard.vsYesterday")}
               // change="+12%"
