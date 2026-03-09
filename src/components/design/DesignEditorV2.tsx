@@ -85,6 +85,7 @@ function isContentComplete(d: CardDesignCreate) {
   return (d.secondary_fields?.length ?? 0) > 0;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function isBackComplete(_d: CardDesignCreate) {
   return true;
 }

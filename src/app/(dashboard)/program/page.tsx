@@ -122,70 +122,70 @@ export default function ProgramOverviewPage() {
   );
 }
 
-/* ── Program Health Card ── */
-function ProgramHealthCard({ delay = 0 }: { delay?: number }) {
-  const t = useTranslations('loyaltyProgram.overview');
+// /* ── Program Health Card ── */
+// function ProgramHealthCard({ delay = 0 }: { delay?: number }) {
+//   const t = useTranslations('loyaltyProgram.overview');
 
-  const metrics = [
-    { label: t('avgStampsPerCustomer'), value: '3.9', color: 'var(--accent)' },
-    { label: t('rewardCompletionRate'), value: '15%', color: '#C4883D' },
-    { label: t('thirtyDayRetention'), value: '72%', color: 'var(--accent)' },
-    { label: t('avgTimeToReward'), value: '18 days', color: '#555' },
-  ];
+//   const metrics = [
+//     { label: t('avgStampsPerCustomer'), value: '3.9', color: 'var(--accent)' },
+//     { label: t('rewardCompletionRate'), value: '15%', color: '#C4883D' },
+//     { label: t('thirtyDayRetention'), value: '72%', color: 'var(--accent)' },
+//     { label: t('avgTimeToReward'), value: '18 days', color: '#555' },
+//   ];
 
-  return (
-    <div
-      className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px] animate-slide-up"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <div className="text-[15px] font-semibold text-[#1A1A1A] mb-3.5">
-        {t('programHealth')}
-      </div>
-      {metrics.map((m, i) => (
-        <div
-          key={i}
-          className="flex justify-between items-center py-[9px]"
-          style={{ borderBottom: i < metrics.length - 1 ? '1px solid var(--border-light)' : 'none' }}
-        >
-          <span className="text-[12px] text-[#8A8A8A]">{m.label}</span>
-          <span className="text-[13px] font-semibold" style={{ color: m.color }}>{m.value}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
+//   return (
+//     <div
+//       className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px] animate-slide-up"
+//       style={{ animationDelay: `${delay}ms` }}
+//     >
+//       <div className="text-[15px] font-semibold text-[#1A1A1A] mb-3.5">
+//         {t('programHealth')}
+//       </div>
+//       {metrics.map((m, i) => (
+//         <div
+//           key={i}
+//           className="flex justify-between items-center py-[9px]"
+//           style={{ borderBottom: i < metrics.length - 1 ? '1px solid var(--border-light)' : 'none' }}
+//         >
+//           <span className="text-[12px] text-[#8A8A8A]">{m.label}</span>
+//           <span className="text-[13px] font-semibold" style={{ color: m.color }}>{m.value}</span>
+//         </div>
+//       ))}
+//     </div>
+//   );
+// }
 
-/* ── Quick Actions (Overview variant) ── */
-function OverviewQuickActions({ delay = 0 }: { delay?: number }) {
-  const t = useTranslations('loyaltyProgram.overview');
+// /* ── Quick Actions (Overview variant) ── */
+// function OverviewQuickActions({ delay = 0 }: { delay?: number }) {
+//   const t = useTranslations('loyaltyProgram.overview');
 
-  const actions = [
-    { label: t('downloadQrPoster'), desc: t('downloadQrPosterDesc'), emoji: '🖨️' },
-    { label: t('testYourCard'), desc: t('testYourCardDesc'), emoji: '🧪' },
-    { label: t('shareLink'), desc: t('shareLinkDesc'), emoji: '🔗' },
-  ];
+//   const actions = [
+//     { label: t('downloadQrPoster'), desc: t('downloadQrPosterDesc'), emoji: '🖨️' },
+//     { label: t('testYourCard'), desc: t('testYourCardDesc'), emoji: '🧪' },
+//     { label: t('shareLink'), desc: t('shareLinkDesc'), emoji: '🔗' },
+//   ];
 
-  return (
-    <div
-      className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 animate-slide-up"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <div className="text-[13px] font-semibold text-[#1A1A1A] mb-2.5">
-        {t('quickActions')}
-      </div>
-      {actions.map((a, i) => (
-        <button
-          key={i}
-          className="w-full flex items-center gap-2.5 p-2.5 rounded-lg border border-[var(--border)] bg-white cursor-pointer text-left transition-colors duration-[120ms] hover:bg-[var(--border-light)]"
-          style={{ marginBottom: i < actions.length - 1 ? 6 : 0 }}
-        >
-          <span className="text-[18px]">{a.emoji}</span>
-          <div>
-            <div className="text-[12px] font-medium text-[#333]">{a.label}</div>
-            <div className="text-[10px] text-[#A5A5A5]">{a.desc}</div>
-          </div>
-        </button>
-      ))}
-    </div>
-  );
-}
+//   return (
+//     <div
+//       className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 animate-slide-up"
+//       style={{ animationDelay: `${delay}ms` }}
+//     >
+//       <div className="text-[13px] font-semibold text-[#1A1A1A] mb-2.5">
+//         {t('quickActions')}
+//       </div>
+//       {actions.map((a, i) => (
+//         <button
+//           key={i}
+//           className="w-full flex items-center gap-2.5 p-2.5 rounded-lg border border-[var(--border)] bg-white cursor-pointer text-left transition-colors duration-[120ms] hover:bg-[var(--border-light)]"
+//           style={{ marginBottom: i < actions.length - 1 ? 6 : 0 }}
+//         >
+//           <span className="text-[18px]">{a.emoji}</span>
+//           <div>
+//             <div className="text-[12px] font-medium text-[#333]">{a.label}</div>
+//             <div className="text-[10px] text-[#A5A5A5]">{a.desc}</div>
+//           </div>
+//         </button>
+//       ))}
+//     </div>
+//   );
+// }

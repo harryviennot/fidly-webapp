@@ -41,7 +41,9 @@ export function ColorPicker({ label, tooltip, colors, value, onChange, annotatio
   const [customInput, setCustomInput] = useState('');
   const colorInputRef = useRef<HTMLInputElement>(null);
   const onCustomColorRef = useRef(onCustomColor);
-  onCustomColorRef.current = onCustomColor;
+  useEffect(() => {
+    onCustomColorRef.current = onCustomColor;
+  }, [onCustomColor]);
 
   // Attach native 'change' event (fires only on commit, unlike React's onChange)
   useEffect(() => {

@@ -8,15 +8,15 @@ import {
   CreditCard,
   Gift,
 } from "@phosphor-icons/react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+// import {
+//   BarChart,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   ResponsiveContainer,
+// } from "recharts";
 import { useBusiness } from "@/contexts/business-context";
 import { useCustomers } from "@/hooks/use-customers";
 import { useActivityStats } from "@/hooks/use-activity-stats";
@@ -29,24 +29,24 @@ import {
   StatCard,
   RecentScans,
   ActiveCardWidget,
-  PeakHoursChart,
+  // PeakHoursChart,
   QuickActions,
-  ChartCard,
-  LegendItem,
+  // ChartCard,
+  // LegendItem,
 } from "@/components/redesign";
 import { computeCardColors } from "@/lib/card-utils";
 import type { StampIconType } from "@/components/design/StampIconPicker";
 
 // Placeholder chart data (will be wired to real analytics later)
-const SCAN_CHART_DATA = [
-  { day: "Mon", scans: 34, stamps: 28, redemptions: 3 },
-  { day: "Tue", scans: 45, stamps: 38, redemptions: 5 },
-  { day: "Wed", scans: 52, stamps: 44, redemptions: 6 },
-  { day: "Thu", scans: 38, stamps: 30, redemptions: 4 },
-  { day: "Fri", scans: 67, stamps: 58, redemptions: 8 },
-  { day: "Sat", scans: 89, stamps: 76, redemptions: 11 },
-  { day: "Sun", scans: 72, stamps: 61, redemptions: 9 },
-];
+// const SCAN_CHART_DATA = [
+//   { day: "Mon", scans: 34, stamps: 28, redemptions: 3 },
+//   { day: "Tue", scans: 45, stamps: 38, redemptions: 5 },
+//   { day: "Wed", scans: 52, stamps: 44, redemptions: 6 },
+//   { day: "Thu", scans: 38, stamps: 30, redemptions: 4 },
+//   { day: "Fri", scans: 67, stamps: 58, redemptions: 8 },
+//   { day: "Sat", scans: 89, stamps: 76, redemptions: 11 },
+//   { day: "Sun", scans: 72, stamps: 61, redemptions: 9 },
+// ];
 
 export default function DashboardPage() {
   const t = useTranslations();
@@ -76,10 +76,10 @@ export default function DashboardPage() {
   const displayName = profile?.name || "there";
 
   // Read accent palette from CSS vars for Recharts (SVG attrs don't support CSS vars directly)
-  const cssStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
-  const accentColor = cssStyle?.getPropertyValue("--accent").trim() || "#f97316";
-  const accent300 = cssStyle?.getPropertyValue("--accent-300").trim() || "#fdba74";
-  const secondaryColor = cssStyle?.getPropertyValue("--business-secondary").trim() || "#C4A67D";
+  // const cssStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
+  // const accentColor = cssStyle?.getPropertyValue("--accent").trim() || "#f97316";
+  // const accent300 = cssStyle?.getPropertyValue("--accent-300").trim() || "#fdba74";
+  // const secondaryColor = cssStyle?.getPropertyValue("--business-secondary").trim() || "#C4A67D";
 
   return (
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
@@ -142,7 +142,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Scan Activity Chart */}
-          {/* <ChartCard
+
+          {/* 
+          <ChartCard
             title={t("dashboard.scanActivity")}
             delay={300}
             legend={

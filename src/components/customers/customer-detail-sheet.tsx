@@ -142,7 +142,6 @@ export function CustomerDetailSheet({
   const colors = design ? computeCardColors(design) : null;
   const stampIcon = (design?.stamp_icon as StampIconType) ?? undefined;
   const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
-  const isMax = customer.stamps >= maxStamps;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
