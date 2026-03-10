@@ -81,6 +81,7 @@ export default function DashboardPage() {
   // const accent300 = cssStyle?.getPropertyValue("--accent-300").trim() || "#fdba74";
   // const secondaryColor = cssStyle?.getPropertyValue("--business-secondary").trim() || "#C4A67D";
 
+  console.log("NEXT_PUBLIC_SCAN_URL", process.env.NEXT_PUBLIC_SCAN_URL);
   return (
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
       {/* Header */}
