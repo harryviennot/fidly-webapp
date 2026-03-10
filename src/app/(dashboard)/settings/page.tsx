@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import { useBusiness } from '@/contexts/business-context';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -23,6 +24,7 @@ interface FormData {
 
 export default function SettingsPage() {
   const { currentBusiness } = useBusiness();
+  const queryClient = useQueryClient();
   const t = useTranslations('settings');
   const tStatus = useTranslations('status');
 
@@ -135,6 +137,7 @@ export default function SettingsPage() {
         settings: { ...currentBusiness.settings, business_info: businessInfo },
       });
       setBusinessInfoDirty(false);
+      queryClient.invalidateQueries({ queryKey: ["business"] });
       toast.success("Back fields successfully updated. Your customers' cards will update shortly.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('cardInfo.saveFailed'));

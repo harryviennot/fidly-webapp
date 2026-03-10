@@ -10,7 +10,7 @@ import {
 import { StepIllustration } from './StepIllustration';
 import Link from 'next/link';
 import { useBusiness } from '@/contexts/business-context';
-import { updateBusiness } from '@/api/businesses';
+import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { LoyaltyProgram, CardDesign } from '@/types';
@@ -27,6 +27,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
   const t = useTranslations('loyaltyProgram.overview');
   const tProgram = useTranslations('loyaltyProgram');
   const { currentBusiness } = useBusiness();
+  const { mutate: doUpdateBusiness } = useUpdateBusiness(currentBusiness?.id);
 
   const [dismissed, setDismissed] = useState(
     currentBusiness?.settings?.setup_checklist_dismissed === true
@@ -61,19 +62,15 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     }
   };
 
-  const handleDismiss = async () => {
+  const handleDismiss = () => {
     setDismissed(true);
     if (currentBusiness?.id) {
-      try {
-        await updateBusiness(currentBusiness.id, {
-          settings: {
-            ...(currentBusiness.settings || {}),
-            setup_checklist_dismissed: true,
-          },
-        });
-      } catch {
-        // Dismiss is already reflected in local state; ignore API errors silently
-      }
+      doUpdateBusiness({
+        settings: {
+          ...(currentBusiness.settings || {}),
+          setup_checklist_dismissed: true,
+        },
+      });
     }
   };
 
@@ -96,7 +93,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     {
       id: 2,
       optional: true,
-      done: false,
+      done: (currentBusiness?.settings?.business_info?.length ?? 0) > 0,
       title: t('steps.backFields'),
       description: t('steps.backFieldsDescription'),
       cta: t('steps.backFieldsCta'),
@@ -226,12 +223,12 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
                     </span>
                   ) : isCurrent ? (
                     <span className="text-[10px] font-bold px-[7px] py-px rounded-lg bg-[var(--warning-light)] text-[var(--warning)]">
-                      Next
+                      {t('steps.next')}
                     </span>
                   ) : isSkipped || step.optional ? (
-                    <span className="text-[10px] font-semibold text-[#CCC]">Optional</span>
+                    <span className="text-[10px] font-semibold text-[#CCC]">{t('steps.optional')}</span>
                   ) : (
-                    <span className="text-[10px] font-semibold text-[#CCC]">Step {step.id}</span>
+                    <span className="text-[10px] font-semibold text-[#CCC]">{t('steps.stepN', { n: step.id })}</span>
                   )}
                 </div>
                 <div
@@ -254,7 +251,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
           <p className="text-[13.5px] font-semibold text-[var(--foreground)] mb-0.5 flex items-center gap-2">
             {selectedStepData.title}
             {selectedStepData.optional && (
-              <span className="text-[10px] font-medium text-[#AAA] normal-case">Optional</span>
+              <span className="text-[10px] font-medium text-[#AAA] normal-case">{t('steps.optional')}</span>
             )}
           </p>
           <p className="text-[12px] text-[#7A7A7A] leading-[1.45]">
@@ -338,10 +335,10 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
                     <span className="text-[9px] font-bold px-1.5 py-px rounded-lg bg-[var(--accent-light)] text-[var(--accent)]">✓</span>
                   )}
                   {isCurrent && !step.done && (
-                    <span className="text-[9px] font-bold px-1.5 py-px rounded-lg bg-[var(--warning-light)] text-[var(--warning)]">Next</span>
+                    <span className="text-[9px] font-bold px-1.5 py-px rounded-lg bg-[var(--warning-light)] text-[var(--warning)]">{t('steps.next')}</span>
                   )}
                   {!step.done && !isCurrent && (step.optional || isSkipped) && (
-                    <span className="text-[9px] font-semibold text-[#CCC]">Optional</span>
+                    <span className="text-[9px] font-semibold text-[#CCC]">{t('steps.optional')}</span>
                   )}
                 </div>
                 {isActive && (

@@ -23,6 +23,7 @@ import {
 export default function ProgramOverviewPage() {
   const { program, designs, activeDesign, loading } = useProgram();
   const { currentBusiness } = useBusiness();
+
   const t = useTranslations('loyaltyProgram.overview');
 
   const { data: customerData } = useCustomers(currentBusiness?.id, 0);

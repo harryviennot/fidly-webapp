@@ -63,6 +63,9 @@
         "backFieldsSkip": "Ignorer pour l'instant",
         "completed": "Terminé",
         "done": "Fait",
+        "next": "Suivant",
+        "optional": "Optionnel",
+        "stepN": "Étape {n}",
         "firstCustomer": "Obtenez votre premier client",
         "firstCustomerDescription": "Partagez votre lien d'inscription ou QR code — un seul scan suffit pour démarrer.",
         "firstCustomerCta": "Copier le lien"

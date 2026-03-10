@@ -63,6 +63,9 @@
         "backFieldsSkip": "Skip for now",
         "completed": "Completed",
         "done": "Done",
+        "next": "Next",
+        "optional": "Optional",
+        "stepN": "Step {n}",
         "firstCustomer": "Get your first customer",
         "firstCustomerDescription": "Share your signup link or QR code — it only takes one scan to get started.",
         "firstCustomerCta": "Copy link"
