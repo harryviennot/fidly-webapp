@@ -55,7 +55,8 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
 
   const addEntry = (type: InfoType) => {
     const defaultData = getDefaultData(type, t);
-    const uid = crypto.randomUUID();
+    // eslint-disable-next-line react-hooks/purity
+    const uid = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
     const key = type === 'custom' ? `biz_custom_${uid}` : `biz_${type}`;
     onChange([...value, { type, key, data: defaultData }]);
   };
