@@ -8,9 +8,10 @@ import type { LoyaltyProgram } from '@/types';
 interface ProgramSummaryCardProps {
   program: LoyaltyProgram | undefined;
   delay?: number;
+  isOwner?: boolean;
 }
 
-export function ProgramSummaryCard({ program, delay = 0 }: ProgramSummaryCardProps) {
+export function ProgramSummaryCard({ program, delay = 0, isOwner = true }: ProgramSummaryCardProps) {
   const t = useTranslations('loyaltyProgram.overview');
 
   if (!program) return null;
@@ -34,12 +35,14 @@ export function ProgramSummaryCard({ program, delay = 0 }: ProgramSummaryCardPro
         <div className="text-[15px] font-semibold text-[#1A1A1A]">
           {t('programConfiguration')}
         </div>
-        <Link
-          href="/program/settings"
-          className="text-[12px] text-[var(--accent)] font-medium hover:underline"
-        >
-          {t('edit')}
-        </Link>
+        {isOwner && (
+          <Link
+            href="/program/settings"
+            className="text-[12px] text-[var(--accent)] font-medium hover:underline"
+          >
+            {t('edit')}
+          </Link>
+        )}
       </div>
 
       {/* Config items grid */}

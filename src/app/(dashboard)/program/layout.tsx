@@ -24,6 +24,7 @@ interface ProgramContextType {
   loading: boolean;
   error: string | null;
   isProPlan: boolean;
+  isOwner: boolean;
   refreshProgram: () => Promise<void>;
   refreshDesigns: () => Promise<void>;
   updateProgram: (data: LoyaltyProgramUpdate) => Promise<void>;
@@ -43,13 +44,14 @@ export function useProgram() {
 }
 
 export default function ProgramLayout({ children }: { children: ReactNode }) {
-  const { currentBusiness } = useBusiness();
+  const { currentBusiness, currentRole } = useBusiness();
   const t = useTranslations('loyaltyProgram');
   const tDesign = useTranslations('designEditor');
   const queryClient = useQueryClient();
   const businessId = currentBusiness?.id;
 
   const isProPlan = currentBusiness?.subscription_tier === 'pro';
+  const isOwner = currentRole === 'owner';
 
   // Queries
   const {
@@ -148,6 +150,7 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
         loading,
         error,
         isProPlan,
+        isOwner,
         refreshProgram,
         refreshDesigns,
         updateProgram: handleUpdateProgram,
