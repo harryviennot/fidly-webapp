@@ -19,6 +19,7 @@ export interface LoyaltyProgram {
 export interface StampProgramConfig {
   total_stamps: number;
   auto_reset_on_redeem?: boolean;
+  user_configured?: boolean;
 }
 
 export type LoyaltyProgramUpdate = Partial<Pick<LoyaltyProgram,

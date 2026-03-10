@@ -43,6 +43,7 @@ export interface BusinessSettings {
   customer_data_collection?: CustomerDataCollection;
   notification_templates?: NotificationTemplates;
   onboarding_complete?: boolean;
+  setup_checklist_dismissed?: boolean;
   business_info?: BusinessInfoEntry[];
   [key: string]: unknown;
 }

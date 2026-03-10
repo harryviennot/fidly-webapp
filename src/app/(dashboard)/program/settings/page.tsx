@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   UserIcon,
@@ -44,6 +44,17 @@ export default function ProgramSettingsPage() {
   const [savingProgram, setSavingProgram] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // Mark the program as user-configured when the owner visits this page,
+  // even if they don't change anything. This signals they've seen the defaults.
+  const markedAsConfigured = useRef(false);
+  useEffect(() => {
+    if (program?.id && !program.config?.user_configured && !markedAsConfigured.current) {
+      markedAsConfigured.current = true;
+      updateProgram({ config: { ...program.config, user_configured: true } }).catch(() => {});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [program?.id]);
+
   // Dirty detection
   const isDirty = program ? (
     programName !== (program.name || '') ||
@@ -85,7 +96,7 @@ export default function ProgramSettingsPage() {
     try {
       await updateProgram({
         name: programName,
-        config: { total_stamps: totalStamps },
+        config: { total_stamps: totalStamps, user_configured: true },
         reward_name: rewardName || null,
       });
       setSaved(true);
