@@ -1,9 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
 import { applyTheme, getAccentFromSettings, getBackgroundFromSettings } from "@/utils/theme";
+import { businessKeys, fetchMemberships } from "@/hooks/use-business-query";
 import { Business } from "@/types";
 
 type MembershipRole = "owner" | "admin" | "scanner";
@@ -29,81 +31,56 @@ const BusinessContext = createContext<BusinessContextType | undefined>(
 );
 
 export function BusinessProvider({ children }: { children: React.ReactNode }) {
-  const [memberships, setMemberships] = useState<Membership[]>([]);
-  const [currentBusiness, setCurrentBusinessState] = useState<Business | null>(
-    null
-  );
-  const [currentRole, setCurrentRole] = useState<MembershipRole | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const supabase = createClient();
 
-  const loadMemberships = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+  const [currentBusinessId, setCurrentBusinessId] = useState<string | null>(
+    () => (typeof window !== "undefined" ? localStorage.getItem("currentBusinessId") : null)
+  );
 
-    setLoading(true);
-    setError(null);
+  const {
+    data: rawMemberships = [],
+    isLoading,
+    error: queryError,
+  } = useQuery({
+    queryKey: businessKeys.memberships(user?.id ?? ""),
+    queryFn: () => fetchMemberships(user!.id),
+    enabled: !!user?.id,
+  });
 
-    try {
-      // Get memberships with business details
-      // After migration: user.id (from auth) equals users.id directly
-      const { data: membershipsData, error: membershipsError } = await supabase
-        .from("memberships")
-        .select("id, role, businesses(*)")
-        .eq("user_id", user.id);
+  const memberships: Membership[] = rawMemberships.map((m) => ({
+    id: m.id,
+    role: m.role as MembershipRole,
+    business: m.businesses as unknown as Business,
+  }));
 
-      if (membershipsError) {
-        setError("Failed to load memberships");
-        setLoading(false);
-        return;
-      }
-
-      if (membershipsData && membershipsData.length > 0) {
-        const formatted: Membership[] = membershipsData.map((m) => ({
-          id: m.id,
-          role: m.role as MembershipRole,
-          business: m.businesses as unknown as Business,
-        }));
-        setMemberships(formatted);
-
-        // Auto-select business from localStorage or first one
-        const savedBusinessId = localStorage.getItem("currentBusinessId");
-        const savedMembership = formatted.find(
-          (m) => m.business.id === savedBusinessId
-        );
-        const defaultMembership = savedMembership || formatted[0];
-
-        setCurrentBusinessState(defaultMembership.business);
-        setCurrentRole(defaultMembership.role);
-
-        // Apply theme from business settings
-        const accentColor = getAccentFromSettings(defaultMembership.business.settings);
-        const secondaryColor = getBackgroundFromSettings(defaultMembership.business.settings);
-        applyTheme(accentColor, secondaryColor ?? undefined);
-      } else {
-        // No memberships - user needs to create a business
-        setMemberships([]);
-        setCurrentBusinessState(null);
-        setCurrentRole(null);
-      }
-    } catch {
-      setError("An error occurred while loading your businesses");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Once memberships load, ensure currentBusinessId points to a valid membership
   useEffect(() => {
-    loadMemberships();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    if (memberships.length === 0) return;
+    const valid = memberships.find((m) => m.business.id === currentBusinessId);
+    if (!valid) {
+      // savedId not in memberships (or never set) — fall back to first
+      setCurrentBusinessId(memberships[0].business.id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberships.length]);
+
+  const membership =
+    memberships.find((m) => m.business.id === currentBusinessId) ??
+    memberships[0] ??
+    null;
+  const currentBusiness = membership?.business ?? null;
+  const currentRole = membership?.role ?? null;
+
+  // Apply theme whenever the selected business changes
+  useEffect(() => {
+    if (!currentBusiness) return;
+    const accentColor = getAccentFromSettings(currentBusiness.settings);
+    const secondaryColor = getBackgroundFromSettings(currentBusiness.settings);
+    applyTheme(accentColor, secondaryColor ?? undefined);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentBusiness?.id, currentBusiness?.settings]);
 
   // Subscribe to realtime business status changes
   useEffect(() => {
@@ -122,8 +99,9 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         (payload) => {
           const newStatus = (payload.new as Record<string, unknown>).status;
           if (newStatus && newStatus !== currentBusiness.status) {
-            // Status changed — reload memberships to get fresh data
-            loadMemberships();
+            queryClient.invalidateQueries({
+              queryKey: businessKeys.memberships(user!.id),
+            });
           }
         }
       )
@@ -132,20 +110,21 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     return () => {
       supabase.removeChannel(channel);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentBusiness?.id, currentBusiness?.status]);
 
   const setCurrentBusiness = (business: Business) => {
-    setCurrentBusinessState(business);
+    setCurrentBusinessId(business.id);
     localStorage.setItem("currentBusinessId", business.id);
-    const membership = memberships.find((m) => m.business.id === business.id);
-    setCurrentRole(membership?.role || null);
-
-    // Apply theme from business settings
     const accentColor = getAccentFromSettings(business.settings);
     const secondaryColor = getBackgroundFromSettings(business.settings);
     applyTheme(accentColor, secondaryColor ?? undefined);
   };
+
+  const refetch = () =>
+    queryClient.invalidateQueries({
+      queryKey: businessKeys.memberships(user?.id ?? ""),
+    });
 
   return (
     <BusinessContext.Provider
@@ -154,9 +133,9 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         currentBusiness,
         currentRole,
         setCurrentBusiness,
-        loading,
-        error,
-        refetch: loadMemberships,
+        loading: isLoading,
+        error: queryError ? "Failed to load memberships" : null,
+        refetch,
       }}
     >
       {children}

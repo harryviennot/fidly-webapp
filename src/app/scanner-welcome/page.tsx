@@ -13,7 +13,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StampeoLogo } from "@/components/ui/stampeo-logo";
-import { DeviceMobileIcon, CheckCircleIcon } from "@phosphor-icons/react";
+import { DeviceMobileIcon, CheckCircleIcon, ArrowSquareOutIcon } from "@phosphor-icons/react";
+
+const scanUrl = process.env.NEXT_PUBLIC_SCAN_URL;
 
 export default function ScannerWelcomePage() {
   const { signOut } = useAuth();
@@ -64,6 +66,14 @@ export default function ScannerWelcomePage() {
               {t('downloadDescription')}
             </p>
             <div className="space-y-2">
+              {scanUrl && (
+                <Button asChild className="w-full">
+                  <a href={scanUrl} target="_blank" rel="noopener noreferrer">
+                    {t('openScanner')}
+                    <ArrowSquareOutIcon className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              )}
               <Button variant="outline" className="w-full" disabled>
                 {t('appStore')}
               </Button>
@@ -71,11 +81,6 @@ export default function ScannerWelcomePage() {
                 {t('googlePlay')}
               </Button>
             </div>
-          </div>
-
-          <div className="text-center text-sm text-gray-500">
-            <p>{t('inDevelopment')}</p>
-            <p>{t('notified')}</p>
           </div>
 
           <Button

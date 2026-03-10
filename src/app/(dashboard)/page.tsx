@@ -50,7 +50,7 @@ import type { StampIconType } from "@/components/design/StampIconPicker";
 
 export default function DashboardPage() {
   const t = useTranslations();
-  const { currentBusiness } = useBusiness();
+  const { currentBusiness, currentRole } = useBusiness();
   const businessId = currentBusiness?.id;
 
   // Data hooks
@@ -231,6 +231,7 @@ export default function DashboardPage() {
             design={activeDesign}
             totalCustomers={totalCustomers}
             activeCards={totalCustomers}
+            isOwner={currentRole === "owner"}
             delay={0}
           />
           {/* <PeakHoursChart delay={100} /> */}

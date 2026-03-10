@@ -21,8 +21,9 @@ import {
 } from '@/components/redesign';
 
 export default function ProgramOverviewPage() {
-  const { program, designs, activeDesign, loading } = useProgram();
+  const { program, designs, activeDesign, loading, isOwner } = useProgram();
   const { currentBusiness } = useBusiness();
+
   const t = useTranslations('loyaltyProgram.overview');
 
   const { data: customerData } = useCustomers(currentBusiness?.id, 0);
@@ -42,13 +43,15 @@ export default function ProgramOverviewPage() {
       />
 
       {/* Setup checklist */}
-      <SetupChecklist
-        program={program}
-        activeDesign={activeDesign}
-        designs={designs}
-        totalCustomers={totalCustomers}
-        delay={0}
-      />
+      {isOwner && (
+        <SetupChecklist
+          program={program}
+          activeDesign={activeDesign}
+          designs={designs}
+          totalCustomers={totalCustomers}
+          delay={0}
+        />
+      )}
 
       {/* Two-column layout */}
       <div className="flex gap-[14px] flex-col min-[1080px]:flex-row min-[1080px]:items-start">
@@ -95,7 +98,7 @@ export default function ProgramOverviewPage() {
           <BusinessUrlCard delay={240} />
 
           {/* Program Configuration Summary */}
-          <ProgramSummaryCard program={program} delay={300} />
+          <ProgramSummaryCard program={program} delay={300} isOwner={isOwner} />
         </div>
 
         {/* Right column */}
@@ -108,6 +111,7 @@ export default function ProgramOverviewPage() {
             design={activeDesign ?? null}
             totalCustomers={totalCustomers}
             activeCards={totalCustomers}
+            isOwner={isOwner}
             delay={0}
           />
 

@@ -14,6 +14,8 @@ export type Role = "owner" | "admin" | "scanner";
 export const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/": ["owner", "admin"],
   "/program": ["owner", "admin"],
+  "/program/settings": ["owner"],
+  "/program/templates": ["owner"],
   "/customers": ["owner", "admin"],
   "/activity": ["owner", "admin"],
   "/team": ["owner", "admin"],
@@ -70,8 +72,6 @@ export function canSeeNavItem(role: Role | null, href: string): boolean {
   if (!role) return false;
   if (role === "scanner") return false;
 
-  const accessibleRoutes = getAccessibleRoutes(role);
-  return accessibleRoutes.some(
-    (route) => href === route || href.startsWith(route + "/")
-  );
+  // Use canAccessRoute which picks the most specific matching route
+  return canAccessRoute(role, href);
 }

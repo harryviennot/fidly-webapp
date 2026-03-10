@@ -13,6 +13,7 @@ interface ActiveCardWidgetProps {
   activeCards: number;
   className?: string;
   delay?: number;
+  isOwner?: boolean;
 }
 
 export function ActiveCardWidget({
@@ -21,6 +22,7 @@ export function ActiveCardWidget({
   activeCards,
   className,
   delay = 0,
+  isOwner = true,
 }: ActiveCardWidgetProps) {
   const t = useTranslations("dashboard");
 
@@ -63,21 +65,29 @@ export function ActiveCardWidget({
     </div>
   );
 
+  const cardContent = design ? (
+    <ScaledCardWrapper
+      baseWidth={280}
+      aspectRatio={1.282}
+      minScale={0.6}
+    >
+      <WalletCard
+        design={design}
+        showQR
+        showSecondaryFields={false}
+        className="[&>div]:[box-shadow:none_!important]"
+      />
+    </ScaledCardWrapper>
+  ) : null;
+
   const cardPreview = design ? (
-    <Link href={`/design/${design.id}`} className="block">
-      <ScaledCardWrapper
-        baseWidth={280}
-        aspectRatio={1.282}
-        minScale={0.6}
-      >
-        <WalletCard
-          design={design}
-          showQR
-          showSecondaryFields={false}
-          className="[&>div]:[box-shadow:none_!important]"
-        />
-      </ScaledCardWrapper>
-    </Link>
+    isOwner ? (
+      <Link href={`/design/${design.id}`} className="block">
+        {cardContent}
+      </Link>
+    ) : (
+      <div>{cardContent}</div>
+    )
   ) : (
     <div className="flex items-center justify-center h-[160px] rounded-xl bg-[var(--muted)] border border-dashed border-[var(--border-dark)]">
       <p className="text-xs text-[#A5A5A5]">{t("noCardYet")}</p>
@@ -97,7 +107,7 @@ export function ActiveCardWidget({
         <h3 className="text-[15px] font-semibold text-[#1A1A1A]">
           {t("activeCard")}
         </h3>
-        {design && (
+        {design && isOwner && (
           <Link
             href={`/design/${design.id}`}
             className="text-xs text-[var(--accent)] font-medium hover:underline"
