@@ -190,6 +190,17 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           router.push(`/design/${created.id}`);
         } else if (design) {
+          // Upload any pending image files before saving
+          if (pendingLogoFile) {
+            const result = await uploadLogo(currentBusiness.id, design.id, pendingLogoFile);
+            data.logo_url = result.url;
+            setPendingLogoFile(null);
+          }
+          if (pendingStripFile) {
+            const result = await uploadStripBackground(currentBusiness.id, design.id, pendingStripFile);
+            data.strip_background_url = result.url;
+            setPendingStripFile(null);
+          }
           await updateDesign(currentBusiness.id, design.id, data);
           clearDraft();
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
@@ -331,27 +342,22 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     };
 
     const handleLogoUpload = async (file: File) => {
-      if (!design || !currentBusiness?.id) {
-        // Deferred upload for new designs: store file and use blob URL for preview
-        setPendingLogoFile(file);
-        const blobUrl = URL.createObjectURL(file);
-        updateField('logo_url', blobUrl);
-        return;
-      }
-      const result = await uploadLogo(currentBusiness.id, design.id, file);
-      updateField('logo_url', result.url);
+      // Always defer: store file and use blob URL for preview; upload happens on Save
+      setPendingLogoFile(file);
+      const blobUrl = URL.createObjectURL(file);
+      updateField('logo_url', blobUrl);
+    };
+
+    const handleLogoClear = () => {
+      updateField('logo_url', null as unknown as string);
+      setPendingLogoFile(null);
     };
 
     const handleStripBackgroundUpload = async (file: File) => {
-      if (!design || !currentBusiness?.id) {
-        // Deferred upload for new designs
-        setPendingStripFile(file);
-        const blobUrl = URL.createObjectURL(file);
-        updateField('strip_background_url', blobUrl);
-        return;
-      }
-      const result = await uploadStripBackground(currentBusiness.id, design.id, file);
-      updateField('strip_background_url', result.url);
+      // Always defer: store file and use blob URL for preview; upload happens on Save
+      setPendingStripFile(file);
+      const blobUrl = URL.createObjectURL(file);
+      updateField('strip_background_url', blobUrl);
     };
 
     // Current colors as hex for pickers
@@ -533,6 +539,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               label={t('logo')}
               value={formData.logo_url}
               onUpload={handleLogoUpload}
+              onClear={handleLogoClear}
               hint={t('logoHint')}
               enableCrop
             />
