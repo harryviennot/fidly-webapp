@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useImperativeHandle, forwardRef, useRef, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useMemo, useImperativeHandle, forwardRef, useRef, useCallback, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
@@ -22,7 +22,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, SlidersHorizontal, CaretDown, GearSix, Palette, Stamp, TextT, ArrowUDownLeft, MapPin, Globe, Phone, Envelope, Clock, NotePencil, Check } from '@phosphor-icons/react';
+import { Eye, SlidersHorizontal, CaretDown, GearSix, Palette, Stamp, TextT, ArrowUDownLeft, Check } from '@phosphor-icons/react';
+import { BUSINESS_INFO_TYPE_ICONS, getEntryLabel, getEntryPreview } from '@/lib/business-info-utils';
+import type { BusinessInfoEntry } from '@/types/business';
 import Link from 'next/link';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import {
@@ -164,6 +166,15 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
     const [pendingStripFile, setPendingStripFile] = useState<File | null>(null);
     const [customColors, setCustomColors] = useState<string[]>([]);
+
+    const previewDesign = useMemo(() => {
+      const businessInfo = (currentBusiness?.settings?.business_info as BusinessInfoEntry[]) || [];
+      const hiddenKeys = formData.hidden_business_info_keys || [];
+      const visibleBizFields = businessInfo
+        .filter((e) => !hiddenKeys.includes(e.key))
+        .map((e) => ({ key: e.key, label: getEntryLabel(e), value: getEntryPreview(e) }));
+      return { ...formData, back_fields: [...(formData.back_fields || []), ...visibleBizFields] };
+    }, [formData, currentBusiness?.settings?.business_info]);
 
     const addCustomColor = useCallback((hex: string) => {
       setCustomColors((prev) => {
@@ -449,7 +460,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                     <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
                       <div className="card-flip-front">
                         <EditorCard
-                          design={formData}
+                          design={previewDesign}
                           previewStamps={previewStamps}
                           totalStamps={totalStamps}
                           organizationName={formData.organization_name}
@@ -458,7 +469,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                       </div>
                       <div className="card-flip-back">
                         <EditorCard
-                          design={formData}
+                          design={previewDesign}
                           previewStamps={previewStamps}
                           totalStamps={totalStamps}
                           organizationName={formData.organization_name}
@@ -475,7 +486,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                       <div className="card-flip-front">
                         <ScaledCardWrapper baseWidth={320} dynamicHeight>
                           <GoogleWalletCard
-                            design={formData}
+                            design={previewDesign}
                             stamps={previewStamps}
                             totalStamps={totalStamps}
                             organizationName={formData.organization_name}
@@ -485,7 +496,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                       <div className="card-flip-back">
                         <ScaledCardWrapper baseWidth={320} dynamicHeight>
                           <GoogleWalletCard
-                            design={formData}
+                            design={previewDesign}
                             stamps={previewStamps}
                             totalStamps={totalStamps}
                             organizationName={formData.organization_name}
@@ -795,7 +806,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
             {/* Inherited business info fields */}
             <BusinessInfoFields
-              businessInfo={(currentBusiness?.settings?.business_info as Array<{ type: string; key: string; data: Record<string, unknown> }>) || []}
+              businessInfo={(currentBusiness?.settings?.business_info as BusinessInfoEntry[]) || []}
               hiddenKeys={formData.hidden_business_info_keys || []}
               onToggleKey={(key) => {
                 const current = formData.hidden_business_info_keys || [];
@@ -896,15 +907,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     );
   });
 
-/** Type-specific icons for business info entries */
-const TYPE_ICONS: Record<string, typeof Clock> = {
-  hours: Clock,
-  website: Globe,
-  phone: Phone,
-  email: Envelope,
-  address: MapPin,
-  custom: NotePencil,
-};
 
 /** Inline component: shows inherited business info with visibility toggles */
 function BusinessInfoFields({
@@ -912,20 +914,11 @@ function BusinessInfoFields({
   hiddenKeys,
   onToggleKey,
 }: {
-  businessInfo: Array<{ type: string; key: string; data: Record<string, unknown> }>;
+  businessInfo: BusinessInfoEntry[];
   hiddenKeys: string[];
   onToggleKey: (key: string) => void;
 }) {
   const t = useTranslations('designEditor.editor');
-
-  const TYPE_LABELS: Record<string, string> = {
-    hours: 'Store Hours',
-    website: 'Website',
-    phone: 'Phone',
-    email: 'Email',
-    address: 'Address',
-    custom: 'Custom',
-  };
 
   if (businessInfo.length === 0) {
     return (
@@ -944,7 +937,7 @@ function BusinessInfoFields({
       {businessInfo.map((entry) => {
         const isHidden = hiddenKeys.includes(entry.key);
         const preview = getEntryPreview(entry);
-        const Icon = TYPE_ICONS[entry.type] || NotePencil;
+        const Icon = BUSINESS_INFO_TYPE_ICONS[entry.type as keyof typeof BUSINESS_INFO_TYPE_ICONS] || BUSINESS_INFO_TYPE_ICONS.custom;
         return (
           <button
             key={entry.key}
@@ -962,7 +955,7 @@ function BusinessInfoFields({
             <Icon className={`w-4 h-4 flex-shrink-0 ${isHidden ? 'text-muted-foreground' : 'text-[var(--accent)]'}`} />
             <div className={`flex-1 min-w-0 ${isHidden ? 'opacity-40' : ''}`}>
               <span className="text-sm font-semibold">
-                {entry.type === 'custom' ? ((entry.data.label as string) || TYPE_LABELS.custom) : (TYPE_LABELS[entry.type] || entry.type)}
+                {getEntryLabel(entry as BusinessInfoEntry)}
               </span>
               {preview && (
                 <p className="text-xs text-muted-foreground truncate">{preview}</p>
@@ -982,19 +975,5 @@ function BusinessInfoFields({
   );
 }
 
-function getEntryPreview(entry: { type: string; data: Record<string, unknown> }): string {
-  switch (entry.type) {
-    case 'website': return (entry.data.url as string) || '';
-    case 'phone': return (entry.data.number as string) || '';
-    case 'email': return (entry.data.email as string) || '';
-    case 'address': return (entry.data.address as string) || '';
-    case 'hours': {
-      const schedule = (entry.data.schedule as Array<{ days: string; closed?: boolean }>) || [];
-      return schedule.map((s) => s.days).join(', ');
-    }
-    case 'custom': return (entry.data.value as string) || '';
-    default: return '';
-  }
-}
 
 export default DesignEditorV2;
