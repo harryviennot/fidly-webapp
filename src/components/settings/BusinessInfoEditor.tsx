@@ -2,19 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import { useRef, useState, useEffect } from 'react';
-import { Plus, Clock, Globe, Phone, Envelope, MapPin, TextT } from '@phosphor-icons/react';
+import { Plus } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import type { BusinessInfoEntry } from '@/types/business';
-
-const INFO_TYPE_ICONS = {
-  hours: Clock,
-  website: Globe,
-  phone: Phone,
-  email: Envelope,
-  address: MapPin,
-  custom: TextT,
-} as const;
+import { BUSINESS_INFO_TYPE_ICONS } from '@/lib/business-info-utils';
 
 const PRESET_TYPES = ['hours', 'website', 'phone', 'email', 'address'] as const;
 const ALL_TYPES = [...PRESET_TYPES, 'custom'] as const;
@@ -137,7 +129,7 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
                 Choose field type
               </div>
               {availableTypes.map((type) => {
-                const Icon = INFO_TYPE_ICONS[type];
+                const Icon = BUSINESS_INFO_TYPE_ICONS[type];
                 const alreadyAdded = type !== 'custom' && usedPresetTypes.has(type);
                 return (
                   <button
@@ -188,7 +180,7 @@ function InfoEntryEditor({
   isRemoving: boolean;
 }) {
   const t = useTranslations('settings.cardInfo');
-  const Icon = INFO_TYPE_ICONS[entry.type] || TextT;
+  const Icon = BUSINESS_INFO_TYPE_ICONS[entry.type as keyof typeof BUSINESS_INFO_TYPE_ICONS] || BUSINESS_INFO_TYPE_ICONS.custom;
   const title = entry.type === 'custom'
     ? ((entry.data.label as string) || t('custom.title'))
     : t(`${entry.type}.title`);

@@ -1,8 +1,8 @@
 'use client';
 
-import { Clock, Globe, Phone, Envelope, MapPin, TextT } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import type { BusinessInfoEntry } from '@/types/business';
+import { BUSINESS_INFO_TYPE_ICONS } from '@/lib/business-info-utils';
 
 interface CardBackPreviewProps {
   businessName: string;
@@ -13,14 +13,6 @@ interface CardBackPreviewProps {
   locale: string;
 }
 
-const TYPE_ICONS = {
-  hours: Clock,
-  website: Globe,
-  phone: Phone,
-  email: Envelope,
-  address: MapPin,
-  custom: TextT,
-} as const;
 
 const LOCALE_DISPLAY: Record<string, string> = {
   fr: '🇫🇷 Français',
@@ -144,7 +136,7 @@ export function CardBackPreview({
         ) : (
           <div className="flex flex-col gap-2.5">
             {fields.map((entry) => {
-              const Icon = TYPE_ICONS[entry.type] || TextT;
+              const Icon = BUSINESS_INFO_TYPE_ICONS[entry.type as keyof typeof BUSINESS_INFO_TYPE_ICONS] || BUSINESS_INFO_TYPE_ICONS.custom;
               const { label, content } = getFieldValue(entry, t);
               return (
                 <div key={entry.key} className="flex items-start gap-2">

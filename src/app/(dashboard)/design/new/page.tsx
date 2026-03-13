@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowsClockwise, PencilSimple, FloppyDisk } from '@phosphor-icons/react';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
@@ -18,8 +18,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useBusiness } from '@/contexts/business-context';
-import { getPrograms } from '@/api';
-import type { LoyaltyProgram } from '@/types';
+import { useDefaultProgram } from '@/hooks/use-programs';
 
 export default function NewDesignPage() {
   const editorRef = useRef<DesignEditorRef>(null);
@@ -29,25 +28,20 @@ export default function NewDesignPage() {
   const [saving, setSaving] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [designName, setDesignName] = useState(t('untitledDesign'));
-  const [program, setProgram] = useState<LoyaltyProgram | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+
+  const { data: program, isLoading: programLoading } = useDefaultProgram(currentBusiness?.id);
 
   const handleConfirmLeave = useCallback(() => {
     editorRef.current?.clearDraft();
   }, []);
   const { showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty, handleConfirmLeave);
 
-  useEffect(() => {
-    if (!currentBusiness?.id) return;
-    getPrograms(currentBusiness.id).then((programs) => {
-      const p = programs.find((p) => p.is_default) || programs[0];
-      if (p) setProgram(p);
-    }).catch(() => {});
-  }, [currentBusiness?.id]);
-
   const handleSave = () => {
     editorRef.current?.handleSave();
   };
+
+  if (programLoading) return null;
 
   return (
     <>
@@ -59,6 +53,7 @@ export default function NewDesignPage() {
         designName={designName}
         programTotalStamps={program?.config?.total_stamps}
         programName={program?.name}
+        programRewardName={program?.reward_name}
         headerLeft={
           editingName ? (
             <Input
