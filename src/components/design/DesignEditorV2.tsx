@@ -90,6 +90,40 @@ function isBackComplete(_d: CardDesignCreate) {
   return true;
 }
 
+/**
+ * Resolves image field updates for a design save.
+ * Only includes logo_url / strip_background_url in the returned object when they were
+ * explicitly changed (new file uploaded or explicitly cleared). Unchanged images are
+ * omitted so the backend's change-detection logic stays accurate.
+ */
+async function resolveImageUpdates(
+  businessId: string,
+  designId: string,
+  existing: { logo_url?: string; strip_background_url?: string },
+  pending: {
+    logo: { file: File | null; cleared: boolean };
+    strip: { file: File | null; cleared: boolean };
+  },
+): Promise<Partial<CardDesignCreate>> {
+  const updates: Partial<CardDesignCreate> = {};
+
+  if (pending.logo.file) {
+    const result = await uploadLogo(businessId, designId, pending.logo.file);
+    updates.logo_url = result.url;
+  } else if (pending.logo.cleared && existing.logo_url) {
+    updates.logo_url = null as unknown as string;
+  }
+
+  if (pending.strip.file) {
+    const result = await uploadStripBackground(businessId, designId, pending.strip.file);
+    updates.strip_background_url = result.url;
+  } else if (pending.strip.cleared && existing.strip_background_url) {
+    updates.strip_background_url = null as unknown as string;
+  }
+
+  return updates;
+}
+
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
   function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, headerLeft, headerRight }, ref) {
     const router = useRouter();
@@ -190,18 +224,22 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           router.push(`/design/${created.id}`);
         } else if (design) {
-          // Upload any pending image files before saving
-          if (pendingLogoFile) {
-            const result = await uploadLogo(currentBusiness.id, design.id, pendingLogoFile);
-            data.logo_url = result.url;
-            setPendingLogoFile(null);
-          }
-          if (pendingStripFile) {
-            const result = await uploadStripBackground(currentBusiness.id, design.id, pendingStripFile);
-            data.strip_background_url = result.url;
-            setPendingStripFile(null);
-          }
-          await updateDesign(currentBusiness.id, design.id, data);
+          // Strip image URL fields from the base payload — only include if explicitly changed
+          const { logo_url, strip_background_url, ...updateData } = data;
+
+          const imageUpdates = await resolveImageUpdates(
+            currentBusiness.id,
+            design.id,
+            { logo_url: design.logo_url, strip_background_url: design.strip_background_url },
+            {
+              logo: { file: pendingLogoFile, cleared: logo_url === null },
+              strip: { file: pendingStripFile, cleared: strip_background_url === null },
+            },
+          );
+          setPendingLogoFile(null);
+          setPendingStripFile(null);
+
+          await updateDesign(currentBusiness.id, design.id, { ...updateData, ...imageUpdates });
           clearDraft();
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           onSave?.();
