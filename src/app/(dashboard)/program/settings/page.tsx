@@ -80,6 +80,7 @@ export default function ProgramSettingsPage() {
     collect_phone: 'off',
   });
   const [savingSettings, setSavingSettings] = useState(false);
+  const [savedSettings, setSavedSettings] = useState(false);
 
   // Sync program data
   useEffect(() => {
@@ -143,6 +144,8 @@ export default function ProgramSettingsPage() {
           },
         });
         lastSavedRef.current = latest;
+        setSavedSettings(true);
+        setTimeout(() => setSavedSettings(false), 2000);
       } catch {
         // Rollback to last successfully saved state
         setSettings(lastSavedRef.current);
@@ -413,6 +416,7 @@ export default function ProgramSettingsPage() {
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[16px] font-semibold text-[#1A1A1A]">{t('dataCollection')}</span>
               {savingSettings && <span className="text-[11px] text-[#A0A0A0] animate-pulse">{t('saving')}</span>}
+              {savedSettings && !savingSettings && <span className="text-[11px] text-[var(--accent)]">{t('toasts.settingsSaved')}</span>}
             </div>
             <div className="text-[12px] text-[#A0A0A0] mb-5">{t('dataCollectionDescription')}</div>
 
