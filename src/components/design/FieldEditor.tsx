@@ -50,13 +50,17 @@ export default function FieldEditor({
 
   const updatePendingField = (updates: Partial<PassField>) => {
     if (!pendingField) return;
-    const updated = { ...pendingField, ...updates };
-    if (updated.label.trim() !== '' || updated.value.trim() !== '') {
-      onChange([...fields, updated]);
-      setPendingField(null);
-    } else {
-      setPendingField(updated);
+    setPendingField({ ...pendingField, ...updates });
+  };
+
+  const commitPendingField = (e: React.FocusEvent) => {
+    if (!pendingField) return;
+    // Only commit when focus leaves the entire pending row
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    if (pendingField.label.trim() !== '' || pendingField.value.trim() !== '') {
+      onChange([...fields, pendingField]);
     }
+    setPendingField(null);
   };
 
   const fieldRow = (
@@ -140,15 +144,18 @@ export default function FieldEditor({
               () => removeField(index),
             ),
           )}
-          {pendingField &&
-            fieldRow(
-              pendingField,
-              fields.length,
-              (v) => updatePendingField({ label: v }),
-              (v) => updatePendingField({ value: v }),
-              () => setPendingField(null),
-              true,
-            )}
+          {pendingField && (
+            <fieldset className="contents" onBlur={commitPendingField}>
+              {fieldRow(
+                pendingField,
+                fields.length,
+                (v) => updatePendingField({ label: v }),
+                (v) => updatePendingField({ value: v }),
+                () => setPendingField(null),
+                true,
+              )}
+            </fieldset>
+          )}
         </div>
       )}
 
