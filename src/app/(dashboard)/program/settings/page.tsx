@@ -26,10 +26,21 @@ import { useProgram } from '../layout';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+import type { FieldCollectionMode } from '@/types/business';
+
+type DataCollectionField = 'collect_name' | 'collect_email' | 'collect_phone';
+
 interface DataCollectionSettings {
-  collect_name: boolean;
-  collect_email: boolean;
-  collect_phone: boolean;
+  collect_name: FieldCollectionMode;
+  collect_email: FieldCollectionMode;
+  collect_phone: FieldCollectionMode;
+}
+
+/** Normalize legacy boolean values to the new tri-state */
+function normalizeFieldMode(value: FieldCollectionMode | boolean | undefined): FieldCollectionMode {
+  if (value === true) return 'required';
+  if (value === false || value === undefined) return 'off';
+  return value;
 }
 
 export default function ProgramSettingsPage() {
@@ -64,9 +75,9 @@ export default function ProgramSettingsPage() {
 
   // Data collection state
   const [settings, setSettings] = useState<DataCollectionSettings>({
-    collect_name: false,
-    collect_email: false,
-    collect_phone: false,
+    collect_name: 'off',
+    collect_email: 'off',
+    collect_phone: 'off',
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -79,14 +90,14 @@ export default function ProgramSettingsPage() {
     }
   }, [program]);
 
-  // Sync data collection settings
+  // Sync data collection settings (handles legacy boolean values)
   useEffect(() => {
     if (currentBusiness?.settings?.customer_data_collection) {
       const dc = currentBusiness.settings.customer_data_collection;
       setSettings({
-        collect_name: dc.collect_name ?? false,
-        collect_email: dc.collect_email ?? false,
-        collect_phone: dc.collect_phone ?? false,
+        collect_name: normalizeFieldMode(dc.collect_name),
+        collect_email: normalizeFieldMode(dc.collect_email),
+        collect_phone: normalizeFieldMode(dc.collect_phone),
       });
     }
   }, [currentBusiness]);
@@ -108,28 +119,41 @@ export default function ProgramSettingsPage() {
     }
   };
 
-  const handleToggle = async (field: keyof DataCollectionSettings) => {
-    if (!currentBusiness?.id) return;
-    const newSettings = { ...settings, [field]: !settings[field] };
-    setSettings(newSettings);
+  const saveSettings = async (newSettings: DataCollectionSettings, rollback: DataCollectionSettings) => {
     setSavingSettings(true);
     try {
-      await updateBusiness(currentBusiness.id, {
+      await updateBusiness(currentBusiness!.id, {
         settings: {
-          ...currentBusiness.settings,
+          ...currentBusiness!.settings,
           customer_data_collection: newSettings,
         },
       });
       await refetch();
     } catch {
-      setSettings((prev) => ({ ...prev, [field]: !prev[field] }));
+      setSettings(rollback);
       toast.error(t('toasts.settingsFailed'));
     } finally {
       setSavingSettings(false);
     }
   };
 
-  const isAnonymousMode = !settings.collect_name && !settings.collect_email && !settings.collect_phone;
+  const handleToggle = async (field: DataCollectionField) => {
+    if (!currentBusiness?.id) return;
+    const prev = { ...settings };
+    const newSettings = { ...settings, [field]: settings[field] === 'off' ? 'required' : 'off' };
+    setSettings(newSettings);
+    await saveSettings(newSettings, prev);
+  };
+
+  const handleRequiredToggle = async (field: DataCollectionField) => {
+    if (!currentBusiness?.id) return;
+    const prev = { ...settings };
+    const newSettings = { ...settings, [field]: settings[field] === 'required' ? 'optional' : 'required' };
+    setSettings(newSettings);
+    await saveSettings(newSettings, prev);
+  };
+
+  const isAnonymousMode = settings.collect_name === 'off' && settings.collect_email === 'off' && settings.collect_phone === 'off';
 
   const dataFields = [
     {
@@ -377,41 +401,63 @@ export default function ProgramSettingsPage() {
             <div className="text-[12px] text-[#A0A0A0] mb-5">{t('dataCollectionDescription')}</div>
 
             <div className="flex flex-col gap-1.5">
-              {dataFields.map((field) => (
-                <div
-                  key={field.key}
-                  className="flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
-                >
-                  <span className="text-[22px] flex-shrink-0">{field.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <Label className={cn(
-                        'text-[14px] font-semibold',
-                        settings[field.key] ? 'text-[#1A1A1A]' : 'text-[#888]'
-                      )}>
-                        {field.label}
-                      </Label>
-                      {field.recommended && (
-                        <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
-                          {t('recommended').toUpperCase()}
-                        </span>
-                      )}
-                      {field.comingSoon && (
-                        <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--paper-hover)] text-[#A0A0A0]">
-                          {t('comingSoonBadge')}
-                        </span>
-                      )}
+              {dataFields.map((field) => {
+                const mode = settings[field.key];
+                const isEnabled = mode !== 'off';
+                return (
+                  <div
+                    key={field.key}
+                    className="flex flex-col px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <span className="text-[22px] flex-shrink-0">{field.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <Label className={cn(
+                            'text-[14px] font-semibold',
+                            isEnabled ? 'text-[#1A1A1A]' : 'text-[#888]'
+                          )}>
+                            {field.label}
+                          </Label>
+                          {field.recommended && (
+                            <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
+                              {t('recommended').toUpperCase()}
+                            </span>
+                          )}
+                          {field.comingSoon && (
+                            <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--paper-hover)] text-[#A0A0A0]">
+                              {t('comingSoonBadge')}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
+                      </div>
+                      <Switch
+                        checked={isEnabled}
+                        onCheckedChange={() => handleToggle(field.key)}
+                        disabled={savingSettings}
+                        className="flex-shrink-0"
+                      />
                     </div>
-                    <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
+                    {isEnabled && (
+                      <div className="flex items-center gap-2 ml-[38px] mt-2">
+                        <Switch
+                          checked={mode === 'required'}
+                          onCheckedChange={() => handleRequiredToggle(field.key)}
+                          disabled={savingSettings}
+                          className="scale-75 origin-left"
+                        />
+                        <span className={cn(
+                          'text-[11px] font-medium',
+                          mode === 'required' ? 'text-[#1A1A1A]' : 'text-[#8A8A8A]'
+                        )}>
+                          {mode === 'required' ? t('requiredField') : t('optionalField')}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <Switch
-                    checked={settings[field.key]}
-                    onCheckedChange={() => handleToggle(field.key)}
-                    disabled={savingSettings}
-                    className="flex-shrink-0"
-                  />
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Anonymous mode warning */}
@@ -469,7 +515,7 @@ export default function ProgramSettingsPage() {
                 [t('overview.type'), loyaltyTypes.find(lt => lt.id === 'stamps')?.label],
                 [t('overview.stampsRequired'), `${totalStamps}`],
                 [t('overview.reward'), rewardName || '—'],
-                [t('overview.dataCollected'), isAnonymousMode ? t('anonymous') : [settings.collect_name && t('dataFields.name'), settings.collect_email && t('dataFields.email'), settings.collect_phone && t('dataFields.phone')].filter(Boolean).join(', ')],
+                [t('overview.dataCollected'), isAnonymousMode ? t('anonymous') : [settings.collect_name !== 'off' && t('dataFields.name'), settings.collect_email !== 'off' && t('dataFields.email'), settings.collect_phone !== 'off' && t('dataFields.phone')].filter(Boolean).join(', ')],
               ].map(([label, value], i) => (
                 <div
                   key={i}
