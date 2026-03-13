@@ -14,6 +14,8 @@
     "dataCollectionDescription": "Collect this information when customers sign up for their loyalty card.",
     "anonymousModeNote": "Note: Collecting no data enables anonymous mode - customers can sign up without providing any information.",
     "anonymousModeWarning": "Anonymous mode is active. Customers won't need to fill any form, but you won't be able to identify them. They won't be able to recover a lost card or sync across devices, and you won't be able to contact them for marketing.",
+    "anonymousModeTitle": "Anonymous Mode active",
+    "rewardFallback": "a reward",
     "recommended": "Recommended",
     "nav": {
       "details": "Details",
@@ -157,7 +159,10 @@
       "phone": "Phone",
       "phoneDescription": "Enable SMS notifications and campaigns (coming soon)"
     },
+    "requiredField": "Required",
+    "optionalField": "Optional",
     "toasts": {
+      "settingsSaved": "Saved!",
       "settingsFailed": "Failed to update settings",
       "programUpdated": "Program updated",
       "programUpdateFailed": "Failed to update program"

@@ -12,7 +12,9 @@
       "businessName": "Nom de l'entreprise",
       "businessNamePlaceholder": "Mon entreprise",
       "businessLogo": "Logo de l'entreprise",
-      "logoHint": "PNG ou JPG, max 2 Mo"
+      "logoHint": "PNG ou JPG, max 2 Mo",
+      "remove": "Supprimer",
+      "nameHint": "Affiché sur votre mini site et toutes les communications (équipe, notifications, etc.)"
     },
     "cardInfo": {
       "title": "Informations de la carte",
@@ -80,7 +82,30 @@
       "backgroundColor": "Couleur secondaire",
       "unsavedChanges": "Vous avez des modifications non enregistrées",
       "upToDate": "Le thème est à jour",
-      "saveTheme": "Enregistrer le thème"
+      "saveTheme": "Enregistrer le thème",
+      "accentColorHint": "Utilisé pour les couleurs de votre entreprise sur le mini site, les communications.",
+      "backgroundColorHint": "Utilisé pour les couleurs de votre entreprise sur le mini site, les communications."
+    },
+    "cardBackPreview": {
+      "title": "Aperçu du dos de la carte",
+      "subtitle": "Aperçu du dos de votre carte wallet",
+      "loyaltyCard": "Carte de fidélité",
+      "notSet": "Non défini",
+      "closed": "Fermé",
+      "noFields": "Aucun champ ajouté",
+      "settingsLabel": "Paramètres",
+      "language": "Langue",
+      "backFields": "Champs du dos",
+      "accent": "Accentuation",
+      "background": "Fond",
+      "field": "champ",
+      "fields": "champs",
+      "typeHours": "Horaires d'ouverture",
+      "typeWebsite": "Site web",
+      "typePhone": "Téléphone",
+      "typeEmail": "Email",
+      "typeAddress": "Adresse",
+      "typeInfo": "Info"
     },
     "errors": {
       "saveFailed": "Échec de l'enregistrement",

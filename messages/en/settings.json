@@ -12,7 +12,9 @@
       "businessName": "Business Name",
       "businessNamePlaceholder": "My Business",
       "businessLogo": "Business Logo",
-      "logoHint": "PNG or JPG, max 2MB"
+      "logoHint": "PNG or JPG, max 2MB",
+      "remove": "Remove",
+      "nameHint": "Displayed on your mini website and all communications (team, notifications, etc)"
     },
     "cardInfo": {
       "title": "Card Information",
@@ -80,7 +82,30 @@
       "backgroundColor": "Secondary Color",
       "unsavedChanges": "You have unsaved changes",
       "upToDate": "Theme is up to date",
-      "saveTheme": "Save Theme"
+      "saveTheme": "Save Theme",
+      "accentColorHint": "Used for your business colors in the mini website, communications.",
+      "backgroundColorHint": "Used for your business colors in the mini website, communications."
+    },
+    "cardBackPreview": {
+      "title": "Card Back Preview",
+      "subtitle": "How the back of your wallet card looks",
+      "loyaltyCard": "Loyalty Card",
+      "notSet": "Not set",
+      "closed": "Closed",
+      "noFields": "No fields added yet",
+      "settingsLabel": "Settings",
+      "language": "Language",
+      "backFields": "Back Fields",
+      "accent": "Accent",
+      "background": "Background",
+      "field": "field",
+      "fields": "fields",
+      "typeHours": "Opening Hours",
+      "typeWebsite": "Website",
+      "typePhone": "Phone",
+      "typeEmail": "Email",
+      "typeAddress": "Address",
+      "typeInfo": "Info"
     },
     "errors": {
       "saveFailed": "Failed to save",

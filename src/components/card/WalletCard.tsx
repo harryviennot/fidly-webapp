@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { CardDesign } from "@/types";
 import {
   StampIconSvg,
@@ -360,6 +361,7 @@ export function WalletCard({
   showSecondaryFields = true,
   className = "",
 }: WalletCardProps) {
+  const t = useTranslations("designEditor.cardBack");
   const displayName =
     organizationName || design.organization_name || "";
   const initials = getInitials(displayName);
@@ -423,7 +425,7 @@ export function WalletCard({
                   className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300"
                   style={{ color: colors.mutedTextColor }}
                 >
-                  stamps
+                  {t("stamps")}
                 </div>
                 <div
                   className="text-md font-medium flex items-baseline gap-1 justify-end transition-colors duration-300 leading-tight"

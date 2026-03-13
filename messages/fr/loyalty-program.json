@@ -14,6 +14,8 @@
     "dataCollectionDescription": "Collectez ces informations lorsque les clients s'inscrivent à leur carte de fidélité.",
     "anonymousModeNote": "Note : Ne collecter aucune donnée active le mode anonyme — les clients peuvent s'inscrire sans fournir aucune information.",
     "anonymousModeWarning": "Le mode anonyme est actif. Les clients n'auront aucun formulaire à remplir, mais vous ne pourrez pas les identifier. Ils ne pourront pas récupérer une carte perdue ni la synchroniser entre appareils, et vous ne pourrez pas les contacter pour du marketing.",
+    "anonymousModeTitle": "Mode Anonyme actif",
+    "rewardFallback": "une récompense",
     "recommended": "Recommandé",
     "nav": {
       "details": "Détails",
@@ -157,7 +159,10 @@
       "phone": "Téléphone",
       "phoneDescription": "Notifications SMS et campagnes (bientôt disponible)"
     },
+    "requiredField": "Obligatoire",
+    "optionalField": "Facultatif",
     "toasts": {
+      "settingsSaved": "Enregistré !",
       "settingsFailed": "Échec de la mise à jour des paramètres",
       "programUpdated": "Programme mis à jour",
       "programUpdateFailed": "Échec de la mise à jour du programme"

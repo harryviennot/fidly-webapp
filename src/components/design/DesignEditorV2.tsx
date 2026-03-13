@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useImperativeHandle, forwardRef, useRef, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useMemo, useImperativeHandle, forwardRef, useRef, useCallback, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
@@ -22,7 +22,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, SlidersHorizontal, CaretDown, GearSix, Palette, Stamp, TextT, ArrowUDownLeft, MapPin, Globe, Phone, Envelope, Clock, NotePencil, Check } from '@phosphor-icons/react';
+import { Eye, SlidersHorizontal, CaretDown, GearSix, Palette, Stamp, TextT, ArrowUDownLeft, Check } from '@phosphor-icons/react';
+import { BUSINESS_INFO_TYPE_ICONS, getEntryLabel, getEntryPreview } from '@/lib/business-info-utils';
+import type { BusinessInfoEntry } from '@/types/business';
 import Link from 'next/link';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import {
@@ -47,11 +49,12 @@ interface DesignEditorV2Props {
   designName?: string;
   programTotalStamps?: number;
   programName?: string;
+  programRewardName?: string | null;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
 }
 
-function getDefaultDesign(t: ReturnType<typeof useTranslations>, totalStamps: number): CardDesignCreate {
+function getDefaultDesign(t: ReturnType<typeof useTranslations>, totalStamps: number, rewardName?: string | null): CardDesignCreate {
   return {
     name: '',
     organization_name: '',
@@ -66,7 +69,7 @@ function getDefaultDesign(t: ReturnType<typeof useTranslations>, totalStamps: nu
     stamp_icon: 'checkmark',
     reward_icon: 'gift',
     icon_color: 'rgb(255, 255, 255)',
-    secondary_fields: [{ key: 'reward', label: t('defaultRewardLabel'), value: t('defaultRewardValue', { count: totalStamps }) }],
+    secondary_fields: [{ key: 'reward', label: t('defaultRewardLabel'), value: rewardName || t('defaultRewardValue', { count: totalStamps }) }],
     auxiliary_fields: [],
     back_fields: [],
   };
@@ -90,8 +93,42 @@ function isBackComplete(_d: CardDesignCreate) {
   return true;
 }
 
+/**
+ * Resolves image field updates for a design save.
+ * Only includes logo_url / strip_background_url in the returned object when they were
+ * explicitly changed (new file uploaded or explicitly cleared). Unchanged images are
+ * omitted so the backend's change-detection logic stays accurate.
+ */
+async function resolveImageUpdates(
+  businessId: string,
+  designId: string,
+  existing: { logo_url?: string; strip_background_url?: string },
+  pending: {
+    logo: { file: File | null; cleared: boolean };
+    strip: { file: File | null; cleared: boolean };
+  },
+): Promise<Partial<CardDesignCreate>> {
+  const updates: Partial<CardDesignCreate> = {};
+
+  if (pending.logo.file) {
+    const result = await uploadLogo(businessId, designId, pending.logo.file);
+    updates.logo_url = result.url;
+  } else if (pending.logo.cleared && existing.logo_url) {
+    updates.logo_url = null as unknown as string;
+  }
+
+  if (pending.strip.file) {
+    const result = await uploadStripBackground(businessId, designId, pending.strip.file);
+    updates.strip_background_url = result.url;
+  } else if (pending.strip.cleared && existing.strip_background_url) {
+    updates.strip_background_url = null as unknown as string;
+  }
+
+  return updates;
+}
+
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, headerLeft, headerRight }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, programRewardName, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const queryClient = useQueryClient();
     const { currentBusiness } = useBusiness();
@@ -102,13 +139,17 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const draftId = design?.id ?? 'new';
     const [formData, setFormData] = useState<CardDesignCreate>(() => {
-      const defaultData = design ? { ...design } : getDefaultDesign(t, totalStamps);
+      const defaultData = design ? { ...design } : getDefaultDesign(t, totalStamps, programRewardName);
       const draft = getDesignDraft(draftId);
       if (draft) {
         // Use draft if it's newer than the server data
         const serverTime = design?.updated_at ? new Date(design.updated_at).getTime() : 0;
         if (draft.lastModified > serverTime) {
-          return { ...defaultData, ...draft.data };
+          const merged = { ...defaultData, ...draft.data };
+          // For new designs, always use fresh program-derived defaults for secondary_fields
+          // so stale drafts don't overwrite the reward name pre-fill
+          if (!design) merged.secondary_fields = defaultData.secondary_fields;
+          return merged;
         }
       }
       return defaultData;
@@ -126,6 +167,15 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const [pendingStripFile, setPendingStripFile] = useState<File | null>(null);
     const [customColors, setCustomColors] = useState<string[]>([]);
 
+    const previewDesign = useMemo(() => {
+      const businessInfo = (currentBusiness?.settings?.business_info as BusinessInfoEntry[]) || [];
+      const hiddenKeys = formData.hidden_business_info_keys || [];
+      const visibleBizFields = businessInfo
+        .filter((e) => !hiddenKeys.includes(e.key))
+        .map((e) => ({ key: e.key, label: getEntryLabel(e), value: getEntryPreview(e) }));
+      return { ...formData, back_fields: [...(formData.back_fields || []), ...visibleBizFields] };
+    }, [formData, currentBusiness?.settings?.business_info]);
+
     const addCustomColor = useCallback((hex: string) => {
       setCustomColors((prev) => {
         if (prev.some((c) => c.toLowerCase() === hex.toLowerCase())) return prev;
@@ -142,7 +192,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // Dirty state tracking
     const lastSavedDataRef = useRef(
-      JSON.stringify(design ? { ...design } : getDefaultDesign(t, totalStamps))
+      JSON.stringify(design ? { ...design } : getDefaultDesign(t, totalStamps, programRewardName))
     );
     const isDirty = JSON.stringify(formData) !== lastSavedDataRef.current;
 
@@ -190,7 +240,23 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           router.push(`/design/${created.id}`);
         } else if (design) {
-          await updateDesign(currentBusiness.id, design.id, data);
+          // Strip image URL fields from the base payload — only include if explicitly changed
+          const { logo_url, strip_background_url, ...updateData } = data;
+
+          const imageUpdates = await resolveImageUpdates(
+            currentBusiness.id,
+            design.id,
+            { logo_url: design.logo_url, strip_background_url: design.strip_background_url },
+            {
+              logo: { file: pendingLogoFile, cleared: logo_url === null },
+              strip: { file: pendingStripFile, cleared: strip_background_url === null },
+            },
+          );
+          setPendingLogoFile(null);
+          setPendingStripFile(null);
+
+          await updateDesign(currentBusiness.id, design.id, { ...updateData, ...imageUpdates });
+          queryClient.invalidateQueries({ queryKey: designKeys.all(currentBusiness.id) });
           clearDraft();
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           onSave?.();
@@ -331,27 +397,22 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     };
 
     const handleLogoUpload = async (file: File) => {
-      if (!design || !currentBusiness?.id) {
-        // Deferred upload for new designs: store file and use blob URL for preview
-        setPendingLogoFile(file);
-        const blobUrl = URL.createObjectURL(file);
-        updateField('logo_url', blobUrl);
-        return;
-      }
-      const result = await uploadLogo(currentBusiness.id, design.id, file);
-      updateField('logo_url', result.url);
+      // Always defer: store file and use blob URL for preview; upload happens on Save
+      setPendingLogoFile(file);
+      const blobUrl = URL.createObjectURL(file);
+      updateField('logo_url', blobUrl);
+    };
+
+    const handleLogoClear = () => {
+      updateField('logo_url', null as unknown as string);
+      setPendingLogoFile(null);
     };
 
     const handleStripBackgroundUpload = async (file: File) => {
-      if (!design || !currentBusiness?.id) {
-        // Deferred upload for new designs
-        setPendingStripFile(file);
-        const blobUrl = URL.createObjectURL(file);
-        updateField('strip_background_url', blobUrl);
-        return;
-      }
-      const result = await uploadStripBackground(currentBusiness.id, design.id, file);
-      updateField('strip_background_url', result.url);
+      // Always defer: store file and use blob URL for preview; upload happens on Save
+      setPendingStripFile(file);
+      const blobUrl = URL.createObjectURL(file);
+      updateField('strip_background_url', blobUrl);
     };
 
     // Current colors as hex for pickers
@@ -380,7 +441,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         <div className="w-full bg-white border border-[#EEEDEA] rounded-[14px] p-[18px] overflow-hidden">
           {/* Header: title + wallet toggle */}
           <div className="flex items-center justify-between mb-3.5">
-            <span className="text-[15px] font-semibold text-foreground">Live Preview</span>
+            <span className="text-[15px] font-semibold text-foreground">{t('livePreview')}</span>
             <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
               <TabsList className="rounded-full bg-[#F4F2EE] p-0.5 h-auto">
                 <TabsTrigger value="apple" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1 text-[11px] font-semibold">{t('appleWallet')}</TabsTrigger>
@@ -399,16 +460,18 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                     <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
                       <div className="card-flip-front">
                         <EditorCard
-                          design={formData}
+                          design={previewDesign}
                           previewStamps={previewStamps}
+                          totalStamps={totalStamps}
                           organizationName={formData.organization_name}
                           showBack={false}
                         />
                       </div>
                       <div className="card-flip-back">
                         <EditorCard
-                          design={formData}
+                          design={previewDesign}
                           previewStamps={previewStamps}
+                          totalStamps={totalStamps}
                           organizationName={formData.organization_name}
                           showBack={true}
                         />
@@ -423,8 +486,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                       <div className="card-flip-front">
                         <ScaledCardWrapper baseWidth={320} dynamicHeight>
                           <GoogleWalletCard
-                            design={formData}
+                            design={previewDesign}
                             stamps={previewStamps}
+                            totalStamps={totalStamps}
                             organizationName={formData.organization_name}
                           />
                         </ScaledCardWrapper>
@@ -432,8 +496,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                       <div className="card-flip-back">
                         <ScaledCardWrapper baseWidth={320} dynamicHeight>
                           <GoogleWalletCard
-                            design={formData}
+                            design={previewDesign}
                             stamps={previewStamps}
+                            totalStamps={totalStamps}
                             organizationName={formData.organization_name}
                             showBack
                           />
@@ -533,6 +598,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               label={t('logo')}
               value={formData.logo_url}
               onUpload={handleLogoUpload}
+              onClear={handleLogoClear}
               hint={t('logoHint')}
               enableCrop
             />
@@ -738,9 +804,16 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               {t('backDescription')}
             </p>
 
+            <FieldEditor
+              title={t('cardSpecific')}
+              fields={formData.back_fields || []}
+              onChange={(f) => updateField('back_fields', f)}
+              maxFields={10}
+            />
+
             {/* Inherited business info fields */}
             <BusinessInfoFields
-              businessInfo={(currentBusiness?.settings?.business_info as Array<{ type: string; key: string; data: Record<string, unknown> }>) || []}
+              businessInfo={(currentBusiness?.settings?.business_info as BusinessInfoEntry[]) || []}
               hiddenKeys={formData.hidden_business_info_keys || []}
               onToggleKey={(key) => {
                 const current = formData.hidden_business_info_keys || [];
@@ -749,13 +822,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                   : [...current, key];
                 updateField('hidden_business_info_keys', next);
               }}
-            />
-
-            <FieldEditor
-              title={t('cardSpecific')}
-              fields={formData.back_fields || []}
-              onChange={(f) => updateField('back_fields', f)}
-              maxFields={10}
             />
           </div>
         </CollapsibleSection>
@@ -841,15 +907,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     );
   });
 
-/** Type-specific icons for business info entries */
-const TYPE_ICONS: Record<string, typeof Clock> = {
-  hours: Clock,
-  website: Globe,
-  phone: Phone,
-  email: Envelope,
-  address: MapPin,
-  custom: NotePencil,
-};
 
 /** Inline component: shows inherited business info with visibility toggles */
 function BusinessInfoFields({
@@ -857,20 +914,11 @@ function BusinessInfoFields({
   hiddenKeys,
   onToggleKey,
 }: {
-  businessInfo: Array<{ type: string; key: string; data: Record<string, unknown> }>;
+  businessInfo: BusinessInfoEntry[];
   hiddenKeys: string[];
   onToggleKey: (key: string) => void;
 }) {
   const t = useTranslations('designEditor.editor');
-
-  const TYPE_LABELS: Record<string, string> = {
-    hours: 'Store Hours',
-    website: 'Website',
-    phone: 'Phone',
-    email: 'Email',
-    address: 'Address',
-    custom: 'Custom',
-  };
 
   if (businessInfo.length === 0) {
     return (
@@ -885,11 +933,15 @@ function BusinessInfoFields({
   }
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[15px] font-medium">{t('fromBusinessSettings')}</span>
+      </div>
+      <div className="space-y-1.5">
       {businessInfo.map((entry) => {
         const isHidden = hiddenKeys.includes(entry.key);
         const preview = getEntryPreview(entry);
-        const Icon = TYPE_ICONS[entry.type] || NotePencil;
+        const Icon = BUSINESS_INFO_TYPE_ICONS[entry.type as keyof typeof BUSINESS_INFO_TYPE_ICONS] || BUSINESS_INFO_TYPE_ICONS.custom;
         return (
           <button
             key={entry.key}
@@ -907,7 +959,7 @@ function BusinessInfoFields({
             <Icon className={`w-4 h-4 flex-shrink-0 ${isHidden ? 'text-muted-foreground' : 'text-[var(--accent)]'}`} />
             <div className={`flex-1 min-w-0 ${isHidden ? 'opacity-40' : ''}`}>
               <span className="text-sm font-semibold">
-                {entry.type === 'custom' ? ((entry.data.label as string) || TYPE_LABELS.custom) : (TYPE_LABELS[entry.type] || entry.type)}
+                {getEntryLabel(entry as BusinessInfoEntry)}
               </span>
               {preview && (
                 <p className="text-xs text-muted-foreground truncate">{preview}</p>
@@ -916,6 +968,7 @@ function BusinessInfoFields({
           </button>
         );
       })}
+      </div>
       <p className="text-xs text-muted-foreground mt-3">
         {t('businessInfoExplanation')}{' '}
         <Link href="/settings" className="text-[var(--accent)] hover:underline inline-flex items-center gap-1">
@@ -927,19 +980,5 @@ function BusinessInfoFields({
   );
 }
 
-function getEntryPreview(entry: { type: string; data: Record<string, unknown> }): string {
-  switch (entry.type) {
-    case 'website': return (entry.data.url as string) || '';
-    case 'phone': return (entry.data.number as string) || '';
-    case 'email': return (entry.data.email as string) || '';
-    case 'address': return (entry.data.address as string) || '';
-    case 'hours': {
-      const schedule = (entry.data.schedule as Array<{ days: string; closed?: boolean }>) || [];
-      return schedule.map((s) => s.days).join(', ');
-    }
-    case 'custom': return (entry.data.value as string) || '';
-    default: return '';
-  }
-}
 
 export default DesignEditorV2;
