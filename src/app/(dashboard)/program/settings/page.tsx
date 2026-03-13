@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   UserIcon,
@@ -44,7 +44,7 @@ function normalizeFieldMode(value: FieldCollectionMode | boolean | undefined): F
 }
 
 export default function ProgramSettingsPage() {
-  const { currentBusiness, refetch } = useBusiness();
+  const { currentBusiness } = useBusiness();
   const { program, activeDesign, loading, updateProgram } = useProgram();
   const t = useTranslations('loyaltyProgram');
 
@@ -90,15 +90,20 @@ export default function ProgramSettingsPage() {
     }
   }, [program]);
 
-  // Sync data collection settings (handles legacy boolean values)
+  // Sync data collection settings on initial load (handles legacy boolean values)
+  const initialSyncDone = useRef(false);
   useEffect(() => {
+    if (initialSyncDone.current) return;
     if (currentBusiness?.settings?.customer_data_collection) {
+      initialSyncDone.current = true;
       const dc = currentBusiness.settings.customer_data_collection;
-      setSettings({
+      const normalized = {
         collect_name: normalizeFieldMode(dc.collect_name),
         collect_email: normalizeFieldMode(dc.collect_email),
         collect_phone: normalizeFieldMode(dc.collect_phone),
-      });
+      };
+      setSettings(normalized);
+      lastSavedRef.current = normalized;
     }
   }, [currentBusiness]);
 
@@ -119,38 +124,46 @@ export default function ProgramSettingsPage() {
     }
   };
 
-  const saveSettings = async (newSettings: DataCollectionSettings, rollback: DataCollectionSettings) => {
+  // Debounced save: accumulate rapid changes, send one API call
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const lastSavedRef = useRef(settings);
+
+  const scheduleSave = useCallback(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
     setSavingSettings(true);
-    try {
-      await updateBusiness(currentBusiness!.id, {
-        settings: {
-          ...currentBusiness!.settings,
-          customer_data_collection: newSettings,
-        },
-      });
-      await refetch();
-    } catch {
-      setSettings(rollback);
-      toast.error(t('toasts.settingsFailed'));
-    } finally {
-      setSavingSettings(false);
-    }
+    debounceTimer.current = setTimeout(async () => {
+      const latest = settingsRef.current;
+      try {
+        await updateBusiness(currentBusiness!.id, {
+          settings: {
+            ...currentBusiness!.settings,
+            customer_data_collection: latest,
+          },
+        });
+        lastSavedRef.current = latest;
+      } catch {
+        // Rollback to last successfully saved state
+        setSettings(lastSavedRef.current);
+        toast.error(t('toasts.settingsFailed'));
+      } finally {
+        setSavingSettings(false);
+      }
+    }, 1000);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentBusiness?.id]);
+
+  const handleToggle = (field: DataCollectionField) => {
+    if (!currentBusiness?.id) return;
+    setSettings(prev => ({ ...prev, [field]: prev[field] === 'off' ? 'required' as const : 'off' as const }));
+    scheduleSave();
   };
 
-  const handleToggle = async (field: DataCollectionField) => {
+  const handleRequiredToggle = (field: DataCollectionField) => {
     if (!currentBusiness?.id) return;
-    const prev = { ...settings };
-    const newSettings = { ...settings, [field]: settings[field] === 'off' ? 'required' : 'off' };
-    setSettings(newSettings);
-    await saveSettings(newSettings, prev);
-  };
-
-  const handleRequiredToggle = async (field: DataCollectionField) => {
-    if (!currentBusiness?.id) return;
-    const prev = { ...settings };
-    const newSettings = { ...settings, [field]: settings[field] === 'required' ? 'optional' : 'required' };
-    setSettings(newSettings);
-    await saveSettings(newSettings, prev);
+    setSettings(prev => ({ ...prev, [field]: prev[field] === 'required' ? 'optional' as const : 'required' as const }));
+    scheduleSave();
   };
 
   const isAnonymousMode = settings.collect_name === 'off' && settings.collect_email === 'off' && settings.collect_phone === 'off';
@@ -397,7 +410,10 @@ export default function ProgramSettingsPage() {
 
           {/* Data Collection */}
           <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up" style={{ animationDelay: '80ms' }}>
-            <div className="text-[16px] font-semibold text-[#1A1A1A] mb-1">{t('dataCollection')}</div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[16px] font-semibold text-[#1A1A1A]">{t('dataCollection')}</span>
+              {savingSettings && <span className="text-[11px] text-[#A0A0A0] animate-pulse">{t('saving')}</span>}
+            </div>
             <div className="text-[12px] text-[#A0A0A0] mb-5">{t('dataCollectionDescription')}</div>
 
             <div className="flex flex-col gap-1.5">
@@ -407,54 +423,51 @@ export default function ProgramSettingsPage() {
                 return (
                   <div
                     key={field.key}
-                    className="flex flex-col px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
+                    className="flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
                   >
-                    <div className="flex items-center gap-3.5">
-                      <span className="text-[22px] flex-shrink-0">{field.icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <Label className={cn(
-                            'text-[14px] font-semibold',
-                            isEnabled ? 'text-[#1A1A1A]' : 'text-[#888]'
-                          )}>
-                            {field.label}
-                          </Label>
-                          {field.recommended && (
-                            <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
-                              {t('recommended').toUpperCase()}
-                            </span>
-                          )}
-                          {field.comingSoon && (
-                            <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--paper-hover)] text-[#A0A0A0]">
-                              {t('comingSoonBadge')}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
+                    <span className="text-[22px] flex-shrink-0">{field.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <Label className={cn(
+                          'text-[14px] font-semibold',
+                          isEnabled ? 'text-[#1A1A1A]' : 'text-[#888]'
+                        )}>
+                          {field.label}
+                        </Label>
+                        {field.recommended && (
+                          <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
+                            {t('recommended').toUpperCase()}
+                          </span>
+                        )}
+                        {field.comingSoon && (
+                          <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--paper-hover)] text-[#A0A0A0]">
+                            {t('comingSoonBadge')}
+                          </span>
+                        )}
                       </div>
-                      <Switch
-                        checked={isEnabled}
-                        onCheckedChange={() => handleToggle(field.key)}
-                        disabled={savingSettings}
-                        className="flex-shrink-0"
-                      />
+                      <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
                     </div>
+                    {/* Required/Optional sub-toggle */}
                     {isEnabled && (
-                      <div className="flex items-center gap-2 ml-[38px] mt-2">
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
                         <Switch
                           checked={mode === 'required'}
                           onCheckedChange={() => handleRequiredToggle(field.key)}
-                          disabled={savingSettings}
-                          className="scale-75 origin-left"
+                          className="scale-75 flex-shrink-0"
                         />
                         <span className={cn(
-                          'text-[11px] font-medium',
+                          'text-[11px] font-medium whitespace-nowrap',
                           mode === 'required' ? 'text-[#1A1A1A]' : 'text-[#8A8A8A]'
                         )}>
                           {mode === 'required' ? t('requiredField') : t('optionalField')}
                         </span>
                       </div>
                     )}
+                    <Switch
+                      checked={isEnabled}
+                      onCheckedChange={() => handleToggle(field.key)}
+                      className="flex-shrink-0"
+                    />
                   </div>
                 );
               })}
