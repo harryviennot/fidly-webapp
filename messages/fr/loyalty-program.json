@@ -159,7 +159,10 @@
       "phone": "Téléphone",
       "phoneDescription": "Notifications SMS et campagnes (bientôt disponible)"
     },
+    "requiredField": "Obligatoire",
+    "optionalField": "Facultatif",
     "toasts": {
+      "settingsSaved": "Enregistré !",
       "settingsFailed": "Échec de la mise à jour des paramètres",
       "programUpdated": "Programme mis à jour",
       "programUpdateFailed": "Échec de la mise à jour du programme"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   UserIcon,
@@ -26,14 +26,25 @@ import { useProgram } from '../layout';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+import type { FieldCollectionMode } from '@/types/business';
+
+type DataCollectionField = 'collect_name' | 'collect_email' | 'collect_phone';
+
 interface DataCollectionSettings {
-  collect_name: boolean;
-  collect_email: boolean;
-  collect_phone: boolean;
+  collect_name: FieldCollectionMode;
+  collect_email: FieldCollectionMode;
+  collect_phone: FieldCollectionMode;
+}
+
+/** Normalize legacy boolean values to the new tri-state */
+function normalizeFieldMode(value: FieldCollectionMode | boolean | undefined): FieldCollectionMode {
+  if (value === true) return 'required';
+  if (value === false || value === undefined) return 'off';
+  return value;
 }
 
 export default function ProgramSettingsPage() {
-  const { currentBusiness, refetch } = useBusiness();
+  const { currentBusiness } = useBusiness();
   const { program, activeDesign, loading, updateProgram } = useProgram();
   const t = useTranslations('loyaltyProgram');
 
@@ -64,11 +75,12 @@ export default function ProgramSettingsPage() {
 
   // Data collection state
   const [settings, setSettings] = useState<DataCollectionSettings>({
-    collect_name: false,
-    collect_email: false,
-    collect_phone: false,
+    collect_name: 'off',
+    collect_email: 'off',
+    collect_phone: 'off',
   });
   const [savingSettings, setSavingSettings] = useState(false);
+  const [savedSettings, setSavedSettings] = useState(false);
 
   // Sync program data
   useEffect(() => {
@@ -79,15 +91,20 @@ export default function ProgramSettingsPage() {
     }
   }, [program]);
 
-  // Sync data collection settings
+  // Sync data collection settings on initial load (handles legacy boolean values)
+  const initialSyncDone = useRef(false);
   useEffect(() => {
+    if (initialSyncDone.current) return;
     if (currentBusiness?.settings?.customer_data_collection) {
+      initialSyncDone.current = true;
       const dc = currentBusiness.settings.customer_data_collection;
-      setSettings({
-        collect_name: dc.collect_name ?? false,
-        collect_email: dc.collect_email ?? false,
-        collect_phone: dc.collect_phone ?? false,
-      });
+      const normalized = {
+        collect_name: normalizeFieldMode(dc.collect_name),
+        collect_email: normalizeFieldMode(dc.collect_email),
+        collect_phone: normalizeFieldMode(dc.collect_phone),
+      };
+      setSettings(normalized);
+      lastSavedRef.current = normalized;
     }
   }, [currentBusiness]);
 
@@ -108,28 +125,51 @@ export default function ProgramSettingsPage() {
     }
   };
 
-  const handleToggle = async (field: keyof DataCollectionSettings) => {
-    if (!currentBusiness?.id) return;
-    const newSettings = { ...settings, [field]: !settings[field] };
-    setSettings(newSettings);
+  // Debounced save: accumulate rapid changes, send one API call
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const lastSavedRef = useRef(settings);
+
+  const scheduleSave = useCallback(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
     setSavingSettings(true);
-    try {
-      await updateBusiness(currentBusiness.id, {
-        settings: {
-          ...currentBusiness.settings,
-          customer_data_collection: newSettings,
-        },
-      });
-      await refetch();
-    } catch {
-      setSettings((prev) => ({ ...prev, [field]: !prev[field] }));
-      toast.error(t('toasts.settingsFailed'));
-    } finally {
-      setSavingSettings(false);
-    }
+    debounceTimer.current = setTimeout(async () => {
+      const latest = settingsRef.current;
+      try {
+        await updateBusiness(currentBusiness!.id, {
+          settings: {
+            ...currentBusiness!.settings,
+            customer_data_collection: latest,
+          },
+        });
+        lastSavedRef.current = latest;
+        setSavedSettings(true);
+        setTimeout(() => setSavedSettings(false), 2000);
+      } catch {
+        // Rollback to last successfully saved state
+        setSettings(lastSavedRef.current);
+        toast.error(t('toasts.settingsFailed'));
+      } finally {
+        setSavingSettings(false);
+      }
+    }, 1000);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentBusiness?.id]);
+
+  const handleToggle = (field: DataCollectionField) => {
+    if (!currentBusiness?.id) return;
+    setSettings(prev => ({ ...prev, [field]: prev[field] === 'off' ? 'required' as const : 'off' as const }));
+    scheduleSave();
   };
 
-  const isAnonymousMode = !settings.collect_name && !settings.collect_email && !settings.collect_phone;
+  const handleRequiredToggle = (field: DataCollectionField) => {
+    if (!currentBusiness?.id) return;
+    setSettings(prev => ({ ...prev, [field]: prev[field] === 'required' ? 'optional' as const : 'required' as const }));
+    scheduleSave();
+  };
+
+  const isAnonymousMode = settings.collect_name === 'off' && settings.collect_email === 'off' && settings.collect_phone === 'off';
 
   const dataFields = [
     {
@@ -373,45 +413,70 @@ export default function ProgramSettingsPage() {
 
           {/* Data Collection */}
           <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up" style={{ animationDelay: '80ms' }}>
-            <div className="text-[16px] font-semibold text-[#1A1A1A] mb-1">{t('dataCollection')}</div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[16px] font-semibold text-[#1A1A1A]">{t('dataCollection')}</span>
+              <span className="inline-grid [&>*]:col-start-1 [&>*]:row-start-1">
+                <span className={`text-[11px] text-[#A0A0A0] transition-opacity duration-300 ${savingSettings ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>{t('saving')}</span>
+                <span className={`text-[11px] text-[var(--accent)] transition-opacity duration-300 ${savedSettings && !savingSettings ? 'opacity-100' : 'opacity-0'}`}>{t('toasts.settingsSaved')}</span>
+              </span>
+            </div>
             <div className="text-[12px] text-[#A0A0A0] mb-5">{t('dataCollectionDescription')}</div>
 
             <div className="flex flex-col gap-1.5">
-              {dataFields.map((field) => (
-                <div
-                  key={field.key}
-                  className="flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
-                >
-                  <span className="text-[22px] flex-shrink-0">{field.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <Label className={cn(
-                        'text-[14px] font-semibold',
-                        settings[field.key] ? 'text-[#1A1A1A]' : 'text-[#888]'
-                      )}>
-                        {field.label}
-                      </Label>
-                      {field.recommended && (
-                        <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
-                          {t('recommended').toUpperCase()}
-                        </span>
-                      )}
-                      {field.comingSoon && (
-                        <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--paper-hover)] text-[#A0A0A0]">
-                          {t('comingSoonBadge')}
-                        </span>
-                      )}
+              {dataFields.map((field) => {
+                const mode = settings[field.key];
+                const isEnabled = mode !== 'off';
+                return (
+                  <div
+                    key={field.key}
+                    className="flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
+                  >
+                    <span className="text-[22px] flex-shrink-0">{field.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <Label className={cn(
+                          'text-[14px] font-semibold',
+                          isEnabled ? 'text-[#1A1A1A]' : 'text-[#888]'
+                        )}>
+                          {field.label}
+                        </Label>
+                        {field.recommended && (
+                          <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
+                            {t('recommended').toUpperCase()}
+                          </span>
+                        )}
+                        {field.comingSoon && (
+                          <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--paper-hover)] text-[#A0A0A0]">
+                            {t('comingSoonBadge')}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
                     </div>
-                    <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
+                    {/* Required/Optional sub-toggle */}
+                    {isEnabled && (
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <Switch
+                          checked={mode === 'required'}
+                          onCheckedChange={() => handleRequiredToggle(field.key)}
+                          className="scale-75 flex-shrink-0"
+                        />
+                        <span className={cn(
+                          'text-[11px] font-medium whitespace-nowrap',
+                          mode === 'required' ? 'text-[#1A1A1A]' : 'text-[#8A8A8A]'
+                        )}>
+                          {mode === 'required' ? t('requiredField') : t('optionalField')}
+                        </span>
+                      </div>
+                    )}
+                    <Switch
+                      checked={isEnabled}
+                      onCheckedChange={() => handleToggle(field.key)}
+                      className="flex-shrink-0"
+                    />
                   </div>
-                  <Switch
-                    checked={settings[field.key]}
-                    onCheckedChange={() => handleToggle(field.key)}
-                    disabled={savingSettings}
-                    className="flex-shrink-0"
-                  />
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Anonymous mode warning */}
@@ -469,7 +534,7 @@ export default function ProgramSettingsPage() {
                 [t('overview.type'), loyaltyTypes.find(lt => lt.id === 'stamps')?.label],
                 [t('overview.stampsRequired'), `${totalStamps}`],
                 [t('overview.reward'), rewardName || '—'],
-                [t('overview.dataCollected'), isAnonymousMode ? t('anonymous') : [settings.collect_name && t('dataFields.name'), settings.collect_email && t('dataFields.email'), settings.collect_phone && t('dataFields.phone')].filter(Boolean).join(', ')],
+                [t('overview.dataCollected'), isAnonymousMode ? t('anonymous') : [settings.collect_name !== 'off' && t('dataFields.name'), settings.collect_email !== 'off' && t('dataFields.email'), settings.collect_phone !== 'off' && t('dataFields.phone')].filter(Boolean).join(', ')],
               ].map(([label, value], i) => (
                 <div
                   key={i}

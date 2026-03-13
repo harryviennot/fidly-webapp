@@ -12,10 +12,12 @@ export interface Business {
   updated_at?: string;
 }
 
+export type FieldCollectionMode = "off" | "required" | "optional";
+
 export interface CustomerDataCollection {
-  collect_name?: boolean;
-  collect_email?: boolean;
-  collect_phone?: boolean;
+  collect_name?: FieldCollectionMode | boolean;
+  collect_email?: FieldCollectionMode | boolean;
+  collect_phone?: FieldCollectionMode | boolean;
 }
 
 export interface NotificationTemplate {

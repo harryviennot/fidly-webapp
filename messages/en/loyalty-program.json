@@ -159,7 +159,10 @@
       "phone": "Phone",
       "phoneDescription": "Enable SMS notifications and campaigns (coming soon)"
     },
+    "requiredField": "Required",
+    "optionalField": "Optional",
     "toasts": {
+      "settingsSaved": "Saved!",
       "settingsFailed": "Failed to update settings",
       "programUpdated": "Program updated",
       "programUpdateFailed": "Failed to update program"
