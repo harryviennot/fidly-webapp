@@ -413,7 +413,7 @@ export default function ProgramSettingsPage() {
 
           {/* Data Collection */}
           <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up" style={{ animationDelay: '80ms' }}>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-baseline gap-2 mb-1">
               <span className="text-[16px] font-semibold text-[#1A1A1A]">{t('dataCollection')}</span>
               <span className="inline-grid [&>*]:col-start-1 [&>*]:row-start-1">
                 <span className={`text-[11px] text-[#A0A0A0] transition-opacity duration-300 ${savingSettings ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>{t('saving')}</span>
