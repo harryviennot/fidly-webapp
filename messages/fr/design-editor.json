@@ -44,6 +44,19 @@
       "savedActive": "Design enregistré ! Les cartes de vos clients seront mises à jour sous peu.",
       "savedDraft": "Design enregistré avec succès."
     },
+    "imageUploader": {
+      "clickToUpload": "Cliquer pour télécharger",
+      "change": "Modifier",
+      "remove": "Supprimer",
+      "uploading": "Téléchargement..."
+    },
+    "cardBack": {
+      "noBackFields": "Aucun champ au dos configuré",
+      "addFieldsHint": "Ajoutez des conditions, infos de contact ou d'autres détails",
+      "poweredBy": "Propulsé par Stampeo",
+      "noBackFieldsAdded": "Aucun champ au dos ajouté",
+      "stamps": "tampons"
+    },
     "editor": {
       "appleWallet": "Apple Wallet",
       "googleWallet": "Google Wallet",
@@ -118,7 +131,8 @@
       "unsavedChangesTitle": "Modifications non enregistrées",
       "unsavedChangesDescription": "Vous avez des modifications non enregistrées qui seront perdues si vous quittez cette page.",
       "leaveWithoutSaving": "Quitter sans enregistrer",
-      "stayOnPage": "Rester sur la page"
+      "stayOnPage": "Rester sur la page",
+      "livePreview": "Aperçu en direct"
     },
     "fieldEditor": {
       "label": "Libellé",

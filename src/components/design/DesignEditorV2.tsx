@@ -380,7 +380,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         <div className="w-full bg-white border border-[#EEEDEA] rounded-[14px] p-[18px] overflow-hidden">
           {/* Header: title + wallet toggle */}
           <div className="flex items-center justify-between mb-3.5">
-            <span className="text-[15px] font-semibold text-foreground">Live Preview</span>
+            <span className="text-[15px] font-semibold text-foreground">{t('livePreview')}</span>
             <Tabs value={previewWallet} onValueChange={(v) => setPreviewWallet(v as 'apple' | 'google')}>
               <TabsList className="rounded-full bg-[#F4F2EE] p-0.5 h-auto">
                 <TabsTrigger value="apple" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1 text-[11px] font-semibold">{t('appleWallet')}</TabsTrigger>

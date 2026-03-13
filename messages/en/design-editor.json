@@ -44,6 +44,19 @@
       "savedActive": "Design saved! Your customers' cards will update shortly.",
       "savedDraft": "Design saved successfully."
     },
+    "imageUploader": {
+      "clickToUpload": "Click to upload",
+      "change": "Change",
+      "remove": "Remove",
+      "uploading": "Uploading..."
+    },
+    "cardBack": {
+      "noBackFields": "No back fields configured",
+      "addFieldsHint": "Add terms, contact info, or other details",
+      "poweredBy": "Powered by Stampeo",
+      "noBackFieldsAdded": "No back fields added yet",
+      "stamps": "stamps"
+    },
     "editor": {
       "appleWallet": "Apple Wallet",
       "googleWallet": "Google Wallet",
@@ -118,7 +131,8 @@
       "unsavedChangesTitle": "Unsaved changes",
       "unsavedChangesDescription": "You have unsaved changes that will be lost if you leave this page.",
       "leaveWithoutSaving": "Leave without saving",
-      "stayOnPage": "Stay on page"
+      "stayOnPage": "Stay on page",
+      "livePreview": "Live Preview"
     },
     "fieldEditor": {
       "label": "Label",

@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { CardDesign } from "@/types";
 import {
   StampIconSvg,
@@ -226,6 +227,7 @@ export function GoogleWalletCard({
   const containerRef = useRef<HTMLDivElement>(null);
   const [heroWidth, setHeroWidth] = useState(0);
 
+  const t = useTranslations("designEditor.cardBack");
   const displayName =
     organizationName || design.organization_name || "Your Business";
   const initials = getInitials(displayName);
@@ -330,7 +332,8 @@ export function GoogleWalletCard({
           </div>
         ) : (
           <div className="px-4 py-8 text-center">
-            <p className="text-sm" style={{ color: colors.mutedTextColor }}>No back fields added yet</p>
+            <p className="text-sm" style={{ color: colors.mutedTextColor }}>{t("noBackFieldsAdded")}</p>
+            <p className="text-xs mt-1" style={{ color: colors.mutedTextColor }}>{t("addFieldsHint")}</p>
           </div>
         )
       ) : (
@@ -352,7 +355,7 @@ export function GoogleWalletCard({
               className="text-xs uppercase font-medium mb-1"
               style={{ color: colors.mutedTextColor }}
             >
-              Stamps
+              {t("stamps")}
             </p>
             <p
               className="text-sm font-normal"
