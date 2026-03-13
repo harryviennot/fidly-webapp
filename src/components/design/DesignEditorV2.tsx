@@ -804,6 +804,13 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               {t('backDescription')}
             </p>
 
+            <FieldEditor
+              title={t('cardSpecific')}
+              fields={formData.back_fields || []}
+              onChange={(f) => updateField('back_fields', f)}
+              maxFields={10}
+            />
+
             {/* Inherited business info fields */}
             <BusinessInfoFields
               businessInfo={(currentBusiness?.settings?.business_info as BusinessInfoEntry[]) || []}
@@ -815,13 +822,6 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                   : [...current, key];
                 updateField('hidden_business_info_keys', next);
               }}
-            />
-
-            <FieldEditor
-              title={t('cardSpecific')}
-              fields={formData.back_fields || []}
-              onChange={(f) => updateField('back_fields', f)}
-              maxFields={10}
             />
           </div>
         </CollapsibleSection>
@@ -933,7 +933,11 @@ function BusinessInfoFields({
   }
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[15px] font-medium">{t('fromBusinessSettings')}</span>
+      </div>
+      <div className="space-y-1.5">
       {businessInfo.map((entry) => {
         const isHidden = hiddenKeys.includes(entry.key);
         const preview = getEntryPreview(entry);
@@ -964,6 +968,7 @@ function BusinessInfoFields({
           </button>
         );
       })}
+      </div>
       <p className="text-xs text-muted-foreground mt-3">
         {t('businessInfoExplanation')}{' '}
         <Link href="/settings" className="text-[var(--accent)] hover:underline inline-flex items-center gap-1">
