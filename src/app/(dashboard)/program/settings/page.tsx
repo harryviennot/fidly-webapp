@@ -415,8 +415,10 @@ export default function ProgramSettingsPage() {
           <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up" style={{ animationDelay: '80ms' }}>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[16px] font-semibold text-[#1A1A1A]">{t('dataCollection')}</span>
-              {savingSettings && <span className="text-[11px] text-[#A0A0A0] animate-pulse">{t('saving')}</span>}
-              {savedSettings && !savingSettings && <span className="text-[11px] text-[var(--accent)]">{t('toasts.settingsSaved')}</span>}
+              <span className="inline-grid [&>*]:col-start-1 [&>*]:row-start-1">
+                <span className={`text-[11px] text-[#A0A0A0] transition-opacity duration-300 ${savingSettings ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>{t('saving')}</span>
+                <span className={`text-[11px] text-[var(--accent)] transition-opacity duration-300 ${savedSettings && !savingSettings ? 'opacity-100' : 'opacity-0'}`}>{t('toasts.settingsSaved')}</span>
+              </span>
             </div>
             <div className="text-[12px] text-[#A0A0A0] mb-5">{t('dataCollectionDescription')}</div>
 
