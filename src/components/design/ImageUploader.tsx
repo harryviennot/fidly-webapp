@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { LogoCropper } from './LogoCropper';
 
 interface ImageUploaderProps {
@@ -24,6 +25,7 @@ export default function ImageUploader({
   hint,
   enableCrop = false,
 }: ImageUploaderProps) {
+  const t = useTranslations('designEditor.imageUploader');
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +109,7 @@ export default function ImageUploader({
               onClick={handleClick}
               className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-colors"
             >
-              Change
+              {t('change')}
             </button>
             {onClear && (
               <button
@@ -115,7 +117,7 @@ export default function ImageUploader({
                 onClick={onClear}
                 className="px-3 py-1.5 text-sm font-medium rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
               >
-                Remove
+                {t('remove')}
               </button>
             )}
           </div>
@@ -127,11 +129,11 @@ export default function ImageUploader({
           onClick={handleClick}
         >
           {isUploading ? (
-            <span className="text-sm text-[var(--muted-foreground)]">Uploading...</span>
+            <span className="text-sm text-[var(--muted-foreground)]">{t('uploading')}</span>
           ) : (
             <>
               <span className="text-2xl text-[var(--muted-foreground)] mb-1">+</span>
-              <span className="text-sm text-[var(--muted-foreground)]">Click to upload</span>
+              <span className="text-sm text-[var(--muted-foreground)]">{t('clickToUpload')}</span>
               {hint && <span className="text-xs text-[var(--muted-foreground)] mt-1">{hint}</span>}
             </>
           )}

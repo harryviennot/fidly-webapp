@@ -366,7 +366,7 @@ export default function ProgramSettingsPage() {
             <div className="px-4 py-3 rounded-lg bg-[var(--paper)] border border-[var(--border-light)] text-[13px] text-[#555] leading-[1.5]">
               <span className="text-[#8A8A8A]">{t('previewSentence')}</span>{' '}
               <span className="font-semibold text-[#1A1A1A]">
-                {t('previewText', { stamps: totalStamps, reward: rewardName || 'reward' })}
+                {t('previewText', { stamps: totalStamps, reward: rewardName || t('rewardFallback') })}
               </span>
             </div>
           </div>
@@ -419,7 +419,7 @@ export default function ProgramSettingsPage() {
               <InfoBox
                 variant="warning"
                 icon={<WarningIcon className="w-4 h-4 text-[var(--warning)]" weight="fill" />}
-                title="Anonymous Mode Active"
+                title={t('anonymousModeTitle')}
                 message={t('anonymousModeWarning')}
                 className="mt-3"
               />

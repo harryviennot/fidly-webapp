@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { CardDesign, PassField } from "@/types";
 import { WalletCard } from "./WalletCard";
 import { computeCardColors, rgbToHex } from "@/lib/card-utils";
@@ -71,11 +72,13 @@ interface CardBackProps {
 }
 
 function CardBack({ design, organizationName }: CardBackProps) {
+  const t = useTranslations("designEditor.cardBack");
   const { cardRef, rotate, glare, handleMouseMove, handleMouseLeave } =
     use3DEffect();
 
   const displayName =
     organizationName || design.organization_name || "Your Business";
+  const headerText = design.description || displayName;
 
   const colors = computeCardColors(design);
   const foregroundColor = design.foreground_color
@@ -138,7 +141,7 @@ function CardBack({ design, organizationName }: CardBackProps) {
                   className="font-semibold text-lg tracking-tight"
                   style={{ color: foregroundColor }}
                 >
-                  {displayName}
+                  {headerText}
                 </h3>
               </div>
 
@@ -166,9 +169,9 @@ function CardBack({ design, organizationName }: CardBackProps) {
                     className="text-center py-8"
                     style={{ color: foregroundColor, opacity: 0.5 }}
                   >
-                    <p className="text-sm">No back fields configured</p>
+                    <p className="text-sm">{t("noBackFields")}</p>
                     <p className="text-xs mt-1">
-                      Add terms, contact info, or other details
+                      {t("addFieldsHint")}
                     </p>
                   </div>
                 )}
@@ -183,7 +186,7 @@ function CardBack({ design, organizationName }: CardBackProps) {
                   className="text-[10px] uppercase tracking-wider"
                   style={{ color: labelColor, opacity: 0.5 }}
                 >
-                  Powered by Stampeo
+                  {t("poweredBy")}
                 </p>
               </div>
             </div>

@@ -286,7 +286,7 @@ export default function SettingsPage() {
                     onClick={handleLogoDelete}
                     className="text-[10px] text-red-400 hover:text-red-600 transition-colors"
                   >
-                    Remove
+                    {t('businessInfo.remove')}
                   </button>
                 )}
                 {!formData.logo_url && (
@@ -306,7 +306,7 @@ export default function SettingsPage() {
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[#DEDBD5] bg-white text-sm text-[#1A1A1A] outline-none transition-colors focus:border-[var(--accent)]"
                 />
                 <div className="text-[11px] text-[#B0B0B0] mt-1">
-                  Displayed on all wallet cards and communications
+                  {t('businessInfo.nameHint')}
                 </div>
               </div>
             </div>
@@ -385,7 +385,7 @@ export default function SettingsPage() {
                   onChange={(c) => handleColorChange('accentColor', c)}
                 />
                 <div className="text-[11px] text-[#B0B0B0] mt-2">
-                  Used for card background, buttons, and highlights
+                  {t('theme.accentColorHint')}
                 </div>
               </div>
               <div className="flex-1">
@@ -395,7 +395,7 @@ export default function SettingsPage() {
                   onChange={(c) => handleColorChange('backgroundColor', c)}
                 />
                 <div className="text-[11px] text-[#B0B0B0] mt-2">
-                  Used for card background and dark areas
+                  {t('theme.backgroundColorHint')}
                 </div>
               </div>
             </div>
