@@ -47,11 +47,12 @@ interface DesignEditorV2Props {
   designName?: string;
   programTotalStamps?: number;
   programName?: string;
+  programRewardName?: string | null;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
 }
 
-function getDefaultDesign(t: ReturnType<typeof useTranslations>, totalStamps: number): CardDesignCreate {
+function getDefaultDesign(t: ReturnType<typeof useTranslations>, totalStamps: number, rewardName?: string | null): CardDesignCreate {
   return {
     name: '',
     organization_name: '',
@@ -66,7 +67,7 @@ function getDefaultDesign(t: ReturnType<typeof useTranslations>, totalStamps: nu
     stamp_icon: 'checkmark',
     reward_icon: 'gift',
     icon_color: 'rgb(255, 255, 255)',
-    secondary_fields: [{ key: 'reward', label: t('defaultRewardLabel'), value: t('defaultRewardValue', { count: totalStamps }) }],
+    secondary_fields: [{ key: 'reward', label: t('defaultRewardLabel'), value: rewardName || t('defaultRewardValue', { count: totalStamps }) }],
     auxiliary_fields: [],
     back_fields: [],
   };
@@ -125,7 +126,7 @@ async function resolveImageUpdates(
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, headerLeft, headerRight }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, programRewardName, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const queryClient = useQueryClient();
     const { currentBusiness } = useBusiness();
@@ -136,13 +137,17 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const draftId = design?.id ?? 'new';
     const [formData, setFormData] = useState<CardDesignCreate>(() => {
-      const defaultData = design ? { ...design } : getDefaultDesign(t, totalStamps);
+      const defaultData = design ? { ...design } : getDefaultDesign(t, totalStamps, programRewardName);
       const draft = getDesignDraft(draftId);
       if (draft) {
         // Use draft if it's newer than the server data
         const serverTime = design?.updated_at ? new Date(design.updated_at).getTime() : 0;
         if (draft.lastModified > serverTime) {
-          return { ...defaultData, ...draft.data };
+          const merged = { ...defaultData, ...draft.data };
+          // For new designs, always use fresh program-derived defaults for secondary_fields
+          // so stale drafts don't overwrite the reward name pre-fill
+          if (!design) merged.secondary_fields = defaultData.secondary_fields;
+          return merged;
         }
       }
       return defaultData;
@@ -176,7 +181,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     // Dirty state tracking
     const lastSavedDataRef = useRef(
-      JSON.stringify(design ? { ...design } : getDefaultDesign(t, totalStamps))
+      JSON.stringify(design ? { ...design } : getDefaultDesign(t, totalStamps, programRewardName))
     );
     const isDirty = JSON.stringify(formData) !== lastSavedDataRef.current;
 
@@ -446,6 +451,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                         <EditorCard
                           design={formData}
                           previewStamps={previewStamps}
+                          totalStamps={totalStamps}
                           organizationName={formData.organization_name}
                           showBack={false}
                         />
@@ -454,6 +460,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                         <EditorCard
                           design={formData}
                           previewStamps={previewStamps}
+                          totalStamps={totalStamps}
                           organizationName={formData.organization_name}
                           showBack={true}
                         />
@@ -470,6 +477,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                           <GoogleWalletCard
                             design={formData}
                             stamps={previewStamps}
+                            totalStamps={totalStamps}
                             organizationName={formData.organization_name}
                           />
                         </ScaledCardWrapper>
@@ -479,6 +487,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                           <GoogleWalletCard
                             design={formData}
                             stamps={previewStamps}
+                            totalStamps={totalStamps}
                             organizationName={formData.organization_name}
                             showBack
                           />

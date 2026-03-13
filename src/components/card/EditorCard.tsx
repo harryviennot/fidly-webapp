@@ -16,6 +16,8 @@ export interface EditorCardProps {
   design: Partial<CardDesign>;
   /** Current preview stamp count */
   previewStamps?: number;
+  /** Total stamps from program (overrides design.total_stamps) */
+  totalStamps?: number;
   /** Organization name (may differ from design during editing) */
   organizationName?: string;
   /** Show back side */
@@ -223,6 +225,7 @@ function CardBack({ design, organizationName }: CardBackProps) {
 export function EditorCard({
   design,
   previewStamps = 3,
+  totalStamps,
   organizationName,
   showBack = false,
 }: EditorCardProps) {
@@ -235,6 +238,7 @@ export function EditorCard({
       <WalletCard
         design={design}
         stamps={previewStamps}
+        totalStamps={totalStamps}
         organizationName={organizationName}
         showQR={true}
         showSecondaryFields={true}
