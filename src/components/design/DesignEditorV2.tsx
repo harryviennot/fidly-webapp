@@ -240,6 +240,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           setPendingStripFile(null);
 
           await updateDesign(currentBusiness.id, design.id, { ...updateData, ...imageUpdates });
+          queryClient.invalidateQueries({ queryKey: designKeys.all(currentBusiness.id) });
           clearDraft();
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           onSave?.();
