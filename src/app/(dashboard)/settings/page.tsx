@@ -29,7 +29,8 @@ export default function SettingsPage() {
   const tStatus = useTranslations('status');
 
   const [savingTheme, setSavingTheme] = useState(false);
-  const [savingInfo, setSavingInfo] = useState(false);
+  const [savingName, setSavingName] = useState(false);
+  const [savedName, setSavedName] = useState(false);
   const [themeChanged, setThemeChanged] = useState(false);
   const [savingCardInfo, setSavingCardInfo] = useState(false);
   const [businessInfo, setBusinessInfo] = useState<BusinessInfoEntry[]>([]);
@@ -46,7 +47,8 @@ export default function SettingsPage() {
   });
 
   const originalTheme = useRef({ accentColor: DEFAULT_ACCENT, backgroundColor: '#1c1c1e' });
-  const saveTimer = useRef<NodeJS.Timeout | null>(null);
+  const nameTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const nameRef = useRef('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -69,30 +71,25 @@ export default function SettingsPage() {
     }
   }, [currentBusiness]);
 
-  const saveBusinessInfo = useCallback(async () => {
-    if (!currentBusiness?.id) return;
-    setSavingInfo(true);
-    try {
-      await updateBusiness(currentBusiness.id, {
-        name: formData.name,
-        settings: {
-          ...currentBusiness.settings,
-          accentColor: formData.accentColor,
-          backgroundColor: formData.backgroundColor,
-        },
-      });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
-    } finally {
-      setSavingInfo(false);
-    }
-  }, [currentBusiness, formData.name, formData.accentColor, formData.backgroundColor, t]);
-
-  const handleNameChange = (value: string) => {
+  const handleNameChange = useCallback((value: string) => {
     setFormData((prev) => ({ ...prev, name: value }));
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => saveBusinessInfo(), 3000);
-  };
+    nameRef.current = value;
+    if (nameTimer.current) clearTimeout(nameTimer.current);
+    setSavingName(true);
+    nameTimer.current = setTimeout(async () => {
+      if (!currentBusiness?.id) return;
+      try {
+        await updateBusiness(currentBusiness.id, { name: nameRef.current });
+        queryClient.invalidateQueries({ queryKey: ["business"] });
+        setSavedName(true);
+        setTimeout(() => setSavedName(false), 2000);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
+      } finally {
+        setSavingName(false);
+      }
+    }, 1000);
+  }, [currentBusiness?.id, currentBusiness?.settings, t]);
 
   const handleColorChange = (key: 'accentColor' | 'backgroundColor', value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -179,7 +176,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (nameTimer.current) clearTimeout(nameTimer.current);
     };
   }, []);
 
@@ -224,9 +221,10 @@ export default function SettingsPage() {
             </div>
             <div className="text-xs text-[#A0A0A0] mb-5">
               {t('businessInfo.description')}
-              {savingInfo && (
-                <span className="ml-2 text-[var(--accent)]">{tStatus('saving')}</span>
-              )}
+              <span className="inline-grid [&>*]:col-start-1 [&>*]:row-start-1 ml-2">
+                <span className={`text-[11px] text-[#A0A0A0] transition-opacity duration-300 ${savingName ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>{tStatus('saving')}</span>
+                <span className={`text-[11px] text-[var(--accent)] transition-opacity duration-300 ${savedName && !savingName ? 'opacity-100' : 'opacity-0'}`}>{tStatus('saved')}</span>
+              </span>
             </div>
 
             <div className="flex gap-5 items-start sm:items-center flex-col sm:flex-row">
