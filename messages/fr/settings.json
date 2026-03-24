@@ -6,6 +6,7 @@
       "language": "Langue",
       "theme": "Thème"
     },
+    "subtitle": "Détails de l'entreprise, configuration des cartes et branding",
     "businessInfo": {
       "title": "Informations de l'entreprise",
       "description": "Modifier le nom et le logo de votre entreprise",
@@ -66,14 +67,15 @@
       },
       "save": "Enregistrer",
       "saving": "Enregistrement...",
-      "saved": "Informations enregistrées",
+      "saved": "Champs du dos mis à jour. Les cartes de vos clients seront actualisées sous peu.",
       "saveFailed": "Échec de l'enregistrement des informations"
     },
     "language": {
       "title": "Langue de votre entreprise",
       "description": "C'est la langue principale de votre entreprise, utilisée pour votre programme de fidélité",
       "passLocale": "Langue",
-      "passLocaleHint": "Vous pouvez toujours ajouter des traductions pour d'autres langues dans l'éditeur de design."
+      "passLocaleHint": "Vous pouvez toujours ajouter des traductions pour d'autres langues dans l'éditeur de design.",
+      "saved": "La langue de votre entreprise a été mise à jour."
     },
     "theme": {
       "title": "Personnalisation du thème",
@@ -84,7 +86,8 @@
       "upToDate": "Le thème est à jour",
       "saveTheme": "Enregistrer le thème",
       "accentColorHint": "Utilisé pour les couleurs de votre entreprise sur le mini site, les communications.",
-      "backgroundColorHint": "Utilisé pour les couleurs de votre entreprise sur le mini site, les communications."
+      "backgroundColorHint": "Utilisé pour les couleurs de votre entreprise sur le mini site, les communications.",
+      "saved": "Paramètres de branding enregistrés."
     },
     "cardBackPreview": {
       "title": "Aperçu du dos de la carte",

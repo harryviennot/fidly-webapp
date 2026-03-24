@@ -29,7 +29,8 @@ export default function SettingsPage() {
   const tStatus = useTranslations('status');
 
   const [savingTheme, setSavingTheme] = useState(false);
-  const [savingInfo, setSavingInfo] = useState(false);
+  const [savingName, setSavingName] = useState(false);
+  const [savedName, setSavedName] = useState(false);
   const [themeChanged, setThemeChanged] = useState(false);
   const [savingCardInfo, setSavingCardInfo] = useState(false);
   const [businessInfo, setBusinessInfo] = useState<BusinessInfoEntry[]>([]);
@@ -46,7 +47,8 @@ export default function SettingsPage() {
   });
 
   const originalTheme = useRef({ accentColor: DEFAULT_ACCENT, backgroundColor: '#1c1c1e' });
-  const saveTimer = useRef<NodeJS.Timeout | null>(null);
+  const nameTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const nameRef = useRef('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -69,30 +71,25 @@ export default function SettingsPage() {
     }
   }, [currentBusiness]);
 
-  const saveBusinessInfo = useCallback(async () => {
-    if (!currentBusiness?.id) return;
-    setSavingInfo(true);
-    try {
-      await updateBusiness(currentBusiness.id, {
-        name: formData.name,
-        settings: {
-          ...currentBusiness.settings,
-          accentColor: formData.accentColor,
-          backgroundColor: formData.backgroundColor,
-        },
-      });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
-    } finally {
-      setSavingInfo(false);
-    }
-  }, [currentBusiness, formData.name, formData.accentColor, formData.backgroundColor, t]);
-
-  const handleNameChange = (value: string) => {
+  const handleNameChange = useCallback((value: string) => {
     setFormData((prev) => ({ ...prev, name: value }));
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => saveBusinessInfo(), 3000);
-  };
+    nameRef.current = value;
+    if (nameTimer.current) clearTimeout(nameTimer.current);
+    setSavingName(true);
+    nameTimer.current = setTimeout(async () => {
+      if (!currentBusiness?.id) return;
+      try {
+        await updateBusiness(currentBusiness.id, { name: nameRef.current });
+        queryClient.invalidateQueries({ queryKey: ["business"] });
+        setSavedName(true);
+        setTimeout(() => setSavedName(false), 2000);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
+      } finally {
+        setSavingName(false);
+      }
+    }, 1000);
+  }, [currentBusiness?.id, currentBusiness?.settings, t]);
 
   const handleColorChange = (key: 'accentColor' | 'backgroundColor', value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -101,7 +98,7 @@ export default function SettingsPage() {
     const newBg = key === 'backgroundColor' ? value : formData.backgroundColor;
     setThemeChanged(
       newAccent !== originalTheme.current.accentColor ||
-        newBg !== originalTheme.current.backgroundColor
+      newBg !== originalTheme.current.backgroundColor
     );
   };
 
@@ -119,7 +116,7 @@ export default function SettingsPage() {
       });
       originalTheme.current = { accentColor: formData.accentColor, backgroundColor: formData.backgroundColor };
       setThemeChanged(false);
-      toast.success('Branding settings saved.');
+      toast.success(t('theme.saved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('errors.themeSaveFailed'));
     } finally {
@@ -138,7 +135,7 @@ export default function SettingsPage() {
       });
       setBusinessInfoDirty(false);
       queryClient.invalidateQueries({ queryKey: ["business"] });
-      toast.success("Back fields successfully updated. Your customers' cards will update shortly.");
+      toast.success(t('cardInfo.saved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('cardInfo.saveFailed'));
     } finally {
@@ -155,7 +152,7 @@ export default function SettingsPage() {
       await updateBusiness(currentBusiness.id, {
         primary_locale: value as 'fr' | 'en',
       });
-      toast.success('Your business language has been successfully updated.');
+      toast.success(t('language.saved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
     } finally {
@@ -179,7 +176,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (nameTimer.current) clearTimeout(nameTimer.current);
     };
   }, []);
 
@@ -209,7 +206,7 @@ export default function SettingsPage() {
 
       <PageHeader
         title={t('businessInfo.title').split(' ')[0] === 'Business' ? 'Settings' : t('businessInfo.title')}
-        subtitle="Business details, card configuration, and branding"
+        subtitle={t('subtitle')}
         className="mb-5"
       />
 
@@ -224,9 +221,10 @@ export default function SettingsPage() {
             </div>
             <div className="text-xs text-[#A0A0A0] mb-5">
               {t('businessInfo.description')}
-              {savingInfo && (
-                <span className="ml-2 text-[var(--accent)]">{tStatus('saving')}</span>
-              )}
+              <span className="inline-grid [&>*]:col-start-1 [&>*]:row-start-1 ml-2">
+                <span className={`text-[11px] text-[#A0A0A0] transition-opacity duration-300 ${savingName ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>{tStatus('saving')}</span>
+                <span className={`text-[11px] text-[var(--accent)] transition-opacity duration-300 ${savedName && !savingName ? 'opacity-100' : 'opacity-0'}`}>{tStatus('saved')}</span>
+              </span>
             </div>
 
             <div className="flex gap-5 items-start sm:items-center flex-col sm:flex-row">
@@ -234,23 +232,23 @@ export default function SettingsPage() {
               <div className="flex flex-col items-center gap-1.5 shrink-0">
                 <button
                   type="button"
-                  className="relative w-20 h-20 rounded-2xl overflow-hidden cursor-pointer p-0 border-0"
+                  className="relative min-w-20 min-h-20 max-h-24  overflow-hidden cursor-pointer p-0 border-0"
                   style={{ boxShadow: `0 4px 16px ${formData.accentColor}30` }}
                   onMouseEnter={() => setLogoHover(true)}
                   onMouseLeave={() => setLogoHover(false)}
                   onClick={() => fileInputRef.current?.click()}
-                  aria-label="Change business logo"
+                  aria-label="Modifier l'image"
                 >
                   {formData.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={formData.logo_url}
                       alt={formData.name}
-                      className="w-full h-full object-cover"
+                      className="h-full max-h-24 w-auto object-contain"
                     />
                   ) : (
                     <div
-                      className="w-full h-full flex items-center justify-center text-white text-3xl font-bold"
+                      className="w-20 h-20 flex items-center justify-center text-white text-3xl font-bold"
                       style={{
                         background: `linear-gradient(135deg, ${formData.accentColor}, ${formData.accentColor}CC)`,
                       }}
@@ -277,7 +275,7 @@ export default function SettingsPage() {
                       <path d="M10 6v1M10 13v1M6 10H5M15 10h-1" strokeWidth="1" />
                     </svg>
                     <span className="text-white text-[9px] font-semibold">
-                      {t('businessInfo.businessLogo')}
+                      Modifier l&apos;image
                     </span>
                   </div>
                 </button>
