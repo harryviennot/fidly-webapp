@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { setLocale, type Locale } from "@/lib/locale";
+import { updateProfile } from "@/api";
 
 const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",
@@ -18,8 +19,15 @@ const LOCALE_LABELS: Record<Locale, string> = {
 export function LanguageSwitcher() {
   const locale = useLocale();
 
+  const handleChange = (v: string) => {
+    const newLocale = v as Locale;
+    // Persist to backend (fire-and-forget, don't block the UI reload)
+    updateProfile({ locale: newLocale }).catch(() => {});
+    setLocale(newLocale);
+  };
+
   return (
-    <Select value={locale} onValueChange={(v) => setLocale(v as Locale)}>
+    <Select value={locale} onValueChange={handleChange}>
       <SelectTrigger className="w-[180px]">
         <SelectValue />
       </SelectTrigger>

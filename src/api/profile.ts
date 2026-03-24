@@ -45,7 +45,7 @@ export async function deleteAvatar(): Promise<void> {
   }
 }
 
-export async function updateProfile(data: { name?: string }): Promise<User> {
+export async function updateProfile(data: { name?: string; locale?: string }): Promise<User> {
   const response = await fetch(`${API_BASE_URL}/profile/me`, {
     method: 'PUT',
     headers: await getAuthHeaders(),
