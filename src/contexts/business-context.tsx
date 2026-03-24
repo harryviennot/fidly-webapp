@@ -6,6 +6,8 @@ import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
 import { applyTheme, getAccentFromSettings, getBackgroundFromSettings } from "@/utils/theme";
 import { businessKeys, fetchMemberships } from "@/hooks/use-business-query";
+import { getMyProfile } from "@/api";
+import { setLocale, SUPPORTED_LOCALES, type Locale } from "@/lib/locale";
 import { Business } from "@/types";
 
 type MembershipRole = "owner" | "admin" | "scanner";
@@ -38,6 +40,28 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const [currentBusinessId, setCurrentBusinessId] = useState<string | null>(
     () => (typeof window !== "undefined" ? localStorage.getItem("currentBusinessId") : null)
   );
+
+  // Sync locale from DB during loading phase (before content renders)
+  const [localeSynced, setLocaleSynced] = useState(false);
+  useEffect(() => {
+    if (!user?.id) return;
+    getMyProfile()
+      .then((profile) => {
+        if (profile.locale && (SUPPORTED_LOCALES as readonly string[]).includes(profile.locale)) {
+          const cookieLocale = document.cookie
+            .split("; ")
+            .find((c) => c.startsWith("NEXT_LOCALE="))
+            ?.split("=")[1];
+          if (cookieLocale !== profile.locale) {
+            // Cookie differs from DB — update cookie and reload with correct locale
+            setLocale(profile.locale as Locale);
+            return; // setLocale triggers reload, no need to continue
+          }
+        }
+        setLocaleSynced(true);
+      })
+      .catch(() => setLocaleSynced(true));
+  }, [user?.id]);
 
   const {
     data: rawMemberships = [],
@@ -133,7 +157,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         currentBusiness,
         currentRole,
         setCurrentBusiness,
-        loading: isLoading,
+        loading: isLoading || !localeSynced,
         error: queryError ? "Failed to load memberships" : null,
         refetch,
       }}

@@ -12,7 +12,6 @@ import {
 import { useAuth } from "@/contexts/auth-provider";
 import { useBusiness } from "@/contexts/business-context";
 import { getMyProfile } from "@/api";
-import { setLocale, SUPPORTED_LOCALES, type Locale } from "@/lib/locale";
 import type { User } from "@/types";
 
 export function NavUser() {
@@ -22,21 +21,7 @@ export function NavUser() {
   const t = useTranslations();
 
   useEffect(() => {
-    getMyProfile()
-      .then((p) => {
-        setProfile(p);
-        // Sync cookie locale from DB (source of truth) on every page load
-        if (p.locale && (SUPPORTED_LOCALES as readonly string[]).includes(p.locale)) {
-          const cookieLocale = document.cookie
-            .split("; ")
-            .find((c) => c.startsWith("NEXT_LOCALE="))
-            ?.split("=")[1];
-          if (cookieLocale !== p.locale) {
-            setLocale(p.locale as Locale);
-          }
-        }
-      })
-      .catch(console.error);
+    getMyProfile().then(setProfile).catch(console.error);
   }, []);
 
   const getInitials = (name: string) => {
