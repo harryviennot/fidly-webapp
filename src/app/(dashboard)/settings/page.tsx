@@ -116,7 +116,7 @@ export default function SettingsPage() {
       });
       originalTheme.current = { accentColor: formData.accentColor, backgroundColor: formData.backgroundColor };
       setThemeChanged(false);
-      toast.success('Branding settings saved.');
+      toast.success(t('theme.saved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('errors.themeSaveFailed'));
     } finally {
@@ -135,7 +135,7 @@ export default function SettingsPage() {
       });
       setBusinessInfoDirty(false);
       queryClient.invalidateQueries({ queryKey: ["business"] });
-      toast.success("Back fields successfully updated. Your customers' cards will update shortly.");
+      toast.success(t('cardInfo.saved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('cardInfo.saveFailed'));
     } finally {
@@ -152,7 +152,7 @@ export default function SettingsPage() {
       await updateBusiness(currentBusiness.id, {
         primary_locale: value as 'fr' | 'en',
       });
-      toast.success('Your business language has been successfully updated.');
+      toast.success(t('language.saved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
     } finally {
@@ -206,7 +206,7 @@ export default function SettingsPage() {
 
       <PageHeader
         title={t('businessInfo.title').split(' ')[0] === 'Business' ? 'Settings' : t('businessInfo.title')}
-        subtitle="Business details, card configuration, and branding"
+        subtitle={t('subtitle')}
         className="mb-5"
       />
 
