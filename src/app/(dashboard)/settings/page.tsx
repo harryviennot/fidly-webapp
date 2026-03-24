@@ -101,7 +101,7 @@ export default function SettingsPage() {
     const newBg = key === 'backgroundColor' ? value : formData.backgroundColor;
     setThemeChanged(
       newAccent !== originalTheme.current.accentColor ||
-        newBg !== originalTheme.current.backgroundColor
+      newBg !== originalTheme.current.backgroundColor
     );
   };
 
@@ -234,23 +234,23 @@ export default function SettingsPage() {
               <div className="flex flex-col items-center gap-1.5 shrink-0">
                 <button
                   type="button"
-                  className="relative w-20 h-20 rounded-2xl overflow-hidden cursor-pointer p-0 border-0"
+                  className="relative min-w-20 min-h-20 max-h-24  overflow-hidden cursor-pointer p-0 border-0"
                   style={{ boxShadow: `0 4px 16px ${formData.accentColor}30` }}
                   onMouseEnter={() => setLogoHover(true)}
                   onMouseLeave={() => setLogoHover(false)}
                   onClick={() => fileInputRef.current?.click()}
-                  aria-label="Change business logo"
+                  aria-label="Modifier l'image"
                 >
                   {formData.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={formData.logo_url}
                       alt={formData.name}
-                      className="w-full h-full object-cover"
+                      className="h-full max-h-24 w-auto object-contain"
                     />
                   ) : (
                     <div
-                      className="w-full h-full flex items-center justify-center text-white text-3xl font-bold"
+                      className="w-20 h-20 flex items-center justify-center text-white text-3xl font-bold"
                       style={{
                         background: `linear-gradient(135deg, ${formData.accentColor}, ${formData.accentColor}CC)`,
                       }}
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                       <path d="M10 6v1M10 13v1M6 10H5M15 10h-1" strokeWidth="1" />
                     </svg>
                     <span className="text-white text-[9px] font-semibold">
-                      {t('businessInfo.businessLogo')}
+                      Modifier l&apos;image
                     </span>
                   </div>
                 </button>
