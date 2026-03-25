@@ -1,63 +1,18 @@
 "use client";
 
+import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import {
-  StampIcon,
-  GiftIcon,
-  ProhibitIcon,
-  StarIcon,
-  SlidersHorizontalIcon,
-} from "@phosphor-icons/react";
-import { StampIconSvg, type StampIconType } from "@/components/design/StampIconPicker";
-import type { TransactionResponse, TransactionType } from "@/types";
+import type { TransactionResponse } from "@/types";
 import { cn } from "@/lib/utils";
+import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
+import { TransactionIcon } from "@/components/activity/transaction-icon";
 
-const TYPE_CONFIG: Record<
-  TransactionType,
-  {
-    icon: typeof StampIcon;
-    iconColor: string;
-    bgColor: string;
-    deltaBg: string;
-    deltaText: string;
-  }
-> = {
-  stamp_added: {
-    icon: StampIcon,
-    iconColor: "text-[var(--accent)]",
-    bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-[var(--accent-light)]",
-    deltaText: "text-[var(--accent)]",
-  },
-  reward_redeemed: {
-    icon: GiftIcon,
-    iconColor: "text-[var(--stamp-sand)]",
-    bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-[var(--accent-light)]",
-    deltaText: "text-[var(--accent)]",
-  },
-  stamp_voided: {
-    icon: ProhibitIcon,
-    iconColor: "text-[var(--stamp-coral)]",
-    bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-[#FDE8E4]",
-    deltaText: "text-[#C75050]",
-  },
-  bonus_stamp: {
-    icon: StarIcon,
-    iconColor: "text-[var(--stamp-sage)]",
-    bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-[#E4F0F8]",
-    deltaText: "text-[#3D7CAF]",
-  },
-  stamps_adjusted: {
-    icon: SlidersHorizontalIcon,
-    iconColor: "text-[var(--muted-foreground)]",
-    bgColor: "bg-[var(--background-subtle)]",
-    deltaBg: "bg-[#F0EDE7]",
-    deltaText: "text-[#8A8A8A]",
-  },
+// Dashboard widget uses accent CSS vars for stamp_added/reward_redeemed delta badges
+const WIDGET_TYPE_CONFIG = {
+  ...TYPE_CONFIG,
+  stamp_added: { ...TYPE_CONFIG.stamp_added, deltaBg: "bg-[var(--accent-light)]", deltaText: "text-[var(--accent)]" },
+  reward_redeemed: { ...TYPE_CONFIG.reward_redeemed, deltaBg: "bg-[var(--accent-light)]", deltaText: "text-[var(--accent)]" },
 };
 
 function formatTime(dateStr: string) {
@@ -76,79 +31,79 @@ interface RecentScansProps {
   transactions: TransactionResponse[];
   className?: string;
   delay?: number;
+  loading?: boolean;
   stampIcon?: string;
   rewardIcon?: string;
   stampFilledColor?: string;
   iconColor?: string;
 }
 
+function SmoothHeight({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | "auto">("auto");
+  const prevHeight = useRef<number | "auto">("auto");
+  const [transitioning, setTransitioning] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const newH = entry.contentRect.height;
+      if (prevHeight.current !== "auto" && prevHeight.current !== newH) {
+        setTransitioning(true);
+      }
+      prevHeight.current = newH;
+      setHeight(newH);
+    });
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      className={cn(
+        "transition-[height] duration-300 ease-out",
+        transitioning ? "overflow-hidden" : "overflow-visible"
+      )}
+      style={{ height: height === "auto" ? "auto" : height }}
+      onTransitionEnd={() => setTransitioning(false)}
+    >
+      <div ref={ref}>{children}</div>
+    </div>
+  );
+}
+
+function RecentScansSkeleton() {
+  return (
+    <div className="flex flex-col">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex gap-2.5 relative">
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 rounded-full bg-[var(--muted)] animate-pulse shrink-0" />
+            {i < 5 && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
+          </div>
+          <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
+            <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-3.5 py-3">
+              <div className="h-3.5 w-32 bg-[var(--muted)] rounded animate-pulse" />
+              <div className="h-3 w-20 bg-[var(--muted)] rounded animate-pulse mt-2" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function RecentScans({
   transactions,
   className,
   delay = 0,
+  loading,
   stampIcon: designStampIcon,
   rewardIcon: designRewardIcon,
   stampFilledColor,
   iconColor,
 }: RecentScansProps) {
   const t = useTranslations();
-  const hasDesignIcons = !!designStampIcon;
-
-  const renderIcon = (tx: TransactionResponse) => {
-    const type = tx.type;
-    const config = TYPE_CONFIG[type];
-
-    if (hasDesignIcons && (type === "stamp_added" || type === "bonus_stamp")) {
-      return (
-        <div
-          className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
-          style={{ backgroundColor: stampFilledColor }}
-        >
-          <StampIconSvg
-            icon={designStampIcon as StampIconType}
-            className="w-4 h-4"
-            color={iconColor}
-          />
-        </div>
-      );
-    }
-
-    if (hasDesignIcons && type === "reward_redeemed") {
-      return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-emerald-500/15">
-          <StampIconSvg
-            icon={(designRewardIcon as StampIconType) ?? "gift"}
-            className="w-4 h-4"
-            color="#10b981"
-          />
-        </div>
-      );
-    }
-
-    if (hasDesignIcons && type === "stamp_voided") {
-      return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-red-500/15">
-          <StampIconSvg
-            icon={designStampIcon as StampIconType}
-            className="w-4 h-4"
-            color="#ef4444"
-          />
-        </div>
-      );
-    }
-
-    const Icon = config.icon;
-    return (
-      <div
-        className={cn(
-          "flex items-center justify-center w-8 h-8 rounded-full shrink-0",
-          config.bgColor
-        )}
-      >
-        <Icon size={14} weight="duotone" className={config.iconColor} />
-      </div>
-    );
-  };
 
   return (
     <div
@@ -170,77 +125,105 @@ export function RecentScans({
         </Link>
       </div>
 
-      <div>
-        {transactions.map((tx, i) => {
-          const config = TYPE_CONFIG[tx.type] || TYPE_CONFIG.stamp_added;
-          const metadata = tx.metadata as Record<string, string> | null;
-          const customerName = metadata?.customer_name || "Customer";
-          const voidReason = metadata?.void_reason;
-          const isLast = i === transactions.length - 1;
-          const deltaText =
-            tx.stamp_delta > 0 ? `+${tx.stamp_delta}` : String(tx.stamp_delta);
+      <SmoothHeight>
+        {loading ? (
+          <RecentScansSkeleton />
+        ) : (
+          <div>
+            {transactions.map((tx, i) => {
+            const config = WIDGET_TYPE_CONFIG[tx.type] || WIDGET_TYPE_CONFIG.stamp_added;
+            const metadata = tx.metadata as Record<string, string> | null;
+            const customerName = metadata?.customer_name || "Customer";
+            const voidReason = metadata?.void_reason;
+            const isLast = i === transactions.length - 1;
+            const deltaText =
+              tx.stamp_delta > 0 ? `+${tx.stamp_delta}` : String(tx.stamp_delta);
 
-          return (
-            <div key={tx.id} className="flex gap-2.5 relative">
-              {/* Timeline icon + connecting line */}
-              <div className="flex flex-col items-center">
-                {renderIcon(tx)}
-                {!isLast && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
-              </div>
+            return (
+              <div
+                key={tx.id}
+                className="flex gap-2.5 relative animate-slide-up"
+                style={{ animationDelay: `${delay + 100 + i * 70}ms` }}
+              >
+                {/* Timeline icon + connecting line */}
+                <div className="flex flex-col items-center">
+                  <TransactionIcon
+                    type={tx.type}
+                    config={config}
+                    size="sm"
+                    designStampIcon={designStampIcon}
+                    designRewardIcon={designRewardIcon}
+                    stampFilledColor={stampFilledColor}
+                    iconColor={iconColor}
+                  />
+                  {!isLast && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
+                </div>
 
-              {/* Content card */}
-              <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
-                <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-3.5 py-2.5">
-                  {/* Top row: customer + delta + time */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[12.5px] font-semibold text-[#1A1A1A] truncate">
-                        {customerName}
-                      </span>
-                      <span
-                        className={cn(
-                          "text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1.5 inline-block",
-                          config.deltaBg,
-                          config.deltaText
+                {/* Content card */}
+                <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
+                  <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-3.5 py-2.5">
+                    {/* Top row: customer + delta + time */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[12.5px] font-semibold text-[#1A1A1A] truncate">
+                          {customerName}
+                        </span>
+                        {!isCardLifecycleType(tx.type) && (
+                          <span
+                            className={cn(
+                              "text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1.5 inline-block",
+                              config.deltaBg,
+                              config.deltaText
+                            )}
+                          >
+                            {deltaText}
+                          </span>
                         )}
-                      >
-                        {deltaText}
+                      </div>
+                      <span className="text-[10px] text-[#B0B0B0] tabular-nums shrink-0 mt-0.5">
+                        {formatTime(tx.created_at)}
                       </span>
                     </div>
-                    <span className="text-[10px] text-[#B0B0B0] tabular-nums shrink-0 mt-0.5">
-                      {formatTime(tx.created_at)}
-                    </span>
-                  </div>
 
-                  {/* Bottom row: stamp transition · employee */}
-                  <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8A8A8A]">
-                    <span className="font-semibold text-[#555] tabular-nums">
-                      {tx.stamps_before}
-                    </span>
-                    <span>→</span>
-                    <span className="font-semibold tabular-nums text-[#555]">
-                      {tx.stamps_after}
-                    </span>
-                    {tx.employee_name && (
-                      <>
-                        <span className="text-[#D8D5CE]">·</span>
-                        <span>by {tx.employee_name}</span>
-                      </>
+                    {/* Bottom row: stamp transition · employee */}
+                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8A8A8A]">
+                      {isCardLifecycleType(tx.type) ? (
+                        <span className="capitalize">
+                          {metadata?.wallet_type === "google" ? "Google Wallet" : "Apple Wallet"}
+                        </span>
+                      ) : (
+                        <>
+                          <span className="font-semibold text-[#555] tabular-nums">
+                            {tx.stamps_before}
+                          </span>
+                          <span>→</span>
+                          <span className="font-semibold tabular-nums text-[#555]">
+                            {tx.stamps_after}
+                          </span>
+                        </>
+                      )}
+                      {tx.employee_name && (
+                        <>
+                          <span className="text-[#D8D5CE]">·</span>
+                          <span>by {tx.employee_name}</span>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Void reason */}
+                    {voidReason && (
+                      <p className="text-[10px] text-[#8A8A8A] mt-1 italic line-clamp-1">
+                        {voidReason}
+                      </p>
                     )}
                   </div>
-
-                  {/* Void reason */}
-                  {voidReason && (
-                    <p className="text-[10px] text-[#8A8A8A] mt-1 italic line-clamp-1">
-                      {voidReason}
-                    </p>
-                  )}
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+          </div>
+        )}
+      </SmoothHeight>
     </div>
   );
 }

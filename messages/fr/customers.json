@@ -98,7 +98,10 @@
         "reward_redeemed": "R\u00e9compense \u00e9chang\u00e9e",
         "stamp_voided": "Tampon annul\u00e9",
         "bonus_stamp": "Tampon bonus",
-        "stamps_adjusted": "Tampons ajust\u00e9s"
+        "stamps_adjusted": "Tampons ajustés",
+        "card_added": "Carte ajoutée",
+        "card_re_added": "Carte ré-ajoutée",
+        "card_deleted": "Carte supprimée"
       },
       "by": "par",
       "you": "Vous",

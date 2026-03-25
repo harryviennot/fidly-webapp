@@ -1,64 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import {
-  StampIcon,
-  GiftIcon,
-  ProhibitIcon,
-  StarIcon,
-  SlidersHorizontalIcon,
-} from "@phosphor-icons/react";
-import { StampIconSvg, type StampIconType } from "@/components/design/StampIconPicker";
-import type { TransactionResponse, TransactionType } from "@/types";
+import type { TransactionResponse } from "@/types";
 import { useAuth } from "@/contexts/auth-provider";
 import { cn } from "@/lib/utils";
-
-const TYPE_CONFIG: Record<
-  TransactionType,
-  {
-    icon: typeof StampIcon;
-    iconColor: string;
-    bgColor: string;
-    deltaBg: string;
-    deltaText: string;
-  }
-> = {
-  stamp_added: {
-    icon: StampIcon,
-    iconColor: "text-[var(--accent)]",
-    bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-[#E8F5E4]",
-    deltaText: "text-[#4A7C59]",
-  },
-  reward_redeemed: {
-    icon: GiftIcon,
-    iconColor: "text-[var(--stamp-sand)]",
-    bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-[#E8F5E4]",
-    deltaText: "text-[#4A7C59]",
-  },
-  stamp_voided: {
-    icon: ProhibitIcon,
-    iconColor: "text-[var(--stamp-coral)]",
-    bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-[#FDE8E4]",
-    deltaText: "text-[#C75050]",
-  },
-  bonus_stamp: {
-    icon: StarIcon,
-    iconColor: "text-[var(--stamp-sage)]",
-    bgColor: "bg-[var(--accent-light)]",
-    deltaBg: "bg-[#E4F0F8]",
-    deltaText: "text-[#3D7CAF]",
-  },
-  stamps_adjusted: {
-    icon: SlidersHorizontalIcon,
-    iconColor: "text-[var(--muted-foreground)]",
-    bgColor: "bg-[var(--background-subtle)]",
-    deltaBg: "bg-[#F0EDE7]",
-    deltaText: "text-[#8A8A8A]",
-  },
-};
+import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
+import { TransactionIcon } from "@/components/activity/transaction-icon";
 
 interface ActivityItemProps {
   transaction: TransactionResponse;
@@ -86,7 +33,6 @@ export function ActivityItem({
   const t = useTranslations("activity");
   const { user } = useAuth();
   const config = TYPE_CONFIG[transaction.type];
-  const hasDesignIcons = !!designStampIcon;
 
   const formatRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -118,61 +64,6 @@ export function ActivityItem({
       ? `+${transaction.stamp_delta}`
       : String(transaction.stamp_delta);
 
-  const renderIcon = () => {
-    const type = transaction.type;
-
-    if (hasDesignIcons && (type === "stamp_added" || type === "bonus_stamp")) {
-      return (
-        <div
-          className="flex items-center justify-center w-9 h-9 rounded-full shrink-0"
-          style={{ backgroundColor: stampFilledColor }}
-        >
-          <StampIconSvg
-            icon={designStampIcon as StampIconType}
-            className="w-4.5 h-4.5"
-            color={iconColor}
-          />
-        </div>
-      );
-    }
-
-    if (hasDesignIcons && type === "reward_redeemed") {
-      return (
-        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-emerald-500/15">
-          <StampIconSvg
-            icon={(designRewardIcon as StampIconType) ?? "gift"}
-            className="w-4.5 h-4.5"
-            color="#10b981"
-          />
-        </div>
-      );
-    }
-
-    if (hasDesignIcons && type === "stamp_voided") {
-      return (
-        <div className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 bg-red-500/15">
-          <StampIconSvg
-            icon={designStampIcon as StampIconType}
-            className="w-4.5 h-4.5"
-            color="#ef4444"
-          />
-        </div>
-      );
-    }
-
-    const Icon = config.icon;
-    return (
-      <div
-        className={cn(
-          "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
-          config.bgColor
-        )}
-      >
-        <Icon size={16} weight="duotone" className={config.iconColor} />
-      </div>
-    );
-  };
-
   return (
     <div
       onClick={onClick}
@@ -184,7 +75,15 @@ export function ActivityItem({
     >
       {/* Timeline dot + connecting line */}
       <div className="flex flex-col items-center">
-        {renderIcon()}
+        <TransactionIcon
+          type={transaction.type}
+          config={config}
+          size="md"
+          designStampIcon={designStampIcon}
+          designRewardIcon={designRewardIcon}
+          stampFilledColor={stampFilledColor}
+          iconColor={iconColor}
+        />
         {!isLast && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
       </div>
 
@@ -205,15 +104,17 @@ export function ActivityItem({
               <span className="text-[13px] text-[#666] ml-1.5">
                 {t(`itemVerbs.${transaction.type}`)}
               </span>
-              <span
-                className={cn(
-                  "text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1 inline-block",
-                  config.deltaBg,
-                  config.deltaText
-                )}
-              >
-                {deltaText}
-              </span>
+              {!isCardLifecycleType(transaction.type) && (
+                <span
+                  className={cn(
+                    "text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1 inline-block",
+                    config.deltaBg,
+                    config.deltaText
+                  )}
+                >
+                  {deltaText}
+                </span>
+              )}
             </div>
             <span className="text-[11px] text-[#B0B0B0] tabular-nums shrink-0 mt-0.5">
               {formatRelativeTime(transaction.created_at)}
@@ -222,26 +123,34 @@ export function ActivityItem({
 
           {/* Bottom row: stamp transition · total · source · employee */}
           <div className="flex items-center gap-1.5 flex-wrap text-[12px] text-[#8A8A8A]">
-            <span className="font-semibold text-[#555] tabular-nums">
-              {transaction.stamps_before}
-            </span>
-            <span>→</span>
-            <span className="font-semibold tabular-nums text-[#555]">
-              {transaction.stamps_after}
-            </span>
-            {totalStamps != null && totalStamps > 0 && (
+            {isCardLifecycleType(transaction.type) ? (
+              <span className="capitalize">
+                {metadata?.wallet_type === "google" ? "Google Wallet" : "Apple Wallet"}
+              </span>
+            ) : (
               <>
-                <span className="text-[#D8D5CE]">·</span>
-                <span>
-                  {t("stampProgress", {
-                    current: transaction.stamps_after,
-                    total: totalStamps,
-                  })}
+                <span className="font-semibold text-[#555] tabular-nums">
+                  {transaction.stamps_before}
                 </span>
+                <span>→</span>
+                <span className="font-semibold tabular-nums text-[#555]">
+                  {transaction.stamps_after}
+                </span>
+                {totalStamps != null && totalStamps > 0 && (
+                  <>
+                    <span className="text-[#D8D5CE]">·</span>
+                    <span>
+                      {t("stampProgress", {
+                        current: transaction.stamps_after,
+                        total: totalStamps,
+                      })}
+                    </span>
+                  </>
+                )}
+                <span className="text-[#D8D5CE]">·</span>
+                <span>{transaction.source}</span>
               </>
             )}
-            <span className="text-[#D8D5CE]">·</span>
-            <span>{transaction.source}</span>
             {transaction.employee_name && (
               <>
                 <span className="text-[#D8D5CE]">·</span>
