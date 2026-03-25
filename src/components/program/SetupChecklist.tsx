@@ -29,9 +29,8 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
   const { currentBusiness } = useBusiness();
   const { mutate: doUpdateBusiness } = useUpdateBusiness(currentBusiness?.id);
 
-  const [dismissed, setDismissed] = useState(
-    currentBusiness?.settings?.setup_checklist_dismissed === true
-  );
+  const [manuallyDismissed, setManuallyDismissed] = useState(false);
+  const dismissed = manuallyDismissed || currentBusiness?.settings?.setup_checklist_dismissed === true;
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const [skippedSteps, setSkippedSteps] = useState<number[]>([]);
@@ -63,7 +62,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
   };
 
   const handleDismiss = () => {
-    setDismissed(true);
+    setManuallyDismissed(true);
     if (currentBusiness?.id) {
       doUpdateBusiness({
         settings: {
@@ -142,7 +141,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
   const isSelectedCurrent = nextStepIndex >= 0 && steps[nextStepIndex].id === selectedStep;
   const isSelectedSkipped = skippedSteps.includes(selectedStep);
 
-  if (dismissed || allDone) return null;
+  if (!currentBusiness || dismissed || allDone) return null;
 
   // Shared button styles for the detail panel CTA
   const ctaClass = (isCurrent: boolean) => cn(
