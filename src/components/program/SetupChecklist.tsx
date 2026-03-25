@@ -29,9 +29,8 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
   const { currentBusiness } = useBusiness();
   const { mutate: doUpdateBusiness } = useUpdateBusiness(currentBusiness?.id);
 
-  const [dismissed, setDismissed] = useState(
-    currentBusiness?.settings?.setup_checklist_dismissed === true
-  );
+  const [manuallyDismissed, setManuallyDismissed] = useState(false);
+  const dismissed = manuallyDismissed || currentBusiness?.settings?.setup_checklist_dismissed === true;
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const [skippedSteps, setSkippedSteps] = useState<number[]>([]);
@@ -63,7 +62,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
   };
 
   const handleDismiss = () => {
-    setDismissed(true);
+    setManuallyDismissed(true);
     if (currentBusiness?.id) {
       doUpdateBusiness({
         settings: {
@@ -103,11 +102,11 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     {
       id: 3,
       optional: false,
-      done: designs.length > 0,
-      title: t('steps.createDesign'),
-      description: t('steps.createDescription'),
-      cta: t('steps.createCta'),
-      href: '/design/new',
+      done: designs.length > 0 && currentBusiness?.settings?.design_reviewed === true,
+      title: designs.length > 0 ? t('steps.reviewDesign') : t('steps.createDesign'),
+      description: designs.length > 0 ? t('steps.reviewDescription') : t('steps.createDescription'),
+      cta: designs.length > 0 ? t('steps.reviewCta') : t('steps.createCta'),
+      href: designs.length > 0 ? `/design/${designs[0].id}` : '/design/new',
       action: undefined as (() => void) | undefined,
     },
     {
@@ -142,7 +141,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
   const isSelectedCurrent = nextStepIndex >= 0 && steps[nextStepIndex].id === selectedStep;
   const isSelectedSkipped = skippedSteps.includes(selectedStep);
 
-  if (dismissed || allDone) return null;
+  if (!currentBusiness || dismissed || allDone) return null;
 
   // Shared button styles for the detail panel CTA
   const ctaClass = (isCurrent: boolean) => cn(

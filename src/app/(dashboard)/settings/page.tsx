@@ -89,7 +89,7 @@ export default function SettingsPage() {
         setSavingName(false);
       }
     }, 1000);
-  }, [currentBusiness?.id, currentBusiness?.settings, t]);
+  }, [currentBusiness?.id, t, queryClient]);
 
   const handleColorChange = (key: 'accentColor' | 'backgroundColor', value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));

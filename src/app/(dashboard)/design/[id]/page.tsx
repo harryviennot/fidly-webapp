@@ -8,6 +8,7 @@ import { PencilSimple, FloppyDisk, ArrowsClockwise, Translate } from '@phosphor-
 import { CardDesign, CardDesignUpdate, LoyaltyProgram } from '@/types';
 import { getDesign, updateDesign, getPrograms } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
+import { useUpdateBusiness } from '@/hooks/use-business-query';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
 import { DesignEditorSkeleton } from '@/components/design/DesignEditorSkeleton';
 import TranslationsDialog from '@/components/design/TranslationsDialog';
@@ -32,6 +33,7 @@ export default function EditDesignPage() {
   const router = useRouter();
   const designId = params.id as string;
   const { currentBusiness } = useBusiness();
+  const { mutate: doUpdateBusiness } = useUpdateBusiness(currentBusiness?.id);
   const editorRef = useRef<DesignEditorRef>(null);
   const t = useTranslations('designEditor.pages');
   const tDesign = useTranslations('designEditor');
@@ -94,6 +96,14 @@ export default function EditDesignPage() {
       ? t('savedActive')
       : t('savedDraft')
     );
+
+    // Mark design as reviewed for the setup checklist
+    if (currentBusiness && !currentBusiness.settings?.design_reviewed) {
+      doUpdateBusiness({
+        settings: { ...(currentBusiness.settings || {}), design_reviewed: true },
+      });
+    }
+
     router.push('/program/design');
   };
 

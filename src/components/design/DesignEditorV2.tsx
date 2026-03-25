@@ -138,6 +138,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const totalStamps = programTotalStamps ?? 10;
 
     const draftId = design?.id ?? 'new';
+    const defaultRewardField = { key: 'reward', label: t('defaultRewardLabel'), value: programRewardName || t('defaultRewardValue', { count: totalStamps }) };
     const [formData, setFormData] = useState<CardDesignCreate>(() => {
       const defaultData = design ? { ...design } : getDefaultDesign(t, totalStamps, programRewardName);
       const draft = getDesignDraft(draftId);
@@ -151,6 +152,11 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           if (!design) merged.secondary_fields = defaultData.secondary_fields;
           return merged;
         }
+      }
+      // For existing designs with no secondary fields, pre-populate with
+      // the default reward field (in dirty state — not saved until user saves)
+      if (design && (!defaultData.secondary_fields || defaultData.secondary_fields.length === 0)) {
+        defaultData.secondary_fields = [defaultRewardField];
       }
       return defaultData;
     });
