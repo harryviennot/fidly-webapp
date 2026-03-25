@@ -103,7 +103,7 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
     {
       id: 3,
       optional: false,
-      done: designs.length > 0 && designs.some(d => d.updated_at && d.created_at && new Date(d.updated_at) > new Date(d.created_at)),
+      done: designs.length > 0 && currentBusiness?.settings?.design_reviewed === true,
       title: designs.length > 0 ? t('steps.reviewDesign') : t('steps.createDesign'),
       description: designs.length > 0 ? t('steps.reviewDescription') : t('steps.createDescription'),
       cta: designs.length > 0 ? t('steps.reviewCta') : t('steps.createCta'),
