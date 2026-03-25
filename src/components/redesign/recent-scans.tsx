@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { TransactionResponse } from "@/types";
@@ -35,6 +36,40 @@ interface RecentScansProps {
   rewardIcon?: string;
   stampFilledColor?: string;
   iconColor?: string;
+}
+
+function SmoothHeight({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | "auto">("auto");
+  const prevHeight = useRef<number | "auto">("auto");
+  const [transitioning, setTransitioning] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const newH = entry.contentRect.height;
+      if (prevHeight.current !== "auto" && prevHeight.current !== newH) {
+        setTransitioning(true);
+      }
+      prevHeight.current = newH;
+      setHeight(newH);
+    });
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      className={cn(
+        "transition-[height] duration-300 ease-out",
+        transitioning ? "overflow-hidden" : "overflow-visible"
+      )}
+      style={{ height: height === "auto" ? "auto" : height }}
+      onTransitionEnd={() => setTransitioning(false)}
+    >
+      <div ref={ref}>{children}</div>
+    </div>
+  );
 }
 
 function RecentScansSkeleton() {
@@ -90,11 +125,12 @@ export function RecentScans({
         </Link>
       </div>
 
-      {loading ? (
-        <RecentScansSkeleton />
-      ) : (
-        <div>
-          {transactions.map((tx, i) => {
+      <SmoothHeight>
+        {loading ? (
+          <RecentScansSkeleton />
+        ) : (
+          <div>
+            {transactions.map((tx, i) => {
             const config = WIDGET_TYPE_CONFIG[tx.type] || WIDGET_TYPE_CONFIG.stamp_added;
             const metadata = tx.metadata as Record<string, string> | null;
             const customerName = metadata?.customer_name || "Customer";
@@ -185,8 +221,9 @@ export function RecentScans({
               </div>
             );
           })}
-        </div>
-      )}
+          </div>
+        )}
+      </SmoothHeight>
     </div>
   );
 }
