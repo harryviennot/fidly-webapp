@@ -9,9 +9,10 @@ import { useActiveDesign } from "@/hooks/use-designs";
 import { useActivityStats, activityKeys } from "@/hooks/use-activity-stats";
 import { useActivityFeed } from "@/hooks/use-activity-feed";
 import { getCustomer } from "@/api";
-import type { TransactionResponse, TransactionType, CustomerResponse } from "@/types";
+import type { TransactionResponse, CustomerResponse } from "@/types";
 import { ActivityStatsBar } from "@/components/activity/activity-stats-bar";
 import { ActivityFilters, ActivityFiltersSkeleton } from "@/components/activity/activity-filters";
+import type { FilterKey } from "@/components/activity/activity-filters";
 import { ActivityFeed, ActivityFeedSkeleton } from "@/components/activity/activity-feed";
 import { ActivityLiveIndicator } from "@/components/activity/activity-live-indicator";
 import { CustomerDetailSheet } from "@/components/customers/customer-detail-sheet";
@@ -25,7 +26,7 @@ export default function ActivityPage() {
   const queryClient = useQueryClient();
   const businessId = currentBusiness?.id;
 
-  const [typeFilter, setTypeFilter] = useState<TransactionType | "all">("all");
+  const [typeFilter, setTypeFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerResponse | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);

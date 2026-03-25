@@ -18,14 +18,20 @@
       "rewardRedeemed": "R\u00e9compenses",
       "stampVoided": "Tampons annul\u00e9s",
       "bonusStamp": "Tampons bonus",
-      "stampsAdjusted": "Ajustements"
+      "stampsAdjusted": "Ajustements",
+      "cardAdded": "Carte ajoutée",
+      "cardReAdded": "Carte ré-ajoutée",
+      "cardDeleted": "Carte supprimée"
     },
     "itemVerbs": {
-      "stamp_added": "a re\u00e7u un tampon",
-      "reward_redeemed": "a \u00e9chang\u00e9 une r\u00e9compense",
-      "stamp_voided": "a eu un tampon annul\u00e9",
-      "bonus_stamp": "a re\u00e7u un tampon bonus",
-      "stamps_adjusted": "a eu ses tampons ajust\u00e9s"
+      "stamp_added": "a reçu un tampon",
+      "reward_redeemed": "a échangé une récompense",
+      "stamp_voided": "a eu un tampon annulé",
+      "bonus_stamp": "a reçu un tampon bonus",
+      "stamps_adjusted": "a eu ses tampons ajustés",
+      "card_added": "a ajouté sa carte",
+      "card_re_added": "a ré-ajouté sa carte",
+      "card_deleted": "a supprimé sa carte"
     },
     "time": {
       "justNow": "\u00c0 l'instant",

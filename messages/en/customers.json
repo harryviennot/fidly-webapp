@@ -98,7 +98,10 @@
         "reward_redeemed": "Reward Redeemed",
         "stamp_voided": "Stamp Voided",
         "bonus_stamp": "Bonus Stamp",
-        "stamps_adjusted": "Stamps Adjusted"
+        "stamps_adjusted": "Stamps Adjusted",
+        "card_added": "Card Added",
+        "card_re_added": "Card Re-added",
+        "card_deleted": "Card Deleted"
       },
       "by": "by",
       "you": "You",
