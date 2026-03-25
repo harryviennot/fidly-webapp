@@ -30,16 +30,39 @@ interface RecentScansProps {
   transactions: TransactionResponse[];
   className?: string;
   delay?: number;
+  loading?: boolean;
   stampIcon?: string;
   rewardIcon?: string;
   stampFilledColor?: string;
   iconColor?: string;
 }
 
+function RecentScansSkeleton() {
+  return (
+    <div className="flex flex-col">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex gap-2.5 relative">
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 rounded-full bg-[var(--muted)] animate-pulse shrink-0" />
+            {i < 5 && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
+          </div>
+          <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
+            <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-3.5 py-3">
+              <div className="h-3.5 w-32 bg-[var(--muted)] rounded animate-pulse" />
+              <div className="h-3 w-20 bg-[var(--muted)] rounded animate-pulse mt-2" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function RecentScans({
   transactions,
   className,
   delay = 0,
+  loading,
   stampIcon: designStampIcon,
   rewardIcon: designRewardIcon,
   stampFilledColor,
@@ -67,95 +90,103 @@ export function RecentScans({
         </Link>
       </div>
 
-      <div>
-        {transactions.map((tx, i) => {
-          const config = WIDGET_TYPE_CONFIG[tx.type] || WIDGET_TYPE_CONFIG.stamp_added;
-          const metadata = tx.metadata as Record<string, string> | null;
-          const customerName = metadata?.customer_name || "Customer";
-          const voidReason = metadata?.void_reason;
-          const isLast = i === transactions.length - 1;
-          const deltaText =
-            tx.stamp_delta > 0 ? `+${tx.stamp_delta}` : String(tx.stamp_delta);
+      {loading ? (
+        <RecentScansSkeleton />
+      ) : (
+        <div>
+          {transactions.map((tx, i) => {
+            const config = WIDGET_TYPE_CONFIG[tx.type] || WIDGET_TYPE_CONFIG.stamp_added;
+            const metadata = tx.metadata as Record<string, string> | null;
+            const customerName = metadata?.customer_name || "Customer";
+            const voidReason = metadata?.void_reason;
+            const isLast = i === transactions.length - 1;
+            const deltaText =
+              tx.stamp_delta > 0 ? `+${tx.stamp_delta}` : String(tx.stamp_delta);
 
-          return (
-            <div key={tx.id} className="flex gap-2.5 relative">
-              {/* Timeline icon + connecting line */}
-              <div className="flex flex-col items-center">
-                <TransactionIcon
-                  type={tx.type}
-                  config={config}
-                  size="sm"
-                  designStampIcon={designStampIcon}
-                  designRewardIcon={designRewardIcon}
-                  stampFilledColor={stampFilledColor}
-                  iconColor={iconColor}
-                />
-                {!isLast && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
-              </div>
+            return (
+              <div
+                key={tx.id}
+                className="flex gap-2.5 relative animate-slide-up"
+                style={{ animationDelay: `${delay + 100 + i * 70}ms` }}
+              >
+                {/* Timeline icon + connecting line */}
+                <div className="flex flex-col items-center">
+                  <TransactionIcon
+                    type={tx.type}
+                    config={config}
+                    size="sm"
+                    designStampIcon={designStampIcon}
+                    designRewardIcon={designRewardIcon}
+                    stampFilledColor={stampFilledColor}
+                    iconColor={iconColor}
+                  />
+                  {!isLast && <div className="w-[1.5px] flex-1 bg-[#E8E5DE]" />}
+                </div>
 
-              {/* Content card */}
-              <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
-                <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-3.5 py-2.5">
-                  {/* Top row: customer + delta + time */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[12.5px] font-semibold text-[#1A1A1A] truncate">
-                        {customerName}
-                      </span>
-                      {!isCardLifecycleType(tx.type) && (
-                        <span
-                          className={cn(
-                            "text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1.5 inline-block",
-                            config.deltaBg,
-                            config.deltaText
-                          )}
-                        >
-                          {deltaText}
+                {/* Content card */}
+                <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
+                  <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-3.5 py-2.5">
+                    {/* Top row: customer + delta + time */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[12.5px] font-semibold text-[#1A1A1A] truncate">
+                          {customerName}
                         </span>
+                        {!isCardLifecycleType(tx.type) && (
+                          <span
+                            className={cn(
+                              "text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1.5 inline-block",
+                              config.deltaBg,
+                              config.deltaText
+                            )}
+                          >
+                            {deltaText}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-[#B0B0B0] tabular-nums shrink-0 mt-0.5">
+                        {formatTime(tx.created_at)}
+                      </span>
+                    </div>
+
+                    {/* Bottom row: stamp transition · employee */}
+                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8A8A8A]">
+                      {isCardLifecycleType(tx.type) ? (
+                        <span className="capitalize">
+                          {metadata?.wallet_type === "google" ? "Google Wallet" : "Apple Wallet"}
+                        </span>
+                      ) : (
+                        <>
+                          <span className="font-semibold text-[#555] tabular-nums">
+                            {tx.stamps_before}
+                          </span>
+                          <span>→</span>
+                          <span className="font-semibold tabular-nums text-[#555]">
+                            {tx.stamps_after}
+                          </span>
+                        </>
+                      )}
+                      {tx.employee_name && (
+                        <>
+                          <span className="text-[#D8D5CE]">·</span>
+                          <span>by {tx.employee_name}</span>
+                        </>
                       )}
                     </div>
-                    <span className="text-[10px] text-[#B0B0B0] tabular-nums shrink-0 mt-0.5">
-                      {formatTime(tx.created_at)}
-                    </span>
-                  </div>
 
-                  {/* Bottom row: stamp transition · employee */}
-                  <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8A8A8A]">
-                    {isCardLifecycleType(tx.type) ? (
-                      <span className="capitalize">
-                        {metadata?.wallet_type === "google" ? "Google Wallet" : "Apple Wallet"}
-                      </span>
-                    ) : (
-                      <>
-                        <span className="font-semibold text-[#555] tabular-nums">
-                          {tx.stamps_before}
-                        </span>
-                        <span>→</span>
-                        <span className="font-semibold tabular-nums text-[#555]">
-                          {tx.stamps_after}
-                        </span>
-                      </>
-                    )}
-                    {tx.employee_name && (
-                      <>
-                        <span className="text-[#D8D5CE]">·</span>
-                        <span>by {tx.employee_name}</span>
-                      </>
+                    {/* Void reason */}
+                    {voidReason && (
+                      <p className="text-[10px] text-[#8A8A8A] mt-1 italic line-clamp-1">
+                        {voidReason}
+                      </p>
                     )}
                   </div>
-
-                  {/* Void reason */}
-                  {voidReason && (
-                    <p className="text-[10px] text-[#8A8A8A] mt-1 italic line-clamp-1">
-                      {voidReason}
-                    </p>
-                  )}
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
