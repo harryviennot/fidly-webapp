@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { Eye, EyeSlash, Check } from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/auth-provider";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/form/form-field";
@@ -12,24 +13,50 @@ interface InviteAuthFormProps {
 }
 
 export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProps) {
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, verifyOtp, resendOtp } = useAuth();
 
-  const [mode, setMode] = useState<"register" | "login">("register");
   const [email, setEmail] = useState(invitation.email);
   const [name, setName] = useState(invitation.name || "");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState<"form" | "verify">("form");
+  const [otpCode, setOtpCode] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [codeSentMessage, setCodeSentMessage] = useState(false);
+  const otpInputRef = useRef<HTMLInputElement>(null);
 
   const emailMatches = email.toLowerCase() === invitation.email.toLowerCase();
   const isValidEmail = email.includes("@") && email.includes(".");
-  const isValidPassword = password.length >= 6;
-  const passwordsMatch = mode === "login" || password === confirmPassword;
-  const isValidName = mode === "login" || name.trim().length > 0;
+  const passwordChecks = useMemo(() => ({
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+    symbol: /[^a-zA-Z0-9]/.test(password),
+    minLength: password.length >= 6,
+  }), [password]);
+  const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
+  const passwordsMatch = password === confirmPassword;
+  const isValidName = name.trim().length > 0;
 
   const isValid =
-    emailMatches && isValidEmail && isValidPassword && passwordsMatch && isValidName;
+    emailMatches && isValidEmail && isPasswordStrong && passwordsMatch && isValidName;
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  // Auto-focus OTP input
+  useEffect(() => {
+    if (phase === "verify") {
+      setTimeout(() => otpInputRef.current?.focus(), 100);
+    }
+  }, [phase]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -46,43 +73,196 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
       setLoading(true);
 
       try {
-        if (mode === "register") {
-          const { error: authError } = await signUp(email, password, name);
+        // 1. Try signup first
+        const { data: signUpData, error: signUpError } = await signUp(email, password, name);
 
-          if (authError) {
-            const errorMsg = authError.message.toLowerCase();
-            if (
-              errorMsg.includes("already registered") ||
-              errorMsg.includes("already exists") ||
-              errorMsg.includes("user already")
-            ) {
-              setError("This email is already registered. Please sign in instead.");
-              setMode("login");
-            } else {
-              setError(authError.message);
+        if (!signUpError) {
+          // Supabase returns user with empty identities[] when email already exists
+          const isExistingUser = !signUpData?.user || signUpData.user.identities?.length === 0;
+          if (isExistingUser) {
+            const { error: signInError } = await signIn(email, password);
+
+            if (!signInError) {
+              onAuthSuccess();
+              return;
             }
-            setLoading(false);
-            return;
-          }
-        } else {
-          const { error: authError } = await signIn(email, password);
 
-          if (authError) {
-            setError(authError.message);
+            const signInMsg = signInError.message.toLowerCase();
+            if (signInMsg.includes("email not confirmed")) {
+              await resendOtp(email);
+              setResendCooldown(60);
+              setPhase("verify");
+              setLoading(false);
+              return;
+            }
+
+            setError("An account with this email already exists. Please check your password.");
             setLoading(false);
             return;
           }
+
+          // New user created — move to OTP verification
+          setResendCooldown(60);
+          setPhase("verify");
+          setLoading(false);
+          return;
         }
 
-        // Success - trigger callback
+        // 2. If already registered (explicit error), silently try sign-in
+        const errorMsg = signUpError.message.toLowerCase();
+        if (
+          errorMsg.includes("already registered") ||
+          errorMsg.includes("already exists") ||
+          errorMsg.includes("user already")
+        ) {
+          const { error: signInError } = await signIn(email, password);
+
+          if (!signInError) {
+            onAuthSuccess();
+            return;
+          }
+
+          const signInMsg = signInError.message.toLowerCase();
+          if (signInMsg.includes("email not confirmed")) {
+            await resendOtp(email);
+            setResendCooldown(60);
+            setPhase("verify");
+            setLoading(false);
+            return;
+          }
+
+          setError("An account with this email already exists. Please check your password.");
+          setLoading(false);
+          return;
+        }
+
+        // Other signup error
+        setError(signUpError.message);
+        setLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+        setLoading(false);
+      }
+    },
+    [email, emailMatches, invitation.email, isValid, name, onAuthSuccess, password, signIn, signUp, resendOtp]
+  );
+
+  const handleVerifySubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (otpCode.length !== 6) return;
+
+      setError(null);
+      setLoading(true);
+
+      try {
+        const { error: verifyError } = await verifyOtp(email, otpCode);
+
+        if (verifyError) {
+          setError("Invalid verification code, please try again");
+          setOtpCode("");
+          setLoading(false);
+          return;
+        }
+
+        // Verification successful
         onAuthSuccess();
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
         setLoading(false);
       }
     },
-    [email, emailMatches, invitation.email, isValid, mode, name, onAuthSuccess, password, signIn, signUp]
+    [email, otpCode, verifyOtp, onAuthSuccess]
   );
+
+  const handleResend = useCallback(async () => {
+    if (resendCooldown > 0) return;
+    const { error } = await resendOtp(email);
+    if (!error) {
+      setResendCooldown(60);
+      setCodeSentMessage(true);
+      setTimeout(() => setCodeSentMessage(false), 3000);
+    }
+  }, [resendCooldown, resendOtp, email]);
+
+  const handleOtpChange = useCallback((value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 6);
+    setOtpCode(digits);
+  }, []);
+
+  if (phase === "verify") {
+    return (
+      <form onSubmit={handleVerifySubmit} className="space-y-4">
+        <div className="text-center mb-2">
+          <p className="text-sm text-muted-foreground">
+            We sent a 6-digit code to <strong>{email}</strong>
+          </p>
+        </div>
+
+        {error && (
+          <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">
+            {error}
+          </div>
+        )}
+
+        {codeSentMessage && (
+          <div className="p-3 rounded-lg bg-green-50 text-green-600 text-sm border border-green-200">
+            New code sent!
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <label htmlFor="otp" className="text-sm font-medium">Verification code</label>
+          <input
+            ref={otpInputRef}
+            id="otp"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            value={otpCode}
+            onChange={(e) => handleOtpChange(e.target.value)}
+            maxLength={6}
+            placeholder="000000"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-center text-2xl font-mono tracking-[0.5em] shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
+        </div>
+
+        <Button type="submit" disabled={otpCode.length !== 6 || loading} className="w-full">
+          {loading ? "Verifying..." : "Verify & join"}
+        </Button>
+
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            {resendCooldown > 0 ? (
+              `Resend in ${resendCooldown}s`
+            ) : (
+              <button
+                type="button"
+                onClick={handleResend}
+                className="text-[var(--accent)] hover:underline font-medium"
+              >
+                Resend code
+              </button>
+            )}
+          </p>
+          <p>
+            <button
+              type="button"
+              onClick={() => {
+                setPhase("form");
+                setOtpCode("");
+                setError(null);
+                setCodeSentMessage(false);
+              }}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Use a different email
+            </button>
+          </p>
+        </div>
+      </form>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -103,84 +283,77 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
         error={!emailMatches && email.length > 0 ? `Email must match: ${invitation.email}` : undefined}
       />
 
-      {mode === "register" && (
-        <FormField
-          label="Your Name"
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter your full name"
-          required
-        />
-      )}
-
       <FormField
-        label="Password"
-        id="password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder={mode === "register" ? "At least 6 characters" : "Enter your password"}
-        minLength={6}
+        label="Your Name"
+        id="name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Enter your full name"
         required
       />
 
-      {mode === "register" && (
-        <FormField
-          label="Confirm Password"
-          id="confirmPassword"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm your password"
-          required
-          error={password && confirmPassword && !passwordsMatch ? "Passwords do not match" : undefined}
-        />
-      )}
+      <div className="flex flex-col gap-2">
+        <label htmlFor="password" className="text-sm font-medium">Password</label>
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Create a strong password"
+            minLength={6}
+            required
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        {password.length > 0 && (
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1">
+            {([
+              ["lowercase", "Lowercase (a-z)"],
+              ["uppercase", "Uppercase (A-Z)"],
+              ["number", "Number (0-9)"],
+              ["symbol", "Symbol (!@#$...)"],
+              ["minLength", "Min 6 characters"],
+            ] as const).map(([key, label]) => (
+              <li
+                key={key}
+                className={`flex items-center gap-1.5 text-xs transition-colors ${
+                  passwordChecks[key]
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <Check size={12} weight={passwordChecks[key] ? "bold" : "regular"} />
+                {label}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <FormField
+        label="Confirm Password"
+        id="confirmPassword"
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        placeholder="Confirm your password"
+        required
+        error={password && confirmPassword && !passwordsMatch ? "Passwords do not match" : undefined}
+      />
 
       <Button type="submit" disabled={!isValid || loading} className="w-full">
-        {loading
-          ? mode === "register"
-            ? "Creating account..."
-            : "Signing in..."
-          : mode === "register"
-            ? "Create account & join"
-            : "Sign in & join"}
+        {loading ? "Please wait..." : "Create account & join"}
       </Button>
-
-      <p className="text-center text-sm text-muted-foreground">
-        {mode === "register" ? (
-          <>
-            Already have an account?{" "}
-            <button
-              type="button"
-              onClick={() => {
-                setMode("login");
-                setError(null);
-                setConfirmPassword("");
-              }}
-              className="text-[var(--accent)] hover:underline font-medium"
-            >
-              Sign in
-            </button>
-          </>
-        ) : (
-          <>
-            Don&apos;t have an account?{" "}
-            <button
-              type="button"
-              onClick={() => {
-                setMode("register");
-                setError(null);
-              }}
-              className="text-[var(--accent)] hover:underline font-medium"
-            >
-              Create one
-            </button>
-          </>
-        )}
-      </p>
     </form>
   );
 }
