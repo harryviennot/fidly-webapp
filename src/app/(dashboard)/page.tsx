@@ -56,7 +56,7 @@ export default function DashboardPage() {
   // Data hooks
   const { data: customerData } = useCustomers(businessId, 0);
   const { data: stats } = useActivityStats(businessId);
-  const { data: txns } = useTransactions(businessId, 10);
+  const { data: txns, isLoading: txnsLoading } = useTransactions(businessId, 10);
   const { data: activeDesign } = useActiveDesign(businessId);
 
   // User profile for welcome message
@@ -214,6 +214,7 @@ export default function DashboardPage() {
           {/* Recent Scans */}
           <RecentScans
             transactions={recentTransactions}
+            loading={txnsLoading}
             delay={400}
             stampIcon={stampIcon}
             rewardIcon={rewardIcon}

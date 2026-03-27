@@ -3,9 +3,12 @@ export type TransactionType =
   | 'reward_redeemed'
   | 'stamp_voided'
   | 'bonus_stamp'
-  | 'stamps_adjusted';
+  | 'stamps_adjusted'
+  | 'card_added'
+  | 'card_re_added'
+  | 'card_deleted';
 
-export type TransactionSource = 'scanner' | 'dashboard' | 'api' | 'system';
+export type TransactionSource = 'scanner' | 'dashboard' | 'api' | 'system' | 'wallet';
 
 export interface TransactionResponse {
   id: string;

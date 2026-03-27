@@ -4,39 +4,50 @@ import { useTranslations } from "next-intl";
 import { FilterPill } from "@/components/reusables/filter-pill";
 import type { TransactionType } from "@/types";
 
-const FILTER_OPTIONS: (TransactionType | "all")[] = [
+type FilterKey = TransactionType | "all" | "card_added,card_re_added";
+
+const FILTER_OPTIONS: FilterKey[] = [
   "all",
   "stamp_added",
   "reward_redeemed",
   "stamp_voided",
   "bonus_stamp",
   "stamps_adjusted",
+  "card_added,card_re_added",
+  "card_deleted",
 ];
 
-const FILTER_LABEL_KEYS: Record<TransactionType | "all", string> = {
+const FILTER_LABEL_KEYS: Record<FilterKey, string> = {
   all: "filters.all",
   stamp_added: "filters.stampAdded",
   reward_redeemed: "filters.rewardRedeemed",
   stamp_voided: "filters.stampVoided",
   bonus_stamp: "filters.bonusStamp",
   stamps_adjusted: "filters.stampsAdjusted",
+  "card_added,card_re_added": "filters.cardAdded",
+  card_added: "filters.cardAdded",
+  card_re_added: "filters.cardReAdded",
+  card_deleted: "filters.cardDeleted",
 };
 
-const FILTER_COLORS: Record<
-  TransactionType | "all",
-  { color: string; bg: string }
-> = {
+const FILTER_COLORS: Record<FilterKey, { color: string; bg: string }> = {
   all: { color: "var(--accent)", bg: "var(--accent-light)" },
   stamp_added: { color: "var(--accent)", bg: "var(--accent-light)" },
   stamp_voided: { color: "#C75050", bg: "#FDE8E4" },
   reward_redeemed: { color: "#C4883D", bg: "#FFF3E0" },
   bonus_stamp: { color: "#3D7CAF", bg: "#E4F0F8" },
   stamps_adjusted: { color: "#8A8A8A", bg: "#F0EDE7" },
+  "card_added,card_re_added": { color: "#4A7C59", bg: "#E8F5E4" },
+  card_added: { color: "#4A7C59", bg: "#E8F5E4" },
+  card_re_added: { color: "#4A7C59", bg: "#E8F5E4" },
+  card_deleted: { color: "#C75050", bg: "#FDE8E4" },
 };
 
+export type { FilterKey };
+
 interface ActivityFiltersProps {
-  selected: TransactionType | "all";
-  onSelect: (filter: TransactionType | "all") => void;
+  selected: FilterKey;
+  onSelect: (filter: FilterKey) => void;
 }
 
 export function ActivityFilters({ selected, onSelect }: ActivityFiltersProps) {

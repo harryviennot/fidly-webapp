@@ -18,14 +18,20 @@
       "rewardRedeemed": "Rewards Redeemed",
       "stampVoided": "Stamps Voided",
       "bonusStamp": "Bonus Stamps",
-      "stampsAdjusted": "Adjustments"
+      "stampsAdjusted": "Adjustments",
+      "cardAdded": "Card Added",
+      "cardReAdded": "Card Re-added",
+      "cardDeleted": "Card Deleted"
     },
     "itemVerbs": {
       "stamp_added": "received a stamp",
       "reward_redeemed": "redeemed a reward",
       "stamp_voided": "had a stamp voided",
       "bonus_stamp": "received a bonus stamp",
-      "stamps_adjusted": "had stamps adjusted"
+      "stamps_adjusted": "had stamps adjusted",
+      "card_added": "added their card",
+      "card_re_added": "re-added their card",
+      "card_deleted": "removed their card"
     },
     "time": {
       "justNow": "Just now",

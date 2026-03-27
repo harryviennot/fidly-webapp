@@ -6,6 +6,7 @@
       "language": "Language",
       "theme": "Theme"
     },
+    "subtitle": "Business details, card configuration, and branding",
     "businessInfo": {
       "title": "Business Information",
       "description": "Update your business name and logo",
@@ -66,14 +67,15 @@
       },
       "save": "Save",
       "saving": "Saving...",
-      "saved": "Card info saved",
+      "saved": "Back fields successfully updated. Your customers' cards will update shortly.",
       "saveFailed": "Failed to save card info"
     },
     "language": {
       "title": "Your Business Language",
       "description": "This is your main business language, and will be used for your loyalty program",
       "passLocale": "Language",
-      "passLocaleHint": "You can always add translations for other languages in the design editor."
+      "passLocaleHint": "You can always add translations for other languages in the design editor.",
+      "saved": "Your business language has been successfully updated."
     },
     "theme": {
       "title": "Theme Customization",
@@ -84,7 +86,8 @@
       "upToDate": "Theme is up to date",
       "saveTheme": "Save Theme",
       "accentColorHint": "Used for your business colors in the mini website, communications.",
-      "backgroundColorHint": "Used for your business colors in the mini website, communications."
+      "backgroundColorHint": "Used for your business colors in the mini website, communications.",
+      "saved": "Branding settings saved."
     },
     "cardBackPreview": {
       "title": "Card Back Preview",

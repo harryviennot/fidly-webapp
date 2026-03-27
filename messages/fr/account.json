@@ -38,7 +38,7 @@
     },
     "language": {
       "title": "Langue",
-      "description": "Choisissez la langue de l'interface de votre tableau de bord.",
+      "description": "Choisissez la langue de l'interface et des communications par email.",
       "label": "Langue d'affichage"
     },
     "errors": {

@@ -38,7 +38,7 @@
     },
     "language": {
       "title": "Language",
-      "description": "Choose the language for your dashboard interface.",
+      "description": "Choose the language for your dashboard and email communications.",
       "label": "Display Language"
     },
     "errors": {
