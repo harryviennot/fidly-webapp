@@ -29,7 +29,20 @@ export default function AdminLayout({
     );
   }
 
-  // Show error or no business state
+  // No business — redirect to onboarding to complete setup
+  if (!error && !currentBusiness) {
+    const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
+    window.location.href = `${showcaseUrl}/onboarding`;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
   if (error || !currentBusiness) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">

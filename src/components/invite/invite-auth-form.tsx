@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { Eye, EyeSlash, Check } from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/auth-provider";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/form/form-field";
@@ -17,6 +18,7 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
   const [email, setEmail] = useState(invitation.email);
   const [name, setName] = useState(invitation.name || "");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,12 +30,19 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
 
   const emailMatches = email.toLowerCase() === invitation.email.toLowerCase();
   const isValidEmail = email.includes("@") && email.includes(".");
-  const isValidPassword = password.length >= 6;
+  const passwordChecks = useMemo(() => ({
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+    symbol: /[^a-zA-Z0-9]/.test(password),
+    minLength: password.length >= 6,
+  }), [password]);
+  const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
   const passwordsMatch = password === confirmPassword;
   const isValidName = name.trim().length > 0;
 
   const isValid =
-    emailMatches && isValidEmail && isValidPassword && passwordsMatch && isValidName;
+    emailMatches && isValidEmail && isPasswordStrong && passwordsMatch && isValidName;
 
   // Resend cooldown timer
   useEffect(() => {
@@ -65,9 +74,33 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
 
       try {
         // 1. Try signup first
-        const { error: signUpError } = await signUp(email, password, name);
+        const { data: signUpData, error: signUpError } = await signUp(email, password, name);
 
         if (!signUpError) {
+          // Supabase returns user with empty identities[] when email already exists
+          const isExistingUser = !signUpData?.user || signUpData.user.identities?.length === 0;
+          if (isExistingUser) {
+            const { error: signInError } = await signIn(email, password);
+
+            if (!signInError) {
+              onAuthSuccess();
+              return;
+            }
+
+            const signInMsg = signInError.message.toLowerCase();
+            if (signInMsg.includes("email not confirmed")) {
+              await resendOtp(email);
+              setResendCooldown(60);
+              setPhase("verify");
+              setLoading(false);
+              return;
+            }
+
+            setError("An account with this email already exists. Please check your password.");
+            setLoading(false);
+            return;
+          }
+
           // New user created — move to OTP verification
           setResendCooldown(60);
           setPhase("verify");
@@ -75,7 +108,7 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
           return;
         }
 
-        // 2. If already registered, silently try sign-in
+        // 2. If already registered (explicit error), silently try sign-in
         const errorMsg = signUpError.message.toLowerCase();
         if (
           errorMsg.includes("already registered") ||
@@ -85,14 +118,12 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
           const { error: signInError } = await signIn(email, password);
 
           if (!signInError) {
-            // Existing verified user — proceed directly
             onAuthSuccess();
             return;
           }
 
           const signInMsg = signInError.message.toLowerCase();
           if (signInMsg.includes("email not confirmed")) {
-            // Existing unverified user — resend OTP and show verify phase
             await resendOtp(email);
             setResendCooldown(60);
             setPhase("verify");
@@ -100,7 +131,6 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
             return;
           }
 
-          // Wrong password for existing account
           setError("An account with this email already exists. Please check your password.");
           setLoading(false);
           return;
@@ -120,7 +150,7 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
   const handleVerifySubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (otpCode.length !== 8) return;
+      if (otpCode.length !== 6) return;
 
       setError(null);
       setLoading(true);
@@ -156,7 +186,7 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
   }, [resendCooldown, resendOtp, email]);
 
   const handleOtpChange = useCallback((value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 8);
+    const digits = value.replace(/\D/g, "").slice(0, 6);
     setOtpCode(digits);
   }, []);
 
@@ -165,7 +195,7 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
       <form onSubmit={handleVerifySubmit} className="space-y-4">
         <div className="text-center mb-2">
           <p className="text-sm text-muted-foreground">
-            We sent an 8-digit code to <strong>{email}</strong>
+            We sent a 6-digit code to <strong>{email}</strong>
           </p>
         </div>
 
@@ -191,13 +221,13 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
             autoComplete="one-time-code"
             value={otpCode}
             onChange={(e) => handleOtpChange(e.target.value)}
-            maxLength={8}
-            placeholder="00000000"
+            maxLength={6}
+            placeholder="000000"
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-center text-2xl font-mono tracking-[0.5em] shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
         </div>
 
-        <Button type="submit" disabled={otpCode.length !== 8 || loading} className="w-full">
+        <Button type="submit" disabled={otpCode.length !== 6 || loading} className="w-full">
           {loading ? "Verifying..." : "Verify & join"}
         </Button>
 
@@ -263,16 +293,52 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
         required
       />
 
-      <FormField
-        label="Password"
-        id="password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="At least 6 characters"
-        minLength={6}
-        required
-      />
+      <div className="flex flex-col gap-2">
+        <label htmlFor="password" className="text-sm font-medium">Password</label>
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Create a strong password"
+            minLength={6}
+            required
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        {password.length > 0 && (
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1">
+            {([
+              ["lowercase", "Lowercase (a-z)"],
+              ["uppercase", "Uppercase (A-Z)"],
+              ["number", "Number (0-9)"],
+              ["symbol", "Symbol (!@#$...)"],
+              ["minLength", "Min 6 characters"],
+            ] as const).map(([key, label]) => (
+              <li
+                key={key}
+                className={`flex items-center gap-1.5 text-xs transition-colors ${
+                  passwordChecks[key]
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <Check size={12} weight={passwordChecks[key] ? "bold" : "regular"} />
+                {label}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <FormField
         label="Confirm Password"
