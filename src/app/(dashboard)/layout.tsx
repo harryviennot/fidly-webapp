@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { AppSidebar, DashboardHeader } from "@/components/dashboard";
 import { RoleGuard } from "@/components/auth/role-guard";
@@ -17,8 +18,17 @@ export default function AdminLayout({
   const { loading, currentBusiness, error } = useBusiness();
   const t = useTranslations();
 
-  // Show loading state
-  if (loading) {
+  // Redirect to onboarding when user has no business
+  const shouldRedirectToOnboarding = !loading && !error && !currentBusiness;
+  useEffect(() => {
+    if (shouldRedirectToOnboarding) {
+      const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
+      window.location.href = `${showcaseUrl}/onboarding`;
+    }
+  }, [shouldRedirectToOnboarding]);
+
+  // Show loading state or redirecting
+  if (loading || shouldRedirectToOnboarding) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">
@@ -29,7 +39,7 @@ export default function AdminLayout({
     );
   }
 
-  // Show error or no business state
+  // Show error state
   if (error || !currentBusiness) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">

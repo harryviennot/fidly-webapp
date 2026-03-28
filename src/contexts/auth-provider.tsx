@@ -18,12 +18,17 @@ interface AuthContextType {
     email: string,
     password: string,
     name: string
-  ) => Promise<{ error: AuthError | null }>;
+  ) => Promise<{ data: { user: User | null } | null; error: AuthError | null }>;
   signIn: (
     email: string,
     password: string
   ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
+  verifyOtp: (
+    email: string,
+    token: string
+  ) => Promise<{ error: AuthError | null }>;
+  resendOtp: (email: string) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = useCallback(
     async (email: string, password: string, name: string) => {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -65,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      return { error };
+      return { data: data ? { user: data.user } : null, error };
     },
     [supabase.auth]
   );
@@ -75,6 +80,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+      });
+      return { error };
+    },
+    [supabase.auth]
+  );
+
+  const verifyOtp = useCallback(
+    async (email: string, token: string) => {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: "signup",
+      });
+      return { error };
+    },
+    [supabase.auth]
+  );
+
+  const resendOtp = useCallback(
+    async (email: string) => {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
       });
       return { error };
     },
@@ -91,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signUp, signIn, signOut }}
+      value={{ user, session, loading, signUp, signIn, signOut, verifyOtp, resendOtp }}
     >
       {children}
     </AuthContext.Provider>
