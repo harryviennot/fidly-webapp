@@ -169,7 +169,7 @@ export default function AccountPage() {
       const supabase = createClient();
       const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || 'https://stampeo.app';
       const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-        redirectTo: `${showcaseUrl}/auth/callback/reset`,
+        redirectTo: `${showcaseUrl}/reset-password`,
       });
 
       if (error) {
