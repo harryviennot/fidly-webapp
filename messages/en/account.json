@@ -17,17 +17,11 @@
       "sharedInfo": "Your profile picture is shared across all businesses you are a member of."
     },
     "password": {
-      "title": "Change Password",
-      "description": "Update your account password",
-      "newPassword": "New Password",
-      "newPasswordPlaceholder": "Enter new password",
-      "confirmPassword": "Confirm New Password",
-      "confirmPasswordPlaceholder": "Confirm new password",
-      "mismatch": "New passwords do not match",
-      "tooShort": "Password must be at least 8 characters",
-      "success": "Password changed successfully!",
-      "changing": "Changing...",
-      "changePassword": "Change Password"
+      "title": "Password",
+      "description": "To change your password, we'll send a reset link to your email.",
+      "sendResetEmail": "Send reset email",
+      "sending": "Sending...",
+      "emailSent": "Reset link sent! Check your inbox."
     },
     "accountInfo": {
       "title": "Account Information",
