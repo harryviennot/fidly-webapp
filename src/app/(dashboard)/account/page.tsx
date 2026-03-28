@@ -173,13 +173,19 @@ export default function AccountPage() {
       });
 
       if (error) {
-        throw new Error(error.message);
+        const msg = error.message.toLowerCase();
+        if (msg.includes('rate') || msg.includes('too many') || msg.includes('429')) {
+          setError(t('password.rateLimited'));
+        } else {
+          setError(t('password.sendFailed'));
+        }
+        return;
       }
 
       setResetEmailSent(true);
       setTimeout(() => setResetEmailSent(false), 5000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('password.sendResetEmail'));
+    } catch {
+      setError(t('password.sendFailed'));
     } finally {
       setSendingResetEmail(false);
     }

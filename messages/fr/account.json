@@ -21,7 +21,9 @@
       "description": "Pour changer votre mot de passe, nous vous enverrons un lien de réinitialisation par email.",
       "sendResetEmail": "Envoyer le lien",
       "sending": "Envoi en cours...",
-      "emailSent": "Lien envoyé ! Vérifiez votre boîte mail."
+      "emailSent": "Lien envoyé ! Vérifiez votre boîte mail.",
+      "rateLimited": "Trop de tentatives. Veuillez patienter un instant et réessayer.",
+      "sendFailed": "Impossible d'envoyer le lien. Veuillez réessayer."
     },
     "accountInfo": {
       "title": "Informations du compte",
