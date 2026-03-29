@@ -42,12 +42,9 @@ export default function AccountPage() {
   const [nameSaved, setNameSaved] = useState(false);
   const saveNameTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Password change state
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordSuccess, setPasswordSuccess] = useState(false);
-  const [changingPassword, setChangingPassword] = useState(false);
+  // Password reset state
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [sendingResetEmail, setSendingResetEmail] = useState(false);
 
   // IntersectionObserver for scroll tracking
   useEffect(() => {
@@ -163,40 +160,34 @@ export default function AccountPage() {
     }
   };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordError(null);
-    setPasswordSuccess(false);
+  const handleSendResetEmail = async () => {
+    const userEmail = profile?.email || authUser?.email;
+    if (!userEmail) return;
 
-    if (newPassword !== confirmPassword) {
-      setPasswordError(t('password.mismatch'));
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      setPasswordError(t('password.tooShort'));
-      return;
-    }
-
-    setChangingPassword(true);
+    setSendingResetEmail(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
+      const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || 'https://stampeo.app';
+      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+        redirectTo: `${showcaseUrl}/reset-password`,
       });
 
       if (error) {
-        throw new Error(error.message);
+        const msg = error.message.toLowerCase();
+        if (msg.includes('rate') || msg.includes('too many') || msg.includes('429')) {
+          setError(t('password.rateLimited'));
+        } else {
+          setError(t('password.sendFailed'));
+        }
+        return;
       }
 
-      setPasswordSuccess(true);
-      setNewPassword('');
-      setConfirmPassword('');
-      setTimeout(() => setPasswordSuccess(false), 5000);
-    } catch (err) {
-      setPasswordError(err instanceof Error ? err.message : t('password.changePassword'));
+      setResetEmailSent(true);
+      setTimeout(() => setResetEmailSent(false), 5000);
+    } catch {
+      setError(t('password.sendFailed'));
     } finally {
-      setChangingPassword(false);
+      setSendingResetEmail(false);
     }
   };
 
@@ -289,7 +280,7 @@ export default function AccountPage() {
           </CardContent>
         </Card>
 
-        {/* Password Change Section */}
+        {/* Password Section */}
         <Card id="password" className="scroll-mt-24">
           <CardHeader>
             <CardTitle className="text-lg">{t('password.title')}</CardTitle>
@@ -297,43 +288,18 @@ export default function AccountPage() {
               {t('password.description')}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              <FormField
-                label={t('password.newPassword')}
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder={t('password.newPasswordPlaceholder')}
-                minLength={8}
-              />
+          <CardContent className="space-y-4">
+            {resetEmailSent && (
+              <p className="text-sm text-[var(--success)]">{t('password.emailSent')}</p>
+            )}
 
-              <FormField
-                label={t('password.confirmPassword')}
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={t('password.confirmPasswordPlaceholder')}
-              />
-
-              {passwordError && (
-                <p className="text-sm text-[var(--error)]">{passwordError}</p>
-              )}
-
-              {passwordSuccess && (
-                <p className="text-sm text-[var(--success)]">{t('password.success')}</p>
-              )}
-
-              <Button
-                type="submit"
-                disabled={changingPassword || !newPassword || !confirmPassword}
-                variant="gradient"
-              >
-                {changingPassword ? t('password.changing') : t('password.changePassword')}
-              </Button>
-            </form>
+            <Button
+              onClick={handleSendResetEmail}
+              disabled={sendingResetEmail}
+              variant="gradient"
+            >
+              {sendingResetEmail ? t('password.sending') : t('password.sendResetEmail')}
+            </Button>
           </CardContent>
         </Card>
 
