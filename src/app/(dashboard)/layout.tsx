@@ -9,7 +9,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { PendingActivationPage } from "@/components/pending-activation-page";
 import { SuspendedPage } from "@/components/suspended-page";
-import { TrialBanner } from "@/components/billing/TrialBanner";
+import { TrialMobileBanner } from "@/components/billing/TrialBanner";
 import { SuspendedBanner } from "@/components/billing/SuspendedOverlay";
 
 export default function AdminLayout({
@@ -71,7 +71,7 @@ export default function AdminLayout({
         <AppSidebar />
         <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
           {currentBusiness.billing_status === "suspended" && <SuspendedBanner />}
-          <TrialBanner />
+          <TrialMobileBanner />
           <DashboardHeader />
           <main className="p-4 md:p-6">{children}</main>
         </SidebarInset>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { WarningCircle } from "@phosphor-icons/react";
+import { WarningCircle, ArrowRight } from "@phosphor-icons/react";
 
 /**
  * Non-blocking banner shown when business is suspended.
@@ -13,22 +13,23 @@ export function SuspendedBanner() {
   const t = useTranslations("billing");
 
   return (
-    <div className="bg-red-50 border-b border-red-200 px-4 py-3">
-      <div className="flex items-center gap-3 max-w-5xl mx-auto">
-        <WarningCircle className="w-5 h-5 text-red-500 shrink-0" weight="fill" />
+    <div className="bg-[var(--error-light)] border-b border-[var(--error)]/20 px-4 py-3">
+      <div className="flex items-center gap-3">
+        <WarningCircle className="w-5 h-5 text-[var(--error)] shrink-0" weight="fill" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-red-700">
+          <p className="text-sm font-medium text-[var(--error)]">
             {t("suspendedBannerTitle")}
           </p>
-          <p className="text-xs text-red-600 mt-0.5">
+          <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
             {t("suspendedBannerDescription")}
           </p>
         </div>
         <Link
           href="/settings/billing"
-          className="shrink-0 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded-full transition-colors"
+          className="shrink-0 inline-flex items-center gap-1 text-sm font-semibold text-[var(--error)] underline underline-offset-2 hover:opacity-80 transition-opacity"
         >
           {t("suspendedBannerCta")}
+          <ArrowRight className="w-3.5 h-3.5" weight="bold" />
         </Link>
       </div>
     </div>

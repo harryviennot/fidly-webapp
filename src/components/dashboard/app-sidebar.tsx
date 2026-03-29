@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { NavUser } from "./nav-user";
 import { Badge } from "@/components/ui/badge";
+import { TrialSidebarWidget } from "@/components/billing/TrialBanner";
 import {
   SquaresFour,
   Users,
@@ -162,6 +163,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter className="p-0">
+        {/* Trial widget */}
+        <TrialSidebarWidget />
+
         {/* Bottom utility links */}
         <div className="px-3">
           <SidebarMenu className="gap-0.5">

@@ -4,8 +4,10 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check, CreditCard, ArrowSquareOut } from "@phosphor-icons/react";
+import { Check, CreditCard, ArrowSquareOut, WarningCircle, Clock } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoBox } from "@/components/reusables/info-box";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +48,12 @@ const FOUNDING_PRICES: Record<string, number> = {
   pro: 30,
 };
 
+const FEATURE_LABELS: Record<string, string> = {
+  starter: "starterLabel",
+  growth: "growthLabel",
+  pro: "proLabel",
+};
+
 function TierCard({
   tier,
   currentTier,
@@ -76,21 +84,81 @@ function TierCard({
     ? FOUNDING_PRICES[tier]
     : TIER_PRICES[tier];
 
+  const features = t.raw(`features.${tier}`) as string[];
+  const featuresLabel = t(`features.${FEATURE_LABELS[tier]}`);
+
+  const renderButton = () => {
+    if (isPro) {
+      return (
+        <Button variant="outline" className="w-full rounded-full" disabled>
+          {t("comingSoon")}
+        </Button>
+      );
+    }
+
+    // No payment linked
+    if (needsSubscription) {
+      if (isCurrent) {
+        return (
+          <Button
+            variant="gradient"
+            className="w-full rounded-full"
+            onClick={() => onSubscribe(tier)}
+            disabled={isLoading}
+          >
+            {t("payNow")}
+          </Button>
+        );
+      }
+      return (
+        <Button
+          variant={isHighlighted ? "gradient" : "outline"}
+          className="w-full rounded-full"
+          onClick={() => onSubscribe(tier)}
+          disabled={isLoading}
+        >
+          {t("switchToThisPlan")}
+        </Button>
+      );
+    }
+
+    // Payment linked
+    if (isCurrent && hasSubscription) {
+      return (
+        <Button variant="outline" className="w-full rounded-full" disabled>
+          {t("currentPlan")}
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        variant={isHighlighted ? "gradient" : "outline"}
+        className="w-full rounded-full"
+        onClick={() => onChangeTier(tier)}
+        disabled={isLoading}
+      >
+        {t("switchToThisPlan")}
+      </Button>
+    );
+  };
+
   return (
-    <div
-      className={`relative rounded-2xl border p-6 transition-all ${
+    <Card
+      hover={false}
+      className={`relative flex flex-col ${
         isPro
-          ? "border-gray-200 opacity-50"
+          ? "opacity-50"
           : isCurrent
-            ? "border-[var(--accent)] bg-[var(--accent)]/5 ring-1 ring-[var(--accent)]"
+            ? "border-[var(--accent)] ring-1 ring-[var(--accent)]"
             : isHighlighted
-              ? "border-gray-200 shadow-md"
-              : "border-gray-200"
+              ? "shadow-md"
+              : ""
       }`}
     >
       {isPro && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-500 whitespace-nowrap">
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] whitespace-nowrap">
             {t("comingSoon")}
           </span>
         </div>
@@ -103,66 +171,39 @@ function TierCard({
         </div>
       )}
 
-      <div className="mb-4">
-        <h3 className={`text-lg font-bold capitalize ${isPro ? "text-gray-400" : ""}`}>{tier}</h3>
+      <CardHeader className="pb-2">
+        <CardTitle className={`text-lg capitalize ${isPro ? "text-[var(--muted-foreground)]" : ""}`}>
+          {tier}
+        </CardTitle>
         <div className="flex items-baseline gap-1 mt-1">
-          <span className={`text-3xl font-extrabold ${isPro ? "text-gray-400" : ""}`}>&euro;{price}</span>
-          <span className="text-sm text-gray-500">{t("perMonth")}</span>
+          <span className={`text-3xl font-extrabold ${isPro ? "text-[var(--muted-foreground)]" : ""}`}>
+            &euro;{price}
+          </span>
+          <span className="text-sm text-[var(--muted-foreground)]">{t("perMonth")}</span>
         </div>
         {isFoundingPartner && !isPro && (
           <span className="text-xs text-[var(--accent)] font-semibold">
             {t("foundingPrice")}
           </span>
         )}
-      </div>
+      </CardHeader>
 
-      {isPro ? (
-        <Button variant="outline" className="w-full rounded-full" disabled>
-          {t("comingSoon")}
-        </Button>
-      ) : needsSubscription && isCurrent ? (
-        /* Trial, no subscription, current tier → "Link payment method" */
-        <Button
-          variant="gradient"
-          className="w-full rounded-full"
-          onClick={() => onSubscribe(tier)}
-          disabled={isLoading}
-        >
-          {t("subscribe")}
-        </Button>
-      ) : needsSubscription && !isCurrent ? (
-        /* Trial, no subscription, different tier → "Switch & link payment" */
-        <div className="space-y-2">
-          <Button
-            variant={isHighlighted ? "gradient" : "outline"}
-            className="w-full rounded-full"
-            onClick={() => onSubscribe(tier)}
-            disabled={isLoading}
-          >
-            {(TIER_RANK[tier] ?? 0) > (TIER_RANK[currentTier] ?? 0) ? t("upgrade") : t("switchPlan")}
-          </Button>
-          <p className="text-[11px] text-gray-400 text-center">{t("trialSwitchHint")}</p>
-        </div>
-      ) : isCurrent && hasSubscription ? (
-        <div className="flex items-center gap-2 text-sm text-[var(--accent)] font-semibold">
-          <Check className="w-4 h-4" weight="bold" />
-          {t("currentPlan")}
-        </div>
-      ) : (
-        /* Active subscriber changing tier → upgrade/downgrade via subscription modify */
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            className="w-full rounded-full"
-            onClick={() => onChangeTier(tier)}
-            disabled={isLoading}
-          >
-            {(TIER_RANK[tier] ?? 0) > (TIER_RANK[currentTier] ?? 0) ? t("upgrade") : t("downgrade")}
-          </Button>
-          <p className="text-[11px] text-gray-400 text-center">{t("prorationHint")}</p>
-        </div>
-      )}
-    </div>
+      <CardContent className="flex-1 pt-2">
+        <p className="text-xs font-medium text-[var(--muted-foreground)] mb-2">{featuresLabel}</p>
+        <ul className="space-y-1.5">
+          {features.map((feature, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-[var(--foreground)]">
+              <Check className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" weight="bold" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+
+      <CardFooter className="pt-0">
+        {renderButton()}
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -191,7 +232,6 @@ export default function BillingPage() {
 
   const currentTier = data?.tier || "starter";
 
-  // Show success toast after Stripe redirect
   useEffect(() => {
     if (searchParams.get("success") === "true") {
       toast.success(t("checkoutSuccess"));
@@ -234,20 +274,38 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-8 pb-12">
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={
+          hasSubscription
+            ? [
+                {
+                  label: t("manageBilling"),
+                  icon: <ArrowSquareOut className="w-4 h-4" />,
+                  onClick: () => portal.mutate(),
+                  variant: "secondary" as const,
+                  disabled: portal.isPending,
+                },
+              ]
+            : undefined
+        }
+      />
 
-      {/* Status banner */}
+      {/* Status banners */}
       {isPastDue && (
-        <div className="rounded-xl bg-red-50 border border-red-200 p-4 flex items-center gap-3">
-          <CreditCard className="w-5 h-5 text-red-500 shrink-0" weight="fill" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-red-700">{t("pastDueTitle")}</p>
-            <p className="text-sm text-red-600">{t("pastDueDescription")}</p>
-          </div>
+        <div className="flex items-center gap-3">
+          <InfoBox
+            variant="error"
+            icon={<CreditCard className="w-4 h-4 text-[var(--error)]" weight="fill" />}
+            title={t("pastDueTitle")}
+            message={t("pastDueDescription")}
+            className="flex-1"
+          />
           <Button
             variant="outline"
             size="sm"
-            className="rounded-full border-red-300 text-red-700"
+            className="shrink-0 rounded-full"
             onClick={() => portal.mutate()}
             disabled={portal.isPending}
           >
@@ -257,94 +315,83 @@ export default function BillingPage() {
       )}
 
       {isGrace && (
-        <div className="rounded-xl bg-amber-50 border border-amber-200 p-4">
-          <p className="text-sm font-semibold text-amber-700">{t("graceTitle")}</p>
-          <p className="text-sm text-amber-600">{t("graceDescription")}</p>
-        </div>
+        <InfoBox
+          variant="warning"
+          icon={<WarningCircle className="w-4 h-4 text-[var(--warning)]" weight="fill" />}
+          title={t("graceTitle")}
+          message={t("graceDescription")}
+        />
       )}
 
       {/* Active subscription info */}
       {(isActive || isCancelled) && (
-        <div className="rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-bold capitalize">{currentTier}</h3>
-              <p className="text-sm text-gray-500">
-                {isCancelled
-                  ? t("cancelledUntil", {
-                      date: data?.billing_period_end
-                        ? new Date(data.billing_period_end).toLocaleDateString()
-                        : "—",
-                    })
-                  : data?.billing_period_end
-                    ? t("nextBilling", {
-                        date: new Date(data.billing_period_end).toLocaleDateString(),
+        <Card hover={false}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold capitalize">{currentTier}</h3>
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  {isCancelled
+                    ? t("cancelledUntil", {
+                        date: data?.billing_period_end
+                          ? new Date(data.billing_period_end).toLocaleDateString()
+                          : "—",
                       })
-                    : ""}
-              </p>
+                    : data?.billing_period_end
+                      ? t("nextBilling", {
+                          date: new Date(data.billing_period_end).toLocaleDateString(),
+                        })
+                      : ""}
+                </p>
+                {isFoundingPartner && (
+                  <span className="inline-flex items-center text-xs font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-2.5 py-1 rounded-full mt-2">
+                    {t("foundingPartner")}
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {isCancelled ? (
+                  <Button
+                    variant="gradient"
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => reactivate.mutate()}
+                    disabled={reactivate.isPending}
+                  >
+                    {t("reactivate")}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full text-[var(--error)] border-[var(--error)]/20 hover:bg-[var(--error-light)]"
+                    onClick={() => setShowCancelDialog(true)}
+                  >
+                    {t("cancel")}
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full"
-                onClick={() => portal.mutate()}
-                disabled={portal.isPending}
-              >
-                <ArrowSquareOut className="w-4 h-4 mr-1" />
-                {t("manageBilling")}
-              </Button>
-              {isCancelled ? (
-                <Button
-                  variant="gradient"
-                  size="sm"
-                  className="rounded-full"
-                  onClick={() => reactivate.mutate()}
-                  disabled={reactivate.isPending}
-                >
-                  {t("reactivate")}
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full text-red-600 border-red-200 hover:bg-red-50"
-                  onClick={() => setShowCancelDialog(true)}
-                >
-                  {t("cancel")}
-                </Button>
-              )}
-            </div>
-          </div>
-          {isFoundingPartner && (
-            <span className="inline-flex items-center text-xs font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-2.5 py-1 rounded-full">
-              {t("foundingPartner")}
-            </span>
-          )}
-        </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Trial info — not yet subscribed */}
+      {/* Trial info — compact */}
       {(isTrialing || isGrace) && !hasSubscription && daysRemaining !== null && (
-        <div className="rounded-xl border border-gray-200 p-6 text-center">
-          <p className="text-sm text-gray-500 mb-1">{t("trialRemaining")}</p>
-          <p className="text-4xl font-extrabold text-gray-900">
-            {daysRemaining}
-          </p>
-          <p className="text-sm text-gray-500">{t("daysLeft")}</p>
-          <p className="text-xs text-gray-400 mt-3 max-w-sm mx-auto">
-            {t("trialSubscribeHint")}
-          </p>
-        </div>
+        <InfoBox
+          variant="info"
+          icon={<Clock className="w-4 h-4 text-[var(--info)]" weight="fill" />}
+          message={t("trialInfoCompact", { days: daysRemaining })}
+        />
       )}
 
       {/* Subscribed during trial — soft info */}
       {isActiveInTrial && daysUntilFirstCharge !== null && (
-        <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center">
-          <p className="text-sm text-blue-600 font-medium">
-            {t("activeInTrialInfo", { days: daysUntilFirstCharge })}
-          </p>
-        </div>
+        <InfoBox
+          variant="info"
+          icon={<Check className="w-4 h-4 text-[var(--info)]" weight="bold" />}
+          message={t("activeInTrialInfo", { days: daysUntilFirstCharge })}
+        />
       )}
 
       {/* Plan selection */}
@@ -370,12 +417,40 @@ export default function BillingPage() {
         </div>
       </div>
 
+      {/* Invoice section */}
+      {hasSubscription && (
+        <Card hover={false}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-semibold">{t("invoiceHistory")}</h3>
+                <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
+                  {t("invoiceHistoryDescription")}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full shrink-0"
+                onClick={() => portal.mutate()}
+                disabled={portal.isPending}
+              >
+                <ArrowSquareOut className="w-4 h-4" />
+                {t("viewInvoices")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Tier change confirmation dialog */}
       <AlertDialog open={!!confirmTier} onOpenChange={(open) => !open && setConfirmTier(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isUpgrade ? t("confirmUpgradeTitle") : t("confirmDowngradeTitle")}
+              {isUpgrade
+                ? t("confirmUpgradeTitle", { to: confirmTier ?? "" })
+                : t("confirmDowngradeTitle", { to: confirmTier ?? "" })}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isUpgrade
@@ -424,7 +499,7 @@ export default function BillingPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t("confirmCancelKeep")}</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-[var(--error)] hover:bg-[var(--error)]/90"
               onClick={() => {
                 cancelSub.mutate(undefined, {
                   onSuccess: () => {
