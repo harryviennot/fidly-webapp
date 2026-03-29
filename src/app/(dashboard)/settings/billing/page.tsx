@@ -65,6 +65,7 @@ function TierCard({
   onSubscribe,
   onChangeTier,
   isLoading,
+  delay = 0,
 }: {
   tier: string;
   currentTier: string;
@@ -75,6 +76,7 @@ function TierCard({
   onSubscribe: (tier: string) => void;
   onChangeTier: (tier: string) => void;
   isLoading: boolean;
+  delay?: number;
 }) {
   const t = useTranslations("billing");
   const isCurrent = tier === currentTier;
@@ -146,13 +148,14 @@ function TierCard({
   return (
     <Card
       hover={false}
-      className={`relative flex flex-col ${
+      className={`relative flex flex-col animate-slide-up ${
         isPro
           ? "opacity-50"
           : isCurrent
             ? "border-[var(--accent)] ring-1 ring-[var(--accent)]"
             : ""
       }`}
+      style={{ animationDelay: `${delay}ms` }}
     >
       {isPro && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -326,7 +329,7 @@ export default function BillingPage() {
 
       {/* Active subscription info */}
       {(isActive || isCancelled) && (
-        <Card hover={false}>
+        <Card hover={false} className="animate-slide-up" style={{ animationDelay: "0ms" }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -396,16 +399,17 @@ export default function BillingPage() {
       )}
 
       {/* Plan selection */}
-      <div className="space-y-4">
+      <div className="space-y-4 animate-slide-up" style={{ animationDelay: "80ms" }}>
         <h2 className="text-lg font-bold">
           {isTrialing || isSuspended || isGrace ? t("choosePlan") : t("changePlan")}
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {TIERS.map((tier) => (
+          {TIERS.map((tier, i) => (
             <TierCard
               key={tier}
               tier={tier}
+              delay={160 + i * 80}
               currentTier={currentTier}
               isFoundingPartner={isFoundingPartner}
               isSuspended={isSuspended}
@@ -421,7 +425,7 @@ export default function BillingPage() {
 
       {/* Invoice section */}
       {hasSubscription && (
-        <Card hover={false}>
+        <Card hover={false} className="animate-slide-up" style={{ animationDelay: "400ms" }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
