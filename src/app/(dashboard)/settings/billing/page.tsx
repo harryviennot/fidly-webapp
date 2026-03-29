@@ -2,20 +2,37 @@
 
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Check, CreditCard, ArrowSquareOut } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { PageHeader } from "@/components/redesign";
 import {
   useBillingStatus,
   useCheckout,
   usePortalSession,
+  useChangeTier,
   useCancelSubscription,
   useReactivateSubscription,
 } from "@/hooks/useBilling";
 
 const TIERS = ["starter", "growth", "pro"] as const;
+
+const TIER_RANK: Record<string, number> = {
+  starter: 0,
+  growth: 1,
+  pro: 2,
+};
 
 const TIER_PRICES: Record<string, number> = {
   starter: 20,
@@ -37,6 +54,7 @@ function TierCard({
   isTrialing,
   hasSubscription,
   onSubscribe,
+  onChangeTier,
   isLoading,
 }: {
   tier: string;
@@ -46,6 +64,7 @@ function TierCard({
   isTrialing: boolean;
   hasSubscription: boolean;
   onSubscribe: (tier: string) => void;
+  onChangeTier: (tier: string) => void;
   isLoading: boolean;
 }) {
   const t = useTranslations("billing");
@@ -101,29 +120,47 @@ function TierCard({
         <Button variant="outline" className="w-full rounded-full" disabled>
           {t("comingSoon")}
         </Button>
-      ) : needsSubscription ? (
+      ) : needsSubscription && isCurrent ? (
+        /* Trial, no subscription, current tier → "Link payment method" */
         <Button
-          variant={isCurrent || isHighlighted ? "gradient" : "outline"}
+          variant="gradient"
           className="w-full rounded-full"
           onClick={() => onSubscribe(tier)}
           disabled={isLoading}
         >
           {t("subscribe")}
         </Button>
+      ) : needsSubscription && !isCurrent ? (
+        /* Trial, no subscription, different tier → "Switch & link payment" */
+        <div className="space-y-2">
+          <Button
+            variant={isHighlighted ? "gradient" : "outline"}
+            className="w-full rounded-full"
+            onClick={() => onSubscribe(tier)}
+            disabled={isLoading}
+          >
+            {(TIER_RANK[tier] ?? 0) > (TIER_RANK[currentTier] ?? 0) ? t("upgrade") : t("switchPlan")}
+          </Button>
+          <p className="text-[11px] text-gray-400 text-center">{t("trialSwitchHint")}</p>
+        </div>
       ) : isCurrent && hasSubscription ? (
         <div className="flex items-center gap-2 text-sm text-[var(--accent)] font-semibold">
           <Check className="w-4 h-4" weight="bold" />
           {t("currentPlan")}
         </div>
       ) : (
-        <Button
-          variant="outline"
-          className="w-full rounded-full"
-          onClick={() => onSubscribe(tier)}
-          disabled={isLoading}
-        >
-          {tier > currentTier ? t("upgrade") : t("downgrade")}
-        </Button>
+        /* Active subscriber changing tier → upgrade/downgrade via subscription modify */
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            className="w-full rounded-full"
+            onClick={() => onChangeTier(tier)}
+            disabled={isLoading}
+          >
+            {(TIER_RANK[tier] ?? 0) > (TIER_RANK[currentTier] ?? 0) ? t("upgrade") : t("downgrade")}
+          </Button>
+          <p className="text-[11px] text-gray-400 text-center">{t("prorationHint")}</p>
+        </div>
       )}
     </div>
   );
@@ -161,11 +198,36 @@ export default function BillingPage() {
     }
   }, [searchParams, t]);
 
+  const changeTier = useChangeTier();
+  const [confirmTier, setConfirmTier] = useState<string | null>(null);
+
+  const isUpgrade = confirmTier
+    ? (TIER_RANK[confirmTier] ?? 0) > (TIER_RANK[currentTier] ?? 0)
+    : false;
+
   const handleSubscribe = (tier: string) => {
     checkout.mutate({
       tier,
       successUrl: `${window.location.origin}/settings/billing?success=true`,
       cancelUrl: `${window.location.origin}/settings/billing`,
+    });
+  };
+
+  const handleChangeTier = (tier: string) => {
+    setConfirmTier(tier);
+  };
+
+  const confirmChangeTier = () => {
+    if (!confirmTier) return;
+    changeTier.mutate(confirmTier, {
+      onSuccess: () => {
+        toast.success(t("tierChanged"));
+        setConfirmTier(null);
+      },
+      onError: (err: Error) => {
+        toast.error(err.message);
+        setConfirmTier(null);
+      },
     });
   };
 
@@ -301,11 +363,49 @@ export default function BillingPage() {
               isTrialing={isTrialing || isGrace}
               hasSubscription={hasSubscription}
               onSubscribe={handleSubscribe}
-              isLoading={checkout.isPending}
+              onChangeTier={handleChangeTier}
+              isLoading={checkout.isPending || changeTier.isPending}
             />
           ))}
         </div>
       </div>
+
+      {/* Tier change confirmation dialog */}
+      <AlertDialog open={!!confirmTier} onOpenChange={(open) => !open && setConfirmTier(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isUpgrade ? t("confirmUpgradeTitle") : t("confirmDowngradeTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isUpgrade
+                ? t("confirmUpgradeDescription", {
+                    from: currentTier,
+                    to: confirmTier ?? "",
+                    fromPrice: isFoundingPartner ? FOUNDING_PRICES[currentTier] : TIER_PRICES[currentTier],
+                    toPrice: confirmTier ? (isFoundingPartner ? FOUNDING_PRICES[confirmTier] : TIER_PRICES[confirmTier]) : 0,
+                  })
+                : t("confirmDowngradeDescription", {
+                    from: currentTier,
+                    to: confirmTier ?? "",
+                  })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("confirmCancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmChangeTier}
+              disabled={changeTier.isPending}
+            >
+              {changeTier.isPending
+                ? t("redirecting")
+                : isUpgrade
+                  ? t("confirmUpgrade")
+                  : t("confirmDowngrade")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
