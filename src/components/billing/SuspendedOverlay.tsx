@@ -1,49 +1,35 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Lock } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
-import { useCheckout } from "@/hooks/useBilling";
-import { useBusiness } from "@/contexts/business-context";
+import { WarningCircle } from "@phosphor-icons/react";
 
-export function SuspendedOverlay() {
+/**
+ * Non-blocking banner shown when business is suspended.
+ * Dashboard remains accessible (read-only), but this banner
+ * is persistent and cannot be dismissed.
+ */
+export function SuspendedBanner() {
   const t = useTranslations("billing");
-  const { currentBusiness } = useBusiness();
-  const checkout = useCheckout();
-
-  const tier = currentBusiness?.subscription_tier || "starter";
-
-  const handleSubscribe = () => {
-    checkout.mutate({
-      tier,
-      successUrl: `${window.location.origin}/settings/billing?success=true`,
-      cancelUrl: `${window.location.origin}/settings/billing`,
-    });
-  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-      <div className="max-w-md mx-auto text-center px-6">
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
-          <Lock className="w-8 h-8 text-red-500" weight="fill" />
+    <div className="bg-red-50 border-b border-red-200 px-4 py-3">
+      <div className="flex items-center gap-3 max-w-5xl mx-auto">
+        <WarningCircle className="w-5 h-5 text-red-500 shrink-0" weight="fill" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-red-700">
+            {t("suspendedBannerTitle")}
+          </p>
+          <p className="text-xs text-red-600 mt-0.5">
+            {t("suspendedBannerDescription")}
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {t("suspendedTitle")}
-        </h2>
-        <p className="text-gray-500 mb-6">
-          {t("suspendedDescription")}
-        </p>
-        <Button
-          variant="gradient"
-          className="rounded-full px-8"
-          onClick={handleSubscribe}
-          disabled={checkout.isPending}
+        <Link
+          href="/settings/billing"
+          className="shrink-0 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded-full transition-colors"
         >
-          {checkout.isPending ? t("redirecting") : t("subscribeCta")}
-        </Button>
-        <p className="text-xs text-gray-400 mt-4">
-          {t("suspendedDataSafe")}
-        </p>
+          {t("suspendedBannerCta")}
+        </Link>
       </div>
     </div>
   );

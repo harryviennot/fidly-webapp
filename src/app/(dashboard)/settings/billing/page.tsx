@@ -200,6 +200,7 @@ export default function BillingPage() {
 
   const changeTier = useChangeTier();
   const [confirmTier, setConfirmTier] = useState<string | null>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const isUpgrade = confirmTier
     ? (TIER_RANK[confirmTier] ?? 0) > (TIER_RANK[currentTier] ?? 0)
@@ -308,8 +309,7 @@ export default function BillingPage() {
                   variant="outline"
                   size="sm"
                   className="rounded-full text-red-600 border-red-200 hover:bg-red-50"
-                  onClick={() => cancelSub.mutate()}
-                  disabled={cancelSub.isPending}
+                  onClick={() => setShowCancelDialog(true)}
                 >
                   {t("cancel")}
                 </Button>
@@ -402,6 +402,44 @@ export default function BillingPage() {
                 : isUpgrade
                   ? t("confirmUpgrade")
                   : t("confirmDowngrade")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel subscription confirmation dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirmCancelTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("confirmCancelDescription", {
+                plan: currentTier,
+                date: data?.billing_period_end
+                  ? new Date(data.billing_period_end).toLocaleDateString()
+                  : t("endOfPeriod"),
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("confirmCancelKeep")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => {
+                cancelSub.mutate(undefined, {
+                  onSuccess: () => {
+                    toast.success(t("cancelSuccess"));
+                    setShowCancelDialog(false);
+                  },
+                  onError: (err: Error) => {
+                    toast.error(err.message);
+                    setShowCancelDialog(false);
+                  },
+                });
+              }}
+              disabled={cancelSub.isPending}
+            >
+              {cancelSub.isPending ? t("redirecting") : t("confirmCancelButton")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
