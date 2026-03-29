@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { WarningCircleIconIcon, ArrowRightIcon } from "@phosphor-icons/react";
+import { WarningCircleIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 /**
  * Non-blocking banner shown when business is suspended.

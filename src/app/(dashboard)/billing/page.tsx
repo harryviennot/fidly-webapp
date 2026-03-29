@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check, CreditCard, ArrowSquareOut, WarningCircle, Clock } from "@phosphor-icons/react";
+import { CheckIcon, CreditCardIcon, ArrowSquareOutIcon, WarningCircleIcon, ClockIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { InfoBox } from "@/components/reusables/info-box";
 import {
@@ -185,7 +185,7 @@ function TierCard({
         <ul className="space-y-1.5">
           {features.map((feature, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-[var(--foreground)]">
-              <Check className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" weight="bold" />
+              <CheckIcon className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" weight="bold" />
               <span>{feature}</span>
             </li>
           ))}
@@ -284,7 +284,7 @@ export default function BillingPage() {
             ? [
                 {
                   label: t("manageBilling"),
-                  icon: <ArrowSquareOut className="w-4 h-4" />,
+                  icon: <ArrowSquareOutIcon className="w-4 h-4" />,
                   onClick: () => portal.mutate(),
                   variant: "secondary" as const,
                   disabled: portal.isPending,
@@ -299,7 +299,7 @@ export default function BillingPage() {
         <div className="flex items-center gap-3">
           <InfoBox
             variant="error"
-            icon={<CreditCard className="w-4 h-4 text-[var(--error)]" weight="fill" />}
+            icon={<CreditCardIcon className="w-4 h-4 text-[var(--error)]" weight="fill" />}
             title={t("pastDueTitle")}
             message={t("pastDueDescription")}
             className="flex-1"
@@ -319,7 +319,7 @@ export default function BillingPage() {
       {isGrace && (
         <InfoBox
           variant="warning"
-          icon={<WarningCircle className="w-4 h-4 text-[var(--warning)]" weight="fill" />}
+          icon={<WarningCircleIcon className="w-4 h-4 text-[var(--warning)]" weight="fill" />}
           title={t("graceTitle")}
           message={t("graceDescription")}
         />
@@ -383,7 +383,7 @@ export default function BillingPage() {
       {(isTrialing || isGrace) && !hasSubscription && daysRemaining !== null && (
         <InfoBox
           variant="info"
-          icon={<Clock className="w-4 h-4 text-[var(--info)]" weight="fill" />}
+          icon={<ClockIcon className="w-4 h-4 text-[var(--info)]" weight="fill" />}
           message={t("trialInfoCompact", { days: daysRemaining })}
         />
       )}
@@ -392,7 +392,7 @@ export default function BillingPage() {
       {isActiveInTrial && daysUntilFirstCharge !== null && (
         <InfoBox
           variant="info"
-          icon={<Check className="w-4 h-4 text-[var(--info)]" weight="bold" />}
+          icon={<CheckIcon className="w-4 h-4 text-[var(--info)]" weight="bold" />}
           message={t("activeInTrialInfo", { days: daysUntilFirstCharge })}
         />
       )}
@@ -442,7 +442,7 @@ export default function BillingPage() {
               onClick={() => portal.mutate()}
               disabled={portal.isPending}
             >
-              <ArrowSquareOut className="w-4 h-4" />
+              <ArrowSquareOutIcon className="w-4 h-4" />
               {t("viewInvoices")}
             </Button>
           </div>

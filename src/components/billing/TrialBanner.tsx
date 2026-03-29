@@ -158,6 +158,7 @@ const VARIANT_ICONS: Record<BannerVariant, typeof ClockIcon> = {
  * Compact trial widget for the sidebar footer (desktop only).
  */
 export function TrialSidebarWidget() {
+  const t = useTranslations("billing");
   const { shouldShow, variant, message, isDismissable, onDismiss } =
     useTrialBannerVisibility();
 
@@ -181,7 +182,7 @@ export function TrialSidebarWidget() {
             className="absolute top-2 right-2 p-0.5 rounded-sm opacity-60 hover:opacity-100 transition-opacity"
             aria-label="Dismiss"
           >
-            <XIconclassName={cn("w-3 h-3", styles.text)} />
+            <XIcon className={cn("w-3 h-3", styles.text)} />
           </button>
         )}
         <div className="flex items-start gap-2 pr-4">
@@ -197,7 +198,7 @@ export function TrialSidebarWidget() {
                 styles.text
               )}
             >
-              {variant === "error" ? "Update billing" : "View plans"}
+              {variant === "error" ? t("updatePayment") : t("viewPlans")}
             </Link>
           </div>
         </div>
@@ -241,7 +242,7 @@ export function TrialMobileBanner() {
           className="shrink-0 p-1 rounded-sm opacity-60 hover:opacity-100 transition-opacity"
           aria-label="Dismiss"
         >
-          <XIconclassName="w-3.5 h-3.5" />
+          <XIcon className="w-3.5 h-3.5" />
         </button>
       )}
     </Link>
