@@ -55,6 +55,7 @@
     "switchPlan": "Passer à ce plan",
     "trialSwitchHint": "Votre essai gratuit continue — vous ne serez pas facturé avant la fin.",
     "prorationHint": "La différence sera facturée ou créditée au prorata de la période restante.",
+    "trialPlanSwitchNote": "Changer de plan ne réinitialise pas votre essai. Votre essai gratuit continue jusqu'au {date}.",
     "trialSubscribeHint": "Ajoutez votre moyen de paiement maintenant. Votre essai continue et vous ne serez pas facturé avant la fin.",
     "activeInTrialInfo": "C'est tout bon ! Votre essai gratuit continue pendant encore {days} jours. Votre premier prélèvement aura lieu après la fin de l'essai.",
     "billingStartsSoon": "Votre premier prélèvement est dans {days} jours — aucune action requise.",

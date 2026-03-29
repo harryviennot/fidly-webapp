@@ -55,6 +55,7 @@
     "switchPlan": "Switch to this plan",
     "trialSwitchHint": "Your free trial continues — you won't be charged until it ends.",
     "prorationHint": "You'll be charged or credited the difference for the remaining billing period.",
+    "trialPlanSwitchNote": "Switching plans won't reset your trial. Your free trial continues until {date}.",
     "trialSubscribeHint": "Link your payment method now. Your free trial continues and you won't be charged until it ends.",
     "activeInTrialInfo": "You're all set! Your free trial continues for {days} more days. Your first charge will be after the trial ends.",
     "billingStartsSoon": "Your first billing is in {days} days — no action needed.",

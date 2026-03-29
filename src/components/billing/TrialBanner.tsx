@@ -167,7 +167,7 @@ export function TrialSidebarWidget() {
   const Icon = VARIANT_ICONS[variant];
 
   return (
-    <div className="px-3 pb-1">
+    <div className="hidden md:block px-3 pb-1">
       <div
         className={cn(
           "relative rounded-lg border p-3",

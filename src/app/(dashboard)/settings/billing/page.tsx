@@ -395,10 +395,11 @@ export default function BillingPage() {
       )}
 
       {/* Plan selection */}
-      <div>
-        <h2 className="text-lg font-bold mb-4">
+      <div className="space-y-4">
+        <h2 className="text-lg font-bold">
           {isTrialing || isSuspended || isGrace ? t("choosePlan") : t("changePlan")}
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {TIERS.map((tier) => (
             <TierCard
@@ -465,6 +466,15 @@ export default function BillingPage() {
                     to: confirmTier ?? "",
                   })}
             </AlertDialogDescription>
+            {(isTrialing || isGrace) && !hasSubscription && data?.trial_ends_at && (
+              <InfoBox
+                variant="note"
+                message={t("trialPlanSwitchNote", {
+                  date: new Date(data.trial_ends_at).toLocaleDateString(),
+                })}
+                className="mt-3"
+              />
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("confirmCancel")}</AlertDialogCancel>
