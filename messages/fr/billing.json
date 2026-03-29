@@ -10,7 +10,7 @@
     "popular": "Le plus populaire",
     "perMonth": "/mois",
     "foundingPrice": "Prix fondateur — garanti à vie",
-    "resellerDiscount": "Remise revendeur de 25% appliquée",
+    "resellerDiscount": "Remise revendeur de {percent}% appliquée",
     "currentPlan": "Plan actuel",
     "payNow": "Payer maintenant",
     "switchToThisPlan": "Passer à ce plan",

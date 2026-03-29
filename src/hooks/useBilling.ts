@@ -54,6 +54,8 @@ export function useBillingStatus() {
     daysRemaining: data?.days_remaining ?? null,
     isFoundingPartner: data?.is_founding_partner ?? false,
     isReseller: data?.is_reseller ?? false,
+    resellerDiscountPercent: data?.reseller_discount_percent ?? null,
+    resellerDiscountLocked: data?.reseller_discount_locked ?? false,
     hasSubscription,
     isActiveInTrial,
     daysUntilFirstCharge,

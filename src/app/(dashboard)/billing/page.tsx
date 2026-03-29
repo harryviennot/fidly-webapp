@@ -59,6 +59,7 @@ function TierCard({
   currentTier,
   isFoundingPartner,
   isReseller,
+  resellerDiscountPercent,
   isSuspended,
   isTrialing,
   hasSubscription,
@@ -71,6 +72,7 @@ function TierCard({
   currentTier: string;
   isFoundingPartner: boolean;
   isReseller: boolean;
+  resellerDiscountPercent: number | null;
   isSuspended: boolean;
   isTrialing: boolean;
   hasSubscription: boolean;
@@ -87,7 +89,7 @@ function TierCard({
   const basePrice = TIER_PRICES[tier];
   let price = basePrice;
   if (isFoundingPartner) price = FOUNDING_PRICES[tier];
-  else if (isReseller) price = Math.round(basePrice * 0.75);
+  else if (isReseller && resellerDiscountPercent) price = Math.round(basePrice * (1 - resellerDiscountPercent / 100));
 
   const features = t.raw(`features.${tier}`) as string[];
   const featuresLabel = t(`features.${FEATURE_LABELS[tier]}`);
@@ -189,7 +191,7 @@ function TierCard({
         )}
         {isReseller && !isPro && (
           <span className="text-xs text-[var(--accent)] font-semibold">
-            {t("resellerDiscount")}
+            {t("resellerDiscount", { percent: resellerDiscountPercent ?? 0 })}
           </span>
         )}
       </div>
@@ -228,6 +230,8 @@ export default function BillingPage() {
     daysRemaining,
     isFoundingPartner,
     isReseller,
+    resellerDiscountPercent,
+    resellerDiscountLocked,
     hasSubscription,
     isActiveInTrial,
     daysUntilFirstCharge,
@@ -427,6 +431,7 @@ export default function BillingPage() {
               currentTier={currentTier}
               isFoundingPartner={isFoundingPartner}
               isReseller={isReseller}
+              resellerDiscountPercent={resellerDiscountPercent}
               isSuspended={isSuspended}
               isTrialing={isTrialing || isGrace}
               hasSubscription={hasSubscription}

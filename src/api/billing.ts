@@ -5,6 +5,8 @@ export interface BillingStatus {
   billing_status: string;
   is_founding_partner: boolean;
   is_reseller: boolean;
+  reseller_discount_percent: number | null;
+  reseller_discount_locked: boolean;
   trial_ends_at: string | null;
   grace_ends_at: string | null;
   days_remaining: number | null;

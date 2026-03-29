@@ -10,7 +10,7 @@
     "popular": "Most popular",
     "perMonth": "/mo",
     "foundingPrice": "Founding partner price — locked for life",
-    "resellerDiscount": "25% reseller discount applied",
+    "resellerDiscount": "{percent}% reseller discount applied",
     "currentPlan": "Current plan",
     "payNow": "Pay now",
     "switchToThisPlan": "Switch to this plan",
