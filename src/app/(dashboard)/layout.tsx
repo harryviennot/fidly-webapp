@@ -9,6 +9,8 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { PendingActivationPage } from "@/components/pending-activation-page";
 import { SuspendedPage } from "@/components/suspended-page";
+import { TrialBanner } from "@/components/billing/TrialBanner";
+import { SuspendedOverlay } from "@/components/billing/SuspendedOverlay";
 
 export default function AdminLayout({
   children,
@@ -68,8 +70,10 @@ export default function AdminLayout({
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
+          <TrialBanner />
           <DashboardHeader />
           <main className="p-4 md:p-6">{children}</main>
+          {currentBusiness.billing_status === "suspended" && <SuspendedOverlay />}
         </SidebarInset>
       </SidebarProvider>
       <Toaster position="bottom-right" />

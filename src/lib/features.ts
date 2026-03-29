@@ -7,7 +7,7 @@
  * - Feature flags (scheduling, geofencing, etc.)
  */
 
-export type SubscriptionTier = "pay" | "pro";
+export type SubscriptionTier = "starter" | "growth" | "pro";
 
 export interface PlanLimits {
   max_card_designs: number | null; // null = unlimited
@@ -20,10 +20,30 @@ export interface PlanLimits {
  * IMPORTANT: Keep in sync with backend/app/core/features.py
  */
 export const PLAN_LIMITS: Record<SubscriptionTier, PlanLimits> = {
-  pay: {
+  starter: {
     max_card_designs: 1,
     max_scanner_accounts: 3,
-    features: ["basic_analytics", "standard_notifications"],
+    features: [
+      "basic_analytics",
+      "standard_notifications",
+      "single_program",
+      "offline_sync",
+    ],
+  },
+  growth: {
+    max_card_designs: null, // unlimited
+    max_scanner_accounts: null, // unlimited
+    features: [
+      "basic_analytics",
+      "advanced_analytics",
+      "standard_notifications",
+      "custom_notifications",
+      "promotional_messaging",
+      "multiple_programs",
+      "promotional_events",
+      "employee_tracking",
+      "offline_sync",
+    ],
   },
   pro: {
     max_card_designs: null, // unlimited
@@ -35,8 +55,16 @@ export const PLAN_LIMITS: Record<SubscriptionTier, PlanLimits> = {
       "custom_notifications",
       "scheduled_campaigns",
       "multiple_locations",
+      "location_analytics",
       "geofencing",
       "promotional_messaging",
+      "multiple_programs",
+      "promotional_events",
+      "design_schedules",
+      "employee_tracking",
+      "segmentation",
+      "scheduled_sends",
+      "offline_sync",
     ],
   },
 };
@@ -47,7 +75,7 @@ export const PLAN_LIMITS: Record<SubscriptionTier, PlanLimits> = {
  * @returns PlanLimits for the tier, defaults to 'pay' if unknown
  */
 export function getPlanLimits(tier: SubscriptionTier | string): PlanLimits {
-  return PLAN_LIMITS[tier as SubscriptionTier] || PLAN_LIMITS.pay;
+  return PLAN_LIMITS[tier as SubscriptionTier] || PLAN_LIMITS.starter;
 }
 
 /**

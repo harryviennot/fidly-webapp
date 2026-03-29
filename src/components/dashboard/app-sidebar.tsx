@@ -31,6 +31,7 @@ import {
   Megaphone,
   MapPin,
   UserCircle,
+  Wallet,
   Question,
 } from "@phosphor-icons/react";
 
@@ -62,6 +63,7 @@ const programItems: NavItem[] = [
 const manageItems: NavItem[] = [
   { href: "/team", labelKey: "nav.team", icon: UserCircle },
   { href: "/settings", labelKey: "nav.settings", icon: GearSix },
+  { href: "/settings/billing", labelKey: "nav.billing", icon: Wallet },
 ];
 
 // Bottom utility links

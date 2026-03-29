@@ -7,9 +7,8 @@
  */
 import { useBusiness } from "@/contexts/business-context";
 import {
-  // BYPASSED FOR MVP: Unused imports preserved for re-enabling later
-  // getPlanLimits,
-  // hasFeature as checkFeature,
+  getPlanLimits,
+  hasFeature as checkFeature,
   PlanLimits,
   SubscriptionTier,
 } from "@/lib/features";
@@ -21,6 +20,8 @@ export interface EntitlementsResult {
   limits: PlanLimits;
   /** Whether the user is on the Pro plan */
   isPro: boolean;
+  /** Whether the business is suspended (needs billing) */
+  isSuspended: boolean;
   /** Check if a specific feature is available */
   hasFeature: (feature: string) => boolean;
   /** Check if a new design can be created given current count */
@@ -60,37 +61,33 @@ export interface EntitlementsResult {
 export function useEntitlements(): EntitlementsResult {
   const { currentBusiness } = useBusiness();
 
-  const tier = (currentBusiness?.subscription_tier || "pay") as SubscriptionTier;
+  const tier = (currentBusiness?.subscription_tier || "starter") as SubscriptionTier;
+  const limits = getPlanLimits(tier);
+  const billingStatus = currentBusiness?.billing_status || "trial";
+  const isSuspended = billingStatus === "suspended";
 
-  // BYPASSED FOR MVP: Always return unlimited
-  // Re-enable when implementing paid tiers
-  // const limits = getPlanLimits(tier);
-  const limits: PlanLimits = {
-    max_card_designs: null,
-    max_scanner_accounts: null,
-    features: [
-      "basic_analytics",
-      "advanced_analytics",
-      "standard_notifications",
-      "custom_notifications",
-      "scheduled_campaigns",
-      "multiple_locations",
-      "geofencing",
-      "promotional_messaging",
-    ],
+  const canCheck = (max: number | null, current: number) => {
+    if (isSuspended) return false;
+    return max === null || current < max;
+  };
+
+  const getRemaining = (max: number | null, current: number) => {
+    if (max === null) return null;
+    return Math.max(0, max - current);
   };
 
   return {
     tier,
     limits,
-    isPro: true, // Always treat as Pro for MVP
-    hasFeature: () => true, // All features enabled
-    canCreateDesign: () => true,
-    canAddScanner: () => true,
-    getDesignsRemaining: () => null,
-    getScannersRemaining: () => null,
-    isAtDesignLimit: () => false,
-    isAtScannerLimit: () => false,
+    isPro: tier === "pro",
+    isSuspended,
+    hasFeature: (feature: string) => !isSuspended && checkFeature(tier, feature),
+    canCreateDesign: (count: number) => canCheck(limits.max_card_designs, count),
+    canAddScanner: (count: number) => canCheck(limits.max_scanner_accounts, count),
+    getDesignsRemaining: (count: number) => getRemaining(limits.max_card_designs, count),
+    getScannersRemaining: (count: number) => getRemaining(limits.max_scanner_accounts, count),
+    isAtDesignLimit: (count: number) => limits.max_card_designs !== null && count >= limits.max_card_designs,
+    isAtScannerLimit: (count: number) => limits.max_scanner_accounts !== null && count >= limits.max_scanner_accounts,
   };
 }
 

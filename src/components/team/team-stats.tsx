@@ -13,13 +13,13 @@ import { StatCard } from "@/components/redesign";
 interface TeamStatsProps {
   members: MembershipWithUser[];
   invitations: Invitation[];
-  subscriptionTier?: "pay" | "pro";
+  subscriptionTier?: "starter" | "growth" | "pro";
 }
 
 export function TeamStats({
   members,
   invitations,
-  subscriptionTier = "pro",
+  subscriptionTier = "growth",
 }: TeamStatsProps) {
   const t = useTranslations('team.stats');
 
@@ -34,8 +34,8 @@ export function TeamStats({
 
   const scannerCount = roleCounts.scanner || 0;
 
-  // Pay tier has scanner limit
-  const scannerLimit = subscriptionTier === "pay" ? 3 : null;
+  // Starter tier has scanner limit
+  const scannerLimit = subscriptionTier === "starter" ? 3 : null;
 
   // Count active scanners (active in last 7 days)
   const now = new Date();
