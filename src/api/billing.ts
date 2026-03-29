@@ -4,6 +4,7 @@ export interface BillingStatus {
   tier: string;
   billing_status: string;
   is_founding_partner: boolean;
+  is_reseller: boolean;
   trial_ends_at: string | null;
   grace_ends_at: string | null;
   days_remaining: number | null;

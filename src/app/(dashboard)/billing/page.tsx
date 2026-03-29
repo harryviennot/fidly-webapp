@@ -58,6 +58,7 @@ function TierCard({
   tier,
   currentTier,
   isFoundingPartner,
+  isReseller,
   isSuspended,
   isTrialing,
   hasSubscription,
@@ -69,6 +70,7 @@ function TierCard({
   tier: string;
   currentTier: string;
   isFoundingPartner: boolean;
+  isReseller: boolean;
   isSuspended: boolean;
   isTrialing: boolean;
   hasSubscription: boolean;
@@ -81,9 +83,11 @@ function TierCard({
   const isCurrent = tier === currentTier;
   const isPro = tier === "pro";
   const needsSubscription = (isTrialing || isSuspended) && !hasSubscription;
-  const price = isFoundingPartner
-    ? FOUNDING_PRICES[tier]
-    : TIER_PRICES[tier];
+  // Mutually exclusive: reseller businesses are never founding partners
+  const basePrice = TIER_PRICES[tier];
+  let price = basePrice;
+  if (isFoundingPartner) price = FOUNDING_PRICES[tier];
+  else if (isReseller) price = Math.round(basePrice * 0.75);
 
   const features = t.raw(`features.${tier}`) as string[];
   const featuresLabel = t(`features.${FEATURE_LABELS[tier]}`);
@@ -168,6 +172,11 @@ function TierCard({
           {tier}
         </h3>
         <div className="flex items-baseline gap-1 mt-1">
+          {isReseller && !isPro && (
+            <span className="text-lg text-[var(--muted-foreground)] line-through mr-1">
+              &euro;{basePrice}
+            </span>
+          )}
           <span className={`text-3xl font-extrabold ${isPro ? "text-[var(--muted-foreground)]" : ""}`}>
             &euro;{price}
           </span>
@@ -176,6 +185,11 @@ function TierCard({
         {isFoundingPartner && !isPro && (
           <span className="text-xs text-[var(--accent)] font-semibold">
             {t("foundingPrice")}
+          </span>
+        )}
+        {isReseller && !isPro && (
+          <span className="text-xs text-[var(--accent)] font-semibold">
+            {t("resellerDiscount")}
           </span>
         )}
       </div>
@@ -213,6 +227,7 @@ export default function BillingPage() {
     isSuspended,
     daysRemaining,
     isFoundingPartner,
+    isReseller,
     hasSubscription,
     isActiveInTrial,
     daysUntilFirstCharge,
@@ -411,6 +426,7 @@ export default function BillingPage() {
               delay={160 + i * 80}
               currentTier={currentTier}
               isFoundingPartner={isFoundingPartner}
+              isReseller={isReseller}
               isSuspended={isSuspended}
               isTrialing={isTrialing || isGrace}
               hasSubscription={hasSubscription}

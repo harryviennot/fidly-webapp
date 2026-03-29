@@ -53,6 +53,7 @@ export function useBillingStatus() {
     isSuspended: billingStatus === "suspended",
     daysRemaining: data?.days_remaining ?? null,
     isFoundingPartner: data?.is_founding_partner ?? false,
+    isReseller: data?.is_reseller ?? false,
     hasSubscription,
     isActiveInTrial,
     daysUntilFirstCharge,
