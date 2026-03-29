@@ -2,13 +2,32 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Clock, WarningCircle } from "@phosphor-icons/react";
+import { Clock, WarningCircle, Info } from "@phosphor-icons/react";
 import { useBillingStatus } from "@/hooks/useBilling";
 
 export function TrialBanner() {
   const t = useTranslations("billing");
-  const { isTrialing, isGrace, isPastDue, daysRemaining } = useBillingStatus();
+  const {
+    isTrialing,
+    isGrace,
+    isPastDue,
+    daysRemaining,
+    isActiveInTrial,
+    daysUntilFirstCharge,
+  } = useBillingStatus();
 
+  // State B: Subscribed during trial — only show soft reminder when ≤3 days until first charge
+  if (isActiveInTrial) {
+    if (daysUntilFirstCharge === null || daysUntilFirstCharge > 3) return null;
+    return (
+      <div className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-blue-50 text-blue-700 border-b border-blue-100">
+        <Info className="w-4 h-4 shrink-0" weight="fill" />
+        <span>{t("billingStartsSoon", { days: daysUntilFirstCharge })}</span>
+      </div>
+    );
+  }
+
+  // State A: Trial without subscription, or grace/past_due
   if (!isTrialing && !isGrace && !isPastDue) return null;
 
   const isUrgent = isGrace || isPastDue || (daysRemaining !== null && daysRemaining <= 3);

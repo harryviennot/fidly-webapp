@@ -28,6 +28,20 @@ export function useBillingStatus() {
   const data = query.data;
   const billingStatus = data?.billing_status ?? "trial";
 
+  const hasSubscription = !!data?.stripe_subscription_id;
+
+  // Use query fetch timestamp as "now" to avoid impure Date.now() calls
+  const now = query.dataUpdatedAt || 0;
+  const trialEndMs = data?.trial_ends_at ? new Date(data.trial_ends_at).getTime() : null;
+  const isActiveInTrial =
+    billingStatus === "active" &&
+    hasSubscription &&
+    trialEndMs !== null &&
+    trialEndMs > now;
+  const daysUntilFirstCharge = isActiveInTrial && trialEndMs
+    ? Math.max(0, Math.ceil((trialEndMs - now) / 86_400_000))
+    : null;
+
   return {
     ...query,
     billingStatus,
@@ -39,6 +53,9 @@ export function useBillingStatus() {
     isSuspended: billingStatus === "suspended",
     daysRemaining: data?.days_remaining ?? null,
     isFoundingPartner: data?.is_founding_partner ?? false,
+    hasSubscription,
+    isActiveInTrial,
+    daysUntilFirstCharge,
   };
 }
 

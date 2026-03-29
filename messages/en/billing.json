@@ -2,19 +2,19 @@
   "billing": {
     "title": "Billing",
     "subtitle": "Manage your subscription and billing",
-    "trialBanner": "Your free trial ends in {days} days",
-    "trialBannerGeneric": "You are on a free trial",
+    "trialBanner": "Your free trial ends in {days} days — link your payment method now",
+    "trialBannerGeneric": "You are on a free trial — link your payment method to avoid interruption",
     "graceBanner": "Your trial has ended. Subscribe now to avoid losing access.",
     "pastDueBanner": "Payment failed. Update your payment method.",
-    "viewPlans": "View plans",
+    "viewPlans": "Link payment",
     "popular": "Most popular",
     "perMonth": "/mo",
     "foundingPrice": "Founding partner price — locked for life",
     "currentPlan": "Current plan",
-    "subscribe": "Subscribe",
+    "subscribe": "Link payment method",
     "upgrade": "Upgrade",
     "downgrade": "Downgrade",
-    "choosePlan": "Choose a plan",
+    "choosePlan": "Choose a plan and link your payment method",
     "changePlan": "Change plan",
     "trialRemaining": "Trial time remaining",
     "daysLeft": "days left",
@@ -34,6 +34,10 @@
     "suspendedDescription": "Your free trial has ended. Subscribe to restore full access to your loyalty program.",
     "subscribeCta": "Subscribe now",
     "redirecting": "Redirecting...",
-    "suspendedDataSafe": "Your data is safe. All customers, stamps, and designs are preserved."
+    "suspendedDataSafe": "Your data is safe. All customers, stamps, and designs are preserved.",
+    "comingSoon": "Coming soon",
+    "trialSubscribeHint": "Link your payment method now to avoid losing access. Your free trial continues and you won't be charged until it ends.",
+    "activeInTrialInfo": "You're all set! Your free trial continues for {days} more days. Your first charge will be after the trial ends.",
+    "billingStartsSoon": "Your first billing is in {days} days — no action needed."
   }
 }

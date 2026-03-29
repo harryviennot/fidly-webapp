@@ -35,6 +35,7 @@ function TierCard({
   isFoundingPartner,
   isSuspended,
   isTrialing,
+  hasSubscription,
   onSubscribe,
   isLoading,
 }: {
@@ -43,12 +44,15 @@ function TierCard({
   isFoundingPartner: boolean;
   isSuspended: boolean;
   isTrialing: boolean;
+  hasSubscription: boolean;
   onSubscribe: (tier: string) => void;
   isLoading: boolean;
 }) {
   const t = useTranslations("billing");
   const isCurrent = tier === currentTier;
   const isHighlighted = tier === "growth";
+  const isPro = tier === "pro";
+  const needsSubscription = (isTrialing || isSuspended) && !hasSubscription;
   const price = isFoundingPartner
     ? FOUNDING_PRICES[tier]
     : TIER_PRICES[tier];
@@ -56,14 +60,23 @@ function TierCard({
   return (
     <div
       className={`relative rounded-2xl border p-6 transition-all ${
-        isCurrent
-          ? "border-[var(--accent)] bg-[var(--accent)]/5 ring-1 ring-[var(--accent)]"
-          : isHighlighted
-            ? "border-gray-200 shadow-md"
-            : "border-gray-200"
+        isPro
+          ? "border-gray-200 opacity-50"
+          : isCurrent
+            ? "border-[var(--accent)] bg-[var(--accent)]/5 ring-1 ring-[var(--accent)]"
+            : isHighlighted
+              ? "border-gray-200 shadow-md"
+              : "border-gray-200"
       }`}
     >
-      {isHighlighted && !isCurrent && (
+      {isPro && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-500 whitespace-nowrap">
+            {t("comingSoon")}
+          </span>
+        </div>
+      )}
+      {isHighlighted && !isCurrent && !isPro && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="text-xs font-bold px-3 py-1 rounded-full bg-[var(--accent)] text-white">
             {t("popular")}
@@ -72,32 +85,36 @@ function TierCard({
       )}
 
       <div className="mb-4">
-        <h3 className="text-lg font-bold capitalize">{tier}</h3>
+        <h3 className={`text-lg font-bold capitalize ${isPro ? "text-gray-400" : ""}`}>{tier}</h3>
         <div className="flex items-baseline gap-1 mt-1">
-          <span className="text-3xl font-extrabold">&euro;{price}</span>
+          <span className={`text-3xl font-extrabold ${isPro ? "text-gray-400" : ""}`}>&euro;{price}</span>
           <span className="text-sm text-gray-500">{t("perMonth")}</span>
         </div>
-        {isFoundingPartner && (
+        {isFoundingPartner && !isPro && (
           <span className="text-xs text-[var(--accent)] font-semibold">
             {t("foundingPrice")}
           </span>
         )}
       </div>
 
-      {isCurrent ? (
-        <div className="flex items-center gap-2 text-sm text-[var(--accent)] font-semibold">
-          <Check className="w-4 h-4" weight="bold" />
-          {t("currentPlan")}
-        </div>
-      ) : (isTrialing || isSuspended) ? (
+      {isPro ? (
+        <Button variant="outline" className="w-full rounded-full" disabled>
+          {t("comingSoon")}
+        </Button>
+      ) : needsSubscription ? (
         <Button
-          variant={isHighlighted ? "gradient" : "outline"}
+          variant={isCurrent || isHighlighted ? "gradient" : "outline"}
           className="w-full rounded-full"
           onClick={() => onSubscribe(tier)}
           disabled={isLoading}
         >
           {t("subscribe")}
         </Button>
+      ) : isCurrent && hasSubscription ? (
+        <div className="flex items-center gap-2 text-sm text-[var(--accent)] font-semibold">
+          <Check className="w-4 h-4" weight="bold" />
+          {t("currentPlan")}
+        </div>
       ) : (
         <Button
           variant="outline"
@@ -125,6 +142,9 @@ export default function BillingPage() {
     isSuspended,
     daysRemaining,
     isFoundingPartner,
+    hasSubscription,
+    isActiveInTrial,
+    daysUntilFirstCharge,
   } = useBillingStatus();
 
   const checkout = useCheckout();
@@ -242,14 +262,26 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Trial info */}
-      {(isTrialing || isGrace) && daysRemaining !== null && (
+      {/* Trial info — not yet subscribed */}
+      {(isTrialing || isGrace) && !hasSubscription && daysRemaining !== null && (
         <div className="rounded-xl border border-gray-200 p-6 text-center">
           <p className="text-sm text-gray-500 mb-1">{t("trialRemaining")}</p>
           <p className="text-4xl font-extrabold text-gray-900">
             {daysRemaining}
           </p>
           <p className="text-sm text-gray-500">{t("daysLeft")}</p>
+          <p className="text-xs text-gray-400 mt-3 max-w-sm mx-auto">
+            {t("trialSubscribeHint")}
+          </p>
+        </div>
+      )}
+
+      {/* Subscribed during trial — soft info */}
+      {isActiveInTrial && daysUntilFirstCharge !== null && (
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center">
+          <p className="text-sm text-blue-600 font-medium">
+            {t("activeInTrialInfo", { days: daysUntilFirstCharge })}
+          </p>
         </div>
       )}
 
@@ -267,6 +299,7 @@ export default function BillingPage() {
               isFoundingPartner={isFoundingPartner}
               isSuspended={isSuspended}
               isTrialing={isTrialing || isGrace}
+              hasSubscription={hasSubscription}
               onSubscribe={handleSubscribe}
               isLoading={checkout.isPending}
             />
