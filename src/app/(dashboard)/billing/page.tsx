@@ -371,6 +371,11 @@ export default function BillingPage() {
                   {t("foundingPartner")}
                 </span>
               )}
+              {resellerDiscountLocked && resellerDiscountPercent && (
+                <span className="inline-flex items-center text-xs font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-2.5 py-1 rounded-full mt-2">
+                  {t("resellerDiscount", { percent: resellerDiscountPercent })}
+                </span>
+              )}
             </div>
             <div className="flex gap-2">
               {isCancelled ? (
