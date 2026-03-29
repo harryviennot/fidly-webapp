@@ -35,7 +35,7 @@ export default function ProgramTemplatesPage() {
         actions={[
           canCreateDesign
             ? { label: t('createCard'), icon: <PlusIcon className="w-4 h-4" />, href: '/design/new' }
-            : { label: 'Upgrade for More Cards', icon: <Crown className="w-4 h-4" weight="fill" />, href: '/settings/billing', variant: 'secondary' as const },
+            : { label: 'Upgrade for More Cards', icon: <Crown className="w-4 h-4" weight="fill" />, href: '/billing', variant: 'secondary' as const },
         ]}
       />
 

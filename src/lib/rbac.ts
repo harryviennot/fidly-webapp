@@ -21,7 +21,7 @@ export const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/team": ["owner", "admin"],
   "/design": ["owner"],
   "/settings": ["owner"],
-  "/settings/billing": ["owner"],
+  "/billing": ["owner"],
   "/account": ["owner", "admin"],
 };
 

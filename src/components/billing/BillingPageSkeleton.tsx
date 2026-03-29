@@ -1,12 +1,11 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 
 function TierCardSkeleton() {
   return (
-    <Card hover={false} className="flex flex-col">
-      <CardHeader className="pb-2">
+    <div className="flex flex-col bg-[var(--card)] rounded-xl border border-[var(--border)]">
+      <div className="p-6 pb-2">
         {/* Tier name */}
         <Skeleton className="h-5 w-20" />
         {/* Price */}
@@ -14,9 +13,9 @@ function TierCardSkeleton() {
           <Skeleton className="h-8 w-16" />
           <Skeleton className="h-4 w-8" />
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="flex-1 pt-2">
+      <div className="flex-1 px-6 pt-2">
         {/* Features label */}
         <Skeleton className="h-3 w-36 mb-3" />
         {/* Feature lines */}
@@ -28,30 +27,28 @@ function TierCardSkeleton() {
             </div>
           ))}
         </div>
-      </CardContent>
+      </div>
 
-      <CardFooter className="pt-0">
+      <div className="p-6 pt-4">
         <Skeleton className="h-9 w-full rounded-full" />
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
 
 export function BillingPageSkeleton() {
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8">
       {/* Subscription info card */}
-      <Card hover={false}>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <Skeleton className="h-5 w-24" />
-              <Skeleton className="h-4 w-40" />
-            </div>
-            <Skeleton className="h-8 w-28 rounded-full" />
+      <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-4 w-40" />
           </div>
-        </CardContent>
-      </Card>
+          <Skeleton className="h-8 w-28 rounded-full" />
+        </div>
+      </div>
 
       {/* Plans section */}
       <div className="space-y-4">
@@ -64,17 +61,15 @@ export function BillingPageSkeleton() {
       </div>
 
       {/* Invoice section */}
-      <Card hover={false}>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <Skeleton className="h-5 w-20" />
-              <Skeleton className="h-4 w-64" />
-            </div>
-            <Skeleton className="h-8 w-32 rounded-full" />
+      <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1.5">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-4 w-64" />
           </div>
-        </CardContent>
-      </Card>
+          <Skeleton className="h-8 w-32 rounded-full" />
+        </div>
+      </div>
     </div>
   );
 }

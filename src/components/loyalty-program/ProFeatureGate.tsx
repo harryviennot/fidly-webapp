@@ -67,7 +67,7 @@ export function UpgradePrompt({ message, compact = false }: UpgradePromptProps) 
     return (
       <span className="text-xs text-muted-foreground">
         {message}{' '}
-        <Link href="/settings/billing" className="text-amber-600 hover:underline">
+        <Link href="/billing" className="text-amber-600 hover:underline">
           Upgrade
         </Link>
       </span>
@@ -79,7 +79,7 @@ export function UpgradePrompt({ message, compact = false }: UpgradePromptProps) 
       <Info className="w-4 h-4 text-amber-600 flex-shrink-0" weight="fill" />
       <span className="text-amber-800">{message}</span>
       <Button asChild size="sm" variant="outline" className="ml-auto">
-        <Link href="/settings/billing">
+        <Link href="/billing">
           Upgrade
         </Link>
       </Button>

@@ -121,7 +121,7 @@ export function TemplateGrid({
             <span className="text-muted-foreground ml-1">{t('pro.upgradeHint')}</span>
           </p>
           <Button asChild variant="outline" size="sm" className="rounded-full shrink-0 ml-4">
-            <Link href="/settings/billing">
+            <Link href="/billing">
               {t('pro.upgradeToPro')}
             </Link>
           </Button>

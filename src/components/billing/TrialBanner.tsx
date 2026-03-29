@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Clock, WarningCircle, Info, X } from "@phosphor-icons/react";
+import { ClockIcon, WarningCircleIcon, InfoIcon, XIcon } from "@phosphor-icons/react";
 import { useBillingStatus } from "@/hooks/useBilling";
 import { useBusiness } from "@/contexts/business-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -148,10 +148,10 @@ const VARIANT_STYLES: Record<BannerVariant, { bg: string; text: string; border: 
   },
 };
 
-const VARIANT_ICONS: Record<BannerVariant, typeof Clock> = {
-  info: Info,
-  warning: Clock,
-  error: WarningCircle,
+const VARIANT_ICONS: Record<BannerVariant, typeof ClockIcon> = {
+  info: InfoIcon,
+  warning: ClockIcon,
+  error: WarningCircleIcon,
 };
 
 /**
@@ -181,7 +181,7 @@ export function TrialSidebarWidget() {
             className="absolute top-2 right-2 p-0.5 rounded-sm opacity-60 hover:opacity-100 transition-opacity"
             aria-label="Dismiss"
           >
-            <X className={cn("w-3 h-3", styles.text)} />
+            <XIconclassName={cn("w-3 h-3", styles.text)} />
           </button>
         )}
         <div className="flex items-start gap-2 pr-4">
@@ -191,7 +191,7 @@ export function TrialSidebarWidget() {
               {message}
             </p>
             <Link
-              href="/settings/billing"
+              href="/billing"
               className={cn(
                 "text-[11px] font-semibold underline underline-offset-2 mt-1 inline-block",
                 styles.text
@@ -221,7 +221,7 @@ export function TrialMobileBanner() {
 
   return (
     <Link
-      href="/settings/billing"
+      href="/billing"
       className={cn(
         "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b transition-colors",
         styles.bg,
@@ -241,7 +241,7 @@ export function TrialMobileBanner() {
           className="shrink-0 p-1 rounded-sm opacity-60 hover:opacity-100 transition-opacity"
           aria-label="Dismiss"
         >
-          <X className="w-3.5 h-3.5" />
+          <XIconclassName="w-3.5 h-3.5" />
         </button>
       )}
     </Link>

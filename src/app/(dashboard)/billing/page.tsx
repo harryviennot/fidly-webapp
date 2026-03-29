@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Check, CreditCard, ArrowSquareOut, WarningCircle, Clock } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoBox } from "@/components/reusables/info-box";
 import {
   AlertDialog,
@@ -146,9 +145,8 @@ function TierCard({
   };
 
   return (
-    <Card
-      hover={false}
-      className={`relative flex flex-col animate-slide-up ${
+    <div
+      className={`relative flex flex-col bg-[var(--card)] rounded-xl border border-[var(--border)] animate-slide-up ${
         isPro
           ? "opacity-50"
           : isCurrent
@@ -165,10 +163,10 @@ function TierCard({
         </div>
       )}
 
-      <CardHeader className="pb-2">
-        <CardTitle className={`text-lg capitalize ${isPro ? "text-[var(--muted-foreground)]" : ""}`}>
+      <div className="p-6 pb-2">
+        <h3 className={`text-lg font-semibold capitalize ${isPro ? "text-[var(--muted-foreground)]" : ""}`}>
           {tier}
-        </CardTitle>
+        </h3>
         <div className="flex items-baseline gap-1 mt-1">
           <span className={`text-3xl font-extrabold ${isPro ? "text-[var(--muted-foreground)]" : ""}`}>
             &euro;{price}
@@ -180,9 +178,9 @@ function TierCard({
             {t("foundingPrice")}
           </span>
         )}
-      </CardHeader>
+      </div>
 
-      <CardContent className="flex-1 pt-2">
+      <div className="flex-1 px-6 pt-2">
         <p className="text-xs font-medium text-[var(--muted-foreground)] mb-2">{featuresLabel}</p>
         <ul className="space-y-1.5">
           {features.map((feature, i) => (
@@ -192,12 +190,12 @@ function TierCard({
             </li>
           ))}
         </ul>
-      </CardContent>
+      </div>
 
-      <CardFooter className="pt-0">
+      <div className="p-6 pt-4">
         {renderButton()}
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -244,8 +242,8 @@ export default function BillingPage() {
   const handleSubscribe = (tier: string) => {
     checkout.mutate({
       tier,
-      successUrl: `${window.location.origin}/settings/billing?success=true`,
-      cancelUrl: `${window.location.origin}/settings/billing`,
+      successUrl: `${window.location.origin}/billing?success=true`,
+      cancelUrl: `${window.location.origin}/billing`,
     });
   };
 
@@ -329,55 +327,56 @@ export default function BillingPage() {
 
       {/* Active subscription info */}
       {(isActive || isCancelled) && (
-        <Card hover={false} className="animate-slide-up" style={{ animationDelay: "0ms" }}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold capitalize">{currentTier}</h3>
-                <p className="text-sm text-[var(--muted-foreground)]">
-                  {isCancelled
-                    ? t("cancelledUntil", {
-                        date: data?.billing_period_end
-                          ? new Date(data.billing_period_end).toLocaleDateString()
-                          : "—",
+        <div
+          className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6 animate-slide-up"
+          style={{ animationDelay: "0ms" }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold capitalize">{currentTier}</h3>
+              <p className="text-sm text-[var(--muted-foreground)]">
+                {isCancelled
+                  ? t("cancelledUntil", {
+                      date: data?.billing_period_end
+                        ? new Date(data.billing_period_end).toLocaleDateString()
+                        : "—",
+                    })
+                  : data?.billing_period_end
+                    ? t("nextBilling", {
+                        date: new Date(data.billing_period_end).toLocaleDateString(),
                       })
-                    : data?.billing_period_end
-                      ? t("nextBilling", {
-                          date: new Date(data.billing_period_end).toLocaleDateString(),
-                        })
-                      : ""}
-                </p>
-                {isFoundingPartner && (
-                  <span className="inline-flex items-center text-xs font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-2.5 py-1 rounded-full mt-2">
-                    {t("foundingPartner")}
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                {isCancelled ? (
-                  <Button
-                    variant="gradient"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => reactivate.mutate()}
-                    disabled={reactivate.isPending}
-                  >
-                    {t("reactivate")}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full text-[var(--error)] border-[var(--error)]/20 hover:bg-[var(--error-light)]"
-                    onClick={() => setShowCancelDialog(true)}
-                  >
-                    {t("cancel")}
-                  </Button>
-                )}
-              </div>
+                    : ""}
+              </p>
+              {isFoundingPartner && (
+                <span className="inline-flex items-center text-xs font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-2.5 py-1 rounded-full mt-2">
+                  {t("foundingPartner")}
+                </span>
+              )}
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex gap-2">
+              {isCancelled ? (
+                <Button
+                  variant="gradient"
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => reactivate.mutate()}
+                  disabled={reactivate.isPending}
+                >
+                  {t("reactivate")}
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full text-[var(--error)] border-[var(--error)]/20 hover:bg-[var(--error-light)]"
+                  onClick={() => setShowCancelDialog(true)}
+                >
+                  {t("cancel")}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Trial info — compact */}
@@ -425,28 +424,29 @@ export default function BillingPage() {
 
       {/* Invoice section */}
       {hasSubscription && (
-        <Card hover={false} className="animate-slide-up" style={{ animationDelay: "400ms" }}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-semibold">{t("invoiceHistory")}</h3>
-                <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
-                  {t("invoiceHistoryDescription")}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full shrink-0"
-                onClick={() => portal.mutate()}
-                disabled={portal.isPending}
-              >
-                <ArrowSquareOut className="w-4 h-4" />
-                {t("viewInvoices")}
-              </Button>
+        <div
+          className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6 animate-slide-up"
+          style={{ animationDelay: "400ms" }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-semibold">{t("invoiceHistory")}</h3>
+              <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
+                {t("invoiceHistoryDescription")}
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full shrink-0"
+              onClick={() => portal.mutate()}
+              disabled={portal.isPending}
+            >
+              <ArrowSquareOut className="w-4 h-4" />
+              {t("viewInvoices")}
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Tier change confirmation dialog */}

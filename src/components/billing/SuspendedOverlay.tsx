@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { WarningCircle, ArrowRight } from "@phosphor-icons/react";
+import { WarningCircleIconIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 /**
  * Non-blocking banner shown when business is suspended.
@@ -15,7 +15,7 @@ export function SuspendedBanner() {
   return (
     <div className="bg-[var(--error-light)] border-b border-[var(--error)]/20 px-4 py-3">
       <div className="flex items-center gap-3">
-        <WarningCircle className="w-5 h-5 text-[var(--error)] shrink-0" weight="fill" />
+        <WarningCircleIcon className="w-5 h-5 text-[var(--error)] shrink-0" weight="fill" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-[var(--error)]">
             {t("suspendedBannerTitle")}
@@ -25,11 +25,11 @@ export function SuspendedBanner() {
           </p>
         </div>
         <Link
-          href="/settings/billing"
+          href="/billing"
           className="shrink-0 inline-flex items-center gap-1 text-sm font-semibold text-[var(--error)] underline underline-offset-2 hover:opacity-80 transition-opacity"
         >
           {t("suspendedBannerCta")}
-          <ArrowRight className="w-3.5 h-3.5" weight="bold" />
+          <ArrowRightIcon className="w-3.5 h-3.5" weight="bold" />
         </Link>
       </div>
     </div>
