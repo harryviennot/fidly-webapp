@@ -27,6 +27,7 @@ import {
   useCancelSubscription,
   useReactivateSubscription,
 } from "@/hooks/useBilling";
+import { BillingPageSkeleton } from "@/components/billing/BillingPageSkeleton";
 
 const TIERS = ["starter", "growth", "pro"] as const;
 
@@ -77,7 +78,6 @@ function TierCard({
 }) {
   const t = useTranslations("billing");
   const isCurrent = tier === currentTier;
-  const isHighlighted = tier === "growth";
   const isPro = tier === "pro";
   const needsSubscription = (isTrialing || isSuspended) && !hasSubscription;
   const price = isFoundingPartner
@@ -112,7 +112,7 @@ function TierCard({
       }
       return (
         <Button
-          variant={isHighlighted ? "gradient" : "outline"}
+          variant="outline"
           className="w-full rounded-full"
           onClick={() => onSubscribe(tier)}
           disabled={isLoading}
@@ -133,7 +133,7 @@ function TierCard({
 
     return (
       <Button
-        variant={isHighlighted ? "gradient" : "outline"}
+        variant="outline"
         className="w-full rounded-full"
         onClick={() => onChangeTier(tier)}
         disabled={isLoading}
@@ -151,22 +151,13 @@ function TierCard({
           ? "opacity-50"
           : isCurrent
             ? "border-[var(--accent)] ring-1 ring-[var(--accent)]"
-            : isHighlighted
-              ? "shadow-md"
-              : ""
+            : ""
       }`}
     >
       {isPro && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="text-xs font-bold px-3 py-1 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] whitespace-nowrap">
             {t("comingSoon")}
-          </span>
-        </div>
-      )}
-      {isHighlighted && !isCurrent && !isPro && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-[var(--accent)] text-white">
-            {t("popular")}
           </span>
         </div>
       )}
@@ -212,6 +203,7 @@ export default function BillingPage() {
   const searchParams = useSearchParams();
   const {
     data,
+    isLoading,
     isTrialing,
     isGrace,
     isActive,
@@ -271,6 +263,15 @@ export default function BillingPage() {
       },
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8 pb-12">
+        <PageHeader title={t("title")} subtitle={t("subtitle")} />
+        <BillingPageSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-12">
@@ -400,7 +401,7 @@ export default function BillingPage() {
           {isTrialing || isSuspended || isGrace ? t("choosePlan") : t("changePlan")}
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {TIERS.map((tier) => (
             <TierCard
               key={tier}
