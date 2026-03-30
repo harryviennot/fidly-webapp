@@ -7,11 +7,16 @@ import {
   changeTier,
   cancelSubscription,
   reactivateSubscription,
+  getOverLimitStatus,
+  previewDowngrade,
   type BillingStatus,
+  type OverLimitStatus,
+  type PreviewDowngradeResponse,
 } from "@/api/billing";
 
 export const billingKeys = {
   status: (businessId: string) => ["billing", "status", businessId] as const,
+  overLimit: (businessId: string) => ["billing", "over-limit", businessId] as const,
 };
 
 export function useBillingStatus() {
@@ -156,6 +161,31 @@ export function useReactivateSubscription() {
           queryKey: billingKeys.status(currentBusiness.id),
         });
       }
+    },
+  });
+}
+
+// ─── Downgrade handling hooks ────────────────────────────────────
+
+export function useOverLimit() {
+  const { currentBusiness } = useBusiness();
+  const businessId = currentBusiness?.id;
+
+  return useQuery<OverLimitStatus>({
+    queryKey: billingKeys.overLimit(businessId ?? ""),
+    queryFn: () => getOverLimitStatus(businessId!),
+    enabled: !!businessId,
+    staleTime: 60_000,
+  });
+}
+
+export function usePreviewDowngrade() {
+  const { currentBusiness } = useBusiness();
+
+  return useMutation<PreviewDowngradeResponse, Error, string>({
+    mutationFn: async (newTier: string) => {
+      if (!currentBusiness?.id) throw new Error("No business selected");
+      return previewDowngrade(currentBusiness.id, newTier);
     },
   });
 }

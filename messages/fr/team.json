@@ -35,7 +35,12 @@
       "stampsGiven": "{count} tampons",
       "statusOnline": "En ligne",
       "statusInvited": "Invité",
-      "statusOffline": "Hors ligne"
+      "statusOffline": "Hors ligne",
+      "statusPaused": "Suspendu",
+      "pause": "Suspendre",
+      "activate": "Activer",
+      "pausedTooltip": "L'accès scanner est suspendu. Activez pour restaurer.",
+      "swapWarning": "Activer ce membre suspendra un autre."
     },
     "table": {
       "member": "Membre",
@@ -110,7 +115,11 @@
       "invitationResent": "Invitation renvoyée à {email}",
       "resendFailed": "Échec du renvoi de l'invitation",
       "invitationCancelled": "Invitation à {email} annulée",
-      "cancelFailed": "Échec de l'annulation de l'invitation"
+      "cancelFailed": "Échec de l'annulation de l'invitation",
+      "memberPaused": "Accès scanner suspendu pour {name}",
+      "memberActivated": "Accès scanner activé pour {name}",
+      "pauseFailed": "Échec de la suspension du membre",
+      "activateFailed": "Échec de l'activation du membre"
     }
   }
 }

@@ -35,7 +35,12 @@
       "stampsGiven": "{count} stamps",
       "statusOnline": "Online",
       "statusInvited": "Invited",
-      "statusOffline": "Offline"
+      "statusOffline": "Offline",
+      "statusPaused": "Paused",
+      "pause": "Pause",
+      "activate": "Activate",
+      "pausedTooltip": "Scanning access is paused. Activate to restore.",
+      "swapWarning": "Activating this member will pause another."
     },
     "table": {
       "member": "Member",
@@ -110,7 +115,11 @@
       "invitationResent": "Invitation resent to {email}",
       "resendFailed": "Failed to resend invitation",
       "invitationCancelled": "Invitation to {email} cancelled",
-      "cancelFailed": "Failed to cancel invitation"
+      "cancelFailed": "Failed to cancel invitation",
+      "memberPaused": "Scanning paused for {name}",
+      "memberActivated": "Scanning activated for {name}",
+      "pauseFailed": "Failed to pause member",
+      "activateFailed": "Failed to activate member"
     }
   }
 }

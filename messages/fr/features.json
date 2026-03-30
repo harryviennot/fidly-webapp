@@ -31,6 +31,25 @@
       "starter": "Starter",
       "growth": "Growth",
       "pro": "Pro"
+    },
+    "overLimit": {
+      "banner": "Votre plan {tier} a des limites dépassées par votre utilisation actuelle. Certaines fonctionnalités sont restreintes.",
+      "bannerDetails": "Voir les détails",
+      "bannerUpgrade": "Passer au supérieur",
+      "sheetTitle": "Limites du plan dépassées",
+      "sheetTeamMembers": "{current} sur {limit} autorisés",
+      "sheetTeamMembersPaused": "{paused} membres ont un accès scanner suspendu",
+      "sheetDesigns": "{current} sur {limit} autorisés",
+      "sheetDesignsReadOnly": "{count} designs en lecture seule",
+      "sheetFeaturePaused": "Non disponible sur {tier}",
+      "sheetReassurance": "Vos données ne sont jamais supprimées. Si vous passez à un plan supérieur, tout sera restauré.",
+      "sheetUpgrade": "Changer de plan",
+      "readOnly": "Lecture seule",
+      "paused": "Suspendu",
+      "active": "Actif",
+      "overLimitBadge": "Hors limite",
+      "toastDesignLocked": "Ce design est en lecture seule car votre plan autorise {limit} design. Passez au supérieur pour un nombre illimité.",
+      "toastFeatureLocked": "Cette fonctionnalité nécessite le plan {tier}."
     }
   }
 }

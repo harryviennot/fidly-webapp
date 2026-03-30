@@ -138,3 +138,67 @@ export async function reactivateSubscription(
 
   return response.json();
 }
+
+// ─── Downgrade handling ─────────────────────────────────────────
+
+export interface ResourceOverLimit {
+  limit: number;
+  current: number;
+  over_by: number;
+}
+
+export interface OverLimitStatus {
+  is_over_limit: boolean;
+  resources: Record<string, ResourceOverLimit>;
+  features_lost: string[];
+}
+
+export interface DowngradeImpactResource {
+  current: number;
+  new_limit: number | null;
+  affected: number;
+}
+
+export interface PreviewDowngradeResponse {
+  current_tier: string;
+  new_tier: string;
+  impact: Record<string, DowngradeImpactResource>;
+  features_lost: string[];
+}
+
+export async function getOverLimitStatus(
+  businessId: string
+): Promise<OverLimitStatus> {
+  const response = await fetch(
+    `${API_BASE_URL}/billing/${businessId}/over-limit`,
+    { headers: await getAuthHeaders() }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || "Failed to fetch over-limit status");
+  }
+
+  return response.json();
+}
+
+export async function previewDowngrade(
+  businessId: string,
+  newTier: string
+): Promise<PreviewDowngradeResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/billing/${businessId}/preview-downgrade`,
+    {
+      method: "POST",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ new_tier: newTier }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || "Failed to preview downgrade");
+  }
+
+  return response.json();
+}

@@ -69,3 +69,31 @@ export async function deleteMembership(membershipId: string): Promise<void> {
     throw new Error(error.detail || 'Failed to delete membership');
   }
 }
+
+export async function pauseMember(membershipId: string): Promise<MembershipWithUser> {
+  const response = await fetch(`${API_BASE_URL}/memberships/${membershipId}/pause`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to pause member');
+  }
+
+  return response.json();
+}
+
+export async function unpauseMember(membershipId: string): Promise<MembershipWithUser> {
+  const response = await fetch(`${API_BASE_URL}/memberships/${membershipId}/unpause`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to unpause member');
+  }
+
+  return response.json();
+}

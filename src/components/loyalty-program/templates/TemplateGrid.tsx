@@ -10,9 +10,11 @@ import {
   CopyIcon,
   CheckCircleIcon,
   TrashIcon,
+  LockIcon,
 } from '@phosphor-icons/react';
 import { WalletCard, CardWrapper } from '@/components/card';
 import { useDesignEntitlements } from '@/hooks/useEntitlements';
+import { toast } from 'sonner';
 
 interface TemplateGridProps {
   activeDesign: CardDesign | undefined;
@@ -34,63 +36,81 @@ export function TemplateGrid({
   const allDesigns = activeDesign
     ? [activeDesign, ...inactiveDesigns]
     : inactiveDesigns;
-  const { canCreateDesign, isAtDesignLimit } = useDesignEntitlements(allDesigns.length);
+  const { canCreateDesign, isAtDesignLimit, getLimit } = useDesignEntitlements(allDesigns.length);
+  const designLimit = getLimit("designs.max_active");
+
+  const handleOverLimitClick = () => {
+    toast(tFeatures('overLimit.toastDesignLocked', { limit: designLimit ?? 1 }));
+  };
 
   return (
     <div className="space-y-6">
       {/* Card grid */}
       {allDesigns.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {allDesigns.map((design) => (
-            <CardWrapper
-              key={design.id}
-              href={`/design/${design.id}`}
-              title={design.organization_name || t('yourBusiness')}
-              badge={
-                design.is_active
-                  ? { label: t('active'), variant: 'success' }
-                  : undefined
-              }
-              metadata={t('stamps', { count: design.total_stamps })}
-              actions={[
-                {
-                  label: t('edit'),
-                  icon: <PencilIcon className="h-4 w-4" />,
-                  href: `/design/${design.id}`,
-                },
-                {
-                  label: t('duplicate'),
-                  icon: <CopyIcon className="h-4 w-4" />,
-                  onClick: () => onDuplicate(design.id),
-                },
-                ...(!design.is_active
-                  ? [
-                    {
-                      label: t('setAsActive'),
-                      icon: <CheckCircleIcon className="h-4 w-4" />,
-                      onClick: () => onActivate(design.id),
-                    },
-                  ]
-                  : []),
-                ...(!design.is_active
-                  ? [
-                    {
-                      label: t('delete'),
-                      icon: <TrashIcon className="h-4 w-4" />,
-                      onClick: () => onDelete(design.id),
-                      destructive: true,
-                    },
-                  ]
-                  : []),
-              ]}
-            >
-              <WalletCard
-                design={design}
-                showQR={true}
-                showSecondaryFields={true}
-              />
-            </CardWrapper>
-          ))}
+          {allDesigns.map((design) => {
+            const isOverLimit = design.is_over_limit ?? false;
+
+            return (
+              <div key={design.id} onClick={isOverLimit ? handleOverLimitClick : undefined} className={isOverLimit ? 'cursor-pointer' : undefined}>
+              <CardWrapper
+                href={isOverLimit ? undefined : `/design/${design.id}`}
+                title={design.organization_name || t('yourBusiness')}
+                badge={
+                  design.is_active
+                    ? { label: t('active'), variant: 'success' }
+                    : isOverLimit
+                      ? { label: tFeatures('overLimit.readOnly'), variant: 'warning' }
+                      : undefined
+                }
+                metadata={t('stamps', { count: design.total_stamps })}
+                className={isOverLimit ? 'opacity-60' : undefined}
+                actions={isOverLimit ? [] : [
+                  {
+                    label: t('edit'),
+                    icon: <PencilIcon className="h-4 w-4" />,
+                    href: `/design/${design.id}`,
+                  },
+                  {
+                    label: t('duplicate'),
+                    icon: <CopyIcon className="h-4 w-4" />,
+                    onClick: () => onDuplicate(design.id),
+                  },
+                  ...(!design.is_active
+                    ? [
+                      {
+                        label: t('setAsActive'),
+                        icon: <CheckCircleIcon className="h-4 w-4" />,
+                        onClick: () => onActivate(design.id),
+                      },
+                    ]
+                    : []),
+                  ...(!design.is_active
+                    ? [
+                      {
+                        label: t('delete'),
+                        icon: <TrashIcon className="h-4 w-4" />,
+                        onClick: () => onDelete(design.id),
+                        destructive: true,
+                      },
+                    ]
+                    : []),
+                ]}
+              >
+                {isOverLimit && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <LockIcon className="w-5 h-5 text-amber-600" weight="fill" />
+                  </div>
+                )}
+                <WalletCard
+                  design={design}
+                  showQR={true}
+                  showSecondaryFields={true}
+                />
+              </CardWrapper>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-12 border-2 border-dashed rounded-xl">

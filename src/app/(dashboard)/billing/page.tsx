@@ -27,6 +27,7 @@ import {
   useReactivateSubscription,
 } from "@/hooks/useBilling";
 import { BillingPageSkeleton } from "@/components/billing/BillingPageSkeleton";
+import { DowngradeConfirmDialog } from "@/components/billing/DowngradeConfirmDialog";
 
 const TIERS = ["starter", "growth", "pro"] as const;
 
@@ -475,53 +476,56 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Tier change confirmation dialog */}
-      <AlertDialog open={!!confirmTier} onOpenChange={(open) => !open && setConfirmTier(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {isUpgrade
-                ? t("confirmUpgradeTitle", { to: confirmTier ?? "" })
-                : t("confirmDowngradeTitle", { to: confirmTier ?? "" })}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {isUpgrade
-                ? t("confirmUpgradeDescription", {
-                    from: currentTier,
-                    to: confirmTier ?? "",
-                    fromPrice: isFoundingPartner ? FOUNDING_PRICES[currentTier] : TIER_PRICES[currentTier],
-                    toPrice: confirmTier ? (isFoundingPartner ? FOUNDING_PRICES[confirmTier] : TIER_PRICES[confirmTier]) : 0,
-                  })
-                : t("confirmDowngradeDescription", {
-                    from: currentTier,
-                    to: confirmTier ?? "",
-                  })}
-            </AlertDialogDescription>
-            {(isTrialing || isGrace) && !hasSubscription && data?.trial_ends_at && (
-              <InfoBox
-                variant="note"
-                message={t("trialPlanSwitchNote", {
-                  date: new Date(data.trial_ends_at).toLocaleDateString(),
+      {/* Tier change confirmation dialog — upgrade */}
+      {isUpgrade && (
+        <AlertDialog open={!!confirmTier} onOpenChange={(open) => !open && setConfirmTier(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {t("confirmUpgradeTitle", { to: confirmTier ?? "" })}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("confirmUpgradeDescription", {
+                  from: currentTier,
+                  to: confirmTier ?? "",
+                  fromPrice: isFoundingPartner ? FOUNDING_PRICES[currentTier] : TIER_PRICES[currentTier],
+                  toPrice: confirmTier ? (isFoundingPartner ? FOUNDING_PRICES[confirmTier] : TIER_PRICES[confirmTier]) : 0,
                 })}
-                className="mt-3"
-              />
-            )}
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("confirmCancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmChangeTier}
-              disabled={changeTier.isPending}
-            >
-              {changeTier.isPending
-                ? t("redirecting")
-                : isUpgrade
-                  ? t("confirmUpgrade")
-                  : t("confirmDowngrade")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              </AlertDialogDescription>
+              {(isTrialing || isGrace) && !hasSubscription && data?.trial_ends_at && (
+                <InfoBox
+                  variant="note"
+                  message={t("trialPlanSwitchNote", {
+                    date: new Date(data.trial_ends_at).toLocaleDateString(),
+                  })}
+                  className="mt-3"
+                />
+              )}
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("confirmCancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmChangeTier}
+                disabled={changeTier.isPending}
+              >
+                {changeTier.isPending ? t("redirecting") : t("confirmUpgrade")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* Tier change confirmation dialog — downgrade with impact preview */}
+      {!isUpgrade && (
+        <DowngradeConfirmDialog
+          open={!!confirmTier}
+          onOpenChange={(open) => !open && setConfirmTier(null)}
+          newTier={confirmTier ?? ""}
+          currentTier={currentTier}
+          onConfirm={confirmChangeTier}
+          isConfirming={changeTier.isPending}
+        />
+      )}
 
       {/* Cancel subscription confirmation dialog */}
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
