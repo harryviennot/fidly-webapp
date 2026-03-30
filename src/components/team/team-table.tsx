@@ -77,14 +77,14 @@ const STATUS_COLORS: Record<string, string> = {
   online: "#4A7C59",
   invited: "#C4883D",
   offline: "#CCCCCC",
-  paused: "#D97706",
+  paused: "#C4883D",
 };
 
 const STATUS_TEXT_COLORS: Record<string, string> = {
   online: "#4A7C59",
   invited: "#C4883D",
   offline: "#AAAAAA",
-  paused: "#D97706",
+  paused: "#C4883D",
 };
 
 interface TeamTableProps {
@@ -368,7 +368,7 @@ export function TeamTable({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className={`text-xs h-7 px-2 ${row.isPaused ? "text-emerald-600 hover:text-emerald-700" : "text-amber-600 hover:text-amber-700"}`}
+                            className={`text-xs h-7 px-2 ${row.isPaused ? "text-[var(--accent)] hover:opacity-80" : "text-[var(--warning)] hover:opacity-80"}`}
                             onClick={() => handleTogglePause(row)}
                             disabled={loading === row.id}
                           >

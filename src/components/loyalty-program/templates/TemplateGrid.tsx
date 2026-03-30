@@ -51,8 +51,7 @@ export function TemplateGrid({
           {allDesigns.map((design) => {
             const isOverLimit = design.is_over_limit ?? false;
 
-            return (
-              <div key={design.id} onClick={isOverLimit ? handleOverLimitClick : undefined} className={isOverLimit ? 'cursor-pointer' : undefined}>
+            const card = (
               <CardWrapper
                 href={isOverLimit ? undefined : `/design/${design.id}`}
                 title={design.organization_name || t('yourBusiness')}
@@ -99,7 +98,7 @@ export function TemplateGrid({
               >
                 {isOverLimit && (
                   <div className="absolute top-2 right-2 z-10">
-                    <LockIcon className="w-5 h-5 text-amber-600" weight="fill" />
+                    <LockIcon className="w-5 h-5 text-[var(--warning)]" weight="fill" />
                   </div>
                 )}
                 <WalletCard
@@ -108,8 +107,17 @@ export function TemplateGrid({
                   showSecondaryFields={true}
                 />
               </CardWrapper>
-              </div>
             );
+
+            if (isOverLimit) {
+              return (
+                <button key={design.id} type="button" onClick={handleOverLimitClick} className="text-left w-full">
+                  {card}
+                </button>
+              );
+            }
+
+            return <div key={design.id}>{card}</div>;
           })}
         </div>
       ) : (

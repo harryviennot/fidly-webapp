@@ -23,7 +23,7 @@ const STATUS_COLORS: Record<string, string> = {
   online: "bg-green-500",
   invited: "bg-amber-500",
   offline: "bg-gray-400",
-  paused: "bg-amber-600",
+  paused: "bg-[#C4883D]",
 };
 
 function getInitials(name: string) {

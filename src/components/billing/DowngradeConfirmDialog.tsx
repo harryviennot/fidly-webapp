@@ -68,7 +68,7 @@ export function DowngradeConfirmDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex flex-col items-center text-center mb-2">
-            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 mb-3.5">
+            <div className="w-12 h-12 rounded-full bg-[var(--warning-light)] flex items-center justify-center text-[var(--warning)] mb-3.5">
               <WarningCircleIcon size={24} weight="fill" />
             </div>
             <AlertDialogTitle>
@@ -82,9 +82,9 @@ export function DowngradeConfirmDialog({
 
         {/* Impact details */}
         {hasImpact && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4 space-y-3 text-sm">
-            <p className="font-semibold text-amber-900">{t("downgradeImpactTitle")}</p>
-            <ul className="space-y-2 text-amber-800">
+          <div className="rounded-lg border border-[var(--warning)]/20 bg-[var(--warning-light)]/50 p-4 space-y-3 text-sm">
+            <p className="font-semibold text-[var(--foreground)]">{t("downgradeImpactTitle")}</p>
+            <ul className="space-y-2 text-[var(--foreground)]">
               {data.impact["team.max_members"] && (
                 <li className="flex items-start gap-2">
                   <UsersIcon className="w-4 h-4 mt-0.5 shrink-0" />
@@ -118,7 +118,7 @@ export function DowngradeConfirmDialog({
                 </li>
               ))}
             </ul>
-            <p className="text-xs text-amber-700 pt-1 border-t border-amber-200">
+            <p className="text-xs text-[var(--muted-foreground)] pt-1 border-t border-[var(--warning)]/20">
               {t("downgradeReassurance")}
             </p>
           </div>
@@ -126,7 +126,7 @@ export function DowngradeConfirmDialog({
 
         {preview.isPending && (
           <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-500" />
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--warning)]" />
           </div>
         )}
 
@@ -135,7 +135,7 @@ export function DowngradeConfirmDialog({
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isConfirming}
-            className="bg-amber-600 text-white hover:bg-amber-700"
+            className="bg-[var(--warning)] text-white hover:opacity-90"
           >
             {isConfirming ? t("redirecting") : t("downgradeConfirm", { tier: newTier })}
           </AlertDialogAction>
