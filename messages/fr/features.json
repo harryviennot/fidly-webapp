@@ -8,7 +8,7 @@
     "featureNotAvailable": "Cette fonctionnalité nécessite le plan {tier}.",
     "limitExceeded": "Vous avez atteint la limite de votre plan. Passez à un plan supérieur.",
     "limitExceededDesigns": "Limite de designs atteinte. Passez à un plan supérieur pour des designs illimités.",
-    "limitExceededMembers": "Limite de membres atteinte. Passez à un plan supérieur pour des membres illimités."
+    "limitExceededMembers": "Votre plan autorise 2 membres d'équipe. Passez à un plan supérieur pour des membres illimités."
   },
   "upgrade": {
     "notifications": "Passez au plan Growth pour personnaliser le texte des notifications",

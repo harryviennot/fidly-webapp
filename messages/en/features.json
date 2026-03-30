@@ -8,7 +8,7 @@
     "featureNotAvailable": "This feature requires the {tier} plan.",
     "limitExceeded": "You've reached the limit for your plan. Upgrade for more.",
     "limitExceededDesigns": "Design limit reached. Upgrade for unlimited designs.",
-    "limitExceededMembers": "Team member limit reached. Upgrade for unlimited members."
+    "limitExceededMembers": "Your plan allows 2 team members. Upgrade for unlimited members."
   },
   "upgrade": {
     "notifications": "Upgrade to Growth to customize notification text",
