@@ -9,19 +9,19 @@ import {
 } from "@phosphor-icons/react";
 import type { MembershipWithUser, Invitation } from "@/types";
 import { StatCard } from "@/components/redesign";
+import { useEntitlements } from "@/hooks/useEntitlements";
 
 interface TeamStatsProps {
   members: MembershipWithUser[];
   invitations: Invitation[];
-  subscriptionTier?: "starter" | "growth" | "pro";
 }
 
 export function TeamStats({
   members,
   invitations,
-  subscriptionTier = "growth",
 }: TeamStatsProps) {
   const t = useTranslations('team.stats');
+  const { getLimit } = useEntitlements();
 
   // Count members by role
   const roleCounts = members.reduce(
@@ -33,9 +33,7 @@ export function TeamStats({
   );
 
   const scannerCount = roleCounts.scanner || 0;
-
-  // Starter tier has scanner limit
-  const scannerLimit = subscriptionTier === "starter" ? 3 : null;
+  const memberLimit = getLimit("team.max_members");
 
   // Count active scanners (active in last 7 days)
   const now = new Date();
@@ -60,8 +58,8 @@ export function TeamStats({
 
       <StatCard
         title={t('scanners')}
-        value={scannerLimit ? scannerCount : scannerCount}
-        suffix={scannerLimit ? `/${scannerLimit}` : undefined}
+        value={scannerCount}
+        suffix={memberLimit ? `/${memberLimit}` : undefined}
         subtitle={
           activeScannersCount > 0
             ? t('activeCount', { count: activeScannersCount })

@@ -271,7 +271,6 @@ export default function TeamPage() {
       <TeamStats
         members={members}
         invitations={invitations}
-        subscriptionTier={currentBusiness?.subscription_tier}
       />
 
       {/* Search & Filter */}
