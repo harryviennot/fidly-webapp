@@ -121,6 +121,11 @@ export function useChangeTier() {
         queryClient.invalidateQueries({
           queryKey: billingKeys.status(currentBusiness.id),
         });
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.overLimit(currentBusiness.id),
+        });
+        // Refresh designs (is_over_limit annotations change with tier)
+        queryClient.invalidateQueries({ queryKey: ["designs", currentBusiness.id] });
         queryClient.invalidateQueries({ queryKey: ["business"] });
       }
     },
@@ -160,6 +165,11 @@ export function useReactivateSubscription() {
         queryClient.invalidateQueries({
           queryKey: billingKeys.status(currentBusiness.id),
         });
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.overLimit(currentBusiness.id),
+        });
+        queryClient.invalidateQueries({ queryKey: ["designs", currentBusiness.id] });
+        queryClient.invalidateQueries({ queryKey: ["business"] });
       }
     },
   });
