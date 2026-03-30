@@ -47,6 +47,7 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
   const { currentBusiness, currentRole } = useBusiness();
   const t = useTranslations('loyaltyProgram');
   const tDesign = useTranslations('designEditor');
+  const tFeatures = useTranslations('features');
   const queryClient = useQueryClient();
   const businessId = currentBusiness?.id;
 
@@ -114,7 +115,7 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
   const handleDuplicate = async (designId: string) => {
     if (!businessId) return;
     if (!canCreateDesign(designs.length)) {
-      toast.error('Design limit reached. Upgrade for unlimited designs.');
+      toast.error(tFeatures('errors.limitExceededDesigns'));
       return;
     }
     try {
@@ -123,7 +124,7 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
     } catch (err: unknown) {
       const detail = (err as { detail?: { code?: string; message?: string } })?.detail;
       if (detail?.code === 'LIMIT_EXCEEDED') {
-        toast.error(detail.message || 'Design limit reached. Upgrade for more designs.');
+        toast.error(tFeatures('errors.limitExceededDesigns'));
         return;
       }
       toast.error(err instanceof Error ? err.message : 'Failed to duplicate design');

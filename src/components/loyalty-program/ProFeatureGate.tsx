@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Info } from '@phosphor-icons/react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useEntitlements } from '@/hooks/useEntitlements';
 
 /**
@@ -27,6 +28,7 @@ export function FeatureGate({
   children,
 }: FeatureGateProps) {
   const { hasFeature } = useEntitlements();
+  const t = useTranslations('features');
 
   if (hasFeature(feature)) {
     return <>{children}</>;
@@ -45,11 +47,11 @@ export function FeatureGate({
       <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-lg">
         <div className="text-center space-y-2 p-4">
           <Crown className="w-8 h-8 text-amber-500 mx-auto" weight="fill" />
-          {description && (
-            <p className="text-sm text-muted-foreground max-w-xs">{description}</p>
-          )}
+          <p className="text-sm text-muted-foreground max-w-xs">
+            {description || t('gate.upgradeToAccess')}
+          </p>
           <Button asChild size="sm" variant="outline">
-            <Link href="/billing">Upgrade</Link>
+            <Link href="/billing">{t('gate.upgrade')}</Link>
           </Button>
         </div>
       </div>
@@ -66,12 +68,14 @@ interface UpgradePromptProps {
 }
 
 export function UpgradePrompt({ message, compact = false }: UpgradePromptProps) {
+  const t = useTranslations('features');
+
   if (compact) {
     return (
       <span className="text-xs text-muted-foreground">
         {message}{' '}
         <Link href="/billing" className="text-amber-600 hover:underline">
-          Upgrade
+          {t('gate.upgrade')}
         </Link>
       </span>
     );
@@ -83,7 +87,7 @@ export function UpgradePrompt({ message, compact = false }: UpgradePromptProps) 
       <span className="text-amber-800">{message}</span>
       <Button asChild size="sm" variant="outline" className="ml-auto">
         <Link href="/billing">
-          Upgrade
+          {t('gate.upgrade')}
         </Link>
       </Button>
     </div>

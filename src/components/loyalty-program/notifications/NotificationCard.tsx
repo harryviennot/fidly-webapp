@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { cn } from '@/lib/utils';
 import { NotificationPreview } from './NotificationPreview';
 import { VariableDropdown, Variable } from './VariableDropdown';
+import { useTranslations } from 'next-intl';
 import { useEntitlements } from '@/hooks/useEntitlements';
 
 const TITLE_MAX_LENGTH = 50;
@@ -50,6 +51,7 @@ export function NotificationCard({
 }: NotificationCardProps) {
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const { getValue } = useEntitlements();
+  const t = useTranslations('features');
   const canCustomize = getValue('notifications.type') === 'custom';
 
   const handleVariableInsert = (variable: string) => {
@@ -218,7 +220,7 @@ export function NotificationCard({
               {!canCustomize && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5 pt-2">
                   <Crown className="h-3.5 w-3.5 text-amber-500" weight="fill" />
-                  Upgrade to Growth to customize notification text
+                  {t('upgrade.notifications')}
                 </p>
               )}
             </div>

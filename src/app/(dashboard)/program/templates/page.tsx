@@ -21,6 +21,7 @@ export default function ProgramTemplatesPage() {
 
   const t = useTranslations('designEditor');
   const tProgram = useTranslations('loyaltyProgram');
+  const tFeatures = useTranslations('features');
   const { canCreateDesign } = useDesignEntitlements(designs.length);
 
   if (loading) {
@@ -34,7 +35,7 @@ export default function ProgramTemplatesPage() {
         actions={[
           canCreateDesign
             ? { label: t('createCard'), icon: <PlusIcon className="w-4 h-4" />, href: '/design/new' }
-            : { label: 'Upgrade for More Cards', icon: <Crown className="w-4 h-4" weight="fill" />, href: '/billing', variant: 'secondary' as const },
+            : { label: tFeatures('upgrade.moreCards'), icon: <Crown className="w-4 h-4" weight="fill" />, href: '/billing', variant: 'secondary' as const },
         ]}
       />
 

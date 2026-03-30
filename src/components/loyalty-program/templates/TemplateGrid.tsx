@@ -30,6 +30,7 @@ export function TemplateGrid({
   onDuplicate,
 }: TemplateGridProps) {
   const t = useTranslations('designEditor');
+  const tFeatures = useTranslations('features');
   const allDesigns = activeDesign
     ? [activeDesign, ...inactiveDesigns]
     : inactiveDesigns;
@@ -114,12 +115,12 @@ export function TemplateGrid({
       {isAtDesignLimit && activeDesign && (
         <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--cream)] p-4">
           <p className="text-sm">
-            <span className="font-medium">{t('pro.wantMore')}</span>
-            <span className="text-muted-foreground ml-1">{t('pro.upgradeHint')}</span>
+            <span className="font-medium">{tFeatures('upgrade.designs')}</span>
+            <span className="text-muted-foreground ml-1">{tFeatures('upgrade.designsHint')}</span>
           </p>
           <Button asChild variant="outline" size="sm" className="rounded-full shrink-0 ml-4">
             <Link href="/billing">
-              {t('pro.upgradeToPro')}
+              {tFeatures('upgrade.designsAction')}
             </Link>
           </Button>
         </div>
