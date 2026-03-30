@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { cn } from '@/lib/utils';
 import { NotificationPreview } from './NotificationPreview';
 import { VariableDropdown, Variable } from './VariableDropdown';
+import { useEntitlements } from '@/hooks/useEntitlements';
 
 const TITLE_MAX_LENGTH = 50;
 const MESSAGE_MAX_LENGTH = 178;
@@ -31,7 +32,6 @@ interface NotificationCardProps {
   isExpanded: boolean;
   onExpandChange: (expanded: boolean) => void;
   onTemplateChange: (field: keyof NotificationTemplate, value: string | boolean) => void;
-  isProPlan: boolean;
   appName?: string;
   appIconUrl?: string;
 }
@@ -45,11 +45,12 @@ export function NotificationCard({
   isExpanded,
   onExpandChange,
   onTemplateChange,
-  isProPlan,
   appName,
   appIconUrl,
 }: NotificationCardProps) {
   const messageRef = useRef<HTMLTextAreaElement>(null);
+  const { getValue } = useEntitlements();
+  const canCustomize = getValue('notifications.type') === 'custom';
 
   const handleVariableInsert = (variable: string) => {
     if (!messageRef.current) return;
@@ -98,7 +99,7 @@ export function NotificationCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className="font-medium text-sm">{label}</p>
-              {!isProPlan && (
+              {!canCustomize && (
                 <Crown className="h-3.5 w-3.5 text-amber-500" weight="fill" />
               )}
             </div>
@@ -114,11 +115,11 @@ export function NotificationCard({
             <Switch
               checked={template.enabled !== false}
               onCheckedChange={(checked) => {
-                if (isProPlan) {
+                if (canCustomize) {
                   onTemplateChange('enabled', checked);
                 }
               }}
-              disabled={!isProPlan}
+              disabled={!canCustomize}
               onClick={(e) => e.stopPropagation()}
             />
             <CaretDown
@@ -162,7 +163,7 @@ export function NotificationCard({
                   id="title"
                   value={template.title}
                   onChange={(e) => onTemplateChange('title', e.target.value)}
-                  disabled={!isProPlan}
+                  disabled={!canCustomize}
                   className="text-sm"
                   placeholder="Notification title..."
                 />
@@ -188,7 +189,7 @@ export function NotificationCard({
                   ref={messageRef}
                   value={template.message}
                   onChange={(e) => onTemplateChange('message', e.target.value)}
-                  disabled={!isProPlan}
+                  disabled={!canCustomize}
                   className="text-sm min-h-[80px] resize-none"
                   placeholder="Notification message..."
                 />
@@ -199,7 +200,7 @@ export function NotificationCard({
                 <VariableDropdown
                   variables={variables}
                   onInsert={handleVariableInsert}
-                  disabled={!isProPlan}
+                  disabled={!canCustomize}
                 />
                 <Button
                   variant="outline"
@@ -213,11 +214,11 @@ export function NotificationCard({
                 </Button>
               </div>
 
-              {/* Pro upsell message */}
-              {!isProPlan && (
+              {/* Upgrade message for predefined-only plans */}
+              {!canCustomize && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5 pt-2">
                   <Crown className="h-3.5 w-3.5 text-amber-500" weight="fill" />
-                  Upgrade to Pro to customize notification text
+                  Upgrade to Growth to customize notification text
                 </p>
               )}
             </div>

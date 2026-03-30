@@ -7,14 +7,16 @@ import {
   ArrowsLeftRightIcon,
 } from '@phosphor-icons/react';
 import { WalletCard, CardWrapper } from '@/components/card';
+import { useEntitlements } from '@/hooks/useEntitlements';
 
 interface ActiveCardWidgetProps {
   design: CardDesign | undefined;
-  isProPlan: boolean;
 }
 
-export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
+export function ActiveCardWidget({ design }: ActiveCardWidgetProps) {
   const t = useTranslations('designEditor');
+  const { getLimit } = useEntitlements();
+  const hasMultipleDesigns = getLimit('designs.max_active') === null;
 
   return (
     <CardWrapper
@@ -37,7 +39,7 @@ export function ActiveCardWidget({ design, isProPlan }: ActiveCardWidgetProps) {
               icon: <PencilIcon className="h-4 w-4" />,
               href: `/design/${design.id}`,
             },
-            ...(isProPlan
+            ...(hasMultipleDesigns
               ? [
                 {
                   label: t('switchCard'),

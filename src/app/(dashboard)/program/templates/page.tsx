@@ -14,7 +14,6 @@ export default function ProgramTemplatesPage() {
     activeDesign,
     inactiveDesigns,
     loading,
-    isProPlan,
     handleDelete,
     handleActivate,
     handleDuplicate,
@@ -42,7 +41,6 @@ export default function ProgramTemplatesPage() {
       <TemplateGrid
         activeDesign={activeDesign}
         inactiveDesigns={inactiveDesigns}
-        isProPlan={isProPlan}
         onDelete={handleDelete}
         onActivate={handleActivate}
         onDuplicate={handleDuplicate}

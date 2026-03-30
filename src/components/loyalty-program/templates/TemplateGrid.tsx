@@ -12,11 +12,11 @@ import {
   TrashIcon,
 } from '@phosphor-icons/react';
 import { WalletCard, CardWrapper } from '@/components/card';
+import { useDesignEntitlements } from '@/hooks/useEntitlements';
 
 interface TemplateGridProps {
   activeDesign: CardDesign | undefined;
   inactiveDesigns: CardDesign[];
-  isProPlan: boolean;
   onDelete: (id: string) => void;
   onActivate: (id: string) => void;
   onDuplicate: (id: string) => void;
@@ -25,18 +25,15 @@ interface TemplateGridProps {
 export function TemplateGrid({
   activeDesign,
   inactiveDesigns,
-  isProPlan,
   onDelete,
   onActivate,
   onDuplicate,
 }: TemplateGridProps) {
   const t = useTranslations('designEditor');
-  const canCreateNew = isProPlan || (!activeDesign && inactiveDesigns.length === 0);
-
-  // Combine all cards with active first
   const allDesigns = activeDesign
     ? [activeDesign, ...inactiveDesigns]
     : inactiveDesigns;
+  const { canCreateDesign, isAtDesignLimit } = useDesignEntitlements(allDesigns.length);
 
   return (
     <div className="space-y-6">
@@ -102,7 +99,7 @@ export function TemplateGrid({
           <p className="text-sm text-muted-foreground mb-4">
             {t('createFirstDesign')}
           </p>
-          {canCreateNew && (
+          {canCreateDesign && (
             <Button asChild variant="outline" className="rounded-full">
               <Link href="/design/new">
                 <PlusIcon className="w-4 h-4 mr-2" />
@@ -113,8 +110,8 @@ export function TemplateGrid({
         </div>
       )}
 
-      {/* Pro hint for non-pro users with existing card */}
-      {!isProPlan && activeDesign && (
+      {/* Upgrade hint for users at their design limit */}
+      {isAtDesignLimit && activeDesign && (
         <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--cream)] p-4">
           <p className="text-sm">
             <span className="font-medium">{t('pro.wantMore')}</span>

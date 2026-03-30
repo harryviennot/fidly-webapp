@@ -10,20 +10,21 @@ import {
   CaretRightIcon,
   Crown,
 } from '@phosphor-icons/react';
+import { useEntitlements } from '@/hooks/useEntitlements';
 
 interface StatusIndicatorsProps {
-  isProPlan: boolean;
   hasCustomNotifications?: boolean;
   scheduledChange?: string | null;
   geofencingLocations?: number;
 }
 
 export function StatusIndicators({
-  isProPlan,
   hasCustomNotifications = false,
   scheduledChange = null,
   geofencingLocations = 0,
 }: StatusIndicatorsProps) {
+  const { hasFeature } = useEntitlements();
+
   const indicators = [
     {
       label: 'Notifications',
@@ -31,7 +32,7 @@ export function StatusIndicators({
       icon: BellIcon,
       status: hasCustomNotifications ? 'Custom' : 'Standard',
       statusColor: hasCustomNotifications ? 'bg-[var(--accent-light)] text-[var(--accent)]' : 'bg-muted text-muted-foreground',
-      proOnly: false,
+      locked: false,
     },
     {
       label: 'Scheduling',
@@ -39,7 +40,7 @@ export function StatusIndicators({
       icon: CalendarIcon,
       status: scheduledChange || 'No changes',
       statusColor: scheduledChange ? 'bg-blue-100 text-blue-700' : 'bg-muted text-muted-foreground',
-      proOnly: true,
+      locked: !hasFeature('designs.scheduled'),
     },
     {
       label: 'Geofencing',
@@ -47,7 +48,7 @@ export function StatusIndicators({
       icon: MapPinIcon,
       status: geofencingLocations > 0 ? `On (${geofencingLocations} locations)` : 'Off',
       statusColor: geofencingLocations > 0 ? 'bg-purple-100 text-purple-700' : 'bg-muted text-muted-foreground',
-      proOnly: true,
+      locked: !hasFeature('locations.geofencing'),
     },
   ];
 
@@ -60,7 +61,6 @@ export function StatusIndicators({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {indicators.map((indicator) => {
             const Icon = indicator.icon;
-            const isLocked = indicator.proOnly && !isProPlan;
 
             return (
               <Link
@@ -73,7 +73,7 @@ export function StatusIndicators({
                     <Icon className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm font-medium">{indicator.label}</span>
                   </div>
-                  {isLocked ? (
+                  {indicator.locked ? (
                     <Crown className="w-4 h-4 text-amber-500" weight="fill" />
                   ) : (
                     <CaretRightIcon className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
