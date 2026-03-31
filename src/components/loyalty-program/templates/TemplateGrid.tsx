@@ -10,7 +10,6 @@ import {
   CopyIcon,
   CheckCircleIcon,
   TrashIcon,
-  LockIcon,
 } from '@phosphor-icons/react';
 import { WalletCard, CardWrapper } from '@/components/card';
 import { useDesignEntitlements } from '@/hooks/useEntitlements';
@@ -63,7 +62,6 @@ export function TemplateGrid({
                       : undefined
                 }
                 metadata={t('stamps', { count: design.total_stamps })}
-                className={isOverLimit ? 'opacity-60' : undefined}
                 actions={isOverLimit ? [] : [
                   {
                     label: t('edit'),
@@ -96,11 +94,6 @@ export function TemplateGrid({
                     : []),
                 ]}
               >
-                {isOverLimit && (
-                  <div className="absolute top-2 right-2 z-10">
-                    <LockIcon className="w-5 h-5 text-[var(--warning)]" weight="fill" />
-                  </div>
-                )}
                 <WalletCard
                   design={design}
                   showQR={true}
