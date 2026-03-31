@@ -19,6 +19,30 @@ export async function getAuthHeaders(): Promise<HeadersInit> {
 }
 
 /**
+ * Structured API error preserving the backend error code for frontend translation.
+ *
+ * Backend returns: { detail: { code, message, feature?, required_tier?, ... } }
+ * This class keeps the code so components can map it to a translated string.
+ */
+export class ApiError extends Error {
+  code: string | undefined;
+  feature: string | undefined;
+  requiredTier: string | undefined;
+  limit: number | undefined;
+  current: number | undefined;
+
+  constructor(message: string, detail?: Record<string, unknown>) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = detail?.code as string | undefined;
+    this.feature = detail?.feature as string | undefined;
+    this.requiredTier = detail?.required_tier as string | undefined;
+    this.limit = detail?.limit as number | undefined;
+    this.current = detail?.current as number | undefined;
+  }
+}
+
+/**
  * Extract a human-readable error message from an API error response.
  * Handles both string detail (legacy) and object detail (standardized errors).
  */
@@ -29,6 +53,20 @@ export function extractErrorMessage(error: Record<string, unknown>, fallback: st
     return (detail as { message: string }).message;
   }
   return fallback;
+}
+
+/**
+ * Throw an ApiError from an API error response.
+ * Preserves the structured error code for frontend translation.
+ */
+export function throwApiError(error: Record<string, unknown>, fallback: string): never {
+  const detail = error.detail;
+  if (detail && typeof detail === 'object') {
+    const d = detail as Record<string, unknown>;
+    const message = (d.message as string) || fallback;
+    throw new ApiError(message, d);
+  }
+  throw new ApiError(typeof detail === 'string' ? detail : fallback);
 }
 
 export async function getAuthHeadersForFormData(): Promise<HeadersInit> {
