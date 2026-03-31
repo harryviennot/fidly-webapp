@@ -70,9 +70,9 @@ export interface CardWrapperProps {
 // ============================================================================
 
 const badgeVariantStyles = {
-  success: "bg-green-100 text-green-700",
+  success: "bg-[var(--accent-light)] text-[var(--accent)]",
   secondary: "bg-muted text-muted-foreground",
-  warning: "bg-yellow-100 text-yellow-700",
+  warning: "bg-[var(--warning-light)] text-[var(--warning)]",
 };
 
 // ============================================================================

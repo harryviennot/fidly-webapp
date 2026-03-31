@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthHeaders, getAuthHeadersForFormData } from './client';
+import { API_BASE_URL, getAuthHeaders, getAuthHeadersForFormData, extractErrorMessage } from './client';
 import type { User } from '@/types';
 
 export async function getMyProfile(): Promise<User> {
@@ -9,7 +9,7 @@ export async function getMyProfile(): Promise<User> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to get profile');
+    throw new Error(extractErrorMessage(error, 'Failed to get profile'));
   }
 
   return response.json();
@@ -27,7 +27,7 @@ export async function uploadAvatar(file: File): Promise<{ url: string }> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to upload avatar');
+    throw new Error(extractErrorMessage(error, 'Failed to upload avatar'));
   }
 
   return response.json();
@@ -41,7 +41,7 @@ export async function deleteAvatar(): Promise<void> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to delete avatar');
+    throw new Error(extractErrorMessage(error, 'Failed to delete avatar'));
   }
 }
 
@@ -54,7 +54,7 @@ export async function updateProfile(data: { name?: string; locale?: string }): P
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to update profile');
+    throw new Error(extractErrorMessage(error, 'Failed to update profile'));
   }
 
   return response.json();

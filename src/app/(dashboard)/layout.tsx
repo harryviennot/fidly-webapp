@@ -11,6 +11,7 @@ import { PendingActivationPage } from "@/components/pending-activation-page";
 import { SuspendedPage } from "@/components/suspended-page";
 import { TrialMobileBanner } from "@/components/billing/TrialBanner";
 import { SuspendedBanner } from "@/components/billing/SuspendedOverlay";
+import { OverLimitBanner } from "@/components/billing/OverLimitBanner";
 
 export default function AdminLayout({
   children,
@@ -71,6 +72,7 @@ export default function AdminLayout({
         <AppSidebar />
         <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
           {currentBusiness.billing_status === "suspended" && <SuspendedBanner />}
+          <OverLimitBanner />
           <TrialMobileBanner />
           <DashboardHeader />
           <main className="p-4 md:p-6">{children}</main>

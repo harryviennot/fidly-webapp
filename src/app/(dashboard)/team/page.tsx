@@ -105,7 +105,13 @@ export default function TeamPage() {
       const isCurrentUser = user?.email === member.user.email;
       const isLastOwner = member.role === "owner" && ownerCount === 1;
       const canModify = canManageTeam && !isCurrentUser && !isLastOwner;
-      const status = getActivityStatus(member.last_active_at);
+      const isPaused = member.is_paused ?? false;
+      const status = isPaused ? ("paused" as const) : getActivityStatus(member.last_active_at);
+      const statusLabelMap: Record<string, string> = {
+        online: t('memberCard.statusOnline'),
+        offline: t('memberCard.statusOffline'),
+        paused: t('memberCard.statusPaused'),
+      };
 
       return {
         type: "member" as const,
@@ -116,7 +122,7 @@ export default function TeamPage() {
         avatarUrl: member.user.avatar_url,
         initials: getInitials(member.user.name || member.user.email),
         status,
-        statusLabel: status === "online" ? t('memberCard.statusOnline') : t('memberCard.statusOffline'),
+        statusLabel: statusLabelMap[status] ?? t('memberCard.statusOffline'),
         joinedDate: member.created_at
           ? t('table.added', { date: new Date(member.created_at).toLocaleDateString() })
           : "",
@@ -124,6 +130,7 @@ export default function TeamPage() {
         isCurrentUser,
         isOwner: member.role === "owner",
         isLastOwner,
+        isPaused,
         canModify,
         member,
       };
@@ -145,6 +152,7 @@ export default function TeamPage() {
       isCurrentUser: false as const,
       isOwner: false as const,
       isLastOwner: false as const,
+      isPaused: false as const,
       canModify: canManageTeam,
       invitation: inv,
     }));
@@ -271,7 +279,6 @@ export default function TeamPage() {
       <TeamStats
         members={members}
         invitations={invitations}
-        subscriptionTier={currentBusiness?.subscription_tier}
       />
 
       {/* Search & Filter */}

@@ -1,5 +1,5 @@
 // Shared components
-export { ProFeatureGate, ProBadge } from './ProFeatureGate';
+export { FeatureGate, ProBadge, UpgradePrompt, LimitBadge } from './ProFeatureGate';
 
 // Overview components
 export { ActiveCardWidget } from './overview/ActiveCardWidget';

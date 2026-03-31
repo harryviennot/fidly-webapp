@@ -17,12 +17,11 @@
     "showingCount": "Showing {filtered} of {total} members",
     "stats": {
       "teamMembers": "Team members",
-      "scanners": "Scanners",
-      "activeThisWeek": "Active this week",
+      "mostActive": "Most active",
+      "pausedMembers": "Paused",
+      "pausedSubtitle": "Scanning access suspended",
       "pendingInvites": "Pending invites",
-      "activeCount": "{count} active this week",
-      "noActivity": "No activity this week",
-      "ofScanners": "of {count} scanner{count, plural, one {} other {s}}"
+      "activeCount": "{count} active this week"
     },
     "memberCard": {
       "you": "(you)",
@@ -35,7 +34,12 @@
       "stampsGiven": "{count} stamps",
       "statusOnline": "Online",
       "statusInvited": "Invited",
-      "statusOffline": "Offline"
+      "statusOffline": "Offline",
+      "statusPaused": "Paused",
+      "pause": "Pause",
+      "activate": "Activate",
+      "pausedTooltip": "Scanning access is paused. Activate to restore.",
+      "swapWarning": "Activating this member will pause another."
     },
     "table": {
       "member": "Member",
@@ -110,7 +114,11 @@
       "invitationResent": "Invitation resent to {email}",
       "resendFailed": "Failed to resend invitation",
       "invitationCancelled": "Invitation to {email} cancelled",
-      "cancelFailed": "Failed to cancel invitation"
+      "cancelFailed": "Failed to cancel invitation",
+      "memberPaused": "Scanning paused for {name}",
+      "memberActivated": "Scanning activated for {name}",
+      "pauseFailed": "Failed to pause member",
+      "activateFailed": "Failed to activate member"
     }
   }
 }

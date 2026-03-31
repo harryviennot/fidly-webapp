@@ -7,11 +7,16 @@ import {
   changeTier,
   cancelSubscription,
   reactivateSubscription,
+  getOverLimitStatus,
+  previewDowngrade,
   type BillingStatus,
+  type OverLimitStatus,
+  type PreviewDowngradeResponse,
 } from "@/api/billing";
 
 export const billingKeys = {
   status: (businessId: string) => ["billing", "status", businessId] as const,
+  overLimit: (businessId: string) => ["billing", "over-limit", businessId] as const,
 };
 
 export function useBillingStatus() {
@@ -116,6 +121,11 @@ export function useChangeTier() {
         queryClient.invalidateQueries({
           queryKey: billingKeys.status(currentBusiness.id),
         });
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.overLimit(currentBusiness.id),
+        });
+        // Refresh designs (is_over_limit annotations change with tier)
+        queryClient.invalidateQueries({ queryKey: ["designs", currentBusiness.id] });
         queryClient.invalidateQueries({ queryKey: ["business"] });
       }
     },
@@ -155,7 +165,37 @@ export function useReactivateSubscription() {
         queryClient.invalidateQueries({
           queryKey: billingKeys.status(currentBusiness.id),
         });
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.overLimit(currentBusiness.id),
+        });
+        queryClient.invalidateQueries({ queryKey: ["designs", currentBusiness.id] });
+        queryClient.invalidateQueries({ queryKey: ["business"] });
       }
+    },
+  });
+}
+
+// ─── Downgrade handling hooks ────────────────────────────────────
+
+export function useOverLimit() {
+  const { currentBusiness } = useBusiness();
+  const businessId = currentBusiness?.id;
+
+  return useQuery<OverLimitStatus>({
+    queryKey: billingKeys.overLimit(businessId ?? ""),
+    queryFn: () => getOverLimitStatus(businessId!),
+    enabled: !!businessId,
+    staleTime: 60_000,
+  });
+}
+
+export function usePreviewDowngrade() {
+  const { currentBusiness } = useBusiness();
+
+  return useMutation<PreviewDowngradeResponse, Error, string>({
+    mutationFn: async (newTier: string) => {
+      if (!currentBusiness?.id) throw new Error("No business selected");
+      return previewDowngrade(currentBusiness.id, newTier);
     },
   });
 }
