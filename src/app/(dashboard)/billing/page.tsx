@@ -55,6 +55,18 @@ const FEATURE_LABELS: Record<string, string> = {
   pro: "proLabel",
 };
 
+function getDisplayPrice(
+  tier: string,
+  isFoundingPartner: boolean,
+  isReseller: boolean,
+  resellerDiscountPercent: number | null,
+): number {
+  const base = TIER_PRICES[tier] ?? 20;
+  if (isFoundingPartner) return FOUNDING_PRICES[tier] ?? base;
+  if (isReseller && resellerDiscountPercent) return Math.round(base * (1 - resellerDiscountPercent / 100));
+  return base;
+}
+
 function TierCard({
   tier,
   currentTier,
@@ -86,11 +98,8 @@ function TierCard({
   const isCurrent = tier === currentTier;
   const isPro = tier === "pro";
   const needsSubscription = (isTrialing || isSuspended) && !hasSubscription;
-  // Mutually exclusive: reseller businesses are never founding partners
   const basePrice = TIER_PRICES[tier];
-  let price = basePrice;
-  if (isFoundingPartner) price = FOUNDING_PRICES[tier];
-  else if (isReseller && resellerDiscountPercent) price = Math.round(basePrice * (1 - resellerDiscountPercent / 100));
+  const price = getDisplayPrice(tier, isFoundingPartner, isReseller, resellerDiscountPercent);
 
   const features = t.raw(`features.${tier}`) as string[];
   const featuresLabel = t(`features.${FEATURE_LABELS[tier]}`);
@@ -488,8 +497,8 @@ export default function BillingPage() {
                 {t("confirmUpgradeDescription", {
                   from: currentTier,
                   to: confirmTier ?? "",
-                  fromPrice: isFoundingPartner ? FOUNDING_PRICES[currentTier] : TIER_PRICES[currentTier],
-                  toPrice: confirmTier ? (isFoundingPartner ? FOUNDING_PRICES[confirmTier] : TIER_PRICES[confirmTier]) : 0,
+                  fromPrice: getDisplayPrice(currentTier, isFoundingPartner, isReseller, resellerDiscountPercent),
+                  toPrice: confirmTier ? getDisplayPrice(confirmTier, isFoundingPartner, isReseller, resellerDiscountPercent) : 0,
                 })}
               </AlertDialogDescription>
               {(isTrialing || isGrace) && !hasSubscription && data?.trial_ends_at && (

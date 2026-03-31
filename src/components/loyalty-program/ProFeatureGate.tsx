@@ -120,13 +120,18 @@ export function LimitBadge({ current, limit }: LimitBadgeProps) {
 }
 
 /**
- * Simple locked badge for inline use.
+ * Tier badge for inline use. Shows the minimum required tier for a feature,
+ * or a custom label. Defaults to "Pro" for backward compatibility.
  */
-export function ProBadge() {
+export function TierBadge({ tier = "pro" }: { tier?: string }) {
+  const label = tier.charAt(0).toUpperCase() + tier.slice(1);
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
       <Crown className="w-3 h-3" weight="fill" />
-      Pro
+      {label}
     </span>
   );
 }
+
+/** @deprecated Use TierBadge instead */
+export const ProBadge = TierBadge;
