@@ -17,12 +17,11 @@
     "showingCount": "{filtered} sur {total} membres affichés",
     "stats": {
       "teamMembers": "Membres de l'équipe",
-      "scanners": "Scanners",
-      "activeThisWeek": "Actifs cette semaine",
+      "mostActive": "Plus actif",
+      "pausedMembers": "Suspendus",
+      "pausedSubtitle": "Accès scanner suspendu",
       "pendingInvites": "Invitations en attente",
-      "activeCount": "{count} actifs cette semaine",
-      "noActivity": "Aucune activité cette semaine",
-      "ofScanners": "sur {count} scanner{count, plural, one {} other {s}}"
+      "activeCount": "{count} actifs cette semaine"
     },
     "memberCard": {
       "you": "(vous)",

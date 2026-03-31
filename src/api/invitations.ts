@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthHeaders } from './client';
+import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
 import type {
   Invitation,
   InvitationPublic,
@@ -18,7 +18,7 @@ export async function createInvitation(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to create invitation');
+    throw new Error(extractErrorMessage(error, 'Failed to create invitation'));
   }
 
   return response.json();
@@ -62,7 +62,7 @@ export async function acceptInvitation(token: string): Promise<InvitationAcceptR
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to accept invitation');
+    throw new Error(extractErrorMessage(error, 'Failed to accept invitation'));
   }
 
   return response.json();
@@ -82,7 +82,7 @@ export async function resendInvitation(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to resend invitation');
+    throw new Error(extractErrorMessage(error, 'Failed to resend invitation'));
   }
 }
 
@@ -100,6 +100,6 @@ export async function cancelInvitation(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to cancel invitation');
+    throw new Error(extractErrorMessage(error, 'Failed to cancel invitation'));
   }
 }

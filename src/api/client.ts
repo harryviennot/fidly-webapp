@@ -18,6 +18,19 @@ export async function getAuthHeaders(): Promise<HeadersInit> {
   };
 }
 
+/**
+ * Extract a human-readable error message from an API error response.
+ * Handles both string detail (legacy) and object detail (standardized errors).
+ */
+export function extractErrorMessage(error: Record<string, unknown>, fallback: string): string {
+  const detail = error.detail;
+  if (typeof detail === 'string') return detail;
+  if (detail && typeof detail === 'object' && 'message' in detail) {
+    return (detail as { message: string }).message;
+  }
+  return fallback;
+}
+
 export async function getAuthHeadersForFormData(): Promise<HeadersInit> {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();

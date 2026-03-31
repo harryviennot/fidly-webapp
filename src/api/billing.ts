@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthHeaders } from "./client";
+import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from "./client";
 
 export interface BillingStatus {
   tier: string;
@@ -28,7 +28,7 @@ export async function getBillingStatus(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || "Failed to fetch billing status");
+    throw new Error(extractErrorMessage(error, "Failed to fetch billing status"));
   }
 
   return response.json();
@@ -55,7 +55,7 @@ export async function createCheckoutSession(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || "Failed to create checkout session");
+    throw new Error(extractErrorMessage(error, "Failed to create checkout session"));
   }
 
   return response.json();
@@ -74,7 +74,7 @@ export async function createPortalSession(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || "Failed to create portal session");
+    throw new Error(extractErrorMessage(error, "Failed to create portal session"));
   }
 
   return response.json();
@@ -95,7 +95,7 @@ export async function changeTier(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || "Failed to change tier");
+    throw new Error(extractErrorMessage(error, "Failed to change tier"));
   }
 
   return response.json();
@@ -114,7 +114,7 @@ export async function cancelSubscription(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || "Failed to cancel subscription");
+    throw new Error(extractErrorMessage(error, "Failed to cancel subscription"));
   }
 
   return response.json();
@@ -133,7 +133,7 @@ export async function reactivateSubscription(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || "Failed to reactivate subscription");
+    throw new Error(extractErrorMessage(error, "Failed to reactivate subscription"));
   }
 
   return response.json();
@@ -176,7 +176,7 @@ export async function getOverLimitStatus(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || "Failed to fetch over-limit status");
+    throw new Error(extractErrorMessage(error, "Failed to fetch over-limit status"));
   }
 
   return response.json();
@@ -197,7 +197,7 @@ export async function previewDowngrade(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || "Failed to preview downgrade");
+    throw new Error(extractErrorMessage(error, "Failed to preview downgrade"));
   }
 
   return response.json();

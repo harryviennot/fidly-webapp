@@ -368,7 +368,11 @@ export function TeamTable({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className={`text-xs h-7 px-2 ${row.isPaused ? "text-[var(--accent)] hover:opacity-80" : "text-[var(--warning)] hover:opacity-80"}`}
+                            className={`text-xs h-7 px-2.5 rounded-full transition-colors ${
+                              row.isPaused
+                                ? "bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white"
+                                : "bg-[var(--warning-light)] text-[var(--warning)] hover:bg-[var(--warning)] hover:text-white"
+                            }`}
                             onClick={() => handleTogglePause(row)}
                             disabled={loading === row.id}
                           >

@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthHeaders } from './client';
+import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
 import type { LoyaltyProgram, LoyaltyProgramUpdate } from '@/types';
 
 export async function getPrograms(businessId: string): Promise<LoyaltyProgram[]> {
@@ -38,7 +38,7 @@ export async function updateProgram(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to update program');
+    throw new Error(extractErrorMessage(error, 'Failed to update program'));
   }
 
   return response.json();

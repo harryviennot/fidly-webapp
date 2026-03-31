@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthHeaders, getAuthHeadersForFormData } from './client';
+import { API_BASE_URL, getAuthHeaders, getAuthHeadersForFormData, extractErrorMessage } from './client';
 import type { Business, BusinessUpdate } from '@/types/business';
 
 export async function updateBusiness(
@@ -13,7 +13,7 @@ export async function updateBusiness(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to update business');
+    throw new Error(extractErrorMessage(error, 'Failed to update business'));
   }
 
   return response.json();
@@ -34,7 +34,7 @@ export async function uploadBusinessLogo(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to upload logo');
+    throw new Error(extractErrorMessage(error, 'Failed to upload logo'));
   }
 
   return response.json();
@@ -53,7 +53,7 @@ export async function getBusinessSignupQR(businessId: string): Promise<SignupQRR
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to fetch QR code');
+    throw new Error(extractErrorMessage(error, 'Failed to fetch QR code'));
   }
 
   return response.json();
@@ -67,6 +67,6 @@ export async function deleteBusinessLogo(businessId: string): Promise<void> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to delete logo');
+    throw new Error(extractErrorMessage(error, 'Failed to delete logo'));
   }
 }

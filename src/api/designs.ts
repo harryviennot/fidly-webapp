@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthHeaders, getAuthHeadersForFormData } from './client';
+import { API_BASE_URL, getAuthHeaders, getAuthHeadersForFormData, extractErrorMessage } from './client';
 import type { CardDesign, CardDesignCreate, CardDesignUpdate, UploadResponse } from '@/types';
 
 export async function getDesigns(businessId: string): Promise<CardDesign[]> {
@@ -46,7 +46,7 @@ export async function createDesign(businessId: string, data: CardDesignCreate): 
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to create design');
+    throw new Error(extractErrorMessage(error, 'Failed to create design'));
   }
 
   return response.json();
@@ -61,7 +61,7 @@ export async function updateDesign(businessId: string, designId: string, data: C
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to update design');
+    throw new Error(extractErrorMessage(error, 'Failed to update design'));
   }
 
   return response.json();
@@ -75,7 +75,7 @@ export async function deleteDesign(businessId: string, designId: string): Promis
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to delete design');
+    throw new Error(extractErrorMessage(error, 'Failed to delete design'));
   }
 }
 
@@ -87,7 +87,7 @@ export async function activateDesign(businessId: string, designId: string): Prom
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to activate design');
+    throw new Error(extractErrorMessage(error, 'Failed to activate design'));
   }
 
   return response.json();
@@ -130,7 +130,7 @@ export async function uploadLogo(businessId: string, designId: string, file: Fil
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to upload logo');
+    throw new Error(extractErrorMessage(error, 'Failed to upload logo'));
   }
 
   return response.json();
@@ -153,7 +153,7 @@ export async function uploadStamp(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to upload stamp');
+    throw new Error(extractErrorMessage(error, 'Failed to upload stamp'));
   }
 
   return response.json();
@@ -175,7 +175,7 @@ export async function uploadStripBackground(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to upload strip background');
+    throw new Error(extractErrorMessage(error, 'Failed to upload strip background'));
   }
 
   return response.json();

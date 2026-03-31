@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthHeaders } from './client';
+import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
 import type { User, MembershipWithUser, MembershipCreate, MembershipUpdate } from '@/types';
 
 export async function getBusinessMembers(businessId: string): Promise<MembershipWithUser[]> {
@@ -37,7 +37,7 @@ export async function createMembership(data: MembershipCreate): Promise<Membersh
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to create membership');
+    throw new Error(extractErrorMessage(error, 'Failed to create membership'));
   }
 
   return response.json();
@@ -52,7 +52,7 @@ export async function updateMembershipRole(membershipId: string, data: Membershi
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to update membership');
+    throw new Error(extractErrorMessage(error, 'Failed to update membership'));
   }
 
   return response.json();
@@ -66,7 +66,7 @@ export async function deleteMembership(membershipId: string): Promise<void> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to delete membership');
+    throw new Error(extractErrorMessage(error, 'Failed to delete membership'));
   }
 }
 
@@ -78,7 +78,7 @@ export async function pauseMember(membershipId: string): Promise<MembershipWithU
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to pause member');
+    throw new Error(extractErrorMessage(error, 'Failed to pause member'));
   }
 
   return response.json();
@@ -92,7 +92,7 @@ export async function unpauseMember(membershipId: string): Promise<MembershipWit
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to unpause member');
+    throw new Error(extractErrorMessage(error, 'Failed to unpause member'));
   }
 
   return response.json();
