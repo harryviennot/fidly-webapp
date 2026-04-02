@@ -4,54 +4,59 @@ import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Info } from '@phosphor-icons/react';
 import Link from 'next/link';
-
-// BYPASSED FOR MVP: Props preserved for re-enabling later
-interface ProFeatureGateProps {
-  feature?: string;
-  description?: string;
-  isProPlan?: boolean;
-  children: ReactNode;
-}
+import { useTranslations } from 'next-intl';
+import { useEntitlements } from '@/hooks/useEntitlements';
 
 /**
- * Gates content behind Pro subscription.
- * Shows blurred preview with upgrade prompt for non-Pro users.
- *
- * NOTE: BYPASSED FOR MVP - Always renders children regardless of plan.
- */
-export function ProFeatureGate({ children }: ProFeatureGateProps) {
-  // BYPASSED FOR MVP: Always show content regardless of plan
-  // Re-enable gating when implementing paid tiers
-  return <>{children}</>;
-}
-
-/**
- * Flexible feature gate supporting both feature flags and usage limits.
- * BYPASSED FOR MVP: Props preserved for re-enabling later
+ * Gates content behind a specific feature.
+ * Shows blurred preview with upgrade prompt when the feature is not available.
  */
 interface FeatureGateProps {
-  /** Whether the feature/action is allowed */
-  allowed?: boolean;
-  /** Title for the gate message */
-  title?: string;
-  /** Description explaining why it's gated */
+  /** Feature key to check (e.g., "locations.geofencing") */
+  feature: string;
+  /** Description of what's gated */
   description?: string;
-  /** What to show when gated: 'blur' shows blurred content, 'hide' hides completely, 'disable' renders children but disabled */
-  fallback?: 'blur' | 'hide' | 'disable';
-  /** Custom fallback element */
-  customFallback?: ReactNode;
+  /** What to show when gated: 'blur' shows blurred content, 'hide' hides completely */
+  fallback?: 'blur' | 'hide';
   children: ReactNode;
 }
 
-/**
- * NOTE: BYPASSED FOR MVP - Always renders children regardless of allowed prop.
- */
 export function FeatureGate({
+  feature,
+  description,
+  fallback = 'blur',
   children,
 }: FeatureGateProps) {
-  // BYPASSED FOR MVP: Always show content regardless of allowed prop
-  // Re-enable gating when implementing paid tiers
-  return <>{children}</>;
+  const { hasFeature } = useEntitlements();
+  const t = useTranslations('features');
+
+  if (hasFeature(feature)) {
+    return <>{children}</>;
+  }
+
+  if (fallback === 'hide') {
+    return null;
+  }
+
+  // Blur fallback
+  return (
+    <div className="relative">
+      <div className="blur-sm pointer-events-none select-none" aria-hidden>
+        {children}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-lg">
+        <div className="text-center space-y-2 p-4">
+          <Crown className="w-8 h-8 text-amber-500 mx-auto" weight="fill" />
+          <p className="text-sm text-muted-foreground max-w-xs">
+            {description || t('gate.upgradeToAccess')}
+          </p>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/billing">{t('gate.upgrade')}</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -63,12 +68,14 @@ interface UpgradePromptProps {
 }
 
 export function UpgradePrompt({ message, compact = false }: UpgradePromptProps) {
+  const t = useTranslations('features');
+
   if (compact) {
     return (
       <span className="text-xs text-muted-foreground">
         {message}{' '}
-        <Link href="/settings/billing" className="text-amber-600 hover:underline">
-          Upgrade
+        <Link href="/billing" className="text-amber-600 hover:underline">
+          {t('gate.upgrade')}
         </Link>
       </span>
     );
@@ -79,8 +86,8 @@ export function UpgradePrompt({ message, compact = false }: UpgradePromptProps) 
       <Info className="w-4 h-4 text-amber-600 flex-shrink-0" weight="fill" />
       <span className="text-amber-800">{message}</span>
       <Button asChild size="sm" variant="outline" className="ml-auto">
-        <Link href="/settings/billing">
-          Upgrade
+        <Link href="/billing">
+          {t('gate.upgrade')}
         </Link>
       </Button>
     </div>
@@ -113,13 +120,18 @@ export function LimitBadge({ current, limit }: LimitBadgeProps) {
 }
 
 /**
- * Simple locked badge for inline use.
+ * Tier badge for inline use. Shows the minimum required tier for a feature,
+ * or a custom label. Defaults to "Pro" for backward compatibility.
  */
-export function ProBadge() {
+export function TierBadge({ tier = "pro" }: { tier?: string }) {
+  const label = tier.charAt(0).toUpperCase() + tier.slice(1);
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
       <Crown className="w-3 h-3" weight="fill" />
-      Pro
+      {label}
     </span>
   );
 }
+
+/** @deprecated Use TierBadge instead */
+export const ProBadge = TierBadge;

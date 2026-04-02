@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { CardDesign, LoyaltyProgram, LoyaltyProgramUpdate } from '@/types';
 import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
-import { getPlanLimits, isLimitExceededError } from '@/lib/features';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { useDefaultProgram, useUpdateProgram, programKeys } from '@/hooks/use-programs';
 import {
   useDesigns,
@@ -23,7 +23,7 @@ interface ProgramContextType {
   inactiveDesigns: CardDesign[];
   loading: boolean;
   error: string | null;
-  isProPlan: boolean;
+  tier: string;
   isOwner: boolean;
   refreshProgram: () => Promise<void>;
   refreshDesigns: () => Promise<void>;
@@ -47,10 +47,11 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
   const { currentBusiness, currentRole } = useBusiness();
   const t = useTranslations('loyaltyProgram');
   const tDesign = useTranslations('designEditor');
+  const tFeatures = useTranslations('features');
   const queryClient = useQueryClient();
   const businessId = currentBusiness?.id;
 
-  const isProPlan = currentBusiness?.subscription_tier === 'pro';
+  const { canCreateDesign, tier } = useEntitlements();
   const isOwner = currentRole === 'owner';
 
   // Queries
@@ -113,17 +114,17 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
 
   const handleDuplicate = async (designId: string) => {
     if (!businessId) return;
-    const limits = getPlanLimits(currentBusiness?.subscription_tier || 'pay');
-    if (limits.max_card_designs !== null && designs.length >= limits.max_card_designs) {
-      toast.error(`Design limit reached. Your plan allows ${limits.max_card_designs} design(s). Upgrade to Pro for unlimited designs.`);
+    if (!canCreateDesign(designs.length)) {
+      toast.error(tFeatures('errors.limitExceededDesigns'));
       return;
     }
     try {
       await duplicateMutation.mutateAsync(designId);
       toast.success(tDesign('toasts.cardDuplicated'));
     } catch (err: unknown) {
-      if (isLimitExceededError(err)) {
-        toast.error(err.detail.message || 'Design limit reached. Upgrade to Pro for more designs.');
+      const detail = (err as { detail?: { code?: string; message?: string } })?.detail;
+      if (detail?.code === 'LIMIT_EXCEEDED') {
+        toast.error(tFeatures('errors.limitExceededDesigns'));
         return;
       }
       toast.error(err instanceof Error ? err.message : 'Failed to duplicate design');
@@ -149,7 +150,7 @@ export default function ProgramLayout({ children }: { children: ReactNode }) {
         inactiveDesigns,
         loading,
         error,
-        isProPlan,
+        tier,
         isOwner,
         refreshProgram,
         refreshDesigns,

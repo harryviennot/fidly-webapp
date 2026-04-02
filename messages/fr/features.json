@@ -1,0 +1,55 @@
+{
+  "features": {
+    "gate": {
+      "upgrade": "Mettre à niveau",
+      "upgradeToAccess": "Passez à un plan supérieur pour accéder à cette fonctionnalité"
+    },
+    "errors": {
+      "billingRequired": "Votre période d'essai est terminée. Veuillez vous abonner pour continuer.",
+      "featureNotAvailable": "Cette fonctionnalité nécessite le plan {tier}.",
+      "limitExceeded": "Vous avez atteint la limite de votre plan. Passez à un plan supérieur.",
+      "limitExceededDesigns": "Limite de designs atteinte. Passez à un plan supérieur pour des designs illimités.",
+      "limitExceededMembers": "Votre plan autorise 2 membres d'équipe. Passez à un plan supérieur pour des membres illimités."
+    },
+    "upgrade": {
+      "notifications": "Passez au plan Growth pour personnaliser le texte des notifications",
+      "designs": "Vous voulez plus de designs ?",
+      "designsHint": "Passez à un plan supérieur pour créer des modèles illimités.",
+      "designsAction": "Changer de plan",
+      "moreCards": "Plus de cartes",
+      "geofencing": "Passez au plan Pro pour activer la géolocalisation",
+      "scheduling": "Passez au plan Pro pour programmer les changements de design",
+      "locations": "Passez au plan Pro pour ajouter plusieurs établissements",
+      "events": "Passez au plan Growth pour créer des événements promotionnels",
+      "programs": "Passez au plan Pro pour créer plusieurs programmes",
+      "broadcasts": "Passez au plan Growth pour envoyer des notifications broadcast",
+      "segmentation": "Passez au plan Pro pour cibler des segments de clients",
+      "scheduledSends": "Passez au plan Pro pour programmer des notifications",
+      "advancedAnalytics": "Passez au plan Pro pour les analyses avancées"
+    },
+    "tiers": {
+      "starter": "Starter",
+      "growth": "Growth",
+      "pro": "Pro"
+    },
+    "overLimit": {
+      "banner": "Votre plan {tier} a des limites dépassées par votre utilisation actuelle. Certaines fonctionnalités sont restreintes.",
+      "bannerDetails": "Voir les détails",
+      "bannerUpgrade": "Passer au supérieur",
+      "sheetTitle": "Limites du plan dépassées",
+      "sheetTeamMembers": "{current} sur {limit} autorisés",
+      "sheetTeamMembersPaused": "{paused} membres ont un accès scanner suspendu",
+      "sheetDesigns": "{current} sur {limit} autorisés",
+      "sheetDesignsReadOnly": "{count} designs en lecture seule",
+      "sheetFeaturePaused": "Non disponible sur {tier}",
+      "sheetReassurance": "Vos données ne sont jamais supprimées. Si vous passez à un plan supérieur, tout sera restauré.",
+      "sheetUpgrade": "Changer de plan",
+      "readOnly": "Lecture seule",
+      "paused": "Suspendu",
+      "active": "Actif",
+      "overLimitBadge": "Hors limite",
+      "toastDesignLocked": "Ce design est en lecture seule car votre plan autorise {limit} design. Passez au supérieur pour un nombre illimité.",
+      "toastFeatureLocked": "Cette fonctionnalité nécessite le plan {tier}."
+    }
+  }
+}

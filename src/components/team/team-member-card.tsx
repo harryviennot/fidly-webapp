@@ -19,10 +19,11 @@ const ROLE_CONFIG: Record<string, { bg: string; color: string }> = {
   scanner: { bg: "bg-blue-50 dark:bg-blue-950/30", color: "text-blue-700 dark:text-blue-400" },
 };
 
-const STATUS_COLORS = {
+const STATUS_COLORS: Record<string, string> = {
   online: "bg-green-500",
   invited: "bg-amber-500",
   offline: "bg-gray-400",
+  paused: "bg-[#C4883D]",
 };
 
 function getInitials(name: string) {
