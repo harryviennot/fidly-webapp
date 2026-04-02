@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { deleteMembership, updateMembershipRole } from "@/api";
+import { deleteMembership, updateMembershipRole, pauseMember, unpauseMember } from "@/api";
 import type { MembershipWithUser, MembershipRole } from "@/types";
 import type { Invitation } from "@/types";
 import { toast } from "sonner";
@@ -37,13 +37,14 @@ export type TeamRow = {
   role: MembershipRole;
   avatarUrl?: string;
   initials: string;
-  status: "online" | "invited" | "offline";
+  status: "online" | "invited" | "offline" | "paused";
   statusLabel: string;
   joinedDate: string;
   stampsGiven: number;
   isCurrentUser: boolean;
   isOwner: boolean;
   isLastOwner: boolean;
+  isPaused: boolean;
   canModify: boolean;
   member: MembershipWithUser;
 } | {
@@ -61,6 +62,7 @@ export type TeamRow = {
   isCurrentUser: false;
   isOwner: false;
   isLastOwner: false;
+  isPaused: false;
   canModify: boolean;
   invitation: Invitation;
 };
@@ -75,12 +77,14 @@ const STATUS_COLORS: Record<string, string> = {
   online: "#4A7C59",
   invited: "#C4883D",
   offline: "#CCCCCC",
+  paused: "#C4883D",
 };
 
 const STATUS_TEXT_COLORS: Record<string, string> = {
   online: "#4A7C59",
   invited: "#C4883D",
   offline: "#AAAAAA",
+  paused: "#C4883D",
 };
 
 interface TeamTableProps {
@@ -179,6 +183,25 @@ export function TeamTable({
       toast.success(t('toasts.invitationResent', { email: row.email }));
     } catch {
       toast.error(t('toasts.resendFailed'));
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleTogglePause = async (row: TeamRow) => {
+    if (row.type !== "member") return;
+    setLoading(row.id);
+    try {
+      if (row.isPaused) {
+        await unpauseMember(row.member.id);
+        toast.success(t('toasts.memberActivated', { name: row.name || row.email }));
+      } else {
+        await pauseMember(row.member.id);
+        toast.success(t('toasts.memberPaused', { name: row.name || row.email }));
+      }
+      onMemberUpdated();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : (row.isPaused ? t('toasts.activateFailed') : t('toasts.pauseFailed')));
     } finally {
       setLoading(null);
     }
@@ -341,6 +364,21 @@ export function TeamTable({
                   {canManageTeam && (
                     <TableCell className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {row.type === "member" && !row.isOwner && row.canModify && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`text-xs h-7 px-2.5 rounded-full transition-colors ${
+                              row.isPaused
+                                ? "bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white"
+                                : "bg-[var(--warning-light)] text-[var(--warning)] hover:bg-[var(--warning)] hover:text-white"
+                            }`}
+                            onClick={() => handleTogglePause(row)}
+                            disabled={loading === row.id}
+                          >
+                            {row.isPaused ? t('memberCard.activate') : t('memberCard.pause')}
+                          </Button>
+                        )}
                         {row.type === "invitation" && (
                           <Button
                             variant="ghost"

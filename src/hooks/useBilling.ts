@@ -1,0 +1,201 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useBusiness } from "@/contexts/business-context";
+import {
+  getBillingStatus,
+  createCheckoutSession,
+  createPortalSession,
+  changeTier,
+  cancelSubscription,
+  reactivateSubscription,
+  getOverLimitStatus,
+  previewDowngrade,
+  type BillingStatus,
+  type OverLimitStatus,
+  type PreviewDowngradeResponse,
+} from "@/api/billing";
+
+export const billingKeys = {
+  status: (businessId: string) => ["billing", "status", businessId] as const,
+  overLimit: (businessId: string) => ["billing", "over-limit", businessId] as const,
+};
+
+export function useBillingStatus() {
+  const { currentBusiness } = useBusiness();
+  const businessId = currentBusiness?.id;
+
+  const query = useQuery<BillingStatus>({
+    queryKey: billingKeys.status(businessId ?? ""),
+    queryFn: () => getBillingStatus(businessId!),
+    enabled: !!businessId,
+    staleTime: 60_000, // 1 minute
+  });
+
+  const data = query.data;
+  const billingStatus = data?.billing_status ?? "trial";
+
+  const hasSubscription = !!data?.stripe_subscription_id;
+
+  // Use query fetch timestamp as "now" to avoid impure Date.now() calls
+  const now = query.dataUpdatedAt || 0;
+  const trialEndMs = data?.trial_ends_at ? new Date(data.trial_ends_at).getTime() : null;
+  const isActiveInTrial =
+    billingStatus === "active" &&
+    hasSubscription &&
+    trialEndMs !== null &&
+    trialEndMs > now;
+  const daysUntilFirstCharge = isActiveInTrial && trialEndMs
+    ? Math.max(0, Math.ceil((trialEndMs - now) / 86_400_000))
+    : null;
+
+  return {
+    ...query,
+    billingStatus,
+    isTrialing: billingStatus === "trial",
+    isGrace: billingStatus === "grace",
+    isActive: billingStatus === "active",
+    isPastDue: billingStatus === "past_due",
+    isCancelled: billingStatus === "cancelled",
+    isSuspended: billingStatus === "suspended",
+    daysRemaining: data?.days_remaining ?? null,
+    isFoundingPartner: data?.is_founding_partner ?? false,
+    isReseller: data?.is_reseller ?? false,
+    resellerDiscountPercent: data?.reseller_discount_percent ?? null,
+    resellerDiscountLocked: data?.reseller_discount_locked ?? false,
+    hasSubscription,
+    isActiveInTrial,
+    daysUntilFirstCharge,
+  };
+}
+
+export function useCheckout() {
+  const { currentBusiness } = useBusiness();
+
+  return useMutation({
+    mutationFn: async ({
+      tier,
+      successUrl,
+      cancelUrl,
+    }: {
+      tier: string;
+      successUrl: string;
+      cancelUrl: string;
+    }) => {
+      if (!currentBusiness?.id) throw new Error("No business selected");
+      const result = await createCheckoutSession(
+        currentBusiness.id,
+        tier,
+        successUrl,
+        cancelUrl
+      );
+      // Redirect to Stripe Checkout
+      window.location.href = result.checkout_url;
+      return result;
+    },
+  });
+}
+
+export function usePortalSession() {
+  const { currentBusiness } = useBusiness();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!currentBusiness?.id) throw new Error("No business selected");
+      const result = await createPortalSession(currentBusiness.id);
+      window.location.href = result.portal_url;
+      return result;
+    },
+  });
+}
+
+export function useChangeTier() {
+  const { currentBusiness } = useBusiness();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (tier: string) => {
+      if (!currentBusiness?.id) throw new Error("No business selected");
+      return changeTier(currentBusiness.id, tier);
+    },
+    onSuccess: () => {
+      if (currentBusiness?.id) {
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.status(currentBusiness.id),
+        });
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.overLimit(currentBusiness.id),
+        });
+        // Refresh designs (is_over_limit annotations change with tier)
+        queryClient.invalidateQueries({ queryKey: ["designs", currentBusiness.id] });
+        queryClient.invalidateQueries({ queryKey: ["business"] });
+      }
+    },
+  });
+}
+
+export function useCancelSubscription() {
+  const { currentBusiness } = useBusiness();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!currentBusiness?.id) throw new Error("No business selected");
+      return cancelSubscription(currentBusiness.id);
+    },
+    onSuccess: () => {
+      if (currentBusiness?.id) {
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.status(currentBusiness.id),
+        });
+      }
+    },
+  });
+}
+
+export function useReactivateSubscription() {
+  const { currentBusiness } = useBusiness();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!currentBusiness?.id) throw new Error("No business selected");
+      return reactivateSubscription(currentBusiness.id);
+    },
+    onSuccess: () => {
+      if (currentBusiness?.id) {
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.status(currentBusiness.id),
+        });
+        queryClient.invalidateQueries({
+          queryKey: billingKeys.overLimit(currentBusiness.id),
+        });
+        queryClient.invalidateQueries({ queryKey: ["designs", currentBusiness.id] });
+        queryClient.invalidateQueries({ queryKey: ["business"] });
+      }
+    },
+  });
+}
+
+// ─── Downgrade handling hooks ────────────────────────────────────
+
+export function useOverLimit() {
+  const { currentBusiness } = useBusiness();
+  const businessId = currentBusiness?.id;
+
+  return useQuery<OverLimitStatus>({
+    queryKey: billingKeys.overLimit(businessId ?? ""),
+    queryFn: () => getOverLimitStatus(businessId!),
+    enabled: !!businessId,
+    staleTime: 60_000,
+  });
+}
+
+export function usePreviewDowngrade() {
+  const { currentBusiness } = useBusiness();
+
+  return useMutation<PreviewDowngradeResponse, Error, string>({
+    mutationFn: async (newTier: string) => {
+      if (!currentBusiness?.id) throw new Error("No business selected");
+      return previewDowngrade(currentBusiness.id, newTier);
+    },
+  });
+}

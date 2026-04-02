@@ -1,0 +1,55 @@
+{
+  "features": {
+    "gate": {
+      "upgrade": "Upgrade",
+      "upgradeToAccess": "Upgrade to access this feature"
+    },
+    "errors": {
+      "billingRequired": "Your trial has ended. Please subscribe to continue.",
+      "featureNotAvailable": "This feature requires the {tier} plan.",
+      "limitExceeded": "You've reached the limit for your plan. Upgrade for more.",
+      "limitExceededDesigns": "Design limit reached. Upgrade for unlimited designs.",
+      "limitExceededMembers": "Your plan allows 2 team members. Upgrade for unlimited members."
+    },
+    "upgrade": {
+      "notifications": "Upgrade to Growth to customize notification text",
+      "designs": "Want more card designs?",
+      "designsHint": "Upgrade to create unlimited templates.",
+      "designsAction": "Upgrade plan",
+      "moreCards": "Upgrade for More Cards",
+      "geofencing": "Upgrade to Pro to enable geofencing",
+      "scheduling": "Upgrade to Pro to schedule design changes",
+      "locations": "Upgrade to Pro to add multiple locations",
+      "events": "Upgrade to Growth to create promotional events",
+      "programs": "Upgrade to Pro to create multiple programs",
+      "broadcasts": "Upgrade to Growth to send broadcast notifications",
+      "segmentation": "Upgrade to Pro to target customer segments",
+      "scheduledSends": "Upgrade to Pro to schedule notifications",
+      "advancedAnalytics": "Upgrade to Pro for advanced analytics"
+    },
+    "tiers": {
+      "starter": "Starter",
+      "growth": "Growth",
+      "pro": "Pro"
+    },
+    "overLimit": {
+      "banner": "Your {tier} plan has limits that your current usage exceeds. Some features are restricted.",
+      "bannerDetails": "View details",
+      "bannerUpgrade": "Upgrade",
+      "sheetTitle": "Plan Limits Exceeded",
+      "sheetTeamMembers": "{current} of {limit} allowed",
+      "sheetTeamMembersPaused": "{paused} members have paused scanning access",
+      "sheetDesigns": "{current} of {limit} allowed",
+      "sheetDesignsReadOnly": "{count} designs are read-only",
+      "sheetFeaturePaused": "Not available on {tier}",
+      "sheetReassurance": "Your data is never deleted. If you upgrade again, everything will be fully restored.",
+      "sheetUpgrade": "Upgrade Plan",
+      "readOnly": "Read-only",
+      "paused": "Paused",
+      "active": "Active",
+      "overLimitBadge": "Over limit",
+      "toastDesignLocked": "This design is read-only because your plan allows {limit} design. Upgrade for unlimited.",
+      "toastFeatureLocked": "This feature requires the {tier} plan."
+    }
+  }
+}

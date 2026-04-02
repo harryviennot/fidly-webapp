@@ -14,6 +14,7 @@ export interface MembershipWithUser {
   user_id: string;
   business_id: string;
   role: MembershipRole;
+  is_paused?: boolean;
   user: User;
   created_at?: string;
   last_active_at?: string;

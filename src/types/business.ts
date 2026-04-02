@@ -1,10 +1,16 @@
+export type BillingStatus = "trial" | "active" | "past_due" | "cancelled" | "grace" | "suspended";
+
 export interface Business {
   id: string;
   name: string;
   url_slug: string;
-  subscription_tier: "pay" | "pro";
+  subscription_tier: "starter" | "growth" | "pro";
   status: "pending" | "active" | "suspended";
   activated_at?: string | null;
+  is_founding_partner?: boolean;
+  billing_status?: BillingStatus;
+  trial_ends_at?: string | null;
+  billing_period_end?: string | null;
   settings: BusinessSettings;
   logo_url?: string | null;
   primary_locale: "fr" | "en";

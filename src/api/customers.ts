@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAuthHeaders } from './client';
+import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
 import type { CustomerResponse, PaginatedCustomerResponse, StampResponse } from '@/types';
 
 export async function getCustomer(businessId: string, customerId: string): Promise<CustomerResponse> {
@@ -66,7 +66,7 @@ export async function redeemReward(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to redeem reward');
+    throw new Error(extractErrorMessage(error, 'Failed to redeem reward'));
   }
 
   return response.json();
@@ -89,7 +89,7 @@ export async function voidStamp(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Failed to void stamp');
+    throw new Error(extractErrorMessage(error, 'Failed to void stamp'));
   }
 
   return response.json();

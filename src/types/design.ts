@@ -57,6 +57,9 @@ export interface CardDesign {
 
   created_at?: string;
   updated_at?: string;
+
+  // Downgrade handling
+  is_over_limit?: boolean;
 }
 
 export interface CardDesignCreate {
