@@ -7,6 +7,10 @@ import {
 import type {
   NotificationTemplate,
   NotificationTemplatesResponse,
+  Milestone,
+  MilestonesResponse,
+  MilestoneCreate,
+  MilestoneUpdate,
   Broadcast,
   BroadcastListParams,
   PaginatedBroadcasts,
@@ -149,6 +153,114 @@ export async function resetNotificationTemplate(
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throwApiError(error, 'Failed to reset notification template');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Milestones (stamp-count triggers)
+// ─────────────────────────────────────────────────────────────────────────
+
+export async function listMilestones(
+  businessId: string,
+  programId?: string
+): Promise<MilestonesResponse> {
+  if (USE_MOCKS) {
+    return {
+      program_id: 'mock-program',
+      tier: 'starter',
+      limit: 0,
+      items: [],
+    };
+  }
+
+  const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
+  const response = await fetch(
+    `${API_BASE_URL}/notifications/${businessId}/milestones${query}`,
+    { headers: await getAuthHeaders() }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to fetch milestones');
+  }
+
+  return response.json();
+}
+
+export async function createMilestone(
+  businessId: string,
+  payload: MilestoneCreate,
+  programId?: string
+): Promise<Milestone> {
+  if (USE_MOCKS) {
+    throw new Error('Milestones not available in mock mode');
+  }
+
+  const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
+  const response = await fetch(
+    `${API_BASE_URL}/notifications/${businessId}/milestones${query}`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to create milestone');
+  }
+
+  return response.json();
+}
+
+export async function updateMilestone(
+  businessId: string,
+  templateId: string,
+  payload: MilestoneUpdate,
+  programId?: string
+): Promise<Milestone> {
+  if (USE_MOCKS) {
+    throw new Error('Milestones not available in mock mode');
+  }
+
+  const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
+  const response = await fetch(
+    `${API_BASE_URL}/notifications/${businessId}/milestones/${templateId}${query}`,
+    {
+      method: 'PUT',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to update milestone');
+  }
+
+  return response.json();
+}
+
+export async function deleteMilestone(
+  businessId: string,
+  templateId: string,
+  programId?: string
+): Promise<void> {
+  if (USE_MOCKS) return;
+
+  const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
+  const response = await fetch(
+    `${API_BASE_URL}/notifications/${businessId}/milestones/${templateId}${query}`,
+    {
+      method: 'DELETE',
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to delete milestone');
   }
 }
 

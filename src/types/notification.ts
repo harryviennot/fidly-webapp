@@ -29,6 +29,36 @@ export interface NotificationTemplatesResponse {
   items: NotificationTemplate[];
 }
 
+/** Stamp-count milestone — fires when customer reaches a specific stamp count. */
+export interface Milestone {
+  id: string;
+  stamp_equals: number;
+  body: LocalizedBody;
+  is_enabled: boolean;
+}
+
+/** Envelope returned by GET /notifications/{business_id}/milestones */
+export interface MilestonesResponse {
+  program_id: string;
+  tier: 'starter' | 'growth' | 'pro';
+  /** Max milestones per program. 0 = Starter (no milestones), null = Pro (unlimited). */
+  limit: number | null;
+  items: Milestone[];
+}
+
+export interface MilestoneCreate {
+  stamp_equals: number;
+  body: LocalizedBody;
+  is_enabled?: boolean;
+}
+
+/** Partial update — any field is optional but at least one is required by the backend. */
+export interface MilestoneUpdate {
+  stamp_equals?: number;
+  body?: LocalizedBody;
+  is_enabled?: boolean;
+}
+
 export type BroadcastStatus =
   | 'draft'
   | 'scheduled'

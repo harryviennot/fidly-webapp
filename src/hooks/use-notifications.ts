@@ -9,6 +9,10 @@ import {
   getNotificationTemplates,
   updateNotificationTemplate,
   resetNotificationTemplate,
+  listMilestones,
+  createMilestone,
+  updateMilestone,
+  deleteMilestone,
   uploadBusinessIcon,
   deleteBusinessIcon,
   listBroadcasts,
@@ -25,12 +29,16 @@ import type {
   BroadcastUpdate,
   BroadcastTargetFilter,
   LocalizedBody,
+  MilestoneCreate,
+  MilestoneUpdate,
   TriggerType,
 } from '@/types/notification';
 
 export const notificationKeys = {
   templates: (businessId: string | undefined, programId?: string) =>
     ['notifications', 'templates', businessId ?? null, programId ?? null] as const,
+  milestones: (businessId: string | undefined, programId?: string) =>
+    ['notifications', 'milestones', businessId ?? null, programId ?? null] as const,
   broadcasts: (params: BroadcastListParams) =>
     ['notifications', 'broadcasts', params] as const,
   broadcast: (id: string | undefined) =>
@@ -94,6 +102,80 @@ export function useResetNotificationTemplate(businessId: string | undefined) {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['notifications', 'templates', businessId],
+      });
+    },
+  });
+}
+
+// ─── Milestones ────────────────────────────────────────────────────────
+
+export function useMilestones(
+  businessId: string | undefined,
+  programId?: string
+) {
+  return useQuery({
+    queryKey: notificationKeys.milestones(businessId, programId),
+    queryFn: () => {
+      if (!businessId) throw new Error('businessId required');
+      return listMilestones(businessId, programId);
+    },
+    enabled: !!businessId,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useCreateMilestone(
+  businessId: string | undefined,
+  programId?: string
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: MilestoneCreate) => {
+      if (!businessId) throw new Error('businessId required');
+      return createMilestone(businessId, payload, programId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'milestones', businessId],
+      });
+    },
+  });
+}
+
+export function useUpdateMilestone(
+  businessId: string | undefined,
+  programId?: string
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (args: { templateId: string; payload: MilestoneUpdate }) => {
+      if (!businessId) throw new Error('businessId required');
+      return updateMilestone(businessId, args.templateId, args.payload, programId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'milestones', businessId],
+      });
+    },
+  });
+}
+
+export function useDeleteMilestone(
+  businessId: string | undefined,
+  programId?: string
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (templateId: string) => {
+      if (!businessId) throw new Error('businessId required');
+      return deleteMilestone(businessId, templateId, programId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'milestones', businessId],
       });
     },
   });

@@ -10,9 +10,11 @@ import {
   IconUploadCard,
   TriggerCard,
   TriggerEditSheet,
+  MilestoneSection,
 } from '@/components/notifications';
 import { useNotificationTemplates } from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
+import { useProgram } from '../layout';
 import type { NotificationTemplate, TriggerType } from '@/types/notification';
 
 // Canonical default bodies per trigger — mirror
@@ -45,12 +47,14 @@ const VARIABLES_REFERENCE: Array<{
 export default function ProgramNotificationsPage() {
   const t = useTranslations('notifications');
   const { currentBusiness } = useBusiness();
+  const { program } = useProgram();
   const { data, isLoading, error } = useNotificationTemplates(
     currentBusiness?.id
   );
 
   const templates = useMemo(() => data?.items ?? [], [data]);
   const isEditable = templates.some((tpl) => tpl.is_editable);
+  const totalStamps = program?.config?.total_stamps;
   const [editingTemplate, setEditingTemplate] =
     useState<NotificationTemplate | null>(null);
 
@@ -133,6 +137,9 @@ export default function ProgramNotificationsPage() {
               />
             )}
           </div>
+
+          {/* Milestones — only visible on Growth/Pro (backend returns limit=0 for Starter) */}
+          {isEditable && <MilestoneSection totalStamps={totalStamps} />}
         </div>
 
         {/* ─── Right column — side widgets ────────────────────── */}
@@ -156,17 +163,19 @@ export default function ProgramNotificationsPage() {
               </div>
 
               <ol className="space-y-2">
-                {[
-                  t('howItWorks.step1'),
-                  t('howItWorks.step2'),
-                  t('howItWorks.step3'),
-                ].map((step, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
+                {(
+                  [
+                    { key: 'step1', text: t('howItWorks.step1') },
+                    { key: 'step2', text: t('howItWorks.step2') },
+                    { key: 'step3', text: t('howItWorks.step3') },
+                  ] as const
+                ).map((step, i) => (
+                  <li key={step.key} className="flex items-start gap-2.5">
                     <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] flex items-center justify-center text-[10px] font-bold text-[#8A8A8A] mt-0.5">
                       {i + 1}
                     </span>
                     <span className="text-[12px] text-[#555] leading-[1.45]">
-                      {step}
+                      {step.text}
                     </span>
                   </li>
                 ))}

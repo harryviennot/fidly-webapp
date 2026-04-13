@@ -65,10 +65,33 @@
       "description": "Send a special message when a customer reaches a specific stamp count",
       "add": "Add milestone",
       "usage": "{count} of {max} used",
-      "empty": "No milestones yet",
+      "unlimited": "{count} milestones",
+      "empty": "No milestones yet. Add one to send a custom message at a specific stamp count.",
       "condition": "When customer reaches {count} stamps",
+      "conditionShort": "At {count} stamps",
       "limitReached": "You've reached the milestone limit for Growth. Upgrade to Pro for unlimited milestones.",
-      "stampCountLabel": "Fires when stamp count equals"
+      "stampCountLabel": "Fires when stamp count equals",
+      "stampCountPlaceholder": "e.g. 5",
+      "createTitle": "New milestone",
+      "createDescription": "Send a custom notification when customers hit a specific stamp count.",
+      "editTitle": "Edit milestone",
+      "editDescription": "Update the stamp count or the message for this milestone.",
+      "deleteConfirmTitle": "Delete milestone?",
+      "deleteConfirmDescription": "This milestone will stop firing for all customers.",
+      "deleteButton": "Delete milestone",
+      "errors": {
+        "duplicate": "A milestone at this stamp count already exists.",
+        "quotaExceeded": "You've reached your milestone limit. Upgrade to Pro for unlimited milestones.",
+        "invalidStampCount": "Stamp count must be a positive number."
+      },
+      "toasts": {
+        "created": "Milestone added",
+        "createFailed": "Failed to add milestone",
+        "updated": "Milestone updated",
+        "updateFailed": "Failed to update milestone",
+        "deleted": "Milestone deleted",
+        "deleteFailed": "Failed to delete milestone"
+      }
     },
     "nearReward": {
       "title": "Near-reward notification",

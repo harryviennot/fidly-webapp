@@ -7,3 +7,5 @@ export { UpgradeCTA } from './UpgradeCTA';
 export { IconUploadCard } from './IconUploadCard';
 export { TriggerCard } from './TriggerCard';
 export { TriggerEditSheet } from './TriggerEditSheet';
+export { MilestoneSection } from './MilestoneSection';
+export { MilestoneCreateSheet } from './MilestoneCreateSheet';

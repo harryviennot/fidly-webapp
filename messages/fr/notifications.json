@@ -65,10 +65,33 @@
       "description": "Envoyez un message spécial lorsqu'un client atteint un nombre précis de tampons",
       "add": "Ajouter un palier",
       "usage": "{count} sur {max} utilisés",
-      "empty": "Aucun palier pour le moment",
+      "unlimited": "{count} paliers",
+      "empty": "Aucun palier pour le moment. Ajoutez-en un pour envoyer un message personnalisé à un nombre précis de tampons.",
       "condition": "Quand le client atteint {count} tampons",
+      "conditionShort": "À {count} tampons",
       "limitReached": "Vous avez atteint la limite de paliers avec Growth. Passez à Pro pour des paliers illimités.",
-      "stampCountLabel": "Se déclenche quand le nombre de tampons est égal à"
+      "stampCountLabel": "Se déclenche quand le nombre de tampons est égal à",
+      "stampCountPlaceholder": "ex. 5",
+      "createTitle": "Nouveau palier",
+      "createDescription": "Envoyez une notification personnalisée quand vos clients atteignent un nombre précis de tampons.",
+      "editTitle": "Modifier le palier",
+      "editDescription": "Modifiez le nombre de tampons ou le message de ce palier.",
+      "deleteConfirmTitle": "Supprimer ce palier ?",
+      "deleteConfirmDescription": "Ce palier ne se déclenchera plus pour aucun client.",
+      "deleteButton": "Supprimer le palier",
+      "errors": {
+        "duplicate": "Un palier avec ce nombre de tampons existe déjà.",
+        "quotaExceeded": "Vous avez atteint la limite de paliers. Passez à Pro pour des paliers illimités.",
+        "invalidStampCount": "Le nombre de tampons doit être un nombre positif."
+      },
+      "toasts": {
+        "created": "Palier ajouté",
+        "createFailed": "Échec de l'ajout du palier",
+        "updated": "Palier mis à jour",
+        "updateFailed": "Échec de la mise à jour",
+        "deleted": "Palier supprimé",
+        "deleteFailed": "Échec de la suppression"
+      }
     },
     "nearReward": {
       "title": "Notification de récompense proche",
