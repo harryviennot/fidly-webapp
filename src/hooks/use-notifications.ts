@@ -65,14 +65,14 @@ export function useUpdateNotificationTemplate(
     mutationFn: (args: {
       trigger: TriggerType;
       body: LocalizedBody;
-      triggerConfig?: { stamp_equals?: number; stamps_before_reward?: number };
+      isEnabled?: boolean;
     }) => {
       if (!businessId) throw new Error('businessId required');
       return updateNotificationTemplate(
         businessId,
         args.trigger,
         args.body,
-        args.triggerConfig
+        args.isEnabled ?? true
       );
     },
     onSuccess: () => {

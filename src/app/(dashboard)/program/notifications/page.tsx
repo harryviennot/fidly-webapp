@@ -1,47 +1,67 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
-import { BellIcon, LightningIcon } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
+import { BellIcon, LightningIcon, BracketsCurlyIcon } from '@phosphor-icons/react';
 import { PageHeader } from '@/components/redesign';
 import { LoadingSpinner } from '@/components/reusables/loading-spinner';
 import { InfoBox } from '@/components/reusables/info-box';
 import {
   IconUploadCard,
   TriggerCard,
-  PhonePreview,
+  TriggerEditSheet,
 } from '@/components/notifications';
 import { useNotificationTemplates } from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
-import type { TriggerType } from '@/types/notification';
+import type { NotificationTemplate, TriggerType } from '@/types/notification';
+
+// Canonical default bodies per trigger — mirror
+// backend/app/services/programs/notification_defaults.py. The edit sheet
+// uses these as the source of truth for variable validation and reset.
+const DEFAULT_BODIES: Record<string, { en: string; fr: string }> = {
+  stamp_added: {
+    en: 'Stamp collected! You have {{stamp_count}} of {{total_stamps}} stamps.',
+    fr: 'Tampon collecté ! Vous avez {{stamp_count}} sur {{total_stamps}} tampons.',
+  },
+  reward_earned: {
+    en: 'You unlocked your reward! Come claim it.',
+    fr: 'Vous avez débloqué votre récompense ! Venez la récupérer.',
+  },
+  reward_redeemed: {
+    en: 'Reward redeemed. Enjoy your {{reward_name}}!',
+    fr: 'Récompense utilisée. Profitez de votre {{reward_name}} !',
+  },
+};
+
+const VARIABLES_REFERENCE: Array<{
+  key: string;
+  example: string;
+}> = [
+  { key: 'stamp_count', example: '3' },
+  { key: 'total_stamps', example: '10' },
+  { key: 'reward_name', example: 'Free Coffee' },
+];
 
 export default function ProgramNotificationsPage() {
   const t = useTranslations('notifications');
-  const uiLocale = useLocale() as 'en' | 'fr';
   const { currentBusiness } = useBusiness();
   const { data, isLoading, error } = useNotificationTemplates(
     currentBusiness?.id
   );
 
   const templates = useMemo(() => data?.items ?? [], [data]);
-  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType | null>(
-    null
-  );
+  const isEditable = templates.some((tpl) => tpl.is_editable);
+  const [editingTemplate, setEditingTemplate] =
+    useState<NotificationTemplate | null>(null);
 
-  const activeTemplate =
-    templates.find((tpl) => tpl.trigger === selectedTrigger) ?? templates[0];
+  const handleEdit = (trigger: TriggerType) => {
+    const tpl = templates.find((t) => t.trigger === trigger);
+    if (tpl) setEditingTemplate(tpl);
+  };
 
-  const previewBody =
-    activeTemplate?.body[uiLocale] || activeTemplate?.body.en || '';
-
-  // Interpolate mock values so the preview feels alive
-  const renderedPreview = previewBody
-    .replace(/\{\{stamp_count\}\}/g, '3')
-    .replace(/\{\{total_stamps\}\}/g, '10')
-    .replace(/\{\{stamps_left\}\}/g, '7')
-    .replace(/\{\{reward_name\}\}/g, 'Free Coffee')
-    .replace(/\{\{business_name\}\}/g, currentBusiness?.name ?? '')
-    .replace(/\{\{customer_first_name\}\}/g, 'Sarah');
+  const editingDefaultBody = editingTemplate
+    ? DEFAULT_BODIES[editingTemplate.trigger] ?? { en: '', fr: '' }
+    : { en: '', fr: '' };
 
   return (
     <div
@@ -53,10 +73,8 @@ export default function ProgramNotificationsPage() {
       <div className="flex gap-[14px] flex-col min-[1080px]:flex-row min-[1080px]:items-start">
         {/* ─── Left column ──────────────────────────────────────── */}
         <div className="flex-1 flex flex-col gap-[14px] min-w-0">
-          {/* Notification icon — read-only preview, canonical upload in /settings */}
           <IconUploadCard readOnly />
 
-          {/* Automated messages — list of trigger rows */}
           <div
             className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up"
             style={{ animationDelay: '80ms' }}
@@ -88,9 +106,11 @@ export default function ProgramNotificationsPage() {
                   <TriggerCard
                     key={template.trigger}
                     template={template}
-                    readOnly
-                    selected={template.trigger === activeTemplate?.trigger}
-                    onSelect={setSelectedTrigger}
+                    readOnly={!template.is_editable}
+                    onSelect={
+                      template.is_editable ? handleEdit : undefined
+                    }
+                    onEdit={handleEdit}
                   />
                 ))}
               </div>
@@ -105,8 +125,7 @@ export default function ProgramNotificationsPage() {
               </div>
             )}
 
-            {/* Plan gate notice for Starter */}
-            {!isLoading && !error && templates.length > 0 && !activeTemplate?.is_editable && (
+            {!isLoading && !error && templates.length > 0 && !isEditable && (
               <InfoBox
                 variant="note"
                 className="mt-4"
@@ -116,39 +135,12 @@ export default function ProgramNotificationsPage() {
           </div>
         </div>
 
-        {/* ─── Right column — sticky preview ────────────────────── */}
+        {/* ─── Right column — side widgets ────────────────────── */}
         <div
           className="hidden min-[1080px]:flex w-[290px] min-w-[290px] flex-shrink-0 flex-col animate-slide-up"
           style={{ animationDelay: '350ms' }}
         >
           <div className="min-[1080px]:sticky min-[1080px]:top-5 flex flex-col gap-[14px]">
-            {/* Phone preview */}
-            <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
-              <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wide mb-3.5">
-                {t('preview.title')}
-              </div>
-
-              {activeTemplate ? (
-                <PhonePreview
-                  iconUrl={currentBusiness?.icon_url ?? null}
-                  businessName={currentBusiness?.name ?? ''}
-                  body={renderedPreview}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-[320px] rounded-xl bg-[var(--muted)] border border-dashed border-[var(--border-dark)]">
-                  <p className="text-[11px] text-[#A5A5A5]">
-                    {t('preview.description')}
-                  </p>
-                </div>
-              )}
-
-              {activeTemplate && (
-                <p className="text-[11px] text-[#8A8A8A] mt-3 text-center leading-[1.4]">
-                  {t(`triggers.${activeTemplate.trigger}.description`)}
-                </p>
-              )}
-            </div>
-
             {/* How it works */}
             <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
               <div className="flex items-center gap-2 mb-3">
@@ -186,9 +178,50 @@ export default function ProgramNotificationsPage() {
                 </p>
               </div>
             </div>
+
+            {/* Variables reference */}
+            <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
+                  <BracketsCurlyIcon
+                    className="h-3.5 w-3.5 text-[var(--accent)]"
+                    weight="bold"
+                  />
+                </div>
+                <div className="text-[13px] font-semibold text-[#1A1A1A]">
+                  {t('variablesReference.title')}
+                </div>
+              </div>
+
+              <p className="text-[11px] text-[#8A8A8A] leading-[1.45] mb-3">
+                {t('variablesReference.description')}
+              </p>
+
+              <div className="flex flex-col gap-1.5">
+                {VARIABLES_REFERENCE.map((v) => (
+                  <div
+                    key={v.key}
+                    className="flex items-center justify-between px-2.5 py-1.5 rounded-[8px] bg-[var(--paper)] border border-[var(--border-light)]"
+                  >
+                    <code className="text-[11px] font-mono text-[var(--accent)]">
+                      {`{{${v.key}}}`}
+                    </code>
+                    <span className="text-[10px] text-[#A0A0A0]">
+                      → {v.example}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <TriggerEditSheet
+        template={editingTemplate}
+        onClose={() => setEditingTemplate(null)}
+        defaultBody={editingDefaultBody}
+      />
     </div>
   );
 }

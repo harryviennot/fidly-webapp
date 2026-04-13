@@ -22,9 +22,10 @@
       "step3": "La notification apparaît sur son écran verrouillé.",
       "note": "Les notifications sont envoyées directement via Apple et Google Wallet — aucune installation d'application requise."
     },
-    "preview": {
-      "title": "Aperçu",
-      "description": "Cliquez sur un message à gauche pour voir à quoi il ressemble sur le téléphone d'un client"
+    "variablesReference": {
+      "title": "Variables disponibles",
+      "description": "Utilisez ces variables dans votre message. Elles seront remplacées par les vraies valeurs lors de l'envoi.",
+      "example": "Exemple"
     },
     "triggers": {
       "sectionTitle": "Messages automatiques",

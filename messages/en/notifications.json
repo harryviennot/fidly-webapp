@@ -22,9 +22,10 @@
       "step3": "They see the notification on their lock screen.",
       "note": "Notifications are delivered directly through Apple and Google Wallet — no app install required."
     },
-    "preview": {
-      "title": "Live preview",
-      "description": "Tap a message on the left to see how it looks on a customer's phone"
+    "variablesReference": {
+      "title": "Available variables",
+      "description": "Use these placeholders in your message. They will be replaced with real values when the notification is sent.",
+      "example": "Example"
     },
     "triggers": {
       "sectionTitle": "Automated messages",

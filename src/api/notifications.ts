@@ -96,7 +96,7 @@ export async function updateNotificationTemplate(
   businessId: string,
   trigger: TriggerType,
   body: LocalizedBody,
-  triggerConfig?: { stamp_equals?: number; stamps_before_reward?: number }
+  isEnabled: boolean = true
 ): Promise<NotificationTemplate> {
   if (USE_MOCKS) {
     const existing = MOCK_TEMPLATES_RESPONSE.items.find(
@@ -105,7 +105,7 @@ export async function updateNotificationTemplate(
     if (!existing) throw new Error(`Unknown trigger: ${trigger}`);
     existing.body = body;
     existing.is_customized = true;
-    if (triggerConfig) existing.trigger_config = triggerConfig;
+    existing.is_enabled = isEnabled;
     return existing;
   }
 
@@ -114,7 +114,7 @@ export async function updateNotificationTemplate(
     {
       method: 'PUT',
       headers: await getAuthHeaders(),
-      body: JSON.stringify({ body, trigger_config: triggerConfig }),
+      body: JSON.stringify({ body, is_enabled: isEnabled }),
     }
   );
 
