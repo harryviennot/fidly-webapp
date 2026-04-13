@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { FloppyDisk } from '@phosphor-icons/react';
+import { FloppyDiskIcon } from '@phosphor-icons/react';
 import {
   Sheet,
   SheetContent,
@@ -105,26 +105,12 @@ function MilestoneForm({
   const [stampEquals, setStampEquals] = useState<string>(
     milestone ? String(milestone.stamp_equals) : ''
   );
-
-  const initialEnabledLocales = useMemo<Locale[]>(() => {
-    const enabled: Locale[] = [primaryLocale];
-    (['en', 'fr'] as Locale[])
-      .filter((l) => l !== primaryLocale)
-      .forEach((l) => {
-        if ((milestone?.body[l] ?? '').trim()) enabled.push(l);
-      });
-    return enabled;
-  }, [primaryLocale, milestone]);
-
-  const [enabledLocales, setEnabledLocales] =
-    useState<Locale[]>(initialEnabledLocales);
   const [locale, setLocale] = useState<Locale>(primaryLocale);
   const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>({
     en: milestone?.body.en ?? '',
     fr: milestone?.body.fr ?? '',
   });
-  const enEditorRef = useRef<VariableEditorHandle>(null);
-  const frEditorRef = useRef<VariableEditorHandle>(null);
+  const editorRef = useRef<VariableEditorHandle>(null);
 
   const stampNumber = parseInt(stampEquals, 10);
   const stampValid = !Number.isNaN(stampNumber) && stampNumber > 0;
@@ -142,27 +128,14 @@ function MilestoneForm({
     bodyByLocale.fr !== (milestone.body.fr ?? '');
 
   const insertVariable = (variable: VariableKey) => {
-    const ref = locale === 'en' ? enEditorRef.current : frEditorRef.current;
-    ref?.insertVariable(variable);
-  };
-
-  const addLocale = (loc: Locale) => {
-    setEnabledLocales((prev) =>
-      prev.includes(loc) ? prev : [...prev, loc]
-    );
-  };
-
-  const removeLocale = (loc: Locale) => {
-    if (loc === primaryLocale) return;
-    setEnabledLocales((prev) => prev.filter((l) => l !== loc));
-    setBodyByLocale((prev) => ({ ...prev, [loc]: '' }));
+    editorRef.current?.insertVariable(variable);
   };
 
   const handleSave = async () => {
     if (!isValid) return;
     const payloadBody: Record<Locale, string> = {
-      en: enabledLocales.includes('en') ? bodyByLocale.en : '',
-      fr: enabledLocales.includes('fr') ? bodyByLocale.fr : '',
+      en: bodyByLocale.en,
+      fr: bodyByLocale.fr,
     };
     try {
       if (isEditMode) {
@@ -255,48 +228,27 @@ function MilestoneForm({
           value={locale}
           onValueChange={setLocale}
           primaryLocale={primaryLocale}
-          enabledLocales={enabledLocales}
-          onAddLocale={addLocale}
-          onRemoveLocale={removeLocale}
-          enContent={
-            enabledLocales.includes('en') ? (
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">
-                  {t('editor.bodyLabel')} (EN)
-                </Label>
-                <VariableEditor
-                  ref={enEditorRef}
-                  value={bodyByLocale.en}
-                  onChange={(next) =>
-                    setBodyByLocale((prev) => ({ ...prev, en: next }))
-                  }
-                  locale="en"
-                  placeholder="You're halfway to your reward!"
-                  ariaLabel={`${t('editor.bodyLabel')} EN`}
-                />
-              </div>
-            ) : null
-          }
-          frContent={
-            enabledLocales.includes('fr') ? (
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">
-                  {t('editor.bodyLabel')} (FR)
-                </Label>
-                <VariableEditor
-                  ref={frEditorRef}
-                  value={bodyByLocale.fr}
-                  onChange={(next) =>
-                    setBodyByLocale((prev) => ({ ...prev, fr: next }))
-                  }
-                  locale="fr"
-                  placeholder="Vous êtes à mi-chemin de votre récompense !"
-                  ariaLabel={`${t('editor.bodyLabel')} FR`}
-                />
-              </div>
-            ) : null
-          }
         />
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">
+            {t('editor.bodyLabel')}
+          </Label>
+          <VariableEditor
+            key={locale}
+            ref={editorRef}
+            value={bodyByLocale[locale]}
+            onChange={(next) =>
+              setBodyByLocale((prev) => ({ ...prev, [locale]: next }))
+            }
+            locale={locale}
+            placeholder={
+              locale === 'fr'
+                ? 'Vous êtes à mi-chemin de votre récompense !'
+                : "You're halfway to your reward!"
+            }
+            ariaLabel={t('editor.bodyLabel')}
+          />
+        </div>
 
         <VariableChips
           variables={MILESTONE_VARIABLES}
@@ -342,7 +294,7 @@ function MilestoneForm({
             onClick={handleSave}
             disabled={!isValid || !isDirty || pending}
           >
-            <FloppyDisk className="h-3.5 w-3.5" />
+            <FloppyDiskIcon className="h-3.5 w-3.5" />
             {pending ? '...' : t('editor.save')}
           </Button>
         </div>

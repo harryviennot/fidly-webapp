@@ -1,113 +1,109 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { PlusIcon, XIcon } from '@phosphor-icons/react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { TranslateIcon, CheckIcon } from '@phosphor-icons/react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { Locale } from '@/types/notification';
 
-interface LocaleTabsProps {
+interface LocaleSwitcherProps {
+  /** The locale currently being edited. */
   value: Locale;
+  /** Switch to editing a different locale. */
   onValueChange: (value: Locale) => void;
-  /** Business's primary locale — always shown first and cannot be removed. */
+  /** Business's primary locale — always shown at the top of the list. */
   primaryLocale: Locale;
-  /** The locales currently displayed as tabs. Must include primaryLocale. */
-  enabledLocales: Locale[];
-  /** Add/remove a secondary locale tab. */
-  onAddLocale: (locale: Locale) => void;
-  onRemoveLocale: (locale: Locale) => void;
-  enContent: React.ReactNode;
-  frContent: React.ReactNode;
   className?: string;
 }
 
 const ALL_LOCALES: Locale[] = ['fr', 'en'];
 
-const LOCALE_LABELS: Record<Locale, string> = {
-  fr: 'FR',
-  en: 'EN',
+const LOCALE_FLAGS: Record<Locale, string> = {
+  fr: '🇫🇷',
+  en: '🇬🇧',
 };
 
+const LOCALE_NATIVE: Record<Locale, string> = {
+  fr: 'Français',
+  en: 'English',
+};
+
+/**
+ * Language picker for the notification editor.
+ *
+ * Shows the active language on the left and a "Translations" dropdown on the
+ * right that lists every supported locale, clicking one switches the editor
+ * to that locale. Primary locale is pinned first. The room to grow into
+ * more locales later was the explicit reason for preferring a dropdown over
+ * a row of tabs — keeps the header compact even with 5+ languages.
+ */
 export function LocaleTabs({
   value,
   onValueChange,
   primaryLocale,
-  enabledLocales,
-  onAddLocale,
-  onRemoveLocale,
-  enContent,
-  frContent,
   className,
-}: Readonly<LocaleTabsProps>) {
+}: Readonly<LocaleSwitcherProps>) {
   const t = useTranslations('notifications.editor');
 
-  // Always render the primary locale first, then the remaining enabled ones
-  // in the canonical order so the tab order is stable across re-renders.
-  const primary = primaryLocale;
-  const secondaries = enabledLocales.filter((l) => l !== primary);
-  const orderedLocales: Locale[] = [primary, ...secondaries];
-
-  const availableToAdd = ALL_LOCALES.filter(
-    (l) => !enabledLocales.includes(l)
-  );
+  const orderedLocales: Locale[] = [
+    primaryLocale,
+    ...ALL_LOCALES.filter((l) => l !== primaryLocale),
+  ];
 
   return (
-    <Tabs
-      value={value}
-      onValueChange={(v) => onValueChange(v as Locale)}
-      className={className}
-    >
-      <div className="flex items-center gap-2">
-        <TabsList>
+    <div className={cn('flex items-center justify-between gap-2', className)}>
+      <div className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-foreground">
+        <span className="text-[13px] leading-none">{LOCALE_FLAGS[value]}</span>
+        {LOCALE_NATIVE[value]}
+      </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 rounded-full bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-black/85 transition-colors"
+          >
+            <TranslateIcon className="h-3.5 w-3.5" weight="bold" />
+            {t('translations')}
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[200px]">
+          <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
+            {t('translations')}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
           {orderedLocales.map((loc) => {
-            const isPrimary = loc === primary;
-            const isActive = value === loc;
+            const isActive = loc === value;
             return (
-              <TabsTrigger key={loc} value={loc} className="gap-1.5">
-                {LOCALE_LABELS[loc]}
-                {!isPrimary && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isActive) onValueChange(primary);
-                      onRemoveLocale(loc);
-                    }}
-                    aria-label={t('removeTranslation')}
-                    className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-muted-foreground hover:bg-black/10 hover:text-foreground"
-                  >
-                    <XIcon className="h-2.5 w-2.5" weight="bold" />
-                  </button>
+              <DropdownMenuItem
+                key={loc}
+                onSelect={() => onValueChange(loc)}
+                className="flex items-center justify-between gap-3"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <span className="text-[14px] leading-none">
+                    {LOCALE_FLAGS[loc]}
+                  </span>
+                  {LOCALE_NATIVE[loc]}
+                </span>
+                {isActive && (
+                  <CheckIcon
+                    className="h-3.5 w-3.5 text-[var(--accent)]"
+                    weight="bold"
+                  />
                 )}
-              </TabsTrigger>
+              </DropdownMenuItem>
             );
           })}
-        </TabsList>
-        {availableToAdd.length > 0 && (
-          <div className="flex items-center gap-1">
-            {availableToAdd.map((loc) => (
-              <button
-                key={loc}
-                type="button"
-                onClick={() => {
-                  onAddLocale(loc);
-                  onValueChange(loc);
-                }}
-                className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-xs text-muted-foreground hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
-              >
-                <PlusIcon className="h-3 w-3" weight="bold" />
-                {LOCALE_LABELS[loc]}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-      <TabsContent value="en" className={cn('mt-3')}>
-        {enContent}
-      </TabsContent>
-      <TabsContent value="fr" className={cn('mt-3')}>
-        {frContent}
-      </TabsContent>
-    </Tabs>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

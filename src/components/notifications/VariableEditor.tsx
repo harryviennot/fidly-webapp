@@ -224,8 +224,9 @@ export const VariableEditor = forwardRef<VariableEditorHandle, VariableEditorPro
         onInput={handleInput}
         onClick={handleClick}
         className={cn(
-          'var-editor min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm',
-          'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          'var-editor min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs',
+          'outline-none transition-[color,box-shadow]',
+          'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
           'whitespace-pre-wrap break-words',
           className
         )}

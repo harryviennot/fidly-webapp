@@ -1,9 +1,12 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { ArrowCounterClockwise, FloppyDisk } from '@phosphor-icons/react';
+import {
+  ArrowCounterClockwiseIcon,
+  FloppyDiskIcon,
+} from '@phosphor-icons/react';
 import {
   Sheet,
   SheetContent,
@@ -32,11 +35,7 @@ import {
   VariableEditor,
   type VariableEditorHandle,
 } from './VariableEditor';
-import type {
-  NotificationTemplate,
-  Locale,
-  TriggerType,
-} from '@/types/notification';
+import type { NotificationTemplate, Locale } from '@/types/notification';
 
 interface TriggerEditSheetProps {
   template: NotificationTemplate | null;
@@ -91,65 +90,38 @@ function EditForm({
 
   const primaryLocale: Locale = currentBusiness?.primary_locale ?? 'fr';
 
-  // Enabled locales: the primary locale is always on. Any secondary locale
-  // that already has saved content on load is also on. The user can toggle
-  // additional ones via the LocaleTabs "+ EN/FR" button.
-  const initialEnabledLocales = useMemo<Locale[]>(() => {
-    const enabled: Locale[] = [primaryLocale];
-    (['en', 'fr'] as Locale[])
-      .filter((l) => l !== primaryLocale)
-      .forEach((l) => {
-        if ((template.body[l] ?? '').trim()) enabled.push(l);
-      });
-    return enabled;
-  }, [primaryLocale, template.body]);
-
-  const [enabledLocales, setEnabledLocales] =
-    useState<Locale[]>(initialEnabledLocales);
   const [locale, setLocale] = useState<Locale>(primaryLocale);
   const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>({
     en: template.body.en ?? '',
     fr: template.body.fr ?? '',
   });
-  const enEditorRef = useRef<VariableEditorHandle>(null);
-  const frEditorRef = useRef<VariableEditorHandle>(null);
+  const editorRef = useRef<VariableEditorHandle>(null);
 
   // Show every known variable as an insertable chip — no parity check.
   const insertableVariables = VARIABLE_KEYS as readonly VariableKey[];
 
   const currentBody = bodyByLocale[locale];
   const primaryBody = bodyByLocale[primaryLocale];
+  // Valid as long as the primary locale is non-empty; secondary locales
+  // are optional — empty ones fall back to the system default at send time.
   const isValid = primaryBody.trim().length > 0;
 
   const insertVariable = (key: VariableKey) => {
-    const ref = locale === 'en' ? enEditorRef.current : frEditorRef.current;
-    ref?.insertVariable(key);
+    editorRef.current?.insertVariable(key);
   };
 
-  const addLocale = (loc: Locale) => {
-    setEnabledLocales((prev) =>
-      prev.includes(loc) ? prev : [...prev, loc]
-    );
-    // Seed with the default body for the locale if the user has nothing yet.
-    setBodyByLocale((prev) =>
-      prev[loc] ? prev : { ...prev, [loc]: defaultBody[loc] ?? '' }
-    );
-  };
-
-  const removeLocale = (loc: Locale) => {
-    if (loc === primaryLocale) return;
-    setEnabledLocales((prev) => prev.filter((l) => l !== loc));
-    setBodyByLocale((prev) => ({ ...prev, [loc]: '' }));
+  const resetLocaleBody = (loc: Locale) => {
+    setBodyByLocale((prev) => ({ ...prev, [loc]: defaultBody[loc] ?? '' }));
   };
 
   const handleSave = async () => {
     const payload: Record<Locale, string> = {
-      en: enabledLocales.includes('en') ? bodyByLocale.en : '',
-      fr: enabledLocales.includes('fr') ? bodyByLocale.fr : '',
+      en: bodyByLocale.en,
+      fr: bodyByLocale.fr,
     };
     try {
       await updateMutation.mutateAsync({
-        trigger: template.trigger as TriggerType,
+        trigger: template.trigger,
         body: payload,
       });
       toast.success(tToast('saved'));
@@ -169,7 +141,7 @@ function EditForm({
       return;
     }
     try {
-      await resetMutation.mutateAsync(template.trigger as TriggerType);
+      await resetMutation.mutateAsync(template.trigger);
       toast.success(tToast('reset'));
       onClose();
     } catch (err) {
@@ -195,39 +167,19 @@ function EditForm({
           value={locale}
           onValueChange={setLocale}
           primaryLocale={primaryLocale}
-          enabledLocales={enabledLocales}
-          onAddLocale={addLocale}
-          onRemoveLocale={removeLocale}
-          enContent={
-            enabledLocales.includes('en') ? (
-              <LocaleBodyField
-                locale="en"
-                labelSuffix="(EN)"
-                value={bodyByLocale.en}
-                placeholder={defaultBody.en}
-                onChange={(next) =>
-                  setBodyByLocale((prev) => ({ ...prev, en: next }))
-                }
-                editorRef={enEditorRef}
-                t={t}
-              />
-            ) : null
+        />
+
+        <LocaleBodyField
+          key={locale}
+          locale={locale}
+          value={bodyByLocale[locale]}
+          placeholder={defaultBody[locale] ?? ''}
+          onChange={(next) =>
+            setBodyByLocale((prev) => ({ ...prev, [locale]: next }))
           }
-          frContent={
-            enabledLocales.includes('fr') ? (
-              <LocaleBodyField
-                locale="fr"
-                labelSuffix="(FR)"
-                value={bodyByLocale.fr}
-                placeholder={defaultBody.fr}
-                onChange={(next) =>
-                  setBodyByLocale((prev) => ({ ...prev, fr: next }))
-                }
-                editorRef={frEditorRef}
-                t={t}
-              />
-            ) : null
-          }
+          onReset={() => resetLocaleBody(locale)}
+          editorRef={editorRef}
+          t={t}
         />
 
         <VariableChips
@@ -259,7 +211,7 @@ function EditForm({
             onClick={handleReset}
             disabled={resetMutation.isPending || updateMutation.isPending}
           >
-            <ArrowCounterClockwise className="h-3.5 w-3.5" />
+            <ArrowCounterClockwiseIcon className="h-3.5 w-3.5" />
             {t('editor.reset')}
           </Button>
           <div className="flex gap-2">
@@ -277,7 +229,7 @@ function EditForm({
               onClick={handleSave}
               disabled={!isValid || updateMutation.isPending}
             >
-              <FloppyDisk className="h-3.5 w-3.5" />
+              <FloppyDiskIcon className="h-3.5 w-3.5" />
               {updateMutation.isPending ? '...' : t('editor.save')}
             </Button>
           </div>
@@ -289,35 +241,45 @@ function EditForm({
 
 interface LocaleBodyFieldProps {
   locale: Locale;
-  labelSuffix: string;
   value: string;
   placeholder: string;
   onChange: (next: string) => void;
+  onReset: () => void;
   editorRef: React.Ref<VariableEditorHandle>;
   t: ReturnType<typeof useTranslations>;
 }
 
 function LocaleBodyField({
   locale,
-  labelSuffix,
   value,
   placeholder,
   onChange,
+  onReset,
   editorRef,
   t,
 }: Readonly<LocaleBodyFieldProps>) {
   return (
     <div className="space-y-2">
-      <Label className="text-xs text-muted-foreground">
-        {t('editor.bodyLabel')} {labelSuffix}
-      </Label>
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-xs text-muted-foreground">
+          {t('editor.bodyLabel')}
+        </Label>
+        <button
+          type="button"
+          onClick={onReset}
+          className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          <ArrowCounterClockwiseIcon className="h-3 w-3" />
+          {t('editor.resetLocale')}
+        </button>
+      </div>
       <VariableEditor
         ref={editorRef}
         value={value}
         onChange={onChange}
         locale={locale}
         placeholder={placeholder}
-        ariaLabel={`${t('editor.bodyLabel')} ${labelSuffix}`}
+        ariaLabel={t('editor.bodyLabel')}
       />
     </div>
   );

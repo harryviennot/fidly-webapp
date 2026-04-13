@@ -108,8 +108,7 @@
       "save": "Enregistrer",
       "cancel": "Annuler",
       "translations": "Traductions",
-      "addTranslation": "Ajouter une traduction",
-      "removeTranslation": "Retirer",
+      "resetLocale": "Réinitialiser cette langue",
       "emptyBody": "Le message ne peut pas être vide",
       "variables": {
         "stamp_count": "Nombre de tampons actuel",

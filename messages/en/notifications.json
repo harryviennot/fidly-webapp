@@ -108,8 +108,7 @@
       "save": "Save",
       "cancel": "Cancel",
       "translations": "Translations",
-      "addTranslation": "Add translation",
-      "removeTranslation": "Remove",
+      "resetLocale": "Reset this language",
       "emptyBody": "Message cannot be empty",
       "variables": {
         "stamp_count": "Current stamp count",
