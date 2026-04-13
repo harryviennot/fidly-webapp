@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 import { useBusiness } from '@/contexts/business-context';
 import {
   useUpdateNotificationTemplate,
@@ -107,6 +109,9 @@ function EditForm({
     en: template.body.en ?? '',
     fr: template.body.fr ?? '',
   });
+  const [isEnabled, setIsEnabled] = useState<boolean>(
+    template.is_enabled !== false
+  );
   const editorRef = useRef<VariableEditorHandle>(null);
 
   // Show every known variable as an insertable chip — no parity check.
@@ -114,9 +119,20 @@ function EditForm({
 
   const currentBody = bodyByLocale[locale];
   const primaryBody = bodyByLocale[primaryLocale];
-  // Valid as long as the primary locale is non-empty; secondary locales
-  // are optional — empty ones fall back to the system default at send time.
-  const isValid = primaryBody.trim().length > 0;
+
+  // Did the user touch the body since load? Starter businesses can't, so
+  // on Starter this is always false and we send an is_enabled-only payload.
+  const isBodyDirty =
+    bodyByLocale.en !== (template.body.en ?? '') ||
+    bodyByLocale.fr !== (template.body.fr ?? '');
+  const isEnabledDirty = isEnabled !== (template.is_enabled !== false);
+
+  // Save is enabled whenever something has actually changed AND, when the
+  // body has been touched, the primary locale still has content. Pure
+  // opt-out toggles (is_enabled only) save even if the body is empty.
+  const canSave =
+    (isBodyDirty || isEnabledDirty) &&
+    (!isBodyDirty || primaryBody.trim().length > 0);
 
   const insertVariable = (key: VariableKey) => {
     editorRef.current?.insertVariable(key);
@@ -127,14 +143,16 @@ function EditForm({
   };
 
   const handleSave = async () => {
-    const payload: Record<Locale, string> = {
-      en: bodyByLocale.en,
-      fr: bodyByLocale.fr,
-    };
     try {
       await updateMutation.mutateAsync({
         trigger: template.trigger,
-        body: payload,
+        // Only include `body` if the user actually edited it. A pure
+        // toggle flow sends only `isEnabled` so the backend skips its
+        // plan gate and the request succeeds on Starter.
+        body: isBodyDirty
+          ? { en: bodyByLocale.en, fr: bodyByLocale.fr }
+          : undefined,
+        isEnabled: isEnabledDirty ? isEnabled : undefined,
       });
       toast.success(tToast('saved'));
       onClose();
@@ -175,39 +193,73 @@ function EditForm({
       </SheetHeader>
 
       <div className="flex-1 overflow-y-auto px-4 pb-2 space-y-4">
-        <LocaleTabs
-          value={locale}
-          onValueChange={setLocale}
-          primaryLocale={primaryLocale}
-        />
+        {/* Enable/disable row — sits at the top of the scrollable area so it
+            doesn't collide with the Sheet's built-in close button. Always
+            interactive, even on Starter where the body editor is read-only. */}
+        <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2.5">
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-medium text-foreground">
+              {isEnabled ? t('editor.enabled') : t('editor.disabled')}
+            </div>
+            {!isEnabled && (
+              <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                {t('editor.disabledHint')}
+              </p>
+            )}
+          </div>
+          <Switch
+            checked={isEnabled}
+            onCheckedChange={setIsEnabled}
+            aria-label={t('editor.enabled')}
+          />
+        </div>
 
-        <LocaleBodyField
-          key={locale}
-          locale={locale}
-          value={bodyByLocale[locale]}
-          placeholder={defaultBody[locale] ?? ''}
-          onChange={(next) =>
-            setBodyByLocale((prev) => ({ ...prev, [locale]: next }))
-          }
-          onReset={() => resetLocaleBody(locale)}
-          editorRef={editorRef}
-          t={t}
-        />
+        <div
+          className={cn(
+            'space-y-4 transition-opacity',
+            !isEnabled && 'opacity-50 pointer-events-none'
+          )}
+          aria-hidden={!isEnabled}
+        >
+          <LocaleTabs
+            value={locale}
+            onValueChange={setLocale}
+            primaryLocale={primaryLocale}
+          />
 
-        <VariableChips
-          variables={insertableVariables as unknown as VariableKey[]}
-          onInsert={insertVariable}
-          locale={locale}
-          disabledVariables={
-            rewardNameSet ? undefined : DISABLED_WITHOUT_REWARD_NAME
-          }
-          disabledTooltips={{
-            reward_name: t('editor.rewardNameMissing'),
-          }}
-          disabledHrefs={{ reward_name: '/program/settings' }}
-        />
+          <LocaleBodyField
+            key={locale}
+            locale={locale}
+            value={bodyByLocale[locale]}
+            placeholder={defaultBody[locale] ?? ''}
+            onChange={(next) =>
+              setBodyByLocale((prev) => ({ ...prev, [locale]: next }))
+            }
+            onReset={() => resetLocaleBody(locale)}
+            editorRef={editorRef}
+            t={t}
+          />
 
-        <div className="pt-2">
+          <VariableChips
+            variables={insertableVariables as unknown as VariableKey[]}
+            onInsert={insertVariable}
+            locale={locale}
+            disabledVariables={
+              rewardNameSet ? undefined : DISABLED_WITHOUT_REWARD_NAME
+            }
+            disabledTooltips={{
+              reward_name: t('editor.rewardNameMissing'),
+            }}
+            disabledHrefs={{ reward_name: '/program/settings' }}
+          />
+        </div>
+
+        <div
+          className={cn(
+            'pt-2 transition-opacity',
+            !isEnabled && 'opacity-40'
+          )}
+        >
           <Label className="text-xs text-muted-foreground mb-2 block">
             {t('editor.previewLabel')}
           </Label>
@@ -246,7 +298,7 @@ function EditForm({
               variant="gradient"
               size="sm"
               onClick={handleSave}
-              disabled={!isValid || updateMutation.isPending}
+              disabled={!canSave || updateMutation.isPending}
             >
               <FloppyDiskIcon className="h-3.5 w-3.5" />
               {updateMutation.isPending ? '...' : t('editor.save')}

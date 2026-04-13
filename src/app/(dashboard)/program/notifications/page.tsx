@@ -18,7 +18,11 @@ import {
   TriggerEditSheet,
   MilestoneSection,
 } from '@/components/notifications';
-import { useNotificationTemplates } from '@/hooks/use-notifications';
+import { toast } from 'sonner';
+import {
+  useNotificationTemplates,
+  useUpdateNotificationTemplate,
+} from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
 import { cn } from '@/lib/utils';
 import { useProgram } from '../layout';
@@ -68,6 +72,8 @@ export default function ProgramNotificationsPage() {
   const { data, isLoading, error } = useNotificationTemplates(
     currentBusiness?.id
   );
+  const toggleMutation = useUpdateNotificationTemplate(currentBusiness?.id);
+  const tToast = useTranslations('notifications.toasts');
 
   const templates = useMemo(() => data?.items ?? [], [data]);
   const isEditable = templates.some((tpl) => tpl.is_editable);
@@ -80,6 +86,18 @@ export default function ProgramNotificationsPage() {
   const handleEdit = (trigger: TriggerType) => {
     const tpl = templates.find((t) => t.trigger === trigger);
     if (tpl) setEditingTemplate(tpl);
+  };
+
+  const handleToggleEnabled = async (
+    trigger: TriggerType,
+    enabled: boolean
+  ) => {
+    try {
+      await toggleMutation.mutateAsync({ trigger, isEnabled: enabled });
+      toast.success(enabled ? tToast('enabled') : tToast('disabled'));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : tToast('saveFailed'));
+    }
   };
 
   const editingDefaultBody = editingTemplate
@@ -134,6 +152,8 @@ export default function ProgramNotificationsPage() {
                       template.is_editable ? handleEdit : undefined
                     }
                     onEdit={handleEdit}
+                    onToggleEnabled={handleToggleEnabled}
+                    isTogglePending={toggleMutation.isPending}
                   />
                 ))}
               </div>

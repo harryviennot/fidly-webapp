@@ -96,29 +96,42 @@ export async function getNotificationTemplates(
   return response.json();
 }
 
+/**
+ * Update a notification template. Either `body` or `isEnabled` (or both)
+ * may be provided. Body-only updates are plan-gated on the backend; a
+ * request that only flips `isEnabled` is allowed on every plan so Starter
+ * businesses can opt out of base messages without unlocking custom copy.
+ */
 export async function updateNotificationTemplate(
   businessId: string,
   trigger: TriggerType,
-  body: LocalizedBody,
-  isEnabled: boolean = true
+  payload: { body?: LocalizedBody; isEnabled?: boolean }
 ): Promise<NotificationTemplate> {
   if (USE_MOCKS) {
     const existing = MOCK_TEMPLATES_RESPONSE.items.find(
       (t) => t.trigger === trigger
     );
     if (!existing) throw new Error(`Unknown trigger: ${trigger}`);
-    existing.body = body;
-    existing.is_customized = true;
-    existing.is_enabled = isEnabled;
+    if (payload.body !== undefined) {
+      existing.body = payload.body;
+      existing.is_customized = true;
+    }
+    if (payload.isEnabled !== undefined) {
+      existing.is_enabled = payload.isEnabled;
+    }
     return existing;
   }
+
+  const requestBody: Record<string, unknown> = {};
+  if (payload.body !== undefined) requestBody.body = payload.body;
+  if (payload.isEnabled !== undefined) requestBody.is_enabled = payload.isEnabled;
 
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/templates/${trigger}`,
     {
       method: 'PUT',
       headers: await getAuthHeaders(),
-      body: JSON.stringify({ body, is_enabled: isEnabled }),
+      body: JSON.stringify(requestBody),
     }
   );
 

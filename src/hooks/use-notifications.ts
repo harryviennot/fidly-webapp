@@ -72,16 +72,16 @@ export function useUpdateNotificationTemplate(
   return useMutation({
     mutationFn: (args: {
       trigger: TriggerType;
-      body: LocalizedBody;
+      /** Omit to keep the stored copy (opt-out-only flow). */
+      body?: LocalizedBody;
+      /** Omit to keep the stored enabled state. */
       isEnabled?: boolean;
     }) => {
       if (!businessId) throw new Error('businessId required');
-      return updateNotificationTemplate(
-        businessId,
-        args.trigger,
-        args.body,
-        args.isEnabled ?? true
-      );
+      return updateNotificationTemplate(businessId, args.trigger, {
+        body: args.body,
+        isEnabled: args.isEnabled,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

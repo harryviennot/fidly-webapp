@@ -10,6 +10,7 @@ import {
   Pencil,
   type Icon,
 } from '@phosphor-icons/react';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import {
   VARIABLE_PATTERN,
@@ -34,6 +35,10 @@ interface TriggerCardProps {
   selected?: boolean;
   onSelect?: (trigger: TriggerType) => void;
   onEdit?: (trigger: TriggerType) => void;
+  /** Inline opt-out toggle. When omitted the switch is not rendered. */
+  onToggleEnabled?: (trigger: TriggerType, enabled: boolean) => void;
+  /** Disable the inline switch while an update is in flight. */
+  isTogglePending?: boolean;
   className?: string;
 }
 
@@ -49,6 +54,8 @@ export function TriggerCard({
   selected = false,
   onSelect,
   onEdit,
+  onToggleEnabled,
+  isTogglePending = false,
   className,
 }: TriggerCardProps) {
   const t = useTranslations('notifications');
@@ -65,10 +72,18 @@ export function TriggerCard({
   );
   const hasEn = Boolean(template.body.en);
   const hasFr = Boolean(template.body.fr);
+  const isDisabled = template.is_enabled === false;
 
-  const statusPill = template.is_customized
-    ? t('card.customPill')
-    : t('card.defaultPill');
+  // Pill priority: disabled wins over customized/default so the user sees
+  // the opt-out state at a glance.
+  let statusPill: string;
+  if (isDisabled) {
+    statusPill = t('card.disabledPill');
+  } else if (template.is_customized) {
+    statusPill = t('card.customPill');
+  } else {
+    statusPill = t('card.defaultPill');
+  }
 
   const handleClick = () => {
     onSelect?.(template.trigger);
@@ -88,35 +103,58 @@ export function TriggerCard({
         selected
           ? 'border-[var(--accent)] bg-[var(--accent-light)]'
           : 'border-[var(--border-light)] bg-[var(--paper)] hover:border-[var(--border)]',
+        isDisabled && 'opacity-60 hover:opacity-100',
         className
       )}
     >
       <div
         className={cn(
           'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
-          selected ? 'bg-white' : 'bg-[var(--accent-light)]'
+          selected
+            ? 'bg-white'
+            : isDisabled
+              ? 'bg-[var(--paper-hover)]'
+              : 'bg-[var(--accent-light)]'
         )}
       >
-        <IconComponent className="h-4 w-4 text-[var(--accent)]" weight="fill" />
+        <IconComponent
+          className={cn(
+            'h-4 w-4',
+            isDisabled ? 'text-[#A0A0A0]' : 'text-[var(--accent)]'
+          )}
+          weight="fill"
+        />
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="text-[14px] font-semibold text-[#1A1A1A] truncate">
+          <span
+            className={cn(
+              'text-[14px] font-semibold truncate',
+              isDisabled ? 'text-[#8A8A8A]' : 'text-[#1A1A1A]'
+            )}
+          >
             {t(`triggers.${template.trigger}.name`)}
           </span>
           <span
             className={cn(
               'text-[9px] font-bold px-1.5 py-px rounded tracking-wide uppercase',
-              template.is_customized
-                ? 'bg-[var(--success-light)] text-[var(--success)]'
-                : 'bg-[var(--paper-hover)] text-[#A0A0A0]'
+              isDisabled
+                ? 'bg-[var(--paper-hover)] text-[#8A8A8A]'
+                : template.is_customized
+                  ? 'bg-[var(--success-light)] text-[var(--success)]'
+                  : 'bg-[var(--paper-hover)] text-[#A0A0A0]'
             )}
           >
             {statusPill}
           </span>
         </div>
-        <p className="text-[12px] text-[#8A8A8A] leading-[1.4] truncate">
+        <p
+          className={cn(
+            'text-[12px] leading-[1.4] truncate',
+            isDisabled ? 'text-[#A0A0A0] line-through' : 'text-[#8A8A8A]'
+          )}
+        >
           {previewBody || t(`triggers.${template.trigger}.description`)}
         </p>
       </div>
@@ -130,6 +168,25 @@ export function TriggerCard({
         {hasFr && (
           <span className="inline-flex items-center rounded border border-[var(--border-light)] bg-white px-1.5 py-0.5 text-[10px] font-medium text-[#8A8A8A]">
             {t('localePills.frSet')}
+          </span>
+        )}
+        {onToggleEnabled && (
+          // Wrapping span catches the pointer event so Radix's button
+          // click doesn't bubble to the card's onClick (which would also
+          // open the edit sheet). onPointerDown is enough for Radix.
+          <span
+            className="ml-1 inline-flex"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Switch
+              checked={template.is_enabled !== false}
+              disabled={isTogglePending}
+              onCheckedChange={(next) =>
+                onToggleEnabled(template.trigger, next)
+              }
+              aria-label={t('editor.enabled')}
+            />
           </span>
         )}
         {!readOnly && onEdit && (

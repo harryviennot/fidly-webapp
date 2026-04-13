@@ -109,6 +109,9 @@
       "cancel": "Annuler",
       "translations": "Traductions",
       "resetLocale": "Réinitialiser cette langue",
+      "enabled": "Activée",
+      "disabled": "Désactivée",
+      "disabledHint": "Une fois désactivée, la carte de fidélité se met toujours à jour en silence — les clients ne voient simplement pas de notification pour cet événement.",
       "rewardNameMissing": "Définissez une récompense dans les paramètres du programme pour utiliser cette variable.",
       "emptyBody": "Le message ne peut pas être vide",
       "variables": {
@@ -133,6 +136,8 @@
       "saveFailed": "Échec de l'enregistrement",
       "reset": "Réinitialisé",
       "resetFailed": "Échec de la réinitialisation",
+      "enabled": "Message réactivé",
+      "disabled": "Message désactivé",
       "iconUploaded": "Icône téléversée",
       "iconUploadFailed": "Échec du téléversement"
     },

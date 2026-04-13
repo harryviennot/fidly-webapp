@@ -109,6 +109,9 @@
       "cancel": "Cancel",
       "translations": "Translations",
       "resetLocale": "Reset this language",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "disabledHint": "When disabled, the loyalty card still updates silently — customers just don't see a notification for this event.",
       "rewardNameMissing": "Define a reward in your program settings to use this variable.",
       "emptyBody": "Message cannot be empty",
       "variables": {
@@ -133,6 +136,8 @@
       "saveFailed": "Failed to save message",
       "reset": "Reset to default",
       "resetFailed": "Failed to reset message",
+      "enabled": "Message reactivated",
+      "disabled": "Message deactivated",
       "iconUploaded": "Icon uploaded",
       "iconUploadFailed": "Failed to upload icon"
     },
