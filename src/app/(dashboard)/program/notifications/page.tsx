@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { BellIcon, LightningIcon, BracketsCurlyIcon } from '@phosphor-icons/react';
 import { PageHeader } from '@/components/redesign';
 import { LoadingSpinner } from '@/components/reusables/loading-spinner';
@@ -15,11 +15,17 @@ import {
 import { useNotificationTemplates } from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
 import { useProgram } from '../layout';
+import {
+  getVariableDisplayName,
+  VARIABLE_KEYS,
+  type Locale,
+  type VariableKey,
+} from '@/lib/template-variables';
 import type { NotificationTemplate, TriggerType } from '@/types/notification';
 
 // Canonical default bodies per trigger — mirror
-// backend/app/services/programs/notification_defaults.py. The edit sheet
-// uses these as the source of truth for variable validation and reset.
+// backend/app/services/programs/notification_defaults.py. Passed to the edit
+// sheet so "Reset to default" can replay the default copy locally.
 const DEFAULT_BODIES: Record<string, { en: string; fr: string }> = {
   stamp_added: {
     en: 'Stamp collected! You have {{stamp_count}} of {{total_stamps}} stamps.',
@@ -35,17 +41,20 @@ const DEFAULT_BODIES: Record<string, { en: string; fr: string }> = {
   },
 };
 
-const VARIABLES_REFERENCE: Array<{
-  key: string;
-  example: string;
-}> = [
-  { key: 'stamp_count', example: '3' },
-  { key: 'total_stamps', example: '10' },
-  { key: 'reward_name', example: 'Free Coffee' },
-];
+// Sample values for the available-variables card. Kept in one place so the
+// sidebar reference matches what we substitute in live previews.
+const VARIABLE_EXAMPLES: Record<VariableKey, string> = {
+  stamp_count: '3',
+  total_stamps: '10',
+  stamps_left: '7',
+  reward_name: 'Free Coffee',
+  business_name: 'Your business',
+  customer_first_name: 'Sarah',
+};
 
 export default function ProgramNotificationsPage() {
   const t = useTranslations('notifications');
+  const uiLocale = useLocale() as Locale;
   const { currentBusiness } = useBusiness();
   const { program } = useProgram();
   const { data, isLoading, error } = useNotificationTemplates(
@@ -55,6 +64,7 @@ export default function ProgramNotificationsPage() {
   const templates = useMemo(() => data?.items ?? [], [data]);
   const isEditable = templates.some((tpl) => tpl.is_editable);
   const totalStamps = program?.config?.total_stamps;
+  const programName = program?.name ?? null;
   const [editingTemplate, setEditingTemplate] =
     useState<NotificationTemplate | null>(null);
 
@@ -139,7 +149,12 @@ export default function ProgramNotificationsPage() {
           </div>
 
           {/* Milestones — only visible on Growth/Pro (backend returns limit=0 for Starter) */}
-          {isEditable && <MilestoneSection totalStamps={totalStamps} />}
+          {isEditable && (
+            <MilestoneSection
+              totalStamps={totalStamps}
+              programName={programName}
+            />
+          )}
         </div>
 
         {/* ─── Right column — side widgets ────────────────────── */}
@@ -207,16 +222,16 @@ export default function ProgramNotificationsPage() {
               </p>
 
               <div className="flex flex-col gap-1.5">
-                {VARIABLES_REFERENCE.map((v) => (
+                {VARIABLE_KEYS.map((key) => (
                   <div
-                    key={v.key}
+                    key={key}
                     className="flex items-center justify-between px-2.5 py-1.5 rounded-[8px] bg-[var(--paper)] border border-[var(--border-light)]"
                   >
                     <code className="text-[11px] font-mono text-[var(--accent)]">
-                      {`{{${v.key}}}`}
+                      {`{{${getVariableDisplayName(key, uiLocale)}}}`}
                     </code>
                     <span className="text-[10px] text-[#A0A0A0]">
-                      → {v.example}
+                      → {VARIABLE_EXAMPLES[key]}
                     </span>
                   </div>
                 ))}
@@ -230,6 +245,7 @@ export default function ProgramNotificationsPage() {
         template={editingTemplate}
         onClose={() => setEditingTemplate(null)}
         defaultBody={editingDefaultBody}
+        programName={programName}
       />
     </div>
   );

@@ -7,33 +7,65 @@
 
 export const VARIABLE_PATTERN = /\{\{(\w+)\}\}/g;
 
+/** Canonical variable keys stored in the backend. */
+export const VARIABLE_KEYS = [
+  'stamp_count',
+  'total_stamps',
+  'stamps_left',
+  'reward_name',
+  'business_name',
+  'customer_first_name',
+] as const;
+
+export type VariableKey = (typeof VARIABLE_KEYS)[number];
+
+export type Locale = 'en' | 'fr';
+
+/**
+ * Localized display names for each canonical variable. Purely a UI concern —
+ * the backend only ever sees the canonical key. French users see
+ * `{{tampons_max}}`, English users see `{{total_stamps}}`.
+ */
+export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>> = {
+  en: {
+    stamp_count: 'stamp_count',
+    total_stamps: 'total_stamps',
+    stamps_left: 'stamps_left',
+    reward_name: 'reward_name',
+    business_name: 'business_name',
+    customer_first_name: 'customer_first_name',
+  },
+  fr: {
+    stamp_count: 'tampons_actuels',
+    total_stamps: 'tampons_max',
+    stamps_left: 'tampons_restants',
+    reward_name: 'nom_recompense',
+    business_name: 'nom_entreprise',
+    customer_first_name: 'prenom_client',
+  },
+};
+
+export function isKnownVariable(key: string): key is VariableKey {
+  return (VARIABLE_KEYS as readonly string[]).includes(key);
+}
+
+/**
+ * Return the UI-facing name for a variable key. Unknown keys fall back
+ * to the key itself so custom/legacy placeholders still render readably.
+ */
+export function getVariableDisplayName(key: string, locale: Locale): string {
+  if (isKnownVariable(key)) {
+    return VARIABLE_DISPLAY_NAMES[locale][key];
+  }
+  return key;
+}
+
 /** Extract the set of {{variable}} names referenced in a template string. */
 export function extractVariables(template: string): Set<string> {
   const matches = template?.matchAll(VARIABLE_PATTERN) ?? [];
   const vars = new Set<string>();
   for (const match of matches) vars.add(match[1]);
   return vars;
-}
-
-/**
- * Validate that a custom template body uses the exact same set of variables
- * as the default. Returns `{ missing, extra }` of variable names; both empty
- * means the body is valid.
- *
- * Mirrors the backend `_validate_template_variables` check in
- * backend/app/api/routes/notifications.py.
- */
-export function validateTemplateVariables(
-  customBody: string,
-  defaultBody: string
-): { missing: string[]; extra: string[] } {
-  const expected = extractVariables(defaultBody);
-  const actual = extractVariables(customBody);
-  const missing: string[] = [];
-  const extra: string[] = [];
-  for (const v of expected) if (!actual.has(v)) missing.push(v);
-  for (const v of actual) if (!expected.has(v)) extra.push(v);
-  return { missing: missing.sort(), extra: extra.sort() };
 }
 
 /**

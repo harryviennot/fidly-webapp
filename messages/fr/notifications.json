@@ -17,10 +17,10 @@
     },
     "howItWorks": {
       "title": "Comment ça marche",
-      "step1": "Le client scanne pour collecter un tampon.",
-      "step2": "Sa carte de fidélité se met à jour en silence.",
-      "step3": "La notification apparaît sur son écran verrouillé.",
-      "note": "Les notifications sont envoyées directement via Apple et Google Wallet — aucune installation d'application requise."
+      "step1": "Un membre de votre équipe scanne la carte de fidélité du client.",
+      "step2": "Sa carte wallet se met à jour en silence en arrière-plan.",
+      "step3": "Le client voit la notification sur son écran verrouillé.",
+      "note": "Les notifications sont délivrées directement via Apple Wallet — aucune installation d'application requise."
     },
     "variablesReference": {
       "title": "Variables disponibles",
@@ -107,10 +107,10 @@
       "reset": "Réinitialiser",
       "save": "Enregistrer",
       "cancel": "Annuler",
-      "validation": {
-        "missingVariable": "La version française n'inclut pas {variable} — ajoutez-la ou retirez-la de la version anglaise",
-        "emptyBody": "Le message ne peut pas être vide"
-      },
+      "translations": "Traductions",
+      "addTranslation": "Ajouter une traduction",
+      "removeTranslation": "Retirer",
+      "emptyBody": "Le message ne peut pas être vide",
       "variables": {
         "stamp_count": "Nombre de tampons actuel",
         "total_stamps": "Tampons requis",

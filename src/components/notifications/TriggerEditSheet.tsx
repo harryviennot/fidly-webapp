@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { ArrowCounterClockwise, FloppyDisk, WarningIcon } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, FloppyDisk } from '@phosphor-icons/react';
 import {
   Sheet,
   SheetContent,
@@ -13,23 +13,25 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { InfoBox } from '@/components/reusables/info-box';
 import { useBusiness } from '@/contexts/business-context';
 import {
   useUpdateNotificationTemplate,
   useResetNotificationTemplate,
 } from '@/hooks/use-notifications';
 import {
-  extractVariables,
   renderSamplePreview,
-  validateTemplateVariables,
+  VARIABLE_KEYS,
+  type VariableKey,
 } from '@/lib/template-variables';
 import { ApiError } from '@/api/client';
 import { LocaleTabs } from './LocaleTabs';
-import { VariableChips, type VariableKey } from './VariableChips';
+import { VariableChips } from './VariableChips';
 import { MessagePreview } from './MessagePreview';
+import {
+  VariableEditor,
+  type VariableEditorHandle,
+} from './VariableEditor';
 import type {
   NotificationTemplate,
   Locale,
@@ -37,31 +39,30 @@ import type {
 } from '@/types/notification';
 
 interface TriggerEditSheetProps {
-  /** Controlled — the template currently being edited, or null if sheet is closed. */
   template: NotificationTemplate | null;
-  /** Called when the sheet should close (user clicked away, saved, or cancelled). */
   onClose: () => void;
-  /** Default template body (un-customized) — used as the source of truth for
-   *  the variable validator and the reset action. */
+  /** Default template body (un-customized) — used by the reset action. */
   defaultBody: Record<Locale, string>;
+  /** Loyalty program name, shown as the title in the preview. */
+  programName?: string | null;
 }
 
 export function TriggerEditSheet({
   template,
   onClose,
   defaultBody,
+  programName,
 }: Readonly<TriggerEditSheetProps>) {
   return (
     <Sheet open={!!template} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="sm:max-w-[520px] w-full flex flex-col">
         {template && (
-          // Remount the form whenever a different trigger is opened so its
-          // internal useState initializer re-runs with the new defaults.
           <EditForm
             key={template.trigger}
             template={template}
             onClose={onClose}
             defaultBody={defaultBody}
+            programName={programName}
           />
         )}
       </SheetContent>
@@ -73,63 +74,88 @@ interface EditFormProps {
   template: NotificationTemplate;
   onClose: () => void;
   defaultBody: Record<Locale, string>;
+  programName?: string | null;
 }
 
-function EditForm({ template, onClose, defaultBody }: Readonly<EditFormProps>) {
+function EditForm({
+  template,
+  onClose,
+  defaultBody,
+  programName,
+}: Readonly<EditFormProps>) {
   const t = useTranslations('notifications');
   const tToast = useTranslations('notifications.toasts');
   const { currentBusiness } = useBusiness();
   const updateMutation = useUpdateNotificationTemplate(currentBusiness?.id);
   const resetMutation = useResetNotificationTemplate(currentBusiness?.id);
 
-  const [locale, setLocale] = useState<Locale>('en');
+  const primaryLocale: Locale = currentBusiness?.primary_locale ?? 'fr';
+
+  // Enabled locales: the primary locale is always on. Any secondary locale
+  // that already has saved content on load is also on. The user can toggle
+  // additional ones via the LocaleTabs "+ EN/FR" button.
+  const initialEnabledLocales = useMemo<Locale[]>(() => {
+    const enabled: Locale[] = [primaryLocale];
+    (['en', 'fr'] as Locale[])
+      .filter((l) => l !== primaryLocale)
+      .forEach((l) => {
+        if ((template.body[l] ?? '').trim()) enabled.push(l);
+      });
+    return enabled;
+  }, [primaryLocale, template.body]);
+
+  const [enabledLocales, setEnabledLocales] =
+    useState<Locale[]>(initialEnabledLocales);
+  const [locale, setLocale] = useState<Locale>(primaryLocale);
   const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>({
     en: template.body.en ?? '',
     fr: template.body.fr ?? '',
   });
-  const enTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const frTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const enEditorRef = useRef<VariableEditorHandle>(null);
+  const frEditorRef = useRef<VariableEditorHandle>(null);
 
-  // The variables that MUST appear in each locale body, derived from the
-  // English default. Backend rejects bodies that add or remove variables.
-  const requiredVariables = Array.from(extractVariables(defaultBody.en)) as VariableKey[];
+  // Show every known variable as an insertable chip — no parity check.
+  const insertableVariables = VARIABLE_KEYS as readonly VariableKey[];
 
-  // Per-locale validation errors (missing/extra variables)
-  const enValidation = validateTemplateVariables(bodyByLocale.en, defaultBody.en);
-  const frValidation = validateTemplateVariables(bodyByLocale.fr, defaultBody.en);
+  const currentBody = bodyByLocale[locale];
+  const primaryBody = bodyByLocale[primaryLocale];
+  const isValid = primaryBody.trim().length > 0;
 
-  const missingLocales: Locale[] = [];
-  if (enValidation.missing.length || enValidation.extra.length) missingLocales.push('en');
-  if (frValidation.missing.length || frValidation.extra.length) missingLocales.push('fr');
+  const insertVariable = (key: VariableKey) => {
+    const ref = locale === 'en' ? enEditorRef.current : frEditorRef.current;
+    ref?.insertVariable(key);
+  };
 
-  const currentValidation = locale === 'en' ? enValidation : frValidation;
-  const isValid = missingLocales.length === 0 && bodyByLocale.en.trim() && bodyByLocale.fr.trim();
+  const addLocale = (loc: Locale) => {
+    setEnabledLocales((prev) =>
+      prev.includes(loc) ? prev : [...prev, loc]
+    );
+    // Seed with the default body for the locale if the user has nothing yet.
+    setBodyByLocale((prev) =>
+      prev[loc] ? prev : { ...prev, [loc]: defaultBody[loc] ?? '' }
+    );
+  };
 
-  const insertVariable = (variable: string) => {
-    const ref = locale === 'en' ? enTextareaRef.current : frTextareaRef.current;
-    if (!ref) return;
-    const start = ref.selectionStart;
-    const end = ref.selectionEnd;
-    const current = bodyByLocale[locale];
-    const next = current.substring(0, start) + variable + current.substring(end);
-    setBodyByLocale({ ...bodyByLocale, [locale]: next });
-    // Restore cursor after the insertion
-    setTimeout(() => {
-      ref.focus();
-      ref.setSelectionRange(start + variable.length, start + variable.length);
-    }, 0);
+  const removeLocale = (loc: Locale) => {
+    if (loc === primaryLocale) return;
+    setEnabledLocales((prev) => prev.filter((l) => l !== loc));
+    setBodyByLocale((prev) => ({ ...prev, [loc]: '' }));
   };
 
   const handleSave = async () => {
+    const payload: Record<Locale, string> = {
+      en: enabledLocales.includes('en') ? bodyByLocale.en : '',
+      fr: enabledLocales.includes('fr') ? bodyByLocale.fr : '',
+    };
     try {
       await updateMutation.mutateAsync({
         trigger: template.trigger as TriggerType,
-        body: bodyByLocale,
+        body: payload,
       });
       toast.success(tToast('saved'));
       onClose();
     } catch (err) {
-      if (err instanceof ApiError && err.code === 'INVALID_TEMPLATE_VARIABLES') {
+      if (err instanceof ApiError) {
         toast.error(err.message);
       } else {
         toast.error(err instanceof Error ? err.message : tToast('saveFailed'));
@@ -151,7 +177,7 @@ function EditForm({ template, onClose, defaultBody }: Readonly<EditFormProps>) {
     }
   };
 
-  const previewBody = renderSamplePreview(bodyByLocale[locale]);
+  const previewBody = renderSamplePreview(currentBody);
 
   return (
     <>
@@ -168,69 +194,47 @@ function EditForm({ template, onClose, defaultBody }: Readonly<EditFormProps>) {
         <LocaleTabs
           value={locale}
           onValueChange={setLocale}
-          missingLocales={missingLocales}
+          primaryLocale={primaryLocale}
+          enabledLocales={enabledLocales}
+          onAddLocale={addLocale}
+          onRemoveLocale={removeLocale}
           enContent={
-            <div className="space-y-2">
-              <Label htmlFor="en-body" className="text-xs text-muted-foreground">
-                {t('editor.bodyLabel')} (EN)
-              </Label>
-              <Textarea
-                id="en-body"
-                ref={enTextareaRef}
+            enabledLocales.includes('en') ? (
+              <LocaleBodyField
+                locale="en"
+                labelSuffix="(EN)"
                 value={bodyByLocale.en}
-                onChange={(e) =>
-                  setBodyByLocale({ ...bodyByLocale, en: e.target.value })
-                }
-                className="min-h-[100px] resize-none text-sm"
                 placeholder={defaultBody.en}
+                onChange={(next) =>
+                  setBodyByLocale((prev) => ({ ...prev, en: next }))
+                }
+                editorRef={enEditorRef}
+                t={t}
               />
-            </div>
+            ) : null
           }
           frContent={
-            <div className="space-y-2">
-              <Label htmlFor="fr-body" className="text-xs text-muted-foreground">
-                {t('editor.bodyLabel')} (FR)
-              </Label>
-              <Textarea
-                id="fr-body"
-                ref={frTextareaRef}
+            enabledLocales.includes('fr') ? (
+              <LocaleBodyField
+                locale="fr"
+                labelSuffix="(FR)"
                 value={bodyByLocale.fr}
-                onChange={(e) =>
-                  setBodyByLocale({ ...bodyByLocale, fr: e.target.value })
-                }
-                className="min-h-[100px] resize-none text-sm"
                 placeholder={defaultBody.fr}
+                onChange={(next) =>
+                  setBodyByLocale((prev) => ({ ...prev, fr: next }))
+                }
+                editorRef={frEditorRef}
+                t={t}
               />
-            </div>
+            ) : null
           }
         />
 
-        {requiredVariables.length > 0 && (
-          <VariableChips
-            variables={requiredVariables}
-            onInsert={insertVariable}
-          />
-        )}
-
-        {(currentValidation.missing.length > 0 ||
-          currentValidation.extra.length > 0) && (
-          <InfoBox
-            variant="warning"
-            icon={<WarningIcon className="h-4 w-4" weight="fill" />}
-            title={
-              currentValidation.missing.length > 0
-                ? t('editor.validation.missingVariable', {
-                    variable: currentValidation.missing
-                      .map((v) => `{{${v}}}`)
-                      .join(', '),
-                  })
-                : `Unexpected variable: ${currentValidation.extra
-                    .map((v) => `{{${v}}}`)
-                    .join(', ')}`
-            }
-            message=""
-          />
-        )}
+        <VariableChips
+          variables={insertableVariables as unknown as VariableKey[]}
+          onInsert={insertVariable}
+          locale={locale}
+        />
 
         <div className="pt-2">
           <Label className="text-xs text-muted-foreground mb-2 block">
@@ -239,6 +243,7 @@ function EditForm({ template, onClose, defaultBody }: Readonly<EditFormProps>) {
           <div className="flex justify-center">
             <MessagePreview
               iconUrl={currentBusiness?.icon_url ?? null}
+              programName={programName}
               businessName={currentBusiness?.name ?? ''}
               body={previewBody}
             />
@@ -279,5 +284,41 @@ function EditForm({ template, onClose, defaultBody }: Readonly<EditFormProps>) {
         </div>
       </SheetFooter>
     </>
+  );
+}
+
+interface LocaleBodyFieldProps {
+  locale: Locale;
+  labelSuffix: string;
+  value: string;
+  placeholder: string;
+  onChange: (next: string) => void;
+  editorRef: React.Ref<VariableEditorHandle>;
+  t: ReturnType<typeof useTranslations>;
+}
+
+function LocaleBodyField({
+  locale,
+  labelSuffix,
+  value,
+  placeholder,
+  onChange,
+  editorRef,
+  t,
+}: Readonly<LocaleBodyFieldProps>) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs text-muted-foreground">
+        {t('editor.bodyLabel')} {labelSuffix}
+      </Label>
+      <VariableEditor
+        ref={editorRef}
+        value={value}
+        onChange={onChange}
+        locale={locale}
+        placeholder={placeholder}
+        ariaLabel={`${t('editor.bodyLabel')} ${labelSuffix}`}
+      />
+    </div>
   );
 }

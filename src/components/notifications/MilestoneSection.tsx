@@ -29,10 +29,13 @@ import type { Milestone } from '@/types/notification';
 interface MilestoneSectionProps {
   /** Total stamps required by the active program — passed to the create sheet for validation. */
   totalStamps?: number;
+  /** Loyalty program name shown in the preview inside the milestone edit sheet. */
+  programName?: string | null;
 }
 
 export function MilestoneSection({
   totalStamps,
+  programName,
 }: Readonly<MilestoneSectionProps>) {
   const t = useTranslations('notifications.milestones');
   const uiLocale = useLocale() as 'en' | 'fr';
@@ -221,6 +224,7 @@ export function MilestoneSection({
         onClose={closeSheet}
         milestone={editingMilestone}
         totalStamps={totalStamps}
+        programName={programName}
       />
 
       <AlertDialog

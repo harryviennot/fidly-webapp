@@ -17,10 +17,10 @@
     },
     "howItWorks": {
       "title": "How it works",
-      "step1": "A customer taps to collect a stamp.",
-      "step2": "Their wallet pass updates silently.",
-      "step3": "They see the notification on their lock screen.",
-      "note": "Notifications are delivered directly through Apple and Google Wallet — no app install required."
+      "step1": "A staff member scans the customer's loyalty card.",
+      "step2": "Their wallet pass silently refreshes in the background.",
+      "step3": "The customer sees the notification on their lock screen.",
+      "note": "Notifications are delivered directly through Apple Wallet — no app install required."
     },
     "variablesReference": {
       "title": "Available variables",
@@ -107,10 +107,10 @@
       "reset": "Reset to default",
       "save": "Save",
       "cancel": "Cancel",
-      "validation": {
-        "missingVariable": "The French version is missing {variable} — please add it or remove it from English",
-        "emptyBody": "Message cannot be empty"
-      },
+      "translations": "Translations",
+      "addTranslation": "Add translation",
+      "removeTranslation": "Remove",
+      "emptyBody": "Message cannot be empty",
       "variables": {
         "stamp_count": "Current stamp count",
         "total_stamps": "Total stamps needed",

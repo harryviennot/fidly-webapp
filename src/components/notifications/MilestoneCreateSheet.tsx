@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { FloppyDisk } from '@phosphor-icons/react';
@@ -13,7 +13,6 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InfoBox } from '@/components/reusables/info-box';
@@ -22,11 +21,18 @@ import {
   useCreateMilestone,
   useUpdateMilestone,
 } from '@/hooks/use-notifications';
-import { renderSamplePreview } from '@/lib/template-variables';
+import {
+  renderSamplePreview,
+  type VariableKey,
+} from '@/lib/template-variables';
 import { ApiError } from '@/api/client';
 import { LocaleTabs } from './LocaleTabs';
-import { VariableChips, type VariableKey } from './VariableChips';
+import { VariableChips } from './VariableChips';
 import { MessagePreview } from './MessagePreview';
+import {
+  VariableEditor,
+  type VariableEditorHandle,
+} from './VariableEditor';
 import type { Locale, Milestone, MilestoneUpdate } from '@/types/notification';
 
 interface MilestoneCreateSheetProps {
@@ -36,6 +42,8 @@ interface MilestoneCreateSheetProps {
   milestone?: Milestone | null;
   /** Upper bound hint — total stamps required by the active program, if known. */
   totalStamps?: number;
+  /** Loyalty program name — used as the title in the notification preview. */
+  programName?: string | null;
 }
 
 // All variables available for milestones (no validator — freeform copy).
@@ -52,6 +60,7 @@ export function MilestoneCreateSheet({
   onClose,
   milestone,
   totalStamps,
+  programName,
 }: Readonly<MilestoneCreateSheetProps>) {
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -63,6 +72,7 @@ export function MilestoneCreateSheet({
             onClose={onClose}
             milestone={milestone ?? null}
             totalStamps={totalStamps}
+            programName={programName}
           />
         )}
       </SheetContent>
@@ -74,12 +84,14 @@ interface MilestoneFormProps {
   onClose: () => void;
   milestone: Milestone | null;
   totalStamps?: number;
+  programName?: string | null;
 }
 
 function MilestoneForm({
   onClose,
   milestone,
   totalStamps,
+  programName,
 }: Readonly<MilestoneFormProps>) {
   const t = useTranslations('notifications');
   const tMilestones = useTranslations('notifications.milestones');
@@ -88,23 +100,38 @@ function MilestoneForm({
   const updateMutation = useUpdateMilestone(currentBusiness?.id);
 
   const isEditMode = milestone !== null;
+  const primaryLocale: Locale = currentBusiness?.primary_locale ?? 'fr';
 
   const [stampEquals, setStampEquals] = useState<string>(
     milestone ? String(milestone.stamp_equals) : ''
   );
-  const [locale, setLocale] = useState<Locale>('en');
+
+  const initialEnabledLocales = useMemo<Locale[]>(() => {
+    const enabled: Locale[] = [primaryLocale];
+    (['en', 'fr'] as Locale[])
+      .filter((l) => l !== primaryLocale)
+      .forEach((l) => {
+        if ((milestone?.body[l] ?? '').trim()) enabled.push(l);
+      });
+    return enabled;
+  }, [primaryLocale, milestone]);
+
+  const [enabledLocales, setEnabledLocales] =
+    useState<Locale[]>(initialEnabledLocales);
+  const [locale, setLocale] = useState<Locale>(primaryLocale);
   const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>({
     en: milestone?.body.en ?? '',
     fr: milestone?.body.fr ?? '',
   });
-  const enRef = useRef<HTMLTextAreaElement>(null);
-  const frRef = useRef<HTMLTextAreaElement>(null);
+  const enEditorRef = useRef<VariableEditorHandle>(null);
+  const frEditorRef = useRef<VariableEditorHandle>(null);
 
   const stampNumber = parseInt(stampEquals, 10);
   const stampValid = !Number.isNaN(stampNumber) && stampNumber > 0;
   const stampInRange =
     !totalStamps || (stampValid && stampNumber < totalStamps);
-  const hasContent = bodyByLocale.en.trim() && bodyByLocale.fr.trim();
+  const primaryBody = bodyByLocale[primaryLocale];
+  const hasContent = primaryBody.trim().length > 0;
   const isValid = stampValid && stampInRange && hasContent;
 
   // Detect whether anything actually changed (edit mode only — disables Save until user edits)
@@ -114,22 +141,29 @@ function MilestoneForm({
     bodyByLocale.en !== (milestone.body.en ?? '') ||
     bodyByLocale.fr !== (milestone.body.fr ?? '');
 
-  const insertVariable = (variable: string) => {
-    const ref = locale === 'en' ? enRef.current : frRef.current;
-    if (!ref) return;
-    const start = ref.selectionStart;
-    const end = ref.selectionEnd;
-    const current = bodyByLocale[locale];
-    const next = current.substring(0, start) + variable + current.substring(end);
-    setBodyByLocale({ ...bodyByLocale, [locale]: next });
-    setTimeout(() => {
-      ref.focus();
-      ref.setSelectionRange(start + variable.length, start + variable.length);
-    }, 0);
+  const insertVariable = (variable: VariableKey) => {
+    const ref = locale === 'en' ? enEditorRef.current : frEditorRef.current;
+    ref?.insertVariable(variable);
+  };
+
+  const addLocale = (loc: Locale) => {
+    setEnabledLocales((prev) =>
+      prev.includes(loc) ? prev : [...prev, loc]
+    );
+  };
+
+  const removeLocale = (loc: Locale) => {
+    if (loc === primaryLocale) return;
+    setEnabledLocales((prev) => prev.filter((l) => l !== loc));
+    setBodyByLocale((prev) => ({ ...prev, [loc]: '' }));
   };
 
   const handleSave = async () => {
     if (!isValid) return;
+    const payloadBody: Record<Locale, string> = {
+      en: enabledLocales.includes('en') ? bodyByLocale.en : '',
+      fr: enabledLocales.includes('fr') ? bodyByLocale.fr : '',
+    };
     try {
       if (isEditMode) {
         // Only send changed fields
@@ -138,10 +172,10 @@ function MilestoneForm({
           payload.stamp_equals = stampNumber;
         }
         if (
-          bodyByLocale.en !== (milestone.body.en ?? '') ||
-          bodyByLocale.fr !== (milestone.body.fr ?? '')
+          payloadBody.en !== (milestone.body.en ?? '') ||
+          payloadBody.fr !== (milestone.body.fr ?? '')
         ) {
-          payload.body = bodyByLocale;
+          payload.body = payloadBody;
         }
         await updateMutation.mutateAsync({
           templateId: milestone.id,
@@ -151,7 +185,7 @@ function MilestoneForm({
       } else {
         await createMutation.mutateAsync({
           stamp_equals: stampNumber,
-          body: bodyByLocale,
+          body: payloadBody,
         });
         toast.success(tMilestones('toasts.created'));
       }
@@ -220,51 +254,54 @@ function MilestoneForm({
         <LocaleTabs
           value={locale}
           onValueChange={setLocale}
+          primaryLocale={primaryLocale}
+          enabledLocales={enabledLocales}
+          onAddLocale={addLocale}
+          onRemoveLocale={removeLocale}
           enContent={
-            <div className="space-y-2">
-              <Label
-                htmlFor="en-body"
-                className="text-xs text-muted-foreground"
-              >
-                {t('editor.bodyLabel')} (EN)
-              </Label>
-              <Textarea
-                id="en-body"
-                ref={enRef}
-                value={bodyByLocale.en}
-                onChange={(e) =>
-                  setBodyByLocale({ ...bodyByLocale, en: e.target.value })
-                }
-                className="min-h-[100px] resize-none text-sm"
-                placeholder="You're halfway to your reward!"
-              />
-            </div>
+            enabledLocales.includes('en') ? (
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">
+                  {t('editor.bodyLabel')} (EN)
+                </Label>
+                <VariableEditor
+                  ref={enEditorRef}
+                  value={bodyByLocale.en}
+                  onChange={(next) =>
+                    setBodyByLocale((prev) => ({ ...prev, en: next }))
+                  }
+                  locale="en"
+                  placeholder="You're halfway to your reward!"
+                  ariaLabel={`${t('editor.bodyLabel')} EN`}
+                />
+              </div>
+            ) : null
           }
           frContent={
-            <div className="space-y-2">
-              <Label
-                htmlFor="fr-body"
-                className="text-xs text-muted-foreground"
-              >
-                {t('editor.bodyLabel')} (FR)
-              </Label>
-              <Textarea
-                id="fr-body"
-                ref={frRef}
-                value={bodyByLocale.fr}
-                onChange={(e) =>
-                  setBodyByLocale({ ...bodyByLocale, fr: e.target.value })
-                }
-                className="min-h-[100px] resize-none text-sm"
-                placeholder="Vous êtes à mi-chemin de votre récompense !"
-              />
-            </div>
+            enabledLocales.includes('fr') ? (
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">
+                  {t('editor.bodyLabel')} (FR)
+                </Label>
+                <VariableEditor
+                  ref={frEditorRef}
+                  value={bodyByLocale.fr}
+                  onChange={(next) =>
+                    setBodyByLocale((prev) => ({ ...prev, fr: next }))
+                  }
+                  locale="fr"
+                  placeholder="Vous êtes à mi-chemin de votre récompense !"
+                  ariaLabel={`${t('editor.bodyLabel')} FR`}
+                />
+              </div>
+            ) : null
           }
         />
 
         <VariableChips
           variables={MILESTONE_VARIABLES}
           onInsert={insertVariable}
+          locale={locale}
         />
 
         {stampValid && !stampInRange && (
@@ -281,6 +318,7 @@ function MilestoneForm({
           <div className="flex justify-center">
             <MessagePreview
               iconUrl={currentBusiness?.icon_url ?? null}
+              programName={programName}
               businessName={currentBusiness?.name ?? ''}
               body={previewBody}
             />

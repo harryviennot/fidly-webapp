@@ -11,6 +11,11 @@ import {
   type Icon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
+import {
+  VARIABLE_PATTERN,
+  getVariableDisplayName,
+  type Locale,
+} from '@/lib/template-variables';
 import type { NotificationTemplate, TriggerType } from '@/types/notification';
 
 const TRIGGER_ICONS: Record<TriggerType, Icon> = {
@@ -47,10 +52,17 @@ export function TriggerCard({
   className,
 }: TriggerCardProps) {
   const t = useTranslations('notifications');
-  const uiLocale = useLocale() as 'en' | 'fr';
+  const uiLocale = useLocale() as Locale;
   const IconComponent = TRIGGER_ICONS[template.trigger];
 
-  const previewBody = template.body[uiLocale] || template.body.en || '';
+  // Rewrite `{{canonical_key}}` to `{{localized_name}}` so the inline preview
+  // on the Messages automatiques card matches what the user sees in the
+  // editor. Canonical keys are what the backend stores.
+  const rawBody = template.body[uiLocale] || template.body.en || '';
+  const previewBody = rawBody.replace(
+    VARIABLE_PATTERN,
+    (_match, key: string) => `{{${getVariableDisplayName(key, uiLocale)}}}`
+  );
   const hasEn = Boolean(template.body.en);
   const hasFr = Boolean(template.body.fr);
 

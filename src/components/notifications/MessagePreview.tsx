@@ -6,7 +6,11 @@ import { cn } from '@/lib/utils';
 interface MessagePreviewProps {
   /** URL to a square icon (29-87 px). Optional — falls back to a generic bell. */
   iconUrl?: string | null;
-  /** Sender name shown at the top of the banner (usually the business name). */
+  /** Loyalty program name — shown as the banner title if provided. iOS uses
+   *  `organizationName` as the push notification title and we fill that
+   *  with the program name (see backend/app/services/pass_generator.py). */
+  programName?: string | null;
+  /** Fallback sender name when the program has no name. */
   businessName: string;
   /** Body text that will appear on the lock screen. */
   body: string;
@@ -23,11 +27,13 @@ interface MessagePreviewProps {
  */
 export function MessagePreview({
   iconUrl,
+  programName,
   businessName,
   body,
   caption,
   className,
 }: MessagePreviewProps) {
+  const displayTitle = programName?.trim() || businessName || 'Your business';
   return (
     <div className={cn('flex flex-col items-center gap-2', className)}>
       <div className="w-full max-w-[280px] rounded-2xl bg-neutral-900/90 backdrop-blur-xl text-white px-3 py-2.5 shadow-lg">
@@ -36,7 +42,7 @@ export function MessagePreview({
             <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md bg-white/10">
               <Image
                 src={iconUrl}
-                alt={businessName}
+                alt={displayTitle}
                 width={32}
                 height={32}
                 className="h-full w-full object-cover"
@@ -51,7 +57,7 @@ export function MessagePreview({
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline justify-between gap-2">
               <div className="truncate text-[11px] font-semibold uppercase tracking-wide text-white/90">
-                {businessName || 'Your business'}
+                {displayTitle}
               </div>
               <div className="text-[10px] text-white/60 shrink-0">now</div>
             </div>
