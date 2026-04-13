@@ -31,11 +31,15 @@ interface MilestoneSectionProps {
   totalStamps?: number;
   /** Loyalty program name shown in the preview inside the milestone edit sheet. */
   programName?: string | null;
+  /** Whether the active program has a reward name set. Forwarded to the
+   *  milestone editor so the `{{reward_name}}` chip can be greyed out. */
+  rewardNameSet?: boolean;
 }
 
 export function MilestoneSection({
   totalStamps,
   programName,
+  rewardNameSet,
 }: Readonly<MilestoneSectionProps>) {
   const t = useTranslations('notifications.milestones');
   const uiLocale = useLocale() as 'en' | 'fr';
@@ -225,6 +229,7 @@ export function MilestoneSection({
         milestone={editingMilestone}
         totalStamps={totalStamps}
         programName={programName}
+        rewardNameSet={rewardNameSet}
       />
 
       <AlertDialog

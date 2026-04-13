@@ -109,6 +109,7 @@
       "cancel": "Cancel",
       "translations": "Translations",
       "resetLocale": "Reset this language",
+      "rewardNameMissing": "Define a reward in your program settings to use this variable.",
       "emptyBody": "Message cannot be empty",
       "variables": {
         "stamp_count": "Current stamp count",

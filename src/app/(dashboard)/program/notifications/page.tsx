@@ -1,11 +1,17 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { BellIcon, LightningIcon, BracketsCurlyIcon } from '@phosphor-icons/react';
 import { PageHeader } from '@/components/redesign';
 import { LoadingSpinner } from '@/components/reusables/loading-spinner';
 import { InfoBox } from '@/components/reusables/info-box';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   IconUploadCard,
   TriggerCard,
@@ -14,6 +20,7 @@ import {
 } from '@/components/notifications';
 import { useNotificationTemplates } from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
+import { cn } from '@/lib/utils';
 import { useProgram } from '../layout';
 import {
   getVariableDisplayName,
@@ -36,8 +43,8 @@ const DEFAULT_BODIES: Record<string, { en: string; fr: string }> = {
     fr: 'Vous avez débloqué votre récompense ! Venez la récupérer.',
   },
   reward_redeemed: {
-    en: 'Reward redeemed. Enjoy your {{reward_name}}!',
-    fr: 'Récompense utilisée. Profitez de votre {{reward_name}} !',
+    en: 'Reward redeemed. Enjoy!',
+    fr: 'Récompense utilisée. Profitez-en !',
   },
 };
 
@@ -55,6 +62,7 @@ const VARIABLE_EXAMPLES: Record<VariableKey, string> = {
 export default function ProgramNotificationsPage() {
   const t = useTranslations('notifications');
   const uiLocale = useLocale() as Locale;
+  const router = useRouter();
   const { currentBusiness } = useBusiness();
   const { program } = useProgram();
   const { data, isLoading, error } = useNotificationTemplates(
@@ -65,6 +73,7 @@ export default function ProgramNotificationsPage() {
   const isEditable = templates.some((tpl) => tpl.is_editable);
   const totalStamps = program?.config?.total_stamps;
   const programName = program?.name ?? null;
+  const rewardNameSet = Boolean(program?.reward_name?.trim());
   const [editingTemplate, setEditingTemplate] =
     useState<NotificationTemplate | null>(null);
 
@@ -153,6 +162,7 @@ export default function ProgramNotificationsPage() {
             <MilestoneSection
               totalStamps={totalStamps}
               programName={programName}
+              rewardNameSet={rewardNameSet}
             />
           )}
         </div>
@@ -222,19 +232,61 @@ export default function ProgramNotificationsPage() {
               </p>
 
               <div className="flex flex-col gap-1.5">
-                {VARIABLE_KEYS.map((key) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between px-2.5 py-1.5 rounded-[8px] bg-[var(--paper)] border border-[var(--border-light)]"
-                  >
-                    <code className="text-[11px] font-mono text-[var(--accent)]">
-                      {`{{${getVariableDisplayName(key, uiLocale)}}}`}
-                    </code>
-                    <span className="text-[10px] text-[#A0A0A0]">
-                      → {VARIABLE_EXAMPLES[key]}
-                    </span>
-                  </div>
-                ))}
+                {VARIABLE_KEYS.map((key) => {
+                  const isDisabled = key === 'reward_name' && !rewardNameSet;
+                  const rowContent = (
+                    <>
+                      <code
+                        className={cn(
+                          'text-[11px] font-mono',
+                          isDisabled
+                            ? 'text-[#A0A0A0]'
+                            : 'text-[var(--accent)]'
+                        )}
+                      >
+                        {`{{${getVariableDisplayName(key, uiLocale)}}}`}
+                      </code>
+                      <span className="text-[10px] text-[#A0A0A0]">
+                        → {VARIABLE_EXAMPLES[key]}
+                      </span>
+                    </>
+                  );
+                  const rowClass = cn(
+                    'w-full flex items-center justify-between px-2.5 py-1.5 rounded-[8px] border text-left',
+                    isDisabled
+                      ? 'bg-[var(--paper)]/40 border-dashed border-[var(--border-light)] opacity-60 hover:opacity-100 cursor-pointer'
+                      : 'bg-[var(--paper)] border-[var(--border-light)]'
+                  );
+                  if (!isDisabled) {
+                    return (
+                      <div key={key} className={rowClass}>
+                        {rowContent}
+                      </div>
+                    );
+                  }
+                  // Button + onClick (not Link) so Radix Tooltip cannot
+                  // swallow the pointerdown → navigate chain.
+                  const rowButton = (
+                    <button
+                      type="button"
+                      className={rowClass}
+                      onClick={() => router.push('/program/settings')}
+                    >
+                      {rowContent}
+                    </button>
+                  );
+                  return (
+                    <Tooltip key={key}>
+                      <TooltipTrigger asChild>{rowButton}</TooltipTrigger>
+                      <TooltipContent
+                        side="left"
+                        className="max-w-[240px] text-[11px] leading-snug"
+                      >
+                        {t('editor.rewardNameMissing')}
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -246,6 +298,7 @@ export default function ProgramNotificationsPage() {
         onClose={() => setEditingTemplate(null)}
         defaultBody={editingDefaultBody}
         programName={programName}
+        rewardNameSet={rewardNameSet}
       />
     </div>
   );

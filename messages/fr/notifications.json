@@ -109,6 +109,7 @@
       "cancel": "Annuler",
       "translations": "Traductions",
       "resetLocale": "Réinitialiser cette langue",
+      "rewardNameMissing": "Définissez une récompense dans les paramètres du programme pour utiliser cette variable.",
       "emptyBody": "Le message ne peut pas être vide",
       "variables": {
         "stamp_count": "Nombre de tampons actuel",

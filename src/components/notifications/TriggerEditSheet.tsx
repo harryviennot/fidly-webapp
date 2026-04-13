@@ -37,6 +37,11 @@ import {
 } from './VariableEditor';
 import type { NotificationTemplate, Locale } from '@/types/notification';
 
+// Variables greyed out when the program has no reward name configured.
+const DISABLED_WITHOUT_REWARD_NAME: ReadonlySet<VariableKey> = new Set([
+  'reward_name',
+]);
+
 interface TriggerEditSheetProps {
   template: NotificationTemplate | null;
   onClose: () => void;
@@ -44,6 +49,9 @@ interface TriggerEditSheetProps {
   defaultBody: Record<Locale, string>;
   /** Loyalty program name, shown as the title in the preview. */
   programName?: string | null;
+  /** Whether the active program has a reward name set. Used to grey out
+   *  the `{{reward_name}}` chip and surface a guidance tooltip. */
+  rewardNameSet?: boolean;
 }
 
 export function TriggerEditSheet({
@@ -51,6 +59,7 @@ export function TriggerEditSheet({
   onClose,
   defaultBody,
   programName,
+  rewardNameSet,
 }: Readonly<TriggerEditSheetProps>) {
   return (
     <Sheet open={!!template} onOpenChange={(open) => !open && onClose()}>
@@ -62,6 +71,7 @@ export function TriggerEditSheet({
             onClose={onClose}
             defaultBody={defaultBody}
             programName={programName}
+            rewardNameSet={rewardNameSet}
           />
         )}
       </SheetContent>
@@ -74,6 +84,7 @@ interface EditFormProps {
   onClose: () => void;
   defaultBody: Record<Locale, string>;
   programName?: string | null;
+  rewardNameSet?: boolean;
 }
 
 function EditForm({
@@ -81,6 +92,7 @@ function EditForm({
   onClose,
   defaultBody,
   programName,
+  rewardNameSet,
 }: Readonly<EditFormProps>) {
   const t = useTranslations('notifications');
   const tToast = useTranslations('notifications.toasts');
@@ -186,6 +198,13 @@ function EditForm({
           variables={insertableVariables as unknown as VariableKey[]}
           onInsert={insertVariable}
           locale={locale}
+          disabledVariables={
+            rewardNameSet ? undefined : DISABLED_WITHOUT_REWARD_NAME
+          }
+          disabledTooltips={{
+            reward_name: t('editor.rewardNameMissing'),
+          }}
+          disabledHrefs={{ reward_name: '/program/settings' }}
         />
 
         <div className="pt-2">

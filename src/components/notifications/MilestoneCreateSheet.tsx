@@ -44,13 +44,25 @@ interface MilestoneCreateSheetProps {
   totalStamps?: number;
   /** Loyalty program name — used as the title in the notification preview. */
   programName?: string | null;
+  /** Whether the active program has a reward name set — greys out the chip. */
+  rewardNameSet?: boolean;
 }
 
-// All variables available for milestones (no validator — freeform copy).
+// Variables greyed out when the program has no reward name configured.
+const DISABLED_WITHOUT_REWARD_NAME: ReadonlySet<VariableKey> = new Set([
+  'reward_name',
+]);
+
+// All variables available for milestones. `reward_name` is included here
+// now that the backend injects it from `program.reward_name` into every
+// trigger's base context (see backend/app/services/programs/service.py).
+// When the program has no reward name set, the notifications page greys
+// out the chip and the sidebar row — see VariableChips `disabledVariables`.
 const MILESTONE_VARIABLES: VariableKey[] = [
   'stamp_count',
   'total_stamps',
   'stamps_left',
+  'reward_name',
   'business_name',
   'customer_first_name',
 ];
@@ -61,6 +73,7 @@ export function MilestoneCreateSheet({
   milestone,
   totalStamps,
   programName,
+  rewardNameSet,
 }: Readonly<MilestoneCreateSheetProps>) {
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -73,6 +86,7 @@ export function MilestoneCreateSheet({
             milestone={milestone ?? null}
             totalStamps={totalStamps}
             programName={programName}
+            rewardNameSet={rewardNameSet}
           />
         )}
       </SheetContent>
@@ -85,6 +99,7 @@ interface MilestoneFormProps {
   milestone: Milestone | null;
   totalStamps?: number;
   programName?: string | null;
+  rewardNameSet?: boolean;
 }
 
 function MilestoneForm({
@@ -92,6 +107,7 @@ function MilestoneForm({
   milestone,
   totalStamps,
   programName,
+  rewardNameSet,
 }: Readonly<MilestoneFormProps>) {
   const t = useTranslations('notifications');
   const tMilestones = useTranslations('notifications.milestones');
@@ -254,6 +270,13 @@ function MilestoneForm({
           variables={MILESTONE_VARIABLES}
           onInsert={insertVariable}
           locale={locale}
+          disabledVariables={
+            rewardNameSet ? undefined : DISABLED_WITHOUT_REWARD_NAME
+          }
+          disabledTooltips={{
+            reward_name: t('editor.rewardNameMissing'),
+          }}
+          disabledHrefs={{ reward_name: '/program/settings' }}
         />
 
         {stampValid && !stampInRange && (
