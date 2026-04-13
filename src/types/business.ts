@@ -13,6 +13,7 @@ export interface Business {
   billing_period_end?: string | null;
   settings: BusinessSettings;
   logo_url?: string | null;
+  icon_url?: string | null;
   primary_locale: "fr" | "en";
   created_at?: string;
   updated_at?: string;

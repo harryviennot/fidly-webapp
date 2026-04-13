@@ -3,6 +3,7 @@ export * from './customers';
 export * from './designs';
 export * from './invitations';
 export * from './memberships';
+export * from './notifications';
 export * from './profile';
 export * from './programs';
 export * from './transactions';

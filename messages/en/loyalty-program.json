@@ -24,7 +24,7 @@
       "configuration": "Configuration",
       "templates": "Templates",
       "notifications": "Notifications",
-      "promotions": "Promotions",
+      "messages": "Messages",
       "locations": "Locations"
     },
     "overview": {
@@ -114,9 +114,9 @@
       "installRate": "install rate",
       "comingSoon": "Coming soon",
       "notifications": "Notifications",
-      "notificationsDescription": "Push notification templates and broadcast messages",
-      "promotions": "Promotions",
-      "promotionsDescription": "Promotional events and multipliers",
+      "notificationsDescription": "Automatic messages sent to customers on loyalty events",
+      "messages": "Messages",
+      "messagesDescription": "Send promotional messages to your customers",
       "locations": "Locations",
       "locationsDescription": "Business locations and geofencing"
     },

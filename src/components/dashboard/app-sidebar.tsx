@@ -56,7 +56,7 @@ const programItems: NavItem[] = [
   { href: "/program/settings", labelKey: "loyaltyProgram.nav.configuration", icon: GearSix },
   { href: "/program/templates", labelKey: "loyaltyProgram.nav.templates", icon: CreditCard },
   { href: "/program/notifications", labelKey: "loyaltyProgram.nav.notifications", icon: Bell },
-  { href: "/program/promotions", labelKey: "loyaltyProgram.nav.promotions", icon: Megaphone, pro: true },
+  { href: "/program/messages", labelKey: "loyaltyProgram.nav.messages", icon: Megaphone, pro: true },
   { href: "/program/locations", labelKey: "loyaltyProgram.nav.locations", icon: MapPin, pro: true },
 ];
 

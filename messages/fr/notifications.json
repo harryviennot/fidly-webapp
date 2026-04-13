@@ -1,0 +1,241 @@
+{
+  "notifications": {
+    "page": {
+      "title": "Notifications",
+      "subtitle": "Messages automatiques envoyés à vos clients lorsqu'ils collectent des tampons ou débloquent des récompenses"
+    },
+    "icon": {
+      "title": "Icône de notification",
+      "description": "Affichée sur l'écran verrouillé de vos clients lorsqu'ils reçoivent une notification de votre carte de fidélité",
+      "changeInSettings": "Modifier dans les paramètres",
+      "default": "Icône par défaut",
+      "custom": "Icône personnalisée",
+      "lockedHint": "Passez à Growth pour utiliser une icône personnalisée",
+      "upload": "Téléverser une icône",
+      "uploadHint": "PNG carré, au moins 87×87 pixels",
+      "preview": "Aperçu"
+    },
+    "howItWorks": {
+      "title": "Comment ça marche",
+      "step1": "Le client scanne pour collecter un tampon.",
+      "step2": "Sa carte de fidélité se met à jour en silence.",
+      "step3": "La notification apparaît sur son écran verrouillé.",
+      "note": "Les notifications sont envoyées directement via Apple et Google Wallet — aucune installation d'application requise."
+    },
+    "preview": {
+      "title": "Aperçu",
+      "description": "Cliquez sur un message à gauche pour voir à quoi il ressemble sur le téléphone d'un client"
+    },
+    "triggers": {
+      "sectionTitle": "Messages automatiques",
+      "sectionDescription": "Ces messages sont envoyés automatiquement lorsqu'un client collecte un tampon ou gagne une récompense",
+      "stamp_added": {
+        "name": "Tampon collecté",
+        "description": "Envoyé lorsqu'un client collecte un nouveau tampon"
+      },
+      "reward_earned": {
+        "name": "Récompense débloquée",
+        "description": "Envoyé lorsqu'un client complète sa carte et gagne une récompense"
+      },
+      "reward_redeemed": {
+        "name": "Récompense utilisée",
+        "description": "Envoyé lorsqu'un client utilise sa récompense"
+      },
+      "milestone": {
+        "name": "Palier",
+        "description": "Envoyé lorsqu'un client atteint un nombre précis de tampons"
+      },
+      "near_reward": {
+        "name": "Récompense proche",
+        "description": "Envoyé lorsqu'un client est sur le point de débloquer sa récompense"
+      }
+    },
+    "localePills": {
+      "enSet": "EN",
+      "frSet": "FR"
+    },
+    "card": {
+      "defaultPill": "Défaut",
+      "customPill": "Personnalisé",
+      "disabledPill": "Désactivé"
+    },
+    "milestones": {
+      "title": "Paliers",
+      "description": "Envoyez un message spécial lorsqu'un client atteint un nombre précis de tampons",
+      "add": "Ajouter un palier",
+      "usage": "{count} sur {max} utilisés",
+      "empty": "Aucun palier pour le moment",
+      "condition": "Quand le client atteint {count} tampons",
+      "limitReached": "Vous avez atteint la limite de paliers avec Growth. Passez à Pro pour des paliers illimités.",
+      "stampCountLabel": "Se déclenche quand le nombre de tampons est égal à"
+    },
+    "nearReward": {
+      "title": "Notification de récompense proche",
+      "description": "Notifiez le client lorsqu'il est à quelques tampons de débloquer sa récompense",
+      "thresholdLabel": "Notifier à",
+      "thresholdSuffix": "tampons de la récompense"
+    },
+    "editor": {
+      "editTitle": "Modifier le message",
+      "bodyLabel": "Message",
+      "variablesLabel": "Insérer une variable",
+      "previewLabel": "Aperçu",
+      "reset": "Réinitialiser",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "validation": {
+        "missingVariable": "La version française n'inclut pas {variable} — ajoutez-la ou retirez-la de la version anglaise",
+        "emptyBody": "Le message ne peut pas être vide"
+      },
+      "variables": {
+        "stamp_count": "Nombre de tampons actuel",
+        "total_stamps": "Tampons requis",
+        "stamps_left": "Tampons restants",
+        "reward_name": "Nom de la récompense",
+        "business_name": "Nom de l'entreprise",
+        "customer_first_name": "Prénom du client"
+      }
+    },
+    "plan": {
+      "starterReadOnly": "Voici les messages par défaut. Passez à un forfait supérieur pour personnaliser le texte.",
+      "upgradeToGrowth": "Passer à Growth",
+      "upgradeToPro": "Passer à Pro",
+      "proBadge": "PRO",
+      "growthBadge": "GROWTH",
+      "lockedTooltip": "Disponible avec {tier}"
+    },
+    "toasts": {
+      "saved": "Message enregistré",
+      "saveFailed": "Échec de l'enregistrement",
+      "reset": "Réinitialisé",
+      "resetFailed": "Échec de la réinitialisation",
+      "iconUploaded": "Icône téléversée",
+      "iconUploadFailed": "Échec du téléversement"
+    },
+    "messages": {
+      "page": {
+        "title": "Messages",
+        "subtitle": "Envoyez des messages promotionnels directement dans le wallet de vos clients"
+      },
+      "new": "Nouveau message",
+      "empty": {
+        "title": "Aucun message pour le moment",
+        "description": "Créez votre premier message pour atteindre vos clients",
+        "cta": "Envoyer votre premier message"
+      },
+      "quota": {
+        "used": "{count} sur {max} envoyés ce mois-ci",
+        "reached": "Limite mensuelle atteinte. Passez à Pro pour des messages illimités."
+      },
+      "filters": {
+        "all": "Tous",
+        "scheduled": "Programmés",
+        "sent": "Envoyés",
+        "drafts": "Brouillons"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "scheduled": "Programmé",
+        "sending": "En cours d'envoi",
+        "sent": "Envoyé",
+        "cancelled": "Annulé",
+        "failed": "Échec"
+      },
+      "row": {
+        "recipients": "{count} destinataires",
+        "delivered": "{count} livrés",
+        "failed": "{count} échoués",
+        "throttled": "{count} limités",
+        "lastEdited": "Modifié {date}"
+      },
+      "detail": {
+        "title": "Titre",
+        "body": "Message",
+        "audience": "Audience",
+        "stats": "Livraison",
+        "createdBy": "Créé par",
+        "createdAt": "Créé le",
+        "sentAt": "Envoyé le",
+        "scheduledFor": "Programmé pour",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "cancel": "Annuler l'envoi",
+        "confirmDelete": "Supprimer ce brouillon ?",
+        "confirmCancel": "Annuler ce message programmé ?"
+      },
+      "wizard": {
+        "steps": {
+          "compose": "Rédiger",
+          "audience": "Audience",
+          "schedule": "Programmer",
+          "review": "Vérifier"
+        },
+        "compose": {
+          "title": "Rédigez votre message",
+          "titleLabel": "Titre",
+          "titlePlaceholder": "Soldes de fin d'année",
+          "bodyLabel": "Message",
+          "bodyPlaceholder": "Profitez de 20% de réduction ce week-end !",
+          "charCount": "{count} / {max} caractères"
+        },
+        "audience": {
+          "title": "Qui recevra ce message ?",
+          "all": "Tous les clients inscrits",
+          "filtered": "Audience filtrée",
+          "addFilter": "Ajouter un filtre",
+          "estimate": "≈ {count} clients recevront ce message",
+          "estimating": "Calcul en cours...",
+          "filters": {
+            "enrolled_before_days": "Inscrits il y a plus de {n} jours",
+            "enrolled_after_days": "Inscrits dans les {n} derniers jours",
+            "stamp_count_min": "Au moins {n} tampons",
+            "stamp_count_max": "Au plus {n} tampons",
+            "has_redeemed": "A utilisé une récompense",
+            "inactive_days": "Inactifs depuis {n} jours"
+          }
+        },
+        "schedule": {
+          "title": "Quand envoyer ce message ?",
+          "sendNow": "Envoyer maintenant",
+          "sendNowDescription": "Vos clients recevront ce message tout de suite",
+          "scheduleLater": "Programmer pour plus tard",
+          "scheduleLaterDescription": "Choisissez une date et une heure",
+          "timezoneNote": "Les horaires sont exprimés en {tz}",
+          "windowError": "Les messages ne peuvent être programmés qu'entre 9h00 et 20h00 ({tz})",
+          "pastError": "La date doit être dans le futur"
+        },
+        "review": {
+          "title": "Vérifier et envoyer",
+          "summaryTitle": "Résumé",
+          "audienceLabel": "Audience",
+          "sendTimeLabel": "Horaire d'envoi",
+          "recipientsLabel": "Destinataires",
+          "quotaNote": "Ceci utilisera 1 de vos {max} messages mensuels",
+          "sendButton": "Envoyer le message",
+          "scheduleButton": "Programmer le message",
+          "confirmSend": "Envoyer à {count} clients ? Cette action est irréversible."
+        },
+        "next": "Suivant",
+        "back": "Retour",
+        "cancel": "Annuler",
+        "saveDraft": "Enregistrer comme brouillon"
+      },
+      "starter": {
+        "headline": "Touchez tous vos clients d'un seul coup",
+        "description": "Envoyez des messages promotionnels à vos clients fidèles — un nouveau menu, une vente flash, un rappel de fêtes. Directement dans leur wallet.",
+        "features": {
+          "segment": "Segmentez par activité client",
+          "schedule": "Programmez à l'avance (Pro)",
+          "localized": "Disponible en français et en anglais"
+        },
+        "cta": "Passer à Growth"
+      }
+    },
+    "downgradeBanner": {
+      "title": "Votre forfait Growth a expiré",
+      "description": "{count, plural, =0 {Les messages personnalisés sont désactivés.} one {# message programmé a été annulé et les messages personnalisés sont désactivés.} other {# messages programmés ont été annulés et les messages personnalisés sont désactivés.}}",
+      "cta": "Réactivez votre forfait",
+      "dismiss": "Ignorer"
+    }
+  }
+}

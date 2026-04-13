@@ -24,7 +24,7 @@
       "configuration": "Configuration",
       "templates": "Modèles",
       "notifications": "Notifications",
-      "promotions": "Promotions",
+      "messages": "Messages",
       "locations": "Emplacements"
     },
     "overview": {
@@ -114,9 +114,9 @@
       "installRate": "taux d'installation",
       "comingSoon": "Bientôt disponible",
       "notifications": "Notifications",
-      "notificationsDescription": "Modèles de notifications push et messages diffusés",
-      "promotions": "Promotions",
-      "promotionsDescription": "Événements promotionnels et multiplicateurs",
+      "notificationsDescription": "Messages automatiques envoyés à vos clients lors des événements de fidélité",
+      "messages": "Messages",
+      "messagesDescription": "Envoyez des messages promotionnels à vos clients",
       "locations": "Emplacements",
       "locationsDescription": "Emplacements de l'entreprise et géorepérage"
     },
