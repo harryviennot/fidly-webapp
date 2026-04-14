@@ -232,7 +232,9 @@
         "cancel": "Cancel send",
         "sendNow": "Send now",
         "confirmDelete": "Delete this draft?",
-        "confirmCancel": "Cancel this scheduled broadcast?"
+        "confirmDeleteBody": "This draft will be permanently deleted. This cannot be undone.",
+        "confirmCancel": "Cancel this scheduled broadcast?",
+        "confirmCancelBody": "The broadcast won't be sent and will be moved back to your drafts. You can reschedule it later."
       },
       "wizard": {
         "steps": {
@@ -260,6 +262,37 @@
           "filteredDescription": "Pick who receives this by activity",
           "estimate": "≈ {count} customers",
           "estimating": "Calculating...",
+          "group": {
+            "enrollment": "Enrollment age",
+            "enrollmentHelp": "Filter by when the customer joined your program.",
+            "stamps": "Collected stamps",
+            "stampsHelp": "Only targets customers with between N and M stamps on their current card.",
+            "activity": "Activity",
+            "activityHelp": "Filter by purchase behavior and last visit."
+          },
+          "enrollment": {
+            "any": "Any",
+            "recent": "Recent",
+            "recentDesc": "Joined within the last N days",
+            "old": "Older",
+            "oldDesc": "Joined more than N days ago",
+            "daysPlaceholder": "e.g. 30",
+            "daysSuffix": "days"
+          },
+          "stamps": {
+            "minLabel": "At least",
+            "maxLabel": "At most",
+            "placeholder": "e.g. 5",
+            "suffix": "stamps",
+            "help": "Tip: leave either field empty to skip that bound."
+          },
+          "activity": {
+            "hasRedeemedLabel": "Has redeemed a reward",
+            "hasRedeemedHelp": "Only sends to customers who have already claimed at least one reward.",
+            "inactiveLabel": "Inactive for",
+            "inactiveHelp": "Target customers who haven't come back in N days — useful for win-back messages.",
+            "inactivePlaceholder": "e.g. 60"
+          },
           "filters": {
             "enrolled_before_days": "Enrolled more than N days ago",
             "enrolled_after_days": "Enrolled within the last N days",
@@ -285,8 +318,8 @@
           "sendNowDescription": "Customers will receive this right away",
           "scheduleLater": "Schedule for later",
           "scheduleLaterDescription": "Pick a date and time",
-          "timezoneNote": "Times are in {tz}",
-          "windowError": "Broadcasts can only be scheduled between 9:00 and 20:00 ({tz})",
+          "timezoneNote": "Your device's local time",
+          "windowError": "Broadcasts can only be scheduled between 9:00 and 20:00",
           "pastError": "Scheduled time must be in the future",
           "dateLabel": "Date",
           "timeLabel": "Time"
@@ -308,12 +341,16 @@
           "heroRecipients": "{count, plural, one {# customer} other {# customers}}",
           "heroImmediate": "Send immediately",
           "heroScheduledFor": "Scheduled for {date}",
-          "translationLabel": "Translation"
+          "translationLabel": "Translation",
+          "contentLabel": "Message"
         },
         "next": "Next",
         "back": "Back",
         "cancel": "Cancel",
-        "saveDraft": "Save as draft",
+        "saveDraft": "Draft",
+        "save": "Save",
+        "deleteDraft": "Delete",
+        "cancelBroadcast": "Cancel send",
         "stepIndicator": "Step {current} of {total}"
       },
       "starter": {
@@ -336,7 +373,8 @@
         "cancelled": "Broadcast cancelled",
         "cancelFailed": "Failed to cancel broadcast",
         "deleted": "Draft deleted",
-        "deleteFailed": "Failed to delete draft"
+        "deleteFailed": "Failed to delete draft",
+        "scheduledCancelled": "Broadcast cancelled — moved to your drafts"
       },
       "errors": {
         "upgradeRequired": "Broadcasts require Growth or Pro.",

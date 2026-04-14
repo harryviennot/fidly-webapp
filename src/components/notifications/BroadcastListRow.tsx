@@ -15,8 +15,6 @@ interface BroadcastListRowProps {
   broadcast: Broadcast;
   onClick: (broadcast: Broadcast) => void;
   className?: string;
-  /** IANA timezone used for rendering dates. Defaults to browser TZ. */
-  businessTimezone?: string;
 }
 
 /**
@@ -28,7 +26,6 @@ export function BroadcastListRow({
   broadcast,
   onClick,
   className,
-  businessTimezone,
 }: Readonly<BroadcastListRowProps>) {
   const t = useTranslations('notifications.broadcasts');
   const uiLocale = useLocale();
@@ -40,7 +37,6 @@ export function BroadcastListRow({
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: businessTimezone,
     });
   };
 

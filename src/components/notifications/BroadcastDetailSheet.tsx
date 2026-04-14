@@ -45,7 +45,6 @@ import { useState } from 'react';
 interface BroadcastDetailSheetProps {
   broadcast: Broadcast | null;
   onClose: () => void;
-  businessTimezone?: string;
 }
 
 /**
@@ -57,7 +56,6 @@ interface BroadcastDetailSheetProps {
 export function BroadcastDetailSheet({
   broadcast,
   onClose,
-  businessTimezone,
 }: Readonly<BroadcastDetailSheetProps>) {
   return (
     <Sheet open={!!broadcast} onOpenChange={(open) => !open && onClose()}>
@@ -67,7 +65,6 @@ export function BroadcastDetailSheet({
             key={broadcast.id}
             broadcast={broadcast}
             onClose={onClose}
-            businessTimezone={businessTimezone}
           />
         )}
       </SheetContent>
@@ -78,10 +75,9 @@ export function BroadcastDetailSheet({
 interface DetailBodyProps {
   broadcast: Broadcast;
   onClose: () => void;
-  businessTimezone?: string;
 }
 
-function DetailBody({ broadcast, onClose, businessTimezone }: Readonly<DetailBodyProps>) {
+function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
   const t = useTranslations('notifications.broadcasts');
   const tWizard = useTranslations('notifications.broadcasts.wizard');
   const uiLocale = useLocale();
@@ -102,7 +98,6 @@ function DetailBody({ broadcast, onClose, businessTimezone }: Readonly<DetailBod
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: businessTimezone,
     });
   };
 

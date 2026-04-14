@@ -232,7 +232,9 @@
         "cancel": "Annuler l'envoi",
         "sendNow": "Envoyer maintenant",
         "confirmDelete": "Supprimer ce brouillon ?",
-        "confirmCancel": "Annuler cette diffusion programmée ?"
+        "confirmDeleteBody": "Ce brouillon sera définitivement supprimé. Cette action est irréversible.",
+        "confirmCancel": "Annuler cette diffusion programmée ?",
+        "confirmCancelBody": "La diffusion ne sera pas envoyée et sera déplacée vers vos brouillons. Vous pourrez la reprogrammer plus tard."
       },
       "wizard": {
         "steps": {
@@ -260,6 +262,37 @@
           "filteredDescription": "Sélectionnez les destinataires par activité",
           "estimate": "≈ {count} clients",
           "estimating": "Calcul en cours...",
+          "group": {
+            "enrollment": "Ancienneté",
+            "enrollmentHelp": "Filtrez selon la date d'inscription du client dans votre programme.",
+            "stamps": "Tampons collectés",
+            "stampsHelp": "Ne cible que les clients qui ont entre N et M tampons sur leur carte actuelle.",
+            "activity": "Activité",
+            "activityHelp": "Filtrez selon le comportement d'achat et la dernière visite."
+          },
+          "enrollment": {
+            "any": "Tous",
+            "recent": "Nouveaux",
+            "recentDesc": "Inscrits dans les N derniers jours",
+            "old": "Anciens",
+            "oldDesc": "Inscrits il y a plus de N jours",
+            "daysPlaceholder": "ex. 30",
+            "daysSuffix": "jours"
+          },
+          "stamps": {
+            "minLabel": "Au moins",
+            "maxLabel": "Au plus",
+            "placeholder": "ex. 5",
+            "suffix": "tampons",
+            "help": "Astuce : laissez un champ vide pour ne pas imposer de borne."
+          },
+          "activity": {
+            "hasRedeemedLabel": "A déjà utilisé une récompense",
+            "hasRedeemedHelp": "N'envoie qu'aux clients qui ont déjà réclamé au moins une récompense.",
+            "inactiveLabel": "Inactifs depuis",
+            "inactiveHelp": "Cible les clients qui ne sont pas revenus depuis N jours — utile pour les relancer.",
+            "inactivePlaceholder": "ex. 60"
+          },
           "filters": {
             "enrolled_before_days": "Inscrits il y a plus de N jours",
             "enrolled_after_days": "Inscrits dans les N derniers jours",
@@ -285,8 +318,8 @@
           "sendNowDescription": "Les clients recevront la diffusion tout de suite",
           "scheduleLater": "Programmer pour plus tard",
           "scheduleLaterDescription": "Choisissez une date et une heure",
-          "timezoneNote": "Les horaires sont exprimés en {tz}",
-          "windowError": "Les diffusions ne peuvent être programmées qu'entre 9h00 et 20h00 ({tz})",
+          "timezoneNote": "Heures locales de votre appareil",
+          "windowError": "Les diffusions ne peuvent être programmées qu'entre 9h00 et 20h00",
           "pastError": "La date doit être dans le futur",
           "dateLabel": "Date",
           "timeLabel": "Heure"
@@ -308,12 +341,16 @@
           "heroRecipients": "{count, plural, one {# client} other {# clients}}",
           "heroImmediate": "Envoi immédiat",
           "heroScheduledFor": "Programmée pour {date}",
-          "translationLabel": "Traduction"
+          "translationLabel": "Traduction",
+          "contentLabel": "Message"
         },
         "next": "Suivant",
         "back": "Retour",
         "cancel": "Annuler",
-        "saveDraft": "Enregistrer comme brouillon",
+        "saveDraft": "Brouillon",
+        "save": "Enregistrer",
+        "deleteDraft": "Supprimer",
+        "cancelBroadcast": "Annuler l'envoi",
         "stepIndicator": "Étape {current} sur {total}"
       },
       "starter": {
@@ -336,7 +373,8 @@
         "cancelled": "Diffusion annulée",
         "cancelFailed": "Échec de l'annulation",
         "deleted": "Brouillon supprimé",
-        "deleteFailed": "Échec de la suppression"
+        "deleteFailed": "Échec de la suppression",
+        "scheduledCancelled": "Diffusion annulée — déplacée vers vos brouillons"
       },
       "errors": {
         "upgradeRequired": "Les diffusions nécessitent Growth ou Pro.",

@@ -54,12 +54,6 @@ export default function ProgramBroadcastsPage() {
   const monthlyLimit = getLimit('notifications.broadcast_limit');
   const isStarter = !canBroadcast;
 
-  const businessTimezone =
-    (currentBusiness as unknown as { timezone?: string })?.timezone ||
-    (typeof Intl !== 'undefined'
-      ? Intl.DateTimeFormat().resolvedOptions().timeZone
-      : 'UTC');
-
   const activeFilter = (searchParams.get('filter') as FilterKey) || 'all';
 
   const { data, isLoading, error } = useBroadcasts(
@@ -84,7 +78,7 @@ export default function ProgramBroadcastsPage() {
 
   const handleRowClick = (broadcast: Broadcast) => {
     if (isEditable(broadcast.status)) {
-      router.push(`/program/broadcasts/new?edit=${broadcast.id}`);
+      router.push(`/program/broadcasts/${broadcast.id}/edit`);
     } else {
       setDetailBroadcast(broadcast);
     }
@@ -258,7 +252,6 @@ export default function ProgramBroadcastsPage() {
                     <BroadcastListRow
                       broadcast={broadcast}
                       onClick={handleRowClick}
-                      businessTimezone={businessTimezone}
                     />
                   </div>
                 ))}
@@ -275,14 +268,14 @@ export default function ProgramBroadcastsPage() {
           <div className="min-[1080px]:sticky min-[1080px]:top-5 flex flex-col gap-[14px]">
             {/* How it works */}
             <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-7 h-7 shrink-0 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
                   <LightningIcon
                     className="h-3.5 w-3.5 text-[var(--accent)]"
                     weight="fill"
                   />
                 </div>
-                <div className="text-[13px] font-semibold text-[#1A1A1A]">
+                <div className="text-[13px] font-semibold text-[#1A1A1A] leading-[1.3]">
                   {t('starter.headline')}
                 </div>
               </div>
@@ -295,8 +288,8 @@ export default function ProgramBroadcastsPage() {
                     { key: 'send', text: t('howItWorks.steps.send') },
                   ] as const
                 ).map((step, i) => (
-                  <li key={step.key} className="flex items-start gap-2.5">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] flex items-center justify-center text-[10px] font-bold text-[#8A8A8A] mt-0.5">
+                  <li key={step.key} className="flex items-center gap-2.5">
+                    <span className="shrink-0 w-5 h-5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] flex items-center justify-center text-[10px] font-bold text-[#8A8A8A]">
                       {i + 1}
                     </span>
                     <span className="text-[12px] text-[#555] leading-[1.45]">
@@ -374,7 +367,6 @@ export default function ProgramBroadcastsPage() {
       <BroadcastDetailSheet
         broadcast={detailBroadcast}
         onClose={() => setDetailBroadcast(null)}
-        businessTimezone={businessTimezone}
       />
     </div>
   );
