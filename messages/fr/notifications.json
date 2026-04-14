@@ -150,7 +150,47 @@
       "empty": {
         "title": "Aucune diffusion pour le moment",
         "description": "Créez votre première diffusion pour atteindre tous vos clients d'un seul coup.",
-        "cta": "Envoyer votre première diffusion"
+        "cta": "Envoyer votre première diffusion",
+        "filters": {
+          "drafts": {
+            "title": "Aucun brouillon",
+            "description": "Les brouillons que vous enregistrez apparaîtront ici.",
+            "cta": "Créer une diffusion"
+          },
+          "scheduled": {
+            "title": "Aucune diffusion programmée",
+            "description": "Programmez une diffusion pour la voir ici.",
+            "cta": "Programmer une diffusion"
+          },
+          "sent": {
+            "title": "Aucune diffusion envoyée",
+            "description": "Votre historique d'envoi apparaîtra ici."
+          }
+        }
+      },
+      "howItWorks": {
+        "steps": {
+          "compose": "Rédigez votre message.",
+          "audience": "Choisissez votre audience.",
+          "send": "Envoyez maintenant ou programmez."
+        },
+        "delivery": "Vos clients reçoivent la notification directement dans leur wallet.",
+        "appleNote": {
+          "title": "À noter pour Apple Wallet",
+          "body": "Apple recommande de ne pas utiliser les passes wallet à des fins de marketing non sollicité. En pratique, les diffusions fonctionnent sans problème, mais veillez à n'envoyer des messages qu'à des clients qui ont volontairement rejoint votre programme de fidélité.",
+          "link": "En savoir plus"
+        }
+      },
+      "lastResults": {
+        "title": "Dernière diffusion",
+        "recipients": "Envois",
+        "delivered": "Livrés",
+        "failed": "Échecs",
+        "deliveryRate": "{rate}% livrés",
+        "relativeJustNow": "à l'instant",
+        "relativeMinutes": "il y a {count}min",
+        "relativeHours": "il y a {count}h",
+        "relativeDays": "il y a {count}j"
       },
       "quota": {
         "used": "{count} sur {max} envoyées ce mois-ci",
@@ -208,7 +248,8 @@
           "titlePlaceholder": "Soldes de fin d'année",
           "bodyLabel": "Message",
           "bodyPlaceholder": "Profitez de 20% de réduction ce week-end !",
-          "charCount": "{count} / {max} caractères"
+          "charCount": "{count} / {max} caractères",
+          "translationHint": "Si vous n'ajoutez pas de traduction, tous les clients reçoivent la version par défaut, quelle que soit leur langue."
         },
         "audience": {
           "title": "Qui recevra cette diffusion ?",
@@ -261,7 +302,13 @@
           "quotaNote": "Ceci utilisera 1 de vos {max} diffusions mensuelles",
           "sendButton": "Envoyer la diffusion",
           "scheduleButton": "Programmer la diffusion",
-          "confirmSend": "Envoyer à {count} clients ? Cette action est irréversible."
+          "confirmSend": "Envoyer la diffusion à {count} clients ?",
+          "confirmSendNowBody": "Cette action est irréversible. Les clients recevront la notification immédiatement.",
+          "confirmSendScheduleBody": "Cette action est irréversible. La diffusion sera envoyée à la date programmée.",
+          "heroRecipients": "{count, plural, one {# client} other {# clients}}",
+          "heroImmediate": "Envoi immédiat",
+          "heroScheduledFor": "Programmée pour {date}",
+          "translationLabel": "Traduction"
         },
         "next": "Suivant",
         "back": "Retour",

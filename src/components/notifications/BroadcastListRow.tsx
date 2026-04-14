@@ -15,6 +15,8 @@ interface BroadcastListRowProps {
   broadcast: Broadcast;
   onClick: (broadcast: Broadcast) => void;
   className?: string;
+  /** IANA timezone used for rendering dates. Defaults to browser TZ. */
+  businessTimezone?: string;
 }
 
 /**
@@ -26,17 +28,19 @@ export function BroadcastListRow({
   broadcast,
   onClick,
   className,
+  businessTimezone,
 }: Readonly<BroadcastListRowProps>) {
   const t = useTranslations('notifications.broadcasts');
   const uiLocale = useLocale();
 
   const formatDate = (iso: string | null) => {
     if (!iso) return '—';
-    return new Date(iso).toLocaleDateString(uiLocale, {
+    return new Date(iso).toLocaleString(uiLocale, {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: businessTimezone,
     });
   };
 

@@ -150,7 +150,47 @@
       "empty": {
         "title": "No broadcasts yet",
         "description": "Create your first broadcast to reach every customer at once.",
-        "cta": "Send your first broadcast"
+        "cta": "Send your first broadcast",
+        "filters": {
+          "drafts": {
+            "title": "No drafts",
+            "description": "Drafts you save will show up here.",
+            "cta": "Create a broadcast"
+          },
+          "scheduled": {
+            "title": "No scheduled broadcasts",
+            "description": "Schedule a broadcast to see it here.",
+            "cta": "Schedule a broadcast"
+          },
+          "sent": {
+            "title": "No broadcasts sent yet",
+            "description": "Your send history will show up here."
+          }
+        }
+      },
+      "howItWorks": {
+        "steps": {
+          "compose": "Write your message.",
+          "audience": "Choose your audience.",
+          "send": "Send now or schedule."
+        },
+        "delivery": "Customers get the notification right inside their wallet.",
+        "appleNote": {
+          "title": "Note about Apple Wallet",
+          "body": "Apple recommends against using wallet passes for unsolicited marketing. In practice, broadcasts work without issue — just make sure you only message customers who voluntarily joined your loyalty program.",
+          "link": "Learn more"
+        }
+      },
+      "lastResults": {
+        "title": "Last broadcast",
+        "recipients": "Sends",
+        "delivered": "Delivered",
+        "failed": "Failed",
+        "deliveryRate": "{rate}% delivered",
+        "relativeJustNow": "just now",
+        "relativeMinutes": "{count}m ago",
+        "relativeHours": "{count}h ago",
+        "relativeDays": "{count}d ago"
       },
       "quota": {
         "used": "{count} of {max} sent this month",
@@ -208,7 +248,8 @@
           "titlePlaceholder": "Holiday Sale",
           "bodyLabel": "Message",
           "bodyPlaceholder": "Get 20% off this weekend!",
-          "charCount": "{count} / {max} characters"
+          "charCount": "{count} / {max} characters",
+          "translationHint": "If you don't add a translation, every customer sees the default version regardless of their language."
         },
         "audience": {
           "title": "Who will receive this?",
@@ -261,7 +302,13 @@
           "quotaNote": "This will use 1 of your {max} monthly broadcasts",
           "sendButton": "Send broadcast",
           "scheduleButton": "Schedule broadcast",
-          "confirmSend": "Send to {count} customers? This cannot be undone."
+          "confirmSend": "Send the broadcast to {count} customers?",
+          "confirmSendNowBody": "This cannot be undone. Customers will receive the notification immediately.",
+          "confirmSendScheduleBody": "This cannot be undone. The broadcast will be sent at the scheduled time.",
+          "heroRecipients": "{count, plural, one {# customer} other {# customers}}",
+          "heroImmediate": "Send immediately",
+          "heroScheduledFor": "Scheduled for {date}",
+          "translationLabel": "Translation"
         },
         "next": "Next",
         "back": "Back",

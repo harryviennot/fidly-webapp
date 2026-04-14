@@ -16,6 +16,8 @@ import {
   ClockIcon,
   FunnelIcon,
   WarningIcon,
+  InfoIcon,
+  TranslateIcon,
 } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +26,11 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { InfoBox } from '@/components/reusables/info-box';
 import { LoadingSpinner } from '@/components/reusables/loading-spinner';
 import {
@@ -48,7 +55,11 @@ import {
 import { ApiError } from '@/api/client';
 import { cn } from '@/lib/utils';
 import { describeFilter } from '@/lib/broadcast-filters';
-import { MessagePreview, PlanGatedField } from '@/components/notifications';
+import {
+  LocaleTabs,
+  MessagePreview,
+  PlanGatedField,
+} from '@/components/notifications';
 import type {
   Broadcast,
   BroadcastTargetFilter,
@@ -64,7 +75,7 @@ type StepKey = 'compose' | 'audience' | 'schedule' | 'review';
 type SendMode = 'now' | 'schedule';
 
 const STEPS: StepKey[] = ['compose', 'audience', 'schedule', 'review'];
-const BODY_CHAR_LIMIT = 120;
+const BODY_CHAR_LIMIT = 100;
 
 const SCHEDULE_HOUR_MIN = 9;
 const SCHEDULE_HOUR_MAX = 20; // exclusive on the backend (last = 19:xx)
@@ -178,6 +189,13 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
   const [currentStep, setCurrentStep] = useState<StepKey>('compose');
   const [confirmSend, setConfirmSend] = useState(false);
 
+  const { data: estimate, isFetching: estimating } = useRecipientEstimate(
+    currentBusiness?.id,
+    state.targetFilter,
+    true
+  );
+  const estimatedCount = estimate?.total ?? null;
+
   const createMutation = useCreateBroadcast(currentBusiness?.id);
   const updateMutation = useUpdateBroadcast(currentBusiness?.id);
   const sendMutation = useSendBroadcast(currentBusiness?.id);
@@ -201,18 +219,26 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
     if (currentStep === 'schedule') {
       if (state.sendMode === 'now') return true;
       if (state.sendMode === 'schedule') {
-        return isScheduleValid(state.scheduledAt, renderTs);
+        return isScheduleValid(state.scheduledAt, renderTs, businessTimezone);
       }
       return false;
     }
     return true;
-  }, [currentStep, state, renderTs]);
+  }, [currentStep, state, renderTs, businessTimezone]);
 
   // ─── Build payload for save ───
+  const hasFilledTranslation =
+    !!state.translation &&
+    (state.translation.title.trim().length > 0 ||
+      state.translation.body.trim().length > 0);
+
   const buildPayload = (includeSendMode: boolean) => {
     const translations: BroadcastTranslations = {};
-    if (state.translation) {
-      translations[secondaryLocale] = state.translation;
+    if (hasFilledTranslation && state.translation) {
+      translations[secondaryLocale] = {
+        title: state.translation.title.trim(),
+        body: state.translation.body.trim(),
+      };
     }
 
     const payload: {
@@ -228,7 +254,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
       target_filter: state.targetFilter,
     };
 
-    if (state.translation) {
+    if (hasFilledTranslation) {
       payload.translations = translations;
     }
 
@@ -271,6 +297,15 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
     setConfirmSend(false);
     try {
       if (editId && existing) {
+        const translationsPayload: BroadcastTranslations =
+          hasFilledTranslation && state.translation
+            ? {
+                [secondaryLocale]: {
+                  title: state.translation.title.trim(),
+                  body: state.translation.body.trim(),
+                },
+              }
+            : {};
         // Edit mode: PATCH with schedule or send via /send
         if (state.sendMode === 'schedule') {
           await updateMutation.mutateAsync({
@@ -278,9 +313,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
             payload: {
               title: state.title.trim(),
               body: state.body.trim(),
-              translations: state.translation
-                ? { [secondaryLocale]: state.translation }
-                : {},
+              translations: translationsPayload,
               target_filter: state.targetFilter,
               scheduled_at: state.scheduledAt!.toISOString(),
             },
@@ -293,9 +326,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
             payload: {
               title: state.title.trim(),
               body: state.body.trim(),
-              translations: state.translation
-                ? { [secondaryLocale]: state.translation }
-                : {},
+              translations: translationsPayload,
               target_filter: state.targetFilter,
               scheduled_at: null,
             },
@@ -356,7 +387,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
       className="flex flex-col gap-[14px] animate-slide-up"
       style={{ animationDelay: '150ms' }}
     >
-      {/* Header with back + step indicator */}
+      {/* Header with back + step indicator + save draft */}
       <div className="flex items-center justify-between gap-4">
         <button
           type="button"
@@ -366,11 +397,25 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
           <CaretLeftIcon className="h-3.5 w-3.5" />
           {t('page.title')}
         </button>
-        <div className="text-[11px] text-[#A0A0A0] font-medium">
-          {tWizard('stepIndicator', {
-            current: currentIndex + 1,
-            total: STEPS.length,
-          })}
+        <div className="flex items-center gap-3">
+          <div className="text-[11px] text-[#A0A0A0] font-medium">
+            {tWizard('stepIndicator', {
+              current: currentIndex + 1,
+              total: STEPS.length,
+            })}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSaveDraft}
+            disabled={
+              isBusy || !state.title.trim() || !state.body.trim()
+            }
+            className="h-8"
+          >
+            <FloppyDiskIcon className="h-3.5 w-3.5" />
+            {tWizard('saveDraft')}
+          </Button>
         </div>
       </div>
 
@@ -411,6 +456,8 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
               state={state}
               setState={setState}
               canSegment={canSegment}
+              estimatedCount={estimatedCount}
+              estimating={estimating}
             />
           )}
           {currentStep === 'schedule' && (
@@ -425,6 +472,8 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
             <ReviewStep
               state={state}
               businessTimezone={businessTimezone}
+              estimatedCount={estimatedCount}
+              estimating={estimating}
             />
           )}
         </div>
@@ -461,18 +510,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
           {currentIndex === 0 ? tWizard('cancel') : tWizard('back')}
         </Button>
 
-        <div className="flex items-center gap-2">
-          {state.title.trim() && state.body.trim() && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSaveDraft}
-              disabled={isBusy}
-            >
-              <FloppyDiskIcon className="h-3.5 w-3.5" />
-              {tWizard('saveDraft')}
-            </Button>
-          )}
+        <div className="flex items-center justify-end min-w-[200px]">
           {isLastStep ? (
             <Button
               variant="gradient"
@@ -513,12 +551,14 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t('wizard.review.confirmSend', { count: '?' })}
+              {t('wizard.review.confirmSend', {
+                count: estimatedCount ?? '…',
+              })}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {state.sendMode === 'now'
-                ? t('wizard.review.sendButton')
-                : t('wizard.review.scheduleButton')}
+                ? t('wizard.review.confirmSendNowBody')
+                : t('wizard.review.confirmSendScheduleBody')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -555,33 +595,93 @@ function ComposeStep({
   secondaryLocale,
 }: Readonly<ComposeStepProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.compose');
-  const hasTranslation = state.translation !== null;
+  const [editingLocale, setEditingLocale] = useState<Locale>(primaryLocale);
 
-  const localeLabel = (loc: Locale) =>
-    loc === 'fr' ? 'Français 🇫🇷' : 'English 🇬🇧';
+  const isPrimary = editingLocale === primaryLocale;
+  const title = isPrimary ? state.title : state.translation?.title ?? '';
+  const body = isPrimary ? state.body : state.translation?.body ?? '';
+
+  const hasTranslation =
+    !!state.translation &&
+    (state.translation.title.trim().length > 0 ||
+      state.translation.body.trim().length > 0);
+
+  const setTitle = (value: string) => {
+    setState((s) => {
+      if (editingLocale === primaryLocale) return { ...s, title: value };
+      const existing = s.translation ?? { title: '', body: '' };
+      return { ...s, translation: { ...existing, title: value } };
+    });
+  };
+  const setBody = (value: string) => {
+    setState((s) => {
+      if (editingLocale === primaryLocale) return { ...s, body: value };
+      const existing = s.translation ?? { title: '', body: '' };
+      return { ...s, translation: { ...existing, body: value } };
+    });
+  };
+
+  const handleLocaleChange = (loc: Locale) => {
+    if (loc !== primaryLocale) {
+      setState((s) =>
+        s.translation
+          ? s
+          : { ...s, translation: { title: '', body: '' } }
+      );
+    }
+    setEditingLocale(loc);
+  };
 
   return (
     <div
       className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up"
       style={{ animationDelay: '60ms' }}
     >
-      <div className="text-[16px] font-semibold text-[#1A1A1A] mb-1">
-        {t('title')}
-      </div>
-      <div className="text-[12px] text-[#A0A0A0] mb-5">{t('subtitle')}</div>
-
-      {/* Primary locale fields */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wide">
-          {localeLabel(primaryLocale)}
+      <div className="flex items-start justify-between gap-3 mb-1">
+        <div className="min-w-0">
+          <div className="text-[16px] font-semibold text-[#1A1A1A]">
+            {t('title')}
+          </div>
+          <div className="text-[12px] text-[#A0A0A0]">{t('subtitle')}</div>
         </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label="translation hint"
+              className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-[#A0A0A0] hover:text-[#555] hover:bg-[var(--paper-hover)] transition-colors"
+            >
+              <InfoIcon className="h-4 w-4" weight="regular" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" className="max-w-[260px] text-[11px] leading-[1.45]">
+            {t('translationHint')}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 mt-4 mb-4">
+        <LocaleTabs
+          value={editingLocale}
+          onValueChange={handleLocaleChange}
+          primaryLocale={primaryLocale}
+        />
+        {hasTranslation && editingLocale === primaryLocale && (
+          <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[var(--accent-light)] text-[var(--accent)] text-[10px] font-semibold px-2 py-0.5">
+            <TranslateIcon className="h-3 w-3" weight="bold" />
+            {secondaryLocale.toUpperCase()}
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-4">
         <div>
           <Label className="text-[12px] font-semibold text-[#555] mb-1.5">
             {t('titleLabel')}
           </Label>
           <Input
-            value={state.title}
-            onChange={(e) => setState((s) => ({ ...s, title: e.target.value }))}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder={t('titlePlaceholder')}
           />
         </div>
@@ -591,84 +691,21 @@ function ComposeStep({
             <span
               className={cn(
                 'text-[11px] font-normal tabular-nums',
-                state.body.length > BODY_CHAR_LIMIT
+                body.length > BODY_CHAR_LIMIT
                   ? 'text-[var(--warning)]'
                   : 'text-[#A0A0A0]'
               )}
             >
-              {t('charCount', { count: state.body.length, max: BODY_CHAR_LIMIT })}
+              {t('charCount', { count: body.length, max: BODY_CHAR_LIMIT })}
             </span>
           </Label>
           <Textarea
-            value={state.body}
-            onChange={(e) => setState((s) => ({ ...s, body: e.target.value }))}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
             placeholder={t('bodyPlaceholder')}
             className="min-h-[100px] resize-none"
           />
         </div>
-      </div>
-
-      {/* Translation toggle */}
-      <div className="mt-5 pt-4 border-t border-[var(--border-light)]">
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-semibold text-[#1A1A1A]">
-              {localeLabel(secondaryLocale)}
-            </div>
-            <p className="text-[11px] text-[#A0A0A0] mt-0.5 leading-[1.4]">
-              Optional translation — customers see the language matching their phone.
-            </p>
-          </div>
-          <Switch
-            checked={hasTranslation}
-            onCheckedChange={(checked) =>
-              setState((s) => ({
-                ...s,
-                translation: checked ? { title: '', body: '' } : null,
-              }))
-            }
-          />
-        </div>
-
-        {hasTranslation && state.translation && (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-[12px] font-semibold text-[#555] mb-1.5">
-                {t('titleLabel')}
-              </Label>
-              <Input
-                value={state.translation.title}
-                onChange={(e) =>
-                  setState((s) => ({
-                    ...s,
-                    translation: s.translation
-                      ? { ...s.translation, title: e.target.value }
-                      : null,
-                  }))
-                }
-                placeholder={t('titlePlaceholder')}
-              />
-            </div>
-            <div>
-              <Label className="text-[12px] font-semibold text-[#555] mb-1.5">
-                {t('bodyLabel')}
-              </Label>
-              <Textarea
-                value={state.translation.body}
-                onChange={(e) =>
-                  setState((s) => ({
-                    ...s,
-                    translation: s.translation
-                      ? { ...s.translation, body: e.target.value }
-                      : null,
-                  }))
-                }
-                placeholder={t('bodyPlaceholder')}
-                className="min-h-[100px] resize-none"
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -682,15 +719,18 @@ interface AudienceStepProps {
   state: WizardState;
   setState: (updater: (prev: WizardState) => WizardState) => void;
   canSegment: boolean;
+  estimatedCount: number | null;
+  estimating: boolean;
 }
 
 function AudienceStep({
   state,
   setState,
   canSegment,
+  estimatedCount,
+  estimating,
 }: Readonly<AudienceStepProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.audience');
-  const { currentBusiness } = useBusiness();
 
   const isAll = !!state.targetFilter.all;
 
@@ -700,12 +740,6 @@ function AudienceStep({
       targetFilter: on ? { all: true } : {},
     }));
   };
-
-  const { data: estimate, isFetching: estimating } = useRecipientEstimate(
-    currentBusiness?.id,
-    state.targetFilter,
-    true
-  );
 
   const updateFilter = <K extends keyof BroadcastTargetFilter>(
     key: K,
@@ -838,12 +872,10 @@ function AudienceStep({
           weight="fill"
         />
         <div className="text-[13px] text-[#555]">
-          {estimating ? (
+          {estimating && estimatedCount === null ? (
             <span className="text-[#A0A0A0]">{t('estimating')}</span>
           ) : (
-            <span>
-              {t('estimate', { count: estimate?.total ?? 0 })}
-            </span>
+            <span>{t('estimate', { count: estimatedCount ?? 0 })}</span>
           )}
         </div>
       </div>
@@ -910,14 +942,33 @@ interface ScheduleStepProps {
 }
 
 /**
+ * Hour at the given instant, interpreted in the given IANA time zone.
+ * Using Intl keeps the comparison correct when the business TZ differs
+ * from the viewer's browser TZ (the common case for roaming owners).
+ */
+function hourInTimeZone(date: Date, timeZone: string): number {
+  return Number(
+    new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      hour12: false,
+      timeZone,
+    }).format(date)
+  );
+}
+
+/**
  * Pure scheduling check. `now` must be passed in explicitly so callers
  * (e.g. useMemo) remain idempotent — we never call `Date.now()` inside
  * the function itself.
  */
-function isScheduleValid(date: Date | null, now: number): boolean {
+function isScheduleValid(
+  date: Date | null,
+  now: number,
+  timeZone: string
+): boolean {
   if (!date) return false;
   if (date.getTime() < now) return false;
-  const hour = date.getHours();
+  const hour = hourInTimeZone(date, timeZone);
   return hour >= SCHEDULE_HOUR_MIN && hour < SCHEDULE_HOUR_MAX;
 }
 
@@ -942,7 +993,7 @@ function ScheduleStep({
   const scheduleError = useMemo(() => {
     if (state.sendMode !== 'schedule' || !state.scheduledAt) return null;
     if (state.scheduledAt.getTime() < renderTs) return t('pastError');
-    const hour = state.scheduledAt.getHours();
+    const hour = hourInTimeZone(state.scheduledAt, businessTimezone);
     if (hour < SCHEDULE_HOUR_MIN || hour >= SCHEDULE_HOUR_MAX) {
       return t('windowError', { tz: businessTimezone });
     }
@@ -959,12 +1010,12 @@ function ScheduleStep({
       </div>
       <div className="text-[12px] text-[#A0A0A0] mb-5">{t('subtitle')}</div>
 
-      <div className="flex gap-2 flex-col sm:flex-row mb-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
         <button
           type="button"
           onClick={() => setMode('now')}
           className={cn(
-            'flex-1 p-4 rounded-[10px] text-left border-[1.5px] transition-all',
+            'w-full p-4 rounded-[10px] text-left border-[1.5px] transition-all',
             state.sendMode === 'now'
               ? 'border-[var(--accent)] bg-[var(--accent-light)]'
               : 'border-[var(--border-light)] bg-[var(--paper)] hover:border-[var(--border)]'
@@ -987,7 +1038,6 @@ function ScheduleStep({
         <PlanGatedField
           requiredTier="pro"
           upgradeFrom="broadcasts.scheduled"
-          className="flex-1"
         >
           <button
             type="button"
@@ -1066,20 +1116,26 @@ function useRenderTimestamp(deps: readonly unknown[]): number {
 interface ReviewStepProps {
   state: WizardState;
   businessTimezone: string;
+  estimatedCount: number | null;
+  estimating: boolean;
 }
 
-function ReviewStep({ state, businessTimezone }: Readonly<ReviewStepProps>) {
+function ReviewStep({
+  state,
+  businessTimezone,
+  estimatedCount,
+  estimating,
+}: Readonly<ReviewStepProps>) {
   const t = useTranslations('notifications.broadcasts');
   const tWizard = useTranslations('notifications.broadcasts.wizard');
-  const tAudience = useTranslations('notifications.broadcasts.wizard.audience');
   const uiLocale = useLocale();
+  const { currentBusiness } = useBusiness();
 
   const chipTranslator = (key: string, values?: Record<string, unknown>) =>
     tWizard(key, values as { n: number });
   const chips = describeFilter(state.targetFilter, chipTranslator);
 
-  const sendTimeLabel = useMemo(() => {
-    if (state.sendMode === 'now') return t('wizard.review.sendImmediately');
+  const scheduledLabel = useMemo(() => {
     if (state.sendMode === 'schedule' && state.scheduledAt) {
       return new Date(state.scheduledAt).toLocaleString(uiLocale, {
         weekday: 'short',
@@ -1087,10 +1143,16 @@ function ReviewStep({ state, businessTimezone }: Readonly<ReviewStepProps>) {
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: businessTimezone,
       });
     }
-    return '—';
-  }, [state.sendMode, state.scheduledAt, uiLocale, t]);
+    return null;
+  }, [state.sendMode, state.scheduledAt, uiLocale, businessTimezone]);
+
+  const hasTranslation =
+    !!state.translation &&
+    (state.translation.title.trim().length > 0 ||
+      state.translation.body.trim().length > 0);
 
   return (
     <div
@@ -1104,29 +1166,72 @@ function ReviewStep({ state, businessTimezone }: Readonly<ReviewStepProps>) {
         {tWizard('review.subtitle')}
       </div>
 
-      <div className="space-y-4">
-        <SummaryRow
-          icon={<MegaphoneIcon className="h-4 w-4" weight="fill" />}
+      {/* Hero: recipient count + send time */}
+      <div className="rounded-[12px] border border-[var(--accent)]/30 bg-[var(--accent-light)] p-4 min-[1080px]:p-5 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl bg-white/70 flex items-center justify-center shrink-0">
+            <PaperPlaneRightIcon
+              className="h-5 w-5 text-[var(--accent)]"
+              weight="fill"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] font-semibold text-[var(--accent)] uppercase tracking-wider mb-0.5">
+              {tWizard('review.recipientsLabel')}
+            </div>
+            <div className="text-[22px] font-bold text-[#1A1A1A] tabular-nums leading-none">
+              {estimating && estimatedCount === null ? (
+                <span className="text-[#A0A0A0]">…</span>
+              ) : (
+                tWizard('review.heroRecipients', {
+                  count: estimatedCount ?? 0,
+                })
+              )}
+            </div>
+            <div className="text-[11px] text-[#555] mt-1">
+              {state.sendMode === 'schedule' && scheduledLabel
+                ? tWizard('review.heroScheduledFor', { date: scheduledLabel })
+                : tWizard('review.heroImmediate')}
+              {' · '}
+              {businessTimezone}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Message preview */}
+      <div className="mb-4">
+        <MessagePreview
+          iconUrl={currentBusiness?.icon_url ?? null}
+          businessName={currentBusiness?.name ?? ''}
+          body={state.body || state.title}
+        />
+      </div>
+
+      {/* Summary rows */}
+      <div className="rounded-[10px] border border-[var(--border-light)] bg-[var(--paper)] divide-y divide-[var(--border-light)]">
+        <SummaryCompactRow
+          icon={<MegaphoneIcon className="h-3.5 w-3.5" weight="fill" />}
           label={t('detail.title')}
           value={
-            <div>
-              <div className="text-[13px] font-semibold text-[#1A1A1A]">
+            <div className="text-right">
+              <div className="text-[12.5px] font-semibold text-[#1A1A1A] truncate">
                 {state.title || '—'}
               </div>
-              <div className="text-[12px] text-[#8A8A8A] mt-0.5 whitespace-pre-wrap">
+              <div className="text-[11px] text-[#8A8A8A] line-clamp-2 whitespace-pre-wrap">
                 {state.body}
               </div>
             </div>
           }
         />
 
-        <SummaryRow
-          icon={<UsersIcon className="h-4 w-4" weight="fill" />}
+        <SummaryCompactRow
+          icon={<UsersIcon className="h-3.5 w-3.5" weight="fill" />}
           label={tWizard('review.audienceLabel')}
           value={
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1 justify-end">
               {chips.map((chip) => (
-                <Badge key={chip.key} variant="outline" className="text-[11px]">
+                <Badge key={chip.key} variant="outline" className="text-[10px]">
                   {chip.label}
                 </Badge>
               ))}
@@ -1134,33 +1239,28 @@ function ReviewStep({ state, businessTimezone }: Readonly<ReviewStepProps>) {
           }
         />
 
-        <SummaryRow
-          icon={<ClockIcon className="h-4 w-4" weight="fill" />}
+        <SummaryCompactRow
+          icon={<ClockIcon className="h-3.5 w-3.5" weight="fill" />}
           label={tWizard('review.sendTimeLabel')}
           value={
-            <div>
-              <div className="text-[13px] font-semibold text-[#1A1A1A]">
-                {sendTimeLabel}
-              </div>
-              {state.sendMode === 'schedule' && (
-                <div className="text-[11px] text-[#A0A0A0] mt-0.5">
-                  {tAudience('estimating')} · {businessTimezone}
-                </div>
-              )}
+            <div className="text-[12.5px] font-semibold text-[#1A1A1A] text-right">
+              {state.sendMode === 'schedule' && scheduledLabel
+                ? scheduledLabel
+                : t('wizard.review.sendImmediately')}
             </div>
           }
         />
 
-        {state.translation && (
-          <SummaryRow
-            icon={<CheckCircleIcon className="h-4 w-4" weight="fill" />}
-            label="Translation"
+        {hasTranslation && state.translation && (
+          <SummaryCompactRow
+            icon={<CheckCircleIcon className="h-3.5 w-3.5" weight="fill" />}
+            label={tWizard('review.translationLabel')}
             value={
-              <div>
-                <div className="text-[13px] font-semibold text-[#1A1A1A]">
-                  {state.translation.title}
+              <div className="text-right">
+                <div className="text-[12.5px] font-semibold text-[#1A1A1A] truncate">
+                  {state.translation.title || '—'}
                 </div>
-                <div className="text-[12px] text-[#8A8A8A] mt-0.5 whitespace-pre-wrap">
+                <div className="text-[11px] text-[#8A8A8A] line-clamp-2 whitespace-pre-wrap">
                   {state.translation.body}
                 </div>
               </div>
@@ -1172,24 +1272,25 @@ function ReviewStep({ state, businessTimezone }: Readonly<ReviewStepProps>) {
   );
 }
 
-interface SummaryRowProps {
+interface SummaryCompactRowProps {
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
 }
 
-function SummaryRow({ icon, label, value }: Readonly<SummaryRowProps>) {
+function SummaryCompactRow({
+  icon,
+  label,
+  value,
+}: Readonly<SummaryCompactRowProps>) {
   return (
-    <div className="flex items-start gap-3 px-3 py-3 rounded-[10px] bg-[var(--paper)] border border-[var(--border-light)]">
-      <div className="w-8 h-8 rounded-lg bg-[var(--accent-light)] flex items-center justify-center flex-shrink-0 text-[var(--accent)]">
-        {icon}
+    <div className="flex items-start justify-between gap-4 px-3.5 py-3">
+      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wide shrink-0">
+        <span className="text-[var(--accent)]">{icon}</span>
+        {label}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wide mb-1">
-          {label}
-        </div>
-        {value}
-      </div>
+      <div className="flex-1 min-w-0">{value}</div>
     </div>
   );
 }
+

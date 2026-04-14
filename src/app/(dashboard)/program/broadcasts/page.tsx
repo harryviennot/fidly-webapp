@@ -9,9 +9,12 @@ import {
   PlusIcon,
   LightningIcon,
   CrownIcon,
+  WarningIcon,
+  ArrowSquareOutIcon,
+  ClockIcon,
+  PaperPlaneTiltIcon,
 } from '@phosphor-icons/react';
 import { PageHeader } from '@/components/redesign';
-import { LoadingSpinner } from '@/components/reusables/loading-spinner';
 import { InfoBox } from '@/components/reusables/info-box';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -21,7 +24,9 @@ import { useBroadcasts } from '@/hooks/use-notifications';
 import { computeThisMonthQuota, isEditable } from '@/lib/broadcast-filters';
 import {
   BroadcastListRow,
+  BroadcastListSkeleton,
   BroadcastDetailSheet,
+  LastBroadcastResultsWidget,
   UpgradeCTA,
 } from '@/components/notifications';
 import type { Broadcast, BroadcastStatus } from '@/types/notification';
@@ -48,6 +53,12 @@ export default function ProgramBroadcastsPage() {
   const canBroadcast = hasFeature('notifications.broadcast');
   const monthlyLimit = getLimit('notifications.broadcast_limit');
   const isStarter = !canBroadcast;
+
+  const businessTimezone =
+    (currentBusiness as unknown as { timezone?: string })?.timezone ||
+    (typeof Intl !== 'undefined'
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone
+      : 'UTC');
 
   const activeFilter = (searchParams.get('filter') as FilterKey) || 'all';
 
@@ -198,7 +209,7 @@ export default function ProgramBroadcastsPage() {
               })}
             </div>
 
-            {isLoading && <LoadingSpinner />}
+            {isLoading && <BroadcastListSkeleton />}
 
             {error && (
               <InfoBox
@@ -229,20 +240,27 @@ export default function ProgramBroadcastsPage() {
               </div>
             )}
 
-            {!isLoading && !error && visibleBroadcasts.length === 0 && allBroadcasts.length > 0 && (
-              <div className="rounded-[10px] border border-dashed border-[var(--border-light)] px-5 py-8 text-center">
-                <p className="text-[12px] text-[#A0A0A0]">—</p>
-              </div>
-            )}
+            {!isLoading &&
+              !error &&
+              visibleBroadcasts.length === 0 &&
+              allBroadcasts.length > 0 && (
+                <FilterEmptyState filter={activeFilter} />
+              )}
 
             {!isLoading && !error && visibleBroadcasts.length > 0 && (
               <div className="flex flex-col gap-1.5">
-                {visibleBroadcasts.map((broadcast) => (
-                  <BroadcastListRow
+                {visibleBroadcasts.map((broadcast, i) => (
+                  <div
                     key={broadcast.id}
-                    broadcast={broadcast}
-                    onClick={handleRowClick}
-                  />
+                    className="animate-slide-up"
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  >
+                    <BroadcastListRow
+                      broadcast={broadcast}
+                      onClick={handleRowClick}
+                      businessTimezone={businessTimezone}
+                    />
+                  </div>
                 ))}
               </div>
             )}
@@ -272,9 +290,9 @@ export default function ProgramBroadcastsPage() {
               <ol className="space-y-2">
                 {(
                   [
-                    { key: 'compose', text: t('wizard.steps.compose') },
-                    { key: 'audience', text: t('wizard.steps.audience') },
-                    { key: 'schedule', text: t('wizard.steps.schedule') },
+                    { key: 'compose', text: t('howItWorks.steps.compose') },
+                    { key: 'audience', text: t('howItWorks.steps.audience') },
+                    { key: 'send', text: t('howItWorks.steps.send') },
                   ] as const
                 ).map((step, i) => (
                   <li key={step.key} className="flex items-start gap-2.5">
@@ -290,10 +308,42 @@ export default function ProgramBroadcastsPage() {
 
               <div className="mt-3.5 pt-3 border-t border-[var(--border-light)]">
                 <p className="text-[11px] text-[#8A8A8A] leading-[1.45]">
-                  {t('starter.description')}
+                  {t('howItWorks.delivery')}
                 </p>
               </div>
+
+              <div className="mt-3 rounded-[10px] border border-amber-200/80 bg-amber-50/70 p-3">
+                <div className="flex items-start gap-2">
+                  <WarningIcon
+                    className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0"
+                    weight="fill"
+                  />
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-semibold text-amber-900 mb-0.5">
+                      {t('howItWorks.appleNote.title')}
+                    </div>
+                    <p className="text-[11px] text-amber-900/80 leading-[1.45]">
+                      {t('howItWorks.appleNote.body')}
+                    </p>
+                    <a
+                      href="https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/PassKit_PG/Updating.html"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold text-amber-800 hover:text-amber-900 underline-offset-2 hover:underline"
+                    >
+                      {t('howItWorks.appleNote.link')}
+                      <ArrowSquareOutIcon className="h-3 w-3" weight="bold" />
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Last broadcast results — hidden until the first sent broadcast exists */}
+            <LastBroadcastResultsWidget
+              broadcasts={allBroadcasts}
+              onOpen={setDetailBroadcast}
+            />
 
             {/* Pro upsell (Growth only) */}
             {tier === 'growth' && (
@@ -324,7 +374,47 @@ export default function ProgramBroadcastsPage() {
       <BroadcastDetailSheet
         broadcast={detailBroadcast}
         onClose={() => setDetailBroadcast(null)}
+        businessTimezone={businessTimezone}
       />
+    </div>
+  );
+}
+
+// ─── Filter empty states ─────────────────────────────────────────────
+
+function FilterEmptyState({ filter }: Readonly<{ filter: FilterKey }>) {
+  const t = useTranslations('notifications.broadcasts');
+
+  if (filter === 'all') return null;
+
+  const ICONS: Record<Exclude<FilterKey, 'all'>, React.ReactNode> = {
+    drafts: <MegaphoneIcon className="mx-auto h-7 w-7 text-[#A0A0A0] mb-2.5" />,
+    scheduled: <ClockIcon className="mx-auto h-7 w-7 text-[#A0A0A0] mb-2.5" />,
+    sent: <PaperPlaneTiltIcon className="mx-auto h-7 w-7 text-[#A0A0A0] mb-2.5" />,
+  };
+  const icon = ICONS[filter];
+
+  const hasCta = filter === 'drafts' || filter === 'scheduled';
+
+  return (
+    <div className="rounded-[10px] border border-dashed border-[var(--border-light)] px-5 py-9 text-center">
+      {icon}
+      <div className="text-[13px] font-semibold text-[#1A1A1A] mb-1">
+        {t(`empty.filters.${filter}.title`)}
+      </div>
+      <p className="text-[12px] text-[#8A8A8A] max-w-xs mx-auto leading-[1.45]">
+        {t(`empty.filters.${filter}.description`)}
+      </p>
+      {hasCta && (
+        <div className="mt-3.5">
+          <Button variant="outline" size="sm" asChild className="rounded-full">
+            <Link href="/program/broadcasts/new">
+              <PlusIcon className="h-3.5 w-3.5" weight="bold" />
+              {t(`empty.filters.${filter}.cta`)}
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
