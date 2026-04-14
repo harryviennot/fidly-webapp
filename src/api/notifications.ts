@@ -17,7 +17,7 @@ import type {
   BroadcastCreate,
   BroadcastUpdate,
   BroadcastTargetFilter,
-  RecipientEstimate,
+  RecipientEstimateResponse,
   BusinessIconUploadResponse,
   TriggerType,
   LocalizedBody,
@@ -328,26 +328,27 @@ export async function deleteBusinessIcon(businessId: string): Promise<void> {
 
 // ─────────────────────────────────────────────────────────────────────────
 // Broadcasts
+//
+// Path contract: /broadcasts/{business_id}[/{broadcast_id}][/send|/estimate]
+// Pagination: offset-based (limit, offset). See
+// backend/app/api/routes/broadcasts.py for the full surface.
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function listBroadcasts(
+  businessId: string,
   params: BroadcastListParams = {}
 ): Promise<PaginatedBroadcasts> {
   if (USE_MOCKS) {
-    return {
-      items: MOCK_BROADCASTS,
-      next_cursor: null,
-      total_this_month: 0,
-    };
+    return { items: MOCK_BROADCASTS, total: 0, limit: 50, offset: 0 };
   }
 
   const query = new URLSearchParams();
-  if (params.status && params.status !== 'all') query.set('status', params.status);
-  if (params.cursor) query.set('cursor', params.cursor);
-  if (params.limit) query.set('limit', params.limit.toString());
+  if (params.limit !== undefined) query.set('limit', params.limit.toString());
+  if (params.offset !== undefined) query.set('offset', params.offset.toString());
+  const qs = query.toString();
 
   const response = await fetch(
-    `${API_BASE_URL}/broadcasts?${query.toString()}`,
+    `${API_BASE_URL}/broadcasts/${businessId}${qs ? `?${qs}` : ''}`,
     { headers: await getAuthHeaders() }
   );
 
@@ -359,16 +360,20 @@ export async function listBroadcasts(
   return response.json();
 }
 
-export async function getBroadcast(id: string): Promise<Broadcast> {
+export async function getBroadcast(
+  businessId: string,
+  broadcastId: string
+): Promise<Broadcast> {
   if (USE_MOCKS) {
-    const b = MOCK_BROADCASTS.find((x) => x.id === id);
+    const b = MOCK_BROADCASTS.find((x) => x.id === broadcastId);
     if (!b) throw new Error('Broadcast not found');
     return b;
   }
 
-  const response = await fetch(`${API_BASE_URL}/broadcasts/${id}`, {
-    headers: await getAuthHeaders(),
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}`,
+    { headers: await getAuthHeaders() }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -379,13 +384,14 @@ export async function getBroadcast(id: string): Promise<Broadcast> {
 }
 
 export async function createBroadcast(
+  businessId: string,
   payload: BroadcastCreate
 ): Promise<Broadcast> {
   if (USE_MOCKS) {
     throw new Error('Broadcasts not available in mock mode');
   }
 
-  const response = await fetch(`${API_BASE_URL}/broadcasts`, {
+  const response = await fetch(`${API_BASE_URL}/broadcasts/${businessId}`, {
     method: 'POST',
     headers: await getAuthHeaders(),
     body: JSON.stringify(payload),
@@ -400,18 +406,22 @@ export async function createBroadcast(
 }
 
 export async function updateBroadcast(
-  id: string,
+  businessId: string,
+  broadcastId: string,
   payload: BroadcastUpdate
 ): Promise<Broadcast> {
   if (USE_MOCKS) {
     throw new Error('Broadcasts not available in mock mode');
   }
 
-  const response = await fetch(`${API_BASE_URL}/broadcasts/${id}`, {
-    method: 'PATCH',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify(payload),
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}`,
+    {
+      method: 'PATCH',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(payload),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -421,47 +431,69 @@ export async function updateBroadcast(
   return response.json();
 }
 
-export async function deleteBroadcast(id: string): Promise<void> {
+/**
+ * Cancel a draft or scheduled broadcast. Backend DELETE flips status to
+ * 'cancelled' rather than deleting the row (audit trail).
+ */
+export async function cancelBroadcast(
+  businessId: string,
+  broadcastId: string
+): Promise<void> {
   if (USE_MOCKS) return;
 
-  const response = await fetch(`${API_BASE_URL}/broadcasts/${id}`, {
-    method: 'DELETE',
-    headers: await getAuthHeaders(),
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}`,
+    {
+      method: 'DELETE',
+      headers: await getAuthHeaders(),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throwApiError(error, 'Failed to delete broadcast');
+    throwApiError(error, 'Failed to cancel broadcast');
   }
 }
 
-export async function sendBroadcast(id: string): Promise<void> {
-  if (USE_MOCKS) return;
+/** Fire a draft right now. Backend flips to 'sending' + enqueues the worker. */
+export async function sendBroadcast(
+  businessId: string,
+  broadcastId: string
+): Promise<Broadcast> {
+  if (USE_MOCKS) {
+    throw new Error('Broadcasts not available in mock mode');
+  }
 
-  const response = await fetch(`${API_BASE_URL}/broadcasts/${id}/send`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}/send`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throwApiError(error, 'Failed to send broadcast');
   }
+
+  return response.json();
 }
 
 export async function estimateRecipients(
+  businessId: string,
   filter: BroadcastTargetFilter
-): Promise<RecipientEstimate> {
+): Promise<RecipientEstimateResponse> {
   if (USE_MOCKS) {
-    return { count: Math.floor(Math.random() * 500) + 50 };
+    return { target_filter: filter, total: Math.floor(Math.random() * 500) + 50 };
   }
 
   const response = await fetch(
-    `${API_BASE_URL}/broadcasts/estimate-recipients`,
+    `${API_BASE_URL}/broadcasts/${businessId}/estimate`,
     {
       method: 'POST',
       headers: await getAuthHeaders(),
-      body: JSON.stringify(filter),
+      body: JSON.stringify({ target_filter: filter }),
     }
   );
 

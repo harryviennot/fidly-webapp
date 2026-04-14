@@ -19,7 +19,7 @@ import {
   getBroadcast,
   createBroadcast,
   updateBroadcast,
-  deleteBroadcast,
+  cancelBroadcast,
   sendBroadcast,
   estimateRecipients,
 } from '@/api';
@@ -213,69 +213,106 @@ export function useDeleteBusinessIcon(businessId: string | undefined) {
 
 // ─── Broadcasts ────────────────────────────────────────────────────────
 
-export function useBroadcasts(params: BroadcastListParams = {}) {
+export function useBroadcasts(
+  businessId: string | undefined,
+  params: BroadcastListParams = {}
+) {
   return useQuery({
-    queryKey: notificationKeys.broadcasts(params),
-    queryFn: () => listBroadcasts(params),
+    queryKey: [
+      'notifications',
+      'broadcasts',
+      businessId ?? null,
+      params.limit ?? 50,
+      params.offset ?? 0,
+    ] as const,
+    queryFn: () => {
+      if (!businessId) throw new Error('businessId required');
+      return listBroadcasts(businessId, params);
+    },
+    enabled: !!businessId,
     placeholderData: keepPreviousData,
   });
 }
 
-export function useBroadcast(id: string | undefined) {
+export function useBroadcast(
+  businessId: string | undefined,
+  broadcastId: string | undefined
+) {
   return useQuery({
-    queryKey: notificationKeys.broadcast(id),
+    queryKey: ['notifications', 'broadcast', businessId ?? null, broadcastId ?? null] as const,
     queryFn: () => {
-      if (!id) throw new Error('id required');
-      return getBroadcast(id);
+      if (!businessId) throw new Error('businessId required');
+      if (!broadcastId) throw new Error('broadcastId required');
+      return getBroadcast(businessId, broadcastId);
     },
-    enabled: !!id,
+    enabled: !!businessId && !!broadcastId,
   });
 }
 
-export function useCreateBroadcast() {
+export function useCreateBroadcast(businessId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: BroadcastCreate) => createBroadcast(payload),
+    mutationFn: (payload: BroadcastCreate) => {
+      if (!businessId) throw new Error('businessId required');
+      return createBroadcast(businessId, payload);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'broadcasts'] });
-    },
-  });
-}
-
-export function useUpdateBroadcast() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (args: { id: string; payload: BroadcastUpdate }) =>
-      updateBroadcast(args.id, args.payload),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'broadcasts'] });
       queryClient.invalidateQueries({
-        queryKey: notificationKeys.broadcast(variables.id),
+        queryKey: ['notifications', 'broadcasts', businessId],
       });
     },
   });
 }
 
-export function useDeleteBroadcast() {
+export function useUpdateBroadcast(businessId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteBroadcast(id),
+    mutationFn: (args: { id: string; payload: BroadcastUpdate }) => {
+      if (!businessId) throw new Error('businessId required');
+      return updateBroadcast(businessId, args.id, args.payload);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'broadcasts'] });
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'broadcasts', businessId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'broadcast', businessId],
+      });
     },
   });
 }
 
-export function useSendBroadcast() {
+/** DELETE on the broadcast — cancels a draft or scheduled row. */
+export function useCancelBroadcast(businessId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => sendBroadcast(id),
+    mutationFn: (broadcastId: string) => {
+      if (!businessId) throw new Error('businessId required');
+      return cancelBroadcast(businessId, broadcastId);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'broadcasts'] });
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'broadcasts', businessId],
+      });
+    },
+  });
+}
+
+export function useSendBroadcast(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (broadcastId: string) => {
+      if (!businessId) throw new Error('businessId required');
+      return sendBroadcast(businessId, broadcastId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'broadcasts', businessId],
+      });
     },
   });
 }
@@ -285,6 +322,7 @@ export function useSendBroadcast() {
  * Fires 400ms after the filter stops changing.
  */
 export function useRecipientEstimate(
+  businessId: string | undefined,
   filter: BroadcastTargetFilter,
   enabled: boolean = true
 ) {
@@ -299,9 +337,12 @@ export function useRecipientEstimate(
   }, [filterKey]);
 
   return useQuery({
-    queryKey: notificationKeys.estimate(debouncedFilter),
-    queryFn: () => estimateRecipients(debouncedFilter),
-    enabled,
+    queryKey: ['notifications', 'estimate', businessId ?? null, debouncedFilter] as const,
+    queryFn: () => {
+      if (!businessId) throw new Error('businessId required');
+      return estimateRecipients(businessId, debouncedFilter);
+    },
+    enabled: enabled && !!businessId,
     placeholderData: keepPreviousData,
   });
 }

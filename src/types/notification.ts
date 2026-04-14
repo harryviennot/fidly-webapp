@@ -82,6 +82,11 @@ export interface BroadcastTranslations {
   fr?: { title: string; body: string };
 }
 
+/**
+ * Broadcast row as returned by `_serialize_broadcast` in the backend.
+ * `title` and `body` are the primary-locale content; other locales live in
+ * `translations[locale] = { title, body }`.
+ */
 export interface Broadcast {
   id: string;
   business_id: string;
@@ -92,33 +97,37 @@ export interface Broadcast {
   status: BroadcastStatus;
   scheduled_at: string | null;
   sent_at: string | null;
-  created_by: string;
-  created_at: string;
-  total_recipients: number | null;
+  total_recipients: number;
   delivered: number;
   failed: number;
   google_throttled: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string | null;
 }
 
 export interface BroadcastListParams {
-  status?: BroadcastStatus | 'all';
-  cursor?: string;
   limit?: number;
+  offset?: number;
 }
 
+/** Offset-paginated envelope — mirrors GET /broadcasts/{business_id}. */
 export interface PaginatedBroadcasts {
   items: Broadcast[];
-  next_cursor: string | null;
-  total_this_month: number;
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface BroadcastCreate {
   title: string;
   body: string;
   translations?: BroadcastTranslations;
-  target_filter: BroadcastTargetFilter;
-  status?: 'draft' | 'scheduled' | 'sending';
+  target_filter?: BroadcastTargetFilter;
+  /** ISO datetime. Mutually exclusive with `immediate: true`. Pro only. */
   scheduled_at?: string | null;
+  /** When true, backend flips status to 'sending' + enqueues the worker. */
+  immediate?: boolean;
 }
 
 export interface BroadcastUpdate {
@@ -127,6 +136,11 @@ export interface BroadcastUpdate {
   translations?: BroadcastTranslations;
   target_filter?: BroadcastTargetFilter;
   scheduled_at?: string | null;
+}
+
+export interface RecipientEstimateResponse {
+  target_filter: BroadcastTargetFilter;
+  total: number;
 }
 
 export interface RecipientEstimate {

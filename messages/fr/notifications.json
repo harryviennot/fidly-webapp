@@ -141,33 +141,34 @@
       "iconUploaded": "Icône téléversée",
       "iconUploadFailed": "Échec du téléversement"
     },
-    "messages": {
+    "broadcasts": {
       "page": {
-        "title": "Messages",
-        "subtitle": "Envoyez des messages promotionnels directement dans le wallet de vos clients"
+        "title": "Diffusions",
+        "subtitle": "Envoyez un message promotionnel directement dans le wallet de tous vos clients"
       },
-      "new": "Nouveau message",
+      "new": "Nouvelle diffusion",
       "empty": {
-        "title": "Aucun message pour le moment",
-        "description": "Créez votre premier message pour atteindre vos clients",
-        "cta": "Envoyer votre premier message"
+        "title": "Aucune diffusion pour le moment",
+        "description": "Créez votre première diffusion pour atteindre tous vos clients d'un seul coup.",
+        "cta": "Envoyer votre première diffusion"
       },
       "quota": {
-        "used": "{count} sur {max} envoyés ce mois-ci",
-        "reached": "Limite mensuelle atteinte. Passez à Pro pour des messages illimités."
+        "used": "{count} sur {max} envoyées ce mois-ci",
+        "reached": "Limite mensuelle atteinte. Passez à Pro pour des diffusions illimitées.",
+        "unlimited": "Illimité"
       },
       "filters": {
-        "all": "Tous",
-        "scheduled": "Programmés",
-        "sent": "Envoyés",
+        "all": "Toutes",
+        "scheduled": "Programmées",
+        "sent": "Envoyées",
         "drafts": "Brouillons"
       },
       "status": {
         "draft": "Brouillon",
-        "scheduled": "Programmé",
-        "sending": "En cours d'envoi",
-        "sent": "Envoyé",
-        "cancelled": "Annulé",
+        "scheduled": "Programmée",
+        "sending": "Envoi en cours",
+        "sent": "Envoyée",
+        "cancelled": "Annulée",
         "failed": "Échec"
       },
       "row": {
@@ -175,22 +176,23 @@
         "delivered": "{count} livrés",
         "failed": "{count} échoués",
         "throttled": "{count} limités",
-        "lastEdited": "Modifié {date}"
+        "lastEdited": "Modifiée {date}"
       },
       "detail": {
         "title": "Titre",
         "body": "Message",
         "audience": "Audience",
         "stats": "Livraison",
-        "createdBy": "Créé par",
-        "createdAt": "Créé le",
-        "sentAt": "Envoyé le",
-        "scheduledFor": "Programmé pour",
+        "createdBy": "Créée par",
+        "createdAt": "Créée le",
+        "sentAt": "Envoyée le",
+        "scheduledFor": "Programmée pour",
         "edit": "Modifier",
-        "delete": "Supprimer",
+        "delete": "Supprimer le brouillon",
         "cancel": "Annuler l'envoi",
+        "sendNow": "Envoyer maintenant",
         "confirmDelete": "Supprimer ce brouillon ?",
-        "confirmCancel": "Annuler ce message programmé ?"
+        "confirmCancel": "Annuler cette diffusion programmée ?"
       },
       "wizard": {
         "steps": {
@@ -200,7 +202,8 @@
           "review": "Vérifier"
         },
         "compose": {
-          "title": "Rédigez votre message",
+          "title": "Rédigez votre diffusion",
+          "subtitle": "Un titre et un message court suffisent. Ajoutez une traduction anglaise — les clients voient la langue qui correspond à leur téléphone.",
           "titleLabel": "Titre",
           "titlePlaceholder": "Soldes de fin d'année",
           "bodyLabel": "Message",
@@ -208,56 +211,91 @@
           "charCount": "{count} / {max} caractères"
         },
         "audience": {
-          "title": "Qui recevra ce message ?",
+          "title": "Qui recevra cette diffusion ?",
+          "subtitle": "Choisissez tout le monde ou filtrez par activité.",
           "all": "Tous les clients inscrits",
+          "allDescription": "Chaque client avec une carte wallet",
           "filtered": "Audience filtrée",
-          "addFilter": "Ajouter un filtre",
-          "estimate": "≈ {count} clients recevront ce message",
+          "filteredDescription": "Sélectionnez les destinataires par activité",
+          "estimate": "≈ {count} clients",
           "estimating": "Calcul en cours...",
           "filters": {
-            "enrolled_before_days": "Inscrits il y a plus de {n} jours",
-            "enrolled_after_days": "Inscrits dans les {n} derniers jours",
-            "stamp_count_min": "Au moins {n} tampons",
-            "stamp_count_max": "Au plus {n} tampons",
-            "has_redeemed": "A utilisé une récompense",
-            "inactive_days": "Inactifs depuis {n} jours"
+            "enrolled_before_days": "Inscrits il y a plus de N jours",
+            "enrolled_after_days": "Inscrits dans les N derniers jours",
+            "stamp_count_min": "Au moins N tampons",
+            "stamp_count_max": "Au plus N tampons",
+            "has_redeemed": "A déjà utilisé une récompense",
+            "inactive_days": "Inactifs depuis N jours"
+          },
+          "chip": {
+            "all": "Tout le monde",
+            "enrolled_before_days": "Inscrits > {n}j",
+            "enrolled_after_days": "Inscrits < {n}j",
+            "stamp_count_min": "≥ {n} tampons",
+            "stamp_count_max": "≤ {n} tampons",
+            "has_redeemed": "A utilisé",
+            "inactive_days": "Inactifs {n}j+"
           }
         },
         "schedule": {
-          "title": "Quand envoyer ce message ?",
+          "title": "Quand l'envoyer ?",
+          "subtitle": "Envoyez tout de suite, ou choisissez une date et une heure dans vos horaires d'ouverture.",
           "sendNow": "Envoyer maintenant",
-          "sendNowDescription": "Vos clients recevront ce message tout de suite",
+          "sendNowDescription": "Les clients recevront la diffusion tout de suite",
           "scheduleLater": "Programmer pour plus tard",
           "scheduleLaterDescription": "Choisissez une date et une heure",
           "timezoneNote": "Les horaires sont exprimés en {tz}",
-          "windowError": "Les messages ne peuvent être programmés qu'entre 9h00 et 20h00 ({tz})",
-          "pastError": "La date doit être dans le futur"
+          "windowError": "Les diffusions ne peuvent être programmées qu'entre 9h00 et 20h00 ({tz})",
+          "pastError": "La date doit être dans le futur",
+          "dateLabel": "Date",
+          "timeLabel": "Heure"
         },
         "review": {
           "title": "Vérifier et envoyer",
+          "subtitle": "Un dernier coup d'œil avant d'envoyer.",
           "summaryTitle": "Résumé",
           "audienceLabel": "Audience",
           "sendTimeLabel": "Horaire d'envoi",
           "recipientsLabel": "Destinataires",
-          "quotaNote": "Ceci utilisera 1 de vos {max} messages mensuels",
-          "sendButton": "Envoyer le message",
-          "scheduleButton": "Programmer le message",
+          "sendImmediately": "Envoi immédiat",
+          "quotaNote": "Ceci utilisera 1 de vos {max} diffusions mensuelles",
+          "sendButton": "Envoyer la diffusion",
+          "scheduleButton": "Programmer la diffusion",
           "confirmSend": "Envoyer à {count} clients ? Cette action est irréversible."
         },
         "next": "Suivant",
         "back": "Retour",
         "cancel": "Annuler",
-        "saveDraft": "Enregistrer comme brouillon"
+        "saveDraft": "Enregistrer comme brouillon",
+        "stepIndicator": "Étape {current} sur {total}"
       },
       "starter": {
         "headline": "Touchez tous vos clients d'un seul coup",
-        "description": "Envoyez des messages promotionnels à vos clients fidèles — un nouveau menu, une vente flash, un rappel de fêtes. Directement dans leur wallet.",
+        "description": "Envoyez une diffusion à tous vos clients fidèles — un nouveau menu, une vente flash, un rappel de fêtes. Directement dans leur wallet, aucune application à installer.",
         "features": {
           "segment": "Segmentez par activité client",
           "schedule": "Programmez à l'avance (Pro)",
           "localized": "Disponible en français et en anglais"
         },
         "cta": "Passer à Growth"
+      },
+      "toasts": {
+        "draftSaved": "Brouillon enregistré",
+        "draftSaveFailed": "Échec de l'enregistrement",
+        "sent": "Diffusion envoyée",
+        "sendFailed": "Échec de l'envoi",
+        "scheduled": "Diffusion programmée",
+        "scheduleFailed": "Échec de la programmation",
+        "cancelled": "Diffusion annulée",
+        "cancelFailed": "Échec de l'annulation",
+        "deleted": "Brouillon supprimé",
+        "deleteFailed": "Échec de la suppression"
+      },
+      "errors": {
+        "upgradeRequired": "Les diffusions nécessitent Growth ou Pro.",
+        "quotaExceeded": "Vous avez utilisé toutes vos diffusions ce mois-ci. Passez à Pro pour des diffusions illimitées.",
+        "scheduleOutOfWindow": "Les diffusions ne peuvent être programmées qu'entre 9h00 et 20h00.",
+        "proFiltersBlocked": "Les filtres avancés nécessitent Pro."
       }
     },
     "downgradeBanner": {

@@ -141,20 +141,21 @@
       "iconUploaded": "Icon uploaded",
       "iconUploadFailed": "Failed to upload icon"
     },
-    "messages": {
+    "broadcasts": {
       "page": {
-        "title": "Messages",
-        "subtitle": "Send promotional messages directly to your customers' wallet"
+        "title": "Broadcasts",
+        "subtitle": "Send promotional messages directly to all your customers' wallets"
       },
-      "new": "New message",
+      "new": "New broadcast",
       "empty": {
-        "title": "No messages yet",
-        "description": "Create your first broadcast to reach your customers",
-        "cta": "Send your first message"
+        "title": "No broadcasts yet",
+        "description": "Create your first broadcast to reach every customer at once.",
+        "cta": "Send your first broadcast"
       },
       "quota": {
         "used": "{count} of {max} sent this month",
-        "reached": "Monthly limit reached. Upgrade to Pro for unlimited messages."
+        "reached": "Monthly limit reached. Upgrade to Pro for unlimited broadcasts.",
+        "unlimited": "Unlimited"
       },
       "filters": {
         "all": "All",
@@ -187,10 +188,11 @@
         "sentAt": "Sent at",
         "scheduledFor": "Scheduled for",
         "edit": "Edit",
-        "delete": "Delete",
+        "delete": "Delete draft",
         "cancel": "Cancel send",
+        "sendNow": "Send now",
         "confirmDelete": "Delete this draft?",
-        "confirmCancel": "Cancel this scheduled message?"
+        "confirmCancel": "Cancel this scheduled broadcast?"
       },
       "wizard": {
         "steps": {
@@ -200,7 +202,8 @@
           "review": "Review"
         },
         "compose": {
-          "title": "Compose your message",
+          "title": "Compose your broadcast",
+          "subtitle": "A title and a short message is all you need. Translate to English if you like — customers see the language that matches their phone.",
           "titleLabel": "Title",
           "titlePlaceholder": "Holiday Sale",
           "bodyLabel": "Message",
@@ -209,55 +212,90 @@
         },
         "audience": {
           "title": "Who will receive this?",
+          "subtitle": "Choose everyone or narrow down by activity.",
           "all": "All enrolled customers",
+          "allDescription": "Every customer with a wallet card",
           "filtered": "Filtered audience",
-          "addFilter": "Add filter",
-          "estimate": "≈ {count} customers will receive this",
+          "filteredDescription": "Pick who receives this by activity",
+          "estimate": "≈ {count} customers",
           "estimating": "Calculating...",
           "filters": {
-            "enrolled_before_days": "Enrolled more than {n} days ago",
-            "enrolled_after_days": "Enrolled within the last {n} days",
-            "stamp_count_min": "At least {n} stamps",
-            "stamp_count_max": "At most {n} stamps",
+            "enrolled_before_days": "Enrolled more than N days ago",
+            "enrolled_after_days": "Enrolled within the last N days",
+            "stamp_count_min": "At least N stamps",
+            "stamp_count_max": "At most N stamps",
             "has_redeemed": "Has redeemed a reward",
-            "inactive_days": "Inactive for {n} days"
+            "inactive_days": "Inactive for N days"
+          },
+          "chip": {
+            "all": "Everyone",
+            "enrolled_before_days": "Enrolled > {n} days ago",
+            "enrolled_after_days": "Enrolled < {n} days ago",
+            "stamp_count_min": "≥ {n} stamps",
+            "stamp_count_max": "≤ {n} stamps",
+            "has_redeemed": "Has redeemed",
+            "inactive_days": "Inactive {n}d+"
           }
         },
         "schedule": {
           "title": "When should we send it?",
+          "subtitle": "Send right away, or pick a date and time inside your business hours.",
           "sendNow": "Send now",
-          "sendNowDescription": "Your customers will receive this right away",
+          "sendNowDescription": "Customers will receive this right away",
           "scheduleLater": "Schedule for later",
           "scheduleLaterDescription": "Pick a date and time",
           "timezoneNote": "Times are in {tz}",
-          "windowError": "Messages can only be scheduled between 9:00 and 20:00 {tz}",
-          "pastError": "Scheduled time must be in the future"
+          "windowError": "Broadcasts can only be scheduled between 9:00 and 20:00 ({tz})",
+          "pastError": "Scheduled time must be in the future",
+          "dateLabel": "Date",
+          "timeLabel": "Time"
         },
         "review": {
           "title": "Review and send",
+          "subtitle": "A final look before you blast this out.",
           "summaryTitle": "Summary",
           "audienceLabel": "Audience",
           "sendTimeLabel": "Send time",
           "recipientsLabel": "Recipients",
-          "quotaNote": "This will use 1 of your {max} monthly messages",
-          "sendButton": "Send message",
-          "scheduleButton": "Schedule message",
+          "sendImmediately": "Send immediately",
+          "quotaNote": "This will use 1 of your {max} monthly broadcasts",
+          "sendButton": "Send broadcast",
+          "scheduleButton": "Schedule broadcast",
           "confirmSend": "Send to {count} customers? This cannot be undone."
         },
         "next": "Next",
         "back": "Back",
         "cancel": "Cancel",
-        "saveDraft": "Save as draft"
+        "saveDraft": "Save as draft",
+        "stepIndicator": "Step {current} of {total}"
       },
       "starter": {
-        "headline": "Reach all your customers at once",
-        "description": "Send promotional messages to your loyal customers — a new menu, a flash sale, a holiday reminder. Right to their wallet.",
+        "headline": "Reach every customer at once",
+        "description": "Send a broadcast to all your loyal customers — a new menu, a flash sale, a holiday reminder. Right to their wallet, no app install needed.",
         "features": {
           "segment": "Segment by customer activity",
           "schedule": "Schedule for later (Pro)",
           "localized": "Localized in English and French"
         },
         "cta": "Upgrade to Growth"
+      },
+      "toasts": {
+        "draftSaved": "Draft saved",
+        "draftSaveFailed": "Failed to save draft",
+        "sent": "Broadcast sent",
+        "sendFailed": "Failed to send broadcast",
+        "scheduled": "Broadcast scheduled",
+        "scheduleFailed": "Failed to schedule broadcast",
+        "cancelled": "Broadcast cancelled",
+        "cancelFailed": "Failed to cancel broadcast",
+        "deleted": "Draft deleted",
+        "deleteFailed": "Failed to delete draft"
+      },
+      "errors": {
+        "upgradeRequired": "Broadcasts require Growth or Pro.",
+        "quotaExceeded": "You've used all your broadcasts this month. Upgrade to Pro for unlimited broadcasts.",
+        "scheduleOutOfWindow": "Broadcasts can only be scheduled between 9:00 and 20:00.",
+        "proFiltersBlocked": "Advanced filters require Pro."
       }
     },
     "downgradeBanner": {

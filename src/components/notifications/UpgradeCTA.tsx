@@ -18,7 +18,7 @@ interface UpgradeCTAProps {
 /**
  * Reusable empty-state upgrade card.
  *
- * Used for locked Starter pages (e.g. /program/messages landing) and
+ * Used for locked Starter pages (e.g. /program/broadcasts landing) and
  * locked-feature sections (e.g. Growth user hitting milestone cap).
  */
 export function UpgradeCTA({

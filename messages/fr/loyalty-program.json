@@ -24,7 +24,7 @@
       "configuration": "Configuration",
       "templates": "Modèles",
       "notifications": "Notifications",
-      "messages": "Messages",
+      "broadcasts": "Diffusions",
       "locations": "Emplacements"
     },
     "overview": {
@@ -115,8 +115,8 @@
       "comingSoon": "Bientôt disponible",
       "notifications": "Notifications",
       "notificationsDescription": "Messages automatiques envoyés à vos clients lors des événements de fidélité",
-      "messages": "Messages",
-      "messagesDescription": "Envoyez des messages promotionnels à vos clients",
+      "broadcasts": "Diffusions",
+      "broadcastsDescription": "Envoyez un message promotionnel à tous vos clients en une fois",
       "locations": "Emplacements",
       "locationsDescription": "Emplacements de l'entreprise et géorepérage"
     },

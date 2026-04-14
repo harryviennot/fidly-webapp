@@ -24,7 +24,7 @@
       "configuration": "Configuration",
       "templates": "Templates",
       "notifications": "Notifications",
-      "messages": "Messages",
+      "broadcasts": "Broadcasts",
       "locations": "Locations"
     },
     "overview": {
@@ -115,8 +115,8 @@
       "comingSoon": "Coming soon",
       "notifications": "Notifications",
       "notificationsDescription": "Automatic messages sent to customers on loyalty events",
-      "messages": "Messages",
-      "messagesDescription": "Send promotional messages to your customers",
+      "broadcasts": "Broadcasts",
+      "broadcastsDescription": "Send promotional messages to all your customers at once",
       "locations": "Locations",
       "locationsDescription": "Business locations and geofencing"
     },
