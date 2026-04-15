@@ -9,7 +9,9 @@
       "description": "Affichée sur l'écran verrouillé de vos clients lorsqu'ils reçoivent une notification de votre carte de fidélité",
       "changeInSettings": "Modifier dans les paramètres",
       "default": "Icône par défaut",
+      "defaultHint": "Vos clients voient une cloche générique sur leur écran verrouillé.",
       "custom": "Icône personnalisée",
+      "customHint": "Votre icône de marque apparaît dans chaque notification.",
       "lockedHint": "Passez à Growth pour utiliser une icône personnalisée",
       "upload": "Téléverser une icône",
       "uploadHint": "PNG, au moins 87×87 pixels",
@@ -132,6 +134,16 @@
         "business_name": "Nom de l'entreprise",
         "customer_first_name": "Prénom du client"
       }
+    },
+    "growthUpsell": {
+      "title": "Débloquez toutes les notifications",
+      "description": "Vous êtes sur Starter. Passez à Growth pour réécrire les messages par défaut à votre façon et créer des notifications personnalisées à des paliers de tampons précis.",
+      "features": {
+        "custom": "Rédigez votre propre texte pour chaque message automatique",
+        "milestones": "Créez des paliers personnalisés à n'importe quel nombre de tampons",
+        "icon": "Conservez votre icône de notification personnalisée"
+      },
+      "cta": "Passer à Growth"
     },
     "plan": {
       "starterReadOnly": "Voici les messages par défaut. Passez à un forfait supérieur pour personnaliser le texte.",

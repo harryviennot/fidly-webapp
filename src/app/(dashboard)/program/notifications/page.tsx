@@ -3,12 +3,16 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
+import Link from 'next/link';
 import {
   BellIcon,
   LightningIcon,
   BracketsCurlyIcon,
   CaretDownIcon,
+  CrownIcon,
+  CheckCircleIcon,
 } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/redesign';
 import { InfoBox } from '@/components/reusables/info-box';
 import {
@@ -62,15 +66,26 @@ const DEFAULT_BODIES: Record<string, { en: string; fr: string }> = {
   },
 };
 
-// Sample values for the available-variables card. Kept in one place so the
-// sidebar reference matches what we substitute in live previews.
-const VARIABLE_EXAMPLES: Record<VariableKey, string> = {
-  stamp_count: '3',
-  total_stamps: '10',
-  stamps_left: '7',
-  reward_name: 'Free Coffee',
-  business_name: 'Your business',
-  customer_first_name: 'Sarah',
+// Fallback sample values for the available-variables card when no real
+// program data is available. Kept in sync with the ones used in inline
+// previews (see `template-variables.ts#renderSamplePreview`).
+const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
+  en: {
+    stamp_count: '3',
+    total_stamps: '10',
+    stamps_left: '7',
+    reward_name: 'Free coffee',
+    business_name: 'Your business',
+    customer_first_name: 'Sarah',
+  },
+  fr: {
+    stamp_count: '3',
+    total_stamps: '10',
+    stamps_left: '7',
+    reward_name: 'Café offert',
+    business_name: 'Votre entreprise',
+    customer_first_name: 'Sarah',
+  },
 };
 
 export default function ProgramNotificationsPage() {
@@ -89,6 +104,30 @@ export default function ProgramNotificationsPage() {
   const totalStamps = program?.config?.total_stamps;
   const programName = program?.name ?? null;
   const rewardNameSet = Boolean(program?.reward_name?.trim());
+
+  // Real-value examples for the variables sidebar — pulls from the active
+  // business + program when possible so French accounts see French copy and
+  // owners see their own brand name instead of a generic placeholder.
+  const variableExamples = useMemo<Record<VariableKey, string>>(() => {
+    const fallbacks = VARIABLE_FALLBACKS[uiLocale];
+    const stampCountReal =
+      typeof totalStamps === 'number' && totalStamps > 0
+        ? Math.max(1, Math.floor(totalStamps / 2))
+        : Number(fallbacks.stamp_count);
+    const totalStampsReal =
+      typeof totalStamps === 'number' && totalStamps > 0
+        ? totalStamps
+        : Number(fallbacks.total_stamps);
+    const stampsLeftReal = Math.max(0, totalStampsReal - stampCountReal);
+    return {
+      stamp_count: String(stampCountReal),
+      total_stamps: String(totalStampsReal),
+      stamps_left: String(stampsLeftReal),
+      reward_name: program?.reward_name?.trim() || fallbacks.reward_name,
+      business_name: currentBusiness?.name?.trim() || fallbacks.business_name,
+      customer_first_name: fallbacks.customer_first_name,
+    };
+  }, [uiLocale, totalStamps, program?.reward_name, currentBusiness?.name]);
   const [editingTemplate, setEditingTemplate] =
     useState<NotificationTemplate | null>(null);
 
@@ -182,6 +221,7 @@ export default function ProgramNotificationsPage() {
                   <VariablesReferenceBody
                     uiLocale={uiLocale}
                     rewardNameSet={rewardNameSet}
+                    examples={variableExamples}
                   />
                 </div>
               </CollapsibleContent>
@@ -240,13 +280,6 @@ export default function ProgramNotificationsPage() {
               </div>
             )}
 
-            {!isLoading && !error && templates.length > 0 && !isEditable && (
-              <InfoBox
-                variant="note"
-                className="mt-4"
-                message={t('plan.starterReadOnly')}
-              />
-            )}
           </div>
 
           {/* Milestones — only visible on Growth/Pro (backend returns limit=0 for Starter) */}
@@ -256,6 +289,11 @@ export default function ProgramNotificationsPage() {
               programName={programName}
               rewardNameSet={rewardNameSet}
             />
+          )}
+
+          {/* Starter — Growth upsell in place of the milestones section. */}
+          {!isLoading && !error && templates.length > 0 && !isEditable && (
+            <GrowthUpsellCard />
           )}
         </div>
 
@@ -269,6 +307,7 @@ export default function ProgramNotificationsPage() {
             <VariablesReferenceCard
               uiLocale={uiLocale}
               rewardNameSet={rewardNameSet}
+              examples={variableExamples}
             />
           </div>
         </div>
@@ -281,6 +320,62 @@ export default function ProgramNotificationsPage() {
         programName={programName}
         rewardNameSet={rewardNameSet}
       />
+    </div>
+  );
+}
+
+// ─── Growth upsell — shown on Starter in place of milestones ───────────
+
+function GrowthUpsellCard() {
+  const t = useTranslations('notifications.growthUpsell');
+  const features = [
+    t('features.custom'),
+    t('features.milestones'),
+    t('features.icon'),
+  ];
+  return (
+    <div
+      className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 min-[1080px]:p-6 animate-slide-up"
+      style={{ animationDelay: '120ms' }}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-amber-200/40 blur-3xl"
+      />
+      <div className="relative flex flex-col sm:flex-row gap-5 sm:items-center">
+        <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] text-white flex items-center justify-center shadow-md shadow-black/10 shrink-0">
+          <CrownIcon className="w-5 h-5 text-amber-400" weight="fill" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[15px] font-bold text-[#1A1A1A] leading-tight mb-1">
+            {t('title')}
+          </div>
+          <p className="text-[12px] text-[#555] leading-[1.5] mb-3">
+            {t('description')}
+          </p>
+          <ul className="flex flex-col gap-1.5 mb-4">
+            {features.map((f) => (
+              <li
+                key={f}
+                className="flex items-start gap-2 text-[12px] text-[#1A1A1A]"
+              >
+                <CheckCircleIcon
+                  className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0"
+                  weight="fill"
+                />
+                <span className="leading-[1.45]">{f}</span>
+              </li>
+            ))}
+          </ul>
+          <Button
+            asChild
+            size="sm"
+            className="rounded-full bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90"
+          >
+            <Link href="/billing?from=notifications">{t('cta')}</Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -345,11 +440,13 @@ function HowItWorksBody() {
 interface VariablesReferenceProps {
   uiLocale: Locale;
   rewardNameSet: boolean;
+  examples: Record<VariableKey, string>;
 }
 
 function VariablesReferenceCard({
   uiLocale,
   rewardNameSet,
+  examples,
 }: Readonly<VariablesReferenceProps>) {
   const t = useTranslations('notifications');
   return (
@@ -373,6 +470,7 @@ function VariablesReferenceCard({
       <VariablesReferenceBody
         uiLocale={uiLocale}
         rewardNameSet={rewardNameSet}
+        examples={examples}
       />
     </div>
   );
@@ -381,6 +479,7 @@ function VariablesReferenceCard({
 function VariablesReferenceBody({
   uiLocale,
   rewardNameSet,
+  examples,
 }: Readonly<VariablesReferenceProps>) {
   const t = useTranslations('notifications');
   const router = useRouter();
@@ -400,8 +499,8 @@ function VariablesReferenceBody({
             >
               {`{{${getVariableDisplayName(key, uiLocale)}}}`}
             </code>
-            <span className="text-[10px] text-[#A0A0A0]">
-              → {VARIABLE_EXAMPLES[key]}
+            <span className="text-[10px] text-[#A0A0A0] truncate max-w-[140px]">
+              → {examples[key]}
             </span>
           </>
         );

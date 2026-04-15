@@ -82,7 +82,7 @@ export function IconUploadCard({ readOnly = false }: Readonly<IconUploadCardProp
               {iconUrl ? t('custom') : t('default')}
             </div>
             <div className="text-[11px] text-[#8A8A8A] mt-0.5">
-              {t('description')}
+              {iconUrl ? t('customHint') : t('defaultHint')}
             </div>
           </div>
           <Link

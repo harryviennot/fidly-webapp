@@ -9,7 +9,9 @@
       "description": "Shown on your customers' lock screen when they receive a notification from your loyalty card",
       "changeInSettings": "Change in settings",
       "default": "Default icon",
+      "defaultHint": "Your customers see a generic bell on their lock screen.",
       "custom": "Custom icon",
+      "customHint": "Your brand icon appears in every notification.",
       "lockedHint": "Upgrade to Growth to use a branded notification icon",
       "upload": "Upload icon",
       "uploadHint": "PNG, at least 87×87 pixels",
@@ -132,6 +134,16 @@
         "business_name": "Business name",
         "customer_first_name": "Customer first name"
       }
+    },
+    "growthUpsell": {
+      "title": "Unlock the full notifications toolkit",
+      "description": "You're on Starter. Upgrade to Growth to rewrite the default messages in your voice and create custom milestone notifications at specific stamp counts.",
+      "features": {
+        "custom": "Write your own wording for every automated message",
+        "milestones": "Create custom milestones at any stamp count",
+        "icon": "Keep your branded notification icon"
+      },
+      "cta": "Upgrade to Growth"
     },
     "plan": {
       "starterReadOnly": "These are the default messages. Upgrade to customize the wording.",
