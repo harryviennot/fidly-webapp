@@ -144,7 +144,7 @@
     "broadcasts": {
       "page": {
         "title": "Broadcasts",
-        "subtitle": "Send promotional messages directly to all your customers' wallets"
+        "subtitle": "Send a promotional message as a notification to all your customers"
       },
       "new": "New broadcast",
       "empty": {
@@ -390,11 +390,11 @@
       },
       "starter": {
         "headline": "Reach every customer at once",
-        "description": "Send a broadcast to all your loyal customers — a new menu, a flash sale, a holiday reminder. Right to their wallet, no app install needed.",
+        "description": "Customers receive the notification directly on their phone and on the back of their loyalty card.",
         "features": {
-          "segment": "Segment by customer activity",
-          "schedule": "Schedule for later (Pro)",
-          "localized": "Localized in English and French"
+          "segment": "Target customers by stamps, activity, or enrolment date",
+          "schedule": "Schedule broadcasts in advance (Pro)",
+          "tracking": "Live delivery tracking — see who got it"
         },
         "cta": "Upgrade to Growth"
       },

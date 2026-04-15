@@ -144,7 +144,7 @@
     "broadcasts": {
       "page": {
         "title": "Diffusions",
-        "subtitle": "Envoyez un message promotionnel directement dans le wallet de tous vos clients"
+        "subtitle": "Envoyez un message promotionnel sous forme de notification à tous vos clients"
       },
       "new": "Nouvelle diffusion",
       "empty": {
@@ -390,11 +390,11 @@
       },
       "starter": {
         "headline": "Touchez tous vos clients d'un seul coup",
-        "description": "Envoyez une diffusion à tous vos clients fidèles — un nouveau menu, une vente flash, un rappel de fêtes. Directement dans leur wallet, aucune application à installer.",
+        "description": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité.",
         "features": {
-          "segment": "Segmentez par activité client",
-          "schedule": "Programmez à l'avance (Pro)",
-          "localized": "Disponible en français et en anglais"
+          "segment": "Ciblez par tampons, activité ou date d'inscription",
+          "schedule": "Programmez vos diffusions à l'avance (Pro)",
+          "tracking": "Suivi de livraison en direct — voyez qui l'a reçue"
         },
         "cta": "Passer à Growth"
       },

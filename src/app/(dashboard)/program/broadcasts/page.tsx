@@ -141,7 +141,7 @@ export default function ProgramBroadcastsPage() {
           features={[
             t('starter.features.segment'),
             t('starter.features.schedule'),
-            t('starter.features.localized'),
+            t('starter.features.tracking'),
           ]}
           ctaLabel={t('starter.cta')}
           upgradeFrom="broadcasts"
