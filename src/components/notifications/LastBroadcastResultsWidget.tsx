@@ -58,18 +58,20 @@ export function LastBroadcastResultsWidget({
 
       {denom > 0 ? (
         <>
-          <div className="flex items-baseline gap-1.5 mb-1">
-            <AnimatedNumber
-              value={rate}
-              suffix="%"
-              className="text-[32px] font-bold tabular-nums text-[var(--success)] leading-none"
-            />
-            <span className="text-[11px] text-[#8A8A8A]">
-              {t('lastResults.deliveredShort')}
-            </span>
-          </div>
-          <div className="text-[11px] text-[#8A8A8A] tabular-nums mb-3">
-            {delivered} / {denom}
+          <div className="flex items-baseline justify-between gap-2 mb-2">
+            <div className="flex items-baseline gap-1.5 min-w-0">
+              <AnimatedNumber
+                value={rate}
+                suffix="%"
+                className="text-[32px] font-bold tabular-nums text-[var(--success)] leading-none"
+              />
+              <span className="text-[11px] text-[#8A8A8A] truncate">
+                {t('lastResults.deliveredShort')}
+              </span>
+            </div>
+            <div className="text-[11px] text-[#8A8A8A] tabular-nums shrink-0">
+              {delivered} / {denom}
+            </div>
           </div>
           <div className="h-1.5 rounded-full bg-[var(--paper-hover)] overflow-hidden">
             <div
