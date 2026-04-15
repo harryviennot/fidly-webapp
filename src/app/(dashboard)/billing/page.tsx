@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { CheckIcon, CreditCardIcon, ArrowSquareOutIcon, WarningCircleIcon, ClockIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { InfoBox } from "@/components/reusables/info-box";
+import { PricingTierCard } from "@/components/reusables";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -161,67 +162,23 @@ function TierCard({
   };
 
   return (
-    <div
-      className={`relative flex flex-col bg-[var(--card)] rounded-xl border border-[var(--border)] animate-slide-up ${
-        isPro
-          ? "opacity-50"
-          : isCurrent
-            ? "border-[var(--accent)] ring-1 ring-[var(--accent)]"
-            : ""
-      }`}
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      {isPro && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] whitespace-nowrap">
-            {t("comingSoon")}
-          </span>
-        </div>
-      )}
-
-      <div className="p-6 pb-2">
-        <h3 className={`text-lg font-semibold capitalize ${isPro ? "text-[var(--muted-foreground)]" : ""}`}>
-          {tier}
-        </h3>
-        <div className="flex items-baseline gap-1 mt-1">
-          {isReseller && !isPro && (
-            <span className="text-lg text-[var(--muted-foreground)] line-through mr-1">
-              &euro;{basePrice}
-            </span>
-          )}
-          <span className={`text-3xl font-extrabold ${isPro ? "text-[var(--muted-foreground)]" : ""}`}>
-            &euro;{price}
-          </span>
-          <span className="text-sm text-[var(--muted-foreground)]">{t("perMonth")}</span>
-        </div>
-        {isFoundingPartner && !isPro && (
-          <span className="text-xs text-[var(--accent)] font-semibold">
-            {t("foundingPrice")}
-          </span>
-        )}
-        {isReseller && !isPro && (
-          <span className="text-xs text-[var(--accent)] font-semibold">
-            {t("resellerDiscount", { percent: resellerDiscountPercent ?? 0 })}
-          </span>
-        )}
-      </div>
-
-      <div className="flex-1 px-6 pt-2">
-        <p className="text-xs font-medium text-[var(--muted-foreground)] mb-2">{featuresLabel}</p>
-        <ul className="space-y-1.5">
-          {features.map((feature, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-[var(--foreground)]">
-              <CheckIcon className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" weight="bold" />
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="p-6 pt-4">
-        {renderButton()}
-      </div>
-    </div>
+    <PricingTierCard
+      tier={tier}
+      basePrice={basePrice}
+      displayPrice={price}
+      perMonthLabel={t("perMonth")}
+      featuresLabel={featuresLabel}
+      features={features}
+      cta={renderButton()}
+      isCurrent={isCurrent}
+      isDisabled={isPro}
+      isFoundingPartner={isFoundingPartner}
+      foundingLabel={t("foundingPrice")}
+      isReseller={isReseller}
+      resellerLabel={t("resellerDiscount", { percent: resellerDiscountPercent ?? 0 })}
+      badgeText={isPro ? t("comingSoon") : undefined}
+      delay={delay}
+    />
   );
 }
 

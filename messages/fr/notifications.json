@@ -137,7 +137,7 @@
     },
     "growthUpsell": {
       "title": "Débloquez toutes les notifications",
-      "description": "Vous êtes sur Starter. Passez à Growth pour réécrire les messages par défaut à votre façon et créer des notifications personnalisées à des paliers de tampons précis.",
+      "description": "Passez à Growth pour réécrire les messages par défaut à votre façon et créer des notifications personnalisées à des paliers de tampons précis.",
       "features": {
         "custom": "Rédigez votre propre texte pour chaque message automatique",
         "milestones": "Créez des paliers personnalisés à n'importe quel nombre de tampons",

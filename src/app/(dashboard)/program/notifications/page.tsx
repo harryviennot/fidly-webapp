@@ -3,28 +3,22 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import Link from 'next/link';
 import {
   BellIcon,
   LightningIcon,
   BracketsCurlyIcon,
-  CaretDownIcon,
   CrownIcon,
-  CheckCircleIcon,
 } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/redesign';
-import { InfoBox } from '@/components/reusables/info-box';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  EmptyState,
+  InfoBox,
+  InfoCard,
+  KeyValueList,
+  NumberedSteps,
+  DividerNote,
+  UpsellInline,
+} from '@/components/reusables';
 import {
   IconUploadCard,
   TriggerCard,
@@ -128,6 +122,7 @@ export default function ProgramNotificationsPage() {
       customer_first_name: fallbacks.customer_first_name,
     };
   }, [uiLocale, totalStamps, program?.reward_name, currentBusiness?.name]);
+
   const [editingTemplate, setEditingTemplate] =
     useState<NotificationTemplate | null>(null);
 
@@ -152,6 +147,42 @@ export default function ProgramNotificationsPage() {
     ? DEFAULT_BODIES[editingTemplate.trigger] ?? { en: '', fr: '' }
     : { en: '', fr: '' };
 
+  // Side widgets shared between desktop sidebar and mobile collapsibles.
+  // Body content is captured once so both placements stay in sync.
+  const howItWorksIcon = (
+    <LightningIcon className="h-3.5 w-3.5" weight="fill" />
+  );
+  const howItWorksTitle = t('howItWorks.title');
+  const howItWorksBody = (
+    <>
+      <NumberedSteps
+        items={[
+          t('howItWorks.step1'),
+          t('howItWorks.step2'),
+          t('howItWorks.step3'),
+        ]}
+      />
+      <DividerNote>{t('howItWorks.note')}</DividerNote>
+    </>
+  );
+
+  const variablesIcon = (
+    <BracketsCurlyIcon className="h-3.5 w-3.5" weight="bold" />
+  );
+  const variablesTitle = t('variablesReference.title');
+  const variablesBody = (
+    <>
+      <p className="text-[11px] text-[#8A8A8A] leading-[1.45] mb-3">
+        {t('variablesReference.description')}
+      </p>
+      <VariablesList
+        uiLocale={uiLocale}
+        rewardNameSet={rewardNameSet}
+        examples={variableExamples}
+      />
+    </>
+  );
+
   return (
     <div
       className="flex flex-col gap-[14px] animate-slide-up"
@@ -167,65 +198,22 @@ export default function ProgramNotificationsPage() {
           {/* Mobile-only: side widgets collapse above the list, matching
               the broadcasts page pattern. Desktop keeps the sticky column. */}
           <div className="min-[1080px]:hidden flex flex-col gap-[14px]">
-            <Collapsible className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden">
-              <CollapsibleTrigger className="group w-full px-4 py-3 flex items-center gap-2.5 hover:bg-[var(--paper)] transition-colors">
-                <div className="w-7 h-7 shrink-0 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
-                  <LightningIcon
-                    className="h-3.5 w-3.5 text-[var(--accent)]"
-                    weight="fill"
-                  />
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <div className="text-[13px] font-semibold text-[#1A1A1A] leading-tight truncate">
-                    {t('howItWorks.title')}
-                  </div>
-                  <div className="text-[11px] text-[#8A8A8A] truncate">
-                    {t('howItWorks.note')}
-                  </div>
-                </div>
-                <CaretDownIcon
-                  className="h-4 w-4 text-[#8A8A8A] shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                  weight="bold"
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="collapsible-content">
-                <div className="px-[18px] pt-3 pb-[18px] border-t border-[var(--border-light)]">
-                  <HowItWorksBody />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden">
-              <CollapsibleTrigger className="group w-full px-4 py-3 flex items-center gap-2.5 hover:bg-[var(--paper)] transition-colors">
-                <div className="w-7 h-7 shrink-0 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
-                  <BracketsCurlyIcon
-                    className="h-3.5 w-3.5 text-[var(--accent)]"
-                    weight="bold"
-                  />
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <div className="text-[13px] font-semibold text-[#1A1A1A] leading-tight truncate">
-                    {t('variablesReference.title')}
-                  </div>
-                  <div className="text-[11px] text-[#8A8A8A] truncate">
-                    {t('variablesReference.description')}
-                  </div>
-                </div>
-                <CaretDownIcon
-                  className="h-4 w-4 text-[#8A8A8A] shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                  weight="bold"
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="collapsible-content">
-                <div className="px-[18px] pt-3 pb-[18px] border-t border-[var(--border-light)]">
-                  <VariablesReferenceBody
-                    uiLocale={uiLocale}
-                    rewardNameSet={rewardNameSet}
-                    examples={variableExamples}
-                  />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+            <InfoCard
+              icon={howItWorksIcon}
+              title={howItWorksTitle}
+              subtitle={t('howItWorks.note')}
+              collapsible
+            >
+              {howItWorksBody}
+            </InfoCard>
+            <InfoCard
+              icon={variablesIcon}
+              title={variablesTitle}
+              subtitle={t('variablesReference.description')}
+              collapsible
+            >
+              {variablesBody}
+            </InfoCard>
           </div>
 
           <div
@@ -272,14 +260,11 @@ export default function ProgramNotificationsPage() {
             )}
 
             {!isLoading && !error && templates.length === 0 && (
-              <div className="rounded-[10px] border border-dashed border-[var(--border-light)] px-5 py-8 text-center">
-                <BellIcon className="mx-auto h-6 w-6 text-[#A0A0A0] mb-2" />
-                <p className="text-[12px] text-[#A0A0A0]">
-                  No notification templates yet.
-                </p>
-              </div>
+              <EmptyState
+                icon={<BellIcon className="h-6 w-6" />}
+                description="No notification templates yet."
+              />
             )}
-
           </div>
 
           {/* Milestones — only visible on Growth/Pro (backend returns limit=0 for Starter) */}
@@ -293,7 +278,19 @@ export default function ProgramNotificationsPage() {
 
           {/* Starter — Growth upsell in place of the milestones section. */}
           {!isLoading && !error && templates.length > 0 && !isEditable && (
-            <GrowthUpsellCard />
+            <UpsellInline
+              icon={<CrownIcon className="w-5 h-5 text-amber-400" weight="fill" />}
+              title={t('growthUpsell.title')}
+              description={t('growthUpsell.description')}
+              features={[
+                t('growthUpsell.features.custom'),
+                t('growthUpsell.features.milestones'),
+                t('growthUpsell.features.icon'),
+              ]}
+              ctaLabel={t('growthUpsell.cta')}
+              ctaHref="/billing?from=notifications"
+              animationDelayMs={120}
+            />
           )}
         </div>
 
@@ -303,12 +300,12 @@ export default function ProgramNotificationsPage() {
           style={{ animationDelay: '350ms' }}
         >
           <div className="min-[1080px]:sticky min-[1080px]:top-5 flex flex-col gap-[14px]">
-            <HowItWorksCard />
-            <VariablesReferenceCard
-              uiLocale={uiLocale}
-              rewardNameSet={rewardNameSet}
-              examples={variableExamples}
-            />
+            <InfoCard icon={howItWorksIcon} title={howItWorksTitle}>
+              {howItWorksBody}
+            </InfoCard>
+            <InfoCard icon={variablesIcon} title={variablesTitle}>
+              {variablesBody}
+            </InfoCard>
           </div>
         </div>
       </div>
@@ -324,220 +321,43 @@ export default function ProgramNotificationsPage() {
   );
 }
 
-// ─── Growth upsell — shown on Starter in place of milestones ───────────
+// ─── Variables list — wraps KeyValueList with the locale-aware row data ──
 
-function GrowthUpsellCard() {
-  const t = useTranslations('notifications.growthUpsell');
-  const features = [
-    t('features.custom'),
-    t('features.milestones'),
-    t('features.icon'),
-  ];
-  return (
-    <div
-      className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 min-[1080px]:p-6 animate-slide-up"
-      style={{ animationDelay: '120ms' }}
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-amber-200/40 blur-3xl"
-      />
-      <div className="relative flex flex-col sm:flex-row gap-5 sm:items-center">
-        <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] text-white flex items-center justify-center shadow-md shadow-black/10 shrink-0">
-          <CrownIcon className="w-5 h-5 text-amber-400" weight="fill" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-[15px] font-bold text-[#1A1A1A] leading-tight mb-1">
-            {t('title')}
-          </div>
-          <p className="text-[12px] text-[#555] leading-[1.5] mb-3">
-            {t('description')}
-          </p>
-          <ul className="flex flex-col gap-1.5 mb-4">
-            {features.map((f) => (
-              <li
-                key={f}
-                className="flex items-start gap-2 text-[12px] text-[#1A1A1A]"
-              >
-                <CheckCircleIcon
-                  className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0"
-                  weight="fill"
-                />
-                <span className="leading-[1.45]">{f}</span>
-              </li>
-            ))}
-          </ul>
-          <Button
-            asChild
-            size="sm"
-            className="rounded-full bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90"
-          >
-            <Link href="/billing?from=notifications">{t('cta')}</Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── How it works — shared by desktop sidebar + mobile collapsible ─────
-
-function HowItWorksCard() {
-  const t = useTranslations('notifications');
-  return (
-    <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
-          <LightningIcon
-            className="h-3.5 w-3.5 text-[var(--accent)]"
-            weight="fill"
-          />
-        </div>
-        <div className="text-[13px] font-semibold text-[#1A1A1A]">
-          {t('howItWorks.title')}
-        </div>
-      </div>
-
-      <HowItWorksBody />
-    </div>
-  );
-}
-
-function HowItWorksBody() {
-  const t = useTranslations('notifications');
-  return (
-    <>
-      <ol className="space-y-2">
-        {(
-          [
-            { key: 'step1', text: t('howItWorks.step1') },
-            { key: 'step2', text: t('howItWorks.step2') },
-            { key: 'step3', text: t('howItWorks.step3') },
-          ] as const
-        ).map((step, i) => (
-          <li key={step.key} className="flex items-start gap-2.5">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] flex items-center justify-center text-[10px] font-bold text-[#8A8A8A] mt-0.5">
-              {i + 1}
-            </span>
-            <span className="text-[12px] text-[#555] leading-[1.45]">
-              {step.text}
-            </span>
-          </li>
-        ))}
-      </ol>
-
-      <div className="mt-3.5 pt-3 border-t border-[var(--border-light)]">
-        <p className="text-[11px] text-[#8A8A8A] leading-[1.45]">
-          {t('howItWorks.note')}
-        </p>
-      </div>
-    </>
-  );
-}
-
-// ─── Variables reference — shared by desktop sidebar + mobile collapsible ──
-
-interface VariablesReferenceProps {
+interface VariablesListProps {
   uiLocale: Locale;
   rewardNameSet: boolean;
   examples: Record<VariableKey, string>;
 }
 
-function VariablesReferenceCard({
+function VariablesList({
   uiLocale,
   rewardNameSet,
   examples,
-}: Readonly<VariablesReferenceProps>) {
-  const t = useTranslations('notifications');
-  return (
-    <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
-          <BracketsCurlyIcon
-            className="h-3.5 w-3.5 text-[var(--accent)]"
-            weight="bold"
-          />
-        </div>
-        <div className="text-[13px] font-semibold text-[#1A1A1A]">
-          {t('variablesReference.title')}
-        </div>
-      </div>
-
-      <p className="text-[11px] text-[#8A8A8A] leading-[1.45] mb-3">
-        {t('variablesReference.description')}
-      </p>
-
-      <VariablesReferenceBody
-        uiLocale={uiLocale}
-        rewardNameSet={rewardNameSet}
-        examples={examples}
-      />
-    </div>
-  );
-}
-
-function VariablesReferenceBody({
-  uiLocale,
-  rewardNameSet,
-  examples,
-}: Readonly<VariablesReferenceProps>) {
+}: Readonly<VariablesListProps>) {
   const t = useTranslations('notifications');
   const router = useRouter();
-  return (
-    <div className="flex flex-col gap-1.5">
-      {VARIABLE_KEYS.map((key) => {
-        const isDisabled = key === 'reward_name' && !rewardNameSet;
-        const rowContent = (
-          <>
-            <code
-              className={cn(
-                'text-[11px] font-mono font-bold',
-                isDisabled
-                  ? 'text-[#A0A0A0] font-semibold'
-                  : 'text-[var(--accent)]'
-              )}
-            >
-              {`{{${getVariableDisplayName(key, uiLocale)}}}`}
-            </code>
-            <span className="text-[10px] text-[#A0A0A0] truncate max-w-[140px]">
-              → {examples[key]}
-            </span>
-          </>
-        );
-        const rowClass = cn(
-          'w-full flex items-center justify-between px-2.5 py-1.5 rounded-[8px] border text-left',
+  const items = VARIABLE_KEYS.map((key) => {
+    const isDisabled = key === 'reward_name' && !rewardNameSet;
+    const label = (
+      <code
+        className={cn(
+          'text-[11px] font-mono font-bold',
           isDisabled
-            ? 'bg-[var(--paper)]/40 border-dashed border-[var(--border-light)] opacity-60 hover:opacity-100 cursor-pointer'
-            : 'bg-[var(--paper)] border-[var(--border-light)]'
-        );
-        if (!isDisabled) {
-          return (
-            <div key={key} className={rowClass}>
-              {rowContent}
-            </div>
-          );
-        }
-        const rowButton = (
-          <button
-            type="button"
-            className={rowClass}
-            onClick={() => router.push('/program/settings')}
-          >
-            {rowContent}
-          </button>
-        );
-        return (
-          <Tooltip key={key}>
-            <TooltipTrigger asChild>{rowButton}</TooltipTrigger>
-            <TooltipContent
-              side="left"
-              className="max-w-[240px] text-[11px] leading-snug"
-            >
-              {t('editor.rewardNameMissing')}
-            </TooltipContent>
-          </Tooltip>
-        );
-      })}
-    </div>
-  );
+            ? 'text-[#A0A0A0] font-semibold'
+            : 'text-[var(--accent)]'
+        )}
+      >
+        {`{{${getVariableDisplayName(key, uiLocale)}}}`}
+      </code>
+    );
+    return {
+      key,
+      label,
+      value: <>→ {examples[key]}</>,
+      disabled: isDisabled,
+      onClick: isDisabled ? () => router.push('/program/settings') : undefined,
+      tooltip: isDisabled ? t('editor.rewardNameMissing') : undefined,
+    };
+  });
+  return <KeyValueList items={items} />;
 }

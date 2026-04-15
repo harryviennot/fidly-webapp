@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { FlagIcon, PencilIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { InfoBox } from '@/components/reusables/info-box';
+import { EmptyState } from '@/components/reusables/empty-state';
 import { TriggerListSkeleton } from './TriggerListSkeleton';
 import {
   AlertDialog,
@@ -138,15 +139,10 @@ export function MilestoneSection({
         )}
 
         {!isLoading && !error && sorted.length === 0 && (
-          <div className="rounded-[10px] border border-dashed border-[var(--border-light)] px-5 py-8 text-center">
-            <FlagIcon
-              className="mx-auto h-6 w-6 text-[#A0A0A0] mb-2"
-              weight="regular"
-            />
-            <p className="text-[12px] text-[#A0A0A0] leading-[1.45] max-w-[320px] mx-auto">
-              {t('empty')}
-            </p>
-          </div>
+          <EmptyState
+            icon={<FlagIcon className="h-6 w-6" weight="regular" />}
+            description={t('empty')}
+          />
         )}
 
         {!isLoading && !error && sorted.length > 0 && (

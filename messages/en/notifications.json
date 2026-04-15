@@ -137,7 +137,7 @@
     },
     "growthUpsell": {
       "title": "Unlock the full notifications toolkit",
-      "description": "You're on Starter. Upgrade to Growth to rewrite the default messages in your voice and create custom milestone notifications at specific stamp counts.",
+      "description": "Upgrade to Growth to rewrite the default messages in your voice and create custom milestone notifications at specific stamp counts.",
       "features": {
         "custom": "Write your own wording for every automated message",
         "milestones": "Create custom milestones at any stamp count",

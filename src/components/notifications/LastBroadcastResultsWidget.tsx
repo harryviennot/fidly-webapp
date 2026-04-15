@@ -2,8 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { PaperPlaneTiltIcon } from '@phosphor-icons/react';
-import { cn } from '@/lib/utils';
-import { AnimatedNumber } from '@/components/redesign/animated-number';
+import { InfoCard, MetricNumber } from '@/components/reusables';
 import type { Broadcast } from '@/types/notification';
 
 interface LastBroadcastResultsWidgetProps {
@@ -27,61 +26,29 @@ export function LastBroadcastResultsWidget({
   const rate = denom > 0 ? Math.round((delivered / denom) * 100) : 0;
 
   return (
-    <button
-      type="button"
+    <InfoCard
+      icon={<PaperPlaneTiltIcon className="h-3.5 w-3.5" weight="fill" />}
+      title={t('lastResults.title')}
+      subtitle={formatRelative(lastSent.sent_at, t)}
       onClick={() => onOpen(lastSent)}
-      className={cn(
-        'text-left w-full bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px] hover:border-[var(--border-light)] hover:shadow-sm transition-all',
-        className
-      )}
+      className={className}
     >
-      <div className="flex items-center gap-2.5 mb-3">
-        <div className="w-7 h-7 shrink-0 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
-          <PaperPlaneTiltIcon
-            className="h-3.5 w-3.5 text-[var(--accent)]"
-            weight="fill"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-semibold text-[#1A1A1A]">
-            {t('lastResults.title')}
-          </div>
-          <div className="text-[10.5px] text-[#A0A0A0] truncate">
-            {formatRelative(lastSent.sent_at, t)}
-          </div>
-        </div>
-      </div>
-
       <div className="text-[12.5px] font-semibold text-[#1A1A1A] truncate mb-3">
         {lastSent.title || '—'}
       </div>
 
-      {denom > 0 ? (
-        <>
-          <div className="flex items-baseline justify-between gap-2 mb-2">
-            <div className="flex items-baseline gap-1.5 min-w-0">
-              <AnimatedNumber
-                value={rate}
-                suffix="%"
-                className="text-[32px] font-bold tabular-nums text-[var(--success)] leading-none"
-              />
-              <span className="text-[11px] text-[#8A8A8A] truncate">
-                {t('lastResults.deliveredShort')}
-              </span>
-            </div>
-            <div className="text-[11px] text-[#8A8A8A] tabular-nums shrink-0">
-              {delivered} / {denom}
-            </div>
-          </div>
-          <div className="h-1.5 rounded-full bg-[var(--paper-hover)] overflow-hidden">
-            <div
-              className="h-full rounded-full bg-[var(--success)] transition-all duration-500"
-              style={{ width: `${rate}%` }}
-            />
-          </div>
-        </>
-      ) : null}
-    </button>
+      {denom > 0 && (
+        <MetricNumber
+          value={rate}
+          suffix="%"
+          label={t('lastResults.deliveredShort')}
+          total={`${delivered} / ${denom}`}
+          progressPercent={rate}
+          variant="success"
+          animated
+        />
+      )}
+    </InfoCard>
   );
 }
 

@@ -1,38 +1,46 @@
 'use client';
 
 import Link from 'next/link';
-import { CrownIcon, CheckCircleIcon, SparkleIcon } from '@phosphor-icons/react';
+import { CrownIcon, SparkleIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { UpsellFeatureList } from './upsell-feature-list';
 
-interface UpgradeCTAProps {
+export interface UpsellHeroProps {
   icon?: React.ReactNode;
-  title: string;
-  description: string;
-  features?: string[];
-  ctaLabel: string;
+  title: React.ReactNode;
+  description: React.ReactNode;
+  features?: React.ReactNode[];
+  ctaLabel: React.ReactNode;
+  /**
+   * `upgradeFrom` is appended as a `?from=` query param on the billing link.
+   * Pass `ctaHref` directly to override the destination entirely.
+   */
   upgradeFrom?: string;
+  ctaHref?: string;
   className?: string;
 }
 
 /**
- * Reusable empty-state upgrade card.
- *
- * Used for locked Starter pages (e.g. /program/broadcasts landing) and
- * locked-feature sections (e.g. Growth user hitting milestone cap).
+ * Centered full-width upgrade card shown when an entire feature is locked
+ * (e.g. Starter user landing on `/program/broadcasts`). Dark icon square
+ * with a sparkle badge, amber glow backdrop, dark CTA pill.
  */
-export function UpgradeCTA({
+export function UpsellHero({
   icon,
   title,
   description,
   features = [],
   ctaLabel,
   upgradeFrom,
+  ctaHref,
   className,
-}: UpgradeCTAProps) {
-  const href = upgradeFrom
-    ? `/billing?from=${encodeURIComponent(upgradeFrom)}`
-    : '/billing';
+}: UpsellHeroProps) {
+  const href =
+    ctaHref ??
+    (upgradeFrom
+      ? `/billing?from=${encodeURIComponent(upgradeFrom)}`
+      : '/billing');
 
   return (
     <div
@@ -41,7 +49,6 @@ export function UpgradeCTA({
         className
       )}
     >
-      {/* Subtle amber glow in the top-right */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-24 -right-24 h-60 w-60 rounded-full bg-amber-200/40 blur-3xl"
@@ -68,20 +75,9 @@ export function UpgradeCTA({
         </p>
 
         {features.length > 0 && (
-          <ul className="flex flex-col gap-2.5 mb-7 text-left max-w-sm w-full">
-            {features.map((f) => (
-              <li
-                key={f}
-                className="flex items-start gap-2.5 text-[13px] text-[#1A1A1A]"
-              >
-                <CheckCircleIcon
-                  className="w-4 h-4 text-amber-500 mt-0.5 shrink-0"
-                  weight="fill"
-                />
-                <span className="leading-[1.45]">{f}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="mb-7">
+            <UpsellFeatureList features={features} size="md" />
+          </div>
         )}
 
         <Button
