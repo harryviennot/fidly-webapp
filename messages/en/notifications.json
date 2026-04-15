@@ -231,10 +231,28 @@
         "delete": "Delete draft",
         "cancel": "Cancel send",
         "sendNow": "Send now",
+        "sendAgain": "Send again",
+        "sendAgainNow": "Send now",
+        "sendAgainSchedule": "Schedule for later",
+        "sendAgainTitle": "Send this broadcast again?",
+        "sendAgainBody": "We'll create a new broadcast with the same message and audience. Delivery stats will start fresh.",
         "confirmDelete": "Delete this draft?",
         "confirmDeleteBody": "This draft will be permanently deleted. This cannot be undone.",
         "confirmCancel": "Cancel this scheduled broadcast?",
-        "confirmCancelBody": "The broadcast won't be sent and will be moved back to your drafts. You can reschedule it later."
+        "confirmCancelBody": "The broadcast won't be sent and will be moved back to your drafts. You can reschedule it later.",
+        "reachable": "Reachable",
+        "reachableHint": "Customers who have an active Apple or Google Wallet pass at send time. Those who never installed the pass are shown separately.",
+        "deliveryRate": "{rate}% delivered",
+        "deliveredHint": "Delivered means the pass update was accepted by Apple or Google Wallet. Customers may have silenced push banners on their device, which we can't detect — the pass itself still updates.",
+        "apple": "Apple Wallet",
+        "google": "Google Wallet",
+        "failed": "Failed",
+        "failedHint": "Customers where neither Apple nor Google Wallet accepted the push. Usually transient network errors — these customers will be targeted again on your next broadcast.",
+        "notReachable": "Not reachable",
+        "notReachableBody": "{count} {count, plural, one {customer has} other {customers have}} no wallet pass installed",
+        "passRemoved": "Pass removed",
+        "passRemovedHint": "Google Wallet users who removed the pass before we could push. They won't receive this broadcast.",
+        "throttledHint": "Google limits each wallet pass to 3 push messages per 24h. Throttled customers will receive your next broadcast."
       },
       "wizard": {
         "steps": {
@@ -244,10 +262,8 @@
           "review": "Review"
         },
         "compose": {
-          "title": "Compose your broadcast",
-          "subtitle": "A title and a short message is all you need. Translate to English if you like — customers see the language that matches their phone.",
-          "titleLabel": "Title",
-          "titlePlaceholder": "Holiday Sale",
+          "title": "Write your broadcast",
+          "subtitle": "Write the short message your customers will see on their wallet. Add a translation if you like — customers see the language that matches their phone.",
           "bodyLabel": "Message",
           "bodyPlaceholder": "Get 20% off this weekend!",
           "charCount": "{count} / {max} characters",
@@ -342,7 +358,10 @@
           "heroImmediate": "Send immediately",
           "heroScheduledFor": "Scheduled for {date}",
           "translationLabel": "Translation",
-          "contentLabel": "Message"
+          "contentLabel": "Message",
+          "nameLabel": "Name this broadcast",
+          "namePlaceholder": "e.g. Black Friday teaser",
+          "nameHelp": "For your records only — customers will not see this. Used to find this broadcast in your history."
         },
         "next": "Next",
         "back": "Back",
@@ -374,7 +393,9 @@
         "cancelFailed": "Failed to cancel broadcast",
         "deleted": "Draft deleted",
         "deleteFailed": "Failed to delete draft",
-        "scheduledCancelled": "Broadcast cancelled — moved to your drafts"
+        "scheduledCancelled": "Broadcast cancelled — moved to your drafts",
+        "sentAgain": "Broadcast re-sent",
+        "sentAgainFailed": "Failed to re-send broadcast"
       },
       "errors": {
         "upgradeRequired": "Broadcasts require Growth or Pro.",

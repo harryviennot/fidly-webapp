@@ -98,9 +98,35 @@ export interface Broadcast {
   scheduled_at: string | null;
   sent_at: string | null;
   total_recipients: number;
+  /**
+   * Customers with at least one active push channel at send time. Denominator
+   * for the delivery-rate percentage shown in the UI. `total_recipients -
+   * reachable_recipients == skipped_no_push`.
+   */
+  reachable_recipients: number;
   delivered: number;
   failed: number;
+  /** Google 3/24h quota exceeded — message dropped for this send. */
   google_throttled: number;
+  /** Apple silent push accepted by APNs. */
+  apple_delivered: number;
+  /** Apple push rejected by APNs (includes permanent failures). */
+  apple_failed: number;
+  /** Google `addMessage` returned `sent`. */
+  google_delivered: number;
+  /** Google `addMessage` returned a non-404, non-429 error. */
+  google_failed: number;
+  /**
+   * Google `addMessage` returned 404 — the pass was removed from the
+   * customer's Google Wallet. Distinct from `google_failed`.
+   */
+  google_not_installed: number;
+  /**
+   * Segment matches with no active push channel. These are customers who
+   * never installed the pass or whose Apple token was soft-disabled after
+   * a permanent APNs failure.
+   */
+  skipped_no_push: number;
   created_by: string | null;
   created_at: string;
   updated_at: string | null;
@@ -135,6 +161,11 @@ export interface BroadcastUpdate {
   body?: string;
   translations?: BroadcastTranslations;
   target_filter?: BroadcastTargetFilter;
+  scheduled_at?: string | null;
+}
+
+export interface BroadcastSendAgain {
+  /** ISO datetime. Omit or pass null to send immediately. Pro only when set. */
   scheduled_at?: string | null;
 }
 

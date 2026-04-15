@@ -102,6 +102,18 @@ const EMPTY_STATE: WizardState = {
   scheduledAt: null,
 };
 
+/** Default "name this broadcast" value for new broadcasts. Internal-only. */
+function buildDefaultBroadcastName(locale: Locale): string {
+  const now = new Date();
+  const formatted = new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(now);
+  return `Broadcast — ${formatted}`;
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // Shared entry — handles loading + routing guards.
 // Both /program/broadcasts/new and /program/broadcasts/[id]/edit render
@@ -174,6 +186,11 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
   const secondaryLocale: Locale = primaryLocale === 'fr' ? 'en' : 'fr';
 
   // ─── Initial state ───
+  // `title` is an internal-only label the business uses to find broadcasts
+  // in their history — it is NOT sent to customers. For new broadcasts we
+  // seed a locale-formatted default like "Broadcast — Mar 15, 14:30" so the
+  // row in the list is always identifiable; for edits we keep the saved
+  // value as-is.
   const initialState = useMemo<WizardState>(() => {
     if (existing) {
       const translationEntry =
@@ -191,8 +208,11 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
           : null,
       };
     }
-    return EMPTY_STATE;
-  }, [existing, secondaryLocale]);
+    return {
+      ...EMPTY_STATE,
+      title: buildDefaultBroadcastName(primaryLocale),
+    };
+  }, [existing, primaryLocale, secondaryLocale]);
 
   const [state, setState] = useState<WizardState>(initialState);
   const [currentStep, setCurrentStep] = useState<StepKey>('compose');
@@ -232,7 +252,10 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
   const renderTs = useRenderTimestamp([currentStep, state]);
   const canAdvance = useMemo(() => {
     if (currentStep === 'compose') {
-      return state.title.trim().length > 0 && state.body.trim().length > 0;
+      // Title is optional — when empty, the worker falls back to the
+      // program name on the customer's wallet banner. Body is still
+      // required.
+      return state.body.trim().length > 0;
     }
     if (currentStep === 'schedule') {
       if (state.sendMode === 'now') return true;
@@ -524,9 +547,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
                 variant="gradient"
                 size="sm"
                 onClick={handleSave}
-                disabled={
-                  isBusy || !state.title.trim() || !state.body.trim()
-                }
+                disabled={isBusy || !state.body.trim()}
                 className="h-8 rounded-full px-3"
               >
                 {tWizard('save')}
@@ -537,9 +558,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
               variant="outline"
               size="sm"
               onClick={handleSaveDraft}
-              disabled={
-                isBusy || !state.title.trim() || !state.body.trim()
-              }
+              disabled={isBusy || !state.body.trim()}
               className="h-8 rounded-full px-3"
             >
               {tWizard('saveDraft')}
@@ -599,6 +618,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
           {currentStep === 'review' && (
             <ReviewStep
               state={state}
+              setState={setState}
               estimatedCount={estimatedCount}
               estimating={estimating}
             />
@@ -618,7 +638,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
               <MessagePreview
                 iconUrl={currentBusiness?.icon_url ?? null}
                 businessName={currentBusiness?.name ?? ''}
-                body={state.body || state.title}
+                body={state.body}
               />
             </div>
           </div>
@@ -787,16 +807,8 @@ function ComposeStep({
   const [editingLocale, setEditingLocale] = useState<Locale>(primaryLocale);
 
   const isPrimary = editingLocale === primaryLocale;
-  const title = isPrimary ? state.title : state.translation?.title ?? '';
   const body = isPrimary ? state.body : state.translation?.body ?? '';
 
-  const setTitle = (value: string) => {
-    setState((s) => {
-      if (editingLocale === primaryLocale) return { ...s, title: value };
-      const existing = s.translation ?? { title: '', body: '' };
-      return { ...s, translation: { ...existing, title: value } };
-    });
-  };
   const setBody = (value: string) => {
     setState((s) => {
       if (editingLocale === primaryLocale) return { ...s, body: value };
@@ -855,38 +867,26 @@ function ComposeStep({
         }
       />
 
-      <div className="space-y-4">
-        <div>
-          <Label className="text-[12px] font-semibold text-[#555] mb-1.5">
-            {t('titleLabel')}
-          </Label>
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={t('titlePlaceholder')}
-          />
-        </div>
-        <div>
-          <Label className="text-[12px] font-semibold text-[#555] mb-1.5 flex items-center justify-between">
-            <span>{t('bodyLabel')}</span>
-            <span
-              className={cn(
-                'text-[11px] font-normal tabular-nums',
-                body.length > BODY_CHAR_LIMIT
-                  ? 'text-[var(--warning)]'
-                  : 'text-[#A0A0A0]'
-              )}
-            >
-              {t('charCount', { count: body.length, max: BODY_CHAR_LIMIT })}
-            </span>
-          </Label>
-          <Textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder={t('bodyPlaceholder')}
-            className="min-h-[100px] resize-none"
-          />
-        </div>
+      <div>
+        <Label className="text-[12px] font-semibold text-[#555] mb-1.5 flex items-center justify-between">
+          <span>{t('bodyLabel')}</span>
+          <span
+            className={cn(
+              'text-[11px] font-normal tabular-nums',
+              body.length > BODY_CHAR_LIMIT
+                ? 'text-[var(--warning)]'
+                : 'text-[#A0A0A0]'
+            )}
+          >
+            {t('charCount', { count: body.length, max: BODY_CHAR_LIMIT })}
+          </span>
+        </Label>
+        <Textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder={t('bodyPlaceholder')}
+          className="min-h-[100px] resize-none"
+        />
       </div>
     </div>
   );
@@ -1615,12 +1615,14 @@ function useRenderTimestamp(deps: readonly unknown[]): number {
 
 interface ReviewStepProps {
   state: WizardState;
+  setState: React.Dispatch<React.SetStateAction<WizardState>>;
   estimatedCount: number | null;
   estimating: boolean;
 }
 
 function ReviewStep({
   state,
+  setState,
   estimatedCount,
   estimating,
 }: Readonly<ReviewStepProps>) {
@@ -1647,9 +1649,7 @@ function ReviewStep({
   }, [state.sendMode, state.scheduledAt, uiLocale]);
 
   const hasTranslation =
-    !!state.translation &&
-    (state.translation.title.trim().length > 0 ||
-      state.translation.body.trim().length > 0);
+    !!state.translation && state.translation.body.trim().length > 0;
 
   return (
     <div
@@ -1661,6 +1661,24 @@ function ReviewStep({
       </div>
       <div className="text-[12px] text-[#A0A0A0] mb-5">
         {tWizard('review.subtitle')}
+      </div>
+
+      {/* Internal-only broadcast name — business-facing label for the
+          history list. Never sent to customers. */}
+      <div className="mb-4">
+        <Label className="text-[12px] font-semibold text-[#555] mb-1.5">
+          {tWizard('review.nameLabel')}
+        </Label>
+        <Input
+          value={state.title}
+          onChange={(e) =>
+            setState((s) => ({ ...s, title: e.target.value }))
+          }
+          placeholder={tWizard('review.namePlaceholder')}
+        />
+        <p className="text-[11px] text-[#8A8A8A] mt-1.5">
+          {tWizard('review.nameHelp')}
+        </p>
       </div>
 
       {/* Hero: recipient count + send time */}
@@ -1699,7 +1717,7 @@ function ReviewStep({
         <MessagePreview
           iconUrl={currentBusiness?.icon_url ?? null}
           businessName={currentBusiness?.name ?? ''}
-          body={state.body || state.title}
+          body={state.body}
         />
       </div>
 
@@ -1709,13 +1727,8 @@ function ReviewStep({
           icon={<MegaphoneIcon className="h-3.5 w-3.5" weight="fill" />}
           label={tWizard('review.contentLabel')}
           value={
-            <div className="text-right">
-              <div className="text-[12.5px] font-semibold text-[#1A1A1A] truncate">
-                {state.title || '—'}
-              </div>
-              <div className="text-[11px] text-[#8A8A8A] line-clamp-2 whitespace-pre-wrap">
-                {state.body}
-              </div>
+            <div className="text-[12.5px] text-[#1A1A1A] text-right line-clamp-3 whitespace-pre-wrap">
+              {state.body || '—'}
             </div>
           }
         />
@@ -1751,13 +1764,8 @@ function ReviewStep({
             icon={<CheckCircleIcon className="h-3.5 w-3.5" weight="fill" />}
             label={tWizard('review.translationLabel')}
             value={
-              <div className="text-right">
-                <div className="text-[12.5px] font-semibold text-[#1A1A1A] truncate">
-                  {state.translation.title || '—'}
-                </div>
-                <div className="text-[11px] text-[#8A8A8A] line-clamp-2 whitespace-pre-wrap">
-                  {state.translation.body}
-                </div>
+              <div className="text-[12.5px] text-[#1A1A1A] text-right line-clamp-3 whitespace-pre-wrap">
+                {state.translation.body || '—'}
               </div>
             }
           />

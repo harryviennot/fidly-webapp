@@ -231,10 +231,28 @@
         "delete": "Supprimer le brouillon",
         "cancel": "Annuler l'envoi",
         "sendNow": "Envoyer maintenant",
+        "sendAgain": "Renvoyer",
+        "sendAgainNow": "Envoyer maintenant",
+        "sendAgainSchedule": "Programmer",
+        "sendAgainTitle": "Renvoyer cette diffusion ?",
+        "sendAgainBody": "Nous créerons une nouvelle diffusion avec le même message et la même audience. Les statistiques de livraison repartiront de zéro.",
         "confirmDelete": "Supprimer ce brouillon ?",
         "confirmDeleteBody": "Ce brouillon sera définitivement supprimé. Cette action est irréversible.",
         "confirmCancel": "Annuler cette diffusion programmée ?",
-        "confirmCancelBody": "La diffusion ne sera pas envoyée et sera déplacée vers vos brouillons. Vous pourrez la reprogrammer plus tard."
+        "confirmCancelBody": "La diffusion ne sera pas envoyée et sera déplacée vers vos brouillons. Vous pourrez la reprogrammer plus tard.",
+        "reachable": "Joignables",
+        "reachableHint": "Clients ayant une carte Apple ou Google Wallet active au moment de l'envoi. Ceux qui n'ont jamais installé la carte sont comptés à part.",
+        "deliveryRate": "{rate}% livrés",
+        "deliveredHint": "« Livré » signifie que la mise à jour de la carte a été acceptée par Apple ou Google Wallet. Les clients peuvent avoir masqué les notifications sur leur téléphone — nous ne pouvons pas le détecter, mais la carte elle-même est bien mise à jour.",
+        "apple": "Apple Wallet",
+        "google": "Google Wallet",
+        "failed": "Échecs",
+        "failedHint": "Clients pour lesquels ni Apple ni Google Wallet n'a accepté la notification. Généralement des erreurs réseau temporaires — ces clients seront reciblés lors de votre prochaine diffusion.",
+        "notReachable": "Non joignables",
+        "notReachableBody": "{count} {count, plural, one {client n'a} other {clients n'ont}} pas de carte wallet installée",
+        "passRemoved": "Carte supprimée",
+        "passRemovedHint": "Utilisateurs Google Wallet ayant supprimé la carte avant l'envoi. Ils ne recevront pas cette diffusion.",
+        "throttledHint": "Google limite chaque carte à 3 notifications par 24h. Les clients limités recevront votre prochaine diffusion."
       },
       "wizard": {
         "steps": {
@@ -245,9 +263,7 @@
         },
         "compose": {
           "title": "Rédigez votre diffusion",
-          "subtitle": "Un titre et un message court suffisent. Ajoutez une traduction anglaise — les clients voient la langue qui correspond à leur téléphone.",
-          "titleLabel": "Titre",
-          "titlePlaceholder": "Soldes de fin d'année",
+          "subtitle": "Écrivez le message court que vos clients verront dans leur wallet. Ajoutez une traduction anglaise si vous voulez — les clients voient la langue qui correspond à leur téléphone.",
           "bodyLabel": "Message",
           "bodyPlaceholder": "Profitez de 20% de réduction ce week-end !",
           "charCount": "{count} / {max} caractères",
@@ -342,7 +358,10 @@
           "heroImmediate": "Envoi immédiat",
           "heroScheduledFor": "Programmée pour {date}",
           "translationLabel": "Traduction",
-          "contentLabel": "Message"
+          "contentLabel": "Message",
+          "nameLabel": "Nommer cette diffusion",
+          "namePlaceholder": "ex. Teasing Black Friday",
+          "nameHelp": "Pour vos archives uniquement — les clients ne verront pas ce nom. Sert à retrouver la diffusion dans votre historique."
         },
         "next": "Suivant",
         "back": "Retour",
@@ -372,6 +391,8 @@
         "scheduleFailed": "Échec de la programmation",
         "cancelled": "Diffusion annulée",
         "cancelFailed": "Échec de l'annulation",
+        "sentAgain": "Diffusion renvoyée",
+        "sentAgainFailed": "Échec du renvoi",
         "deleted": "Brouillon supprimé",
         "deleteFailed": "Échec de la suppression",
         "scheduledCancelled": "Diffusion annulée — déplacée vers vos brouillons"

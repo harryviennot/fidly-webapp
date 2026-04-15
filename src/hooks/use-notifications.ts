@@ -21,12 +21,14 @@ import {
   updateBroadcast,
   cancelBroadcast,
   sendBroadcast,
+  sendBroadcastAgain,
   estimateRecipients,
 } from '@/api';
 import type {
   BroadcastListParams,
   BroadcastCreate,
   BroadcastUpdate,
+  BroadcastSendAgain,
   BroadcastTargetFilter,
   LocalizedBody,
   MilestoneCreate,
@@ -308,6 +310,27 @@ export function useSendBroadcast(businessId: string | undefined) {
     mutationFn: (broadcastId: string) => {
       if (!businessId) throw new Error('businessId required');
       return sendBroadcast(businessId, broadcastId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'broadcasts', businessId],
+      });
+    },
+  });
+}
+
+/**
+ * Reuse a past broadcast's content + audience to create a new one. Without
+ * `scheduled_at` the backend flips the new row to 'sending' immediately;
+ * with it, the row is 'scheduled' for the cron poller.
+ */
+export function useSendBroadcastAgain(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (args: { id: string; payload: BroadcastSendAgain }) => {
+      if (!businessId) throw new Error('businessId required');
+      return sendBroadcastAgain(businessId, args.id, args.payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

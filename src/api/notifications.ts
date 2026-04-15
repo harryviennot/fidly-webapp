@@ -16,6 +16,7 @@ import type {
   PaginatedBroadcasts,
   BroadcastCreate,
   BroadcastUpdate,
+  BroadcastSendAgain,
   BroadcastTargetFilter,
   RecipientEstimateResponse,
   BusinessIconUploadResponse,
@@ -475,6 +476,41 @@ export async function sendBroadcast(
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throwApiError(error, 'Failed to send broadcast');
+  }
+
+  return response.json();
+}
+
+/**
+ * Create a new broadcast reusing the content and audience of an existing
+ * one. Without `scheduled_at` the new broadcast fires immediately. With
+ * `scheduled_at` it's persisted as `scheduled` for the cron poller to
+ * pick up. Counters reset to 0 — it's a fresh delivery attempt.
+ */
+export async function sendBroadcastAgain(
+  businessId: string,
+  broadcastId: string,
+  payload: BroadcastSendAgain
+): Promise<Broadcast> {
+  if (USE_MOCKS) {
+    throw new Error('Broadcasts not available in mock mode');
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}/send-again`,
+    {
+      method: 'POST',
+      headers: {
+        ...(await getAuthHeaders()),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload ?? {}),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to re-send broadcast');
   }
 
   return response.json();
