@@ -217,7 +217,7 @@ export function ImageCropper({
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        <div className="flex items-center justify-center max-h-[50vh] overflow-auto">
+        <div className="flex items-center justify-center">
           <ReactCrop
             crop={crop}
             onChange={(c) => {
@@ -280,7 +280,7 @@ export function ImageCropper({
               src={imageSrc}
               alt="Crop preview"
               onLoad={onImageLoad}
-              style={{ maxHeight: '45vh', maxWidth: '100%' }}
+              className="max-h-[55vh] max-w-full w-auto h-auto object-contain"
             />
           </ReactCrop>
         </div>
