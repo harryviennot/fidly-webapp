@@ -168,16 +168,21 @@
           }
         }
       },
+      "preview": {
+        "now": "now",
+        "placeholder": "Your message will appear here",
+        "fallbackTitle": "Your business"
+      },
       "howItWorks": {
         "steps": {
           "compose": "Write your message.",
           "audience": "Choose your audience.",
           "send": "Send now or schedule."
         },
-        "delivery": "Customers receive it directly on their phone and on the back of their loyalty card.",
+        "delivery": "Customers receive the notification directly on their phone and on the back of their loyalty card.",
         "appleNote": {
           "title": "Note about Apple Wallet",
-          "body": "Only send broadcasts related to your program or business. Apple may revoke passes it deems unsolicited.",
+          "body": "Only send broadcasts related to your program or business. If Apple finds the notifications you send are unsolicited and unrelated, they may revoke the loyalty card.",
           "link": "Learn more"
         },
         "googleNote": {
@@ -266,6 +271,11 @@
           "audience": "Audience",
           "schedule": "Schedule",
           "review": "Review"
+        },
+        "summary": {
+          "messageLabel": "Message",
+          "customerOne": "customer",
+          "customerOther": "customers"
         },
         "compose": {
           "title": "Write your broadcast",

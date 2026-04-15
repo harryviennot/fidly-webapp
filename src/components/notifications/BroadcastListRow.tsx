@@ -13,6 +13,7 @@ import {
   ArrowClockwiseIcon,
   PencilSimpleIcon,
   XCircleIcon,
+  TrashIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { BroadcastStatusBadge } from './BroadcastStatusBadge';
@@ -67,7 +68,9 @@ export function BroadcastListRow({
   const cancelMutation = useCancelBroadcast(currentBusiness?.id);
 
   const [sendAgainOpen, setSendAgainOpen] = useState(false);
-  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [confirming, setConfirming] = useState<null | 'cancel' | 'delete'>(
+    null
+  );
 
   const formatDate = (iso: string | null) => {
     if (!iso) return '—';
@@ -87,16 +90,24 @@ export function BroadcastListRow({
     broadcast.status === 'sent' ||
     broadcast.status === 'cancelled' ||
     broadcast.status === 'failed';
-  const hasMenu = canSendAgain || isScheduled;
+  const hasMenu = canSendAgain || isScheduled || isDraft;
 
-  const handleCancel = async () => {
+  const handleConfirm = async () => {
+    const action = confirming;
+    if (!action) return;
     try {
       await cancelMutation.mutateAsync(broadcast.id);
-      toast.success(t('toasts.cancelled'));
-      setConfirmingCancel(false);
+      toast.success(
+        action === 'delete' ? t('toasts.deleted') : t('toasts.cancelled')
+      );
+      setConfirming(null);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : t('toasts.cancelFailed')
+        err instanceof Error
+          ? err.message
+          : action === 'delete'
+          ? t('toasts.deleteFailed')
+          : t('toasts.cancelFailed')
       );
     }
   };
@@ -220,12 +231,35 @@ export function BroadcastListRow({
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      setConfirmingCancel(true);
+                      setConfirming('cancel');
                     }}
-                    className="text-[var(--error)] focus:text-[var(--error)]"
+                    className="text-[var(--error)] focus:text-[var(--error)] focus:bg-[var(--error)]/10"
                   >
                     <XCircleIcon className="h-3.5 w-3.5 mr-2" />
                     {t('detail.cancel')}
+                  </DropdownMenuItem>
+                </>
+              )}
+              {isDraft && (
+                <>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit();
+                    }}
+                  >
+                    <PencilSimpleIcon className="h-3.5 w-3.5 mr-2" />
+                    {t('detail.edit')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirming('delete');
+                    }}
+                    className="text-[var(--error)] focus:text-[var(--error)] focus:bg-[var(--error)]/10"
+                  >
+                    <TrashIcon className="h-3.5 w-3.5 mr-2" />
+                    {t('detail.delete')}
                   </DropdownMenuItem>
                 </>
               )}
@@ -240,14 +274,20 @@ export function BroadcastListRow({
       />
 
       <AlertDialog
-        open={confirmingCancel}
-        onOpenChange={setConfirmingCancel}
+        open={confirming !== null}
+        onOpenChange={(open) => !open && setConfirming(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('detail.confirmCancel')}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {confirming === 'delete'
+                ? t('detail.confirmDelete')
+                : t('detail.confirmCancel')}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {t('detail.confirmCancel')}
+              {confirming === 'delete'
+                ? t('detail.confirmDeleteBody')
+                : t('detail.confirmCancelBody')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -255,11 +295,13 @@ export function BroadcastListRow({
               {tWizard('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleCancel}
+              onClick={handleConfirm}
               disabled={cancelMutation.isPending}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
-              {t('detail.cancel')}
+              {confirming === 'delete'
+                ? t('detail.delete')
+                : t('detail.cancel')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

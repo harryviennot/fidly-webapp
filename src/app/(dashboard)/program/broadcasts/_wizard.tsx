@@ -59,6 +59,7 @@ import { ApiError } from '@/api/client';
 import { cn } from '@/lib/utils';
 import { describeFilter } from '@/lib/broadcast-filters';
 import { MessagePreview, PlanGatedField } from '@/components/notifications';
+import { AnimatedNumber } from '@/components/redesign/animated-number';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -100,7 +101,7 @@ const EMPTY_STATE: WizardState = {
   body: '',
   translation: null,
   targetFilter: { all: true },
-  sendMode: null,
+  sendMode: 'now',
   scheduledAt: null,
 };
 
@@ -630,25 +631,19 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
           )}
         </div>
 
-        {/* Right sidebar — persistent live preview */}
-        <div
-          className="hidden min-[1080px]:flex w-[290px] min-w-[290px] flex-shrink-0 flex-col"
-          style={{ animationDelay: '350ms' }}
-        >
-          <div className="min-[1080px]:sticky min-[1080px]:top-5 flex flex-col gap-[14px]">
-            <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
-              <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-3">
-                {t('wizard.review.summaryTitle')}
-              </div>
-              <MessagePreview
-                iconUrl={currentBusiness?.icon_url ?? null}
-                programName={programName}
-                businessName={currentBusiness?.name ?? ''}
-                body={state.body}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Right sidebar — progressive summary. Hidden on review step
+            (review shows its own inline summary and takes full width). */}
+        {currentStep !== 'review' && (
+          <WizardSummarySidebar
+            currentIndex={currentIndex}
+            state={state}
+            estimatedCount={estimatedCount}
+            estimating={estimating}
+            iconUrl={currentBusiness?.icon_url ?? null}
+            programName={programName}
+            businessName={currentBusiness?.name ?? ''}
+          />
+        )}
       </div>
 
       {/* Footer */}
@@ -1778,6 +1773,191 @@ function ReviewStep({
               </div>
             }
           />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Progressive summary sidebar — visible alongside compose/audience/schedule
+// steps. Each sub-card appears once the user has confirmed the matching
+// step by pressing Next. Hidden entirely on the review step (review shows
+// its own inline summary and takes full width).
+// ─────────────────────────────────────────────────────────────────────
+
+interface WizardSummarySidebarProps {
+  currentIndex: number;
+  state: WizardState;
+  estimatedCount: number | null;
+  estimating: boolean;
+  iconUrl: string | null;
+  programName: string | null;
+  businessName: string;
+}
+
+function WizardSummarySidebar({
+  currentIndex,
+  state,
+  estimatedCount,
+  estimating,
+  iconUrl,
+  programName,
+  businessName,
+}: Readonly<WizardSummarySidebarProps>) {
+  const tWizard = useTranslations('notifications.broadcasts.wizard');
+  const uiLocale = useLocale();
+  const chipTranslator = (key: string, values?: Record<string, unknown>) =>
+    tWizard(key, values as { n: number });
+  const chips = describeFilter(state.targetFilter, chipTranslator);
+  const isEveryone = !!state.targetFilter.all;
+
+  // Audience card becomes visible once the user leaves the audience step.
+  const showAudience = currentIndex >= 2;
+  // Schedule card becomes visible once the user leaves the schedule step.
+  // In practice this only fires on the review step, where the whole sidebar
+  // is hidden — kept for symmetry in case the flow is extended later.
+  const showSchedule = currentIndex >= 3;
+
+  const scheduledLabel =
+    state.sendMode === 'schedule' && state.scheduledAt
+      ? new Date(state.scheduledAt).toLocaleString(uiLocale, {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : null;
+
+  return (
+    <div className="hidden min-[1080px]:flex w-[290px] min-w-[290px] flex-shrink-0 flex-col">
+      <div className="min-[1080px]:sticky min-[1080px]:top-5 flex flex-col gap-[14px]">
+        {/* Message preview — always visible */}
+        <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px] animate-slide-up">
+          <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-3">
+            {tWizard('summary.messageLabel')}
+          </div>
+          <MessagePreview
+            iconUrl={iconUrl}
+            programName={programName}
+            businessName={businessName}
+            body={state.body}
+          />
+        </div>
+
+        {/* Audience summary — shows after leaving the audience step */}
+        {showAudience && (
+          <div
+            className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px] animate-slide-up"
+            style={{ animationDelay: '60ms' }}
+          >
+            <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-3">
+              {tWizard('review.audienceLabel')}
+            </div>
+
+            {isEveryone ? (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[var(--accent-light)] flex items-center justify-center shrink-0">
+                  <UsersIcon
+                    className="h-5 w-5 text-[var(--accent)]"
+                    weight="fill"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[14px] font-semibold text-[#1A1A1A] leading-tight">
+                    {tWizard('audience.chip.all')}
+                  </div>
+                  <div className="text-[11.5px] text-[#8A8A8A] mt-0.5">
+                    {estimating && estimatedCount === null ? (
+                      '…'
+                    ) : (
+                      <>
+                        <AnimatedNumber
+                          value={estimatedCount ?? 0}
+                          className="font-semibold text-[#1A1A1A] tabular-nums"
+                        />{' '}
+                        {tWizard(
+                          (estimatedCount ?? 0) === 1
+                            ? 'summary.customerOne'
+                            : 'summary.customerOther'
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {chips.map((chip) => (
+                    <Badge
+                      key={chip.key}
+                      variant="outline"
+                      className="rounded-full bg-[var(--paper)] border border-[var(--border-light)] px-2.5 py-1 text-[11px] font-medium text-[#555]"
+                    >
+                      {chip.label}
+                    </Badge>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 pt-3 border-t border-[var(--border-light)]">
+                  <UsersIcon
+                    className="h-3.5 w-3.5 text-[var(--accent)]"
+                    weight="fill"
+                  />
+                  <div className="text-[11.5px] text-[#8A8A8A]">
+                    {estimating && estimatedCount === null ? (
+                      '…'
+                    ) : (
+                      <>
+                        <AnimatedNumber
+                          value={estimatedCount ?? 0}
+                          className="font-semibold text-[#1A1A1A] tabular-nums"
+                        />{' '}
+                        {tWizard(
+                          (estimatedCount ?? 0) === 1
+                            ? 'summary.customerOne'
+                            : 'summary.customerOther'
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Schedule summary — shows after leaving the schedule step */}
+        {showSchedule && (
+          <div
+            className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px] animate-slide-up"
+            style={{ animationDelay: '120ms' }}
+          >
+            <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-3">
+              {tWizard('review.sendTimeLabel')}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--accent-light)] flex items-center justify-center shrink-0">
+                {state.sendMode === 'schedule' ? (
+                  <ClockIcon
+                    className="h-5 w-5 text-[var(--accent)]"
+                    weight="fill"
+                  />
+                ) : (
+                  <PaperPlaneRightIcon
+                    className="h-5 w-5 text-[var(--accent)]"
+                    weight="fill"
+                  />
+                )}
+              </div>
+              <div className="min-w-0 text-[13px] font-semibold text-[#1A1A1A] leading-tight">
+                {state.sendMode === 'schedule' && scheduledLabel
+                  ? scheduledLabel
+                  : tWizard('schedule.sendNow')}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

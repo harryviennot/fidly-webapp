@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface MessagePreviewProps {
@@ -33,7 +34,8 @@ export function MessagePreview({
   caption,
   className,
 }: MessagePreviewProps) {
-  const displayTitle = programName?.trim() || businessName || 'Your business';
+  const t = useTranslations('notifications.broadcasts.preview');
+  const displayTitle = programName?.trim() || businessName || t('fallbackTitle');
   return (
     <div className={cn('flex flex-col items-center gap-2', className)}>
       <div className="w-[280px] rounded-2xl bg-neutral-900/90 backdrop-blur-xl text-white px-3 py-2.5 shadow-lg">
@@ -59,12 +61,14 @@ export function MessagePreview({
               <div className="truncate text-[11px] font-semibold uppercase tracking-wide text-white/90">
                 {displayTitle}
               </div>
-              <div className="text-[10px] text-white/60 shrink-0">now</div>
+              <div className="text-[10px] text-white/60 shrink-0">
+                {t('now')}
+              </div>
             </div>
             <div className="mt-0.5 text-[13px] leading-snug text-white break-words">
               {body || (
                 <span className="italic text-white/50">
-                  Your message will appear here
+                  {t('placeholder')}
                 </span>
               )}
             </div>

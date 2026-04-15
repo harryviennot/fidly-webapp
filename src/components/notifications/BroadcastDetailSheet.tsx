@@ -12,8 +12,6 @@ import {
   TrashIcon,
   XCircleIcon,
   InfoIcon,
-  ChartBarIcon,
-  MegaphoneIcon,
   AppleLogoIcon,
   GoogleLogoIcon,
 } from '@phosphor-icons/react';
@@ -191,10 +189,9 @@ function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
       <div className="flex-1 overflow-y-auto px-4 pb-2 space-y-6">
         {/* Message + preview */}
         <section>
-          <SectionHeader
-            icon={<MegaphoneIcon className="h-3.5 w-3.5" weight="fill" />}
-            label={t('detail.body')}
-          />
+          <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">
+            {t('detail.body')}
+          </div>
           <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] p-4">
             <p className="text-[13px] text-[#1A1A1A] leading-[1.5] mb-3 whitespace-pre-wrap">
               {broadcast.body}
@@ -212,10 +209,9 @@ function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
 
         {/* Audience chips */}
         <section>
-          <SectionHeader
-            icon={<UsersIcon className="h-3.5 w-3.5" weight="fill" />}
-            label={t('detail.audience')}
-          />
+          <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">
+            {t('detail.audience')}
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {chips.map((chip) => (
               <Badge
@@ -327,20 +323,6 @@ function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
   );
 }
 
-function SectionHeader({
-  icon,
-  label,
-}: Readonly<{ icon: React.ReactNode; label: string }>) {
-  return (
-    <div className="flex items-center gap-2 mb-2.5">
-      <div className="w-6 h-6 shrink-0 rounded-md bg-[var(--accent-light)] text-[var(--accent)] flex items-center justify-center">
-        {icon}
-      </div>
-      <div className="text-[13px] font-semibold text-[#1A1A1A]">{label}</div>
-    </div>
-  );
-}
-
 function DeliveryStats({ broadcast }: Readonly<{ broadcast: Broadcast }>) {
   const t = useTranslations('notifications.broadcasts.detail');
 
@@ -360,10 +342,9 @@ function DeliveryStats({ broadcast }: Readonly<{ broadcast: Broadcast }>) {
   if (!hasNewStats && broadcast.total_recipients > 0) {
     return (
       <section>
-        <SectionHeader
-          icon={<ChartBarIcon className="h-3.5 w-3.5" weight="fill" />}
-          label={t('stats')}
-        />
+        <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">
+          {t('stats')}
+        </div>
         <div className="grid grid-cols-3 gap-2">
           <LegacyStatCell
             icon={<UsersIcon className="h-4 w-4" />}
@@ -444,10 +425,9 @@ function DeliveryStats({ broadcast }: Readonly<{ broadcast: Broadcast }>) {
 
   return (
     <section className="space-y-4">
-      <SectionHeader
-        icon={<ChartBarIcon className="h-3.5 w-3.5" weight="fill" />}
-        label={t('stats')}
-      />
+      <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider">
+        {t('stats')}
+      </div>
 
       {/* Headline: delivery rate over reachable — one clean number, caption below */}
       <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] px-4 py-4">

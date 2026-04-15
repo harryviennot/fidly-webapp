@@ -168,16 +168,21 @@
           }
         }
       },
+      "preview": {
+        "now": "maintenant",
+        "placeholder": "Votre message apparaîtra ici",
+        "fallbackTitle": "Votre entreprise"
+      },
       "howItWorks": {
         "steps": {
           "compose": "Rédigez votre message.",
           "audience": "Choisissez votre audience.",
           "send": "Envoyez maintenant ou programmez."
         },
-        "delivery": "Vos clients la reçoivent directement sur leur téléphone et au dos de leur carte de fidélité.",
+        "delivery": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité.",
         "appleNote": {
           "title": "À noter pour Apple Wallet",
-          "body": "N'envoyez que des messages liés à votre programme ou à votre activité. Apple peut révoquer les cartes qu'il juge non sollicitées.",
+          "body": "N'envoyez que des messages liés à votre programme ou à votre activité. Si Apple juge que les notifications envoyées sont non sollicitées et hors sujet, ils peuvent révoquer la carte de fidélité.",
           "link": "En savoir plus"
         },
         "googleNote": {
@@ -266,6 +271,11 @@
           "audience": "Audience",
           "schedule": "Programmer",
           "review": "Vérifier"
+        },
+        "summary": {
+          "messageLabel": "Message",
+          "customerOne": "client",
+          "customerOther": "clients"
         },
         "compose": {
           "title": "Rédigez votre diffusion",
