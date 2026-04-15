@@ -13,6 +13,7 @@ import type {
   MilestoneUpdate,
   Broadcast,
   BroadcastListParams,
+  BroadcastStatsResponse,
   PaginatedBroadcasts,
   BroadcastCreate,
   BroadcastUpdate,
@@ -346,6 +347,7 @@ export async function listBroadcasts(
   const query = new URLSearchParams();
   if (params.limit !== undefined) query.set('limit', params.limit.toString());
   if (params.offset !== undefined) query.set('offset', params.offset.toString());
+  if (params.status !== undefined) query.set('status', params.status);
   const qs = query.toString();
 
   const response = await fetch(
@@ -358,6 +360,20 @@ export async function listBroadcasts(
     throwApiError(error, 'Failed to fetch broadcasts');
   }
 
+  return response.json();
+}
+
+export async function getBroadcastStats(
+  businessId: string
+): Promise<BroadcastStatsResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/broadcasts/${businessId}/stats`,
+    { headers: await getAuthHeaders() }
+  );
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to fetch broadcast stats');
+  }
   return response.json();
 }
 

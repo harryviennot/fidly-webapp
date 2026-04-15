@@ -174,17 +174,22 @@
           "audience": "Choose your audience.",
           "send": "Send now or schedule."
         },
-        "delivery": "Customers get the notification right inside their wallet.",
+        "delivery": "Customers receive it directly on their phone and on the back of their loyalty card.",
         "appleNote": {
           "title": "Note about Apple Wallet",
-          "body": "Apple recommends against using wallet passes for unsolicited marketing. In practice, broadcasts work without issue — just make sure you only message customers who voluntarily joined your loyalty program.",
+          "body": "Only send broadcasts related to your program or business. Apple may revoke passes it deems unsolicited.",
           "link": "Learn more"
+        },
+        "googleNote": {
+          "title": "Note about Google Wallet",
+          "body": "Google limits passes to 3 notifications per day. Customers who already received 3 notifications today (e.g. stamps) won't receive this broadcast."
         }
       },
       "lastResults": {
         "title": "Last broadcast",
         "recipients": "Sends",
         "delivered": "Delivered",
+        "deliveredShort": "delivered",
         "failed": "Failed",
         "deliveryRate": "{rate}% delivered",
         "relativeJustNow": "just now",
@@ -241,6 +246,7 @@
         "confirmCancel": "Cancel this scheduled broadcast?",
         "confirmCancelBody": "The broadcast won't be sent and will be moved back to your drafts. You can reschedule it later.",
         "reachable": "Reachable",
+        "totalSendsShort": "total",
         "reachableHint": "Customers who have an active Apple or Google Wallet pass at send time. Those who never installed the pass are shown separately.",
         "deliveryRate": "{rate}% delivered",
         "deliveredHint": "Delivered means the pass update was accepted by Apple or Google Wallet. Customers may have silenced push banners on their device, which we can't detect — the pass itself still updates.",

@@ -36,7 +36,7 @@ export function MessagePreview({
   const displayTitle = programName?.trim() || businessName || 'Your business';
   return (
     <div className={cn('flex flex-col items-center gap-2', className)}>
-      <div className="w-full max-w-[280px] rounded-2xl bg-neutral-900/90 backdrop-blur-xl text-white px-3 py-2.5 shadow-lg">
+      <div className="w-[280px] rounded-2xl bg-neutral-900/90 backdrop-blur-xl text-white px-3 py-2.5 shadow-lg">
         <div className="flex items-start gap-2.5">
           {iconUrl ? (
             <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md bg-white/10">

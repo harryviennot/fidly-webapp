@@ -2,6 +2,7 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  useInfiniteQuery,
   keepPreviousData,
 } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
@@ -17,6 +18,7 @@ import {
   deleteBusinessIcon,
   listBroadcasts,
   getBroadcast,
+  getBroadcastStats,
   createBroadcast,
   updateBroadcast,
   cancelBroadcast,
@@ -26,6 +28,7 @@ import {
 } from '@/api';
 import type {
   BroadcastListParams,
+  BroadcastStatusFilter,
   BroadcastCreate,
   BroadcastUpdate,
   BroadcastSendAgain,
@@ -226,10 +229,54 @@ export function useBroadcasts(
       businessId ?? null,
       params.limit ?? 50,
       params.offset ?? 0,
+      params.status ?? null,
     ] as const,
     queryFn: () => {
       if (!businessId) throw new Error('businessId required');
       return listBroadcasts(businessId, params);
+    },
+    enabled: !!businessId,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useInfiniteBroadcasts(
+  businessId: string | undefined,
+  options: { limit?: number; status?: BroadcastStatusFilter } = {}
+) {
+  const limit = options.limit ?? 20;
+  return useInfiniteQuery({
+    queryKey: [
+      'notifications',
+      'broadcasts',
+      businessId ?? null,
+      'infinite',
+      limit,
+      options.status ?? null,
+    ] as const,
+    queryFn: ({ pageParam = 0 }) => {
+      if (!businessId) throw new Error('businessId required');
+      return listBroadcasts(businessId, {
+        limit,
+        offset: pageParam,
+        status: options.status,
+      });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((sum, p) => sum + p.items.length, 0);
+      return loaded < lastPage.total ? loaded : undefined;
+    },
+    enabled: !!businessId,
+  });
+}
+
+export function useBroadcastStats(businessId: string | undefined) {
+  return useQuery({
+    queryKey: ['notifications', 'broadcasts', businessId ?? null, 'stats'] as const,
+    queryFn: () => {
+      if (!businessId) throw new Error('businessId required');
+      return getBroadcastStats(businessId);
     },
     enabled: !!businessId,
     placeholderData: keepPreviousData,

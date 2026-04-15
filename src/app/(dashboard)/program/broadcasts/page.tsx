@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -13,6 +13,7 @@ import {
   ArrowSquareOutIcon,
   ClockIcon,
   PaperPlaneTiltIcon,
+  GoogleLogoIcon,
 } from '@phosphor-icons/react';
 import { PageHeader } from '@/components/redesign';
 import { InfoBox } from '@/components/reusables/info-box';
@@ -20,8 +21,11 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useBusiness } from '@/contexts/business-context';
 import { useEntitlements } from '@/hooks/useEntitlements';
-import { useBroadcasts } from '@/hooks/use-notifications';
-import { computeThisMonthQuota, isEditable } from '@/lib/broadcast-filters';
+import {
+  useInfiniteBroadcasts,
+  useBroadcastStats,
+} from '@/hooks/use-notifications';
+import { isEditable } from '@/lib/broadcast-filters';
 import {
   BroadcastListRow,
   BroadcastListSkeleton,
@@ -29,18 +33,20 @@ import {
   LastBroadcastResultsWidget,
   UpgradeCTA,
 } from '@/components/notifications';
-import type { Broadcast, BroadcastStatus } from '@/types/notification';
+import type {
+  Broadcast,
+  BroadcastStatusFilter,
+} from '@/types/notification';
 
 type FilterKey = 'all' | 'scheduled' | 'sent' | 'drafts';
 
 const FILTER_ORDER: FilterKey[] = ['all', 'scheduled', 'sent', 'drafts'];
 
-function matchesFilter(status: BroadcastStatus, filter: FilterKey): boolean {
-  if (filter === 'all') return true;
-  if (filter === 'scheduled') return status === 'scheduled';
-  if (filter === 'sent') return status === 'sent' || status === 'sending';
-  if (filter === 'drafts') return status === 'draft';
-  return true;
+function filterKeyToStatus(
+  filter: FilterKey
+): BroadcastStatusFilter | undefined {
+  if (filter === 'all') return undefined;
+  return filter;
 }
 
 export default function ProgramBroadcastsPage() {
@@ -56,25 +62,48 @@ export default function ProgramBroadcastsPage() {
 
   const activeFilter = (searchParams.get('filter') as FilterKey) || 'all';
 
-  const { data, isLoading, error } = useBroadcasts(
-    canBroadcast ? currentBusiness?.id : undefined,
-    { limit: 100 }
-  );
+  const businessIdForQuery = canBroadcast ? currentBusiness?.id : undefined;
 
-  const allBroadcasts = useMemo(() => data?.items ?? [], [data]);
+  const {
+    data: infiniteData,
+    isLoading,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteBroadcasts(businessIdForQuery, {
+    limit: 20,
+    status: filterKeyToStatus(activeFilter),
+  });
+
+  const { data: statsData } = useBroadcastStats(businessIdForQuery);
+
   const visibleBroadcasts = useMemo(
-    () => allBroadcasts.filter((b) => matchesFilter(b.status, activeFilter)),
-    [allBroadcasts, activeFilter]
+    () => infiniteData?.pages.flatMap((p) => p.items) ?? [],
+    [infiniteData]
   );
-
-  const quotaUsed = useMemo(
-    () => computeThisMonthQuota(allBroadcasts),
-    [allBroadcasts]
-  );
+  const quotaUsed = statsData?.month_quota_used ?? 0;
   const hasMonthlyLimit = typeof monthlyLimit === 'number' && monthlyLimit > 0;
   const isQuotaReached = hasMonthlyLimit && quotaUsed >= monthlyLimit;
 
   const [detailBroadcast, setDetailBroadcast] = useState<Broadcast | null>(null);
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleRowClick = (broadcast: Broadcast) => {
     if (isEditable(broadcast.status)) {
@@ -216,28 +245,31 @@ export default function ProgramBroadcastsPage() {
               />
             )}
 
-            {!isLoading && !error && visibleBroadcasts.length === 0 && allBroadcasts.length === 0 && (
-              <div className="rounded-[10px] border border-dashed border-[var(--border-light)] px-5 py-10 text-center">
-                <MegaphoneIcon className="mx-auto h-8 w-8 text-[#A0A0A0] mb-3" />
-                <div className="text-[14px] font-semibold text-[#1A1A1A] mb-1">
-                  {t('empty.title')}
+            {!isLoading &&
+              !error &&
+              visibleBroadcasts.length === 0 &&
+              activeFilter === 'all' && (
+                <div className="rounded-[10px] border border-dashed border-[var(--border-light)] px-5 py-10 text-center">
+                  <MegaphoneIcon className="mx-auto h-8 w-8 text-[#A0A0A0] mb-3" />
+                  <div className="text-[14px] font-semibold text-[#1A1A1A] mb-1">
+                    {t('empty.title')}
+                  </div>
+                  <p className="text-[12px] text-[#8A8A8A] mb-4 max-w-xs mx-auto leading-[1.45]">
+                    {t('empty.description')}
+                  </p>
+                  <Button variant="gradient" asChild className="rounded-full">
+                    <Link href="/program/broadcasts/new">
+                      <PlusIcon className="h-4 w-4" weight="bold" />
+                      {t('empty.cta')}
+                    </Link>
+                  </Button>
                 </div>
-                <p className="text-[12px] text-[#8A8A8A] mb-4 max-w-xs mx-auto leading-[1.45]">
-                  {t('empty.description')}
-                </p>
-                <Button variant="gradient" asChild className="rounded-full">
-                  <Link href="/program/broadcasts/new">
-                    <PlusIcon className="h-4 w-4" weight="bold" />
-                    {t('empty.cta')}
-                  </Link>
-                </Button>
-              </div>
-            )}
+              )}
 
             {!isLoading &&
               !error &&
               visibleBroadcasts.length === 0 &&
-              allBroadcasts.length > 0 && (
+              activeFilter !== 'all' && (
                 <FilterEmptyState filter={activeFilter} />
               )}
 
@@ -247,7 +279,9 @@ export default function ProgramBroadcastsPage() {
                   <div
                     key={broadcast.id}
                     className="animate-slide-up"
-                    style={{ animationDelay: `${i * 60}ms` }}
+                    style={{
+                      animationDelay: `${Math.min(i, 10) * 60}ms`,
+                    }}
                   >
                     <BroadcastListRow
                       broadcast={broadcast}
@@ -255,6 +289,12 @@ export default function ProgramBroadcastsPage() {
                     />
                   </div>
                 ))}
+                <div ref={sentinelRef} className="h-1" />
+                {isFetchingNextPage && (
+                  <div className="pt-2">
+                    <BroadcastListSkeleton />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -330,11 +370,28 @@ export default function ProgramBroadcastsPage() {
                   </div>
                 </div>
               </div>
+
+              <div className="mt-2 rounded-[10px] border border-blue-200/80 bg-blue-50/70 p-3">
+                <div className="flex items-start gap-2">
+                  <GoogleLogoIcon
+                    className="h-3.5 w-3.5 text-blue-600 mt-0.5 shrink-0"
+                    weight="fill"
+                  />
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-semibold text-blue-900 mb-0.5">
+                      {t('howItWorks.googleNote.title')}
+                    </div>
+                    <p className="text-[11px] text-blue-900/80 leading-[1.45]">
+                      {t('howItWorks.googleNote.body')}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Last broadcast results — hidden until the first sent broadcast exists */}
             <LastBroadcastResultsWidget
-              broadcasts={allBroadcasts}
+              lastSent={statsData?.last_sent ?? null}
               onOpen={setDetailBroadcast}
             />
 

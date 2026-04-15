@@ -12,6 +12,8 @@ import {
   TrashIcon,
   XCircleIcon,
   InfoIcon,
+  ChartBarIcon,
+  MegaphoneIcon,
   AppleLogoIcon,
   GoogleLogoIcon,
 } from '@phosphor-icons/react';
@@ -41,11 +43,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useBusiness } from '@/contexts/business-context';
+import { useProgram } from '../../app/(dashboard)/program/layout';
 import {
   useCancelBroadcast,
   useSendBroadcast,
 } from '@/hooks/use-notifications';
 import { describeFilter } from '@/lib/broadcast-filters';
+import { AnimatedNumber } from '@/components/redesign/animated-number';
 import { BroadcastStatusBadge } from './BroadcastStatusBadge';
 import { MessagePreview } from './MessagePreview';
 import { SendAgainDialog } from './SendAgainDialog';
@@ -92,6 +96,8 @@ function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
   const tWizard = useTranslations('notifications.broadcasts.wizard');
   const uiLocale = useLocale();
   const { currentBusiness } = useBusiness();
+  const { program } = useProgram();
+  const programName = program?.name ?? null;
   const cancelMutation = useCancelBroadcast(currentBusiness?.id);
   const sendMutation = useSendBroadcast(currentBusiness?.id);
   const [confirming, setConfirming] = useState<'cancel' | 'delete' | null>(
@@ -150,47 +156,73 @@ function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
   return (
     <>
       <SheetHeader>
-        <div className="flex items-center gap-2 mb-1">
+        <div className="mb-2">
           <BroadcastStatusBadge status={broadcast.status} />
         </div>
-        <SheetTitle className="text-left">
+        <SheetTitle className="text-left text-[19px] leading-tight">
           {broadcast.title || '—'}
         </SheetTitle>
-        <SheetDescription className="text-left">
-          {broadcast.sent_at
-            ? `${t('detail.sentAt')} ${formatDate(broadcast.sent_at)}`
-            : broadcast.scheduled_at
-            ? `${t('detail.scheduledFor')} ${formatDate(broadcast.scheduled_at)}`
-            : `${t('detail.createdAt')} ${formatDate(broadcast.created_at)}`}
+        <SheetDescription className="text-left text-[12px] text-[#8A8A8A] mt-1">
+          {broadcast.sent_at ? (
+            <>
+              {t('detail.sentAt')}{' '}
+              <span className="text-[#1A1A1A] font-medium">
+                {formatDate(broadcast.sent_at)}
+              </span>
+            </>
+          ) : broadcast.scheduled_at ? (
+            <>
+              {t('detail.scheduledFor')}{' '}
+              <span className="text-[#1A1A1A] font-medium">
+                {formatDate(broadcast.scheduled_at)}
+              </span>
+            </>
+          ) : (
+            <>
+              {t('detail.createdAt')}{' '}
+              <span className="text-[#1A1A1A] font-medium">
+                {formatDate(broadcast.created_at)}
+              </span>
+            </>
+          )}
         </SheetDescription>
       </SheetHeader>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-2 space-y-5">
+      <div className="flex-1 overflow-y-auto px-4 pb-2 space-y-6">
         {/* Message + preview */}
         <section>
-          <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">
-            {t('detail.body')}
-          </div>
-          <p className="text-[13px] text-[#1A1A1A] leading-[1.5] mb-3 whitespace-pre-wrap">
-            {broadcast.body}
-          </p>
-          <div className="flex justify-center">
-            <MessagePreview
-              iconUrl={currentBusiness?.icon_url ?? null}
-              businessName={currentBusiness?.name ?? ''}
-              body={broadcast.body}
-            />
+          <SectionHeader
+            icon={<MegaphoneIcon className="h-3.5 w-3.5" weight="fill" />}
+            label={t('detail.body')}
+          />
+          <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] p-4">
+            <p className="text-[13px] text-[#1A1A1A] leading-[1.5] mb-3 whitespace-pre-wrap">
+              {broadcast.body}
+            </p>
+            <div className="flex justify-center">
+              <MessagePreview
+                iconUrl={currentBusiness?.icon_url ?? null}
+                programName={programName}
+                businessName={currentBusiness?.name ?? ''}
+                body={broadcast.body}
+              />
+            </div>
           </div>
         </section>
 
         {/* Audience chips */}
         <section>
-          <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">
-            {t('detail.audience')}
-          </div>
+          <SectionHeader
+            icon={<UsersIcon className="h-3.5 w-3.5" weight="fill" />}
+            label={t('detail.audience')}
+          />
           <div className="flex flex-wrap gap-1.5">
             {chips.map((chip) => (
-              <Badge key={chip.key} variant="outline" className="text-[11px]">
+              <Badge
+                key={chip.key}
+                variant="outline"
+                className="rounded-full bg-[var(--paper)] border border-[var(--border-light)] px-2.5 py-1 text-[11.5px] font-medium text-[#555]"
+              >
                 {chip.label}
               </Badge>
             ))}
@@ -295,6 +327,20 @@ function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
   );
 }
 
+function SectionHeader({
+  icon,
+  label,
+}: Readonly<{ icon: React.ReactNode; label: string }>) {
+  return (
+    <div className="flex items-center gap-2 mb-2.5">
+      <div className="w-6 h-6 shrink-0 rounded-md bg-[var(--accent-light)] text-[var(--accent)] flex items-center justify-center">
+        {icon}
+      </div>
+      <div className="text-[13px] font-semibold text-[#1A1A1A]">{label}</div>
+    </div>
+  );
+}
+
 function DeliveryStats({ broadcast }: Readonly<{ broadcast: Broadcast }>) {
   const t = useTranslations('notifications.broadcasts.detail');
 
@@ -314,9 +360,10 @@ function DeliveryStats({ broadcast }: Readonly<{ broadcast: Broadcast }>) {
   if (!hasNewStats && broadcast.total_recipients > 0) {
     return (
       <section>
-        <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">
-          {t('stats')}
-        </div>
+        <SectionHeader
+          icon={<ChartBarIcon className="h-3.5 w-3.5" weight="fill" />}
+          label={t('stats')}
+        />
         <div className="grid grid-cols-3 gap-2">
           <LegacyStatCell
             icon={<UsersIcon className="h-4 w-4" />}
@@ -353,42 +400,84 @@ function DeliveryStats({ broadcast }: Readonly<{ broadcast: Broadcast }>) {
   const deliveryRate =
     reachable > 0 ? Math.round((delivered / reachable) * 100) : 0;
 
+  const statBoxes: StatBoxSpec[] = [];
+  if (broadcast.failed > 0) {
+    statBoxes.push({
+      key: 'failed',
+      icon: <WarningIcon className="h-3.5 w-3.5" weight="fill" />,
+      label: t('failed'),
+      value: broadcast.failed,
+      hint: t('failedHint'),
+      tone: 'error',
+    });
+  }
+  if (broadcast.skipped_no_push > 0) {
+    statBoxes.push({
+      key: 'skipped',
+      icon: <UsersIcon className="h-3.5 w-3.5" />,
+      label: t('notReachable'),
+      value: broadcast.skipped_no_push,
+      hint: t('notReachableBody', { count: broadcast.skipped_no_push }),
+      tone: 'default',
+    });
+  }
+  if (broadcast.google_not_installed > 0) {
+    statBoxes.push({
+      key: 'not_installed',
+      icon: <XCircleIcon className="h-3.5 w-3.5" />,
+      label: t('passRemoved'),
+      value: broadcast.google_not_installed,
+      hint: t('passRemovedHint'),
+      tone: 'default',
+    });
+  }
+  if (broadcast.google_throttled > 0) {
+    statBoxes.push({
+      key: 'throttled',
+      icon: <ClockIcon className="h-3.5 w-3.5" />,
+      label: t('google'),
+      value: broadcast.google_throttled,
+      hint: t('throttledHint'),
+      tone: 'warning',
+    });
+  }
+
   return (
     <section className="space-y-4">
-      <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider">
-        {t('stats')}
-      </div>
+      <SectionHeader
+        icon={<ChartBarIcon className="h-3.5 w-3.5" weight="fill" />}
+        label={t('stats')}
+      />
 
-      {/* Headline: delivery rate over reachable */}
-      <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] px-4 py-3.5">
-        <div className="flex items-center justify-between">
-          <div className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider flex items-center gap-1">
-            {t('reachable')}
-            <InfoTooltip content={t('reachableHint')} />
-          </div>
-          <div className="text-[12px] font-semibold text-[#1A1A1A] tabular-nums">
-            {reachable} / {total}
-          </div>
-        </div>
-        <div className="flex items-baseline gap-2 mt-2">
-          <div className="text-[28px] font-bold tabular-nums text-[var(--success)] leading-none">
-            {deliveryRate}%
-          </div>
+      {/* Headline: delivery rate over reachable — one clean number, caption below */}
+      <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] px-4 py-4">
+        <div className="flex items-baseline gap-1.5">
+          <AnimatedNumber
+            value={deliveryRate}
+            suffix="%"
+            className="text-[32px] font-bold tabular-nums text-[var(--success)] leading-none"
+          />
           <div className="text-[12px] text-[#8A8A8A] flex items-center gap-1">
             {t('deliveryRate', { rate: '' }).replace('%', '').trim()}
             <InfoTooltip content={t('deliveredHint')} />
           </div>
         </div>
+        <div className="mt-1.5 text-[11.5px] text-[#8A8A8A] tabular-nums flex items-center gap-1">
+          <span>
+            {delivered} / {reachable} {t('reachable').toLowerCase()}
+            {total !== reachable ? ` · ${total} ${t('totalSendsShort')}` : ''}
+          </span>
+          <InfoTooltip content={t('reachableHint')} />
+        </div>
         <div className="mt-3 h-1.5 rounded-full bg-[var(--border-light)] overflow-hidden">
           <div
-            className="h-full bg-[var(--success)] transition-all"
+            className="h-full bg-[var(--success)] transition-all duration-700"
             style={{ width: `${deliveryRate}%` }}
           />
         </div>
       </div>
 
-      {/* Per-provider split — only surfaces when at least one provider had a
-          failure. Perfect sends just show the 100% headline above. */}
+      {/* Per-provider split — only when at least one provider had a failure. */}
       {(broadcast.apple_failed > 0 || broadcast.google_failed > 0) && (
         <div className="space-y-2">
           {broadcast.apple_delivered + broadcast.apple_failed > 0 && (
@@ -410,49 +499,67 @@ function DeliveryStats({ broadcast }: Readonly<{ broadcast: Broadcast }>) {
         </div>
       )}
 
-      {/* Secondary buckets */}
-      {(broadcast.failed > 0 ||
-        broadcast.skipped_no_push > 0 ||
-        broadcast.google_not_installed > 0 ||
-        broadcast.google_throttled > 0) && (
-        <div className="space-y-1.5">
-          {broadcast.failed > 0 && (
-            <SecondaryBucket
-              icon={<WarningIcon className="h-3.5 w-3.5" weight="fill" />}
-              label={t('failed')}
-              value={broadcast.failed}
-              hint={t('failedHint')}
-              tone="error"
-            />
-          )}
-          {broadcast.skipped_no_push > 0 && (
-            <SecondaryBucket
-              icon={<UsersIcon className="h-3.5 w-3.5" />}
-              label={t('notReachable')}
-              value={broadcast.skipped_no_push}
-              hint={t('notReachableBody', { count: broadcast.skipped_no_push })}
-            />
-          )}
-          {broadcast.google_not_installed > 0 && (
-            <SecondaryBucket
-              icon={<XCircleIcon className="h-3.5 w-3.5" />}
-              label={t('passRemoved')}
-              value={broadcast.google_not_installed}
-              hint={t('passRemovedHint')}
-            />
-          )}
-          {broadcast.google_throttled > 0 && (
-            <SecondaryBucket
-              icon={<ClockIcon className="h-3.5 w-3.5" />}
-              label={t('google')}
-              value={broadcast.google_throttled}
-              hint={t('throttledHint')}
-              tone="warning"
-            />
-          )}
+      {/* Detail boxes — one tile per non-zero bucket, hover for tooltip. */}
+      {statBoxes.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {statBoxes.map((box) => (
+            <StatBox key={box.key} spec={box} />
+          ))}
         </div>
       )}
     </section>
+  );
+}
+
+interface StatBoxSpec {
+  key: string;
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  hint: string;
+  tone: 'default' | 'warning' | 'error';
+}
+
+function StatBox({ spec }: Readonly<{ spec: StatBoxSpec }>) {
+  const toneRing =
+    spec.tone === 'error'
+      ? 'text-[var(--error)] bg-[var(--error)]/10'
+      : spec.tone === 'warning'
+      ? 'text-[var(--warning)] bg-[var(--warning)]/10'
+      : 'text-[#666] bg-[var(--border-light)]';
+  const toneValue =
+    spec.tone === 'error'
+      ? 'text-[var(--error)]'
+      : spec.tone === 'warning'
+      ? 'text-[var(--warning)]'
+      : 'text-[#1A1A1A]';
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex-1 min-w-[120px] cursor-help rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] px-3 py-2.5 flex items-center gap-2.5 transition-colors hover:bg-[var(--paper-hover)]">
+          <div
+            className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center ${toneRing}`}
+          >
+            {spec.icon}
+          </div>
+          <div className="min-w-0">
+            <AnimatedNumber
+              value={spec.value}
+              className={`block text-[18px] font-bold tabular-nums leading-none ${toneValue}`}
+            />
+            <div className="mt-0.5 text-[10.5px] text-[#8A8A8A] truncate">
+              {spec.label}
+            </div>
+          </div>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="max-w-[260px] text-[11px] leading-[1.4]"
+      >
+        {spec.hint}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -487,37 +594,6 @@ function ProviderRow({
       <div className="text-[12px] tabular-nums text-[#1A1A1A] font-semibold w-[60px] text-right">
         {delivered} / {attempts}
       </div>
-    </div>
-  );
-}
-
-interface SecondaryBucketProps {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  hint: string;
-  tone?: 'warning' | 'error';
-}
-
-function SecondaryBucket({
-  icon,
-  label,
-  value,
-  hint,
-  tone,
-}: Readonly<SecondaryBucketProps>) {
-  const colorClass =
-    tone === 'error'
-      ? 'text-[var(--error)]'
-      : tone === 'warning'
-      ? 'text-[var(--warning)]'
-      : 'text-[#8A8A8A]';
-  return (
-    <div className={`flex items-center gap-2 text-[11px] ${colorClass}`}>
-      {icon}
-      <span className="font-semibold tabular-nums">{value}</span>
-      <span>· {label}</span>
-      <InfoTooltip content={hint} />
     </div>
   );
 }

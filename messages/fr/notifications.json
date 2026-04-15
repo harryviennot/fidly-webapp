@@ -174,17 +174,22 @@
           "audience": "Choisissez votre audience.",
           "send": "Envoyez maintenant ou programmez."
         },
-        "delivery": "Vos clients reçoivent la notification directement dans leur wallet.",
+        "delivery": "Vos clients la reçoivent directement sur leur téléphone et au dos de leur carte de fidélité.",
         "appleNote": {
           "title": "À noter pour Apple Wallet",
-          "body": "Apple recommande de ne pas utiliser les passes wallet à des fins de marketing non sollicité. En pratique, les diffusions fonctionnent sans problème, mais veillez à n'envoyer des messages qu'à des clients qui ont volontairement rejoint votre programme de fidélité.",
+          "body": "N'envoyez que des messages liés à votre programme ou à votre activité. Apple peut révoquer les cartes qu'il juge non sollicitées.",
           "link": "En savoir plus"
+        },
+        "googleNote": {
+          "title": "À noter pour Google Wallet",
+          "body": "Google limite les cartes à 3 notifications par jour. Les clients ayant déjà reçu 3 notifications aujourd'hui (tampons, etc.) ne recevront pas cette diffusion."
         }
       },
       "lastResults": {
         "title": "Dernière diffusion",
         "recipients": "Envois",
         "delivered": "Livrés",
+        "deliveredShort": "livrés",
         "failed": "Échecs",
         "deliveryRate": "{rate}% livrés",
         "relativeJustNow": "à l'instant",
@@ -241,6 +246,7 @@
         "confirmCancel": "Annuler cette diffusion programmée ?",
         "confirmCancelBody": "La diffusion ne sera pas envoyée et sera déplacée vers vos brouillons. Vous pourrez la reprogrammer plus tard.",
         "reachable": "Joignables",
+        "totalSendsShort": "total",
         "reachableHint": "Clients ayant une carte Apple ou Google Wallet active au moment de l'envoi. Ceux qui n'ont jamais installé la carte sont comptés à part.",
         "deliveryRate": "{rate}% livrés",
         "deliveredHint": "« Livré » signifie que la mise à jour de la carte a été acceptée par Apple ou Google Wallet. Les clients peuvent avoir masqué les notifications sur leur téléphone — nous ne pouvons pas le détecter, mais la carte elle-même est bien mise à jour.",

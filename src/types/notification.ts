@@ -132,9 +132,17 @@ export interface Broadcast {
   updated_at: string | null;
 }
 
+export type BroadcastStatusFilter = 'scheduled' | 'sent' | 'drafts';
+
 export interface BroadcastListParams {
   limit?: number;
   offset?: number;
+  status?: BroadcastStatusFilter;
+}
+
+export interface BroadcastStatsResponse {
+  month_quota_used: number;
+  last_sent: Broadcast | null;
 }
 
 /** Offset-paginated envelope — mirrors GET /broadcasts/{business_id}. */

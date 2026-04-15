@@ -18,6 +18,7 @@ import {
   InfoIcon,
   TrashIcon,
   XCircleIcon,
+  FloppyDiskIcon,
 } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +45,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useBusiness } from '@/contexts/business-context';
+import { useProgram } from '../layout';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import {
   useBroadcast,
@@ -178,6 +180,8 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
   const tErrors = useTranslations('notifications.broadcasts.errors');
   const router = useRouter();
   const { currentBusiness } = useBusiness();
+  const { program } = useProgram();
+  const programName = program?.name ?? null;
   const { hasFeature } = useEntitlements();
 
   const canSchedule = hasFeature('notifications.scheduled');
@@ -561,6 +565,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
               disabled={isBusy || !state.body.trim()}
               className="h-8 rounded-full px-3"
             >
+              <FloppyDiskIcon className="h-3.5 w-3.5" weight="fill" />
               {tWizard('saveDraft')}
             </Button>
           )}
@@ -637,6 +642,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
               </div>
               <MessagePreview
                 iconUrl={currentBusiness?.icon_url ?? null}
+                programName={programName}
                 businessName={currentBusiness?.name ?? ''}
                 body={state.body}
               />
@@ -1630,6 +1636,8 @@ function ReviewStep({
   const tWizard = useTranslations('notifications.broadcasts.wizard');
   const uiLocale = useLocale();
   const { currentBusiness } = useBusiness();
+  const { program } = useProgram();
+  const programName = program?.name ?? null;
 
   const chipTranslator = (key: string, values?: Record<string, unknown>) =>
     tWizard(key, values as { n: number });
@@ -1716,6 +1724,7 @@ function ReviewStep({
       <div className="mb-4">
         <MessagePreview
           iconUrl={currentBusiness?.icon_url ?? null}
+          programName={programName}
           businessName={currentBusiness?.name ?? ''}
           body={state.body}
         />
