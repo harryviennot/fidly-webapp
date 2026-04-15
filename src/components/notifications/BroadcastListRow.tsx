@@ -213,7 +213,7 @@ export function BroadcastListRow({
                     setSendAgainOpen(true);
                   }}
                 >
-                  <ArrowClockwiseIcon className="h-3.5 w-3.5 mr-2" />
+                  <ArrowClockwiseIcon className="h-3.5 w-3.5" />
                   {t('detail.sendAgain')}
                 </DropdownMenuItem>
               )}
@@ -225,7 +225,7 @@ export function BroadcastListRow({
                       handleEdit();
                     }}
                   >
-                    <PencilSimpleIcon className="h-3.5 w-3.5 mr-2" />
+                    <PencilSimpleIcon className="h-3.5 w-3.5" />
                     {t('detail.edit')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -235,7 +235,7 @@ export function BroadcastListRow({
                     }}
                     className="text-[var(--error)] focus:text-[var(--error)] focus:bg-[var(--error)]/10"
                   >
-                    <XCircleIcon className="h-3.5 w-3.5 mr-2" />
+                    <XCircleIcon className="h-3.5 w-3.5" />
                     {t('detail.cancel')}
                   </DropdownMenuItem>
                 </>
@@ -248,7 +248,7 @@ export function BroadcastListRow({
                       handleEdit();
                     }}
                   >
-                    <PencilSimpleIcon className="h-3.5 w-3.5 mr-2" />
+                    <PencilSimpleIcon className="h-3.5 w-3.5" />
                     {t('detail.edit')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -258,7 +258,7 @@ export function BroadcastListRow({
                     }}
                     className="text-[var(--error)] focus:text-[var(--error)] focus:bg-[var(--error)]/10"
                   >
-                    <TrashIcon className="h-3.5 w-3.5 mr-2" />
+                    <TrashIcon className="h-3.5 w-3.5" />
                     {t('detail.delete')}
                   </DropdownMenuItem>
                 </>
