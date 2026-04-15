@@ -14,7 +14,13 @@ import {
   ClockIcon,
   PaperPlaneTiltIcon,
   GoogleLogoIcon,
+  CaretDownIcon,
 } from '@phosphor-icons/react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { PageHeader } from '@/components/redesign';
 import { InfoBox } from '@/components/reusables/info-box';
 import { Button } from '@/components/ui/button';
@@ -206,6 +212,48 @@ export default function ProgramBroadcastsPage() {
             </div>
           )}
 
+          {/* Info panel — collapsed banner on <1080px. Desktop keeps the
+              sticky sidebar instead. Compact when closed so the list stays
+              reachable without long scrolling on mobile. */}
+          <div className="min-[1080px]:hidden flex flex-col gap-[14px]">
+            {statsData?.last_sent && (
+              <LastBroadcastResultsWidget
+                lastSent={statsData.last_sent}
+                onOpen={setDetailBroadcast}
+              />
+            )}
+            <Collapsible className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden">
+              <CollapsibleTrigger
+                className="group w-full px-4 py-3 flex items-center gap-2.5 hover:bg-[var(--paper)] transition-colors"
+                aria-label={t('starter.headline')}
+              >
+                <div className="w-7 h-7 shrink-0 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
+                  <LightningIcon
+                    className="h-3.5 w-3.5 text-[var(--accent)]"
+                    weight="fill"
+                  />
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <div className="text-[13px] font-semibold text-[#1A1A1A] leading-tight truncate">
+                    {t('starter.headline')}
+                  </div>
+                  <div className="text-[11px] text-[#8A8A8A] truncate">
+                    {t('howItWorks.delivery')}
+                  </div>
+                </div>
+                <CaretDownIcon
+                  className="h-4 w-4 text-[#8A8A8A] shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                  weight="bold"
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="collapsible-content">
+                <div className="px-[18px] pt-3 pb-[18px] border-t border-[var(--border-light)]">
+                  <HowItWorksBody />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+
           {/* Filter chips + list */}
           <div
             className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up"
@@ -307,87 +355,8 @@ export default function ProgramBroadcastsPage() {
         >
           <div className="min-[1080px]:sticky min-[1080px]:top-5 flex flex-col gap-[14px]">
             {/* How it works */}
-            <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-7 h-7 shrink-0 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
-                  <LightningIcon
-                    className="h-3.5 w-3.5 text-[var(--accent)]"
-                    weight="fill"
-                  />
-                </div>
-                <div className="text-[13px] font-semibold text-[#1A1A1A] leading-[1.3]">
-                  {t('starter.headline')}
-                </div>
-              </div>
+            <HowItWorksCard />
 
-              <ol className="space-y-2">
-                {(
-                  [
-                    { key: 'compose', text: t('howItWorks.steps.compose') },
-                    { key: 'audience', text: t('howItWorks.steps.audience') },
-                    { key: 'send', text: t('howItWorks.steps.send') },
-                  ] as const
-                ).map((step, i) => (
-                  <li key={step.key} className="flex items-center gap-2.5">
-                    <span className="shrink-0 w-5 h-5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] flex items-center justify-center text-[10px] font-bold text-[#8A8A8A]">
-                      {i + 1}
-                    </span>
-                    <span className="text-[12px] text-[#555] leading-[1.45]">
-                      {step.text}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-
-              <div className="mt-3.5 pt-3 border-t border-[var(--border-light)]">
-                <p className="text-[11px] text-[#8A8A8A] leading-[1.45]">
-                  {t('howItWorks.delivery')}
-                </p>
-              </div>
-
-              <div className="mt-3 rounded-[10px] border border-amber-200/80 bg-amber-50/70 p-3">
-                <div className="flex items-start gap-2">
-                  <WarningIcon
-                    className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0"
-                    weight="fill"
-                  />
-                  <div className="min-w-0">
-                    <div className="text-[11px] font-semibold text-amber-900 mb-0.5">
-                      {t('howItWorks.appleNote.title')}
-                    </div>
-                    <p className="text-[11px] text-amber-900/80 leading-[1.45]">
-                      {t('howItWorks.appleNote.body')}
-                    </p>
-                    <a
-                      href="https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/PassKit_PG/Updating.html"
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold text-amber-800 hover:text-amber-900 underline-offset-2 hover:underline"
-                    >
-                      {t('howItWorks.appleNote.link')}
-                      <ArrowSquareOutIcon className="h-3 w-3" weight="bold" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-2 rounded-[10px] border border-blue-200/80 bg-blue-50/70 p-3">
-                <div className="flex items-start gap-2">
-                  <GoogleLogoIcon
-                    className="h-3.5 w-3.5 text-blue-600 mt-0.5 shrink-0"
-                    weight="fill"
-                  />
-                  <div className="min-w-0">
-                    <div className="text-[11px] font-semibold text-blue-900 mb-0.5">
-                      {t('howItWorks.googleNote.title')}
-                    </div>
-                    <p className="text-[11px] text-blue-900/80 leading-[1.45]">
-                      {t('howItWorks.googleNote.body')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Last broadcast results — hidden until the first sent broadcast exists */}
             <LastBroadcastResultsWidget
@@ -426,6 +395,104 @@ export default function ProgramBroadcastsPage() {
         onClose={() => setDetailBroadcast(null)}
       />
     </div>
+  );
+}
+
+// ─── How it works card — shared by desktop sidebar + mobile collapsible ──
+
+function HowItWorksCard() {
+  const t = useTranslations('notifications.broadcasts');
+  return (
+    <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-[18px]">
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="w-7 h-7 shrink-0 rounded-lg bg-[var(--accent-light)] flex items-center justify-center">
+          <LightningIcon
+            className="h-3.5 w-3.5 text-[var(--accent)]"
+            weight="fill"
+          />
+        </div>
+        <div className="text-[13px] font-semibold text-[#1A1A1A] leading-[1.3]">
+          {t('starter.headline')}
+        </div>
+      </div>
+
+      <HowItWorksBody />
+    </div>
+  );
+}
+
+function HowItWorksBody() {
+  const t = useTranslations('notifications.broadcasts');
+  return (
+    <>
+      <ol className="space-y-2">
+        {(
+          [
+            { key: 'compose', text: t('howItWorks.steps.compose') },
+            { key: 'audience', text: t('howItWorks.steps.audience') },
+            { key: 'send', text: t('howItWorks.steps.send') },
+          ] as const
+        ).map((step, i) => (
+          <li key={step.key} className="flex items-center gap-2.5">
+            <span className="shrink-0 w-5 h-5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] flex items-center justify-center text-[10px] font-bold text-[#8A8A8A]">
+              {i + 1}
+            </span>
+            <span className="text-[12px] text-[#555] leading-[1.45]">
+              {step.text}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-3.5 pt-3 border-t border-[var(--border-light)]">
+        <p className="text-[11px] text-[#8A8A8A] leading-[1.45]">
+          {t('howItWorks.delivery')}
+        </p>
+      </div>
+
+      <div className="mt-3 rounded-[10px] border border-amber-200/80 bg-amber-50/70 p-3">
+        <div className="flex items-start gap-2">
+          <WarningIcon
+            className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0"
+            weight="fill"
+          />
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold text-amber-900 mb-0.5">
+              {t('howItWorks.appleNote.title')}
+            </div>
+            <p className="text-[11px] text-amber-900/80 leading-[1.45]">
+              {t('howItWorks.appleNote.body')}
+            </p>
+            <a
+              href="https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/PassKit_PG/Updating.html"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold text-amber-800 hover:text-amber-900 underline-offset-2 hover:underline"
+            >
+              {t('howItWorks.appleNote.link')}
+              <ArrowSquareOutIcon className="h-3 w-3" weight="bold" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 rounded-[10px] border border-blue-200/80 bg-blue-50/70 p-3">
+        <div className="flex items-start gap-2">
+          <GoogleLogoIcon
+            className="h-3.5 w-3.5 text-blue-600 mt-0.5 shrink-0"
+            weight="fill"
+          />
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold text-blue-900 mb-0.5">
+              {t('howItWorks.googleNote.title')}
+            </div>
+            <p className="text-[11px] text-blue-900/80 leading-[1.45]">
+              {t('howItWorks.googleNote.body')}
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
