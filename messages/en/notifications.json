@@ -420,6 +420,15 @@
         },
         "cta": "Upgrade to Growth"
       },
+      "proUpsell": {
+        "title": "Schedule and broadcast without limits",
+        "description": "Plan campaigns ahead of time and reach every customer as often as you need.",
+        "features": {
+          "schedule": "Schedule broadcasts days or weeks in advance",
+          "unlimited": "Unlimited monthly broadcasts"
+        },
+        "cta": "Upgrade to Pro"
+      },
       "toasts": {
         "draftSaved": "Draft saved",
         "draftSaveFailed": "Failed to save draft",

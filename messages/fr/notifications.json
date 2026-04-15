@@ -410,6 +410,15 @@
         "cancelBroadcast": "Annuler l'envoi",
         "stepIndicator": "Étape {current} sur {total}"
       },
+      "proUpsell": {
+        "title": "Planifiez et diffusez sans limite",
+        "description": "Préparez vos campagnes à l'avance et touchez vos clients aussi souvent que nécessaire.",
+        "features": {
+          "schedule": "Programmez vos diffusions des jours ou semaines à l'avance",
+          "unlimited": "Diffusions mensuelles illimitées"
+        },
+        "cta": "Passer à Pro"
+      },
       "starter": {
         "headline": "Touchez tous vos clients d'un seul coup",
         "description": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité.",

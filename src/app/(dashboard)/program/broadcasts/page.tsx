@@ -388,10 +388,13 @@ export default function ProgramBroadcastsPage() {
             {/* Pro upsell (Growth only) */}
             {tier === 'growth' && (
               <UpsellInline
-                variant="compact"
-                title={t('starter.features.schedule')}
-                description={t('starter.description')}
-                ctaLabel={t('starter.cta').replace('Growth', 'Pro')}
+                title={t('proUpsell.title')}
+                description={t('proUpsell.description')}
+                features={[
+                  t('proUpsell.features.schedule'),
+                  t('proUpsell.features.unlimited'),
+                ]}
+                ctaLabel={t('proUpsell.cta')}
                 ctaHref="/billing?from=broadcasts"
               />
             )}
