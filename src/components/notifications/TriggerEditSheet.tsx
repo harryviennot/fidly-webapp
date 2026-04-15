@@ -266,6 +266,7 @@ function EditForm({
           <div className="flex justify-center">
             <MessagePreview
               iconUrl={currentBusiness?.icon_url ?? null}
+              iconOriginalUrl={currentBusiness?.icon_original_url ?? null}
               programName={programName}
               businessName={currentBusiness?.name ?? ''}
               body={previewBody}

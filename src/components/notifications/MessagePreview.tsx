@@ -7,6 +7,9 @@ import { cn } from '@/lib/utils';
 interface MessagePreviewProps {
   /** URL to a square icon (29-87 px). Optional — falls back to a generic bell. */
   iconUrl?: string | null;
+  /** Full-resolution square original. Preferred over `iconUrl` when available
+   *  so dashboard previews aren't upscaling Apple's tiny 29px asset. */
+  iconOriginalUrl?: string | null;
   /** Loyalty program name — shown as the banner title if provided. iOS uses
    *  `organizationName` as the push notification title and we fill that
    *  with the program name (see backend/app/services/pass_generator.py). */
@@ -28,6 +31,7 @@ interface MessagePreviewProps {
  */
 export function MessagePreview({
   iconUrl,
+  iconOriginalUrl,
   programName,
   businessName,
   body,
@@ -36,14 +40,15 @@ export function MessagePreview({
 }: MessagePreviewProps) {
   const t = useTranslations('notifications.broadcasts.preview');
   const displayTitle = programName?.trim() || businessName || t('fallbackTitle');
+  const displayIconUrl = iconOriginalUrl || iconUrl;
   return (
     <div className={cn('flex flex-col items-center gap-2', className)}>
       <div className="w-[280px] rounded-2xl bg-neutral-900/90 backdrop-blur-xl text-white px-3 py-2.5 shadow-lg">
         <div className="flex items-start gap-2.5">
-          {iconUrl ? (
+          {displayIconUrl ? (
             <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md bg-white/10">
               <Image
-                src={iconUrl}
+                src={displayIconUrl}
                 alt={displayTitle}
                 width={32}
                 height={32}

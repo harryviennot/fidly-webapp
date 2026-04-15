@@ -12,15 +12,25 @@
       "custom": "Custom icon",
       "lockedHint": "Upgrade to Growth to use a branded notification icon",
       "upload": "Upload icon",
-      "uploadHint": "Square PNG, at least 87×87 pixels",
-      "preview": "Preview"
+      "uploadHint": "PNG, at least 87×87 pixels",
+      "preview": "Preview",
+      "crop": {
+        "title": "Crop your icon",
+        "description": "Drag the square to pick the part of your image to use. It will be resized automatically.",
+        "apply": "Apply",
+        "cancel": "Cancel"
+      },
+      "cacheWarning": {
+        "title": "Heads up about updates",
+        "body": "New customers will see your updated icon right away. Existing customers may take several days — Apple Wallet caches pass assets aggressively and we can't force a refresh."
+      }
     },
     "howItWorks": {
       "title": "How it works",
       "step1": "A staff member scans the customer's loyalty card.",
       "step2": "Their wallet pass silently refreshes in the background.",
       "step3": "The customer sees the notification on their lock screen.",
-      "note": "Notifications are delivered directly through Apple Wallet — no app install required."
+      "note": "Your customers receive the notification directly on their phone and on the back of their loyalty card."
     },
     "variablesReference": {
       "title": "Available variables",

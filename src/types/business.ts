@@ -14,6 +14,7 @@ export interface Business {
   settings: BusinessSettings;
   logo_url?: string | null;
   icon_url?: string | null;
+  icon_original_url?: string | null;
   primary_locale: "fr" | "en";
   created_at?: string;
   updated_at?: string;

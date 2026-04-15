@@ -89,17 +89,35 @@ export function TriggerCard({
     onSelect?.(template.trigger);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect?.(template.trigger);
+    }
+  };
+
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onEdit?.(template.trigger);
   };
 
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      onEdit?.(template.trigger);
+    }
+  };
+
   return (
-    <button
-      type="button"
-      onClick={handleClick}
+    <div
+      role="button"
+      tabIndex={onSelect ? 0 : -1}
+      onClick={onSelect ? handleClick : undefined}
+      onKeyDown={onSelect ? handleKeyDown : undefined}
       className={cn(
         'w-full text-left flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] border-[1.5px] transition-all duration-150',
+        onSelect && 'cursor-pointer',
         selected
           ? 'border-[var(--accent)] bg-[var(--accent-light)]'
           : 'border-[var(--border-light)] bg-[var(--paper)] hover:border-[var(--border)]',
@@ -190,16 +208,18 @@ export function TriggerCard({
           </span>
         )}
         {!readOnly && onEdit && (
-          <button
-            type="button"
+          <span
+            role="button"
+            tabIndex={0}
             onClick={handleEditClick}
-            className="ml-1 w-7 h-7 rounded-md flex items-center justify-center text-[#8A8A8A] hover:bg-white hover:text-[var(--accent)] transition-colors"
+            onKeyDown={handleEditKeyDown}
+            className="ml-1 w-7 h-7 rounded-md flex items-center justify-center text-[#8A8A8A] hover:bg-white hover:text-[var(--accent)] transition-colors cursor-pointer"
             aria-label="Edit"
           >
             <Pencil className="h-3.5 w-3.5" />
-          </button>
+          </span>
         )}
       </div>
-    </button>
+    </div>
   );
 }

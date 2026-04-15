@@ -199,6 +199,7 @@ function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
             <div className="flex justify-center">
               <MessagePreview
                 iconUrl={currentBusiness?.icon_url ?? null}
+                iconOriginalUrl={currentBusiness?.icon_original_url ?? null}
                 programName={programName}
                 businessName={currentBusiness?.name ?? ''}
                 body={broadcast.body}

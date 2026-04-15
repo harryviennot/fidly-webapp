@@ -640,6 +640,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
             estimatedCount={estimatedCount}
             estimating={estimating}
             iconUrl={currentBusiness?.icon_url ?? null}
+            iconOriginalUrl={currentBusiness?.icon_original_url ?? null}
             programName={programName}
             businessName={currentBusiness?.name ?? ''}
           />
@@ -1719,6 +1720,7 @@ function ReviewStep({
       <div className="mb-4">
         <MessagePreview
           iconUrl={currentBusiness?.icon_url ?? null}
+          iconOriginalUrl={currentBusiness?.icon_original_url ?? null}
           programName={programName}
           businessName={currentBusiness?.name ?? ''}
           body={state.body}
@@ -1792,6 +1794,7 @@ interface WizardSummarySidebarProps {
   estimatedCount: number | null;
   estimating: boolean;
   iconUrl: string | null;
+  iconOriginalUrl: string | null;
   programName: string | null;
   businessName: string;
 }
@@ -1802,6 +1805,7 @@ function WizardSummarySidebar({
   estimatedCount,
   estimating,
   iconUrl,
+  iconOriginalUrl,
   programName,
   businessName,
 }: Readonly<WizardSummarySidebarProps>) {
@@ -1840,6 +1844,7 @@ function WizardSummarySidebar({
           </div>
           <MessagePreview
             iconUrl={iconUrl}
+            iconOriginalUrl={iconOriginalUrl}
             programName={programName}
             businessName={businessName}
             body={state.body}

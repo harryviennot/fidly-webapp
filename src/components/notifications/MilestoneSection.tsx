@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { FlagIcon, PencilIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { InfoBox } from '@/components/reusables/info-box';
-import { LoadingSpinner } from '@/components/reusables/loading-spinner';
+import { TriggerListSkeleton } from './TriggerListSkeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -126,7 +126,7 @@ export function MilestoneSection({
       </div>
 
       <div className="mt-4">
-        {isLoading && <LoadingSpinner />}
+        {isLoading && <TriggerListSkeleton rows={2} />}
 
         {error && (
           <InfoBox
@@ -157,12 +157,20 @@ export function MilestoneSection({
               const preview = renderSamplePreview(bodyText, {
                 stamp_count: String(milestone.stamp_equals),
               });
+              const handleRowKeyDown = (e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  openEdit(milestone);
+                }
+              };
               return (
-                <button
+                <div
                   key={milestone.id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => openEdit(milestone)}
-                  className="w-full text-left flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)] hover:border-[var(--border)] transition-all group"
+                  onKeyDown={handleRowKeyDown}
+                  className="w-full text-left flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)] hover:border-[var(--border)] transition-all group cursor-pointer"
                 >
                   <div className="w-9 h-9 rounded-lg bg-[var(--accent-light)] flex items-center justify-center flex-shrink-0">
                     <span className="text-[13px] font-bold text-[var(--accent)] tabular-nums">
@@ -208,7 +216,7 @@ export function MilestoneSection({
                       <TrashIcon className="h-3.5 w-3.5" />
                     </span>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>

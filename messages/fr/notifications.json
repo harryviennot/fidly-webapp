@@ -12,15 +12,25 @@
       "custom": "Icône personnalisée",
       "lockedHint": "Passez à Growth pour utiliser une icône personnalisée",
       "upload": "Téléverser une icône",
-      "uploadHint": "PNG carré, au moins 87×87 pixels",
-      "preview": "Aperçu"
+      "uploadHint": "PNG, au moins 87×87 pixels",
+      "preview": "Aperçu",
+      "crop": {
+        "title": "Recadrez votre icône",
+        "description": "Déplacez le carré pour choisir la partie de l'image à utiliser. Elle sera redimensionnée automatiquement.",
+        "apply": "Appliquer",
+        "cancel": "Annuler"
+      },
+      "cacheWarning": {
+        "title": "À propos des mises à jour",
+        "body": "Les nouveaux clients verront la nouvelle icône immédiatement. Pour les clients existants, cela peut prendre plusieurs jours — Apple Wallet met les ressources en cache de manière agressive et nous ne pouvons pas forcer la mise à jour."
+      }
     },
     "howItWorks": {
       "title": "Comment ça marche",
       "step1": "Un membre de votre équipe scanne la carte de fidélité du client.",
       "step2": "Sa carte wallet se met à jour en silence en arrière-plan.",
       "step3": "Le client voit la notification sur son écran verrouillé.",
-      "note": "Les notifications sont délivrées directement via Apple Wallet — aucune installation d'application requise."
+      "note": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité."
     },
     "variablesReference": {
       "title": "Variables disponibles",
