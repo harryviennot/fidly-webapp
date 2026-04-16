@@ -109,16 +109,16 @@
         "enabled": "Milestone enabled",
         "disabled": "Milestone disabled",
         "toggleFailed": "Failed to toggle milestone"
-      }
-    },
-    "proUpsell": {
-      "title": "Unlimited milestones",
-      "description": "Upgrade to Pro to create as many milestone notifications as you need — no cap.",
-      "features": {
-        "unlimited": "Unlimited milestones per program",
-        "broadcasts": "Unlimited broadcasts + scheduling"
       },
-      "cta": "Upgrade to Pro"
+      "proUpsell": {
+        "title": "Unlimited milestones",
+        "description": "Upgrade to Pro to create as many milestone notifications as you need — no cap.",
+        "features": {
+          "unlimited": "Unlimited milestones",
+          "broadcasts": "Unlimited broadcasts + scheduling"
+        },
+        "cta": "Upgrade to Pro"
+      }
     },
     "nearReward": {
       "title": "Near-reward notification",

@@ -218,6 +218,18 @@ export default function ProgramNotificationsPage() {
             >
               {variablesBody}
             </InfoCard>
+            {tier === 'growth' && (
+              <UpsellInline
+                title={t('milestones.proUpsell.title')}
+                description={t('milestones.proUpsell.description')}
+                features={[
+                  t('milestones.proUpsell.features.unlimited'),
+                  t('milestones.proUpsell.features.broadcasts'),
+                ]}
+                ctaLabel={t('milestones.proUpsell.cta')}
+                ctaHref="/billing?from=notifications"
+              />
+            )}
           </div>
 
           <div
@@ -280,20 +292,6 @@ export default function ProgramNotificationsPage() {
             />
           )}
 
-          {/* Growth — Pro upsell for unlimited milestones */}
-          {tier === 'growth' && (
-            <UpsellInline
-              title={t('milestones.proUpsell.title')}
-              description={t('milestones.proUpsell.description')}
-              features={[
-                t('milestones.proUpsell.features.unlimited'),
-                t('milestones.proUpsell.features.broadcasts'),
-              ]}
-              ctaLabel={t('milestones.proUpsell.cta')}
-              ctaHref="/billing?from=notifications"
-            />
-          )}
-
           {/* Starter — Growth upsell in place of the milestones section. */}
           {!isLoading && !error && templates.length > 0 && !isEditable && (
             <UpsellInline
@@ -324,6 +322,18 @@ export default function ProgramNotificationsPage() {
             <InfoCard icon={variablesIcon} title={variablesTitle}>
               {variablesBody}
             </InfoCard>
+            {tier === 'growth' && (
+              <UpsellInline
+                title={t('milestones.proUpsell.title')}
+                description={t('milestones.proUpsell.description')}
+                features={[
+                  t('milestones.proUpsell.features.unlimited'),
+                  t('milestones.proUpsell.features.broadcasts'),
+                ]}
+                ctaLabel={t('milestones.proUpsell.cta')}
+                ctaHref="/billing?from=notifications"
+              />
+            )}
           </div>
         </div>
       </div>

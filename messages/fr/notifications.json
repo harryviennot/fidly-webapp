@@ -109,16 +109,16 @@
         "enabled": "Palier activé",
         "disabled": "Palier désactivé",
         "toggleFailed": "Échec de la mise à jour du palier"
-      }
-    },
-    "proUpsell": {
-      "title": "Paliers illimités",
-      "description": "Passez à Pro pour créer autant de paliers que vous voulez — sans limite.",
-      "features": {
-        "unlimited": "Paliers illimités par programme",
-        "broadcasts": "Diffusions illimitées + programmation"
       },
-      "cta": "Passer à Pro"
+      "proUpsell": {
+        "title": "Paliers illimités",
+        "description": "Passez à Pro pour créer autant de paliers que vous voulez — sans limite.",
+        "features": {
+          "unlimited": "Paliers illimités",
+          "broadcasts": "Diffusions illimitées + programmation"
+        },
+        "cta": "Passer à Pro"
+      }
     },
     "nearReward": {
       "title": "Notification de récompense proche",
