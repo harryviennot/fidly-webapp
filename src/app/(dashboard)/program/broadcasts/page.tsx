@@ -375,15 +375,15 @@ export default function ProgramBroadcastsPage() {
           style={{ animationDelay: '350ms' }}
         >
           <div className="min-[1080px]:sticky min-[1080px]:top-5 flex flex-col gap-[14px]">
-            <InfoCard icon={howItWorksIcon} title={howItWorksTitle}>
-              {howItWorksBody}
-            </InfoCard>
-
             {/* Last broadcast results — hidden until the first sent broadcast exists */}
             <LastBroadcastResultsWidget
               lastSent={statsData?.last_sent ?? null}
               onOpen={setDetailBroadcast}
             />
+
+            <InfoCard icon={howItWorksIcon} title={howItWorksTitle}>
+              {howItWorksBody}
+            </InfoCard>
 
             {/* Pro upsell (Growth only) */}
             {tier === 'growth' && (
