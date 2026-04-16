@@ -94,10 +94,13 @@ export default function ProgramNotificationsPage() {
   const tToast = useTranslations('notifications.toasts');
 
   const templates = useMemo(() => data?.items ?? [], [data]);
+  const tier = data?.tier;
   const isEditable = templates.some((tpl) => tpl.is_editable);
   const totalStamps = program?.config?.total_stamps;
   const programName = program?.name ?? null;
   const rewardNameSet = Boolean(program?.reward_name?.trim());
+  const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
+  const nameCollectionOff = collectName === 'off' || collectName === false;
 
   // Real-value examples for the variables sidebar — pulls from the active
   // business + program when possible so French accounts see French copy and
@@ -178,6 +181,7 @@ export default function ProgramNotificationsPage() {
       <VariablesList
         uiLocale={uiLocale}
         rewardNameSet={rewardNameSet}
+        nameCollectionOff={nameCollectionOff}
         examples={variableExamples}
       />
     </>
@@ -276,6 +280,20 @@ export default function ProgramNotificationsPage() {
             />
           )}
 
+          {/* Growth — Pro upsell for unlimited milestones */}
+          {tier === 'growth' && (
+            <UpsellInline
+              title={t('milestones.proUpsell.title')}
+              description={t('milestones.proUpsell.description')}
+              features={[
+                t('milestones.proUpsell.features.unlimited'),
+                t('milestones.proUpsell.features.broadcasts'),
+              ]}
+              ctaLabel={t('milestones.proUpsell.cta')}
+              ctaHref="/billing?from=notifications"
+            />
+          )}
+
           {/* Starter — Growth upsell in place of the milestones section. */}
           {!isLoading && !error && templates.length > 0 && !isEditable && (
             <UpsellInline
@@ -326,18 +344,28 @@ export default function ProgramNotificationsPage() {
 interface VariablesListProps {
   uiLocale: Locale;
   rewardNameSet: boolean;
+  nameCollectionOff: boolean;
   examples: Record<VariableKey, string>;
 }
 
 function VariablesList({
   uiLocale,
   rewardNameSet,
+  nameCollectionOff,
   examples,
 }: Readonly<VariablesListProps>) {
   const t = useTranslations('notifications');
   const router = useRouter();
   const items = VARIABLE_KEYS.map((key) => {
-    const isDisabled = key === 'reward_name' && !rewardNameSet;
+    const isDisabled =
+      (key === 'reward_name' && !rewardNameSet) ||
+      (key === 'customer_first_name' && nameCollectionOff);
+    const tooltip =
+      key === 'reward_name' && !rewardNameSet
+        ? t('editor.rewardNameMissing')
+        : key === 'customer_first_name' && nameCollectionOff
+          ? t('editor.nameCollectionOff')
+          : undefined;
     const label = (
       <code
         className={cn(
@@ -356,7 +384,7 @@ function VariablesList({
       value: <>→ {examples[key]}</>,
       disabled: isDisabled,
       onClick: isDisabled ? () => router.push('/program/settings') : undefined,
-      tooltip: isDisabled ? t('editor.rewardNameMissing') : undefined,
+      tooltip,
     };
   });
   return <KeyValueList items={items} />;

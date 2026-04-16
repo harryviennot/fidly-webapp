@@ -15,22 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { usePreviewDowngrade } from "@/hooks/useBilling";
 import type { PreviewDowngradeResponse } from "@/api/billing";
-
-// Human-readable labels for feature keys
-const FEATURE_LABELS: Record<string, string> = {
-  "programs.events": "Promotional events",
-  "programs.multiple": "Multiple programs",
-  "notifications.broadcast": "Broadcast notifications",
-  "notifications.scheduled": "Scheduled sends",
-  "notifications.segmentation": "Customer segmentation",
-  "notifications.type": "Custom notification text",
-  "designs.scheduled": "Scheduled design changes",
-  "locations.multiple": "Multiple locations",
-  "locations.geofencing": "Geofencing",
-  "locations.analytics": "Location analytics",
-  "analytics.advanced": "Advanced analytics",
-  "team.employee_tracking": "Employee scan tracking",
-};
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DowngradeConfirmDialogProps {
   open: boolean;
@@ -117,16 +102,20 @@ export function DowngradeConfirmDialog({
                   </span>
                 </li>
               )}
-              {data.features_lost.map((key) => (
-                <li key={key} className="flex items-start gap-2">
-                  <LightningIcon className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>
-                    {t("downgradeImpactFeature", {
-                      feature: FEATURE_LABELS[key] || key,
-                    })}
-                  </span>
-                </li>
-              ))}
+              {data.features_lost.map((key) => {
+                // Backend sends dotted keys like "programs.events" but
+                // next-intl treats dots as nesting, so we convert to
+                // underscore keys: "programs_events".
+                const labelKey = `featureLabels.${key.replace(/\./g, "_")}` as Parameters<typeof t>[0];
+                return (
+                  <li key={key} className="flex items-start gap-2">
+                    <LightningIcon className="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>
+                      {t("downgradeImpactFeature", { feature: t(labelKey) })}
+                    </span>
+                  </li>
+                );
+              })}
               {ni && ni.custom_templates_disabled > 0 && (
                 <li className="flex items-start gap-2">
                   <BellSimpleIcon className="w-4 h-4 mt-0.5 shrink-0" />
@@ -167,8 +156,19 @@ export function DowngradeConfirmDialog({
         )}
 
         {preview.isPending && (
-          <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--warning)]" />
+          <div className="rounded-lg border border-[var(--warning)]/20 bg-[var(--warning-light)]/50 p-4 space-y-3">
+            <Skeleton className="h-4 w-32" />
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded shrink-0" />
+                <Skeleton className="h-3.5 w-48" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded shrink-0" />
+                <Skeleton className="h-3.5 w-40" />
+              </div>
+            </div>
+            <Skeleton className="h-3 w-56 mt-1" />
           </div>
         )}
 

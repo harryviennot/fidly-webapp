@@ -77,6 +77,8 @@
       "description": "Envoyez un message spécial lorsqu'un client atteint un nombre précis de tampons",
       "add": "Ajouter un palier",
       "usage": "{count} sur {max} utilisés",
+      "usageActive": "{count} sur {max} actifs",
+      "disabledPill": "Désactivé",
       "unlimited": "{count} paliers",
       "empty": "Aucun palier pour le moment. Ajoutez-en un pour envoyer un message personnalisé à un nombre précis de tampons.",
       "condition": "Quand le client atteint {count} tampons",
@@ -103,8 +105,20 @@
         "updateFailed": "Échec de la mise à jour",
         "deleted": "Palier supprimé",
         "deleteFailed": "Échec de la suppression",
-        "swappedOff": "Le palier au tampon {stamp} a été désactivé pour faire de la place"
+        "swappedOff": "Le palier au tampon {stamp} a été désactivé pour faire de la place",
+        "enabled": "Palier activé",
+        "disabled": "Palier désactivé",
+        "toggleFailed": "Échec de la mise à jour du palier"
       }
+    },
+    "proUpsell": {
+      "title": "Paliers illimités",
+      "description": "Passez à Pro pour créer autant de paliers que vous voulez — sans limite.",
+      "features": {
+        "unlimited": "Paliers illimités par programme",
+        "broadcasts": "Diffusions illimitées + programmation"
+      },
+      "cta": "Passer à Pro"
     },
     "nearReward": {
       "title": "Notification de récompense proche",
@@ -126,6 +140,9 @@
       "disabled": "Désactivée",
       "disabledHint": "Une fois désactivée, la carte de fidélité se met toujours à jour en silence — les clients ne voient simplement pas de notification pour cet événement.",
       "rewardNameMissing": "Définissez une récompense dans les paramètres du programme pour utiliser cette variable.",
+      "nameCollectionOff": "Activez la collecte des prénoms dans les paramètres du programme pour utiliser cette variable.",
+      "nameWarning": "Certains clients n'ont pas de prénom enregistré. Ils verront le message sans le prénom.",
+      "previewWithoutName": "Aperçu pour les clients sans prénom",
       "emptyBody": "Le message ne peut pas être vide",
       "variables": {
         "stamp_count": "Nombre de tampons actuel",
@@ -148,6 +165,8 @@
     },
     "plan": {
       "starterReadOnly": "Voici les messages par défaut. Passez à un forfait supérieur pour personnaliser le texte.",
+      "starterUsingDefault": "Le contenu personnalisé est suspendu sur votre plan actuel. Les messages par défaut sont envoyés à la place.",
+      "upgradeToCustomize": "Passez à Growth pour personnaliser",
       "upgradeToGrowth": "Passer à Growth",
       "upgradeToPro": "Passer à Pro",
       "proBadge": "PRO",
@@ -368,13 +387,12 @@
         },
         "schedule": {
           "title": "Quand l'envoyer ?",
-          "subtitle": "Envoyez tout de suite, ou choisissez une date et une heure dans vos horaires d'ouverture.",
+          "subtitle": "Envoyez tout de suite, ou programmez à une date et une heure précises.",
           "sendNow": "Envoyer maintenant",
           "sendNowDescription": "Les clients recevront la diffusion tout de suite",
           "scheduleLater": "Programmer pour plus tard",
           "scheduleLaterDescription": "Choisissez une date et une heure",
-          "timezoneNote": "Heures locales de votre appareil",
-          "windowError": "Les diffusions ne peuvent être programmées qu'entre 9h00 et 20h00",
+          "timezoneLabel": "Fuseau horaire",
           "pastError": "La date doit être dans le futur",
           "dateLabel": "Date",
           "timeLabel": "Heure"
@@ -447,8 +465,7 @@
       },
       "errors": {
         "upgradeRequired": "Les diffusions nécessitent Growth ou Pro.",
-        "quotaExceeded": "Vous avez utilisé toutes vos diffusions ce mois-ci. Passez à Pro pour des diffusions illimitées.",
-        "scheduleOutOfWindow": "Les diffusions ne peuvent être programmées qu'entre 9h00 et 20h00.",
+        "quotaExceeded": "Vous avez utilisé toutes vos diffusions ce mois-ci. Enregistrez-la comme brouillon et envoyez-la quand votre quota se réinitialise, ou passez à Pro pour des diffusions illimitées.",
         "proFiltersBlocked": "Les filtres avancés nécessitent Pro."
       }
     },

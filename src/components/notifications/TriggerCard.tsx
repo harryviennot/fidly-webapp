@@ -74,11 +74,14 @@ export function TriggerCard({
   const hasFr = Boolean(template.body.fr);
   const isDisabled = template.is_enabled === false;
 
-  // Pill priority: disabled wins over customized/default so the user sees
-  // the opt-out state at a glance.
+  // Pill priority: disabled wins, then is_using_default (Starter override),
+  // then customized/default.
+  const isUsingDefault = template.is_using_default === true;
   let statusPill: string;
   if (isDisabled) {
     statusPill = t('card.disabledPill');
+  } else if (isUsingDefault) {
+    statusPill = t('card.defaultPill');
   } else if (template.is_customized) {
     statusPill = t('card.customPill');
   } else {
@@ -159,7 +162,7 @@ export function TriggerCard({
               'text-[9px] font-bold px-1.5 py-px rounded tracking-wide uppercase',
               isDisabled
                 ? 'bg-[var(--paper-hover)] text-[#8A8A8A]'
-                : template.is_customized
+                : template.is_customized && !isUsingDefault
                   ? 'bg-[var(--success-light)] text-[var(--success)]'
                   : 'bg-[var(--paper-hover)] text-[#A0A0A0]'
             )}

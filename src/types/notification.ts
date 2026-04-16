@@ -16,6 +16,9 @@ export interface NotificationTemplate {
   is_enabled: boolean;
   is_editable: boolean;
   is_customized: boolean;
+  /** True when the business is on Starter and the backend returns default
+   *  content instead of the stored custom body. */
+  is_using_default?: boolean;
   trigger_config?: {
     stamp_equals?: number;
     stamps_before_reward?: number;
@@ -137,6 +140,8 @@ export interface Broadcast {
    * a permanent APNs failure.
    */
   skipped_no_push: number;
+  /** IANA timezone selected when scheduling (e.g. "Europe/Paris"). Display only. */
+  timezone: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string | null;
@@ -172,6 +177,8 @@ export interface BroadcastCreate {
   scheduled_at?: string | null;
   /** When true, backend flips status to 'sending' + enqueues the worker. */
   immediate?: boolean;
+  /** IANA timezone for display purposes (e.g. "Europe/Paris"). */
+  timezone?: string;
 }
 
 export interface BroadcastUpdate {
@@ -185,6 +192,8 @@ export interface BroadcastUpdate {
 export interface BroadcastSendAgain {
   /** ISO datetime. Omit or pass null to send immediately. Pro only when set. */
   scheduled_at?: string | null;
+  /** IANA timezone for display purposes (e.g. "Europe/Paris"). */
+  timezone?: string;
 }
 
 export interface RecipientEstimateResponse {

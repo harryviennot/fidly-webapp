@@ -77,6 +77,8 @@
       "description": "Send a special message when a customer reaches a specific stamp count",
       "add": "Add milestone",
       "usage": "{count} of {max} used",
+      "usageActive": "{count} of {max} active",
+      "disabledPill": "Disabled",
       "unlimited": "{count} milestones",
       "empty": "No milestones yet. Add one to send a custom message at a specific stamp count.",
       "condition": "When customer reaches {count} stamps",
@@ -103,8 +105,20 @@
         "updateFailed": "Failed to update milestone",
         "deleted": "Milestone deleted",
         "deleteFailed": "Failed to delete milestone",
-        "swappedOff": "Milestone at stamp {stamp} was turned off to make room"
+        "swappedOff": "Milestone at stamp {stamp} was turned off to make room",
+        "enabled": "Milestone enabled",
+        "disabled": "Milestone disabled",
+        "toggleFailed": "Failed to toggle milestone"
       }
+    },
+    "proUpsell": {
+      "title": "Unlimited milestones",
+      "description": "Upgrade to Pro to create as many milestone notifications as you need — no cap.",
+      "features": {
+        "unlimited": "Unlimited milestones per program",
+        "broadcasts": "Unlimited broadcasts + scheduling"
+      },
+      "cta": "Upgrade to Pro"
     },
     "nearReward": {
       "title": "Near-reward notification",
@@ -126,6 +140,9 @@
       "disabled": "Disabled",
       "disabledHint": "When disabled, the loyalty card still updates silently — customers just don't see a notification for this event.",
       "rewardNameMissing": "Define a reward in your program settings to use this variable.",
+      "nameCollectionOff": "Enable name collection in program settings to use this variable.",
+      "nameWarning": "Some customers don't have a name on file. They'll see the message without the name.",
+      "previewWithoutName": "Preview for customers without a name",
       "emptyBody": "Message cannot be empty",
       "variables": {
         "stamp_count": "Current stamp count",
@@ -148,6 +165,8 @@
     },
     "plan": {
       "starterReadOnly": "These are the default messages. Upgrade to customize the wording.",
+      "starterUsingDefault": "Custom content is paused on your current plan. Default messages are being sent instead.",
+      "upgradeToCustomize": "Upgrade to Growth to customize",
       "upgradeToGrowth": "Upgrade to Growth",
       "upgradeToPro": "Upgrade to Pro",
       "proBadge": "PRO",
@@ -368,13 +387,12 @@
         },
         "schedule": {
           "title": "When should we send it?",
-          "subtitle": "Send right away, or pick a date and time inside your business hours.",
+          "subtitle": "Send right away, or schedule for a specific date and time.",
           "sendNow": "Send now",
           "sendNowDescription": "Customers will receive this right away",
           "scheduleLater": "Schedule for later",
           "scheduleLaterDescription": "Pick a date and time",
-          "timezoneNote": "Your device's local time",
-          "windowError": "Broadcasts can only be scheduled between 9:00 and 20:00",
+          "timezoneLabel": "Timezone",
           "pastError": "Scheduled time must be in the future",
           "dateLabel": "Date",
           "timeLabel": "Time"
@@ -447,8 +465,7 @@
       },
       "errors": {
         "upgradeRequired": "Broadcasts require Growth or Pro.",
-        "quotaExceeded": "You've used all your broadcasts this month. Upgrade to Pro for unlimited broadcasts.",
-        "scheduleOutOfWindow": "Broadcasts can only be scheduled between 9:00 and 20:00.",
+        "quotaExceeded": "You've used all your broadcasts this month. Save it as a draft and send it when your quota resets, or upgrade to Pro for unlimited broadcasts.",
         "proFiltersBlocked": "Advanced filters require Pro."
       }
     },

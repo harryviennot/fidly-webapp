@@ -36,7 +36,7 @@ interface DateTimePickerProps {
   hint?: React.ReactNode
 }
 
-const TIME_STEP_MINUTES = 15
+const TIME_STEP_MINUTES = 5
 
 function buildHourOptions(min: number, max: number): number[] {
   const out: number[] = []
@@ -62,8 +62,8 @@ export function DateTimePicker({
   value,
   onChange,
   minDate,
-  hourMin = 9,
-  hourMax = 20,
+  hourMin = 0,
+  hourMax = 23,
   disabled = false,
   ariaLabel,
   hint,

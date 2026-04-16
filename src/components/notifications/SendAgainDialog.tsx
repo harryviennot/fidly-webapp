@@ -19,17 +19,43 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useBusiness } from '@/contexts/business-context';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { useSendBroadcastAgain } from '@/hooks/use-notifications';
+import { ApiError } from '@/api/client';
 import { describeFilter } from '@/lib/broadcast-filters';
 import { PlanGatedField } from './PlanGatedField';
 import type { Broadcast } from '@/types/notification';
 
-// Same 09:00–20:00 window as _wizard.tsx — backend validates identically.
-const SCHEDULE_HOUR_MIN = 9;
-const SCHEDULE_HOUR_MAX = 20;
+const BROWSER_TIMEZONE =
+  typeof Intl !== 'undefined'
+    ? Intl.DateTimeFormat().resolvedOptions().timeZone
+    : 'UTC';
+
+/** Common IANA timezone choices. */
+const TIMEZONE_OPTIONS = [
+  'Europe/Paris',
+  'Europe/London',
+  'Europe/Berlin',
+  'Europe/Madrid',
+  'Europe/Rome',
+  'Europe/Brussels',
+  'Europe/Amsterdam',
+  'Europe/Zurich',
+  'America/New_York',
+  'America/Chicago',
+  'America/Los_Angeles',
+  'America/Montreal',
+  'UTC',
+] as const;
 
 type SendMode = 'now' | 'schedule';
 
@@ -90,6 +116,7 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
 
   const [mode, setMode] = useState<SendMode>('now');
   const [scheduledAt, setScheduledAt] = useState<Date | null>(null);
+  const [selectedTz, setSelectedTz] = useState(BROWSER_TIMEZONE);
 
   const chipTranslator = (key: string, values?: Record<string, unknown>) =>
     tWizard(key, values as { n: number });
@@ -104,10 +131,6 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
     if (mode !== 'schedule') return null;
     if (!scheduledAt) return null;
     if (scheduledAt.getTime() < now) return tSchedule('pastError');
-    const hour = scheduledAt.getHours();
-    if (hour < SCHEDULE_HOUR_MIN || hour >= SCHEDULE_HOUR_MAX) {
-      return tSchedule('windowError');
-    }
     return null;
   }, [mode, scheduledAt, now, tSchedule]);
 
@@ -115,13 +138,15 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
     mode === 'now' ||
     (mode === 'schedule' && scheduledAt !== null && scheduleError === null);
 
+  const tErrors = useTranslations('notifications.broadcasts.errors');
+
   const handleConfirm = async () => {
     try {
       await sendAgainMutation.mutateAsync({
         id: broadcast.id,
         payload:
           mode === 'schedule' && scheduledAt
-            ? { scheduled_at: scheduledAt.toISOString() }
+            ? { scheduled_at: scheduledAt.toISOString(), timezone: selectedTz }
             : {},
       });
       toast.success(
@@ -130,9 +155,13 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
       onOpenChange(false);
       onSuccess?.();
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : tToasts('sentAgainFailed')
-      );
+      if (err instanceof ApiError && err.code === 'QUOTA_EXCEEDED') {
+        toast.error(tErrors('quotaExceeded'));
+      } else {
+        toast.error(
+          err instanceof Error ? err.message : tToasts('sentAgainFailed')
+        );
+      }
     }
   };
 
@@ -241,10 +270,31 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
             <DateTimePicker
               value={scheduledAt}
               onChange={setScheduledAt}
-              hourMin={SCHEDULE_HOUR_MIN}
-              hourMax={SCHEDULE_HOUR_MAX - 1}
-              hint={tSchedule('timezoneNote')}
             />
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground shrink-0">
+                {tSchedule('timezoneLabel')}
+              </span>
+              <Select value={selectedTz} onValueChange={setSelectedTz}>
+                <SelectTrigger className="w-[200px] !py-1.5 !rounded-md text-[11px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIMEZONE_OPTIONS.map((tz) => (
+                    <SelectItem key={tz} value={tz} className="text-xs">
+                      {tz.replace(/_/g, ' ')}
+                    </SelectItem>
+                  ))}
+                  {!TIMEZONE_OPTIONS.includes(
+                    selectedTz as (typeof TIMEZONE_OPTIONS)[number]
+                  ) && (
+                    <SelectItem value={selectedTz} className="text-xs">
+                      {selectedTz.replace(/_/g, ' ')}
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
             {scheduleError && (
               <div className="flex items-center gap-1.5 text-[11px] text-[var(--warning)]">
                 <WarningIcon className="h-3.5 w-3.5" weight="fill" />

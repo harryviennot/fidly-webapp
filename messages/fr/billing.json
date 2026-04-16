@@ -78,6 +78,20 @@
     "trialSidebarGrace": "Essai terminé — abonnez-vous pour garder l'accès",
     "trialSidebarPastDue": "Paiement échoué — mettez à jour",
     "trialSidebarBillingSoon": "Premier prélèvement dans {days} jours",
+    "featureLabels": {
+      "programs_events": "Événements promotionnels",
+      "programs_multiple": "Programmes multiples",
+      "notifications_broadcast": "Diffusions",
+      "notifications_scheduled": "Envois programmés",
+      "notifications_segmentation": "Segmentation clients",
+      "notifications_type": "Notifications personnalisées",
+      "designs_scheduled": "Changements de design programmés",
+      "locations_multiple": "Établissements multiples",
+      "locations_geofencing": "Géorepérage",
+      "locations_analytics": "Analyses par établissement",
+      "analytics_advanced": "Analyses avancées",
+      "team_employee_tracking": "Suivi des scans par employé"
+    },
     "features": {
       "starterLabel": "Tout inclus :",
       "growthLabel": "Tout dans Starter, plus :",

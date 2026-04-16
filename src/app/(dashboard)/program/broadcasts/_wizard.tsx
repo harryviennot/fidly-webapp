@@ -28,6 +28,13 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -83,8 +90,22 @@ type SendMode = 'now' | 'schedule';
 const STEPS: StepKey[] = ['compose', 'audience', 'schedule', 'review'];
 const BODY_CHAR_LIMIT = 100;
 
-const SCHEDULE_HOUR_MIN = 9;
-const SCHEDULE_HOUR_MAX = 20; // exclusive on the backend (last = 19:xx)
+/** Common IANA timezone choices — covers Western/Central Europe + UTC. */
+const TIMEZONE_OPTIONS = [
+  'Europe/Paris',
+  'Europe/London',
+  'Europe/Berlin',
+  'Europe/Madrid',
+  'Europe/Rome',
+  'Europe/Brussels',
+  'Europe/Amsterdam',
+  'Europe/Zurich',
+  'America/New_York',
+  'America/Chicago',
+  'America/Los_Angeles',
+  'America/Montreal',
+  'UTC',
+] as const;
 
 interface WizardState {
   title: string;
@@ -94,7 +115,14 @@ interface WizardState {
   targetFilter: BroadcastTargetFilter;
   sendMode: SendMode | null;
   scheduledAt: Date | null;
+  /** IANA timezone for the scheduled time. Defaults to browser timezone. */
+  timezone: string;
 }
+
+const BROWSER_TIMEZONE =
+  typeof Intl !== 'undefined'
+    ? Intl.DateTimeFormat().resolvedOptions().timeZone
+    : 'UTC';
 
 const EMPTY_STATE: WizardState = {
   title: '',
@@ -103,6 +131,7 @@ const EMPTY_STATE: WizardState = {
   targetFilter: { all: true },
   sendMode: 'now',
   scheduledAt: null,
+  timezone: BROWSER_TIMEZONE,
 };
 
 /** Default "name this broadcast" value for new broadcasts. Internal-only. */
@@ -211,6 +240,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
         scheduledAt: existing.scheduled_at
           ? new Date(existing.scheduled_at)
           : null,
+        timezone: existing.timezone ?? BROWSER_TIMEZONE,
       };
     }
     return {
@@ -294,6 +324,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
       target_filter: BroadcastTargetFilter;
       scheduled_at?: string | null;
       immediate?: boolean;
+      timezone?: string;
     } = {
       title: state.title.trim(),
       body: state.body.trim(),
@@ -307,6 +338,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
     if (includeSendMode) {
       if (state.sendMode === 'schedule' && state.scheduledAt) {
         payload.scheduled_at = state.scheduledAt.toISOString();
+        payload.timezone = state.timezone;
       } else if (state.sendMode === 'now') {
         payload.immediate = true;
       }
@@ -1463,16 +1495,12 @@ interface ScheduleStepProps {
 }
 
 /**
- * Pure scheduling check. `now` must be passed in explicitly so callers
- * (e.g. useMemo) remain idempotent — we never call `Date.now()` inside
- * the function itself. The hour check runs in the viewer's browser
- * timezone — what they see in the picker is what gets validated.
+ * Pure scheduling check — only validates that the date is in the future.
+ * No hour restriction: businesses manage their own send timing.
  */
 function isScheduleValid(date: Date | null, now: number): boolean {
   if (!date) return false;
-  if (date.getTime() < now) return false;
-  const hour = date.getHours();
-  return hour >= SCHEDULE_HOUR_MIN && hour < SCHEDULE_HOUR_MAX;
+  return date.getTime() > now;
 }
 
 function ScheduleStep({
@@ -1495,10 +1523,6 @@ function ScheduleStep({
   const scheduleError = useMemo(() => {
     if (state.sendMode !== 'schedule' || !state.scheduledAt) return null;
     if (state.scheduledAt.getTime() < renderTs) return t('pastError');
-    const hour = state.scheduledAt.getHours();
-    if (hour < SCHEDULE_HOUR_MIN || hour >= SCHEDULE_HOUR_MAX) {
-      return t('windowError');
-    }
     return null;
   }, [state.sendMode, state.scheduledAt, t, renderTs]);
 
@@ -1576,10 +1600,40 @@ function ScheduleStep({
             onChange={(next) =>
               setState((s) => ({ ...s, scheduledAt: next }))
             }
-            hourMin={SCHEDULE_HOUR_MIN}
-            hourMax={SCHEDULE_HOUR_MAX - 1}
-            hint={t('timezoneNote')}
           />
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground shrink-0">
+              {t('timezoneLabel')}
+            </span>
+            <Select
+              value={state.timezone}
+              onValueChange={(tz) =>
+                setState((s) => ({ ...s, timezone: tz }))
+              }
+            >
+              <SelectTrigger className="w-[220px] !py-2 !rounded-md text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TIMEZONE_OPTIONS.map((tz) => (
+                  <SelectItem key={tz} value={tz} className="text-xs">
+                    {tz.replace(/_/g, ' ')}
+                  </SelectItem>
+                ))}
+                {/* Include browser timezone if not in the preset list */}
+                {!TIMEZONE_OPTIONS.includes(
+                  state.timezone as (typeof TIMEZONE_OPTIONS)[number]
+                ) && (
+                  <SelectItem
+                    value={state.timezone}
+                    className="text-xs"
+                  >
+                    {state.timezone.replace(/_/g, ' ')}
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
           {scheduleError && (
             <InfoBox
               variant="warning"

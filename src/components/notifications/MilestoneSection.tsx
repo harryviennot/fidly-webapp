@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { FlagIcon, PencilIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { InfoBox } from '@/components/reusables/info-box';
 import { EmptyState } from '@/components/reusables/empty-state';
 import { TriggerListSkeleton } from './TriggerListSkeleton';
@@ -22,6 +23,7 @@ import { useBusiness } from '@/contexts/business-context';
 import {
   useMilestones,
   useDeleteMilestone,
+  useUpdateMilestone,
 } from '@/hooks/use-notifications';
 import { renderSamplePreview } from '@/lib/template-variables';
 import { MilestoneCreateSheet } from './MilestoneCreateSheet';
@@ -47,10 +49,12 @@ export function MilestoneSection({
   const { currentBusiness } = useBusiness();
   const { data, isLoading, error } = useMilestones(currentBusiness?.id);
   const deleteMutation = useDeleteMilestone(currentBusiness?.id);
+  const updateMutation = useUpdateMilestone(currentBusiness?.id);
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Milestone | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const openCreate = () => {
     setEditingMilestone(null);
@@ -69,9 +73,39 @@ export function MilestoneSection({
 
   const milestones = data?.items ?? [];
   const limit = data?.limit ?? 0;
-  const isAtLimit =
-    typeof limit === 'number' && limit > 0 && milestones.length >= limit;
+  const activeMilestones = milestones.filter((m) => m.is_enabled);
+  const isAtActiveLimit =
+    typeof limit === 'number' && limit > 0 && activeMilestones.length >= limit;
   const isUnlimited = limit === null;
+
+  const handleToggleEnabled = async (milestone: Milestone) => {
+    setTogglingId(milestone.id);
+    try {
+      const result = await updateMutation.mutateAsync({
+        templateId: milestone.id,
+        payload: { is_enabled: !milestone.is_enabled },
+      });
+      if (milestone.is_enabled) {
+        toast.success(t('toasts.disabled'));
+      } else {
+        toast.success(t('toasts.enabled'));
+      }
+      // Handle auto-swap: backend disabled the oldest active milestone
+      if (result?.swapped_off) {
+        const swapped = result.swapped_off;
+        const swappedStamp = swapped.stamp_equals;
+        toast.info(
+          t('toasts.swappedOff', { stamp: swappedStamp })
+        );
+      }
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : t('toasts.toggleFailed')
+      );
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   const handleDelete = async () => {
     if (!pendingDelete) return;
@@ -106,7 +140,7 @@ export function MilestoneSection({
         <div className="flex items-center gap-2 flex-shrink-0">
           {!isUnlimited && typeof limit === 'number' && limit > 0 && (
             <span className="text-[11px] text-[#8A8A8A] font-medium">
-              {t('usage', { count: milestones.length, max: limit })}
+              {t('usageActive', { count: activeMilestones.length, max: limit })}
             </span>
           )}
           {isUnlimited && milestones.length > 0 && (
@@ -118,7 +152,6 @@ export function MilestoneSection({
             variant="outline"
             size="sm"
             onClick={openCreate}
-            disabled={isAtLimit}
           >
             <PlusIcon className="h-3.5 w-3.5" />
             {t('add')}
@@ -148,6 +181,7 @@ export function MilestoneSection({
         {!isLoading && !error && sorted.length > 0 && (
           <div className="flex flex-col gap-1.5">
             {sorted.map((milestone) => {
+              const isDisabled = milestone.is_enabled === false;
               const bodyText =
                 milestone.body[uiLocale] || milestone.body.en || '';
               const preview = renderSamplePreview(bodyText, {
@@ -166,26 +200,45 @@ export function MilestoneSection({
                   tabIndex={0}
                   onClick={() => openEdit(milestone)}
                   onKeyDown={handleRowKeyDown}
-                  className="w-full text-left flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)] hover:border-[var(--border)] transition-all group cursor-pointer"
+                  className={`w-full text-left flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)] hover:border-[var(--border)] transition-all group cursor-pointer ${isDisabled ? 'opacity-50' : ''}`}
                 >
-                  <div className="w-9 h-9 rounded-lg bg-[var(--accent-light)] flex items-center justify-center flex-shrink-0">
-                    <span className="text-[13px] font-bold text-[var(--accent)] tabular-nums">
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isDisabled ? 'bg-[var(--paper-hover)]' : 'bg-[var(--accent-light)]'}`}>
+                    <span className={`text-[13px] font-bold tabular-nums ${isDisabled ? 'text-[#A0A0A0]' : 'text-[var(--accent)]'}`}>
                       {milestone.stamp_equals}
                     </span>
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-semibold text-[#1A1A1A] mb-0.5">
-                      {t('conditionShort', {
-                        count: milestone.stamp_equals,
-                      })}
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className={`text-[13px] font-semibold ${isDisabled ? 'text-[#8A8A8A]' : 'text-[#1A1A1A]'}`}>
+                        {t('conditionShort', {
+                          count: milestone.stamp_equals,
+                        })}
+                      </span>
+                      {isDisabled && (
+                        <span className="text-[9px] font-bold px-1.5 py-px rounded tracking-wide uppercase bg-[var(--paper-hover)] text-[#8A8A8A]">
+                          {t('disabledPill')}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[12px] text-[#8A8A8A] leading-[1.4] truncate">
+                    <p className={`text-[12px] leading-[1.4] truncate ${isDisabled ? 'text-[#A0A0A0] line-through' : 'text-[#8A8A8A]'}`}>
                       {preview}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <span
+                      className="inline-flex"
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Switch
+                        checked={!isDisabled}
+                        disabled={togglingId === milestone.id}
+                        onCheckedChange={() => handleToggleEnabled(milestone)}
+                        aria-label={isDisabled ? t('toasts.enabled') : t('toasts.disabled')}
+                      />
+                    </span>
                     <span
                       className="w-7 h-7 rounded-md flex items-center justify-center text-[#8A8A8A] group-hover:text-[var(--accent)] transition-colors"
                       aria-hidden
@@ -218,7 +271,7 @@ export function MilestoneSection({
           </div>
         )}
 
-        {isAtLimit && (
+        {isAtActiveLimit && (
           <InfoBox
             variant="note"
             className="mt-3"

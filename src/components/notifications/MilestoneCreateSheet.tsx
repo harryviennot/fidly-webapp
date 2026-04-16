@@ -48,10 +48,10 @@ interface MilestoneCreateSheetProps {
   rewardNameSet?: boolean;
 }
 
-// Variables greyed out when the program has no reward name configured.
-const DISABLED_WITHOUT_REWARD_NAME: ReadonlySet<VariableKey> = new Set([
-  'reward_name',
-]);
+/** Check whether the body references `{{customer_first_name}}` (canonical key). */
+function bodyUsesCustomerName(body: Record<Locale, string>): boolean {
+  return /\{\{customer_first_name\}\}/.test(body.en) || /\{\{customer_first_name\}\}/.test(body.fr);
+}
 
 // All variables available for milestones. `reward_name` is included here
 // now that the backend injects it from `program.reward_name` into every
@@ -142,6 +142,14 @@ function MilestoneForm({
     stampNumber !== milestone.stamp_equals ||
     bodyByLocale.en !== (milestone.body.en ?? '') ||
     bodyByLocale.fr !== (milestone.body.fr ?? '');
+
+  // Build the set of disabled variables based on program configuration.
+  const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
+  const isNameCollectionOff = collectName === 'off' || collectName === false;
+  const disabledVars = new Set<VariableKey>();
+  if (!rewardNameSet) disabledVars.add('reward_name');
+  if (isNameCollectionOff) disabledVars.add('customer_first_name');
+  const usesCustomerName = bodyUsesCustomerName(bodyByLocale);
 
   const insertVariable = (variable: VariableKey) => {
     editorRef.current?.insertVariable(variable);
@@ -278,19 +286,29 @@ function MilestoneForm({
           variables={MILESTONE_VARIABLES}
           onInsert={insertVariable}
           locale={locale}
-          disabledVariables={
-            rewardNameSet ? undefined : DISABLED_WITHOUT_REWARD_NAME
-          }
+          disabledVariables={disabledVars.size > 0 ? disabledVars : undefined}
           disabledTooltips={{
             reward_name: t('editor.rewardNameMissing'),
+            customer_first_name: t('editor.nameCollectionOff'),
           }}
-          disabledHrefs={{ reward_name: '/program/settings' }}
+          disabledHrefs={{
+            reward_name: '/program/settings',
+            customer_first_name: '/program/settings',
+          }}
         />
 
         {stampValid && !stampInRange && (
           <InfoBox
             variant="warning"
             message={`Stamp count must be less than ${totalStamps} (total stamps in your program).`}
+          />
+        )}
+
+        {/* Warning when body uses customer_first_name */}
+        {usesCustomerName && (
+          <InfoBox
+            variant="warning"
+            message={t('editor.nameWarning')}
           />
         )}
 
@@ -307,6 +325,26 @@ function MilestoneForm({
               body={previewBody}
             />
           </div>
+          {/* Second preview without customer name */}
+          {usesCustomerName && (
+            <div className="mt-3">
+              <Label className="text-xs text-muted-foreground mb-2 block text-center">
+                {t('editor.previewWithoutName')}
+              </Label>
+              <div className="flex justify-center">
+                <MessagePreview
+                  iconUrl={currentBusiness?.icon_url ?? null}
+                  iconOriginalUrl={currentBusiness?.icon_original_url ?? null}
+                  programName={programName}
+                  businessName={currentBusiness?.name ?? ''}
+                  body={renderSamplePreview(bodyByLocale[locale], {
+                    stamp_count: stampEquals || '5',
+                    customer_first_name: '',
+                  })}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

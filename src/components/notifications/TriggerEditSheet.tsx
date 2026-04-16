@@ -30,6 +30,7 @@ import {
   type VariableKey,
 } from '@/lib/template-variables';
 import { ApiError } from '@/api/client';
+import { InfoBox } from '@/components/reusables/info-box';
 import { LocaleTabs } from './LocaleTabs';
 import { VariableChips } from './VariableChips';
 import { MessagePreview } from './MessagePreview';
@@ -39,10 +40,10 @@ import {
 } from './VariableEditor';
 import type { NotificationTemplate, Locale } from '@/types/notification';
 
-// Variables greyed out when the program has no reward name configured.
-const DISABLED_WITHOUT_REWARD_NAME: ReadonlySet<VariableKey> = new Set([
-  'reward_name',
-]);
+/** Check whether the body references `{{customer_first_name}}` (canonical key). */
+function bodyUsesCustomerName(body: Record<Locale, string>): boolean {
+  return /\{\{customer_first_name\}\}/.test(body.en) || /\{\{customer_first_name\}\}/.test(body.fr);
+}
 
 interface TriggerEditSheetProps {
   template: NotificationTemplate | null;
@@ -103,6 +104,7 @@ function EditForm({
   const resetMutation = useResetNotificationTemplate(currentBusiness?.id);
 
   const primaryLocale: Locale = currentBusiness?.primary_locale ?? 'fr';
+  const isUsingDefault = template.is_using_default === true;
 
   const [locale, setLocale] = useState<Locale>(primaryLocale);
   const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>({
@@ -117,14 +119,24 @@ function EditForm({
   // Show every known variable as an insertable chip — no parity check.
   const insertableVariables = VARIABLE_KEYS as readonly VariableKey[];
 
+  // Build the set of disabled variables based on program configuration.
+  const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
+  const isNameCollectionOff = collectName === 'off' || collectName === false;
+  const disabledVars = new Set<VariableKey>();
+  if (!rewardNameSet) disabledVars.add('reward_name');
+  if (isNameCollectionOff) disabledVars.add('customer_first_name');
+  const usesCustomerName = bodyUsesCustomerName(bodyByLocale);
+
   const currentBody = bodyByLocale[locale];
   const primaryBody = bodyByLocale[primaryLocale];
 
   // Did the user touch the body since load? Starter businesses can't, so
   // on Starter this is always false and we send an is_enabled-only payload.
+  // Also blocked when is_using_default (Starter with custom content paused).
   const isBodyDirty =
-    bodyByLocale.en !== (template.body.en ?? '') ||
-    bodyByLocale.fr !== (template.body.fr ?? '');
+    !isUsingDefault &&
+    (bodyByLocale.en !== (template.body.en ?? '') ||
+    bodyByLocale.fr !== (template.body.fr ?? ''));
   const isEnabledDirty = isEnabled !== (template.is_enabled !== false);
 
   // Save is enabled whenever something has actually changed AND, when the
@@ -193,6 +205,14 @@ function EditForm({
       </SheetHeader>
 
       <div className="flex-1 overflow-y-auto px-4 pb-2 space-y-4">
+        {/* Starter using-default banner */}
+        {isUsingDefault && (
+          <InfoBox
+            variant="note"
+            message={t('plan.starterUsingDefault')}
+          />
+        )}
+
         {/* Enable/disable row — sits at the top of the scrollable area so it
             doesn't collide with the Sheet's built-in close button. Always
             interactive, even on Starter where the body editor is read-only. */}
@@ -217,9 +237,9 @@ function EditForm({
         <div
           className={cn(
             'space-y-4 transition-opacity',
-            !isEnabled && 'opacity-50 pointer-events-none'
+            (!isEnabled || isUsingDefault) && 'opacity-50 pointer-events-none'
           )}
-          aria-hidden={!isEnabled}
+          aria-hidden={!isEnabled || isUsingDefault}
         >
           <LocaleTabs
             value={locale}
@@ -244,15 +264,25 @@ function EditForm({
             variables={insertableVariables as unknown as VariableKey[]}
             onInsert={insertVariable}
             locale={locale}
-            disabledVariables={
-              rewardNameSet ? undefined : DISABLED_WITHOUT_REWARD_NAME
-            }
+            disabledVariables={disabledVars.size > 0 ? disabledVars : undefined}
             disabledTooltips={{
               reward_name: t('editor.rewardNameMissing'),
+              customer_first_name: t('editor.nameCollectionOff'),
             }}
-            disabledHrefs={{ reward_name: '/program/settings' }}
+            disabledHrefs={{
+              reward_name: '/program/settings',
+              customer_first_name: '/program/settings',
+            }}
           />
         </div>
+
+        {/* Warning when body uses customer_first_name */}
+        {usesCustomerName && !isUsingDefault && (
+          <InfoBox
+            variant="warning"
+            message={t('editor.nameWarning')}
+          />
+        )}
 
         <div
           className={cn(
@@ -272,39 +302,67 @@ function EditForm({
               body={previewBody}
             />
           </div>
+          {/* Second preview without customer name */}
+          {usesCustomerName && (
+            <div className="mt-3">
+              <Label className="text-xs text-muted-foreground mb-2 block text-center">
+                {t('editor.previewWithoutName')}
+              </Label>
+              <div className="flex justify-center">
+                <MessagePreview
+                  iconUrl={currentBusiness?.icon_url ?? null}
+                  iconOriginalUrl={currentBusiness?.icon_original_url ?? null}
+                  programName={programName}
+                  businessName={currentBusiness?.name ?? ''}
+                  body={renderSamplePreview(currentBody, { customer_first_name: '' })}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       <SheetFooter className="border-t border-border pt-4">
         <div className="flex w-full items-center justify-between gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            disabled={resetMutation.isPending || updateMutation.isPending}
-          >
-            <ArrowCounterClockwiseIcon className="h-3.5 w-3.5" />
-            {t('editor.reset')}
-          </Button>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              disabled={updateMutation.isPending}
-            >
-              {t('editor.cancel')}
-            </Button>
-            <Button
-              variant="gradient"
-              size="sm"
-              onClick={handleSave}
-              disabled={!canSave || updateMutation.isPending}
-            >
-              <FloppyDiskIcon className="h-3.5 w-3.5" />
-              {updateMutation.isPending ? '...' : t('editor.save')}
-            </Button>
-          </div>
+          {isUsingDefault ? (
+            <>
+              <div />
+              <Button variant="ghost" size="sm" onClick={onClose}>
+                {t('editor.cancel')}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReset}
+                disabled={resetMutation.isPending || updateMutation.isPending}
+              >
+                <ArrowCounterClockwiseIcon className="h-3.5 w-3.5" />
+                {t('editor.reset')}
+              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  disabled={updateMutation.isPending}
+                >
+                  {t('editor.cancel')}
+                </Button>
+                <Button
+                  variant="gradient"
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={!canSave || updateMutation.isPending}
+                >
+                  <FloppyDiskIcon className="h-3.5 w-3.5" />
+                  {updateMutation.isPending ? '...' : t('editor.save')}
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </SheetFooter>
     </>

@@ -78,6 +78,20 @@
     "trialSidebarGrace": "Trial ended — subscribe to keep access",
     "trialSidebarPastDue": "Payment failed — update billing",
     "trialSidebarBillingSoon": "First billing in {days} days",
+    "featureLabels": {
+      "programs_events": "Promotional events",
+      "programs_multiple": "Multiple programs",
+      "notifications_broadcast": "Broadcast notifications",
+      "notifications_scheduled": "Scheduled sends",
+      "notifications_segmentation": "Customer segmentation",
+      "notifications_type": "Custom notification text",
+      "designs_scheduled": "Scheduled design changes",
+      "locations_multiple": "Multiple locations",
+      "locations_geofencing": "Geofencing",
+      "locations_analytics": "Location analytics",
+      "analytics_advanced": "Advanced analytics",
+      "team_employee_tracking": "Employee scan tracking"
+    },
     "features": {
       "starterLabel": "Everything included:",
       "growthLabel": "Everything in Starter, plus:",
