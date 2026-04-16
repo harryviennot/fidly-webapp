@@ -83,7 +83,7 @@ export function SendAgainDialog({
       open={!!broadcast}
       onOpenChange={(open) => !open && onOpenChange(false)}
     >
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[540px]">
         {broadcast && (
           <DialogBody
             key={broadcast.id}
@@ -236,6 +236,8 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
           <PlanGatedField
             requiredTier="pro"
             upgradeFrom="broadcasts.scheduled"
+            gatedTitle={tSchedule('scheduleLater')}
+            gatedDescription={tSchedule('scheduleLaterDescription')}
           >
             <button
               type="button"
@@ -245,8 +247,7 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
                 'w-full p-3 rounded-[10px] text-left border-[1.5px] transition-all',
                 mode === 'schedule'
                   ? 'border-[var(--accent)] bg-[var(--accent-light)]'
-                  : 'border-[var(--border-light)] bg-[var(--paper)] hover:border-[var(--border)]',
-                !canSchedule && 'opacity-60'
+                  : 'border-[var(--border-light)] bg-[var(--paper)] hover:border-[var(--border)]'
               )}
             >
               <div className="flex items-center gap-2 mb-1">

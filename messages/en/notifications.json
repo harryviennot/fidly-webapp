@@ -171,7 +171,8 @@
       "upgradeToPro": "Upgrade to Pro",
       "proBadge": "PRO",
       "growthBadge": "GROWTH",
-      "lockedTooltip": "Available on {tier}"
+      "lockedTooltip": "Available on {tier}",
+      "upgradeTo": "Upgrade to {tier}"
     },
     "toasts": {
       "saved": "Message saved",

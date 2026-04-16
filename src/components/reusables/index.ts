@@ -32,12 +32,14 @@ export type {
 export {
   UpsellHero,
   UpsellInline,
+  UpsellCard,
   PricingTierCard,
   UpsellFeatureList,
 } from './upsell';
 export type {
   UpsellHeroProps,
   UpsellInlineProps,
+  UpsellCardProps,
   PricingTierCardProps,
   UpsellFeatureListProps,
 } from './upsell';

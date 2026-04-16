@@ -171,7 +171,8 @@
       "upgradeToPro": "Passer à Pro",
       "proBadge": "PRO",
       "growthBadge": "GROWTH",
-      "lockedTooltip": "Disponible avec {tier}"
+      "lockedTooltip": "Disponible avec {tier}",
+      "upgradeTo": "Passer à {tier}"
     },
     "toasts": {
       "saved": "Message enregistré",
@@ -287,7 +288,7 @@
         "sendAgainNow": "Envoyer maintenant",
         "sendAgainSchedule": "Programmer",
         "sendAgainTitle": "Renvoyer cette diffusion ?",
-        "sendAgainBody": "Nous créerons une nouvelle diffusion avec le même message et la même audience. Les statistiques de livraison repartiront de zéro.",
+        "sendAgainBody": "Une nouvelle diffusion sera créée avec le même message et la même audience. Les statistiques de livraison repartiront de zéro.",
         "confirmDelete": "Supprimer ce brouillon ?",
         "confirmDeleteBody": "Ce brouillon sera définitivement supprimé. Cette action est irréversible.",
         "confirmCancel": "Annuler cette diffusion programmée ?",

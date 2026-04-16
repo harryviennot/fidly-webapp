@@ -1167,7 +1167,12 @@ function AudienceStep({
             updateFilter={updateFilter}
           />
 
-          <PlanGatedField requiredTier="pro" upgradeFrom="broadcasts.segmentation">
+          <PlanGatedField
+            requiredTier="pro"
+            upgradeFrom="broadcasts.segmentation"
+            gatedTitle={t('group.stamps') + ' & ' + t('group.activity')}
+            gatedDescription={t('filteredDescription')}
+          >
             <div className="space-y-4">
               <StampsGroup
                 targetFilter={state.targetFilter}
@@ -1564,6 +1569,8 @@ function ScheduleStep({
         <PlanGatedField
           requiredTier="pro"
           upgradeFrom="broadcasts.scheduled"
+          gatedTitle={t('scheduleLater')}
+          gatedDescription={t('scheduleLaterDescription')}
         >
           <button
             type="button"
@@ -1573,8 +1580,7 @@ function ScheduleStep({
               'w-full p-4 rounded-[10px] text-left border-[1.5px] transition-all',
               state.sendMode === 'schedule'
                 ? 'border-[var(--accent)] bg-[var(--accent-light)]'
-                : 'border-[var(--border-light)] bg-[var(--paper)] hover:border-[var(--border)]',
-              !canSchedule && 'opacity-60'
+                : 'border-[var(--border-light)] bg-[var(--paper)] hover:border-[var(--border)]'
             )}
           >
             <div className="flex items-center gap-2 mb-1">

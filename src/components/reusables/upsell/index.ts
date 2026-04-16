@@ -6,3 +6,5 @@ export { PricingTierCard } from './pricing-tier-card';
 export type { PricingTierCardProps } from './pricing-tier-card';
 export { UpsellFeatureList } from './upsell-feature-list';
 export type { UpsellFeatureListProps } from './upsell-feature-list';
+export { UpsellCard } from './upsell-card';
+export type { UpsellCardProps } from './upsell-card';
