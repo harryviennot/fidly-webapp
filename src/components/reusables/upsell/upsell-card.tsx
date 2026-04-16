@@ -2,14 +2,16 @@
 
 import Link from 'next/link';
 import { CrownIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { UpsellFeatureList } from './upsell-feature-list';
 
 export interface UpsellCardProps {
   /** Title text next to the crown icon. */
   title: React.ReactNode;
   /** Short description below the icon row. */
   description?: React.ReactNode;
+  /** Bullet-point features shown between description and CTA. */
+  features?: React.ReactNode[];
   /** CTA label shown in the dark upgrade pill. */
   ctaLabel: React.ReactNode;
   /** Destination when clicking the card. */
@@ -27,6 +29,7 @@ export interface UpsellCardProps {
 export function UpsellCard({
   title,
   description,
+  features = [],
   ctaLabel,
   ctaHref,
   className,
@@ -53,16 +56,18 @@ export function UpsellCard({
           </span>
         </div>
         {description && (
-          <p className="text-[11px] text-[#8A8A8A] leading-[1.4] mb-2.5">
+          <p className="text-[11px] text-[#8A8A8A] leading-[1.4] mb-2">
             {description}
           </p>
         )}
-        <Button
-          size="sm"
-          className="rounded-full bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 pointer-events-none"
-        >
+        {features.length > 0 && (
+          <div className="mb-2.5">
+            <UpsellFeatureList features={features} size="sm" />
+          </div>
+        )}
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-[#1A1A1A] px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm group-hover:bg-[#1A1A1A]/90 transition-colors">
           {ctaLabel}
-        </Button>
+        </div>
       </div>
     </Link>
   );

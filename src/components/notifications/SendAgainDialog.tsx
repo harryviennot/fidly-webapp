@@ -32,7 +32,7 @@ import { useEntitlements } from '@/hooks/useEntitlements';
 import { useSendBroadcastAgain } from '@/hooks/use-notifications';
 import { ApiError } from '@/api/client';
 import { describeFilter } from '@/lib/broadcast-filters';
-import { PlanGatedField } from './PlanGatedField';
+import { GatedFeature } from '@/components/reusables/gated-feature';
 import type { Broadcast } from '@/types/notification';
 
 const BROWSER_TIMEZONE =
@@ -83,7 +83,7 @@ export function SendAgainDialog({
       open={!!broadcast}
       onOpenChange={(open) => !open && onOpenChange(false)}
     >
-      <DialogContent className="sm:max-w-[540px]">
+      <DialogContent className="sm:max-w-[580px]">
         {broadcast && (
           <DialogBody
             key={broadcast.id}
@@ -233,7 +233,7 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
             </p>
           </button>
 
-          <PlanGatedField
+          <GatedFeature
             requiredTier="pro"
             upgradeFrom="broadcasts.scheduled"
             gatedTitle={tSchedule('scheduleLater')}
@@ -263,7 +263,7 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
                 {tSchedule('scheduleLaterDescription')}
               </p>
             </button>
-          </PlanGatedField>
+          </GatedFeature>
         </div>
 
         {mode === 'schedule' && canSchedule && (
@@ -289,10 +289,10 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
                   {!TIMEZONE_OPTIONS.includes(
                     selectedTz as (typeof TIMEZONE_OPTIONS)[number]
                   ) && (
-                    <SelectItem value={selectedTz} className="text-xs">
-                      {selectedTz.replace(/_/g, ' ')}
-                    </SelectItem>
-                  )}
+                      <SelectItem value={selectedTz} className="text-xs">
+                        {selectedTz.replace(/_/g, ' ')}
+                      </SelectItem>
+                    )}
                 </SelectContent>
               </Select>
             </div>

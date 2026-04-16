@@ -2,7 +2,6 @@ export { MessagePreview } from './MessagePreview';
 export { LocaleTabs } from './LocaleTabs';
 export { VariableChips } from './VariableChips';
 export type { VariableKey } from './VariableChips';
-export { PlanGatedField } from './PlanGatedField';
 export { IconUploadCard } from './IconUploadCard';
 export { TriggerCard } from './TriggerCard';
 export { TriggerListSkeleton } from './TriggerListSkeleton';

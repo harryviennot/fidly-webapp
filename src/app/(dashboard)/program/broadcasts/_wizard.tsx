@@ -65,8 +65,9 @@ import {
 import { ApiError } from '@/api/client';
 import { cn } from '@/lib/utils';
 import { describeFilter } from '@/lib/broadcast-filters';
-import { MessagePreview, PlanGatedField } from '@/components/notifications';
+import { MessagePreview } from '@/components/notifications';
 import { AnimatedNumber } from '@/components/redesign/animated-number';
+import { GatedFeature } from '@/components/reusables/gated-feature';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -229,7 +230,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
     if (existing) {
       const translationEntry =
         (existing.translations as BroadcastTranslations | undefined)?.[
-          secondaryLocale
+        secondaryLocale
         ] ?? null;
       return {
         title: existing.title ?? '',
@@ -451,11 +452,11 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
         const translationsPayload: BroadcastTranslations =
           hasFilledTranslation && state.translation
             ? {
-                [secondaryLocale]: {
-                  title: state.translation.title.trim(),
-                  body: state.translation.body.trim(),
-                },
-              }
+              [secondaryLocale]: {
+                title: state.translation.title.trim(),
+                body: state.translation.body.trim(),
+              },
+            }
             : {};
         // Edit mode: PATCH with schedule or send via /send
         if (state.sendMode === 'schedule') {
@@ -618,8 +619,8 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
                 isActive
                   ? 'bg-[var(--accent)]'
                   : isPast
-                  ? 'bg-[var(--accent)]/60'
-                  : 'bg-[var(--border-light)]'
+                    ? 'bg-[var(--accent)]/60'
+                    : 'bg-[var(--border-light)]'
               )}
             />
           );
@@ -1167,7 +1168,7 @@ function AudienceStep({
             updateFilter={updateFilter}
           />
 
-          <PlanGatedField
+          <GatedFeature
             requiredTier="pro"
             upgradeFrom="broadcasts.segmentation"
             gatedTitle={t('group.stamps') + ' & ' + t('group.activity')}
@@ -1185,7 +1186,7 @@ function AudienceStep({
                 disabled={!canSegment}
               />
             </div>
-          </PlanGatedField>
+          </GatedFeature>
         </div>
       )}
 
@@ -1271,8 +1272,8 @@ function EnrollmentAgeGroup({
     mode === 'recent'
       ? targetFilter.enrolled_after_days
       : mode === 'old'
-      ? targetFilter.enrolled_before_days
-      : undefined;
+        ? targetFilter.enrolled_before_days
+        : undefined;
 
   const setMode = (next: EnrollmentMode) => {
     // Mutual exclusivity: clear the unused key before writing the new one.
@@ -1566,7 +1567,7 @@ function ScheduleStep({
           </p>
         </button>
 
-        <PlanGatedField
+        <GatedFeature
           requiredTier="pro"
           upgradeFrom="broadcasts.scheduled"
           gatedTitle={t('scheduleLater')}
@@ -1596,7 +1597,7 @@ function ScheduleStep({
               {t('scheduleLaterDescription')}
             </p>
           </button>
-        </PlanGatedField>
+        </GatedFeature>
       </div>
 
       {state.sendMode === 'schedule' && canSchedule && (
@@ -1630,13 +1631,13 @@ function ScheduleStep({
                 {!TIMEZONE_OPTIONS.includes(
                   state.timezone as (typeof TIMEZONE_OPTIONS)[number]
                 ) && (
-                  <SelectItem
-                    value={state.timezone}
-                    className="text-xs"
-                  >
-                    {state.timezone.replace(/_/g, ' ')}
-                  </SelectItem>
-                )}
+                    <SelectItem
+                      value={state.timezone}
+                      className="text-xs"
+                    >
+                      {state.timezone.replace(/_/g, ' ')}
+                    </SelectItem>
+                  )}
               </SelectContent>
             </Select>
           </div>
@@ -1886,12 +1887,12 @@ function WizardSummarySidebar({
   const scheduledLabel =
     state.sendMode === 'schedule' && state.scheduledAt
       ? new Date(state.scheduledAt).toLocaleString(uiLocale, {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
       : null;
 
   return (

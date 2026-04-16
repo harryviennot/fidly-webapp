@@ -44,6 +44,9 @@ export type {
   UpsellFeatureListProps,
 } from './upsell';
 
+// Gated feature
+export { GatedFeature, PlanGatedField } from './gated-feature';
+
 // Empty state
 export { EmptyState } from './empty-state';
 export type { EmptyStateProps } from './empty-state';
