@@ -59,6 +59,16 @@ export interface MilestoneUpdate {
   is_enabled?: boolean;
 }
 
+/**
+ * PUT /milestones/{id} response. Extends Milestone with an optional
+ * `swapped_off` field: when the user toggles a milestone ON while at the
+ * tier's cap, the backend auto-disables the oldest currently-active
+ * milestone and returns it here so the frontend can show a toast.
+ */
+export interface MilestoneUpdateResponse extends Milestone {
+  swapped_off?: Milestone;
+}
+
 export type BroadcastStatus =
   | 'draft'
   | 'scheduled'

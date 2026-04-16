@@ -102,7 +102,8 @@
         "updated": "Milestone updated",
         "updateFailed": "Failed to update milestone",
         "deleted": "Milestone deleted",
-        "deleteFailed": "Failed to delete milestone"
+        "deleteFailed": "Failed to delete milestone",
+        "swappedOff": "Milestone at stamp {stamp} was turned off to make room"
       }
     },
     "nearReward": {

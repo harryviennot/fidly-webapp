@@ -166,11 +166,19 @@ function MilestoneForm({
         ) {
           payload.body = payloadBody;
         }
-        await updateMutation.mutateAsync({
+        const result = await updateMutation.mutateAsync({
           templateId: milestone.id,
           payload,
         });
-        toast.success(tMilestones('toasts.updated'));
+        if (result?.swapped_off) {
+          toast.warning(
+            tMilestones('toasts.swappedOff', {
+              stamp: result.swapped_off.stamp_equals,
+            })
+          );
+        } else {
+          toast.success(tMilestones('toasts.updated'));
+        }
       } else {
         await createMutation.mutateAsync({
           stamp_equals: stampNumber,

@@ -11,6 +11,7 @@ import type {
   MilestonesResponse,
   MilestoneCreate,
   MilestoneUpdate,
+  MilestoneUpdateResponse,
   Broadcast,
   BroadcastListParams,
   BroadcastStatsResponse,
@@ -234,7 +235,7 @@ export async function updateMilestone(
   templateId: string,
   payload: MilestoneUpdate,
   programId?: string
-): Promise<Milestone> {
+): Promise<MilestoneUpdateResponse> {
   if (USE_MOCKS) {
     throw new Error('Milestones not available in mock mode');
   }

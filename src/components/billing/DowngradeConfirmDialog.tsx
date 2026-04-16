@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { WarningCircleIcon, UsersIcon, PaintBrushIcon, LightningIcon } from "@phosphor-icons/react";
+import { WarningCircleIcon, UsersIcon, PaintBrushIcon, LightningIcon, BellSimpleIcon, CalendarCheckIcon, StepsIcon } from "@phosphor-icons/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,7 +61,17 @@ export function DowngradeConfirmDialog({
   }, [open, newTier]);
 
   const data: PreviewDowngradeResponse | undefined = preview.data ?? undefined;
-  const hasImpact = data && (Object.keys(data.impact).length > 0 || data.features_lost.length > 0);
+  const ni = data?.notification_impact;
+  const hasNotificationImpact = ni && (
+    ni.custom_templates_disabled > 0 ||
+    ni.milestones_disabled > 0 ||
+    ni.scheduled_broadcasts_cancelled > 0
+  );
+  const hasImpact = data && (
+    Object.keys(data.impact).length > 0 ||
+    data.features_lost.length > 0 ||
+    hasNotificationImpact
+  );
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -117,6 +127,38 @@ export function DowngradeConfirmDialog({
                   </span>
                 </li>
               ))}
+              {ni && ni.custom_templates_disabled > 0 && (
+                <li className="flex items-start gap-2">
+                  <BellSimpleIcon className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span>
+                    {t("downgradeImpactCustomTemplates", {
+                      count: ni.custom_templates_disabled,
+                    })}
+                  </span>
+                </li>
+              )}
+              {ni && ni.milestones_disabled > 0 && (
+                <li className="flex items-start gap-2">
+                  <StepsIcon className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span>
+                    {t("downgradeImpactMilestones", {
+                      disabled: ni.milestones_disabled,
+                      kept: ni.milestones_kept_active,
+                      cap: ni.milestones_new_cap_per_program ?? 0,
+                    })}
+                  </span>
+                </li>
+              )}
+              {ni && ni.scheduled_broadcasts_cancelled > 0 && (
+                <li className="flex items-start gap-2">
+                  <CalendarCheckIcon className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span>
+                    {t("downgradeImpactScheduledBroadcasts", {
+                      count: ni.scheduled_broadcasts_cancelled,
+                    })}
+                  </span>
+                </li>
+              )}
             </ul>
             <p className="text-xs text-[var(--muted-foreground)] pt-1 border-t border-[var(--warning)]/20">
               {t("downgradeReassurance")}

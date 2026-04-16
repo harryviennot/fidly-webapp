@@ -159,11 +159,21 @@ export interface DowngradeImpactResource {
   affected: number;
 }
 
+export interface NotificationDowngradeImpact {
+  custom_templates_disabled: number;
+  active_milestones_before: number;
+  milestones_kept_active: number;
+  milestones_disabled: number;
+  milestones_new_cap_per_program: number | null;
+  scheduled_broadcasts_cancelled: number;
+}
+
 export interface PreviewDowngradeResponse {
   current_tier: string;
   new_tier: string;
   impact: Record<string, DowngradeImpactResource>;
   features_lost: string[];
+  notification_impact: NotificationDowngradeImpact;
 }
 
 export async function getOverLimitStatus(
