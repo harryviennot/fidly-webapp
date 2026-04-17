@@ -34,8 +34,8 @@
     "jspdf": "^4.2.1",
     "lucide-react": "^0.575.0",
     "minimatch": "^10.2.4",
-    "next": "16.2.1",
-    "next-intl": "^4.8.3",
+    "next": "^16.2.4",
+    "next-intl": "^4.9.1",
     "next-themes": "^0.4.6",
     "react": "19.2.3",
     "react-day-picker": "^9",
@@ -70,6 +70,7 @@
     "@eslint/eslintrc>ajv": "~6.14.0",
     "flatted": ">=3.4.2",
     "picomatch": ">=4.0.4",
-    "brace-expansion": ">=5.0.5"
+    "brace-expansion": ">=5.0.5",
+    "dompurify": ">=3.4.0"
   }
 }
