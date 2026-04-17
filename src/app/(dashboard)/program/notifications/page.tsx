@@ -42,24 +42,6 @@ import {
 } from '@/lib/template-variables';
 import type { NotificationTemplate, TriggerType } from '@/types/notification';
 
-// Canonical default bodies per trigger — mirror
-// backend/app/services/programs/notification_defaults.py. Passed to the edit
-// sheet so "Reset to default" can replay the default copy locally.
-const DEFAULT_BODIES: Record<string, { en: string; fr: string }> = {
-  stamp_added: {
-    en: 'Stamp collected! You have {{stamp_count}} of {{total_stamps}} stamps.',
-    fr: 'Tampon collecté ! Vous avez {{stamp_count}} sur {{total_stamps}} tampons.',
-  },
-  reward_earned: {
-    en: 'You unlocked your reward! Come claim it.',
-    fr: 'Vous avez débloqué votre récompense ! Venez la récupérer.',
-  },
-  reward_redeemed: {
-    en: 'Reward redeemed. Enjoy!',
-    fr: 'Récompense utilisée. Profitez-en !',
-  },
-};
-
 // Fallback sample values for the available-variables card when no real
 // program data is available. Kept in sync with the ones used in inline
 // previews (see `template-variables.ts#renderSamplePreview`).
@@ -146,9 +128,7 @@ export default function ProgramNotificationsPage() {
     }
   };
 
-  const editingDefaultBody = editingTemplate
-    ? DEFAULT_BODIES[editingTemplate.trigger] ?? { en: '', fr: '' }
-    : { en: '', fr: '' };
+  const editingDefaultBody = editingTemplate?.default_body ?? { en: '', fr: '' };
 
   // Side widgets shared between desktop sidebar and mobile collapsibles.
   // Body content is captured once so both placements stay in sync.
