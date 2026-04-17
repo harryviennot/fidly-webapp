@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { TrashIcon, CheckIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { deleteMembership, updateMembershipRole, pauseMember, unpauseMember } from "@/api";
 import type { MembershipWithUser, MembershipRole } from "@/types";
 import type { Invitation } from "@/types";
@@ -110,19 +111,6 @@ export function TeamTable({
   const [selectedRow, setSelectedRow] = useState<TeamRow | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [roleDropdown, setRoleDropdown] = useState<string | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close role dropdown on outside click
-  useEffect(() => {
-    if (!roleDropdown) return;
-    const close = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setRoleDropdown(null);
-      }
-    };
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
-  }, [roleDropdown]);
 
   const getInitials = (name: string) => {
     return name
@@ -292,47 +280,52 @@ export function TeamTable({
                         {tRoles(row.role)}
                       </span>
                     ) : row.type === "member" && row.canModify ? (
-                      <div className="relative" ref={roleDropdown === row.id ? dropdownRef : undefined}>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setRoleDropdown(roleDropdown === row.id ? null : row.id); }}
-                          disabled={loading === row.id}
-                          className="inline-flex items-center gap-1 text-[11px] py-0.5 px-2.5 rounded-full font-semibold cursor-pointer transition-all hover:opacity-80"
-                          style={{ background: rs.bg, color: rs.color, border: `1px solid ${rs.border}` }}
+                      <Popover
+                        open={roleDropdown === row.id}
+                        onOpenChange={(open) => setRoleDropdown(open ? row.id : null)}
+                      >
+                        <PopoverTrigger asChild>
+                          <button
+                            disabled={loading === row.id}
+                            className="inline-flex items-center gap-1 text-[11px] py-0.5 px-2.5 rounded-full font-semibold cursor-pointer transition-all hover:opacity-80"
+                            style={{ background: rs.bg, color: rs.color, border: `1px solid ${rs.border}` }}
+                          >
+                            {tRoles(row.role)}
+                            <CaretDownIcon size={10} weight="bold" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          align="start"
+                          sideOffset={4}
+                          className="w-auto min-w-[170px] p-0 rounded-xl border-[#EEEDEA] overflow-hidden"
                         >
-                          {tRoles(row.role)}
-                          <CaretDownIcon size={10} weight="bold" />
-                        </button>
-
-                        {roleDropdown === row.id && (
-                          <div className="absolute top-full left-0 mt-1 z-50 bg-white rounded-xl border border-[#EEEDEA] shadow-lg overflow-hidden min-w-[170px]">
-                            {(["admin", "scanner"] as MembershipRole[]).map((r) => {
-                              const rStyle = ROLE_STYLES[r];
-                              const isCurrent = row.role === r;
-                              return (
-                                <button
-                                  key={r}
-                                  onClick={() => handleRoleChange(row, r)}
-                                  className="w-full flex items-center gap-2.5 py-2.5 px-3.5 text-left text-xs transition-colors"
-                                  style={{ background: isCurrent ? "#FAFAF8" : "transparent" }}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = "#FAFAF8"; }}
-                                  onMouseLeave={(e) => { if (!isCurrent) e.currentTarget.style.background = "transparent"; }}
+                          {(["admin", "scanner"] as MembershipRole[]).map((r) => {
+                            const rStyle = ROLE_STYLES[r];
+                            const isCurrent = row.role === r;
+                            return (
+                              <button
+                                key={r}
+                                onClick={() => handleRoleChange(row, r)}
+                                className="w-full flex items-center gap-2.5 py-2.5 px-3.5 text-left text-xs transition-colors"
+                                style={{ background: isCurrent ? "#FAFAF8" : "transparent" }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "#FAFAF8"; }}
+                                onMouseLeave={(e) => { if (!isCurrent) e.currentTarget.style.background = "transparent"; }}
+                              >
+                                <span
+                                  className="text-[11px] py-0.5 px-2 rounded-xl font-semibold"
+                                  style={{ background: rStyle.bg, color: rStyle.color }}
                                 >
-                                  <span
-                                    className="text-[11px] py-0.5 px-2 rounded-xl font-semibold"
-                                    style={{ background: rStyle.bg, color: rStyle.color }}
-                                  >
-                                    {t(`table.role${r.charAt(0).toUpperCase() + r.slice(1)}`)}
-                                  </span>
-                                  <span className="flex-1 text-[11px] text-[#AAA]">
-                                    {t(`table.role${r.charAt(0).toUpperCase() + r.slice(1)}Desc`)}
-                                  </span>
-                                  {isCurrent && <CheckIcon size={12} className="text-[#4A7C59]" weight="bold" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
+                                  {t(`table.role${r.charAt(0).toUpperCase() + r.slice(1)}`)}
+                                </span>
+                                <span className="flex-1 text-[11px] text-[#AAA]">
+                                  {t(`table.role${r.charAt(0).toUpperCase() + r.slice(1)}Desc`)}
+                                </span>
+                                {isCurrent && <CheckIcon size={12} className="text-[#4A7C59]" weight="bold" />}
+                              </button>
+                            );
+                          })}
+                        </PopoverContent>
+                      </Popover>
                     ) : (
                       <span
                         className="inline-flex text-[11px] py-0.5 px-2.5 rounded-full font-semibold"
