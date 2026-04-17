@@ -26,55 +26,6 @@ import type {
   LocalizedBody,
 } from '@/types/notification';
 
-const USE_MOCKS = process.env.NEXT_PUBLIC_MOCK_NOTIFICATIONS === '1';
-
-// ─────────────────────────────────────────────────────────────────────────
-// Mock data — used when NEXT_PUBLIC_MOCK_NOTIFICATIONS=1
-// Keeps Phase 0/1 UI work unblocked before backend endpoints ship.
-// ─────────────────────────────────────────────────────────────────────────
-
-const MOCK_TEMPLATES_RESPONSE: NotificationTemplatesResponse = {
-  program_id: 'mock-program',
-  tier: 'starter',
-  items: [
-    {
-      template_id: null,
-      trigger: 'stamp_added',
-      body: {
-        en: 'Stamp collected! You have {{stamp_count}} of {{total_stamps}} stamps.',
-        fr: 'Tampon collecté ! Vous avez {{stamp_count}} sur {{total_stamps}} tampons.',
-      },
-      is_enabled: true,
-      is_editable: false,
-      is_customized: false,
-    },
-    {
-      template_id: null,
-      trigger: 'reward_earned',
-      body: {
-        en: 'You unlocked your reward! Come claim it.',
-        fr: 'Vous avez débloqué votre récompense ! Venez la récupérer.',
-      },
-      is_enabled: true,
-      is_editable: false,
-      is_customized: false,
-    },
-    {
-      template_id: null,
-      trigger: 'reward_redeemed',
-      body: {
-        en: 'Reward redeemed. Enjoy your {{reward_name}}!',
-        fr: 'Récompense utilisée. Profitez de votre {{reward_name}} !',
-      },
-      is_enabled: true,
-      is_editable: false,
-      is_customized: false,
-    },
-  ],
-};
-
-const MOCK_BROADCASTS: Broadcast[] = [];
-
 // ─────────────────────────────────────────────────────────────────────────
 // Transactional templates
 // ─────────────────────────────────────────────────────────────────────────
@@ -83,8 +34,6 @@ export async function getNotificationTemplates(
   businessId: string,
   programId?: string
 ): Promise<NotificationTemplatesResponse> {
-  if (USE_MOCKS) return MOCK_TEMPLATES_RESPONSE;
-
   const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/templates${query}`,
@@ -110,21 +59,6 @@ export async function updateNotificationTemplate(
   trigger: TriggerType,
   payload: { body?: LocalizedBody; isEnabled?: boolean }
 ): Promise<NotificationTemplate> {
-  if (USE_MOCKS) {
-    const existing = MOCK_TEMPLATES_RESPONSE.items.find(
-      (t) => t.trigger === trigger
-    );
-    if (!existing) throw new Error(`Unknown trigger: ${trigger}`);
-    if (payload.body !== undefined) {
-      existing.body = payload.body;
-      existing.is_customized = true;
-    }
-    if (payload.isEnabled !== undefined) {
-      existing.is_enabled = payload.isEnabled;
-    }
-    return existing;
-  }
-
   const requestBody: Record<string, unknown> = {};
   if (payload.body !== undefined) requestBody.body = payload.body;
   if (payload.isEnabled !== undefined) requestBody.is_enabled = payload.isEnabled;
@@ -150,14 +84,6 @@ export async function resetNotificationTemplate(
   businessId: string,
   trigger: TriggerType
 ): Promise<void> {
-  if (USE_MOCKS) {
-    const existing = MOCK_TEMPLATES_RESPONSE.items.find(
-      (t) => t.trigger === trigger
-    );
-    if (existing) existing.is_customized = false;
-    return;
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/templates/${trigger}`,
     {
@@ -180,15 +106,6 @@ export async function listMilestones(
   businessId: string,
   programId?: string
 ): Promise<MilestonesResponse> {
-  if (USE_MOCKS) {
-    return {
-      program_id: 'mock-program',
-      tier: 'starter',
-      limit: 0,
-      items: [],
-    };
-  }
-
   const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/milestones${query}`,
@@ -208,10 +125,6 @@ export async function createMilestone(
   payload: MilestoneCreate,
   programId?: string
 ): Promise<Milestone> {
-  if (USE_MOCKS) {
-    throw new Error('Milestones not available in mock mode');
-  }
-
   const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/milestones${query}`,
@@ -236,10 +149,6 @@ export async function updateMilestone(
   payload: MilestoneUpdate,
   programId?: string
 ): Promise<MilestoneUpdateResponse> {
-  if (USE_MOCKS) {
-    throw new Error('Milestones not available in mock mode');
-  }
-
   const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/milestones/${templateId}${query}`,
@@ -263,8 +172,6 @@ export async function deleteMilestone(
   templateId: string,
   programId?: string
 ): Promise<void> {
-  if (USE_MOCKS) return;
-
   const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/milestones/${templateId}${query}`,
@@ -288,10 +195,6 @@ export async function uploadBusinessIcon(
   businessId: string,
   file: File
 ): Promise<BusinessIconUploadResponse> {
-  if (USE_MOCKS) {
-    return { url: URL.createObjectURL(file) };
-  }
-
   const formData = new FormData();
   formData.append('file', file);
 
@@ -313,8 +216,6 @@ export async function uploadBusinessIcon(
 }
 
 export async function deleteBusinessIcon(businessId: string): Promise<void> {
-  if (USE_MOCKS) return;
-
   const response = await fetch(
     `${API_BASE_URL}/businesses/${businessId}/icon`,
     {
@@ -341,10 +242,6 @@ export async function listBroadcasts(
   businessId: string,
   params: BroadcastListParams = {}
 ): Promise<PaginatedBroadcasts> {
-  if (USE_MOCKS) {
-    return { items: MOCK_BROADCASTS, total: 0, limit: 50, offset: 0 };
-  }
-
   const query = new URLSearchParams();
   if (params.limit !== undefined) query.set('limit', params.limit.toString());
   if (params.offset !== undefined) query.set('offset', params.offset.toString());
@@ -382,12 +279,6 @@ export async function getBroadcast(
   businessId: string,
   broadcastId: string
 ): Promise<Broadcast> {
-  if (USE_MOCKS) {
-    const b = MOCK_BROADCASTS.find((x) => x.id === broadcastId);
-    if (!b) throw new Error('Broadcast not found');
-    return b;
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}`,
     { headers: await getAuthHeaders() }
@@ -405,10 +296,6 @@ export async function createBroadcast(
   businessId: string,
   payload: BroadcastCreate
 ): Promise<Broadcast> {
-  if (USE_MOCKS) {
-    throw new Error('Broadcasts not available in mock mode');
-  }
-
   const response = await fetch(`${API_BASE_URL}/broadcasts/${businessId}`, {
     method: 'POST',
     headers: await getAuthHeaders(),
@@ -428,10 +315,6 @@ export async function updateBroadcast(
   broadcastId: string,
   payload: BroadcastUpdate
 ): Promise<Broadcast> {
-  if (USE_MOCKS) {
-    throw new Error('Broadcasts not available in mock mode');
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}`,
     {
@@ -457,8 +340,6 @@ export async function cancelBroadcast(
   businessId: string,
   broadcastId: string
 ): Promise<void> {
-  if (USE_MOCKS) return;
-
   const response = await fetch(
     `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}`,
     {
@@ -478,10 +359,6 @@ export async function sendBroadcast(
   businessId: string,
   broadcastId: string
 ): Promise<Broadcast> {
-  if (USE_MOCKS) {
-    throw new Error('Broadcasts not available in mock mode');
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}/send`,
     {
@@ -509,10 +386,6 @@ export async function sendBroadcastAgain(
   broadcastId: string,
   payload: BroadcastSendAgain
 ): Promise<Broadcast> {
-  if (USE_MOCKS) {
-    throw new Error('Broadcasts not available in mock mode');
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/broadcasts/${businessId}/${broadcastId}/send-again`,
     {
@@ -537,10 +410,6 @@ export async function estimateRecipients(
   businessId: string,
   filter: BroadcastTargetFilter
 ): Promise<RecipientEstimateResponse> {
-  if (USE_MOCKS) {
-    return { target_filter: filter, total: Math.floor(Math.random() * 500) + 50 };
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/broadcasts/${businessId}/estimate`,
     {

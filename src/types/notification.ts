@@ -13,6 +13,8 @@ export interface NotificationTemplate {
   template_id: string | null;
   trigger: TriggerType;
   body: LocalizedBody;
+  /** Python default body from the backend — used for "reset to default". */
+  default_body: LocalizedBody;
   is_enabled: boolean;
   is_editable: boolean;
   is_customized: boolean;
