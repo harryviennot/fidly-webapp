@@ -1,5 +1,11 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import {
+  Info,
+  CheckCircle,
+  WarningCircle,
+  Warning,
+} from "@phosphor-icons/react";
 
 type InfoBoxVariant = "info" | "success" | "error" | "warning" | "note";
 
@@ -34,9 +40,18 @@ const VARIANT_STYLES: Record<
   },
 };
 
+const DEFAULT_ICONS: Record<InfoBoxVariant, ReactNode> = {
+  info: <Info size={16} weight="fill" className="text-[var(--info)]" />,
+  success: <CheckCircle size={16} weight="fill" className="text-[var(--success)]" />,
+  error: <WarningCircle size={16} weight="fill" className="text-[var(--error)]" />,
+  warning: <Warning size={16} weight="fill" className="text-[var(--warning)]" />,
+  note: <Info size={16} weight="fill" className="text-[#8A8A8A]" />,
+};
+
 interface InfoBoxProps {
   variant?: InfoBoxVariant;
-  icon?: ReactNode;
+  /** Custom icon. Pass `null` to hide the icon entirely. Omit to use the default icon for the variant. */
+  icon?: ReactNode | null;
   title?: string;
   message: ReactNode;
   className?: string;
@@ -50,8 +65,9 @@ export function InfoBox({
   className,
 }: InfoBoxProps) {
   const styles = VARIANT_STYLES[variant];
+  const resolvedIcon = icon === null ? null : (icon ?? DEFAULT_ICONS[variant]);
 
-  if (icon || title) {
+  if (resolvedIcon || title) {
     return (
       <div
         className={cn(
@@ -60,7 +76,7 @@ export function InfoBox({
           className
         )}
       >
-        {icon && <div className="shrink-0 mt-0.5">{icon}</div>}
+        {resolvedIcon && <div className="shrink-0 mt-0.5">{resolvedIcon}</div>}
         <div>
           {title && (
             <div className={cn("text-[13px] font-semibold mb-0.5", styles.title)}>
@@ -78,13 +94,15 @@ export function InfoBox({
   return (
     <div
       className={cn(
-        "px-4 py-3 rounded-lg border text-sm",
+        "flex items-start gap-2.5 p-3.5 rounded-lg border text-sm",
         styles.container,
-        styles.text,
         className
       )}
     >
-      {message}
+      <div className="shrink-0 mt-0.5">{DEFAULT_ICONS[variant]}</div>
+      <div className={cn("text-[12px] leading-[1.4]", styles.text)}>
+        {message}
+      </div>
     </div>
   );
 }

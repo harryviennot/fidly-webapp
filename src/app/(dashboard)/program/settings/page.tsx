@@ -6,7 +6,6 @@ import {
   UserIcon,
   EnvelopeIcon,
   PhoneIcon,
-  WarningIcon,
   CheckIcon,
   FloppyDiskIcon,
 } from '@phosphor-icons/react';
@@ -61,9 +60,9 @@ export default function ProgramSettingsPage() {
   useEffect(() => {
     if (program?.id && !program.config?.user_configured && !markedAsConfigured.current) {
       markedAsConfigured.current = true;
-      updateProgram({ config: { ...program.config, user_configured: true } }).catch(() => {});
+      updateProgram({ config: { ...program.config, user_configured: true } }).catch(() => { });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [program?.id]);
 
   // Dirty detection
@@ -154,7 +153,7 @@ export default function ProgramSettingsPage() {
         setSavingSettings(false);
       }
     }, 1000);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentBusiness?.id]);
 
   const handleToggle = (field: DataCollectionField) => {
@@ -195,7 +194,6 @@ export default function ProgramSettingsPage() {
       icon: '📱',
       fieldIcon: PhoneIcon,
       recommended: false,
-      comingSoon: true,
     },
   ];
 
@@ -445,11 +443,6 @@ export default function ProgramSettingsPage() {
                             {t('recommended').toUpperCase()}
                           </span>
                         )}
-                        {field.comingSoon && (
-                          <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--paper-hover)] text-[#A0A0A0]">
-                            {t('comingSoonBadge')}
-                          </span>
-                        )}
                       </div>
                       <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
                     </div>
@@ -483,16 +476,15 @@ export default function ProgramSettingsPage() {
             {isAnonymousMode ? (
               <InfoBox
                 variant="warning"
-                icon={<WarningIcon className="w-4 h-4 text-[var(--warning)]" weight="fill" />}
                 title={t('anonymousModeTitle')}
                 message={t('anonymousModeWarning')}
                 className="mt-3"
               />
             ) : (
               <InfoBox
-                variant="note"
+                variant="info"
                 message={t('anonymousModeNote')}
-                className="mt-3 px-3.5 py-2.5 text-[12px] leading-[1.5]"
+                className="mt-3"
               />
             )}
           </div>

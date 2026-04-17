@@ -1,0 +1,480 @@
+{
+  "notifications": {
+    "page": {
+      "title": "Notifications",
+      "subtitle": "Automatic messages sent to your customers when they collect stamps or unlock rewards"
+    },
+    "icon": {
+      "title": "Notification icon",
+      "description": "Shown on your customers' lock screen when they receive a notification from your loyalty card",
+      "changeInSettings": "Change in settings",
+      "default": "Default icon",
+      "defaultHint": "Your customers see a generic bell on their lock screen.",
+      "custom": "Custom icon",
+      "customHint": "Your brand icon appears in every notification.",
+      "lockedHint": "Upgrade to Growth to use a branded notification icon",
+      "upload": "Upload icon",
+      "uploadHint": "PNG, at least 87×87 pixels",
+      "preview": "Preview",
+      "crop": {
+        "title": "Crop your icon",
+        "description": "Drag the square to pick the part of your image to use. It will be resized automatically.",
+        "apply": "Apply",
+        "cancel": "Cancel"
+      },
+      "cacheWarning": {
+        "title": "Heads up about updates",
+        "body": "New customers will see your updated icon right away. Existing customers may take several days — Apple Wallet caches pass assets aggressively and we can't force a refresh."
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "step1": "A staff member scans the customer's loyalty card.",
+      "step2": "Their wallet pass silently refreshes in the background.",
+      "step3": "The customer sees the notification on their lock screen.",
+      "note": "Your customers receive the notification directly on their phone and on the back of their loyalty card."
+    },
+    "variablesReference": {
+      "title": "Available variables",
+      "description": "Use these placeholders in your message. They will be replaced with real values when the notification is sent.",
+      "example": "Example"
+    },
+    "triggers": {
+      "sectionTitle": "Automated messages",
+      "sectionDescription": "These messages are sent automatically when a customer collects a stamp or earns a reward",
+      "stamp_added": {
+        "name": "Stamp collected",
+        "description": "Sent when a customer collects a new stamp"
+      },
+      "reward_earned": {
+        "name": "Reward unlocked",
+        "description": "Sent when a customer completes their card and earns a reward"
+      },
+      "reward_redeemed": {
+        "name": "Reward redeemed",
+        "description": "Sent when a customer redeems their reward"
+      },
+      "milestone": {
+        "name": "Milestone",
+        "description": "Sent when a customer reaches a specific stamp count"
+      },
+      "near_reward": {
+        "name": "Near reward",
+        "description": "Sent when a customer is close to unlocking their reward"
+      }
+    },
+    "localePills": {
+      "enSet": "EN",
+      "frSet": "FR"
+    },
+    "card": {
+      "defaultPill": "Default",
+      "customPill": "Custom",
+      "disabledPill": "Disabled"
+    },
+    "milestones": {
+      "title": "Milestones",
+      "description": "Send a special message when a customer reaches a specific stamp count",
+      "add": "Add milestone",
+      "usage": "{count} of {max} used",
+      "usageActive": "{count} of {max} active",
+      "disabledPill": "Disabled",
+      "unlimited": "{count} milestones",
+      "empty": "No milestones yet. Add one to send a custom message at a specific stamp count.",
+      "condition": "When customer reaches {count} stamps",
+      "conditionShort": "At {count} stamps",
+      "limitReached": "You've reached the milestone limit for Growth. Upgrade to Pro for unlimited milestones.",
+      "stampCountLabel": "Fires when stamp count equals",
+      "stampCountPlaceholder": "e.g. 5",
+      "createTitle": "New milestone",
+      "createDescription": "Send a custom notification when customers hit a specific stamp count.",
+      "editTitle": "Edit milestone",
+      "editDescription": "Update the stamp count or the message for this milestone.",
+      "deleteConfirmTitle": "Delete milestone?",
+      "deleteConfirmDescription": "This milestone will stop firing for all customers.",
+      "deleteButton": "Delete milestone",
+      "errors": {
+        "duplicate": "A milestone at this stamp count already exists.",
+        "quotaExceeded": "You've reached your milestone limit. Upgrade to Pro for unlimited milestones.",
+        "invalidStampCount": "Stamp count must be a positive number."
+      },
+      "toasts": {
+        "created": "Milestone added",
+        "createFailed": "Failed to add milestone",
+        "updated": "Milestone updated",
+        "updateFailed": "Failed to update milestone",
+        "deleted": "Milestone deleted",
+        "deleteFailed": "Failed to delete milestone",
+        "swappedOff": "Milestone at stamp {stamp} was turned off to make room",
+        "enabled": "Milestone enabled",
+        "disabled": "Milestone disabled",
+        "toggleFailed": "Failed to toggle milestone"
+      },
+      "proUpsell": {
+        "title": "Unlimited milestones",
+        "description": "Upgrade to Pro to create as many milestone notifications as you need — no cap.",
+        "features": {
+          "unlimited": "Unlimited milestones",
+          "broadcasts": "Unlimited broadcasts + scheduling"
+        },
+        "cta": "Upgrade to Pro"
+      }
+    },
+    "nearReward": {
+      "title": "Near-reward notification",
+      "description": "Notify the customer when they are a few stamps away from unlocking their reward",
+      "thresholdLabel": "Notify when",
+      "thresholdSuffix": "stamps away from reward"
+    },
+    "editor": {
+      "editTitle": "Edit message",
+      "bodyLabel": "Message",
+      "variablesLabel": "Insert variable",
+      "previewLabel": "Preview",
+      "reset": "Reset to default",
+      "save": "Save",
+      "cancel": "Cancel",
+      "translations": "Translations",
+      "resetLocale": "Reset this language",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "disabledHint": "When disabled, the loyalty card still updates silently — customers just don't see a notification for this event.",
+      "rewardNameMissing": "Define a reward in your program settings to use this variable.",
+      "nameCollectionOff": "Enable name collection in program settings to use this variable.",
+      "nameWarning": "Some customers don't have a name on file. They'll see the message without the name.",
+      "previewWithoutName": "Preview for customers without a name",
+      "emptyBody": "Message cannot be empty",
+      "variables": {
+        "stamp_count": "Current stamp count",
+        "total_stamps": "Total stamps needed",
+        "stamps_left": "Stamps remaining",
+        "reward_name": "Reward name",
+        "business_name": "Business name",
+        "customer_first_name": "Customer first name"
+      }
+    },
+    "growthUpsell": {
+      "title": "Unlock the full notifications toolkit",
+      "description": "Upgrade to Growth to rewrite the default messages in your voice and create custom milestone notifications at specific stamp counts.",
+      "features": {
+        "custom": "Write your own wording for every automated message",
+        "milestones": "Create custom milestones at any stamp count",
+        "icon": "Keep your branded notification icon"
+      },
+      "cta": "Upgrade to Growth"
+    },
+    "plan": {
+      "starterReadOnly": "These are the default messages. Upgrade to customize the wording.",
+      "starterUsingDefault": "Custom content is paused on your current plan. Default messages are being sent instead.",
+      "upgradeToCustomize": "Upgrade to Growth to customize",
+      "upgradeToGrowth": "Upgrade to Growth",
+      "upgradeToPro": "Upgrade to Pro",
+      "proBadge": "PRO",
+      "growthBadge": "GROWTH",
+      "lockedTooltip": "Available on {tier}",
+      "upgradeTo": "Upgrade to {tier}"
+    },
+    "toasts": {
+      "saved": "Message saved",
+      "saveFailed": "Failed to save message",
+      "reset": "Reset to default",
+      "resetFailed": "Failed to reset message",
+      "enabled": "Message reactivated",
+      "disabled": "Message deactivated",
+      "iconUploaded": "Icon uploaded",
+      "iconUploadFailed": "Failed to upload icon"
+    },
+    "broadcasts": {
+      "page": {
+        "title": "Broadcasts",
+        "subtitle": "Send a promotional message as a notification to all your customers"
+      },
+      "new": "New broadcast",
+      "empty": {
+        "title": "No broadcasts yet",
+        "description": "Create your first broadcast to reach every customer at once.",
+        "cta": "Send your first broadcast",
+        "filters": {
+          "drafts": {
+            "title": "No drafts",
+            "description": "Drafts you save will show up here.",
+            "cta": "Create a broadcast"
+          },
+          "scheduled": {
+            "title": "No scheduled broadcasts",
+            "description": "Schedule a broadcast to see it here.",
+            "cta": "Schedule a broadcast"
+          },
+          "sent": {
+            "title": "No broadcasts sent yet",
+            "description": "Your send history will show up here."
+          }
+        }
+      },
+      "preview": {
+        "now": "now",
+        "placeholder": "Your message will appear here",
+        "fallbackTitle": "Your business"
+      },
+      "howItWorks": {
+        "steps": {
+          "compose": "Write your message.",
+          "audience": "Choose your audience.",
+          "send": "Send now or schedule."
+        },
+        "delivery": "Customers receive the notification directly on their phone and on the back of their loyalty card.",
+        "appleNote": {
+          "title": "Note about Apple Wallet",
+          "body": "Only send broadcasts related to your program or business. If Apple finds the notifications you send are unsolicited and unrelated, they may revoke the loyalty card.",
+          "link": "Learn more"
+        },
+        "googleNote": {
+          "title": "Note about Google Wallet",
+          "body": "Google limits passes to 3 notifications per day. Customers who already received 3 notifications today (e.g. stamps) won't receive this broadcast."
+        }
+      },
+      "lastResults": {
+        "title": "Last broadcast",
+        "recipients": "Sends",
+        "delivered": "Delivered",
+        "deliveredShort": "delivered",
+        "failed": "Failed",
+        "deliveryRate": "{rate}% delivered",
+        "relativeJustNow": "just now",
+        "relativeMinutes": "{count}m ago",
+        "relativeHours": "{count}h ago",
+        "relativeDays": "{count}d ago"
+      },
+      "quota": {
+        "used": "{count} of {max} sent this month",
+        "reached": "Monthly limit reached. Upgrade to Pro for unlimited broadcasts.",
+        "unlimited": "Unlimited"
+      },
+      "filters": {
+        "all": "All",
+        "scheduled": "Scheduled",
+        "sent": "Sent",
+        "drafts": "Drafts"
+      },
+      "status": {
+        "draft": "Draft",
+        "scheduled": "Scheduled",
+        "sending": "Sending",
+        "sent": "Sent",
+        "cancelled": "Cancelled",
+        "failed": "Failed"
+      },
+      "row": {
+        "recipients": "{count} recipients",
+        "delivered": "{count} delivered",
+        "failed": "{count} failed",
+        "throttled": "{count} throttled",
+        "lastEdited": "Last edited {date}"
+      },
+      "detail": {
+        "title": "Title",
+        "body": "Message",
+        "audience": "Audience",
+        "stats": "Delivery",
+        "createdBy": "Created by",
+        "createdAt": "Created at",
+        "sentAt": "Sent at",
+        "scheduledFor": "Scheduled for",
+        "edit": "Edit",
+        "delete": "Delete draft",
+        "cancel": "Cancel send",
+        "sendNow": "Send now",
+        "sendAgain": "Send again",
+        "sendAgainNow": "Send now",
+        "sendAgainSchedule": "Schedule for later",
+        "sendAgainTitle": "Send this broadcast again?",
+        "sendAgainBody": "We'll create a new broadcast with the same message and audience. Delivery stats will start fresh.",
+        "confirmDelete": "Delete this draft?",
+        "confirmDeleteBody": "This draft will be permanently deleted. This cannot be undone.",
+        "confirmCancel": "Cancel this scheduled broadcast?",
+        "confirmCancelBody": "The broadcast won't be sent and will be moved back to your drafts. You can reschedule it later.",
+        "reachable": "Reachable",
+        "totalSendsShort": "total",
+        "reachableHint": "Customers who have an active Apple or Google Wallet pass at send time. Those who never installed the pass are shown separately.",
+        "deliveryRate": "{rate}% delivered",
+        "deliveredHint": "Delivered means the pass update was accepted by Apple or Google Wallet. Customers may have silenced push banners on their device, which we can't detect — the pass itself still updates.",
+        "apple": "Apple Wallet",
+        "google": "Google Wallet",
+        "failed": "Failed",
+        "failedHint": "Customers where neither Apple nor Google Wallet accepted the push. Usually transient network errors — these customers will be targeted again on your next broadcast.",
+        "notReachable": "Not reachable",
+        "notReachableBody": "{count} {count, plural, one {customer has} other {customers have}} no wallet pass installed",
+        "passRemoved": "Pass removed",
+        "passRemovedHint": "Google Wallet users who removed the pass before we could push. They won't receive this broadcast.",
+        "throttledHint": "Google limits each wallet pass to 3 push messages per 24h. Throttled customers will receive your next broadcast."
+      },
+      "wizard": {
+        "steps": {
+          "compose": "Compose",
+          "audience": "Audience",
+          "schedule": "Schedule",
+          "review": "Review"
+        },
+        "summary": {
+          "messageLabel": "Message",
+          "customerOne": "customer",
+          "customerOther": "customers"
+        },
+        "compose": {
+          "title": "Write your broadcast",
+          "subtitle": "Write the short message your customers will see on their wallet. Add a translation if you like — customers see the language that matches their phone.",
+          "bodyLabel": "Message",
+          "bodyPlaceholder": "Get 20% off this weekend!",
+          "charCount": "{count} / {max} characters",
+          "translationHint": "If you don't add a translation, every customer sees the default version regardless of their language."
+        },
+        "audience": {
+          "title": "Who will receive this?",
+          "subtitle": "Choose everyone or narrow down by activity.",
+          "all": "All enrolled customers",
+          "allDescription": "Every customer with a wallet card",
+          "filtered": "Filtered audience",
+          "filteredDescription": "Pick who receives this by activity",
+          "estimate": "≈ {count} customers",
+          "estimating": "Calculating...",
+          "group": {
+            "enrollment": "Enrollment age",
+            "enrollmentHelp": "Filter by when the customer joined your program.",
+            "stamps": "Collected stamps",
+            "stampsHelp": "Only targets customers with between N and M stamps on their current card.",
+            "activity": "Activity",
+            "activityHelp": "Filter by purchase behavior and last visit."
+          },
+          "enrollment": {
+            "any": "Any",
+            "recent": "Recent",
+            "recentDesc": "Joined within the last N days",
+            "old": "Older",
+            "oldDesc": "Joined more than N days ago",
+            "daysPlaceholder": "e.g. 30",
+            "daysSuffix": "days"
+          },
+          "stamps": {
+            "minLabel": "At least",
+            "maxLabel": "At most",
+            "placeholder": "e.g. 5",
+            "suffix": "stamps",
+            "help": "Tip: leave either field empty to skip that bound."
+          },
+          "activity": {
+            "hasRedeemedLabel": "Has redeemed a reward",
+            "hasRedeemedHelp": "Only sends to customers who have already claimed at least one reward.",
+            "inactiveLabel": "Inactive for",
+            "inactiveHelp": "Target customers who haven't come back in N days — useful for win-back messages.",
+            "inactivePlaceholder": "e.g. 60"
+          },
+          "filters": {
+            "enrolled_before_days": "Enrolled more than N days ago",
+            "enrolled_after_days": "Enrolled within the last N days",
+            "stamp_count_min": "At least N stamps",
+            "stamp_count_max": "At most N stamps",
+            "has_redeemed": "Has redeemed a reward",
+            "inactive_days": "Inactive for N days"
+          },
+          "chip": {
+            "all": "Everyone",
+            "enrolled_before_days": "Enrolled > {n} days ago",
+            "enrolled_after_days": "Enrolled < {n} days ago",
+            "stamp_count_min": "≥ {n} stamps",
+            "stamp_count_max": "≤ {n} stamps",
+            "has_redeemed": "Has redeemed",
+            "inactive_days": "Inactive {n}d+"
+          }
+        },
+        "schedule": {
+          "title": "When should we send it?",
+          "subtitle": "Send right away, or schedule for a specific date and time.",
+          "sendNow": "Send now",
+          "sendNowDescription": "Customers will receive this right away",
+          "scheduleLater": "Schedule for later",
+          "scheduleLaterDescription": "Pick a date and time",
+          "timezoneLabel": "Timezone",
+          "pastError": "Scheduled time must be in the future",
+          "dateLabel": "Date",
+          "timeLabel": "Time"
+        },
+        "review": {
+          "title": "Review and send",
+          "subtitle": "A final look before you blast this out.",
+          "summaryTitle": "Summary",
+          "audienceLabel": "Audience",
+          "sendTimeLabel": "Send time",
+          "recipientsLabel": "Recipients",
+          "sendImmediately": "Send immediately",
+          "quotaNote": "This will use 1 of your {max} monthly broadcasts",
+          "sendButton": "Send broadcast",
+          "scheduleButton": "Schedule broadcast",
+          "confirmSend": "Send the broadcast to {count} customers?",
+          "confirmSendNowBody": "This cannot be undone. Customers will receive the notification immediately.",
+          "confirmSendScheduleBody": "This cannot be undone. The broadcast will be sent at the scheduled time.",
+          "heroRecipients": "{count, plural, one {# customer} other {# customers}}",
+          "heroImmediate": "Send immediately",
+          "heroScheduledFor": "Scheduled for {date}",
+          "translationLabel": "Translation",
+          "contentLabel": "Message",
+          "nameLabel": "Name this broadcast",
+          "namePlaceholder": "e.g. Black Friday teaser",
+          "nameHelp": "For your records only — customers will not see this. Used to find this broadcast in your history."
+        },
+        "next": "Next",
+        "back": "Back",
+        "cancel": "Cancel",
+        "saveDraft": "Draft",
+        "save": "Save",
+        "deleteDraft": "Delete",
+        "cancelBroadcast": "Cancel send",
+        "stepIndicator": "Step {current} of {total}"
+      },
+      "starter": {
+        "headline": "Reach every customer at once",
+        "description": "Customers receive the notification directly on their phone and on the back of their loyalty card.",
+        "features": {
+          "segment": "Target customers by stamps, activity, or enrolment date",
+          "schedule": "Schedule broadcasts in advance (Pro)",
+          "tracking": "Live delivery tracking — see who got it"
+        },
+        "cta": "Upgrade to Growth"
+      },
+      "proUpsell": {
+        "title": "Schedule and broadcast without limits",
+        "description": "Plan campaigns ahead of time and reach every customer as often as you need.",
+        "features": {
+          "schedule": "Schedule broadcasts days or weeks in advance",
+          "unlimited": "Unlimited monthly broadcasts"
+        },
+        "cta": "Upgrade to Pro"
+      },
+      "toasts": {
+        "draftSaved": "Draft saved",
+        "draftSaveFailed": "Failed to save draft",
+        "sent": "Broadcast sent",
+        "sendFailed": "Failed to send broadcast",
+        "scheduled": "Broadcast scheduled",
+        "scheduleFailed": "Failed to schedule broadcast",
+        "cancelled": "Broadcast cancelled",
+        "cancelFailed": "Failed to cancel broadcast",
+        "deleted": "Draft deleted",
+        "deleteFailed": "Failed to delete draft",
+        "scheduledCancelled": "Broadcast cancelled — moved to your drafts",
+        "sentAgain": "Broadcast re-sent",
+        "sentAgainFailed": "Failed to re-send broadcast"
+      },
+      "errors": {
+        "upgradeRequired": "Broadcasts require Growth or Pro.",
+        "quotaExceeded": "You've used all your broadcasts this month. Save it as a draft and send it when your quota resets, or upgrade to Pro for unlimited broadcasts.",
+        "proFiltersBlocked": "Advanced filters require Pro."
+      }
+    },
+    "downgradeBanner": {
+      "title": "Your Growth plan ended",
+      "description": "{count, plural, =0 {Custom templates are disabled.} one {# scheduled message was cancelled and custom templates are disabled.} other {# scheduled messages were cancelled and custom templates are disabled.}}",
+      "cta": "Upgrade to restore",
+      "dismiss": "Dismiss"
+    }
+  }
+}

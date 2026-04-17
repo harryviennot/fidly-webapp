@@ -14,6 +14,7 @@ import { updateBusiness, uploadBusinessLogo, deleteBusinessLogo } from '@/api';
 import { DEFAULT_ACCENT, applyTheme } from '@/utils/theme';
 import type { BusinessInfoEntry } from '@/types/business';
 import { PageHeader } from '@/components/redesign';
+import { IconUploadCard } from '@/components/notifications';
 
 interface FormData {
   name: string;
@@ -365,6 +366,9 @@ export default function SettingsPage() {
               <p className="text-[11px] text-[#B0B0B0] mt-1.5">{t('language.passLocaleHint')}</p>
             </div>
           </div>
+
+          {/* ── Notification icon ── */}
+          <IconUploadCard />
 
           {/* ── Branding ── */}
           <div className={`bg-[var(--card)] rounded-xl border border-[var(--card-border)] px-6 py-5 transition-shadow${pulsing === 'theme' ? ' ring-2 ring-[var(--accent)]/25 animate-pulse' : ''}`}>

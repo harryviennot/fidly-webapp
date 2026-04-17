@@ -4,6 +4,15 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { LogoCropper } from './LogoCropper';
+import {
+  ImageCropper,
+  type ImageCropperProps,
+} from '@/components/reusables/image-cropper';
+
+type CropPropsPassthrough = Omit<
+  ImageCropperProps,
+  'open' | 'onOpenChange' | 'imageSrc' | 'onCropComplete'
+>;
 
 interface ImageUploaderProps {
   label: string;
@@ -12,8 +21,14 @@ interface ImageUploaderProps {
   onClear?: () => void;
   accept?: string;
   hint?: string;
-  /** When true, opens a crop dialog before uploading */
+  /** When true, opens a crop dialog before uploading. */
   enableCrop?: boolean;
+  /**
+   * Optional crop configuration. When provided, the generic `ImageCropper` is
+   * used instead of the logo-specific `LogoCropper`. Pass `aspect={1}` for a
+   * square-locked crop (e.g. notification icon).
+   */
+  cropProps?: CropPropsPassthrough;
 }
 
 export default function ImageUploader({
@@ -24,6 +39,7 @@ export default function ImageUploader({
   accept = 'image/png',
   hint,
   enableCrop = false,
+  cropProps,
 }: ImageUploaderProps) {
   const t = useTranslations('designEditor.imageUploader');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +73,6 @@ export default function ImageUploader({
     if (enableCrop) {
       const url = URL.createObjectURL(file);
       setCropSrc(url);
-      // Reset input so same file can be selected again
       if (inputRef.current) inputRef.current.value = '';
     } else {
       await processUpload(file);
@@ -91,7 +106,11 @@ export default function ImageUploader({
 
   return (
     <div>
-      {label && <label className="text-sm font-medium text-[var(--foreground)] mb-2 block">{label}</label>}
+      {label && (
+        <label className="text-sm font-medium text-[var(--foreground)] mb-2 block">
+          {label}
+        </label>
+      )}
 
       {value ? (
         <div className="relative inline-block">
@@ -129,12 +148,22 @@ export default function ImageUploader({
           onClick={handleClick}
         >
           {isUploading ? (
-            <span className="text-sm text-[var(--muted-foreground)]">{t('uploading')}</span>
+            <span className="text-sm text-[var(--muted-foreground)]">
+              {t('uploading')}
+            </span>
           ) : (
             <>
-              <span className="text-2xl text-[var(--muted-foreground)] mb-1">+</span>
-              <span className="text-sm text-[var(--muted-foreground)]">{t('clickToUpload')}</span>
-              {hint && <span className="text-xs text-[var(--muted-foreground)] mt-1">{hint}</span>}
+              <span className="text-2xl text-[var(--muted-foreground)] mb-1">
+                +
+              </span>
+              <span className="text-sm text-[var(--muted-foreground)]">
+                {t('clickToUpload')}
+              </span>
+              {hint && (
+                <span className="text-xs text-[var(--muted-foreground)] mt-1">
+                  {hint}
+                </span>
+              )}
             </>
           )}
           {fileInput}
@@ -144,12 +173,22 @@ export default function ImageUploader({
       {error && <div className="text-sm text-red-600 mt-1">{error}</div>}
 
       {enableCrop && cropSrc && (
-        <LogoCropper
-          open={!!cropSrc}
-          onOpenChange={handleCropClose}
-          imageSrc={cropSrc}
-          onCropComplete={handleCropComplete}
-        />
+        cropProps ? (
+          <ImageCropper
+            open={!!cropSrc}
+            onOpenChange={handleCropClose}
+            imageSrc={cropSrc}
+            onCropComplete={handleCropComplete}
+            {...cropProps}
+          />
+        ) : (
+          <LogoCropper
+            open={!!cropSrc}
+            onOpenChange={handleCropClose}
+            imageSrc={cropSrc}
+            onCropComplete={handleCropComplete}
+          />
+        )
       )}
     </div>
   );

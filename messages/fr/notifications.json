@@ -1,0 +1,480 @@
+{
+  "notifications": {
+    "page": {
+      "title": "Notifications",
+      "subtitle": "Messages automatiques envoyés à vos clients lorsqu'ils collectent des tampons ou débloquent des récompenses"
+    },
+    "icon": {
+      "title": "Icône de notification",
+      "description": "Affichée sur l'écran verrouillé de vos clients lorsqu'ils reçoivent une notification de votre carte de fidélité",
+      "changeInSettings": "Modifier dans les paramètres",
+      "default": "Icône par défaut",
+      "defaultHint": "Vos clients voient une cloche générique sur leur écran verrouillé.",
+      "custom": "Icône personnalisée",
+      "customHint": "Votre icône de marque apparaît dans chaque notification.",
+      "lockedHint": "Passez à Growth pour utiliser une icône personnalisée",
+      "upload": "Téléverser une icône",
+      "uploadHint": "PNG, au moins 87×87 pixels",
+      "preview": "Aperçu",
+      "crop": {
+        "title": "Recadrez votre icône",
+        "description": "Déplacez le carré pour choisir la partie de l'image à utiliser. Elle sera redimensionnée automatiquement.",
+        "apply": "Appliquer",
+        "cancel": "Annuler"
+      },
+      "cacheWarning": {
+        "title": "À propos des mises à jour",
+        "body": "Les nouveaux clients verront la nouvelle icône immédiatement. Pour les clients existants, cela peut prendre plusieurs jours — Apple Wallet met les ressources en cache de manière agressive et nous ne pouvons pas forcer la mise à jour."
+      }
+    },
+    "howItWorks": {
+      "title": "Comment ça marche",
+      "step1": "Un membre de votre équipe scanne la carte de fidélité du client.",
+      "step2": "Sa carte wallet se met à jour en silence en arrière-plan.",
+      "step3": "Le client voit la notification sur son écran verrouillé.",
+      "note": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité."
+    },
+    "variablesReference": {
+      "title": "Variables disponibles",
+      "description": "Utilisez ces variables dans votre message. Elles seront remplacées par les vraies valeurs lors de l'envoi.",
+      "example": "Exemple"
+    },
+    "triggers": {
+      "sectionTitle": "Messages automatiques",
+      "sectionDescription": "Ces messages sont envoyés automatiquement lorsqu'un client collecte un tampon ou gagne une récompense",
+      "stamp_added": {
+        "name": "Tampon collecté",
+        "description": "Envoyé lorsqu'un client collecte un nouveau tampon"
+      },
+      "reward_earned": {
+        "name": "Récompense débloquée",
+        "description": "Envoyé lorsqu'un client complète sa carte et gagne une récompense"
+      },
+      "reward_redeemed": {
+        "name": "Récompense utilisée",
+        "description": "Envoyé lorsqu'un client utilise sa récompense"
+      },
+      "milestone": {
+        "name": "Palier",
+        "description": "Envoyé lorsqu'un client atteint un nombre précis de tampons"
+      },
+      "near_reward": {
+        "name": "Récompense proche",
+        "description": "Envoyé lorsqu'un client est sur le point de débloquer sa récompense"
+      }
+    },
+    "localePills": {
+      "enSet": "EN",
+      "frSet": "FR"
+    },
+    "card": {
+      "defaultPill": "Défaut",
+      "customPill": "Personnalisé",
+      "disabledPill": "Désactivé"
+    },
+    "milestones": {
+      "title": "Paliers",
+      "description": "Envoyez un message spécial lorsqu'un client atteint un nombre précis de tampons",
+      "add": "Ajouter un palier",
+      "usage": "{count} sur {max} utilisés",
+      "usageActive": "{count} sur {max} actifs",
+      "disabledPill": "Désactivé",
+      "unlimited": "{count} paliers",
+      "empty": "Aucun palier pour le moment. Ajoutez-en un pour envoyer un message personnalisé à un nombre précis de tampons.",
+      "condition": "Quand le client atteint {count} tampons",
+      "conditionShort": "À {count} tampons",
+      "limitReached": "Vous avez atteint la limite de paliers avec Growth. Passez à Pro pour des paliers illimités.",
+      "stampCountLabel": "Se déclenche quand le nombre de tampons est égal à",
+      "stampCountPlaceholder": "ex. 5",
+      "createTitle": "Nouveau palier",
+      "createDescription": "Envoyez une notification personnalisée quand vos clients atteignent un nombre précis de tampons.",
+      "editTitle": "Modifier le palier",
+      "editDescription": "Modifiez le nombre de tampons ou le message de ce palier.",
+      "deleteConfirmTitle": "Supprimer ce palier ?",
+      "deleteConfirmDescription": "Ce palier ne se déclenchera plus pour aucun client.",
+      "deleteButton": "Supprimer le palier",
+      "errors": {
+        "duplicate": "Un palier avec ce nombre de tampons existe déjà.",
+        "quotaExceeded": "Vous avez atteint la limite de paliers. Passez à Pro pour des paliers illimités.",
+        "invalidStampCount": "Le nombre de tampons doit être un nombre positif."
+      },
+      "toasts": {
+        "created": "Palier ajouté",
+        "createFailed": "Échec de l'ajout du palier",
+        "updated": "Palier mis à jour",
+        "updateFailed": "Échec de la mise à jour",
+        "deleted": "Palier supprimé",
+        "deleteFailed": "Échec de la suppression",
+        "swappedOff": "Le palier au tampon {stamp} a été désactivé pour faire de la place",
+        "enabled": "Palier activé",
+        "disabled": "Palier désactivé",
+        "toggleFailed": "Échec de la mise à jour du palier"
+      },
+      "proUpsell": {
+        "title": "Paliers illimités",
+        "description": "Passez à Pro pour créer autant de paliers que vous voulez — sans limite.",
+        "features": {
+          "unlimited": "Paliers illimités",
+          "broadcasts": "Diffusions illimitées + programmation"
+        },
+        "cta": "Passer à Pro"
+      }
+    },
+    "nearReward": {
+      "title": "Notification de récompense proche",
+      "description": "Notifiez le client lorsqu'il est à quelques tampons de débloquer sa récompense",
+      "thresholdLabel": "Notifier à",
+      "thresholdSuffix": "tampons de la récompense"
+    },
+    "editor": {
+      "editTitle": "Modifier le message",
+      "bodyLabel": "Message",
+      "variablesLabel": "Insérer une variable",
+      "previewLabel": "Aperçu",
+      "reset": "Réinitialiser",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "translations": "Traductions",
+      "resetLocale": "Réinitialiser cette langue",
+      "enabled": "Activée",
+      "disabled": "Désactivée",
+      "disabledHint": "Une fois désactivée, la carte de fidélité se met toujours à jour en silence — les clients ne voient simplement pas de notification pour cet événement.",
+      "rewardNameMissing": "Définissez une récompense dans les paramètres du programme pour utiliser cette variable.",
+      "nameCollectionOff": "Activez la collecte des prénoms dans les paramètres du programme pour utiliser cette variable.",
+      "nameWarning": "Certains clients n'ont pas de prénom enregistré. Ils verront le message sans le prénom.",
+      "previewWithoutName": "Aperçu pour les clients sans prénom",
+      "emptyBody": "Le message ne peut pas être vide",
+      "variables": {
+        "stamp_count": "Nombre de tampons actuel",
+        "total_stamps": "Tampons requis",
+        "stamps_left": "Tampons restants",
+        "reward_name": "Nom de la récompense",
+        "business_name": "Nom de l'entreprise",
+        "customer_first_name": "Prénom du client"
+      }
+    },
+    "growthUpsell": {
+      "title": "Débloquez toutes les notifications",
+      "description": "Passez à Growth pour réécrire les messages par défaut à votre façon et créer des notifications personnalisées à des paliers de tampons précis.",
+      "features": {
+        "custom": "Rédigez votre propre texte pour chaque message automatique",
+        "milestones": "Créez des paliers personnalisés à n'importe quel nombre de tampons",
+        "icon": "Conservez votre icône de notification personnalisée"
+      },
+      "cta": "Passer à Growth"
+    },
+    "plan": {
+      "starterReadOnly": "Voici les messages par défaut. Passez à un forfait supérieur pour personnaliser le texte.",
+      "starterUsingDefault": "Le contenu personnalisé est suspendu sur votre plan actuel. Les messages par défaut sont envoyés à la place.",
+      "upgradeToCustomize": "Passez à Growth pour personnaliser",
+      "upgradeToGrowth": "Passer à Growth",
+      "upgradeToPro": "Passer à Pro",
+      "proBadge": "PRO",
+      "growthBadge": "GROWTH",
+      "lockedTooltip": "Disponible avec {tier}",
+      "upgradeTo": "Passer à {tier}"
+    },
+    "toasts": {
+      "saved": "Message enregistré",
+      "saveFailed": "Échec de l'enregistrement",
+      "reset": "Réinitialisé",
+      "resetFailed": "Échec de la réinitialisation",
+      "enabled": "Message réactivé",
+      "disabled": "Message désactivé",
+      "iconUploaded": "Icône téléversée",
+      "iconUploadFailed": "Échec du téléversement"
+    },
+    "broadcasts": {
+      "page": {
+        "title": "Diffusions",
+        "subtitle": "Envoyez un message promotionnel sous forme de notification à tous vos clients"
+      },
+      "new": "Nouvelle diffusion",
+      "empty": {
+        "title": "Aucune diffusion pour le moment",
+        "description": "Créez votre première diffusion pour atteindre tous vos clients d'un seul coup.",
+        "cta": "Envoyer votre première diffusion",
+        "filters": {
+          "drafts": {
+            "title": "Aucun brouillon",
+            "description": "Les brouillons que vous enregistrez apparaîtront ici.",
+            "cta": "Créer une diffusion"
+          },
+          "scheduled": {
+            "title": "Aucune diffusion programmée",
+            "description": "Programmez une diffusion pour la voir ici.",
+            "cta": "Programmer une diffusion"
+          },
+          "sent": {
+            "title": "Aucune diffusion envoyée",
+            "description": "Votre historique d'envoi apparaîtra ici."
+          }
+        }
+      },
+      "preview": {
+        "now": "maintenant",
+        "placeholder": "Votre message apparaîtra ici",
+        "fallbackTitle": "Votre entreprise"
+      },
+      "howItWorks": {
+        "steps": {
+          "compose": "Rédigez votre message.",
+          "audience": "Choisissez votre audience.",
+          "send": "Envoyez maintenant ou programmez."
+        },
+        "delivery": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité.",
+        "appleNote": {
+          "title": "À noter pour Apple Wallet",
+          "body": "N'envoyez que des messages liés à votre programme ou à votre activité. Si Apple juge que les notifications envoyées sont non sollicitées et hors sujet, ils peuvent révoquer la carte de fidélité.",
+          "link": "En savoir plus"
+        },
+        "googleNote": {
+          "title": "À noter pour Google Wallet",
+          "body": "Google limite les cartes à 3 notifications par jour. Les clients ayant déjà reçu 3 notifications aujourd'hui (tampons, etc.) ne recevront pas cette diffusion."
+        }
+      },
+      "lastResults": {
+        "title": "Dernière diffusion",
+        "recipients": "Envois",
+        "delivered": "Livrés",
+        "deliveredShort": "livrés",
+        "failed": "Échecs",
+        "deliveryRate": "{rate}% livrés",
+        "relativeJustNow": "à l'instant",
+        "relativeMinutes": "il y a {count}min",
+        "relativeHours": "il y a {count}h",
+        "relativeDays": "il y a {count}j"
+      },
+      "quota": {
+        "used": "{count} sur {max} envoyées ce mois-ci",
+        "reached": "Limite mensuelle atteinte. Passez à Pro pour des diffusions illimitées.",
+        "unlimited": "Illimité"
+      },
+      "filters": {
+        "all": "Toutes",
+        "scheduled": "Programmées",
+        "sent": "Envoyées",
+        "drafts": "Brouillons"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "scheduled": "Programmée",
+        "sending": "Envoi en cours",
+        "sent": "Envoyée",
+        "cancelled": "Annulée",
+        "failed": "Échec"
+      },
+      "row": {
+        "recipients": "{count} destinataires",
+        "delivered": "{count} livrés",
+        "failed": "{count} échoués",
+        "throttled": "{count} limités",
+        "lastEdited": "Modifiée {date}"
+      },
+      "detail": {
+        "title": "Titre",
+        "body": "Message",
+        "audience": "Audience",
+        "stats": "Livraison",
+        "createdBy": "Créée par",
+        "createdAt": "Créée le",
+        "sentAt": "Envoyée le",
+        "scheduledFor": "Programmée pour",
+        "edit": "Modifier",
+        "delete": "Supprimer le brouillon",
+        "cancel": "Annuler l'envoi",
+        "sendNow": "Envoyer maintenant",
+        "sendAgain": "Renvoyer",
+        "sendAgainNow": "Envoyer maintenant",
+        "sendAgainSchedule": "Programmer",
+        "sendAgainTitle": "Renvoyer cette diffusion ?",
+        "sendAgainBody": "Une nouvelle diffusion sera créée avec le même message et la même audience. Les statistiques de livraison repartiront de zéro.",
+        "confirmDelete": "Supprimer ce brouillon ?",
+        "confirmDeleteBody": "Ce brouillon sera définitivement supprimé. Cette action est irréversible.",
+        "confirmCancel": "Annuler cette diffusion programmée ?",
+        "confirmCancelBody": "La diffusion ne sera pas envoyée et sera déplacée vers vos brouillons. Vous pourrez la reprogrammer plus tard.",
+        "reachable": "Joignables",
+        "totalSendsShort": "total",
+        "reachableHint": "Clients ayant une carte Apple ou Google Wallet active au moment de l'envoi. Ceux qui n'ont jamais installé la carte sont comptés à part.",
+        "deliveryRate": "{rate}% livrés",
+        "deliveredHint": "« Livré » signifie que la mise à jour de la carte a été acceptée par Apple ou Google Wallet. Les clients peuvent avoir masqué les notifications sur leur téléphone — nous ne pouvons pas le détecter, mais la carte elle-même est bien mise à jour.",
+        "apple": "Apple Wallet",
+        "google": "Google Wallet",
+        "failed": "Échecs",
+        "failedHint": "Clients pour lesquels ni Apple ni Google Wallet n'a accepté la notification. Généralement des erreurs réseau temporaires — ces clients seront reciblés lors de votre prochaine diffusion.",
+        "notReachable": "Non joignables",
+        "notReachableBody": "{count} {count, plural, one {client n'a} other {clients n'ont}} pas de carte wallet installée",
+        "passRemoved": "Carte supprimée",
+        "passRemovedHint": "Utilisateurs Google Wallet ayant supprimé la carte avant l'envoi. Ils ne recevront pas cette diffusion.",
+        "throttledHint": "Google limite chaque carte à 3 notifications par 24h. Les clients limités recevront votre prochaine diffusion."
+      },
+      "wizard": {
+        "steps": {
+          "compose": "Rédiger",
+          "audience": "Audience",
+          "schedule": "Programmer",
+          "review": "Vérifier"
+        },
+        "summary": {
+          "messageLabel": "Message",
+          "customerOne": "client",
+          "customerOther": "clients"
+        },
+        "compose": {
+          "title": "Rédigez votre diffusion",
+          "subtitle": "Écrivez le message court que vos clients verront dans leur wallet. Ajoutez une traduction anglaise si vous voulez — les clients voient la langue qui correspond à leur téléphone.",
+          "bodyLabel": "Message",
+          "bodyPlaceholder": "Profitez de 20% de réduction ce week-end !",
+          "charCount": "{count} / {max} caractères",
+          "translationHint": "Si vous n'ajoutez pas de traduction, tous les clients reçoivent la version par défaut, quelle que soit leur langue."
+        },
+        "audience": {
+          "title": "Qui recevra cette diffusion ?",
+          "subtitle": "Choisissez tout le monde ou filtrez par activité.",
+          "all": "Tous les clients inscrits",
+          "allDescription": "Chaque client avec une carte wallet",
+          "filtered": "Audience filtrée",
+          "filteredDescription": "Sélectionnez les destinataires par activité",
+          "estimate": "≈ {count} clients",
+          "estimating": "Calcul en cours...",
+          "group": {
+            "enrollment": "Ancienneté",
+            "enrollmentHelp": "Filtrez selon la date d'inscription du client dans votre programme.",
+            "stamps": "Tampons collectés",
+            "stampsHelp": "Ne cible que les clients qui ont entre N et M tampons sur leur carte actuelle.",
+            "activity": "Activité",
+            "activityHelp": "Filtrez selon le comportement d'achat et la dernière visite."
+          },
+          "enrollment": {
+            "any": "Tous",
+            "recent": "Nouveaux",
+            "recentDesc": "Inscrits dans les N derniers jours",
+            "old": "Anciens",
+            "oldDesc": "Inscrits il y a plus de N jours",
+            "daysPlaceholder": "ex. 30",
+            "daysSuffix": "jours"
+          },
+          "stamps": {
+            "minLabel": "Au moins",
+            "maxLabel": "Au plus",
+            "placeholder": "ex. 5",
+            "suffix": "tampons",
+            "help": "Astuce : laissez un champ vide pour ne pas imposer de borne."
+          },
+          "activity": {
+            "hasRedeemedLabel": "A déjà utilisé une récompense",
+            "hasRedeemedHelp": "N'envoie qu'aux clients qui ont déjà réclamé au moins une récompense.",
+            "inactiveLabel": "Inactifs depuis",
+            "inactiveHelp": "Cible les clients qui ne sont pas revenus depuis N jours — utile pour les relancer.",
+            "inactivePlaceholder": "ex. 60"
+          },
+          "filters": {
+            "enrolled_before_days": "Inscrits il y a plus de N jours",
+            "enrolled_after_days": "Inscrits dans les N derniers jours",
+            "stamp_count_min": "Au moins N tampons",
+            "stamp_count_max": "Au plus N tampons",
+            "has_redeemed": "A déjà utilisé une récompense",
+            "inactive_days": "Inactifs depuis N jours"
+          },
+          "chip": {
+            "all": "Tout le monde",
+            "enrolled_before_days": "Inscrits > {n}j",
+            "enrolled_after_days": "Inscrits < {n}j",
+            "stamp_count_min": "≥ {n} tampons",
+            "stamp_count_max": "≤ {n} tampons",
+            "has_redeemed": "A utilisé",
+            "inactive_days": "Inactifs {n}j+"
+          }
+        },
+        "schedule": {
+          "title": "Quand l'envoyer ?",
+          "subtitle": "Envoyez tout de suite, ou programmez à une date et une heure précises.",
+          "sendNow": "Envoyer maintenant",
+          "sendNowDescription": "Les clients recevront la diffusion tout de suite",
+          "scheduleLater": "Programmer pour plus tard",
+          "scheduleLaterDescription": "Choisissez une date et une heure",
+          "timezoneLabel": "Fuseau horaire",
+          "pastError": "La date doit être dans le futur",
+          "dateLabel": "Date",
+          "timeLabel": "Heure"
+        },
+        "review": {
+          "title": "Vérifier et envoyer",
+          "subtitle": "Un dernier coup d'œil avant d'envoyer.",
+          "summaryTitle": "Résumé",
+          "audienceLabel": "Audience",
+          "sendTimeLabel": "Horaire d'envoi",
+          "recipientsLabel": "Destinataires",
+          "sendImmediately": "Envoi immédiat",
+          "quotaNote": "Ceci utilisera 1 de vos {max} diffusions mensuelles",
+          "sendButton": "Envoyer la diffusion",
+          "scheduleButton": "Programmer la diffusion",
+          "confirmSend": "Envoyer la diffusion à {count} clients ?",
+          "confirmSendNowBody": "Cette action est irréversible. Les clients recevront la notification immédiatement.",
+          "confirmSendScheduleBody": "Cette action est irréversible. La diffusion sera envoyée à la date programmée.",
+          "heroRecipients": "{count, plural, one {# client} other {# clients}}",
+          "heroImmediate": "Envoi immédiat",
+          "heroScheduledFor": "Programmée pour {date}",
+          "translationLabel": "Traduction",
+          "contentLabel": "Message",
+          "nameLabel": "Nommer cette diffusion",
+          "namePlaceholder": "ex. Teasing Black Friday",
+          "nameHelp": "Pour vos archives uniquement — les clients ne verront pas ce nom. Sert à retrouver la diffusion dans votre historique."
+        },
+        "next": "Suivant",
+        "back": "Retour",
+        "cancel": "Annuler",
+        "saveDraft": "Brouillon",
+        "save": "Enregistrer",
+        "deleteDraft": "Supprimer",
+        "cancelBroadcast": "Annuler l'envoi",
+        "stepIndicator": "Étape {current} sur {total}"
+      },
+      "proUpsell": {
+        "title": "Planifiez et diffusez sans limite",
+        "description": "Préparez vos campagnes à l'avance et touchez vos clients aussi souvent que nécessaire.",
+        "features": {
+          "schedule": "Programmez vos diffusions des jours ou semaines à l'avance",
+          "unlimited": "Diffusions mensuelles illimitées"
+        },
+        "cta": "Passer à Pro"
+      },
+      "starter": {
+        "headline": "Touchez tous vos clients d'un seul coup",
+        "description": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité.",
+        "features": {
+          "segment": "Ciblez par tampons, activité ou date d'inscription",
+          "schedule": "Programmez vos diffusions à l'avance (Pro)",
+          "tracking": "Suivi de livraison en direct — voyez qui l'a reçue"
+        },
+        "cta": "Passer à Growth"
+      },
+      "toasts": {
+        "draftSaved": "Brouillon enregistré",
+        "draftSaveFailed": "Échec de l'enregistrement",
+        "sent": "Diffusion envoyée",
+        "sendFailed": "Échec de l'envoi",
+        "scheduled": "Diffusion programmée",
+        "scheduleFailed": "Échec de la programmation",
+        "cancelled": "Diffusion annulée",
+        "cancelFailed": "Échec de l'annulation",
+        "sentAgain": "Diffusion renvoyée",
+        "sentAgainFailed": "Échec du renvoi",
+        "deleted": "Brouillon supprimé",
+        "deleteFailed": "Échec de la suppression",
+        "scheduledCancelled": "Diffusion annulée — déplacée vers vos brouillons"
+      },
+      "errors": {
+        "upgradeRequired": "Les diffusions nécessitent Growth ou Pro.",
+        "quotaExceeded": "Vous avez utilisé toutes vos diffusions ce mois-ci. Enregistrez-la comme brouillon et envoyez-la quand votre quota se réinitialise, ou passez à Pro pour des diffusions illimitées.",
+        "proFiltersBlocked": "Les filtres avancés nécessitent Pro."
+      }
+    },
+    "downgradeBanner": {
+      "title": "Votre forfait Growth a expiré",
+      "description": "{count, plural, =0 {Les messages personnalisés sont désactivés.} one {# message programmé a été annulé et les messages personnalisés sont désactivés.} other {# messages programmés ont été annulés et les messages personnalisés sont désactivés.}}",
+      "cta": "Réactivez votre forfait",
+      "dismiss": "Ignorer"
+    }
+  }
+}

@@ -21,6 +21,7 @@ export default getRequestConfig(async () => {
       ...(await import(`../../messages/${locale}/dashboard.json`)).default,
       ...(await import(`../../messages/${locale}/billing.json`)).default,
       ...(await import(`../../messages/${locale}/features.json`)).default,
+      ...(await import(`../../messages/${locale}/notifications.json`)).default,
     },
   };
 });
