@@ -509,6 +509,56 @@ html {
   background: transparent;
 }
 
+/* Notification template editor: contenteditable area + inline variable pills */
+.var-editor {
+  line-height: 1.55;
+  cursor: text;
+}
+.var-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground, #A0A0A0);
+  pointer-events: none;
+}
+.var-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 1px;
+  padding: 1px 3px 1px 5px;
+  border-radius: 999px;
+  background: var(--accent-light, #F5F0E8);
+  border: 1.5px solid var(--accent, #8B5A2B);
+  color: var(--accent, #8B5A2B);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78em;
+  font-weight: 500;
+  white-space: nowrap;
+  vertical-align: baseline;
+  line-height: 1.4;
+  user-select: none;
+}
+.var-pill-label {
+  pointer-events: none;
+}
+.var-pill-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: transparent;
+  border: 0;
+  color: var(--accent, #8B5A2B);
+  opacity: 0.55;
+  cursor: pointer;
+  padding: 0;
+}
+.var-pill-remove:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

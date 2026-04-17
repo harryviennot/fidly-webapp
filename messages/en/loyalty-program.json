@@ -12,7 +12,7 @@
     "linkCopied": "Link copied to clipboard",
     "qrCodeHint": "QR code downloads are available in the scanner app",
     "dataCollectionDescription": "Collect this information when customers sign up for their loyalty card.",
-    "anonymousModeNote": "Note: Collecting no data enables anonymous mode - customers can sign up without providing any information.",
+    "anonymousModeNote": "Collecting no data enables anonymous mode — customers can sign up without providing any information.",
     "anonymousModeWarning": "Anonymous mode is active. Customers won't need to fill any form, but you won't be able to identify them. They won't be able to recover a lost card or sync across devices, and you won't be able to contact them for marketing.",
     "anonymousModeTitle": "Anonymous Mode active",
     "rewardFallback": "a reward",
@@ -24,7 +24,7 @@
       "configuration": "Configuration",
       "templates": "Templates",
       "notifications": "Notifications",
-      "promotions": "Promotions",
+      "broadcasts": "Broadcasts",
       "locations": "Locations"
     },
     "overview": {
@@ -114,9 +114,9 @@
       "installRate": "install rate",
       "comingSoon": "Coming soon",
       "notifications": "Notifications",
-      "notificationsDescription": "Push notification templates and broadcast messages",
-      "promotions": "Promotions",
-      "promotionsDescription": "Promotional events and multipliers",
+      "notificationsDescription": "Automatic messages sent to customers on loyalty events",
+      "broadcasts": "Broadcasts",
+      "broadcastsDescription": "Send promotional messages to all your customers at once",
       "locations": "Locations",
       "locationsDescription": "Business locations and geofencing"
     },
@@ -156,11 +156,11 @@
     "unsavedChanges": "Unsaved changes",
     "dataFields": {
       "name": "Name",
-      "nameDescription": "Personalize their card and help you identify customers",
+      "nameDescription": "Identify your customers, personalize their card and notifications",
       "email": "Email",
       "emailDescription": "Enable pass recovery, email campaigns, and customer lookup",
       "phone": "Phone",
-      "phoneDescription": "Enable SMS notifications and campaigns (coming soon)"
+      "phoneDescription": "Enable SMS notifications and campaigns"
     },
     "requiredField": "Required",
     "optionalField": "Optional",

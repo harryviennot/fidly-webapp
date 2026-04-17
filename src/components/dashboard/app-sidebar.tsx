@@ -2,6 +2,7 @@ import * as React from "react"
 import { useTranslations } from "next-intl";
 import { canSeeNavItem } from "@/lib/rbac";
 import { useBusiness } from "@/contexts/business-context";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { BusinessSwitcher } from "./business-switcher";
@@ -40,7 +41,13 @@ interface NavItem {
   href: string;
   labelKey: string;
   icon: React.ComponentType<{ className?: string; weight?: "regular" | "fill" | "bold" }>;
+  /** Static badge label — always shown when set (legacy "Pro" pattern). */
   pro?: boolean;
+  /** Entitlement key that gates the feature. Badge is shown only when the
+   *  user lacks this feature, with the label set by `lockedBadgeLabel`. */
+  lockedFeature?: string;
+  /** Badge label when the feature is locked (e.g. "GROWTH" or "PRO"). */
+  lockedBadgeLabel?: string;
 }
 
 // Top section — no label
@@ -56,7 +63,13 @@ const programItems: NavItem[] = [
   { href: "/program/settings", labelKey: "loyaltyProgram.nav.configuration", icon: GearSix },
   { href: "/program/templates", labelKey: "loyaltyProgram.nav.templates", icon: CreditCard },
   { href: "/program/notifications", labelKey: "loyaltyProgram.nav.notifications", icon: Bell },
-  { href: "/program/promotions", labelKey: "loyaltyProgram.nav.promotions", icon: Megaphone, pro: true },
+  {
+    href: "/program/broadcasts",
+    labelKey: "loyaltyProgram.nav.broadcasts",
+    icon: Megaphone,
+    lockedFeature: "notifications.broadcast",
+    lockedBadgeLabel: "GROWTH",
+  },
   { href: "/program/locations", labelKey: "loyaltyProgram.nav.locations", icon: MapPin, pro: true },
 ];
 
@@ -75,6 +88,7 @@ const bottomItems: NavItem[] = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { currentRole } = useBusiness();
+  const { hasFeature } = useEntitlements();
   const t = useTranslations();
 
   const isActive = (href: string) => {
@@ -92,6 +106,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const renderNavItem = (item: NavItem) => {
     const Icon = item.icon;
     const active = isActive(item.href);
+    const lockedBadge =
+      item.lockedFeature && !hasFeature(item.lockedFeature)
+        ? item.lockedBadgeLabel ?? "PRO"
+        : null;
     return (
       <SidebarMenuItem key={item.href}>
         <SidebarMenuButton
@@ -113,6 +131,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {item.pro && (
               <Badge variant="pro" className="ml-auto">
                 PRO
+              </Badge>
+            )}
+            {lockedBadge && (
+              <Badge variant="pro" className="ml-auto">
+                {lockedBadge}
               </Badge>
             )}
           </Link>
