@@ -22,6 +22,8 @@ interface BusinessContextType {
   memberships: Membership[];
   currentBusiness: Business | null;
   currentRole: MembershipRole | null;
+  hasAnyMembership: boolean;
+  hasActiveMembership: boolean;
   setCurrentBusiness: (business: Business) => void;
   loading: boolean;
   error: string | null;
@@ -79,21 +81,42 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     business: m.businesses as unknown as Business,
   }));
 
-  // Once memberships load, ensure currentBusinessId points to a valid membership
+  const activeMemberships = memberships.filter(
+    (m) => m.business.status === "active"
+  );
+  const hasAnyMembership = memberships.length > 0;
+  const hasActiveMembership = activeMemberships.length > 0;
+
+  // Reconcile currentBusinessId against memberships. Prefer an active
+  // membership; never silently auto-select a suspended/pending one.
   useEffect(() => {
-    if (memberships.length === 0) return;
-    const valid = memberships.find((m) => m.business.id === currentBusinessId);
-    if (!valid) {
-      // savedId not in memberships (or never set) — fall back to first
-      setCurrentBusinessId(memberships[0].business.id);
+    if (!user?.id) return;
+    const storedMatch = memberships.find(
+      (m) => m.business.id === currentBusinessId
+    );
+    const storedIsActive = storedMatch?.business.status === "active";
+
+    if (storedIsActive) return;
+
+    if (activeMemberships.length > 0) {
+      const nextId = activeMemberships[0].business.id;
+      if (nextId !== currentBusinessId) {
+        setCurrentBusinessId(nextId);
+        localStorage.setItem("currentBusinessId", nextId);
+      }
+      return;
+    }
+
+    // No active membership — clear stale selection so stale IDs can't linger.
+    if (currentBusinessId !== null) {
+      setCurrentBusinessId(null);
+      localStorage.removeItem("currentBusinessId");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memberships.length]);
+  }, [user?.id, memberships.length, activeMemberships.length]);
 
   const membership =
-    memberships.find((m) => m.business.id === currentBusinessId) ??
-    memberships[0] ??
-    null;
+    memberships.find((m) => m.business.id === currentBusinessId) ?? null;
   const currentBusiness = membership?.business ?? null;
   const currentRole = membership?.role ?? null;
 
@@ -156,6 +179,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         memberships,
         currentBusiness,
         currentRole,
+        hasAnyMembership,
+        hasActiveMembership,
         setCurrentBusiness,
         loading: isLoading || !localeSynced,
         error: queryError ? "Failed to load memberships" : null,
