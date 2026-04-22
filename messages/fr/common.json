@@ -45,5 +45,11 @@
     "noBusinessFound": "Aucune entreprise trouvée",
     "noBusinessAccess": "Vous n'avez pas encore accès à une entreprise."
   },
+  "noActiveBusiness": {
+    "title": "Vous n'avez pas encore d'entreprise active",
+    "description": "Si vous avez une entreprise suspendue, contactez le support pour la récupérer. Sinon, vous pouvez en créer une nouvelle ci-dessous.",
+    "createBusinessCta": "Créer une nouvelle entreprise",
+    "contactSupport": "Contacter le support"
+  },
   "poweredBy": "Propulsé par"
 }
