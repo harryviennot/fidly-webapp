@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/contexts/auth-provider";
@@ -82,6 +82,26 @@ export default function InviteAcceptPage() {
       handleAccept();
     }, 500);
   }, [handleAccept]);
+
+  // Auto-accept after OAuth: when an authenticated user lands on /invite via
+  // the OAuth callback redirect (no form submit fired handleAuthSuccess), the
+  // password flow's auto-accept never runs. Mirror that behavior here once the
+  // invitation is loaded and the OAuth-returned email matches the invite.
+  const autoAcceptedRef = useRef(false);
+  useEffect(() => {
+    if (autoAcceptedRef.current) return;
+    if (!session || !user || !invitation) return;
+    if (accepting || success) return;
+    if (invitation.is_expired || invitation.status !== "pending") return;
+    if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) return;
+    autoAcceptedRef.current = true;
+    console.log("[invite] auto-accept firing", {
+      userEmail: user.email,
+      inviteEmail: invitation.email,
+      role: invitation.role,
+    });
+    handleAccept();
+  }, [session, user, invitation, accepting, success, handleAccept]);
 
   const handleSignInDifferentAccount = () => {
     const showcaseUrl =

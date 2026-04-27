@@ -95,7 +95,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithOAuth = useCallback(
     async (provider: OAuthProvider, returnTo?: string) => {
       const callbackUrl = new URL("/auth/callback", globalThis.location.origin);
-      if (returnTo) callbackUrl.searchParams.set("next", returnTo);
+      if (returnTo) {
+        callbackUrl.searchParams.set("next", returnTo);
+        // Backup: stash next in sessionStorage in case Supabase strips the
+        // query string from the configured redirect URL.
+        try {
+          sessionStorage.setItem("auth_next", returnTo);
+        } catch {
+          // sessionStorage unavailable (private browsing, etc.) — silently
+          // degrade; the query-string path still works in most setups.
+        }
+      }
+      console.log("[auth] signInWithOAuth", { provider, returnTo, redirectTo: callbackUrl.toString() });
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: { redirectTo: callbackUrl.toString() },

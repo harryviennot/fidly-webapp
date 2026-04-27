@@ -6,6 +6,12 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next");
 
+  console.log("[auth/callback] hit:", {
+    fullUrl: requestUrl.toString(),
+    hasCode: !!code,
+    next,
+  });
+
   const providerError = requestUrl.searchParams.get("error");
   if (providerError) {
     const description = requestUrl.searchParams.get("error_description") || providerError;
