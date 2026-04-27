@@ -5,6 +5,10 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next");
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ??
+    request.headers.get("origin") ??
+    requestUrl.origin;
 
   console.log("[auth/callback] hit:", {
     fullUrl: requestUrl.toString(),
@@ -37,8 +41,8 @@ export async function GET(request: Request) {
   }
 
   if (next && next.startsWith("/") && !next.startsWith("//")) {
-    return NextResponse.redirect(new URL(next, requestUrl.origin));
+    return NextResponse.redirect(new URL(next, baseUrl));
   }
 
-  return NextResponse.redirect(new URL("/", requestUrl.origin));
+  return NextResponse.redirect(new URL("/", baseUrl));
 }
