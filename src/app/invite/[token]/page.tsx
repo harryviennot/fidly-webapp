@@ -89,17 +89,28 @@ export default function InviteAcceptPage() {
   // invitation is loaded and the OAuth-returned email matches the invite.
   const autoAcceptedRef = useRef(false);
   useEffect(() => {
+    console.log("[invite] auto-accept check", {
+      alreadyAccepted: autoAcceptedRef.current,
+      hasSession: !!session,
+      hasUser: !!user,
+      hasInvitation: !!invitation,
+      accepting,
+      success,
+      invitationExpired: invitation?.is_expired,
+      invitationStatus: invitation?.status,
+      userEmail: user?.email,
+      inviteEmail: invitation?.email,
+      emailMatches: user?.email && invitation?.email
+        ? user.email.toLowerCase() === invitation.email.toLowerCase()
+        : null,
+    });
     if (autoAcceptedRef.current) return;
     if (!session || !user || !invitation) return;
     if (accepting || success) return;
     if (invitation.is_expired || invitation.status !== "pending") return;
     if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) return;
     autoAcceptedRef.current = true;
-    console.log("[invite] auto-accept firing", {
-      userEmail: user.email,
-      inviteEmail: invitation.email,
-      role: invitation.role,
-    });
+    console.log("[invite] auto-accept firing");
     handleAccept();
   }, [session, user, invitation, accepting, success, handleAccept]);
 

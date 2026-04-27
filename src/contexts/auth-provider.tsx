@@ -94,16 +94,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithOAuth = useCallback(
     async (provider: OAuthProvider, returnTo?: string) => {
-      const callbackUrl = new URL("/auth/callback", globalThis.location.origin);
+      // Use the configured app URL when present so OAuth lands on the
+      // cookie-domain-compatible host (e.g. nip.io) even if the current
+      // tab somehow resolved to localhost. Falls back to the live origin
+      // only when NEXT_PUBLIC_APP_URL isn't set.
+      const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL || globalThis.location.origin;
+      const callbackUrl = new URL("/auth/callback", baseUrl);
       if (returnTo) {
         callbackUrl.searchParams.set("next", returnTo);
-        // Backup: stash next in sessionStorage in case Supabase strips the
-        // query string from the configured redirect URL.
         try {
           sessionStorage.setItem("auth_next", returnTo);
         } catch {
-          // sessionStorage unavailable (private browsing, etc.) — silently
-          // degrade; the query-string path still works in most setups.
+          // sessionStorage unavailable (private browsing) — silently degrade.
         }
       }
       console.log("[auth] signInWithOAuth", { provider, returnTo, redirectTo: callbackUrl.toString() });
