@@ -35,6 +35,9 @@ interface AuthContextType {
     token: string
   ) => Promise<{ error: AuthError | null }>;
   resendOtp: (email: string) => Promise<{ error: AuthError | null }>;
+  resetPasswordForEmail: (
+    email: string
+  ) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -142,6 +145,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [supabase.auth]
   );
 
+  const resetPasswordForEmail = useCallback(
+    async (email: string) => {
+      const showcaseUrl =
+        process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${showcaseUrl}/reset-password`,
+      });
+      return { error };
+    },
+    [supabase.auth]
+  );
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     // Redirect to showcase login after sign out
@@ -152,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signUp, signIn, signInWithOAuth, signOut, verifyOtp, resendOtp }}
+      value={{ user, session, loading, signUp, signIn, signInWithOAuth, signOut, verifyOtp, resendOtp, resetPasswordForEmail }}
     >
       {children}
     </AuthContext.Provider>

@@ -26,7 +26,10 @@ export interface InvitationPublic {
   role: InvitableRole;
   status: InvitationStatus;
   expires_at: string;
+  accepted_at?: string | null;
   business_name: string;
+  business_logo_url?: string | null;
+  business_accent_color?: string | null;
   inviter_name: string;
   is_expired: boolean;
 }
