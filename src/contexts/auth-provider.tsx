@@ -8,7 +8,9 @@ import {
   useCallback,
 } from "react";
 import { createClient } from "../utils/supabase/client";
-import type { User, Session, AuthError } from "@supabase/supabase-js";
+import type { User, Session, AuthError, Provider } from "@supabase/supabase-js";
+
+export type OAuthProvider = Extract<Provider, "google" | "apple">;
 
 interface AuthContextType {
   user: User | null;
@@ -22,6 +24,10 @@ interface AuthContextType {
   signIn: (
     email: string,
     password: string
+  ) => Promise<{ error: AuthError | null }>;
+  signInWithOAuth: (
+    provider: OAuthProvider,
+    returnTo?: string
   ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   verifyOtp: (
@@ -86,6 +92,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [supabase.auth]
   );
 
+  const signInWithOAuth = useCallback(
+    async (provider: OAuthProvider, returnTo?: string) => {
+      const callbackUrl = new URL("/auth/callback", globalThis.location.origin);
+      if (returnTo) callbackUrl.searchParams.set("next", returnTo);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: callbackUrl.toString() },
+      });
+      return { error };
+    },
+    [supabase.auth]
+  );
+
   const verifyOtp = useCallback(
     async (email: string, token: string) => {
       const { error } = await supabase.auth.verifyOtp({
@@ -119,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signUp, signIn, signOut, verifyOtp, resendOtp }}
+      value={{ user, session, loading, signUp, signIn, signInWithOAuth, signOut, verifyOtp, resendOtp }}
     >
       {children}
     </AuthContext.Provider>

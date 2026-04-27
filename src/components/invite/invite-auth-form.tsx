@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useParams } from "next/navigation";
 import { Eye, EyeSlash, Check } from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/auth-provider";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/form/form-field";
+import { OAuthButtons, OAuthDivider } from "@/components/auth/OAuthButtons";
 import type { InvitationPublic } from "@/types";
 
 interface InviteAuthFormProps {
@@ -14,6 +16,9 @@ interface InviteAuthFormProps {
 
 export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProps) {
   const { signUp, signIn, verifyOtp, resendOtp } = useAuth();
+  const params = useParams();
+  const token = typeof params.token === "string" ? params.token : "";
+  const returnTo = token ? `/invite/${token}` : undefined;
 
   const [email, setEmail] = useState(invitation.email);
   const [name, setName] = useState(invitation.name || "");
@@ -265,12 +270,19 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">
-          {error}
-        </div>
-      )}
+    <div className="space-y-4">
+      <OAuthButtons
+        returnTo={returnTo}
+        disabled={loading}
+        onError={(message) => setError(message)}
+      />
+      <OAuthDivider />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">
+            {error}
+          </div>
+        )}
 
       <FormField
         label="Email"
@@ -354,6 +366,7 @@ export function InviteAuthForm({ invitation, onAuthSuccess }: InviteAuthFormProp
       <Button type="submit" disabled={!isValid || loading} className="w-full">
         {loading ? "Please wait..." : "Create account & join"}
       </Button>
-    </form>
+      </form>
+    </div>
   );
 }

@@ -4,14 +4,16 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("next");
 
   if (code) {
     const supabase = await createClient();
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  // Check if there's a pending invite token to return to
-  // The actual token handling happens client-side via sessionStorage
-  // Just redirect to root, the app will handle routing
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    return NextResponse.redirect(new URL(next, requestUrl.origin));
+  }
+
   return NextResponse.redirect(new URL("/", requestUrl.origin));
 }
