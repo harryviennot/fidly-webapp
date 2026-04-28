@@ -183,14 +183,22 @@ export function InviteAuthChoice({
   // ---- choose method ----
   if (subPhase === "choose") {
     const lastUsedLabel = tOAuth("lastUsed");
+    const emailDomain = invitation.email.split("@")[1]?.toLowerCase() ?? "";
+    const isGoogleEmail = ["gmail.com", "googlemail.com"].includes(emailDomain);
+    const isAppleEmail = ["icloud.com", "me.com", "mac.com"].includes(emailDomain);
+    const showGoogle = !isAppleEmail;
+    const showApple = !isGoogleEmail;
     return (
       <div className="space-y-6">
-        <div className="text-center space-y-1">
+        <div className="text-center space-y-2">
           <h1 className="text-xl font-semibold tracking-tight">
             {tStep2("greeting", { name })}
           </h1>
           <p className="text-sm text-muted-foreground">
             {tStep2("howToJoin", { business: invitation.business_name })}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {tStep2("emailReminder", { email: invitation.email })}
           </p>
         </div>
 
@@ -201,26 +209,30 @@ export function InviteAuthChoice({
         )}
 
         <div className="space-y-3">
-          <MethodButton
-            onClick={() => handleOAuth("google")}
-            disabled={pendingOAuth !== null}
-            loading={pendingOAuth === "google"}
-            loadingLabel={tOAuth("connecting")}
-            icon={<GoogleLogo size={20} />}
-            lastUsedLabel={lastUsed === "google" ? lastUsedLabel : undefined}
-          >
-            {tStep2("continueGoogle")}
-          </MethodButton>
-          <MethodButton
-            onClick={() => handleOAuth("apple")}
-            disabled={pendingOAuth !== null}
-            loading={pendingOAuth === "apple"}
-            loadingLabel={tOAuth("connecting")}
-            icon={<AppleLogo size={20} />}
-            lastUsedLabel={lastUsed === "apple" ? lastUsedLabel : undefined}
-          >
-            {tStep2("continueApple")}
-          </MethodButton>
+          {showGoogle && (
+            <MethodButton
+              onClick={() => handleOAuth("google")}
+              disabled={pendingOAuth !== null}
+              loading={pendingOAuth === "google"}
+              loadingLabel={tOAuth("connecting")}
+              icon={<GoogleLogo size={20} />}
+              lastUsedLabel={lastUsed === "google" ? lastUsedLabel : undefined}
+            >
+              {tStep2("continueGoogle")}
+            </MethodButton>
+          )}
+          {showApple && (
+            <MethodButton
+              onClick={() => handleOAuth("apple")}
+              disabled={pendingOAuth !== null}
+              loading={pendingOAuth === "apple"}
+              loadingLabel={tOAuth("connecting")}
+              icon={<AppleLogo size={20} />}
+              lastUsedLabel={lastUsed === "apple" ? lastUsedLabel : undefined}
+            >
+              {tStep2("continueApple")}
+            </MethodButton>
+          )}
           <MethodButton
             onClick={() => setSubPhase("password")}
             disabled={pendingOAuth !== null}

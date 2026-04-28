@@ -15,7 +15,7 @@ interface InviteIntroProps {
 
 export function InviteIntro({ invitation, initialName, onContinue }: InviteIntroProps) {
   const t = useTranslations("auth.invite");
-  const [name, setName] = useState(initialName ?? invitation.name ?? "");
+  const [name, setName] = useState(initialName || invitation.name || "");
 
   const trimmedName = name.trim();
   const canContinue = trimmedName.length > 0;
@@ -63,6 +63,9 @@ export function InviteIntro({ invitation, initialName, onContinue }: InviteIntro
         <p className="mt-2 font-medium text-sm break-all">{invitation.email}</p>
         <p className="mt-1 text-xs text-muted-foreground">
           {t("step1.emailHint")}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t("step1.emailHintSwitch", { inviter: invitation.inviter_name })}
         </p>
       </div>
 

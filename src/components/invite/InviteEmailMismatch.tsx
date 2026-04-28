@@ -21,16 +21,8 @@ export function InviteEmailMismatch({
 
   const handleSwitchAccount = async () => {
     setSwitching(true);
-    const here = window.location.href;
     const supabase = createClient();
     await supabase.auth.signOut();
-    const showcaseUrl =
-      process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
-    const params = new URLSearchParams({
-      email: invitation.email,
-      redirect: here,
-    });
-    window.location.href = `${showcaseUrl}/login?${params.toString()}`;
   };
 
   return (
