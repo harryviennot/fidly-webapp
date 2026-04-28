@@ -2,28 +2,24 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
+import {
+  ArrowSquareOutIcon,
+  CheckCircleIcon,
+  DeviceMobileIcon,
+} from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/auth-provider";
 import { useBusiness } from "@/contexts/business-context";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { StampeoLogo } from "@/components/ui/stampeo-logo";
-import { DeviceMobileIcon, CheckCircleIcon, ArrowSquareOutIcon } from "@phosphor-icons/react";
+import { InviteShell } from "@/components/invite/InviteShell";
 
 const scanUrl = process.env.NEXT_PUBLIC_SCAN_URL;
 
 export default function ScannerWelcomePage() {
   const { signOut } = useAuth();
   const { currentRole, currentBusiness, loading } = useBusiness();
-  const t = useTranslations('auth.scannerWelcome');
-  const tAuth = useTranslations('auth');
+  const t = useTranslations("auth.scannerWelcome");
+  const tAuth = useTranslations("auth");
 
-  // If user is not a scanner, redirect them to dashboard
   useEffect(() => {
     if (!loading && currentRole && currentRole !== "scanner") {
       window.location.href = "/";
@@ -32,66 +28,90 @@ export default function ScannerWelcomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <StampeoLogo className="h-8" />
+    <InviteShell
+      businessName={currentBusiness?.name}
+      logoUrl={currentBusiness?.logo_url}
+    >
+      <div className="space-y-6">
+        <div className="text-center space-y-3">
+          <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center text-foreground">
+            <CheckCircleIcon size={24} weight="fill" />
           </div>
-          <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircleIcon className="h-10 w-10 text-green-600" weight="fill" />
-          </div>
-          <CardTitle className="text-green-600">{t('allSet')}</CardTitle>
-          <CardDescription>
-            {currentBusiness ? (
-              t('joinedAs', { business: currentBusiness.name })
-            ) : (
-              t('setupComplete')
-            )}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          <div className="bg-gray-100 rounded-lg p-6 text-center">
-            <DeviceMobileIcon className="h-12 w-12 mx-auto mb-3 text-gray-600" />
-            <h3 className="font-medium mb-2">{t('downloadApp')}</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              {t('downloadDescription')}
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold tracking-tight">
+              {t("allSet")}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {currentBusiness
+                ? t("joinedAs", { business: currentBusiness.name })
+                : t("setupComplete")}
             </p>
-            <div className="space-y-2">
-              {scanUrl && (
-                <Button asChild className="w-full">
-                  <a href={scanUrl} target="_blank" rel="noopener noreferrer">
-                    {t('openScanner')}
-                    <ArrowSquareOutIcon className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-              )}
-              <Button variant="outline" className="w-full" disabled>
-                {t('appStore')}
-              </Button>
-              <Button variant="outline" className="w-full" disabled>
-                {t('googlePlay')}
-              </Button>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-[var(--card-border)] p-4 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+              <DeviceMobileIcon size={18} />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold">{t("downloadApp")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("downloadDescription")}
+              </p>
             </div>
           </div>
 
-          <Button
-            variant="ghost"
+          <div className="space-y-2">
+            {scanUrl && (
+              <Button
+                asChild
+                variant="gradient"
+                size="xl"
+                className="w-full"
+              >
+                <a href={scanUrl} target="_blank" rel="noopener noreferrer">
+                  {t("openScanner")}
+                  <ArrowSquareOutIcon className="ml-1 h-4 w-4" />
+                </a>
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="xl"
+              className="w-full"
+              disabled
+            >
+              {t("appStore")}
+            </Button>
+            <Button
+              variant="outline"
+              size="xl"
+              className="w-full"
+              disabled
+            >
+              {t("googlePlay")}
+            </Button>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <button
+            type="button"
             onClick={() => signOut()}
-            className="w-full text-gray-600"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {tAuth('signOut')}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+            {tAuth("signOut")}
+          </button>
+        </div>
+      </div>
+    </InviteShell>
   );
 }
