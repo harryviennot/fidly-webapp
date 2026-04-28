@@ -8,7 +8,9 @@ import {
   useCallback,
 } from "react";
 import { createClient } from "../utils/supabase/client";
-import type { User, Session, AuthError } from "@supabase/supabase-js";
+import type { User, Session, AuthError, Provider } from "@supabase/supabase-js";
+
+export type OAuthProvider = Extract<Provider, "google" | "apple">;
 
 interface AuthContextType {
   user: User | null;
@@ -23,12 +25,19 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ error: AuthError | null }>;
+  signInWithOAuth: (
+    provider: OAuthProvider,
+    returnTo?: string
+  ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   verifyOtp: (
     email: string,
     token: string
   ) => Promise<{ error: AuthError | null }>;
   resendOtp: (email: string) => Promise<{ error: AuthError | null }>;
+  resetPasswordForEmail: (
+    email: string
+  ) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -86,6 +95,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [supabase.auth]
   );
 
+  const signInWithOAuth = useCallback(
+    async (provider: OAuthProvider, returnTo?: string) => {
+      // Use the configured app URL when present so OAuth lands on the
+      // cookie-domain-compatible host (e.g. nip.io) even if the current
+      // tab somehow resolved to localhost. Falls back to the live origin
+      // only when NEXT_PUBLIC_APP_URL isn't set.
+      const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL || globalThis.location.origin;
+      const callbackUrl = new URL("/auth/callback", baseUrl);
+      if (returnTo) {
+        callbackUrl.searchParams.set("next", returnTo);
+        try {
+          sessionStorage.setItem("auth_next", returnTo);
+        } catch {
+          // sessionStorage unavailable (private browsing) — silently degrade.
+        }
+      }
+      console.log("[auth] signInWithOAuth", { provider, returnTo, redirectTo: callbackUrl.toString() });
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: callbackUrl.toString() },
+      });
+      return { error };
+    },
+    [supabase.auth]
+  );
+
   const verifyOtp = useCallback(
     async (email: string, token: string) => {
       const { error } = await supabase.auth.verifyOtp({
@@ -109,6 +145,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [supabase.auth]
   );
 
+  const resetPasswordForEmail = useCallback(
+    async (email: string) => {
+      const showcaseUrl =
+        process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${showcaseUrl}/reset-password`,
+      });
+      return { error };
+    },
+    [supabase.auth]
+  );
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     // Redirect to showcase login after sign out
@@ -119,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signUp, signIn, signOut, verifyOtp, resendOtp }}
+      value={{ user, session, loading, signUp, signIn, signInWithOAuth, signOut, verifyOtp, resendOtp, resetPasswordForEmail }}
     >
       {children}
     </AuthContext.Provider>
