@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-provider";
+import { writeLastLogin } from "@/lib/last-login";
 
 interface InviteOtpVerifyProps {
   email: string;
@@ -51,6 +52,7 @@ export function InviteOtpVerify({
         setLoading(false);
         return;
       }
+      writeLastLogin("email", email);
       onVerified();
     },
     [email, otp, verifyOtp, t, onVerified]

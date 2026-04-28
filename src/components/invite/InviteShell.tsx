@@ -39,7 +39,9 @@ export function InviteShell({
         aria-label="Stampeo"
       >
         <StampeoLogo className="w-6 h-6 text-foreground" />
-        <span className="text-lg font-bold gradient-text">Stampeo</span>
+        <span className="text-lg font-bold tracking-tight text-foreground">
+          Stampeo
+        </span>
       </a>
 
       <Card hover={false} className="w-full max-w-md p-0 overflow-hidden">

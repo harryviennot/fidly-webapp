@@ -1,5 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import {
+  buildLastLoginCookie,
+  type LastLoginMethod,
+} from "@/lib/last-login";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -26,9 +30,12 @@ export async function GET(request: Request) {
     );
   }
 
+  let lastLoginMethod: LastLoginMethod | null = null;
+  let lastLoginEmail: string | undefined;
+
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
       console.error("[auth/callback] exchangeCodeForSession failed:", error);
       const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
@@ -36,13 +43,23 @@ export async function GET(request: Request) {
         `${showcaseUrl}/login?auth_error=${encodeURIComponent(error.message)}`
       );
     }
+    const provider = data.user?.app_metadata?.provider;
+    if (provider === "google" || provider === "apple" || provider === "email") {
+      lastLoginMethod = provider;
+      lastLoginEmail = data.user?.email ?? undefined;
+    }
   } else {
     console.warn("[auth/callback] no code param in callback URL");
   }
 
-  if (next && next.startsWith("/") && !next.startsWith("//")) {
-    return NextResponse.redirect(new URL(next, baseUrl));
-  }
+  const target =
+    next && next.startsWith("/") && !next.startsWith("//")
+      ? new URL(next, baseUrl)
+      : new URL("/", baseUrl);
 
-  return NextResponse.redirect(new URL("/", baseUrl));
+  const response = NextResponse.redirect(target);
+  if (lastLoginMethod) {
+    response.cookies.set(buildLastLoginCookie(lastLoginMethod, lastLoginEmail));
+  }
+  return response;
 }

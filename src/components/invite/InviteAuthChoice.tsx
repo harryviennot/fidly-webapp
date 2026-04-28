@@ -15,6 +15,8 @@ import { AppleLogo, GoogleLogo } from "@/components/auth/OAuthButtons";
 import { useAuth, type OAuthProvider } from "@/contexts/auth-provider";
 import type { InvitationPublic } from "@/types";
 import { InviteForgotPassword } from "./InviteForgotPassword";
+import { writeLastLogin } from "@/lib/last-login";
+import { useLastLogin } from "@/lib/use-last-login";
 
 type SubPhase = "choose" | "password" | "forgot";
 
@@ -46,6 +48,15 @@ export function InviteAuthChoice({
   const [subPhase, setSubPhase] = useState<SubPhase>("choose");
   const [pendingOAuth, setPendingOAuth] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Only hint at the previous method when the cookie's email matches the
+  // invite — otherwise we'd be showing a misleading badge to a different
+  // person on a shared device.
+  const lastLogin = useLastLogin();
+  const lastUsed =
+    lastLogin?.email?.toLowerCase() === invitation.email.toLowerCase()
+      ? lastLogin?.method ?? null
+      : null;
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -103,6 +114,7 @@ export function InviteAuthChoice({
               password
             );
             if (!signInError) {
+              writeLastLogin("email", invitation.email);
               onAuthSuccess();
               return;
             }
@@ -170,6 +182,7 @@ export function InviteAuthChoice({
 
   // ---- choose method ----
   if (subPhase === "choose") {
+    const lastUsedLabel = tOAuth("lastUsed");
     return (
       <div className="space-y-6">
         <div className="text-center space-y-1">
@@ -194,6 +207,7 @@ export function InviteAuthChoice({
             loading={pendingOAuth === "google"}
             loadingLabel={tOAuth("connecting")}
             icon={<GoogleLogo size={20} />}
+            lastUsedLabel={lastUsed === "google" ? lastUsedLabel : undefined}
           >
             {tStep2("continueGoogle")}
           </MethodButton>
@@ -203,6 +217,7 @@ export function InviteAuthChoice({
             loading={pendingOAuth === "apple"}
             loadingLabel={tOAuth("connecting")}
             icon={<AppleLogo size={20} />}
+            lastUsedLabel={lastUsed === "apple" ? lastUsedLabel : undefined}
           >
             {tStep2("continueApple")}
           </MethodButton>
@@ -210,6 +225,7 @@ export function InviteAuthChoice({
             onClick={() => setSubPhase("password")}
             disabled={pendingOAuth !== null}
             icon={<EnvelopeSimpleIcon size={20} />}
+            lastUsedLabel={lastUsed === "email" ? lastUsedLabel : undefined}
           >
             {tStep2("continueEmail")}
           </MethodButton>
@@ -388,6 +404,7 @@ interface MethodButtonProps {
   loadingLabel?: string;
   icon: React.ReactNode;
   children: React.ReactNode;
+  lastUsedLabel?: string;
 }
 
 function MethodButton({
@@ -397,6 +414,7 @@ function MethodButton({
   loadingLabel,
   icon,
   children,
+  lastUsedLabel,
 }: MethodButtonProps) {
   return (
     <button
@@ -409,6 +427,11 @@ function MethodButton({
       <span className="font-medium text-sm flex-1">
         {loading && loadingLabel ? loadingLabel : children}
       </span>
+      {lastUsedLabel && (
+        <span className="text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
+          {lastUsedLabel}
+        </span>
+      )}
       <CaretRightIcon
         size={16}
         className="text-muted-foreground"
