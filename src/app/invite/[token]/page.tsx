@@ -1,285 +1,272 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { CheckCircleIcon } from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/auth-provider";
 import { getInvitationByToken, acceptInvitation } from "@/api";
 import type { InvitationPublic } from "@/types";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { StampeoLogo } from "@/components/ui/stampeo-logo";
-import { InviteAuthForm } from "@/components/invite/invite-auth-form";
+import { InviteShell } from "@/components/invite/InviteShell";
+import { InviteIntro } from "@/components/invite/InviteIntro";
+import { InviteAuthChoice } from "@/components/invite/InviteAuthChoice";
+import { InviteOtpVerify } from "@/components/invite/InviteOtpVerify";
+import { InviteEmailMismatch } from "@/components/invite/InviteEmailMismatch";
+import { InviteAlreadyAccepted } from "@/components/invite/InviteAlreadyAccepted";
+import { InviteNotFound } from "@/components/invite/InviteNotFound";
+import { InviteExpired } from "@/components/invite/InviteExpired";
+
+type LoadStatus =
+  | { kind: "loading" }
+  | { kind: "loaded"; invitation: InvitationPublic }
+  | { kind: "not-found" };
+
+type UnauthPhase = "intro" | "auth-choice" | "otp";
 
 export default function InviteAcceptPage() {
   const params = useParams();
-  const router = useRouter();
   const token = params.token as string;
-  const t = useTranslations('auth.invite');
+  const t = useTranslations("auth.invite");
 
   const { user, session, loading: authLoading } = useAuth();
-  const [invitation, setInvitation] = useState<InvitationPublic | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  const [loadStatus, setLoadStatus] = useState<LoadStatus>({ kind: "loading" });
   const [accepting, setAccepting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [acceptError, setAcceptError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Load invitation details
+  // Multi-step state for unauthenticated flow
+  const [unauthPhase, setUnauthPhase] = useState<UnauthPhase>("intro");
+  const [name, setName] = useState("");
+
   useEffect(() => {
-    async function loadInvitation() {
+    let cancelled = false;
+    async function load() {
       try {
         const inv = await getInvitationByToken(token);
-        setInvitation(inv);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load invitation"
-        );
-      } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoadStatus({ kind: "loaded", invitation: inv });
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadStatus({ kind: "not-found" });
+        }
       }
     }
-    loadInvitation();
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [token]);
+
+  const invitation =
+    loadStatus.kind === "loaded" ? loadStatus.invitation : null;
 
   const handleAccept = useCallback(async () => {
     if (!invitation) return;
-
     setAccepting(true);
-    setError(null);
-
+    setAcceptError(null);
     try {
       await acceptInvitation(token);
-      // Clear stored token
       sessionStorage.removeItem("pendingInviteToken");
       setSuccess(true);
-      // Full page reload to ensure business context loads fresh with new membership
-      // Scanners go to welcome page, others go to dashboard
       setTimeout(() => {
         if (invitation.role === "scanner") {
           window.location.href = "/scanner-welcome";
         } else {
           window.location.href = "/";
         }
-      }, 2000);
+      }, 1800);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to accept invitation"
+      setAcceptError(
+        err instanceof Error ? err.message : t("errors.acceptFailed")
       );
       setAccepting(false);
     }
-  }, [invitation, token]);
+  }, [invitation, token, t]);
 
-  // Handle auth success - auto-accept invitation
-  const handleAuthSuccess = useCallback(() => {
-    // Small delay to ensure session is established
-    setTimeout(() => {
-      handleAccept();
-    }, 500);
-  }, [handleAccept]);
+  // No auto-accept: when emails match the user sees an explicit
+  // "Join {business}" prompt and confirms with a click. Same for the
+  // post-OAuth round-trip and the post-OTP password sign-up — every path
+  // ends on the same confirmation screen so the user understands what they
+  // are agreeing to.
 
-  const handleSignInDifferentAccount = () => {
-    const showcaseUrl =
-      process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
-    window.location.href = `${showcaseUrl}/login?redirect=${encodeURIComponent(window.location.href)}`;
-  };
-
-  // Loading state
-  if (loading || authLoading) {
+  if (loadStatus.kind === "loading" || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
       </div>
     );
   }
 
-  // Error state - invitation not found
-  if (error && !invitation) {
+  if (loadStatus.kind === "not-found") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <StampeoLogo className="h-8" />
+      <InviteShell>
+        <InviteNotFound isAuthenticated={!!session} />
+      </InviteShell>
+    );
+  }
+
+  // Loaded — render based on invitation state + auth state
+  const inv = loadStatus.invitation;
+  const isPending = !inv.is_expired && inv.status === "pending";
+  const emailMatchesUser =
+    user && user.email?.toLowerCase() === inv.email.toLowerCase();
+
+  // Expired
+  if (inv.is_expired && inv.status === "pending") {
+    return (
+      <InviteShell
+        businessName={inv.business_name}
+        logoUrl={inv.business_logo_url}
+        accentColor={inv.business_accent_color}
+      >
+        <InviteExpired invitation={inv} isAuthenticated={!!session} />
+      </InviteShell>
+    );
+  }
+
+  // Already accepted / cancelled
+  if (inv.status !== "pending") {
+    return (
+      <InviteShell
+        businessName={inv.business_name}
+        logoUrl={inv.business_logo_url}
+        accentColor={inv.business_accent_color}
+      >
+        <InviteAlreadyAccepted
+          invitation={inv}
+          variant={emailMatchesUser ? "by-me" : "by-other"}
+          isAuthenticated={!!session}
+        />
+      </InviteShell>
+    );
+  }
+
+  // Pending + authenticated + emails match → accept screen / auto-accept
+  if (isPending && session && user && emailMatchesUser) {
+    return (
+      <InviteShell
+        businessName={inv.business_name}
+        logoUrl={inv.business_logo_url}
+        accentColor={inv.business_accent_color}
+      >
+        {success ? (
+          <div className="space-y-4 text-center">
+            <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center text-foreground">
+              <CheckCircleIcon size={24} weight="fill" />
             </div>
-            <CardTitle className="text-red-600">{t('invalidInvitation')}</CardTitle>
-            <CardDescription>{error}</CardDescription>
-          </CardHeader>
-          <CardContent>
+            <div className="space-y-1">
+              <h1 className="text-xl font-semibold tracking-tight">
+                {t("welcomeAboard")}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {t("joinedSuccess", { business: inv.business_name })}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-5 text-center">
+            <div className="space-y-1">
+              <h1 className="text-xl font-semibold tracking-tight">
+                {t("step1.title", { business: inv.business_name })}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {t("step1.subtitle", { inviter: inv.inviter_name })}
+              </p>
+            </div>
+            <div className="rounded-xl border border-[var(--card-border)] p-4 text-left space-y-3">
+              <div className="flex justify-between items-start gap-3">
+                <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {t("role")}
+                </span>
+                <div className="text-right">
+                  <span className="font-medium text-sm">
+                    {inv.role.charAt(0).toUpperCase() + inv.role.slice(1)}
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-0.5 max-w-[220px]">
+                    {t(`roleDescriptions.${inv.role}`)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {acceptError && (
+              <div className="p-3 rounded-lg border border-[var(--card-border)] text-sm text-left">
+                {acceptError}
+              </div>
+            )}
             <Button
-              onClick={() => router.push("/")}
-              variant="outline"
+              type="button"
+              variant="gradient"
+              size="xl"
+              onClick={handleAccept}
+              disabled={accepting}
               className="w-full"
             >
-              {t('goToDashboard')}
+              {accepting
+                ? t("accepting")
+                : t("joinBusiness", { business: inv.business_name })}
             </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!invitation) return null;
-
-  const isExpiredOrUsed =
-    invitation.is_expired || invitation.status !== "pending";
-
-  // Unauthenticated - show inline auth form
-  if (!session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <StampeoLogo className="h-8" />
-            </div>
-            <CardTitle>{t('youreInvited')}</CardTitle>
-            <CardDescription>
-              {t('invitedBy', { inviter: invitation.inviter_name, business: invitation.business_name })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Invitation details */}
-            <div className="bg-gray-100 rounded-lg p-4 space-y-3">
-              <div className="flex justify-between items-start">
-                <span className="text-gray-600 text-sm">{t('role')}</span>
-                <div className="text-right">
-                  <span className="font-medium">
-                    {invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)}
-                  </span>
-                  <p className="text-xs text-gray-500 mt-0.5 max-w-[200px]">
-                    {t(`roleDescriptions.${invitation.role}`)}
-                  </p>
-                </div>
-              </div>
-              <div className="border-t border-gray-200 pt-3 flex justify-between">
-                <span className="text-gray-600 text-sm">{t('email')}</span>
-                <span className="font-medium text-sm">{invitation.email}</span>
-              </div>
-            </div>
-
-            {/* Show error if invitation is expired or used */}
-            {isExpiredOrUsed ? (
-              <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                {invitation.is_expired
-                  ? t('expired')
-                  : t('alreadyUsed', { status: invitation.status })}
-              </div>
-            ) : (
-              <div className="border-t pt-4">
-                <p className="text-sm text-gray-600 mb-4 text-center">
-                  {t('createOrSignIn')}
-                </p>
-                <InviteAuthForm
-                  invitation={invitation}
-                  onAuthSuccess={handleAuthSuccess}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const emailMismatch =
-    user && user.email?.toLowerCase() !== invitation.email.toLowerCase();
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <StampeoLogo className="h-8" />
           </div>
-          {success ? (
-            <>
-              <CardTitle className="text-green-600">{t('welcomeAboard')}</CardTitle>
-              <CardDescription>
-                {t('joinedSuccess', { business: invitation.business_name })}
-              </CardDescription>
-            </>
-          ) : (
-            <>
-              <CardTitle>{t('youreInvited')}</CardTitle>
-              <CardDescription>
-                {t('invitedBy', { inviter: invitation.inviter_name, business: invitation.business_name })}
-              </CardDescription>
-            </>
-          )}
-        </CardHeader>
-
-        {!success && (
-          <CardContent className="space-y-6">
-            {/* Invitation details */}
-            <div className="bg-gray-100 rounded-lg p-4 space-y-3">
-              <div className="flex justify-between items-start">
-                <span className="text-gray-600 text-sm">{t('role')}</span>
-                <div className="text-right">
-                  <span className="font-medium">
-                    {invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)}
-                  </span>
-                  <p className="text-xs text-gray-500 mt-0.5 max-w-[200px]">
-                    {t(`roleDescriptions.${invitation.role}`)}
-                  </p>
-                </div>
-              </div>
-              <div className="border-t border-gray-200 pt-3 flex justify-between">
-                <span className="text-gray-600 text-sm">{t('email')}</span>
-                <span className="font-medium text-sm">{invitation.email}</span>
-              </div>
-            </div>
-
-            {/* Status messages */}
-            {isExpiredOrUsed && (
-              <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                {invitation.is_expired
-                  ? t('expired')
-                  : t('alreadyUsed', { status: invitation.status })}
-              </div>
-            )}
-
-            {emailMismatch && !isExpiredOrUsed && (
-              <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm">
-                <p>{t('sentTo', { email: invitation.email })}</p>
-                <p className="mt-1">{t('signedInAs', { email: user?.email || '' })}</p>
-              </div>
-            )}
-
-            {error && (
-              <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="space-y-3">
-              <Button
-                onClick={handleAccept}
-                disabled={accepting || isExpiredOrUsed || !!emailMismatch}
-                className="w-full"
-              >
-                {accepting ? t('accepting') : t('acceptInvitation')}
-              </Button>
-
-              {emailMismatch && !isExpiredOrUsed && (
-                <Button
-                  variant="outline"
-                  onClick={handleSignInDifferentAccount}
-                  className="w-full"
-                >
-                  {t('signInDifferent')}
-                </Button>
-              )}
-            </div>
-          </CardContent>
         )}
-      </Card>
-    </div>
+      </InviteShell>
+    );
+  }
+
+  // Pending + authenticated + email mismatch
+  if (isPending && session && user && !emailMatchesUser) {
+    return (
+      <InviteShell
+        businessName={inv.business_name}
+        logoUrl={inv.business_logo_url}
+        accentColor={inv.business_accent_color}
+      >
+        <InviteEmailMismatch invitation={inv} currentEmail={user.email ?? ""} />
+      </InviteShell>
+    );
+  }
+
+  // Pending + unauthenticated → multi-step signup flow
+  return (
+    <InviteShell
+      businessName={inv.business_name}
+      logoUrl={inv.business_logo_url}
+      accentColor={inv.business_accent_color}
+    >
+      {unauthPhase === "intro" && (
+        <InviteIntro
+          invitation={inv}
+          initialName={name}
+          onContinue={(value) => {
+            setName(value);
+            setUnauthPhase("auth-choice");
+          }}
+        />
+      )}
+      {unauthPhase === "auth-choice" && (
+        <InviteAuthChoice
+          invitation={inv}
+          name={name}
+          returnTo={`/invite/${token}`}
+          onBack={() => setUnauthPhase("intro")}
+          onAuthSuccess={() => {
+            // signed in via existing creds, password path — auth state will
+            // update via Supabase listener and trigger auto-accept.
+          }}
+          onPasswordRequiresOtp={() => setUnauthPhase("otp")}
+        />
+      )}
+      {unauthPhase === "otp" && (
+        <InviteOtpVerify
+          email={inv.email}
+          onVerified={() => {
+            // Supabase auth listener will pick up the verified session and
+            // trigger auto-accept via the effect above.
+          }}
+          onUseDifferentEmail={() => setUnauthPhase("auth-choice")}
+        />
+      )}
+    </InviteShell>
   );
 }

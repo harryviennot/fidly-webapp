@@ -73,7 +73,10 @@ export const config = {
      * - api routes (they handle their own auth)
      * - register (public customer registration page)
      * - invite (team invitation acceptance page)
+     * - auth (OAuth callback writes the session cookie itself; middleware
+     *   running first would see no session and redirect to login before
+     *   the code can be exchanged)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api|register|invite).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api|register|invite|auth).*)",
   ],
 };
