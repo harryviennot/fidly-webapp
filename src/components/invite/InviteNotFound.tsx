@@ -16,9 +16,14 @@ export function InviteNotFound({ isAuthenticated }: InviteNotFoundProps) {
   const showcaseUrl =
     process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
 
+  // No business context here (token doesn't resolve), so we don't theme on
+  // a business accent — render the action with the neutral primary (#1A1A1A).
+  const primaryClass =
+    "w-full h-12 rounded-full px-6 text-base bg-primary text-primary-foreground hover:bg-primary/90 font-semibold";
+
   return (
     <div className="space-y-5 text-center">
-      <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+      <div className="mx-auto h-12 w-12 rounded-full bg-foreground flex items-center justify-center text-background">
         <XCircleIcon size={24} weight="fill" />
       </div>
       <div className="space-y-2">
@@ -32,10 +37,8 @@ export function InviteNotFound({ isAuthenticated }: InviteNotFoundProps) {
       {isAuthenticated ? (
         <Button
           type="button"
-          variant="gradient"
-          size="xl"
           onClick={() => router.push("/")}
-          className="w-full"
+          className={primaryClass}
         >
           {t("goToDashboard")}
         </Button>
@@ -43,12 +46,10 @@ export function InviteNotFound({ isAuthenticated }: InviteNotFoundProps) {
         <div className="space-y-2">
           <Button
             type="button"
-            variant="gradient"
-            size="xl"
             onClick={() => {
               globalThis.location.href = `${showcaseUrl}/login`;
             }}
-            className="w-full"
+            className={primaryClass}
           >
             {t("createAccount")}
           </Button>
@@ -59,7 +60,7 @@ export function InviteNotFound({ isAuthenticated }: InviteNotFoundProps) {
             onClick={() => {
               globalThis.location.href = showcaseUrl;
             }}
-            className="w-full"
+            className="w-full rounded-full"
           >
             {t("goToHome")}
           </Button>
