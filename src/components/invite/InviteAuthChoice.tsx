@@ -2,12 +2,21 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeftIcon, CheckIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
+import {
+  ArrowLeftIcon,
+  CaretRightIcon,
+  CheckIcon,
+  EnvelopeSimpleIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { OAuthButtons, OAuthDivider } from "@/components/auth/OAuthButtons";
-import { useAuth } from "@/contexts/auth-provider";
+import { AppleLogo, GoogleLogo } from "@/components/auth/OAuthButtons";
+import { useAuth, type OAuthProvider } from "@/contexts/auth-provider";
 import type { InvitationPublic } from "@/types";
 import { InviteForgotPassword } from "./InviteForgotPassword";
+
+type SubPhase = "choose" | "password" | "forgot";
 
 interface InviteAuthChoiceProps {
   invitation: InvitationPublic;
@@ -30,15 +39,18 @@ export function InviteAuthChoice({
   const tChecks = useTranslations("auth.invite.passwordChecks");
   const tErrors = useTranslations("auth.invite.errors");
   const tForgot = useTranslations("auth.invite.forgotPassword");
+  const tOAuth = useTranslations("auth.oauth");
 
-  const { signUp, signIn, resendOtp } = useAuth();
+  const { signUp, signIn, signInWithOAuth, resendOtp } = useAuth();
+
+  const [subPhase, setSubPhase] = useState<SubPhase>("choose");
+  const [pendingOAuth, setPendingOAuth] = useState<OAuthProvider | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showForgot, setShowForgot] = useState(false);
 
   const passwordChecks = useMemo(
     () => ({
@@ -53,6 +65,19 @@ export function InviteAuthChoice({
   const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
   const passwordsMatch = password === confirmPassword;
   const canSubmit = isPasswordStrong && passwordsMatch && password.length > 0;
+
+  const handleOAuth = useCallback(
+    async (provider: OAuthProvider) => {
+      setError(null);
+      setPendingOAuth(provider);
+      const { error: oauthError } = await signInWithOAuth(provider, returnTo);
+      if (oauthError) {
+        setError(tOAuth("error"));
+        setPendingOAuth(null);
+      }
+    },
+    [signInWithOAuth, returnTo, tOAuth]
+  );
 
   const handlePasswordSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -143,150 +168,252 @@ export function InviteAuthChoice({
     ]
   );
 
+  // ---- choose method ----
+  if (subPhase === "choose") {
+    return (
+      <div className="space-y-6">
+        <div className="text-center space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight">
+            {tStep2("greeting", { name })}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {tStep2("howToJoin", { business: invitation.business_name })}
+          </p>
+        </div>
+
+        {error && (
+          <div className="p-3 rounded-lg border border-[var(--card-border)] text-sm text-center">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-3">
+          <MethodButton
+            onClick={() => handleOAuth("google")}
+            disabled={pendingOAuth !== null}
+            loading={pendingOAuth === "google"}
+            loadingLabel={tOAuth("connecting")}
+            icon={<GoogleLogo size={20} />}
+          >
+            {tStep2("continueGoogle")}
+          </MethodButton>
+          <MethodButton
+            onClick={() => handleOAuth("apple")}
+            disabled={pendingOAuth !== null}
+            loading={pendingOAuth === "apple"}
+            loadingLabel={tOAuth("connecting")}
+            icon={<AppleLogo size={20} />}
+          >
+            {tStep2("continueApple")}
+          </MethodButton>
+          <MethodButton
+            onClick={() => setSubPhase("password")}
+            disabled={pendingOAuth !== null}
+            icon={<EnvelopeSimpleIcon size={20} />}
+          >
+            {tStep2("continueEmail")}
+          </MethodButton>
+        </div>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeftIcon size={14} />
+            {tStep2("editName")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- forgot password ----
+  if (subPhase === "forgot") {
+    return (
+      <div className="space-y-5">
+        <div className="text-center space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight">
+            {tForgot("link").replace(/\?$/, "")}
+          </h1>
+        </div>
+        <InviteForgotPassword
+          email={invitation.email}
+          businessName={invitation.business_name}
+          onCancel={() => setSubPhase("password")}
+        />
+      </div>
+    );
+  }
+
+  // ---- password ----
   return (
     <div className="space-y-5">
       <div className="text-center space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">
-          {tStep2("greeting", { name })}
+          {tStep2("passwordTitle")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {tStep2("howToJoin", { business: invitation.business_name })}
+          {tStep2("passwordSubtitle", { email: invitation.email })}
         </p>
       </div>
 
-      <OAuthButtons
-        returnTo={returnTo}
-        disabled={loading}
-        onError={(message) => setError(message)}
-      />
-      <OAuthDivider />
-
-      {showForgot ? (
-        <InviteForgotPassword
-          email={invitation.email}
-          businessName={invitation.business_name}
-          onCancel={() => setShowForgot(false)}
-        />
-      ) : (
-        <form onSubmit={handlePasswordSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 rounded-lg border border-[var(--card-border)] text-sm">
-              {error}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="invite-password" className="text-sm font-medium">
-              {tStep2("passwordLabel")}
-            </label>
-            <div className="relative">
-              <input
-                id="invite-password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={tStep2("passwordPlaceholder")}
-                minLength={6}
-                required
-                autoComplete="new-password"
-                className="w-full px-4 py-3.5 pr-12 rounded-xl border border-[var(--border)] bg-white/50 dark:bg-white/5 focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)] outline-none transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                tabIndex={-1}
-                aria-label="Toggle password visibility"
-              >
-                {showPassword ? <EyeSlashIcon size={18} /> : <EyeIcon size={18} />}
-              </button>
-            </div>
-            {password.length > 0 && (
-              <ul className="grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1">
-                {(
-                  [
-                    ["lowercase", tChecks("lowercase")],
-                    ["uppercase", tChecks("uppercase")],
-                    ["number", tChecks("number")],
-                    ["symbol", tChecks("symbol")],
-                    ["minLength", tChecks("minLength")],
-                  ] as const
-                ).map(([key, label]) => (
-                  <li
-                    key={key}
-                    className={`flex items-center gap-1.5 text-xs transition-colors ${
-                      passwordChecks[key]
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    <CheckIcon
-                      size={12}
-                      weight={passwordChecks[key] ? "bold" : "regular"}
-                    />
-                    {label}
-                  </li>
-                ))}
-              </ul>
-            )}
+      <form onSubmit={handlePasswordSubmit} className="space-y-4">
+        {error && (
+          <div className="p-3 rounded-lg border border-[var(--card-border)] text-sm">
+            {error}
           </div>
+        )}
 
-          <div className="flex flex-col gap-2">
-            <label htmlFor="invite-confirm-password" className="text-sm font-medium">
-              {tStep2("confirmPasswordLabel")}
-            </label>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="invite-password" className="text-sm font-medium">
+            {tStep2("passwordLabel")}
+          </label>
+          <div className="relative">
             <input
-              id="invite-confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder={tStep2("confirmPasswordPlaceholder")}
+              id="invite-password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={tStep2("passwordPlaceholder")}
+              minLength={6}
               required
               autoComplete="new-password"
-              className="w-full px-4 py-3.5 rounded-xl border border-[var(--border)] bg-white/50 dark:bg-white/5 focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)] outline-none transition-all"
+              className="w-full px-4 py-3.5 pr-12 rounded-xl border border-[var(--border)] bg-white/50 dark:bg-white/5 focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)] outline-none transition-all"
             />
-            {password && confirmPassword && !passwordsMatch && (
-              <p className="text-xs text-red-500">
-                {tStep2("passwordsDontMatch")}
-              </p>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              tabIndex={-1}
+              aria-label="Toggle password visibility"
+            >
+              {showPassword ? <EyeSlashIcon size={18} /> : <EyeIcon size={18} />}
+            </button>
           </div>
+          {password.length > 0 && (
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1">
+              {(
+                [
+                  ["lowercase", tChecks("lowercase")],
+                  ["uppercase", tChecks("uppercase")],
+                  ["number", tChecks("number")],
+                  ["symbol", tChecks("symbol")],
+                  ["minLength", tChecks("minLength")],
+                ] as const
+              ).map(([key, label]) => (
+                <li
+                  key={key}
+                  className={`flex items-center gap-1.5 text-xs transition-colors ${
+                    passwordChecks[key]
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  <CheckIcon
+                    size={12}
+                    weight={passwordChecks[key] ? "bold" : "regular"}
+                  />
+                  {label}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-          <Button
-            type="submit"
-            disabled={!canSubmit || loading}
-            variant="gradient"
-            size="xl"
-            className="w-full"
-          >
-            {loading ? tStep2("creating") : tStep2("createAccount")}
-          </Button>
-        </form>
-      )}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="invite-confirm-password" className="text-sm font-medium">
+            {tStep2("confirmPasswordLabel")}
+          </label>
+          <input
+            id="invite-confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder={tStep2("confirmPasswordPlaceholder")}
+            required
+            autoComplete="new-password"
+            className="w-full px-4 py-3.5 rounded-xl border border-[var(--border)] bg-white/50 dark:bg-white/5 focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)] outline-none transition-all"
+          />
+          {password && confirmPassword && !passwordsMatch && (
+            <p className="text-xs text-red-500">
+              {tStep2("passwordsDontMatch")}
+            </p>
+          )}
+        </div>
 
-      <div className="flex items-center justify-between pt-2 text-sm">
+        <Button
+          type="submit"
+          disabled={!canSubmit || loading}
+          variant="gradient"
+          size="xl"
+          className="w-full"
+        >
+          {loading ? tStep2("creating") : tStep2("createAccount")}
+        </Button>
+      </form>
+
+      <div className="flex items-center justify-between pt-1 text-sm">
         <button
           type="button"
-          onClick={onBack}
+          onClick={() => {
+            setSubPhase("choose");
+            setError(null);
+          }}
           className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeftIcon size={14} />
-          {tStep2("editName")}
+          {tStep2("chooseDifferentMethod")}
         </button>
-        {!showForgot && (
-          <button
-            type="button"
-            onClick={() => {
-              setShowForgot(true);
-              setError(null);
-            }}
-            className="text-[var(--accent)] hover:underline"
-          >
-            {tForgot("link")}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => {
+            setSubPhase("forgot");
+            setError(null);
+          }}
+          className="text-[var(--accent)] hover:underline"
+        >
+          {tForgot("link")}
+        </button>
       </div>
-
     </div>
+  );
+}
+
+interface MethodButtonProps {
+  onClick: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  loadingLabel?: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}
+
+function MethodButton({
+  onClick,
+  disabled,
+  loading,
+  loadingLabel,
+  icon,
+  children,
+}: MethodButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="w-full flex items-center gap-3 px-5 h-14 rounded-full border border-[var(--card-border)] bg-card hover:bg-muted/40 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      <span className="flex items-center justify-center w-7 h-7">{icon}</span>
+      <span className="font-medium text-sm flex-1">
+        {loading && loadingLabel ? loadingLabel : children}
+      </span>
+      <CaretRightIcon
+        size={16}
+        className="text-muted-foreground"
+        weight="bold"
+      />
+    </button>
   );
 }

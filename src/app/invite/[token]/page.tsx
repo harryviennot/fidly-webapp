@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { CheckCircleIcon } from "@phosphor-icons/react";
@@ -86,21 +86,11 @@ export default function InviteAcceptPage() {
     }
   }, [invitation, token, t]);
 
-  const autoAcceptedRef = useRef(false);
-  useEffect(() => {
-    if (autoAcceptedRef.current) return;
-    if (!session || !user || !invitation) return;
-    if (accepting || success) return;
-    if (invitation.is_expired || invitation.status !== "pending") return;
-    if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) return;
-    autoAcceptedRef.current = true;
-    // Defer to next tick so the synchronous setState inside handleAccept
-    // doesn't cascade-render from inside the effect body.
-    const id = setTimeout(() => {
-      void handleAccept();
-    }, 0);
-    return () => clearTimeout(id);
-  }, [session, user, invitation, accepting, success, handleAccept]);
+  // No auto-accept: when emails match the user sees an explicit
+  // "Join {business}" prompt and confirms with a click. Same for the
+  // post-OAuth round-trip and the post-OTP password sign-up — every path
+  // ends on the same confirmation screen so the user understands what they
+  // are agreeing to.
 
   if (loadStatus.kind === "loading" || authLoading) {
     return (

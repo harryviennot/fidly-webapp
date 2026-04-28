@@ -45,31 +45,35 @@ export function InviteForgotPassword({
         <p className="text-xs text-muted-foreground">
           {t("afterReset", { business: businessName })}
         </p>
+        <p className="text-xs text-muted-foreground">{t("checkSpam")}</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-[var(--card-border)] bg-muted/30 p-4 space-y-3">
+    <div className="space-y-4">
       <p className="text-sm">{t("intro", { email })}</p>
-      {error && <p className="text-xs text-red-600">{error}</p>}
-      <div className="flex gap-2">
+      {error && (
+        <p className="text-xs text-red-600 text-center">{error}</p>
+      )}
+      <div className="flex flex-col gap-2">
         <Button
           type="button"
           variant="gradient"
-          size="default"
+          size="xl"
           onClick={handleSend}
           disabled={loading}
-          className="flex-1"
+          className="w-full"
         >
           {loading ? t("sending") : t("send")}
         </Button>
         <Button
           type="button"
           variant="outline"
-          size="default"
+          size="xl"
           onClick={onCancel}
           disabled={loading}
+          className="w-full rounded-full"
         >
           {t("cancel")}
         </Button>

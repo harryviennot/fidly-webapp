@@ -73,13 +73,15 @@ export function InviteAlreadyAccepted({
       <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
         <InfoIcon size={24} weight="fill" />
       </div>
-      <div className="space-y-1">
+      <div className="space-y-2">
         <h1 className="text-xl font-semibold tracking-tight">
           {t("alreadyAcceptedByOther.title")}
         </h1>
+        <p className="text-sm">
+          {t("alreadyAcceptedByOther.body", { email: invitation.email })}
+        </p>
         <p className="text-sm text-muted-foreground">
-          {t("alreadyAcceptedByOther.body", {
-            email: invitation.email,
+          {t("alreadyAcceptedByOther.instructions", {
             business: invitation.business_name,
           })}
         </p>
@@ -92,7 +94,7 @@ export function InviteAlreadyAccepted({
         disabled={switching}
         className="w-full"
       >
-        {t("alreadyAcceptedByOther.cta", { email: invitation.email })}
+        {t("alreadyAcceptedByOther.cta")}
       </Button>
     </div>
   );

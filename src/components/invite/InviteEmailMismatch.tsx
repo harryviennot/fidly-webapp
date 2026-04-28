@@ -60,7 +60,7 @@ export function InviteEmailMismatch({
           </li>
           <li className="flex gap-2">
             <span className="mt-0.5">•</span>
-            <span>{t("orSignInAs", { email: invitation.email })}</span>
+            <span>{t("orSignInAs")}</span>
           </li>
         </ul>
       </div>
@@ -73,7 +73,7 @@ export function InviteEmailMismatch({
         disabled={switching}
         className="w-full"
       >
-        {t("switchAccount", { email: invitation.email })}
+        {t("switchAccount")}
       </Button>
     </div>
   );
