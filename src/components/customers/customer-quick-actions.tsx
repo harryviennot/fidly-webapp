@@ -49,9 +49,15 @@ export function CustomerQuickActions({
       )
   );
 
+  // Phase 4: stamp/redeem/void address an enrollment, not a customer. Today
+  // every customer has exactly one enrollment per business, so [0] is "the"
+  // enrollment. Multi-program pro businesses will pick by program later.
+  const enrollmentId = customer.enrollments[0]?.id;
+
   const handleAddStamp = async () => {
+    if (!enrollmentId) return;
     try {
-      await addStampMutation.mutateAsync(customer.id);
+      await addStampMutation.mutateAsync({ customerId: customer.id, enrollmentId });
       toast.success(t("stampAddedToast"));
       onActionComplete();
     } catch (error) {
@@ -60,8 +66,9 @@ export function CustomerQuickActions({
   };
 
   const handleRedeem = async () => {
+    if (!enrollmentId) return;
     try {
-      await redeemMutation.mutateAsync(customer.id);
+      await redeemMutation.mutateAsync({ customerId: customer.id, enrollmentId });
       toast.success(t("redeemSuccessToast"));
       onActionComplete();
     } catch (error) {
@@ -70,10 +77,11 @@ export function CustomerQuickActions({
   };
 
   const handleVoid = async () => {
-    if (!lastVoidable || !voidReason.trim()) return;
+    if (!lastVoidable || !voidReason.trim() || !enrollmentId) return;
     try {
       await voidMutation.mutateAsync({
         customerId: customer.id,
+        enrollmentId,
         transactionId: lastVoidable.id,
         reason: voidReason.trim(),
       });

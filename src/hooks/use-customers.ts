@@ -23,12 +23,19 @@ export function useCustomers(businessId: string | undefined, page: number = 0) {
 
 export { PAGE_SIZE };
 
+// Mutations key on `enrollmentId` (the new URL contract — Phase 4) for the
+// network call, but also accept `customerId` so the optimistic update can
+// find the right row in the cached customer list. Today every customer has
+// exactly one enrollment per business; multi-program will surface multiple
+// enrollments per customer and the caller picks which one to address.
+type StampVars = { customerId: string; enrollmentId: string };
+
 export function useAddStamp(businessId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (customerId: string) => addStamp(businessId!, customerId),
-    onMutate: async (customerId) => {
+    mutationFn: ({ enrollmentId }: StampVars) => addStamp(businessId!, enrollmentId),
+    onMutate: async ({ customerId }) => {
       await queryClient.cancelQueries({
         queryKey: customerKeys.all(businessId!),
       });
@@ -63,6 +70,9 @@ export function useAddStamp(businessId: string | undefined) {
       queryClient.invalidateQueries({
         queryKey: ["transactions", businessId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["activity", businessId],
+      });
     },
   });
 }
@@ -71,8 +81,8 @@ export function useRedeemReward(businessId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (customerId: string) => redeemReward(businessId!, customerId),
-    onMutate: async (customerId) => {
+    mutationFn: ({ enrollmentId }: StampVars) => redeemReward(businessId!, enrollmentId),
+    onMutate: async ({ customerId }) => {
       await queryClient.cancelQueries({
         queryKey: customerKeys.all(businessId!),
       });
@@ -108,6 +118,9 @@ export function useRedeemReward(businessId: string | undefined) {
       queryClient.invalidateQueries({
         queryKey: ["transactions", businessId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["activity", businessId],
+      });
     },
   });
 }
@@ -117,14 +130,15 @@ export function useVoidStamp(businessId: string | undefined) {
 
   return useMutation({
     mutationFn: ({
-      customerId,
+      enrollmentId,
       transactionId,
       reason,
     }: {
       customerId: string;
+      enrollmentId: string;
       transactionId: string;
       reason: string;
-    }) => voidStamp(businessId!, customerId, transactionId, reason),
+    }) => voidStamp(businessId!, enrollmentId, transactionId, reason),
     onMutate: async ({ customerId }) => {
       await queryClient.cancelQueries({
         queryKey: customerKeys.all(businessId!),
@@ -160,6 +174,9 @@ export function useVoidStamp(businessId: string | undefined) {
       });
       queryClient.invalidateQueries({
         queryKey: ["transactions", businessId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["activity", businessId],
       });
     },
   });
