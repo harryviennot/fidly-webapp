@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AppSidebar, DashboardHeader } from "@/components/dashboard";
 import { RoleGuard } from "@/components/auth/role-guard";
@@ -15,14 +17,35 @@ import { OverLimitBanner } from "@/components/billing/OverLimitBanner";
 import { ImpersonationBanner } from "@/components/impersonation/impersonation-banner";
 import { useImpersonationBeacon } from "@/hooks/use-impersonation-beacon";
 
+function wizardResumePath(setupProgress: { last_step?: { chapter: string; step?: string } } | undefined): string {
+  const last = setupProgress?.last_step;
+  if (!last?.chapter) return "/onboarding/business/welcome";
+  return last.step ? `/onboarding/business/${last.chapter}/${last.step}` : `/onboarding/business/${last.chapter}`;
+}
+
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { loading, currentBusiness, error, hasActiveMembership } = useBusiness();
+  const router = useRouter();
+  const { loading, currentBusiness, error, hasActiveMembership, currentRole, isImpersonating } =
+    useBusiness();
   const t = useTranslations();
   useImpersonationBeacon();
+
+  const setupProgress = currentBusiness?.settings?.setup_progress;
+  const needsWizard =
+    !!currentBusiness &&
+    currentRole === "owner" &&
+    !isImpersonating &&
+    !setupProgress?.completed_at;
+
+  useEffect(() => {
+    if (needsWizard) {
+      router.replace(wizardResumePath(setupProgress));
+    }
+  }, [needsWizard, router, setupProgress]);
 
   // Show loading state
   if (loading) {
@@ -69,6 +92,20 @@ export default function AdminLayout({
   // (and switcher) accessible so the user can switch back to an active one.
   if (currentBusiness.status === "suspended") {
     return <SuspendedPage />;
+  }
+
+  // Owner with an incomplete launch wizard cannot reach the dashboard. The
+  // useEffect above triggers the redirect; render a loading shell in the
+  // interim so the dashboard chrome never flashes.
+  if (needsWizard) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
+          <p className="mt-4 text-sm text-[var(--muted-foreground)]">{t("status.loading")}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
