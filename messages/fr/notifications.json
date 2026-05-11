@@ -96,7 +96,8 @@
       "errors": {
         "duplicate": "Un palier avec ce nombre de tampons existe déjà.",
         "quotaExceeded": "Vous avez atteint la limite de paliers. Passez à Pro pour des paliers illimités.",
-        "invalidStampCount": "Le nombre de tampons doit être un nombre positif."
+        "invalidStampCount": "Le nombre de tampons doit être un nombre positif.",
+        "outOfRange": "Le nombre de tampons doit être inférieur à {total} (le total de tampons de votre programme)."
       },
       "toasts": {
         "created": "Palier ajouté",
