@@ -5,6 +5,7 @@
     "subtitleAdmin": "All businesses on the platform.",
     "searchPlaceholder": "Search by name or slug…",
     "ownedBy": "Owner: {name}",
+    "count": "{count} of {total}",
     "openDashboard": "Open",
     "viewAs": "View as…",
     "viewAsComingSoon": "Coming soon",

@@ -2,32 +2,35 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ArrowSquareOutIcon, UserSwitchIcon } from "@phosphor-icons/react";
+import { UserSwitchIcon } from "@phosphor-icons/react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { BusinessListItem } from "@/api/businesses";
 
 interface BusinessCardProps {
   business: BusinessListItem;
-  /** Pass a handler to render "Open dashboard". Omit to hide the action
-   * (e.g. superadmin viewing a business they are not a member of). */
+  /** Primary action — opens the business dashboard. Omit when the viewer
+   * isn't a member (e.g. superadmin browsing an unrelated business). */
   onOpen?: () => void;
-  /** Pass a handler to render "View as…". Typically only for superadmins. */
+  /** Secondary action — superadmin "View as…" shortcut. */
   onImpersonate?: () => void;
   impersonateDisabled?: boolean;
   impersonateDisabledReason?: string;
 }
 
-const ROLE_BADGE: Record<string, { bg: string; color: string }> = {
-  owner:   { bg: "bg-green-50 dark:bg-green-950/30",   color: "text-green-700 dark:text-green-400" },
-  admin:   { bg: "bg-orange-50 dark:bg-orange-950/30", color: "text-orange-700 dark:text-orange-400" },
-  scanner: { bg: "bg-blue-50 dark:bg-blue-950/30",     color: "text-blue-700 dark:text-blue-400" },
+type BadgeVariant = "success" | "warning" | "error" | "info" | "outline";
+
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  active: "success",
+  pending: "warning",
+  suspended: "error",
 };
 
-const STATUS_BADGE: Record<string, { bg: string; color: string }> = {
-  active:    { bg: "bg-green-50 dark:bg-green-950/30",  color: "text-green-700 dark:text-green-400" },
-  pending:   { bg: "bg-amber-50 dark:bg-amber-950/30",  color: "text-amber-700 dark:text-amber-400" },
-  suspended: { bg: "bg-red-50 dark:bg-red-950/30",      color: "text-red-700 dark:text-red-400" },
+const ROLE_VARIANT: Record<string, BadgeVariant> = {
+  owner: "success",
+  admin: "warning",
+  scanner: "info",
 };
 
 function getInitials(name: string) {
@@ -49,11 +52,17 @@ export function BusinessCard({
   const t = useTranslations("businessesPage");
   const tRoles = useTranslations("roles");
 
-  const roleBadge = business.role ? ROLE_BADGE[business.role] : null;
-  const statusBadge = STATUS_BADGE[business.status] || STATUS_BADGE.pending;
+  const statusVariant = STATUS_VARIANT[business.status] ?? "warning";
+  const roleVariant = business.role ? ROLE_VARIANT[business.role] : null;
 
-  return (
-    <div className="flex flex-col gap-3 p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] transition-all duration-200 hover:shadow-sm">
+  // Primary action wraps the whole card: prefer "open" for members,
+  // fall back to "impersonate" for superadmins on non-member businesses.
+  const primaryAction = onOpen ?? onImpersonate;
+  // Show the floating secondary icon only when both actions are available.
+  const showSecondary = !!onOpen && !!onImpersonate;
+
+  const cardContent = (
+    <>
       <div className="flex items-start gap-3">
         <div className="h-11 w-11 shrink-0 rounded-lg overflow-hidden flex items-center justify-center bg-[var(--muted)]">
           {business.logo_url ? (
@@ -88,45 +97,52 @@ export function BusinessCard({
       </div>
 
       <div className="flex items-center gap-1.5 flex-wrap">
-        <span className={cn("text-[10px] py-0.5 px-2 rounded-xl font-semibold", statusBadge.bg, statusBadge.color)}>
-          {t(`status.${business.status}`)}
-        </span>
-        {roleBadge && (
-          <span className={cn("text-[10px] py-0.5 px-2 rounded-xl font-semibold", roleBadge.bg, roleBadge.color)}>
-            {tRoles(business.role!)}
-          </span>
+        <Badge variant={statusVariant}>{t(`status.${business.status}`)}</Badge>
+        {roleVariant && (
+          <Badge variant={roleVariant}>{tRoles(business.role!)}</Badge>
         )}
-        <span className="text-[10px] py-0.5 px-2 rounded-xl font-semibold bg-[var(--muted)] text-[var(--muted-foreground)]">
+        <Badge variant="outline" className="capitalize">
           {business.subscription_tier}
-        </span>
+        </Badge>
       </div>
+    </>
+  );
 
-      <div className="flex items-center gap-2 pt-1">
-        {onOpen && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1 text-xs h-8"
-            onClick={onOpen}
-          >
-            <ArrowSquareOutIcon size={14} className="mr-1" />
-            {t("openDashboard")}
-          </Button>
-        )}
-        {onImpersonate && (
-          <Button
-            size="sm"
-            variant={onOpen ? "ghost" : "outline"}
-            className={cn("text-xs h-8", !onOpen && "flex-1")}
-            onClick={onImpersonate}
-            disabled={impersonateDisabled}
-            title={impersonateDisabledReason}
-          >
-            <UserSwitchIcon size={14} className="mr-1" />
-            {t("viewAs")}
-          </Button>
-        )}
-      </div>
+  const baseClasses =
+    "relative flex flex-col gap-3 p-4 rounded-xl border border-[var(--card-border)] bg-[var(--card)] shadow-[var(--card-shadow)] transition-all duration-200";
+  const interactiveClasses =
+    "text-left w-full cursor-pointer hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
+
+  if (!primaryAction) {
+    return <div className={baseClasses}>{cardContent}</div>;
+  }
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={primaryAction}
+        className={cn(baseClasses, interactiveClasses)}
+      >
+        {cardContent}
+      </button>
+      {showSecondary && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="absolute top-2.5 right-2.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+          onClick={(e) => {
+            e.stopPropagation();
+            onImpersonate?.();
+          }}
+          disabled={impersonateDisabled}
+          title={impersonateDisabled ? impersonateDisabledReason ?? t("viewAsComingSoon") : t("viewAs")}
+          aria-label={t("viewAs")}
+        >
+          <UserSwitchIcon size={14} />
+        </Button>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@
     "subtitleAdmin": "Tous les établissements de la plateforme.",
     "searchPlaceholder": "Rechercher par nom ou identifiant…",
     "ownedBy": "Propriétaire : {name}",
+    "count": "{count} sur {total}",
     "openDashboard": "Ouvrir",
     "viewAs": "Voir en tant que…",
     "viewAsComingSoon": "Bientôt disponible",

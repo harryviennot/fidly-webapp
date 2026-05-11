@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ArrowSquareOutIcon, UserSwitchIcon } from "@phosphor-icons/react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -26,16 +27,18 @@ interface BusinessTableProps {
   impersonateDisabled?: boolean;
 }
 
-const ROLE_BADGE: Record<string, { bg: string; color: string }> = {
-  owner:   { bg: "bg-green-50 dark:bg-green-950/30",   color: "text-green-700 dark:text-green-400" },
-  admin:   { bg: "bg-orange-50 dark:bg-orange-950/30", color: "text-orange-700 dark:text-orange-400" },
-  scanner: { bg: "bg-blue-50 dark:bg-blue-950/30",     color: "text-blue-700 dark:text-blue-400" },
+type BadgeVariant = "success" | "warning" | "error" | "info" | "outline";
+
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  active: "success",
+  pending: "warning",
+  suspended: "error",
 };
 
-const STATUS_BADGE: Record<string, { bg: string; color: string }> = {
-  active:    { bg: "bg-green-50 dark:bg-green-950/30",  color: "text-green-700 dark:text-green-400" },
-  pending:   { bg: "bg-amber-50 dark:bg-amber-950/30",  color: "text-amber-700 dark:text-amber-400" },
-  suspended: { bg: "bg-red-50 dark:bg-red-950/30",      color: "text-red-700 dark:text-red-400" },
+const ROLE_VARIANT: Record<string, BadgeVariant> = {
+  owner: "success",
+  admin: "warning",
+  scanner: "info",
 };
 
 function getInitials(name: string) {
@@ -54,7 +57,7 @@ export function BusinessTable({
   const tRoles = useTranslations("roles");
 
   return (
-    <div className="rounded-xl border border-[var(--border)] overflow-hidden">
+    <div className="rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--card)]">
       <Table>
         <TableHeader>
           <TableRow>
@@ -68,10 +71,21 @@ export function BusinessTable({
         </TableHeader>
         <TableBody>
           {businesses.map((b) => {
-            const roleBadge = b.role ? ROLE_BADGE[b.role] : null;
-            const statusBadge = STATUS_BADGE[b.status] || STATUS_BADGE.pending;
+            const statusVariant = STATUS_VARIANT[b.status] ?? "warning";
+            const roleVariant = b.role ? ROLE_VARIANT[b.role] : null;
+            const canOpen = !isMember || isMember(b);
+            const rowAction = canOpen
+              ? () => onOpen(b.id)
+              : onImpersonate
+                ? () => onImpersonate(b)
+                : undefined;
+
             return (
-              <TableRow key={b.id}>
+              <TableRow
+                key={b.id}
+                onClick={rowAction}
+                className={cn(rowAction && "cursor-pointer")}
+              >
                 <TableCell>
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="h-8 w-8 shrink-0 rounded-md overflow-hidden flex items-center justify-center bg-[var(--muted)]">
@@ -105,43 +119,49 @@ export function BusinessTable({
                   </TableCell>
                 )}
                 <TableCell>
-                  <span className={cn("text-[10px] py-0.5 px-2 rounded-xl font-semibold", statusBadge.bg, statusBadge.color)}>
-                    {t(`status.${b.status}`)}
-                  </span>
+                  <Badge variant={statusVariant}>{t(`status.${b.status}`)}</Badge>
                 </TableCell>
                 <TableCell>
-                  <span className="text-xs text-[var(--muted-foreground)]">{b.subscription_tier}</span>
+                  <Badge variant="outline" className="capitalize">
+                    {b.subscription_tier}
+                  </Badge>
                 </TableCell>
                 <TableCell>
-                  {roleBadge ? (
-                    <span className={cn("text-[10px] py-0.5 px-2 rounded-xl font-semibold", roleBadge.bg, roleBadge.color)}>
-                      {tRoles(b.role!)}
-                    </span>
+                  {roleVariant ? (
+                    <Badge variant={roleVariant}>{tRoles(b.role!)}</Badge>
                   ) : (
                     <span className="text-xs text-[var(--muted-foreground)]">—</span>
                   )}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="inline-flex gap-1">
-                    {(!isMember || isMember(b)) && (
+                    {canOpen && (
                       <Button
-                        size="sm"
+                        size="icon-xs"
                         variant="ghost"
-                        className="h-7 px-2 text-xs"
-                        onClick={() => onOpen(b.id)}
+                        className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpen(b.id);
+                        }}
                         title={t("openDashboard")}
+                        aria-label={t("openDashboard")}
                       >
                         <ArrowSquareOutIcon size={14} />
                       </Button>
                     )}
                     {onImpersonate && (
                       <Button
-                        size="sm"
+                        size="icon-xs"
                         variant="ghost"
-                        className="h-7 px-2 text-xs"
-                        onClick={() => onImpersonate(b)}
+                        className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onImpersonate(b);
+                        }}
                         disabled={impersonateDisabled}
                         title={impersonateDisabled ? t("viewAsComingSoon") : t("viewAs")}
+                        aria-label={t("viewAs")}
                       >
                         <UserSwitchIcon size={14} />
                       </Button>
