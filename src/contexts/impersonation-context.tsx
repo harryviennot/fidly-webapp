@@ -6,6 +6,7 @@ import {
   endImpersonation,
   type CurrentImpersonationSession,
 } from "@/api/impersonation";
+import { clearImpersonationToken, getImpersonationToken } from "@/api/client";
 
 interface ImpersonationContextValue {
   isImpersonating: boolean;
@@ -22,11 +23,21 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    // Skip the network call when we have no token stored — saves a 204 on
+    // every mount for users not impersonating, which is the common path.
+    if (!getImpersonationToken()) {
+      setSession(null);
+      setLoading(false);
+      return;
+    }
     try {
       const current = await getCurrentImpersonation();
       setSession(current);
+      // Server says no active session (e.g. expired) — drop the stale token.
+      if (!current) clearImpersonationToken();
     } catch {
       setSession(null);
+      clearImpersonationToken();
     } finally {
       setLoading(false);
     }

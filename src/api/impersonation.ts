@@ -1,4 +1,10 @@
-import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
+import {
+  API_BASE_URL,
+  clearImpersonationToken,
+  extractErrorMessage,
+  getAuthHeaders,
+  setImpersonationToken,
+} from './client';
 
 export interface ImpersonationBusinessUser {
   user_id: string;
@@ -22,6 +28,7 @@ export interface StartImpersonationResponse {
   target_role: "owner" | "admin" | "scanner";
   expires_at: string;
   redirect_url: string;
+  token: string;
 }
 
 export interface CurrentImpersonationSession {
@@ -64,15 +71,24 @@ export async function startImpersonation(
     const error = await response.json().catch(() => ({}));
     throw new Error(extractErrorMessage(error, 'Failed to start impersonation'));
   }
-  return response.json();
+  const data: StartImpersonationResponse = await response.json();
+  // Store the token before the redirect — the backend recognises it on the
+  // next page load via the X-Impersonation-Token header, which is more
+  // robust than relying on cross-origin cookies in dev.
+  setImpersonationToken(data.token);
+  return data;
 }
 
 export async function endImpersonation(): Promise<void> {
-  await fetch(`${API_BASE_URL}/admin/impersonation/end`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    credentials: 'include',
-  });
+  try {
+    await fetch(`${API_BASE_URL}/admin/impersonation/end`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      credentials: 'include',
+    });
+  } finally {
+    clearImpersonationToken();
+  }
 }
 
 export async function getCurrentImpersonation(): Promise<CurrentImpersonationSession | null> {
