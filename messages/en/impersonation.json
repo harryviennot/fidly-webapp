@@ -1,0 +1,49 @@
+{
+  "impersonation": {
+    "dialog": {
+      "title": "View as… ({name})",
+      "description": "This opens a read-only session on the business's dashboard. Every action is logged for audit.",
+      "steps": {
+        "target": "1. Target",
+        "reason": "2. Reason",
+        "targetSubtitle": "Pick who you'll view this business as.",
+        "reasonSubtitle": "Explain why — this will be logged with the session.",
+        "summaryLabel": "Will impersonate"
+      },
+      "next": "Next",
+      "back": "Back",
+      "mode": {
+        "label": "How to choose the target",
+        "byRole": "By role",
+        "byRoleHint": "Pick a role (we'll select an active member)",
+        "byUser": "By specific user",
+        "byUserHint": "Pick a named member of this business"
+      },
+      "byRole": {
+        "label": "Role to impersonate",
+        "preview": "Will view as {name} ({email})",
+        "noneAvailable": "No active {role}s on this business"
+      },
+      "byUser": {
+        "label": "User to impersonate",
+        "placeholder": "Pick a member…"
+      },
+      "reason": {
+        "label": "Reason for access",
+        "placeholder": "Ticket #1234 — customer reports stamps not applying after scan",
+        "counter": "{count}/{max} characters (min {min})"
+      },
+      "confirmation": "I confirm this access is for legitimate support purposes. The session will be logged.",
+      "cancel": "Cancel",
+      "submit": "Start session",
+      "starting": "Starting…",
+      "loading": "Loading…",
+      "genericError": "Could not start the impersonation session"
+    },
+    "banner": {
+      "text": "Viewing as {name} ({role}) at {business} — read-only",
+      "byRoleAnnotation": "selected by role",
+      "endSession": "End session"
+    }
+  }
+}
