@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { useWizardStep } from '../../wizard-context';
 import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
 import { createBusiness, updateBusiness } from '@/api/businesses';
+import { detectBusinessLocale } from '@/lib/locale-detect';
 import type { SetupProgress } from '@/types/business';
 
 const SLUG_INPUT_RE = /[^a-z0-9-]/g;
@@ -40,6 +41,7 @@ export function IdentityStep() {
   const { currentBusiness, setCurrentBusiness, refetch } = useBusiness();
   const queryClient = useQueryClient();
   const ctx = useWizardStep();
+  const uiLocale = useLocale();
 
   // Pre-fill from currentBusiness when present (e.g. business was created on
   // showcase before this wizard ran). In that case Identity becomes
@@ -108,6 +110,7 @@ export function IdentityStep() {
             subscription_tier: 'pro',
             settings: {},
             website: website.trim() || undefined,
+            primary_locale: detectBusinessLocale(uiLocale),
           });
           await updateBusiness(business.id, {
             settings: {
@@ -156,6 +159,7 @@ export function IdentityStep() {
     queryClient,
     user?.id,
     tErr,
+    uiLocale,
   ]);
 
   const slugPreview = slug || t('fields.slugPlaceholder');
