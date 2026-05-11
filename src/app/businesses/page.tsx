@@ -34,7 +34,6 @@ export default function BusinessesPage() {
   const { memberships, setCurrentBusiness } = useBusiness();
 
   const [view, setView] = useListViewPreference<View>("businessListView", "cards");
-  // Superadmins default to "all"; regular owners always see their own.
   const [scope, setScope] = useListViewPreference<"mine" | "all">(
     "businessListScope",
     isSuperadmin ? "all" : "mine",
@@ -43,10 +42,8 @@ export default function BusinessesPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [page, setPage] = useState(0);
 
-  // Force "mine" scope for non-superadmins regardless of cached preference.
   const effectiveScope: "mine" | "all" = isSuperadmin ? scope : "mine";
 
-  // Single-membership owners shouldn't see this page; bounce to dashboard.
   useEffect(() => {
     if (!isSuperadmin && memberships.length === 1) {
       router.replace("/");
@@ -60,9 +57,6 @@ export default function BusinessesPage() {
     scope: effectiveScope,
   });
 
-  // Client-side status filter applied to the current page. Server doesn't
-  // expose status as a filter on /businesses/list to keep the endpoint thin;
-  // the per-page volume is small enough that filtering here is fine.
   const items = useMemo<BusinessListItem[]>(() => {
     const raw = data?.items ?? [];
     if (statusFilter === "all") return raw;
@@ -72,26 +66,17 @@ export default function BusinessesPage() {
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+  // Whether the viewer can "Open" the business directly — only true when
+  // they're a member. For superadmins on businesses they don't belong to,
+  // the entry point is impersonation ("View as").
+  const isMember = (business: BusinessListItem) =>
+    memberships.some((m) => m.business.id === business.id);
+
   const handleOpen = (business: BusinessListItem) => {
-    if (effectiveScope === "all" && isSuperadmin) {
-      // Superadmin viewing all-businesses: clicking "Open dashboard" attempts
-      // to switch the local business context. Only works if the superadmin
-      // is also a member (rare). Otherwise impersonation is the path —
-      // wired in Phase 5.
-      const membership = memberships.find((m) => m.business.id === business.id);
-      if (membership) {
-        setCurrentBusiness(membership.business);
-        router.push("/");
-        return;
-      }
-      // No membership → no-op for now. Phase 5 will wire impersonation here.
-      return;
-    }
     const membership = memberships.find((m) => m.business.id === business.id);
-    if (membership) {
-      setCurrentBusiness(membership.business);
-      router.push("/");
-    }
+    if (!membership) return;
+    setCurrentBusiness(membership.business);
+    router.push("/");
   };
 
   const [impersonateTarget, setImpersonateTarget] = useState<BusinessListItem | null>(null);
@@ -99,8 +84,6 @@ export default function BusinessesPage() {
   const handleImpersonate = (business: BusinessListItem) => {
     setImpersonateTarget(business);
   };
-
-  const impersonateDisabled = false;
 
   return (
     <div className="space-y-4">
@@ -183,14 +166,8 @@ export default function BusinessesPage() {
             <BusinessCard
               key={b.id}
               business={b}
-              onOpen={() => handleOpen(b)}
-              onImpersonate={
-                isSuperadmin && b.owner_id !== undefined
-                  ? () => handleImpersonate(b)
-                  : undefined
-              }
-              impersonateDisabled={impersonateDisabled}
-              impersonateDisabledReason={t("viewAsComingSoon")}
+              onOpen={isMember(b) ? () => handleOpen(b) : undefined}
+              onImpersonate={isSuperadmin ? () => handleImpersonate(b) : undefined}
             />
           ))}
         </div>
@@ -198,12 +175,12 @@ export default function BusinessesPage() {
         <BusinessTable
           businesses={items}
           showOwnerColumn={isSuperadmin && effectiveScope === "all"}
+          isMember={isMember}
           onOpen={(id) => {
             const b = items.find((x) => x.id === id);
             if (b) handleOpen(b);
           }}
           onImpersonate={isSuperadmin ? handleImpersonate : undefined}
-          impersonateDisabled={impersonateDisabled}
         />
       )}
 

@@ -18,6 +18,9 @@ import type { BusinessListItem } from "@/api/businesses";
 interface BusinessTableProps {
   businesses: BusinessListItem[];
   showOwnerColumn: boolean;
+  /** Predicate — return true to render the "Open" action for this row.
+   * Defaults to "always" if omitted. */
+  isMember?: (business: BusinessListItem) => boolean;
   onOpen: (id: string) => void;
   onImpersonate?: (business: BusinessListItem) => void;
   impersonateDisabled?: boolean;
@@ -42,6 +45,7 @@ function getInitials(name: string) {
 export function BusinessTable({
   businesses,
   showOwnerColumn,
+  isMember,
   onOpen,
   onImpersonate,
   impersonateDisabled,
@@ -119,9 +123,17 @@ export function BusinessTable({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="inline-flex gap-1">
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => onOpen(b.id)}>
-                      <ArrowSquareOutIcon size={14} />
-                    </Button>
+                    {(!isMember || isMember(b)) && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-xs"
+                        onClick={() => onOpen(b.id)}
+                        title={t("openDashboard")}
+                      >
+                        <ArrowSquareOutIcon size={14} />
+                      </Button>
+                    )}
                     {onImpersonate && (
                       <Button
                         size="sm"

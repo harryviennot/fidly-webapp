@@ -9,8 +9,11 @@ import type { BusinessListItem } from "@/api/businesses";
 
 interface BusinessCardProps {
   business: BusinessListItem;
-  onOpen: () => void;
-  onImpersonate?: () => void;       // shown only for superadmins; disabled until Phase 5
+  /** Pass a handler to render "Open dashboard". Omit to hide the action
+   * (e.g. superadmin viewing a business they are not a member of). */
+  onOpen?: () => void;
+  /** Pass a handler to render "View as…". Typically only for superadmins. */
+  onImpersonate?: () => void;
   impersonateDisabled?: boolean;
   impersonateDisabledReason?: string;
 }
@@ -99,20 +102,22 @@ export function BusinessCard({
       </div>
 
       <div className="flex items-center gap-2 pt-1">
-        <Button
-          size="sm"
-          variant="outline"
-          className="flex-1 text-xs h-8"
-          onClick={onOpen}
-        >
-          <ArrowSquareOutIcon size={14} className="mr-1" />
-          {t("openDashboard")}
-        </Button>
+        {onOpen && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1 text-xs h-8"
+            onClick={onOpen}
+          >
+            <ArrowSquareOutIcon size={14} className="mr-1" />
+            {t("openDashboard")}
+          </Button>
+        )}
         {onImpersonate && (
           <Button
             size="sm"
-            variant="ghost"
-            className="text-xs h-8"
+            variant={onOpen ? "ghost" : "outline"}
+            className={cn("text-xs h-8", !onOpen && "flex-1")}
             onClick={onImpersonate}
             disabled={impersonateDisabled}
             title={impersonateDisabledReason}
