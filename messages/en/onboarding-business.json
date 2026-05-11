@@ -13,7 +13,10 @@
       "slugTaken": "That web address is already taken.",
       "slugInvalid": "Use lowercase letters, numbers, and hyphens only.",
       "nameRequired": "Give your business a name.",
-      "createFailed": "Something went wrong creating your business. Please try again."
+      "createFailed": "Something went wrong creating your business. Please try again.",
+      "saveFailed": "Couldn't save. Please try again.",
+      "programNameRequired": "Give your program a name.",
+      "rewardRequired": "Set the reward customers will earn."
     },
     "chapters": {
       "welcome": {
@@ -39,6 +42,23 @@
               "logo": "Logo",
               "logoHelp": "Square works best."
             }
+          }
+        }
+      },
+      "program": {
+        "title": "Set up your loyalty program",
+        "subtitle": "Decide how many stamps it takes and what customers earn."
+      },
+      "dataCollection": {
+        "title": "What to collect from customers",
+        "subtitle": "Pick the fields you want on the signup form."
+      },
+      "design": {
+        "title": "Brand your card",
+        "steps": {
+          "branding": {
+            "title": "Branding",
+            "subtitle": "Add your logo and colors. Defaults work — you can refine later."
           }
         }
       }

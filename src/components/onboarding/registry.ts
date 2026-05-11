@@ -1,6 +1,9 @@
 import type { ChapterDef, ResolvedStep, SubStepDef } from './types';
 import { WelcomeStep } from './chapters/welcome/WelcomeStep';
 import { IdentityStep } from './chapters/business/IdentityStep';
+import { ProgramStep } from './chapters/program/ProgramStep';
+import { DataCollectionStep } from './chapters/data-collection/DataCollectionStep';
+import { BrandingStep } from './chapters/design/BrandingStep';
 
 /**
  * Ordered list of wizard chapters. Adding or reordering a sub-step is a single
@@ -10,6 +13,19 @@ import { IdentityStep } from './chapters/business/IdentityStep';
  * `required: true` means the sub-step cannot be individually skipped. Once all
  * required sub-steps are in `setup_progress.completed`, the footer surfaces
  * "Skip rest of setup."
+ *
+ * Coverage of the plan's 11-chapter map at this point:
+ *  - Ch 1 Welcome ✓
+ *  - Ch 2 Business: Identity only (Type/Size/Locations/Objectives TODO)
+ *  - Ch 3 Program ✓
+ *  - Ch 4 Data collection ✓
+ *  - Ch 5 Design: Branding only (Stamps/Content/Back TODO)
+ *  - Ch 6 Notifications: TODO
+ *  - Ch 7 First customer: TODO
+ *  - Ch 8 Live stamp: TODO
+ *  - Ch 9 First broadcast: TODO
+ *  - Ch 10 Team: TODO
+ *  - Ch 11 Plan: TODO
  */
 export const WIZARD_CHAPTERS: ChapterDef[] = [
   {
@@ -20,11 +36,22 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     id: 'business',
     subSteps: [
       { id: 'identity', required: true, Component: IdentityStep },
-      // TODO: type, size, locations, objectives — added in subsequent tasks
     ],
   },
-  // TODO subsequent chapters: program, data-collection, design, notifications,
-  // first-customer, live-stamp, first-broadcast, team, plan
+  {
+    id: 'program',
+    subSteps: [{ id: 'program', required: true, Component: ProgramStep }],
+  },
+  {
+    id: 'data-collection',
+    subSteps: [{ id: 'data-collection', required: false, Component: DataCollectionStep }],
+  },
+  {
+    id: 'design',
+    subSteps: [
+      { id: 'branding', required: true, Component: BrandingStep },
+    ],
+  },
 ];
 
 export const TOTAL_CHAPTERS = WIZARD_CHAPTERS.length;

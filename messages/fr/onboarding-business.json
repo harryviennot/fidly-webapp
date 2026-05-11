@@ -13,7 +13,10 @@
       "slugTaken": "Cette adresse est déjà prise.",
       "slugInvalid": "Lettres minuscules, chiffres et tirets uniquement.",
       "nameRequired": "Donnez un nom à votre commerce.",
-      "createFailed": "Une erreur est survenue à la création de votre commerce. Réessayez."
+      "createFailed": "Une erreur est survenue à la création de votre commerce. Réessayez.",
+      "saveFailed": "Impossible d'enregistrer. Réessayez.",
+      "programNameRequired": "Donnez un nom à votre programme.",
+      "rewardRequired": "Indiquez la récompense que les clients gagneront."
     },
     "chapters": {
       "welcome": {
@@ -39,6 +42,23 @@
               "logo": "Logo",
               "logoHelp": "Format carré conseillé."
             }
+          }
+        }
+      },
+      "program": {
+        "title": "Configurez votre programme",
+        "subtitle": "Décidez combien de tampons sont nécessaires et ce que vos clients gagnent."
+      },
+      "dataCollection": {
+        "title": "Que collecter auprès des clients",
+        "subtitle": "Choisissez les champs du formulaire d'inscription."
+      },
+      "design": {
+        "title": "Personnalisez votre carte",
+        "steps": {
+          "branding": {
+            "title": "Identité visuelle",
+            "subtitle": "Ajoutez votre logo et vos couleurs. Vous pourrez affiner plus tard."
           }
         }
       }
