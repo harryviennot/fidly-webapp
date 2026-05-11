@@ -1,18 +1,23 @@
 "use client"
 
 import * as React from "react"
-import { CaretUpDown, Check } from "@phosphor-icons/react"
+import { CaretUpDown, Check, ArrowRight } from "@phosphor-icons/react"
 import { useTranslations } from "next-intl"
+import Link from "next/link"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useBusiness } from "@/contexts/business-context"
+import { useIsSuperadmin } from "@/lib/auth/use-is-superadmin"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+
+const DROPDOWN_LIMIT = 5
 
 function BusinessAvatar({ name, logoUrl, size = "md" }: { name: string; logoUrl?: string | null; size?: "sm" | "md" }) {
   const initials = name
@@ -52,9 +57,30 @@ function BusinessAvatar({ name, logoUrl, size = "md" }: { name: string; logoUrl?
 
 export function BusinessSwitcher() {
   const { memberships, currentBusiness, setCurrentBusiness } = useBusiness()
+  const isSuperadmin = useIsSuperadmin()
   const t = useTranslations()
 
-  const hasMultipleMemberships = memberships.length > 1
+  // Superadmins always get the dropdown (even with 0/1 memberships) so they
+  // can reach /businesses via "View all". Regular users only get a dropdown
+  // when they have more than one membership.
+  const hasMultipleMemberships = memberships.length > 1 || isSuperadmin
+  const shouldShowViewAll = isSuperadmin || memberships.length > DROPDOWN_LIMIT
+
+  // Sort: current business first, then active, then by name.
+  const sortedMemberships = React.useMemo(() => {
+    const list = [...memberships]
+    list.sort((a, b) => {
+      if (a.business.id === currentBusiness?.id) return -1
+      if (b.business.id === currentBusiness?.id) return 1
+      const aActive = a.business.status === "active" ? 0 : 1
+      const bActive = b.business.status === "active" ? 0 : 1
+      if (aActive !== bActive) return aActive - bActive
+      return (a.business.name || "").localeCompare(b.business.name || "")
+    })
+    return list
+  }, [memberships, currentBusiness?.id])
+
+  const visibleMemberships = sortedMemberships.slice(0, DROPDOWN_LIMIT)
 
   const formatRole = (role: string) => {
     const key = `roles.${role}` as const;
@@ -112,7 +138,7 @@ export function BusinessSwitcher() {
         <DropdownMenuLabel className="text-muted-foreground text-xs">
           {t("businessSwitcher.yourBusinesses")}
         </DropdownMenuLabel>
-        {memberships.map((membership) => {
+        {visibleMemberships.map((membership) => {
           const isSelected = membership.business.id === currentBusiness?.id
           return (
             <DropdownMenuItem
@@ -139,6 +165,22 @@ export function BusinessSwitcher() {
             </DropdownMenuItem>
           )
         })}
+        {shouldShowViewAll && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link
+                href="/businesses"
+                className="flex items-center justify-between gap-2 p-2 text-sm"
+              >
+                <span className="text-[var(--accent)] font-medium">
+                  {t("businessSwitcher.viewAll", { count: memberships.length })}
+                </span>
+                <ArrowRight className="size-3.5 text-[var(--accent)]" weight="bold" />
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -1,0 +1,49 @@
+{
+  "businessesPage": {
+    "title": "Businesses",
+    "subtitle": "All the businesses you belong to.",
+    "subtitleAdmin": "All businesses on the platform.",
+    "searchPlaceholder": "Search by name or slug…",
+    "ownedBy": "Owner: {name}",
+    "openDashboard": "Open",
+    "viewAs": "View as…",
+    "viewAsComingSoon": "Coming soon",
+    "loadError": "Failed to load businesses. Please refresh.",
+    "scope": {
+      "mine": "My businesses",
+      "all": "All businesses"
+    },
+    "view": {
+      "cards": "Cards",
+      "table": "Table"
+    },
+    "statusFilter": {
+      "all": "All",
+      "active": "Active",
+      "pending": "Pending",
+      "suspended": "Suspended"
+    },
+    "status": {
+      "active": "Active",
+      "pending": "Pending",
+      "suspended": "Suspended"
+    },
+    "empty": {
+      "title": "No businesses found",
+      "description": "Try adjusting your search or filters."
+    },
+    "table": {
+      "business": "Business",
+      "owner": "Owner",
+      "status": "Status",
+      "plan": "Plan",
+      "role": "Your role",
+      "actions": "Actions"
+    },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    }
+  }
+}
