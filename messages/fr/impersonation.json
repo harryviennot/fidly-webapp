@@ -1,0 +1,40 @@
+{
+  "impersonation": {
+    "dialog": {
+      "title": "Voir en tant que… ({name})",
+      "description": "Ouvre une session en lecture seule sur le tableau de bord de l'établissement. Chaque action est consignée à des fins d'audit.",
+      "mode": {
+        "label": "Comment choisir la cible",
+        "byRole": "Par rôle",
+        "byRoleHint": "Choisir un rôle (on sélectionnera un membre actif)",
+        "byUser": "Par utilisateur",
+        "byUserHint": "Choisir un membre nommé de l'établissement"
+      },
+      "byRole": {
+        "label": "Rôle à incarner",
+        "preview": "Vous verrez en tant que {name} ({email})",
+        "noneAvailable": "Aucun(e) {role} actif dans cet établissement"
+      },
+      "byUser": {
+        "label": "Utilisateur à incarner",
+        "placeholder": "Choisir un membre…"
+      },
+      "reason": {
+        "label": "Motif de l'accès",
+        "placeholder": "Ticket #1234 — un client signale que les tampons ne s'appliquent pas après le scan",
+        "counter": "{count}/{max} caractères (min {min})"
+      },
+      "confirmation": "Je confirme que cet accès relève d'un motif support légitime. La session sera consignée.",
+      "cancel": "Annuler",
+      "submit": "Démarrer la session",
+      "starting": "Démarrage…",
+      "loading": "Chargement…",
+      "genericError": "Impossible de démarrer la session d'impersonation"
+    },
+    "banner": {
+      "text": "Consultation en tant que {name} ({role}) chez {business} — lecture seule",
+      "byRoleAnnotation": "sélectionné par rôle",
+      "endSession": "Terminer la session"
+    }
+  }
+}

@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/auth-provider";
 import { applyTheme, getAccentFromSettings, getBackgroundFromSettings } from "@/utils/theme";
 import { businessKeys, fetchMemberships } from "@/hooks/use-business-query";
 import { getMyProfile } from "@/api";
+import { useImpersonation } from "@/contexts/impersonation-context";
+import { API_BASE_URL, getAuthHeaders } from "@/api/client";
 import { setLocale, SUPPORTED_LOCALES, type Locale } from "@/lib/locale";
 import { Business } from "@/types";
 
@@ -28,16 +30,27 @@ interface BusinessContextType {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  isImpersonating: boolean;
 }
 
 const BusinessContext = createContext<BusinessContextType | undefined>(
   undefined
 );
 
+async function fetchImpersonatedBusiness(businessId: string): Promise<Business | null> {
+  const response = await fetch(`${API_BASE_URL}/businesses/${businessId}`, {
+    headers: await getAuthHeaders(),
+    credentials: "include",
+  });
+  if (!response.ok) return null;
+  return response.json();
+}
+
 export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const supabase = createClient();
+  const { isImpersonating, session: impersonationSession } = useImpersonation();
 
   const [currentBusinessId, setCurrentBusinessId] = useState<string | null>(
     () => (typeof window !== "undefined" ? localStorage.getItem("currentBusinessId") : null)
@@ -65,6 +78,15 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       .catch(() => setLocaleSynced(true));
   }, [user?.id]);
 
+  // Impersonation branch: fetch the impersonated business via backend; skip
+  // the Supabase memberships query, which would resolve as the superadmin
+  // and produce the wrong identity downstream.
+  const { data: impersonatedBusiness } = useQuery({
+    queryKey: ["impersonated-business", impersonationSession?.business_id],
+    queryFn: () => fetchImpersonatedBusiness(impersonationSession!.business_id),
+    enabled: isImpersonating && !!impersonationSession?.business_id,
+  });
+
   const {
     data: rawMemberships = [],
     isLoading,
@@ -72,14 +94,20 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: businessKeys.memberships(user?.id ?? ""),
     queryFn: () => fetchMemberships(user!.id),
-    enabled: !!user?.id,
+    enabled: !!user?.id && !isImpersonating,
   });
 
-  const memberships: Membership[] = rawMemberships.map((m) => ({
-    id: m.id,
-    role: m.role as MembershipRole,
-    business: m.businesses as unknown as Business,
-  }));
+  const memberships: Membership[] = isImpersonating && impersonatedBusiness && impersonationSession
+    ? [{
+        id: `imp-${impersonationSession.session_id}`,
+        role: impersonationSession.target_role as MembershipRole,
+        business: impersonatedBusiness,
+      }]
+    : rawMemberships.map((m) => ({
+        id: m.id,
+        role: m.role as MembershipRole,
+        business: m.businesses as unknown as Business,
+      }));
 
   const activeMemberships = memberships.filter(
     (m) => m.business.status === "active"
@@ -91,6 +119,16 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   // membership; never silently auto-select a suspended/pending one.
   useEffect(() => {
     if (!user?.id) return;
+
+    // During impersonation, force the impersonated business as the current
+    // one regardless of localStorage state.
+    if (isImpersonating && impersonatedBusiness) {
+      if (currentBusinessId !== impersonatedBusiness.id) {
+        setCurrentBusinessId(impersonatedBusiness.id);
+      }
+      return;
+    }
+
     const storedMatch = memberships.find(
       (m) => m.business.id === currentBusinessId
     );
@@ -113,7 +151,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("currentBusinessId");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, memberships.length, activeMemberships.length]);
+  }, [user?.id, memberships.length, activeMemberships.length, isImpersonating, impersonatedBusiness?.id]);
 
   const membership =
     memberships.find((m) => m.business.id === currentBusinessId) ?? null;
@@ -132,6 +170,10 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   // Subscribe to realtime business status changes
   useEffect(() => {
     if (!currentBusiness?.id) return;
+    // STA-140: during impersonation the Supabase session belongs to the
+    // superadmin; subscribing here would attach the wrong identity to the
+    // realtime channel. The dashboard refresh button is enough in v1.
+    if (isImpersonating) return;
 
     const channel = supabase
       .channel(`business-status-${currentBusiness.id}`)
@@ -158,7 +200,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       supabase.removeChannel(channel);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentBusiness?.id, currentBusiness?.status]);
+  }, [currentBusiness?.id, currentBusiness?.status, isImpersonating]);
 
   const setCurrentBusiness = (business: Business) => {
     setCurrentBusinessId(business.id);
@@ -185,6 +227,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         loading: isLoading || !localeSynced,
         error: queryError ? "Failed to load memberships" : null,
         refetch,
+        isImpersonating,
       }}
     >
       {children}

@@ -20,6 +20,7 @@ import { useIsSuperadmin } from "@/lib/auth/use-is-superadmin";
 import { useBusiness } from "@/contexts/business-context";
 import { BusinessCard } from "@/components/businesses/business-card";
 import { BusinessTable } from "@/components/businesses/business-table";
+import { ImpersonateDialog } from "@/components/impersonation/impersonate-dialog";
 import type { BusinessListItem } from "@/api/businesses";
 
 const PAGE_SIZE = 50;
@@ -93,12 +94,13 @@ export default function BusinessesPage() {
     }
   };
 
-  // Phase 5 will replace this with the impersonate dialog.
+  const [impersonateTarget, setImpersonateTarget] = useState<BusinessListItem | null>(null);
+
   const handleImpersonate = (business: BusinessListItem) => {
-    void business;
+    setImpersonateTarget(business);
   };
 
-  const impersonateDisabled = true; // toggled to false in Phase 5
+  const impersonateDisabled = false;
 
   return (
     <div className="space-y-4">
@@ -202,6 +204,15 @@ export default function BusinessesPage() {
           }}
           onImpersonate={isSuperadmin ? handleImpersonate : undefined}
           impersonateDisabled={impersonateDisabled}
+        />
+      )}
+
+      {impersonateTarget && (
+        <ImpersonateDialog
+          open={!!impersonateTarget}
+          onOpenChange={(open) => !open && setImpersonateTarget(null)}
+          businessId={impersonateTarget.id}
+          businessName={impersonateTarget.name}
         />
       )}
 
