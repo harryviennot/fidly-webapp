@@ -37,13 +37,16 @@ export function IdentityStep() {
   const t = useTranslations('onboardingBusiness.chapters.business.steps.identity');
   const tErr = useTranslations('onboardingBusiness.errors');
   const { user } = useAuth();
-  const { setCurrentBusiness, refetch } = useBusiness();
+  const { currentBusiness, setCurrentBusiness, refetch } = useBusiness();
   const queryClient = useQueryClient();
   const ctx = useWizardStep();
 
-  const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
-  const [slugTouched, setSlugTouched] = useState(false);
+  // Pre-fill from currentBusiness when present (e.g. business was created on
+  // showcase before this wizard ran). In that case Identity becomes
+  // "confirm + commit" — no new business is created.
+  const [name, setName] = useState(() => currentBusiness?.name ?? '');
+  const [slug, setSlug] = useState(() => currentBusiness?.url_slug ?? '');
+  const [slugTouched, setSlugTouched] = useState(!!currentBusiness?.url_slug);
   const [website, setWebsite] = useState('');
 
   // Keep the slug synced with the business name until the user edits the slug
@@ -74,14 +77,6 @@ export function IdentityStep() {
         return { ok: false };
       }
       try {
-        const business = await createBusiness({
-          name: name.trim(),
-          url_slug: slug,
-          subscription_tier: 'pro',
-          settings: {},
-          website: website.trim() || undefined,
-        });
-
         const initialProgress: SetupProgress = {
           started_at: new Date().toISOString(),
           completed_at: null,
@@ -94,12 +89,33 @@ export function IdentityStep() {
           payload: {},
         };
 
-        await updateBusiness(business.id, {
-          settings: {
-            ...(business.settings ?? {}),
-            setup_progress: initialProgress,
-          },
-        });
+        let business;
+        if (currentBusiness) {
+          // Existing business (showcase or prior wizard run) — update name +
+          // setup_progress. Slug isn't mutable post-creation; the form pre-
+          // fills it but we don't try to change it.
+          business = await updateBusiness(currentBusiness.id, {
+            name: name.trim(),
+            settings: {
+              ...(currentBusiness.settings ?? {}),
+              setup_progress: initialProgress,
+            },
+          });
+        } else {
+          business = await createBusiness({
+            name: name.trim(),
+            url_slug: slug,
+            subscription_tier: 'pro',
+            settings: {},
+            website: website.trim() || undefined,
+          });
+          await updateBusiness(business.id, {
+            settings: {
+              ...(business.settings ?? {}),
+              setup_progress: initialProgress,
+            },
+          });
+        }
 
         await refetch();
         setCurrentBusiness({
@@ -134,6 +150,7 @@ export function IdentityStep() {
     isNameValid,
     isSlugValid,
     ctx,
+    currentBusiness,
     refetch,
     setCurrentBusiness,
     queryClient,
@@ -180,6 +197,8 @@ export function IdentityStep() {
             inputMode="url"
             autoComplete="off"
             spellCheck={false}
+            readOnly={!!currentBusiness}
+            disabled={!!currentBusiness}
             className="h-11"
           />
           <p className="text-[11.5px] text-[#999]">{t('fields.slugHelp', { slug: slugPreview })}</p>
