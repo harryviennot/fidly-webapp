@@ -73,7 +73,7 @@ export default function CustomersPage() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
   const [voidReason, setVoidReason] = useState("");
-  const [voidTarget, setVoidTarget] = useState<{ customerId: string; transactionId: string } | null>(null);
+  const [voidTarget, setVoidTarget] = useState<{ customerId: string; enrollmentId: string; transactionId: string } | null>(null);
 
   const selectedCustomer = selectedCustomerId
     ? customers.find((c) => c.id === selectedCustomerId) ?? null
@@ -82,8 +82,10 @@ export default function CustomersPage() {
   const handleAddStamp = async (e: React.MouseEvent, customer: CustomerResponse) => {
     e.stopPropagation();
     if (!businessId) return;
+    const enrollmentId = customer.enrollments[0]?.id;
+    if (!enrollmentId) return;
     try {
-      await addStampMutation.mutateAsync(customer.id);
+      await addStampMutation.mutateAsync({ customerId: customer.id, enrollmentId });
       toast.success(t("toasts.stampAdded", { name: customer.name }));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("toasts.stampFailed"));
@@ -93,8 +95,10 @@ export default function CustomersPage() {
   const handleRedeem = async (e: React.MouseEvent, customer: CustomerResponse) => {
     e.stopPropagation();
     if (!businessId) return;
+    const enrollmentId = customer.enrollments[0]?.id;
+    if (!enrollmentId) return;
     try {
-      await redeemMutation.mutateAsync(customer.id);
+      await redeemMutation.mutateAsync({ customerId: customer.id, enrollmentId });
       toast.success(t("actions.redeemSuccessToast"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("actions.redeemFailedToast"));
@@ -104,6 +108,8 @@ export default function CustomersPage() {
   const handleVoid = (e: React.MouseEvent, customer: CustomerResponse) => {
     e.stopPropagation();
     if (!businessId) return;
+    const enrollmentId = customer.enrollments[0]?.id;
+    if (!enrollmentId) return;
     const customerTxns = transactions.filter((txn) => txn.customer_id === customer.id);
     const lastVoidable = customerTxns.find(
       (txn) =>
@@ -116,7 +122,7 @@ export default function CustomersPage() {
       toast.error(t("actions.noVoidableStamp"));
       return;
     }
-    setVoidTarget({ customerId: customer.id, transactionId: lastVoidable.id });
+    setVoidTarget({ customerId: customer.id, enrollmentId, transactionId: lastVoidable.id });
     setVoidDialogOpen(true);
   };
 
@@ -125,6 +131,7 @@ export default function CustomersPage() {
     try {
       await voidMutation.mutateAsync({
         customerId: voidTarget.customerId,
+        enrollmentId: voidTarget.enrollmentId,
         transactionId: voidTarget.transactionId,
         reason: voidReason.trim(),
       });
@@ -174,7 +181,6 @@ export default function CustomersPage() {
       let cmp = 0;
       switch (sortKey) {
         case "name": cmp = a.name.localeCompare(b.name); break;
-        case "email": cmp = a.email.localeCompare(b.email); break;
         case "stamps": cmp = a.stamps - b.stamps; break;
         case "updated_at":
           cmp = (a.last_activity_at ?? a.updated_at ?? "").localeCompare(

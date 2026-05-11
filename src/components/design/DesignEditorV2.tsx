@@ -34,7 +34,7 @@ import {
 import { getDesignDraft, useDesignDraftPersistence } from '@/hooks/use-design-draft';
 
 export interface DesignEditorRef {
-  handleSave: () => Promise<void>;
+  handleSave: () => Promise<boolean>;
   saving: boolean;
   isDirty: boolean;
   clearDraft: () => void;
@@ -206,13 +206,13 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       onDirtyChange?.(isDirty);
     }, [isDirty, onDirtyChange]);
 
-    const handleSave = useCallback(async () => {
-      if (!currentBusiness?.id) return;
+    const handleSave = useCallback(async (): Promise<boolean> => {
+      if (!currentBusiness?.id) return false;
       const { translations, ...data } = formDataRef.current;
       void translations;
       if (!data.name || !data.description) {
         setError(t('requiredFields'));
-        return;
+        return false;
       }
 
       // Strip blob URLs before sending to API
@@ -245,6 +245,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           clearDraft();
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           router.push(`/design/${created.id}`);
+          return true;
         } else if (design) {
           // Strip image URL fields from the base payload — only include if explicitly changed
           const { logo_url, strip_background_url, ...updateData } = data;
@@ -266,9 +267,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           clearDraft();
           lastSavedDataRef.current = JSON.stringify(formDataRef.current);
           onSave?.();
+          return true;
         }
+        return false;
       } catch (err) {
         setError(err instanceof Error ? err.message : t('failedToSave'));
+        return false;
       } finally {
         setSaving(false);
         onSavingChange?.(false);

@@ -49,7 +49,7 @@ export function TeamStats({
         suffix={memberLimit ? `/${memberLimit}` : undefined}
         subtitle={t('activeCount', { count: activeCount })}
         icon={<Users className="w-4 h-4" weight="bold" />}
-        iconBg="var(--accent-light)"
+        tone="accent"
         delay={0}
       />
 
@@ -58,7 +58,7 @@ export function TeamStats({
         value={mostActive?.scans_count ?? 0}
         subtitle={mostActive?.user?.name || mostActive?.user?.email || undefined}
         icon={<Trophy className="w-4 h-4" weight="bold" />}
-        iconBg="var(--accent-light)"
+        tone="accent"
         delay={80}
       />
 
@@ -67,7 +67,7 @@ export function TeamStats({
         value={pausedCount}
         subtitle={pausedCount > 0 ? t('pausedSubtitle') : undefined}
         icon={<PauseCircle className="w-4 h-4" weight="bold" />}
-        iconBg="var(--warning-light)"
+        tone="warning"
         delay={160}
       />
 
@@ -76,7 +76,7 @@ export function TeamStats({
           title={t('pendingInvites')}
           value={invitations.length}
           icon={<EnvelopeSimple className="w-4 h-4" weight="bold" />}
-          iconBg="var(--warning-light)"
+          tone="warning"
           delay={240}
           className="flex-1"
         />

@@ -109,7 +109,7 @@ export default function DashboardPage() {
               title={t("dashboard.totalCustomers")}
               value={totalCustomers}
               icon={<Users className="w-4 h-4" weight="bold" />}
-              iconBg="var(--accent-light)"
+              tone="accent"
               // subtitle={t("dashboard.vsLastMonth")}
               // change="+18%"
               // positive
@@ -120,7 +120,7 @@ export default function DashboardPage() {
               title={t("dashboard.scansToday")}
               value={activeCustomersToday}
               icon={<QrCodeIcon className="w-4 h-4" weight="bold" />}
-              iconBg="var(--accent-light)"
+              tone="accent"
               // subtitle={t("dashboard.vsYesterday")}
               // change="+12%"
               // positive
@@ -131,7 +131,7 @@ export default function DashboardPage() {
               title={t("dashboard.activeCards")}
               value={totalCustomers}
               icon={<CreditCard className="w-4 h-4" weight="bold" />}
-              iconBg="#F0EDE7"
+              tone="neutral"
               // subtitle={t("dashboard.installRate87")}
               // change="+8%"
               // positive
@@ -142,7 +142,7 @@ export default function DashboardPage() {
               title={t("dashboard.redemptions")}
               value={rewardsToday}
               icon={<Gift className="w-4 h-4" weight="bold" />}
-              iconBg="#FFF3E0"
+              tone="warning"
               // subtitle={t("dashboard.thisWeek")}
               // change="+23%"
               // positive
