@@ -132,6 +132,7 @@
       "unsavedChangesDescription": "Vous avez des modifications non enregistrées qui seront perdues si vous quittez cette page.",
       "leaveWithoutSaving": "Quitter sans enregistrer",
       "stayOnPage": "Rester sur la page",
+      "saveAndLeave": "Enregistrer et quitter",
       "livePreview": "Aperçu en direct"
     },
     "fieldEditor": {

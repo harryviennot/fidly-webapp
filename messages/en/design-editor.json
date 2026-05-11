@@ -132,6 +132,7 @@
       "unsavedChangesDescription": "You have unsaved changes that will be lost if you leave this page.",
       "leaveWithoutSaving": "Leave without saving",
       "stayOnPage": "Stay on page",
+      "saveAndLeave": "Save & leave",
       "livePreview": "Live Preview"
     },
     "fieldEditor": {

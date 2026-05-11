@@ -64,7 +64,7 @@ export default function ProgramOverviewPage() {
               title={t('totalStampsGiven')}
               value={stats?.stamps_today ?? 0}
               icon={<StampIcon className="w-4 h-4" weight="bold" />}
-              iconBg="var(--accent-light)"
+              tone="accent"
               // subtitle={t('allTime')}
               // change="+22%"
               // positive
@@ -75,7 +75,7 @@ export default function ProgramOverviewPage() {
               title={t('rewardsRedeemed')}
               value={stats?.rewards_today ?? 0}
               icon={<GiftIcon className="w-4 h-4" weight="bold" />}
-              iconBg="#FFF3E0"
+              tone="warning"
               // subtitle={t('allTime')}
               // change="+15%"
               // positive
@@ -86,7 +86,7 @@ export default function ProgramOverviewPage() {
               title={t('activeCards')}
               value={totalCustomers}
               icon={<CreditCardIcon className="w-4 h-4" weight="bold" />}
-              iconBg="#E4F0F8"
+              tone="info"
               // subtitle={`87% ${t('installRate')}`}
               // change="+8%"
               // positive

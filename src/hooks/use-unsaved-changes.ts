@@ -62,5 +62,26 @@ export function useUnsavedChanges(isDirty: boolean, onConfirmLeave?: () => void)
     setPendingUrl(null);
   }, []);
 
-  return { showLeaveDialog, pendingUrl, confirmLeave, cancelLeave };
+  const saveAndLeave = useCallback(
+    async (saveFn: () => Promise<boolean | void> | boolean | void) => {
+      const url = pendingUrl;
+      setShowLeaveDialog(false);
+      let success = false;
+      try {
+        const result = await saveFn();
+        // void / undefined / true → assume success; explicit false → failure
+        success = result !== false;
+      } catch {
+        success = false;
+      }
+      if (success && url) {
+        isDirtyRef.current = false;
+        router.push(url);
+        setPendingUrl(null);
+      }
+    },
+    [pendingUrl, router]
+  );
+
+  return { showLeaveDialog, pendingUrl, confirmLeave, cancelLeave, saveAndLeave };
 }

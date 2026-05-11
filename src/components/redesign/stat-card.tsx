@@ -3,6 +3,15 @@
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "./animated-number";
 
+export type StatCardTone = "accent" | "warning" | "info" | "neutral";
+
+const TONE_STYLES: Record<StatCardTone, { background: string; color: string }> = {
+  accent: { background: "var(--accent-light)", color: "var(--accent)" },
+  warning: { background: "var(--warning-light)", color: "var(--warning)" },
+  info: { background: "var(--info-light)", color: "var(--info)" },
+  neutral: { background: "var(--muted)", color: "var(--muted-foreground)" },
+};
+
 interface StatCardProps {
   title: string;
   value: number;
@@ -12,7 +21,7 @@ interface StatCardProps {
   change?: string;
   positive?: boolean;
   icon: React.ReactNode;
-  iconBg?: string;
+  tone?: StatCardTone;
   delay?: number;
   className?: string;
 }
@@ -26,10 +35,11 @@ export function StatCard({
   change,
   positive,
   icon,
-  iconBg,
+  tone = "accent",
   delay = 0,
   className,
 }: StatCardProps) {
+  const { background, color } = TONE_STYLES[tone];
   return (
     <div
       className={cn(
@@ -41,8 +51,8 @@ export function StatCard({
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-[#8A8A8A]">{title}</span>
         <div
-          className="w-8 h-8 rounded-md flex items-center justify-center text-[var(--accent)]"
-          style={{ background: iconBg || "var(--accent-light)" }}
+          className="w-8 h-8 rounded-md flex items-center justify-center"
+          style={{ background, color }}
         >
           {icon}
         </div>

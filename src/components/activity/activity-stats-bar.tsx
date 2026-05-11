@@ -28,21 +28,21 @@ export function ActivityStatsBar({ stats, isLoading }: ActivityStatsBarProps) {
         title={t("stats.stampsToday")}
         value={stats?.stamps_today ?? 0}
         icon={<Stamp className="w-4 h-4" weight="bold" />}
-        iconBg="var(--accent-light)"
+        tone="accent"
         delay={0}
       />
       <StatCard
         title={t("stats.rewardsToday")}
         value={stats?.rewards_today ?? 0}
         icon={<Gift className="w-4 h-4" weight="bold" />}
-        iconBg="#FFF3E0"
+        tone="warning"
         delay={80}
       />
       <StatCard
         title={t("stats.totalThisWeek")}
         value={stats?.total_this_week ?? 0}
         icon={<ChartBar className="w-4 h-4" weight="bold" />}
-        iconBg="var(--accent-light)"
+        tone="accent"
         delay={160}
       />
       <div className="md:col-span-3 lg:col-span-1">
@@ -50,7 +50,7 @@ export function ActivityStatsBar({ stats, isLoading }: ActivityStatsBarProps) {
           title={t("stats.activeCustomersToday")}
           value={stats?.active_customers_today ?? 0}
           icon={<DeviceMobileCamera className="w-4 h-4" weight="bold" />}
-          iconBg="#E4F0F8"
+          tone="info"
           delay={240}
         />
       </div>

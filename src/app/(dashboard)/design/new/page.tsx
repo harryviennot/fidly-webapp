@@ -35,7 +35,7 @@ export default function NewDesignPage() {
   const handleConfirmLeave = useCallback(() => {
     editorRef.current?.clearDraft();
   }, []);
-  const { showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty, handleConfirmLeave);
+  const { showLeaveDialog, confirmLeave, cancelLeave, saveAndLeave } = useUnsavedChanges(isDirty, handleConfirmLeave);
 
   const handleSave = () => {
     editorRef.current?.handleSave();
@@ -105,7 +105,18 @@ export default function NewDesignPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-full" onClick={cancelLeave}>{tEditor('stayOnPage')}</AlertDialogCancel>
-            <AlertDialogAction className="rounded-full" onClick={confirmLeave}>{tEditor('leaveWithoutSaving')}</AlertDialogAction>
+            <AlertDialogAction
+              className="rounded-full bg-transparent text-foreground border border-border hover:bg-muted"
+              onClick={confirmLeave}
+            >
+              {tEditor('leaveWithoutSaving')}
+            </AlertDialogAction>
+            <AlertDialogAction
+              className="rounded-full bg-[var(--accent)] hover:bg-[var(--accent)]/90"
+              onClick={() => saveAndLeave(() => editorRef.current?.handleSave() ?? false)}
+            >
+              {tEditor('saveAndLeave')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

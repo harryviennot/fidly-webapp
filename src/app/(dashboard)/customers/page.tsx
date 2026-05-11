@@ -174,7 +174,6 @@ export default function CustomersPage() {
       let cmp = 0;
       switch (sortKey) {
         case "name": cmp = a.name.localeCompare(b.name); break;
-        case "email": cmp = a.email.localeCompare(b.email); break;
         case "stamps": cmp = a.stamps - b.stamps; break;
         case "updated_at":
           cmp = (a.last_activity_at ?? a.updated_at ?? "").localeCompare(

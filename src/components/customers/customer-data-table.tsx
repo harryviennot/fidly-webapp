@@ -9,7 +9,13 @@ import {
   Stamp,
   Gift,
   Prohibit,
+  Info,
 } from "@phosphor-icons/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { CustomerResponse, CardDesign } from "@/types";
 import {
   classifyCustomer,
@@ -28,7 +34,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PAGE_SIZE } from "@/hooks/use-customers";
 
-export type SortKey = "name" | "email" | "stamps" | "updated_at" | "total_redemptions";
+export type SortKey = "name" | "stamps" | "updated_at" | "total_redemptions";
 export type SortDir = "asc" | "desc";
 
 function SortIndicator({
@@ -141,13 +147,6 @@ export function CustomerDataTable({
                 <SortIndicator sortKey={sortKey} sortDir={sortDir} column="name" />
               </TableHead>
               <TableHead
-                className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 hidden lg:table-cell"
-                onClick={() => onSort("email")}
-              >
-                {t("table.email")}
-                <SortIndicator sortKey={sortKey} sortDir={sortDir} column="email" />
-              </TableHead>
-              <TableHead
                 className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4"
                 onClick={() => onSort("stamps")}
               >
@@ -155,7 +154,32 @@ export function CustomerDataTable({
                 <SortIndicator sortKey={sortKey} sortDir={sortDir} column="stamps" />
               </TableHead>
               <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4">
-                {t("table.segment")}
+                <span className="inline-flex items-center gap-1">
+                  {t("table.segment")}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label={t("segmentsHelp.title")}
+                        className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full text-[#A0A0A0] hover:text-[#555]"
+                      >
+                        <Info className="h-3.5 w-3.5" weight="regular" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="max-w-[320px] text-[11px] leading-[1.5] normal-case tracking-normal font-normal"
+                    >
+                      <div className="space-y-1.5">
+                        <div><span className="font-semibold">{t("segments.new")}</span>{" — "}{t("segmentsHelp.new")}</div>
+                        <div><span className="font-semibold">{t("segments.regular")}</span>{" — "}{t("segmentsHelp.regular")}</div>
+                        <div><span className="font-semibold">{t("segments.vip")}</span>{" — "}{t("segmentsHelp.vip")}</div>
+                        <div><span className="font-semibold">{t("segments.closeToReward")}</span>{" — "}{t("segmentsHelp.closeToReward")}</div>
+                        <div><span className="font-semibold">{t("segments.atRisk")}</span>{" — "}{t("segmentsHelp.atRisk")}</div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </span>
               </TableHead>
               <TableHead
                 className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 hidden lg:table-cell"
@@ -202,10 +226,6 @@ export function CustomerDataTable({
                         </div>
                       </div>
                     </div>
-                  </TableCell>
-
-                  <TableCell className="py-3 px-4 text-[12.5px] text-[#666] hidden lg:table-cell">
-                    {customer.email}
                   </TableCell>
 
                   <TableCell className="py-3 px-4">
@@ -351,9 +371,6 @@ export function CustomerDataTable({
                       >
                         {t(segConfig.labelKey)}
                       </span>
-                    </div>
-                    <div className="text-[11px] text-[#A5A5A5] mt-0.5 truncate">
-                      {customer.email}
                     </div>
                   </div>
                 </div>

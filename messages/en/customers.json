@@ -34,6 +34,14 @@
       "closeToReward": "Close to Reward",
       "atRisk": "At Risk"
     },
+    "segmentsHelp": {
+      "title": "What do these segments mean?",
+      "new": "Joined within the last 7 days.",
+      "regular": "Active customers without a special status.",
+      "vip": "Customers who have redeemed 3 or more rewards.",
+      "closeToReward": "Within 2 stamps of completing their card.",
+      "atRisk": "Have stamps but haven't visited in over 30 days."
+    },
     "actions": {
       "addStamp": "Add Stamp",
       "maxed": "Max!",

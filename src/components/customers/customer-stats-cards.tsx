@@ -23,21 +23,21 @@ export function CustomerStatsCards({ stats }: CustomerStatsCardsProps) {
         title={t("totalCustomers")}
         value={stats.totalCustomers}
         icon={<Users className="w-4 h-4" weight="bold" />}
-        iconBg="var(--accent-light)"
+        tone="accent"
         delay={0}
       />
       <StatCard
         title={t("newThisWeek")}
         value={stats.newThisWeek}
         icon={<UserPlus className="w-4 h-4" weight="bold" />}
-        iconBg="#E4F0F8"
+        tone="info"
         delay={80}
       />
       <StatCard
         title={t("stampsToday")}
         value={stats.stampsToday}
         icon={<ChartBar className="w-4 h-4" weight="bold" />}
-        iconBg="var(--accent-light)"
+        tone="accent"
         delay={160}
       />
       <div className="md:col-span-3 lg:col-span-1">
@@ -45,7 +45,7 @@ export function CustomerStatsCards({ stats }: CustomerStatsCardsProps) {
           title={t("redemptionsThisMonth")}
           value={stats.redemptionsThisMonth}
           icon={<Gift className="w-4 h-4" weight="bold" />}
-          iconBg="#FFF3E0"
+          tone="warning"
           delay={240}
         />
       </div>
