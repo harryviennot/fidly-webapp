@@ -29,7 +29,9 @@
     "logOut": "Se déconnecter"
   },
   "businessSwitcher": {
-    "yourBusinesses": "Vos entreprises"
+    "yourBusinesses": "Vos entreprises",
+    "switchTo": "Basculer vers",
+    "viewAll": "Voir tous ({count})"
   },
   "roles": {
     "owner": "Propriétaire",

@@ -5,6 +5,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { AuthProvider } from "@/contexts/auth-provider";
 import { BusinessProvider } from "@/contexts/business-context";
 import { FeaturesProvider } from "@/contexts/features-context";
+import { ImpersonationProvider } from "@/contexts/impersonation-context";
 import { QueryProvider } from "@/components/providers";
 import "./globals.css";
 
@@ -38,7 +39,9 @@ export default async function RootLayout({
           <QueryProvider>
             <FeaturesProvider>
               <AuthProvider>
-                <BusinessProvider>{children}</BusinessProvider>
+                <ImpersonationProvider>
+                  <BusinessProvider>{children}</BusinessProvider>
+                </ImpersonationProvider>
               </AuthProvider>
             </FeaturesProvider>
           </QueryProvider>

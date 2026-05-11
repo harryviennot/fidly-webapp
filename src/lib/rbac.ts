@@ -23,6 +23,9 @@ export const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/settings": ["owner"],
   "/billing": ["owner"],
   "/account": ["owner", "admin"],
+  // Business listing page — open to every dashboard role. Scanners are
+  // still blocked by canAccessRoute's `role === "scanner"` early-return.
+  "/businesses": ["owner", "admin"],
 };
 
 /**

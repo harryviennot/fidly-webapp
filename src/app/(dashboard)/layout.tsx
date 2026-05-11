@@ -12,6 +12,8 @@ import { NoActiveBusinessState } from "@/components/no-active-business-state";
 import { TrialMobileBanner } from "@/components/billing/TrialBanner";
 import { SuspendedBanner } from "@/components/billing/SuspendedOverlay";
 import { OverLimitBanner } from "@/components/billing/OverLimitBanner";
+import { ImpersonationBanner } from "@/components/impersonation/impersonation-banner";
+import { useImpersonationBeacon } from "@/hooks/use-impersonation-beacon";
 
 export default function AdminLayout({
   children,
@@ -20,6 +22,7 @@ export default function AdminLayout({
 }) {
   const { loading, currentBusiness, error, hasActiveMembership } = useBusiness();
   const t = useTranslations();
+  useImpersonationBeacon();
 
   // Show loading state
   if (loading) {
@@ -73,6 +76,7 @@ export default function AdminLayout({
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
+          <ImpersonationBanner />
           {currentBusiness.billing_status === "suspended" && <SuspendedBanner />}
           <OverLimitBanner />
           <TrialMobileBanner />

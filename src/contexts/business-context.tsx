@@ -1,13 +1,17 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
 import { applyTheme, getAccentFromSettings, getBackgroundFromSettings } from "@/utils/theme";
 import { businessKeys, fetchMemberships } from "@/hooks/use-business-query";
 import { getMyProfile } from "@/api";
+import { endImpersonation } from "@/api/impersonation";
+import { useImpersonation } from "@/contexts/impersonation-context";
+import { API_BASE_URL, getAuthHeaders } from "@/api/client";
 import { setLocale, SUPPORTED_LOCALES, type Locale } from "@/lib/locale";
+import { bumpRecentAccess, getRecentAccess, type RecentAccessMap } from "@/lib/recent-business-access";
 import { Business } from "@/types";
 
 type MembershipRole = "owner" | "admin" | "scanner";
@@ -28,20 +32,35 @@ interface BusinessContextType {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  isImpersonating: boolean;
 }
 
 const BusinessContext = createContext<BusinessContextType | undefined>(
   undefined
 );
 
+async function fetchImpersonatedBusiness(businessId: string): Promise<Business | null> {
+  const response = await fetch(`${API_BASE_URL}/businesses/${businessId}`, {
+    headers: await getAuthHeaders(),
+    credentials: "include",
+  });
+  if (!response.ok) return null;
+  return response.json();
+}
+
 export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const supabase = createClient();
+  const { isImpersonating, session: impersonationSession } = useImpersonation();
 
   const [currentBusinessId, setCurrentBusinessId] = useState<string | null>(
     () => (typeof window !== "undefined" ? localStorage.getItem("currentBusinessId") : null)
   );
+
+  // Tracks the last time the user explicitly switched to each business so
+  // the switcher / list can sort by recent access. Lives in localStorage.
+  const [recentAccess, setRecentAccess] = useState<RecentAccessMap>(() => getRecentAccess());
 
   // Sync locale from DB during loading phase (before content renders)
   const [localeSynced, setLocaleSynced] = useState(false);
@@ -65,6 +84,15 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       .catch(() => setLocaleSynced(true));
   }, [user?.id]);
 
+  // Impersonation branch: fetch the impersonated business via backend; skip
+  // the Supabase memberships query, which would resolve as the superadmin
+  // and produce the wrong identity downstream.
+  const { data: impersonatedBusiness } = useQuery({
+    queryKey: ["impersonated-business", impersonationSession?.business_id],
+    queryFn: () => fetchImpersonatedBusiness(impersonationSession!.business_id),
+    enabled: isImpersonating && !!impersonationSession?.business_id,
+  });
+
   const {
     data: rawMemberships = [],
     isLoading,
@@ -72,14 +100,36 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: businessKeys.memberships(user?.id ?? ""),
     queryFn: () => fetchMemberships(user!.id),
-    enabled: !!user?.id,
+    enabled: !!user?.id && !isImpersonating,
   });
 
-  const memberships: Membership[] = rawMemberships.map((m) => ({
-    id: m.id,
-    role: m.role as MembershipRole,
-    business: m.businesses as unknown as Business,
-  }));
+  const unsortedMemberships: Membership[] = isImpersonating && impersonatedBusiness && impersonationSession
+    ? [{
+        id: `imp-${impersonationSession.session_id}`,
+        role: impersonationSession.target_role as MembershipRole,
+        business: impersonatedBusiness,
+      }]
+    : rawMemberships.map((m) => ({
+        id: m.id,
+        role: m.role as MembershipRole,
+        business: m.businesses as unknown as Business,
+      }));
+
+  // Sort by recent access: most-recently switched-to comes first. Ties
+  // (never accessed) fall back to active-first, then alphabetical.
+  const memberships = useMemo(() => {
+    return [...unsortedMemberships].sort((a, b) => {
+      const aT = recentAccess[a.business.id] ?? 0;
+      const bT = recentAccess[b.business.id] ?? 0;
+      if (aT !== bT) return bT - aT;
+      const aActive = a.business.status === "active" ? 1 : 0;
+      const bActive = b.business.status === "active" ? 1 : 0;
+      if (aActive !== bActive) return bActive - aActive;
+      return (a.business.name || "").localeCompare(b.business.name || "");
+    });
+  // We intentionally key off the raw membership ids + the recentAccess map.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unsortedMemberships.map((m) => m.business.id).join(","), recentAccess]);
 
   const activeMemberships = memberships.filter(
     (m) => m.business.status === "active"
@@ -91,6 +141,21 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   // membership; never silently auto-select a suspended/pending one.
   useEffect(() => {
     if (!user?.id) return;
+
+    // During impersonation, force the impersonated business as the current
+    // one regardless of localStorage state.
+    if (isImpersonating && impersonatedBusiness) {
+      if (currentBusinessId !== impersonatedBusiness.id) {
+        setCurrentBusinessId(impersonatedBusiness.id);
+      }
+      return;
+    }
+
+    // Don't touch the stored selection until the memberships query has
+    // resolved — otherwise on refresh we would clobber a valid stored ID
+    // with the first active membership before knowing what's available.
+    if (isLoading) return;
+
     const storedMatch = memberships.find(
       (m) => m.business.id === currentBusinessId
     );
@@ -113,7 +178,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("currentBusinessId");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, memberships.length, activeMemberships.length]);
+  }, [user?.id, isLoading, memberships.length, activeMemberships.length, isImpersonating, impersonatedBusiness?.id]);
 
   const membership =
     memberships.find((m) => m.business.id === currentBusinessId) ?? null;
@@ -132,6 +197,10 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   // Subscribe to realtime business status changes
   useEffect(() => {
     if (!currentBusiness?.id) return;
+    // STA-140: during impersonation the Supabase session belongs to the
+    // superadmin; subscribing here would attach the wrong identity to the
+    // realtime channel. The dashboard refresh button is enough in v1.
+    if (isImpersonating) return;
 
     const channel = supabase
       .channel(`business-status-${currentBusiness.id}`)
@@ -158,11 +227,18 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       supabase.removeChannel(channel);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentBusiness?.id, currentBusiness?.status]);
+  }, [currentBusiness?.id, currentBusiness?.status, isImpersonating]);
 
   const setCurrentBusiness = (business: Business) => {
+    // Switching businesses while impersonating ends the session — the
+    // operator is leaving the impersonated context, and the audit log
+    // should reflect that as a clean exit, not a silent drift.
+    if (isImpersonating) {
+      void endImpersonation();
+    }
     setCurrentBusinessId(business.id);
     localStorage.setItem("currentBusinessId", business.id);
+    setRecentAccess(bumpRecentAccess(business.id));
     const accentColor = getAccentFromSettings(business.settings);
     const secondaryColor = getBackgroundFromSettings(business.settings);
     applyTheme(accentColor, secondaryColor ?? undefined);
@@ -185,6 +261,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         loading: isLoading || !localeSynced,
         error: queryError ? "Failed to load memberships" : null,
         refetch,
+        isImpersonating,
       }}
     >
       {children}
