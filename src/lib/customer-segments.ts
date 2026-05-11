@@ -1,6 +1,6 @@
 import type { CustomerResponse } from '@/types';
 
-export type CustomerSegment = 'new' | 'regular' | 'vip' | 'close_to_reward' | 'at_risk';
+export type CustomerSegment = 'new' | 'regular' | 'vip' | 'close_to_reward' | 'at_risk' | 'ghost';
 
 export function classifyCustomer(
   customer: CustomerResponse,
@@ -17,12 +17,17 @@ export function classifyCustomer(
     return 'close_to_reward';
   }
 
-  // New: created less than 7 days ago
+  // New: created less than 14 days ago
   if (createdAt) {
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    if (createdAt >= sevenDaysAgo) {
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    if (createdAt >= fourteenDaysAgo) {
       return 'new';
     }
+  }
+
+  // Ghost: never came back after getting the card (0 stamps, past the "new" window)
+  if (stamps === 0) {
+    return 'ghost';
   }
 
   // At risk: no activity in 30+ days and has stamps
@@ -75,6 +80,11 @@ const SEGMENT_CONFIGS: Record<CustomerSegment, SegmentConfig> = {
     color: '#C75050',
     bg: '#FDE8E4',
   },
+  ghost: {
+    labelKey: 'segments.ghost',
+    color: '#6B6B6B',
+    bg: '#EDECEA',
+  },
 };
 
 /** Avatar background colors per segment */
@@ -84,6 +94,7 @@ export const SEGMENT_AVATAR_COLORS: Record<CustomerSegment, string> = {
   vip: '#C4883D',
   close_to_reward: '#4A7C59',
   at_risk: '#C75050',
+  ghost: '#9A9A9A',
 };
 
 export function getSegmentConfig(segment: CustomerSegment): SegmentConfig {
@@ -101,6 +112,7 @@ export function countBySegment(
     vip: 0,
     close_to_reward: 0,
     at_risk: 0,
+    ghost: 0,
   };
 
   for (const customer of customers) {

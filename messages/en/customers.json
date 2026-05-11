@@ -32,15 +32,17 @@
       "regular": "Regular",
       "vip": "VIP",
       "closeToReward": "Close to Reward",
-      "atRisk": "At Risk"
+      "atRisk": "At Risk",
+      "ghost": "Ghost"
     },
     "segmentsHelp": {
       "title": "What do these segments mean?",
-      "new": "Joined within the last 7 days.",
+      "new": "Joined within the last 14 days.",
       "regular": "Active customers without a special status.",
       "vip": "Customers who have redeemed 3 or more rewards.",
       "closeToReward": "Within 2 stamps of completing their card.",
-      "atRisk": "Have stamps but haven't visited in over 30 days."
+      "atRisk": "Have stamps but haven't visited in over 30 days.",
+      "ghost": "Got their card but never came back — no stamps yet."
     },
     "actions": {
       "addStamp": "Add Stamp",
@@ -94,7 +96,8 @@
         "regular": "Regular",
         "vip": "VIP",
         "close_to_reward": "Close to Reward",
-        "at_risk": "At Risk"
+        "at_risk": "At Risk",
+        "ghost": "Ghost"
       }
     },
     "transaction": {

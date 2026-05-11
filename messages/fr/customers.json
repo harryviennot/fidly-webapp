@@ -32,15 +32,17 @@
       "regular": "R\u00e9gulier",
       "vip": "VIP",
       "closeToReward": "Proche de la r\u00e9compense",
-      "atRisk": "\u00c0 risque"
+      "atRisk": "\u00c0 risque",
+      "ghost": "Fant\u00f4me"
     },
     "segmentsHelp": {
       "title": "Que signifient ces segments ?",
-      "new": "Inscrits il y a moins de 7 jours.",
+      "new": "Inscrits il y a moins de 14 jours.",
       "regular": "Clients actifs sans statut particulier.",
       "vip": "Clients ayant utilis\u00e9 3 r\u00e9compenses ou plus.",
       "closeToReward": "\u00c0 moins de 2 tampons de leur r\u00e9compense.",
-      "atRisk": "Ont des tampons mais ne sont pas venus depuis plus de 30 jours."
+      "atRisk": "Ont des tampons mais ne sont pas venus depuis plus de 30 jours.",
+      "ghost": "Ont pris leur carte mais ne sont jamais revenus \u2014 aucun tampon."
     },
     "actions": {
       "addStamp": "Ajouter tampon",
@@ -94,7 +96,8 @@
         "regular": "R\u00e9gulier",
         "vip": "VIP",
         "close_to_reward": "Proche de la r\u00e9compense",
-        "at_risk": "\u00c0 risque"
+        "at_risk": "\u00c0 risque",
+        "ghost": "Fant\u00f4me"
       }
     },
     "transaction": {

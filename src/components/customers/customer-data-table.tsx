@@ -176,6 +176,7 @@ export function CustomerDataTable({
                         <div><span className="font-semibold">{t("segments.vip")}</span>{" — "}{t("segmentsHelp.vip")}</div>
                         <div><span className="font-semibold">{t("segments.closeToReward")}</span>{" — "}{t("segmentsHelp.closeToReward")}</div>
                         <div><span className="font-semibold">{t("segments.atRisk")}</span>{" — "}{t("segmentsHelp.atRisk")}</div>
+                        <div><span className="font-semibold">{t("segments.ghost")}</span>{" — "}{t("segmentsHelp.ghost")}</div>
                       </div>
                     </TooltipContent>
                   </Tooltip>
