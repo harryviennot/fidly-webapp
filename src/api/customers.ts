@@ -30,8 +30,8 @@ export async function getCustomers(
   return response.json();
 }
 
-export async function addStamp(businessId: string, customerId: string): Promise<StampResponse> {
-  const response = await fetch(`${API_BASE_URL}/stamps/${businessId}/${customerId}`, {
+export async function addStamp(businessId: string, enrollmentId: string): Promise<StampResponse> {
+  const response = await fetch(`${API_BASE_URL}/stamps/${businessId}/${enrollmentId}`, {
     method: 'POST',
     headers: await getAuthHeaders(),
   });
@@ -44,7 +44,7 @@ export async function addStamp(businessId: string, customerId: string): Promise<
       throw new Error('You don\'t have access to this business');
     }
     if (response.status === 404) {
-      throw new Error('Customer not found');
+      throw new Error('Enrollment not found');
     }
     throw new Error('Failed to add stamp');
   }
@@ -54,10 +54,10 @@ export async function addStamp(businessId: string, customerId: string): Promise<
 
 export async function redeemReward(
   businessId: string,
-  customerId: string
+  enrollmentId: string
 ): Promise<StampResponse> {
   const response = await fetch(
-    `${API_BASE_URL}/stamps/${businessId}/${customerId}/redeem`,
+    `${API_BASE_URL}/stamps/${businessId}/${enrollmentId}/redeem`,
     {
       method: 'POST',
       headers: await getAuthHeaders(),
@@ -74,12 +74,12 @@ export async function redeemReward(
 
 export async function voidStamp(
   businessId: string,
-  customerId: string,
+  enrollmentId: string,
   transactionId: string,
   reason: string
 ): Promise<StampResponse> {
   const response = await fetch(
-    `${API_BASE_URL}/stamps/${businessId}/${customerId}/void`,
+    `${API_BASE_URL}/stamps/${businessId}/${enrollmentId}/void`,
     {
       method: 'POST',
       headers: await getAuthHeaders(),

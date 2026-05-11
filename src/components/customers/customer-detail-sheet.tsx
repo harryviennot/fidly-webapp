@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarBlank,
   Clock,
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
-import { getCustomerTransactions } from "@/api";
+import { getCustomer, getCustomerTransactions } from "@/api";
 import {
   classifyCustomer,
   getSegmentConfig,
@@ -32,6 +32,7 @@ import {
   useCustomerTransactions,
   transactionKeys,
 } from "@/hooks/use-transactions";
+import { customerKeys } from "@/hooks/use-customers";
 import type { CustomerResponse, TransactionResponse } from "@/types";
 import type { CardDesign } from "@/types/design";
 import type { StampIconType } from "@/components/design/StampIconPicker";
@@ -74,6 +75,14 @@ export function CustomerDetailSheet({
     customer?.id,
     open && !!customer
   );
+
+  const customerQuery = useQuery({
+    queryKey: customerKeys.detail(currentBusiness?.id ?? "", customer?.id ?? ""),
+    queryFn: () => getCustomer(currentBusiness!.id, customer!.id),
+    enabled: open && !!customer && !!currentBusiness?.id,
+    initialData: customer ?? undefined,
+  });
+  const liveCustomer = customerQuery.data ?? customer;
 
   const [extraTransactions, setExtraTransactions] = useState<
     TransactionResponse[]
@@ -118,9 +127,9 @@ export function CustomerDetailSheet({
     }
   };
 
-  if (!customer) return null;
+  if (!customer || !liveCustomer) return null;
 
-  const segment = classifyCustomer(customer, maxStamps);
+  const segment = classifyCustomer(liveCustomer, maxStamps);
   const segConfig = getSegmentConfig(segment);
   const avatarColor = SEGMENT_AVATAR_COLORS[segment];
 
@@ -137,8 +146,8 @@ export function CustomerDetailSheet({
     (txn) => txn.stamp_delta > 0
   ).length;
 
-  const firstVisit = customer.created_at;
-  const lastVisit = customer.last_activity_at ?? customer.updated_at;
+  const firstVisit = liveCustomer.created_at;
+  const lastVisit = liveCustomer.last_activity_at ?? liveCustomer.updated_at;
   const colors = design ? computeCardColors(design) : null;
   const stampIcon = (design?.stamp_icon as StampIconType) ?? undefined;
   const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
@@ -149,8 +158,8 @@ export function CustomerDetailSheet({
         side="right"
         className="sm:max-w-[440px] overflow-y-auto p-0 gap-0"
       >
-        <SheetTitle className="sr-only">{customer.name}</SheetTitle>
-        <SheetDescription className="sr-only">{customer.email}</SheetDescription>
+        <SheetTitle className="sr-only">{liveCustomer.name}</SheetTitle>
+        <SheetDescription className="sr-only">{liveCustomer.email}</SheetDescription>
 
         {/* ── Header ── */}
         <div className="px-5 pt-6 pb-5">
@@ -164,14 +173,14 @@ export function CustomerDetailSheet({
               className="w-14 h-14 rounded-full flex items-center justify-center text-white text-[22px] font-bold mb-2.5"
               style={{ background: avatarColor }}
             >
-              {getInitials(customer.name)}
+              {getInitials(liveCustomer.name)}
             </div>
             <h2 className="text-[18px] font-bold text-[#1A1A1A] mb-0.5">
-              {customer.name}
+              {liveCustomer.name}
             </h2>
             <div className="text-[12px] text-[#A0A0A0] mb-2 flex items-center gap-1">
               <Envelope className="w-3.5 h-3.5 text-[#BBB]" />
-              {customer.email}
+              {liveCustomer.email}
             </div>
             <span
               className="text-[11px] px-3 py-0.5 rounded-full font-semibold"
@@ -191,7 +200,7 @@ export function CustomerDetailSheet({
             {colors && (
               <StampGridContainer
                 totalStamps={maxStamps}
-                filledCount={customer.stamps}
+                filledCount={liveCustomer.stamps}
                 colors={colors}
                 stampIcon={stampIcon ?? "checkmark"}
                 rewardIcon={rewardIcon ?? "gift"}
@@ -204,7 +213,7 @@ export function CustomerDetailSheet({
         {currentBusiness && (
           <div className="px-5 pb-4">
             <CustomerQuickActions
-              customer={customer}
+              customer={liveCustomer}
               businessId={currentBusiness.id}
               maxStamps={maxStamps}
               transactions={transactions}
@@ -238,7 +247,7 @@ export function CustomerDetailSheet({
             <StatRow
               icon={<Trophy className="w-4 h-4" />}
               label={t("redemptions")}
-              value={String(customer.total_redemptions ?? 0)}
+              value={String(liveCustomer.total_redemptions ?? 0)}
               accent="#C4883D"
             />
           </div>
