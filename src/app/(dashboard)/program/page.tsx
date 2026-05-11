@@ -10,7 +10,6 @@ import {
   GiftIcon,
   CreditCardIcon,
 } from '@phosphor-icons/react';
-import { SetupChecklist } from '@/components/program/SetupChecklist';
 import { BusinessUrlCard } from '@/components/program/BusinessUrlCard';
 import { ProgramSummaryCard } from '@/components/program/ProgramSummaryCard';
 import { OverviewPageSkeleton } from '@/components/loyalty-program/skeletons/OverviewPageSkeleton';
@@ -41,17 +40,6 @@ export default function ProgramOverviewPage() {
         title={t('title')}
         subtitle={t('subtitle')}
       />
-
-      {/* Setup checklist */}
-      {isOwner && (
-        <SetupChecklist
-          program={program}
-          activeDesign={activeDesign}
-          designs={designs}
-          totalCustomers={totalCustomers}
-          delay={0}
-        />
-      )}
 
       {/* Two-column layout */}
       <div className="flex gap-[14px] flex-col min-[1080px]:flex-row min-[1080px]:items-start">

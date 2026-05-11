@@ -45,6 +45,24 @@ export interface BusinessInfoEntry {
   data: Record<string, unknown>;
 }
 
+export interface SetupStepRef {
+  chapter: string;
+  step?: string;
+}
+
+export interface SetupProgress {
+  started_at: string;
+  completed_at: string | null;
+  last_step: SetupStepRef;
+  completed: SetupStepRef[];
+  skipped: SetupStepRef[];
+  payload: {
+    design_id?: string;
+    demo_customer_id?: string;
+    demo_enrollment_id?: string;
+  };
+}
+
 export interface BusinessSettings {
   accentColor?: string;
   backgroundColor?: string;
@@ -55,6 +73,13 @@ export interface BusinessSettings {
   onboarding_complete?: boolean;
   setup_checklist_dismissed?: boolean;
   business_info?: BusinessInfoEntry[];
+  setup_progress?: SetupProgress;
+  first_broadcast_sent?: boolean;
+  design_reviewed?: boolean;
+  business_type?: string;
+  team_size?: string;
+  locations_count?: number;
+  primary_goal?: string;
   [key: string]: unknown;
 }
 
