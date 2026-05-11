@@ -115,6 +115,18 @@
           "branding": {
             "title": "Identité visuelle",
             "subtitle": "Ajoutez votre logo et vos couleurs. Vous pourrez affiner plus tard."
+          },
+          "stamps": {
+            "title": "Tampons",
+            "subtitle": "Choisissez les icônes de tampon et de récompense, ajustez les couleurs."
+          },
+          "content": {
+            "title": "Contenu",
+            "subtitle": "Affichez des infos utiles en façade (limite, expiration, etc.)."
+          },
+          "back": {
+            "title": "Verso de la carte",
+            "subtitle": "Choisissez les infos qui apparaissent quand vos clients tapent l'icône i."
           }
         }
       },

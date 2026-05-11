@@ -8,6 +8,9 @@ import { ObjectivesStep } from './chapters/business/ObjectivesStep';
 import { ProgramStep } from './chapters/program/ProgramStep';
 import { DataCollectionStep } from './chapters/data-collection/DataCollectionStep';
 import { BrandingStep } from './chapters/design/BrandingStep';
+import { StampsStep } from './chapters/design/StampsStep';
+import { ContentStep } from './chapters/design/ContentStep';
+import { BackStep } from './chapters/design/BackStep';
 import { IconStep } from './chapters/notifications/IconStep';
 import { TransactionalStep } from './chapters/notifications/TransactionalStep';
 import { MilestonesStep } from './chapters/notifications/MilestonesStep';
@@ -66,6 +69,9 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     id: 'design',
     subSteps: [
       { id: 'branding', required: true, Component: BrandingStep },
+      { id: 'stamps', required: false, Component: StampsStep },
+      { id: 'content', required: false, Component: ContentStep },
+      { id: 'back', required: false, Component: BackStep },
     ],
   },
   {

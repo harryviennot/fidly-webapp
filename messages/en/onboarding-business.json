@@ -115,6 +115,18 @@
           "branding": {
             "title": "Branding",
             "subtitle": "Add your logo and colors. Defaults work — you can refine later."
+          },
+          "stamps": {
+            "title": "Stamps",
+            "subtitle": "Pick stamp + reward icons and tune their colors."
+          },
+          "content": {
+            "title": "Content",
+            "subtitle": "Show extra info on the front of the card (limit, expiry, anything useful)."
+          },
+          "back": {
+            "title": "Back of card",
+            "subtitle": "Pick which business info appears when customers tap the i icon."
           }
         }
       },

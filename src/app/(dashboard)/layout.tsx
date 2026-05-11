@@ -29,8 +29,15 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { loading, currentBusiness, error, hasActiveMembership, currentRole, isImpersonating } =
-    useBusiness();
+  const {
+    loading,
+    currentBusiness,
+    error,
+    hasActiveMembership,
+    hasAnyMembership,
+    currentRole,
+    isImpersonating,
+  } = useBusiness();
   const t = useTranslations();
   useImpersonationBeacon();
 
@@ -40,12 +47,17 @@ export default function AdminLayout({
     currentRole === "owner" &&
     !isImpersonating &&
     !setupProgress?.completed_at;
+  // A signed-in user with zero memberships has just come from /signup —
+  // ship them into the wizard to create their first business.
+  const needsWizardNoBusiness = !loading && !hasAnyMembership && !isImpersonating;
 
   useEffect(() => {
     if (needsWizard) {
       router.replace(wizardResumePath(setupProgress));
+    } else if (needsWizardNoBusiness) {
+      router.replace("/onboarding/business/welcome");
     }
-  }, [needsWizard, router, setupProgress]);
+  }, [needsWizard, needsWizardNoBusiness, router, setupProgress]);
 
   // Show loading state
   if (loading) {
@@ -73,9 +85,22 @@ export default function AdminLayout({
     );
   }
 
-  // No usable business — zero memberships, only suspended, or only pending.
-  // Show the explicit empty state with a "create new business" CTA rather
-  // than auto-redirecting or silently rendering a suspended business.
+  // Brand-new user (zero memberships): the useEffect above redirects them to
+  // the launch wizard; render the loading shell in the interim so we don't
+  // flash NoActiveBusinessState.
+  if (needsWizardNoBusiness) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
+          <p className="mt-4 text-sm text-[var(--muted-foreground)]">{t("status.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Users with memberships but none active (suspended / pending only). Show
+  // the empty state so they can resolve the situation.
   if (!hasActiveMembership || !currentBusiness) {
     return <NoActiveBusinessState />;
   }
