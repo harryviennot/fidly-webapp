@@ -148,15 +148,32 @@
         }
       },
       "first-customer": {
-        "title": "Obtenez votre premier client",
-        "subtitle": "Partagez votre lien d'inscription ou scannez le QR avec votre propre téléphone."
+        "title": "Premier client : vous",
+        "subtitle": "On vous enregistre comme client pour que vous installiez la carte sur votre téléphone en quelques secondes.",
+        "registerTitle": "Utiliser mes infos comme premier client",
+        "registerBody": "On crée un client avec les infos de votre compte. Ensuite, installez la carte dans votre wallet pour vivre l'expérience.",
+        "registerCta": "M'enregistrer comme client",
+        "registering": "Enregistrement…",
+        "asNameLabel": "Nom",
+        "asEmailLabel": "E-mail",
+        "installTitle": "Ajoutez la carte à votre wallet",
+        "installBody": "Tapez un des boutons ci-dessous depuis votre téléphone. La carte arrive dans votre wallet immédiatement.",
+        "installHint": "Ouvrez cette page sur votre téléphone si ce n'est pas déjà fait.",
+        "addToAppleWallet": "Ajouter à Apple Wallet",
+        "addToGoogleWallet": "Ajouter à Google Wallet"
       },
       "live-stamp": {
         "title": "Envoyez votre premier tampon",
-        "subtitle": "Ouvrez la liste des clients, trouvez-vous, ajoutez un tampon en un clic.",
-        "cardTitle": "Ajoutez un tampon",
-        "cardBody": "Une fois la carte installée, chaque tampon déclenche une notification push. Essayez avec la vôtre.",
-        "openCustomers": "Ouvrir les clients"
+        "subtitle": "Le moment magique — tamponnez votre propre carte et regardez la notification arriver.",
+        "prereqTitle": "Installez d'abord votre carte",
+        "prereqBody": "Revenez à l'étape précédente pour ajouter la carte à votre wallet — sans ça, pas de notification possible.",
+        "readyTitle": "Tamponnez-vous",
+        "readyBody": "Tapez ci-dessous. Un vrai tampon part, votre téléphone vibre en quelques secondes.",
+        "sendCta": "Envoyer le tampon test",
+        "watching": "On surveille votre tampon…",
+        "successTitle": "C'est arrivé !",
+        "successBody": "Votre téléphone affiche désormais {count} tampon(s). C'est exactement ce que verront vos clients — sans l'assistant.",
+        "fallback": "Pas de vibration ? Vérifiez votre téléphone — la livraison push peut prendre quelques secondes."
       },
       "first-broadcast": {
         "title": "Envoyez votre première diffusion",

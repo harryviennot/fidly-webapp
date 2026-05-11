@@ -148,15 +148,32 @@
         }
       },
       "first-customer": {
-        "title": "Get your first customer",
-        "subtitle": "Share your signup link or scan the QR with your own phone to install the card."
+        "title": "Get your first customer — you",
+        "subtitle": "We'll register you as a customer so you can install the card on your own phone in seconds.",
+        "registerTitle": "Use my info as the first customer",
+        "registerBody": "We'll create a customer record using the details from your account. After that, install the card to your wallet to feel what your customers will experience.",
+        "registerCta": "Register me as a customer",
+        "registering": "Registering…",
+        "asNameLabel": "Name",
+        "asEmailLabel": "Email",
+        "installTitle": "Add the card to your wallet",
+        "installBody": "Tap one of the buttons below on your phone. The card lands in your wallet right away.",
+        "installHint": "Open this page on your phone if you're not there already.",
+        "addToAppleWallet": "Add to Apple Wallet",
+        "addToGoogleWallet": "Add to Google Wallet"
       },
       "live-stamp": {
         "title": "Send your first stamp",
-        "subtitle": "Open the customers list, find yourself, and tap to add a stamp.",
-        "cardTitle": "Add a stamp",
-        "cardBody": "Once a customer has installed the card, stamps trigger a push notification on their phone. Try it with your own.",
-        "openCustomers": "Open customers"
+        "subtitle": "Now the wow moment — stamp your own card and watch the notification arrive.",
+        "prereqTitle": "Install your card first",
+        "prereqBody": "Go back to the previous step and add the card to your wallet so you can receive the test stamp.",
+        "readyTitle": "Stamp yourself",
+        "readyBody": "Tap below. We'll fire a real stamp; your phone should buzz within a few seconds.",
+        "sendCta": "Send the test stamp",
+        "watching": "Watching for the stamp…",
+        "successTitle": "It arrived!",
+        "successBody": "Your phone now shows {count} stamp(s). That's exactly what your customers will see — minus the wizard.",
+        "fallback": "No buzz yet? Check your phone — push delivery sometimes takes a few seconds."
       },
       "first-broadcast": {
         "title": "Send your first broadcast",

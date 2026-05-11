@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
-import { createDesign, updateDesign, uploadLogo, activateDesign } from '@/api';
+import { createDesign, updateDesign, uploadLogo } from '@/api';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
 import { BrandingForm } from '@/components/design/forms/BrandingForm';
 import { useWizardStep } from '../../wizard-context';
@@ -17,8 +17,9 @@ import type { CardDesignCreate } from '@/types';
 
 /**
  * Chapter 5 step 1 — required. Creates the business's card design (if it
- * doesn't exist yet) and activates it. The remaining design sub-steps update
- * the same design row — saving here once unblocks the entire chapter.
+ * doesn't exist yet). Activation is deferred to BackStep so strip
+ * regeneration triggered by the logo upload has time to settle — activating
+ * here races strip_status="regenerating" and 400s.
  */
 export function BrandingStep() {
   const t = useTranslations('onboardingBusiness.chapters.design.steps.branding');
@@ -64,9 +65,6 @@ export function BrandingStep() {
           await updateDesign(businessId, designId, { ...cleaned, logo_url: result.url });
           setPendingLogoFile(null);
         }
-
-        // Activate so a usable card exists even if user skips remaining design sub-steps.
-        await activateDesign(businessId, designId);
 
         if (currentBusiness) {
           await updateBusiness({
