@@ -3,7 +3,7 @@
 import * as React from "react"
 import { CaretUpDown, Check, ArrowRight } from "@phosphor-icons/react"
 import { useTranslations } from "next-intl"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +58,7 @@ function BusinessAvatar({ name, logoUrl, size = "md" }: { name: string; logoUrl?
 export function BusinessSwitcher() {
   const { memberships, currentBusiness, setCurrentBusiness } = useBusiness()
   const isSuperadmin = useIsSuperadmin()
+  const router = useRouter()
   const t = useTranslations()
 
   // Superadmins always get the dropdown (even with 0/1 memberships) so they
@@ -168,16 +169,17 @@ export function BusinessSwitcher() {
         {shouldShowViewAll && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link
-                href="/businesses"
-                className="flex items-center justify-between gap-2 p-2 text-sm"
-              >
-                <span className="text-[var(--accent)] font-medium">
-                  {t("businessSwitcher.viewAll", { count: memberships.length })}
-                </span>
-                <ArrowRight className="size-3.5 text-[var(--accent)]" weight="bold" />
-              </Link>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault()
+                router.push("/businesses")
+              }}
+              className="flex items-center justify-between gap-2 p-2 text-sm cursor-pointer"
+            >
+              <span className="text-[var(--accent)] font-medium">
+                {t("businessSwitcher.viewAll", { count: memberships.length })}
+              </span>
+              <ArrowRight className="size-3.5 text-[var(--accent)]" weight="bold" />
             </DropdownMenuItem>
           </>
         )}
