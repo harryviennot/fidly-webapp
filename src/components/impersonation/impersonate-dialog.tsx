@@ -39,10 +39,10 @@ interface ImpersonateDialogProps {
 }
 
 type Mode = "by_role" | "by_user";
-type Role = "owner" | "admin" | "scanner";
+type Role = "owner" | "admin";
 type Step = 1 | 2;
 
-const ROLES: Role[] = ["owner", "admin", "scanner"];
+const ROLES: Role[] = ["owner", "admin"];
 const MIN_REASON = 10;
 const MAX_REASON = 1000;
 
@@ -78,9 +78,9 @@ export function ImpersonateDialog({ open, onOpenChange, businessId, businessName
   });
 
   const usersByRole = useMemo(() => {
-    const grouped: Record<Role, ImpersonationBusinessUser[]> = { owner: [], admin: [], scanner: [] };
+    const grouped: Record<Role, ImpersonationBusinessUser[]> = { owner: [], admin: [] };
     users.forEach((u) => {
-      if (grouped[u.role]) grouped[u.role].push(u);
+      if (u.role !== "scanner" && grouped[u.role as Role]) grouped[u.role as Role].push(u);
     });
     return grouped;
   }, [users]);
@@ -240,7 +240,7 @@ export function ImpersonateDialog({ open, onOpenChange, businessId, businessName
                     <SelectValue placeholder={usersLoading ? t("loading") : t("byUser.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {users.map((u) => (
+                    {users.filter((u) => u.role !== "scanner").map((u) => (
                       <SelectItem key={u.user_id} value={u.user_id}>
                         <span className="flex items-center gap-2">
                           <span className="font-medium">{u.name ?? u.email ?? u.user_id}</span>
