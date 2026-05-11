@@ -42,6 +42,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   });
   const [canSkip, setCanSkip] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
+  const [nextLabel, setNextLabel] = useState<string | null>(null);
 
   const resolved = useMemo(() => resolveSlug(slug), [slug]);
 
@@ -53,11 +54,20 @@ export function WizardShell({ slug }: WizardShellProps) {
       },
       setCanSkip,
       setIsBusy,
+      setNextLabel,
       advance: () => void handlersRef.current.next(),
       skip: () => void handlersRef.current.skip(),
     }),
     []
   );
+
+  // Reset per-step overrides when the URL changes — each step starts fresh
+  // and re-registers what it needs.
+  useEffect(() => {
+    setCanSkip(false);
+    setNextLabel(null);
+    submitHandlerRef.current = null;
+  }, [slug]);
 
   const handleNext = useCallback(async () => {
     if (!resolved) return;
@@ -186,6 +196,7 @@ export function WizardShell({ slug }: WizardShellProps) {
         isBusy={isBusy}
         isFirst={chapterIndex === 0 && subStepIndex === 0}
         isLast={resolved.isLast}
+        nextLabel={nextLabel ?? undefined}
       />
     </div>
   );
