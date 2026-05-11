@@ -11,6 +11,7 @@ const SEGMENTS: (CustomerSegment | "all")[] = [
   "vip",
   "close_to_reward",
   "at_risk",
+  "ghost",
 ];
 
 const SEGMENT_LABEL_KEYS: Record<CustomerSegment | "all", string> = {
@@ -20,6 +21,7 @@ const SEGMENT_LABEL_KEYS: Record<CustomerSegment | "all", string> = {
   vip: "segments.vip",
   close_to_reward: "segments.closeToReward",
   at_risk: "segments.atRisk",
+  ghost: "segments.ghost",
 };
 
 interface CustomerSegmentFiltersProps {
