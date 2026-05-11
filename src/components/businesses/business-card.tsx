@@ -17,6 +17,9 @@ interface BusinessCardProps {
   onImpersonate?: () => void;
   impersonateDisabled?: boolean;
   impersonateDisabledReason?: string;
+  /** When true, surface the status badge even for "active" rows.
+   * Superadmins need it; regular owners do not. */
+  showActiveBadge?: boolean;
 }
 
 type BadgeVariant = "success" | "warning" | "error" | "info" | "outline";
@@ -48,12 +51,23 @@ export function BusinessCard({
   onImpersonate,
   impersonateDisabled,
   impersonateDisabledReason,
+  showActiveBadge,
 }: BusinessCardProps) {
   const t = useTranslations("businessesPage");
   const tRoles = useTranslations("roles");
 
   const statusVariant = STATUS_VARIANT[business.status] ?? "warning";
   const roleVariant = business.role ? ROLE_VARIANT[business.role] : null;
+
+  // Drop noise: "active" is the default, "owner" is implicit for an owner
+  // looking at their own businesses. Surface only meaningful signals.
+  const showStatus = business.status !== "active" || !!showActiveBadge;
+  const showRole = !!roleVariant && business.role !== "owner";
+
+  const accentColor = business.settings?.accentColor;
+  const avatarStyle = accentColor
+    ? { backgroundColor: accentColor }
+    : undefined;
 
   // Primary action wraps the whole card: prefer "open" for members,
   // fall back to "impersonate" for superadmins on non-member businesses.
@@ -64,25 +78,29 @@ export function BusinessCard({
   const cardContent = (
     <>
       <div className="flex items-start gap-3">
-        <div className="h-11 w-11 shrink-0 rounded-lg overflow-hidden flex items-center justify-center bg-[var(--muted)]">
+        <div
+          className={cn(
+            "h-12 w-12 shrink-0 rounded-xl overflow-hidden flex items-center justify-center text-white font-bold",
+            !accentColor && "bg-[var(--accent)]",
+          )}
+          style={avatarStyle}
+        >
           {business.logo_url ? (
             <Image
               src={business.logo_url}
               alt={business.name}
-              width={88}
-              height={44}
+              width={96}
+              height={48}
               className="w-full h-full object-cover"
               unoptimized
             />
           ) : (
-            <span className="text-sm font-bold text-[var(--muted-foreground)]">
-              {getInitials(business.name)}
-            </span>
+            <span className="text-sm">{getInitials(business.name)}</span>
           )}
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-[var(--foreground)] truncate">
+          <h3 className="text-[15px] font-semibold text-[var(--foreground)] truncate leading-tight">
             {business.name}
           </h3>
           <p className="text-[11px] text-[var(--muted-foreground)] truncate mt-0.5">
@@ -96,10 +114,12 @@ export function BusinessCard({
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <Badge variant={statusVariant}>{t(`status.${business.status}`)}</Badge>
-        {roleVariant && (
-          <Badge variant={roleVariant}>{tRoles(business.role!)}</Badge>
+      <div className="flex items-center gap-1.5 flex-wrap mt-auto pt-1">
+        {showStatus && (
+          <Badge variant={statusVariant}>{t(`status.${business.status}`)}</Badge>
+        )}
+        {showRole && (
+          <Badge variant={roleVariant!}>{tRoles(business.role!)}</Badge>
         )}
         <Badge variant="outline" className="capitalize">
           {business.subscription_tier}
@@ -109,7 +129,7 @@ export function BusinessCard({
   );
 
   const baseClasses =
-    "relative flex flex-col gap-3 p-4 rounded-xl border border-[var(--card-border)] bg-[var(--card)] shadow-[var(--card-shadow)] transition-all duration-200";
+    "relative h-full flex flex-col gap-3 p-4 rounded-xl border border-[var(--card-border)] bg-[var(--card)] shadow-[var(--card-shadow)] transition-all duration-200";
   const interactiveClasses =
     "text-left w-full cursor-pointer hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
 
@@ -118,7 +138,7 @@ export function BusinessCard({
   }
 
   return (
-    <div className="relative">
+    <div className="relative h-full">
       <button
         type="button"
         onClick={primaryAction}

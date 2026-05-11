@@ -87,6 +87,12 @@ export default function BusinessesPage() {
   };
 
   const showCount = !isLoading && !isError && total > 0;
+  // Toolbar (search + filters + view toggle) is only useful past a certain
+  // count. Superadmins always see it; regular users only when the list grows.
+  const TOOLBAR_THRESHOLD = 16;
+  const showToolbar = isSuperadmin || total > TOOLBAR_THRESHOLD;
+  // When the toolbar is hidden, the view toggle is hidden too — force cards.
+  const effectiveView: View = showToolbar ? view : "cards";
 
   return (
     <div className="flex flex-col gap-[14px]">
@@ -102,61 +108,63 @@ export default function BusinessesPage() {
         }
       />
 
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5 flex flex-col gap-2.5">
-        <div className="flex gap-2.5 items-center flex-wrap">
-          <div className="flex-1 min-w-[180px] max-w-md">
-            <SearchInput
-              value={search}
-              onChange={(v) => {
-                setSearch(v);
-                setPage(0);
-              }}
-              placeholder={t("searchPlaceholder")}
-            />
-          </div>
-          {isSuperadmin && (
-            <div className="flex gap-1">
-              <FilterPill
-                label={t("scope.mine")}
-                isActive={scope === "mine"}
-                onClick={() => {
-                  setScope("mine");
+      {showToolbar && (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5 flex flex-col gap-2.5">
+          <div className="flex gap-2.5 items-center flex-wrap">
+            <div className="flex-1 min-w-[180px] max-w-md">
+              <SearchInput
+                value={search}
+                onChange={(v) => {
+                  setSearch(v);
                   setPage(0);
                 }}
-              />
-              <FilterPill
-                label={t("scope.all")}
-                isActive={scope === "all"}
-                onClick={() => {
-                  setScope("all");
-                  setPage(0);
-                }}
+                placeholder={t("searchPlaceholder")}
               />
             </div>
-          )}
-          <div className="ml-auto">
-            <ViewToggle
-              value={view}
-              onChange={setView}
-              options={[
-                { value: "cards", label: t("view.cards"), icon: <SquaresFourIcon size={14} /> },
-                { value: "table", label: t("view.table"), icon: <RowsIcon size={14} /> },
-              ]}
-            />
+            {isSuperadmin && (
+              <div className="flex gap-1">
+                <FilterPill
+                  label={t("scope.mine")}
+                  isActive={scope === "mine"}
+                  onClick={() => {
+                    setScope("mine");
+                    setPage(0);
+                  }}
+                />
+                <FilterPill
+                  label={t("scope.all")}
+                  isActive={scope === "all"}
+                  onClick={() => {
+                    setScope("all");
+                    setPage(0);
+                  }}
+                />
+              </div>
+            )}
+            <div className="ml-auto">
+              <ViewToggle
+                value={view}
+                onChange={setView}
+                options={[
+                  { value: "cards", label: t("view.cards"), icon: <SquaresFourIcon size={14} /> },
+                  { value: "table", label: t("view.table"), icon: <RowsIcon size={14} /> },
+                ]}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-1">
+            {(["all", "active", "pending", "suspended"] as StatusFilter[]).map((s) => (
+              <FilterPill
+                key={s}
+                label={t(`statusFilter.${s}`)}
+                isActive={statusFilter === s}
+                onClick={() => setStatusFilter(s)}
+              />
+            ))}
           </div>
         </div>
-
-        <div className="flex flex-wrap gap-1">
-          {(["all", "active", "pending", "suspended"] as StatusFilter[]).map((s) => (
-            <FilterPill
-              key={s}
-              label={t(`statusFilter.${s}`)}
-              isActive={statusFilter === s}
-              onClick={() => setStatusFilter(s)}
-            />
-          ))}
-        </div>
-      </div>
+      )}
 
       {isError && (
         <div className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/20 p-4 text-sm text-red-700 dark:text-red-300">
@@ -172,7 +180,7 @@ export default function BusinessesPage() {
         />
       )}
 
-      {view === "cards" ? (
+      {effectiveView === "cards" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {items.map((b) => (
             <BusinessCard
@@ -180,6 +188,7 @@ export default function BusinessesPage() {
               business={b}
               onOpen={isMember(b) ? () => handleOpen(b) : undefined}
               onImpersonate={isSuperadmin ? () => handleImpersonate(b) : undefined}
+              showActiveBadge={isSuperadmin}
             />
           ))}
         </div>

@@ -3,6 +3,15 @@
     "dialog": {
       "title": "Voir en tant que… ({name})",
       "description": "Ouvre une session en lecture seule sur le tableau de bord de l'établissement. Chaque action est consignée à des fins d'audit.",
+      "steps": {
+        "target": "1. Cible",
+        "reason": "2. Motif",
+        "targetSubtitle": "Choisissez en tant que qui vous voulez consulter cet établissement.",
+        "reasonSubtitle": "Expliquez pourquoi — l'information est consignée avec la session.",
+        "summaryLabel": "Vous incarnerez"
+      },
+      "next": "Suivant",
+      "back": "Retour",
       "mode": {
         "label": "Comment choisir la cible",
         "byRole": "Par rôle",

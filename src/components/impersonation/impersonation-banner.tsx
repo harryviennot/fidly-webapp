@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ShieldWarningIcon, SignOutIcon } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useImpersonation } from "@/contexts/impersonation-context";
 
 function formatRemaining(ms: number): string {
@@ -53,36 +54,45 @@ export function ImpersonationBanner() {
   return (
     <div
       role="status"
-      className={`sticky top-0 z-50 flex items-center justify-between gap-3 px-4 py-2 text-white ${
-        isCritical ? "bg-red-700 animate-pulse" : "bg-red-600"
-      }`}
+      className="sticky top-0 z-50 border-b border-[var(--error)]/20 bg-[var(--error-light)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--error-light)]/80"
     >
-      <div className="flex items-center gap-2 min-w-0">
-        <ShieldWarningIcon size={18} weight="fill" className="shrink-0" />
-        <p className="text-xs sm:text-sm truncate">
-          {t("text", {
-            name: targetName,
-            role: tRoles(session.target_role),
-            business: session.business_name ?? "",
-          })}
-          {session.selection_mode === "by_role" && (
-            <span className="ml-1 opacity-80">· {t("byRoleAnnotation")}</span>
-          )}
-        </p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="font-mono text-xs sm:text-sm tabular-nums">
-          {formatRemaining(remaining)}
-        </span>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="h-7 text-xs"
-          onClick={handleEnd}
-        >
-          <SignOutIcon size={14} className="mr-1" />
-          {t("endSession")}
-        </Button>
+      <div className="flex items-center justify-between gap-3 px-4 py-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="size-7 shrink-0 rounded-full bg-[var(--error)]/10 flex items-center justify-center">
+            <ShieldWarningIcon size={14} weight="fill" className="text-[var(--error)]" />
+          </div>
+          <p className="text-xs sm:text-sm text-[var(--foreground)] truncate">
+            {t("text", {
+              name: targetName,
+              role: tRoles(session.target_role),
+              business: session.business_name ?? "",
+            })}
+            {session.selection_mode === "by_role" && (
+              <span className="ml-1 text-[var(--muted-foreground)]">· {t("byRoleAnnotation")}</span>
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span
+            className={cn(
+              "font-mono text-xs tabular-nums",
+              isCritical
+                ? "text-[var(--error)] font-semibold"
+                : "text-[var(--muted-foreground)]",
+            )}
+          >
+            {formatRemaining(remaining)}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs border-[var(--error)]/30 text-[var(--error)] hover:bg-[var(--error)]/5 hover:text-[var(--error)] hover:border-[var(--error)]/40"
+            onClick={handleEnd}
+          >
+            <SignOutIcon size={14} className="mr-1" />
+            {t("endSession")}
+          </Button>
+        </div>
       </div>
     </div>
   );
