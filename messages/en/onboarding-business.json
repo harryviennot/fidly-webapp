@@ -1,0 +1,47 @@
+{
+  "onboardingBusiness": {
+    "footer": {
+      "back": "Back",
+      "skip": "Skip",
+      "next": "Save & continue",
+      "finish": "Finish setup",
+      "saving": "Saving…",
+      "skipAll": "Skip rest of setup"
+    },
+    "errors": {
+      "unknownStep": "We couldn't find that setup step. Take me back to the start.",
+      "slugTaken": "That web address is already taken.",
+      "slugInvalid": "Use lowercase letters, numbers, and hyphens only.",
+      "nameRequired": "Give your business a name.",
+      "createFailed": "Something went wrong creating your business. Please try again."
+    },
+    "chapters": {
+      "welcome": {
+        "title": "Welcome to Stampeo",
+        "subtitle": "Let's get your loyalty program ready.",
+        "body": "In a few minutes you'll have a branded digital card live in your customers' wallets — and a first stamp sent to your own phone.",
+        "cta": "Let's go"
+      },
+      "business": {
+        "title": "About your business",
+        "steps": {
+          "identity": {
+            "title": "Identity",
+            "subtitle": "Tell us what your business is called and where to find it.",
+            "fields": {
+              "name": "Business name",
+              "namePlaceholder": "e.g. Café du Coin",
+              "slug": "Web address",
+              "slugHelp": "Your card link will be stampeo.app/{slug}",
+              "slugPlaceholder": "cafe-du-coin",
+              "website": "Website (optional)",
+              "websitePlaceholder": "https://…",
+              "logo": "Logo",
+              "logoHelp": "Square works best."
+            }
+          }
+        }
+      }
+    }
+  }
+}

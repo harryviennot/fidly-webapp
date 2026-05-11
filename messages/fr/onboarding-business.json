@@ -1,0 +1,47 @@
+{
+  "onboardingBusiness": {
+    "footer": {
+      "back": "Retour",
+      "skip": "Passer",
+      "next": "Enregistrer et continuer",
+      "finish": "Terminer",
+      "saving": "Enregistrement…",
+      "skipAll": "Passer le reste de la configuration"
+    },
+    "errors": {
+      "unknownStep": "Cette étape de configuration est introuvable. Retour au début.",
+      "slugTaken": "Cette adresse est déjà prise.",
+      "slugInvalid": "Lettres minuscules, chiffres et tirets uniquement.",
+      "nameRequired": "Donnez un nom à votre commerce.",
+      "createFailed": "Une erreur est survenue à la création de votre commerce. Réessayez."
+    },
+    "chapters": {
+      "welcome": {
+        "title": "Bienvenue sur Stampeo",
+        "subtitle": "On prépare votre programme de fidélité.",
+        "body": "En quelques minutes, une carte de fidélité à vos couleurs sera dans le wallet de vos clients — et un premier tampon arrivera sur votre téléphone.",
+        "cta": "C'est parti"
+      },
+      "business": {
+        "title": "Votre commerce",
+        "steps": {
+          "identity": {
+            "title": "Identité",
+            "subtitle": "Indiquez le nom de votre commerce et son adresse.",
+            "fields": {
+              "name": "Nom du commerce",
+              "namePlaceholder": "ex. Café du Coin",
+              "slug": "Adresse web",
+              "slugHelp": "Le lien de votre carte sera stampeo.app/{slug}",
+              "slugPlaceholder": "cafe-du-coin",
+              "website": "Site web (optionnel)",
+              "websitePlaceholder": "https://…",
+              "logo": "Logo",
+              "logoHelp": "Format carré conseillé."
+            }
+          }
+        }
+      }
+    }
+  }
+}

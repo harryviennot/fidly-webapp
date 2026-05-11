@@ -44,6 +44,42 @@ export async function fetchBusinessesList(
   return response.json();
 }
 
+export interface BusinessCreatePayload {
+  name: string;
+  url_slug: string;
+  subscription_tier: 'starter' | 'growth' | 'pro';
+  settings?: Record<string, unknown>;
+  logo_url?: string | null;
+  website?: string;
+  primary_locale?: 'fr' | 'en';
+}
+
+export async function createBusiness(payload: BusinessCreatePayload): Promise<Business> {
+  const response = await fetch(`${API_BASE_URL}/businesses`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to create business'));
+  }
+
+  return response.json();
+}
+
+export async function checkSlugAvailability(slug: string): Promise<{ available: boolean; reason?: string }> {
+  if (!slug || slug.length < 3) {
+    return { available: false, reason: 'Slug must be at least 3 characters' };
+  }
+  const response = await fetch(`${API_BASE_URL}/businesses/slug/${encodeURIComponent(slug)}/available`);
+  if (!response.ok) {
+    return { available: false, reason: 'Failed to check availability' };
+  }
+  return response.json();
+}
+
 export async function updateBusiness(
   businessId: string,
   data: BusinessUpdate
