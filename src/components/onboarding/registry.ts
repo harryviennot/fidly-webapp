@@ -1,9 +1,21 @@
 import type { ChapterDef, ResolvedStep, SubStepDef } from './types';
 import { WelcomeStep } from './chapters/welcome/WelcomeStep';
 import { IdentityStep } from './chapters/business/IdentityStep';
+import { TypeStep } from './chapters/business/TypeStep';
+import { SizeStep } from './chapters/business/SizeStep';
+import { LocationsStep } from './chapters/business/LocationsStep';
+import { ObjectivesStep } from './chapters/business/ObjectivesStep';
 import { ProgramStep } from './chapters/program/ProgramStep';
 import { DataCollectionStep } from './chapters/data-collection/DataCollectionStep';
 import { BrandingStep } from './chapters/design/BrandingStep';
+import { IconStep } from './chapters/notifications/IconStep';
+import { TransactionalStep } from './chapters/notifications/TransactionalStep';
+import { MilestonesStep } from './chapters/notifications/MilestonesStep';
+import { FirstCustomerStep } from './chapters/first-customer/FirstCustomerStep';
+import { LiveStampStep } from './chapters/live-stamp/LiveStampStep';
+import { FirstBroadcastStep } from './chapters/first-broadcast/FirstBroadcastStep';
+import { TeamStep } from './chapters/team/TeamStep';
+import { PlanStep } from './chapters/plan/PlanStep';
 
 /**
  * Ordered list of wizard chapters. Adding or reordering a sub-step is a single
@@ -36,6 +48,10 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     id: 'business',
     subSteps: [
       { id: 'identity', required: true, Component: IdentityStep },
+      { id: 'type', required: false, Component: TypeStep },
+      { id: 'size', required: false, Component: SizeStep },
+      { id: 'locations', required: false, Component: LocationsStep },
+      { id: 'objectives', required: false, Component: ObjectivesStep },
     ],
   },
   {
@@ -51,6 +67,34 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     subSteps: [
       { id: 'branding', required: true, Component: BrandingStep },
     ],
+  },
+  {
+    id: 'notifications',
+    subSteps: [
+      { id: 'icon', required: false, Component: IconStep },
+      { id: 'transactional', required: false, Component: TransactionalStep },
+      { id: 'milestones', required: false, Component: MilestonesStep },
+    ],
+  },
+  {
+    id: 'first-customer',
+    subSteps: [{ id: 'first-customer', required: false, Component: FirstCustomerStep }],
+  },
+  {
+    id: 'live-stamp',
+    subSteps: [{ id: 'live-stamp', required: false, Component: LiveStampStep }],
+  },
+  {
+    id: 'first-broadcast',
+    subSteps: [{ id: 'first-broadcast', required: false, Component: FirstBroadcastStep }],
+  },
+  {
+    id: 'team',
+    subSteps: [{ id: 'team', required: false, Component: TeamStep }],
+  },
+  {
+    id: 'plan',
+    subSteps: [{ id: 'plan', required: false, Component: PlanStep }],
   },
 ];
 

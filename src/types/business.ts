@@ -78,7 +78,7 @@ export interface BusinessSettings {
   design_reviewed?: boolean;
   business_type?: string;
   team_size?: string;
-  locations_count?: number;
+  locations_count?: string;
   primary_goal?: string;
   [key: string]: unknown;
 }

@@ -42,6 +42,62 @@
               "logo": "Logo",
               "logoHelp": "Format carré conseillé."
             }
+          },
+          "type": {
+            "title": "Quel type de commerce ?",
+            "subtitle": "Choisissez le plus proche — on ajustera les modèles et la communication.",
+            "options": {
+              "cafe": "Café / Salon de thé",
+              "restaurant": "Restaurant",
+              "bakery": "Boulangerie / Pâtisserie",
+              "beauty": "Beauté / Coiffure",
+              "retail": "Boutique / Commerce",
+              "fitness": "Fitness / Studio",
+              "services": "Services",
+              "other": "Autre chose"
+            }
+          },
+          "size": {
+            "title": "Quelle est la taille de votre équipe ?",
+            "subtitle": "Pour recommander qui devrait avoir un compte scanner.",
+            "options": {
+              "solo": { "label": "Juste moi", "description": "Activité en solo." },
+              "small": { "label": "2 à 5 personnes", "description": "Petite équipe." },
+              "medium": { "label": "6 à 20 personnes", "description": "Équipe en croissance." },
+              "large": { "label": "Plus de 20", "description": "Plusieurs équipes ou points de vente." }
+            }
+          },
+          "locations": {
+            "title": "Combien d'établissements ?",
+            "subtitle": "Tous vos établissements peuvent utiliser la même carte.",
+            "options": {
+              "one": "Un seul",
+              "few": "2 à 5 établissements",
+              "several": "6 à 20 établissements",
+              "many": "Plus de 20"
+            }
+          },
+          "objectives": {
+            "title": "Quel est votre objectif principal ?",
+            "subtitle": "On gardera les conseils et stats focalisés sur ce qui compte.",
+            "options": {
+              "retention": {
+                "label": "Fidéliser mes clients",
+                "description": "Transformer les nouveaux en habitués."
+              },
+              "frequency": {
+                "label": "Augmenter la fréquence",
+                "description": "Faire venir les habitués plus souvent."
+              },
+              "basket": {
+                "label": "Augmenter le panier moyen",
+                "description": "Encourager des achats plus importants."
+              },
+              "acquisition": {
+                "label": "Toucher de nouveaux clients",
+                "description": "Booster bouche-à-oreille et parrainages."
+              }
+            }
           }
         }
       },
@@ -59,6 +115,91 @@
           "branding": {
             "title": "Identité visuelle",
             "subtitle": "Ajoutez votre logo et vos couleurs. Vous pourrez affiner plus tard."
+          }
+        }
+      },
+      "notifications": {
+        "title": "Configurez les notifications",
+        "steps": {
+          "icon": {
+            "title": "Icône des notifications",
+            "subtitle": "L'icône que vos clients verront quand leur carte sonne — souvent votre logo."
+          },
+          "transactional": {
+            "title": "Messages automatiques",
+            "subtitle": "Personnalisez le texte envoyé à chaque tampon, récompense débloquée ou utilisée."
+          },
+          "milestones": {
+            "title": "Paliers personnalisés",
+            "subtitle": "Optionnel. Ajoutez des notifications à des étapes précises (ex. « à mi-chemin »)."
+          }
+        }
+      },
+      "first-customer": {
+        "title": "Obtenez votre premier client",
+        "subtitle": "Partagez votre lien d'inscription ou scannez le QR avec votre propre téléphone."
+      },
+      "live-stamp": {
+        "title": "Envoyez votre premier tampon",
+        "subtitle": "Ouvrez la liste des clients, trouvez-vous, ajoutez un tampon en un clic.",
+        "cardTitle": "Ajoutez un tampon",
+        "cardBody": "Une fois la carte installée, chaque tampon déclenche une notification push. Essayez avec la vôtre.",
+        "openCustomers": "Ouvrir les clients"
+      },
+      "first-broadcast": {
+        "title": "Envoyez votre première diffusion",
+        "subtitle": "Les diffusions envoient un message à tous les clients ayant installé votre carte.",
+        "cardTitle": "Composer une diffusion",
+        "cardBody": "Choisissez un horaire, rédigez votre message, prévisualisez ce que verront vos clients.",
+        "openComposer": "Ouvrir le composeur"
+      },
+      "team": {
+        "title": "Invitez votre équipe",
+        "subtitle": "Ajoutez admins ou scanners — ils pourront tamponner les clients à la caisse.",
+        "inviteLabel": "Ajoutez vos collaborateurs",
+        "inviteHint": "Envoyez une invitation par e-mail. Ils auront un accès scanner.",
+        "inviteCta": "Inviter"
+      },
+      "plan": {
+        "title": "Choisissez votre plan",
+        "subtitle": "Vous êtes en essai Pro de 30 jours. Choisissez maintenant ou continuez l'essai.",
+        "keepTrialCta": "Plus tard",
+        "recommendedBadge": "Recommandé",
+        "perMonth": "/mois",
+        "youdLose": "Vous perdriez :",
+        "andMore": "+ {count} autre(s)…",
+        "downgradeTitle": "Passer à Starter ?",
+        "downgradeBody": "Certaines fonctionnalités configurées ne seront plus disponibles :",
+        "downgradeNoLosses": "Aucune de vos configurations ne sera affectée.",
+        "downgradeCancel": "Annuler",
+        "downgradeConfirm": "Passer à Starter",
+        "tiers": {
+          "starter": {
+            "label": "Starter",
+            "tagline": "L'essentiel.",
+            "cta": "Choisir Starter",
+            "feat1": "1 carte de fidélité",
+            "feat2": "Messages de notification par défaut",
+            "feat3": "Solo ou petite équipe"
+          },
+          "growth": {
+            "label": "Growth",
+            "tagline": "Faites grandir votre fidélité.",
+            "cta": "Choisir Growth",
+            "feat1": "Plusieurs cartes de fidélité",
+            "feat2": "Messages personnalisés",
+            "feat3": "Diffusions (limitées)",
+            "feat4": "Invitations d'équipe"
+          },
+          "pro": {
+            "label": "Pro",
+            "tagline": "Tout, débloqué.",
+            "cta": "Choisir Pro",
+            "feat1": "Designs et paliers illimités",
+            "feat2": "Diffusions illimitées",
+            "feat3": "Équipe illimitée",
+            "feat4": "Rappels géolocalisés",
+            "feat5": "Support prioritaire"
           }
         }
       }

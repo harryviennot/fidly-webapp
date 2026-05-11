@@ -42,6 +42,62 @@
               "logo": "Logo",
               "logoHelp": "Square works best."
             }
+          },
+          "type": {
+            "title": "What kind of business?",
+            "subtitle": "Pick the closest match — we'll tune templates and copy to fit.",
+            "options": {
+              "cafe": "Café / Coffee shop",
+              "restaurant": "Restaurant",
+              "bakery": "Bakery / Pastry",
+              "beauty": "Beauty / Hair salon",
+              "retail": "Retail / Boutique",
+              "fitness": "Fitness / Studio",
+              "services": "Services",
+              "other": "Something else"
+            }
+          },
+          "size": {
+            "title": "How big is your team?",
+            "subtitle": "Helps us recommend who should have a scanner account.",
+            "options": {
+              "solo": { "label": "Just me", "description": "Solo operation." },
+              "small": { "label": "2–5 people", "description": "Small team." },
+              "medium": { "label": "6–20 people", "description": "Growing team." },
+              "large": { "label": "20+ people", "description": "Multi-shift or multi-location." }
+            }
+          },
+          "locations": {
+            "title": "How many locations?",
+            "subtitle": "Each location can use the same loyalty card.",
+            "options": {
+              "one": "Just one",
+              "few": "2–5 locations",
+              "several": "6–20 locations",
+              "many": "20+ locations"
+            }
+          },
+          "objectives": {
+            "title": "What's your main goal?",
+            "subtitle": "We'll keep tips and metrics focused on what matters most.",
+            "options": {
+              "retention": {
+                "label": "Keep customers coming back",
+                "description": "Turn one-timers into regulars."
+              },
+              "frequency": {
+                "label": "Increase visit frequency",
+                "description": "Get regulars in more often."
+              },
+              "basket": {
+                "label": "Grow average ticket",
+                "description": "Encourage bigger orders per visit."
+              },
+              "acquisition": {
+                "label": "Reach new customers",
+                "description": "Use referrals + word of mouth."
+              }
+            }
           }
         }
       },
@@ -59,6 +115,91 @@
           "branding": {
             "title": "Branding",
             "subtitle": "Add your logo and colors. Defaults work — you can refine later."
+          }
+        }
+      },
+      "notifications": {
+        "title": "Set up notifications",
+        "steps": {
+          "icon": {
+            "title": "Notification icon",
+            "subtitle": "Pick the icon customers see when your card pings them — typically your logo."
+          },
+          "transactional": {
+            "title": "Default messages",
+            "subtitle": "Customise the text sent on each stamp, reward unlocked, and reward redeemed."
+          },
+          "milestones": {
+            "title": "Custom milestones",
+            "subtitle": "Optional. Add bonus pings at specific stamp counts (e.g. \"halfway there\")."
+          }
+        }
+      },
+      "first-customer": {
+        "title": "Get your first customer",
+        "subtitle": "Share your signup link or scan the QR with your own phone to install the card."
+      },
+      "live-stamp": {
+        "title": "Send your first stamp",
+        "subtitle": "Open the customers list, find yourself, and tap to add a stamp.",
+        "cardTitle": "Add a stamp",
+        "cardBody": "Once a customer has installed the card, stamps trigger a push notification on their phone. Try it with your own.",
+        "openCustomers": "Open customers"
+      },
+      "first-broadcast": {
+        "title": "Send your first broadcast",
+        "subtitle": "Broadcasts push a message to every customer who installed your card.",
+        "cardTitle": "Compose a broadcast",
+        "cardBody": "Pick a time, write your message, preview what customers see on their lock screen.",
+        "openComposer": "Open composer"
+      },
+      "team": {
+        "title": "Invite your team",
+        "subtitle": "Add admins or scanners — they'll be able to stamp customers at the counter.",
+        "inviteLabel": "Bring people in",
+        "inviteHint": "Send an email invite. They'll get a scanner login.",
+        "inviteCta": "Invite"
+      },
+      "plan": {
+        "title": "Choose your plan",
+        "subtitle": "You're on a 30-day Pro trial. Pick a plan now or keep exploring on the trial.",
+        "keepTrialCta": "Decide later",
+        "recommendedBadge": "Recommended",
+        "perMonth": "/mo",
+        "youdLose": "You'd lose:",
+        "andMore": "+ {count} more…",
+        "downgradeTitle": "Switch to Starter?",
+        "downgradeBody": "Some things you've set up won't be available on Starter:",
+        "downgradeNoLosses": "Nothing you've configured will change.",
+        "downgradeCancel": "Cancel",
+        "downgradeConfirm": "Switch to Starter",
+        "tiers": {
+          "starter": {
+            "label": "Starter",
+            "tagline": "The essentials.",
+            "cta": "Pick Starter",
+            "feat1": "1 card design",
+            "feat2": "Default notification messages",
+            "feat3": "Solo or small team"
+          },
+          "growth": {
+            "label": "Growth",
+            "tagline": "Scale your loyalty.",
+            "cta": "Pick Growth",
+            "feat1": "Multiple card designs",
+            "feat2": "Custom notification messages",
+            "feat3": "Broadcasts (limited)",
+            "feat4": "Team invites"
+          },
+          "pro": {
+            "label": "Pro",
+            "tagline": "Everything, unlocked.",
+            "cta": "Pick Pro",
+            "feat1": "Unlimited designs + milestones",
+            "feat2": "Unlimited broadcasts",
+            "feat3": "Unlimited team",
+            "feat4": "Geofenced reminders",
+            "feat5": "Priority support"
           }
         }
       }
