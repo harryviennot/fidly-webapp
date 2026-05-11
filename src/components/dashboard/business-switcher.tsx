@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CaretUpDown, Check, ArrowRight } from "@phosphor-icons/react"
+import { CaretUpDown, ArrowRight } from "@phosphor-icons/react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import {
@@ -19,7 +19,17 @@ import { cn } from "@/lib/utils"
 
 const DROPDOWN_LIMIT = 5
 
-function BusinessAvatar({ name, logoUrl, size = "md" }: { name: string; logoUrl?: string | null; size?: "sm" | "md" }) {
+function BusinessAvatar({
+  name,
+  logoUrl,
+  accentColor,
+  size = "md",
+}: {
+  name: string;
+  logoUrl?: string | null;
+  accentColor?: string;
+  size?: "sm" | "md";
+}) {
   const initials = name
     .split(" ")
     .map((w) => w[0])
@@ -45,10 +55,12 @@ function BusinessAvatar({ name, logoUrl, size = "md" }: { name: string; logoUrl?
   return (
     <div
       className={cn(
-        "rounded-lg shrink-0 flex items-center justify-center bg-[var(--accent)] text-white font-bold",
+        "rounded-lg shrink-0 flex items-center justify-center text-white font-bold",
+        !accentColor && "bg-[var(--accent)]",
         height,
         size === "sm" ? "w-7 text-xs" : "w-9 text-sm"
       )}
+      style={accentColor ? { backgroundColor: accentColor } : undefined}
     >
       {initials}
     </div>
@@ -67,21 +79,14 @@ export function BusinessSwitcher() {
   const hasMultipleMemberships = memberships.length > 1 || isSuperadmin
   const shouldShowViewAll = isSuperadmin || memberships.length > DROPDOWN_LIMIT
 
-  // Sort: current business first, then active, then by name.
-  const sortedMemberships = React.useMemo(() => {
-    const list = [...memberships]
-    list.sort((a, b) => {
-      if (a.business.id === currentBusiness?.id) return -1
-      if (b.business.id === currentBusiness?.id) return 1
-      const aActive = a.business.status === "active" ? 0 : 1
-      const bActive = b.business.status === "active" ? 0 : 1
-      if (aActive !== bActive) return aActive - bActive
-      return (a.business.name || "").localeCompare(b.business.name || "")
-    })
-    return list
-  }, [memberships, currentBusiness?.id])
+  // Memberships arrive already sorted by recent access from BusinessProvider.
+  // Hide the currently selected business — it's already in the trigger row.
+  const otherMemberships = React.useMemo(
+    () => memberships.filter((m) => m.business.id !== currentBusiness?.id),
+    [memberships, currentBusiness?.id],
+  )
 
-  const visibleMemberships = sortedMemberships.slice(0, DROPDOWN_LIMIT)
+  const visibleMemberships = otherMemberships.slice(0, DROPDOWN_LIMIT)
 
   const formatRole = (role: string) => {
     const key = `roles.${role}` as const;
@@ -93,6 +98,7 @@ export function BusinessSwitcher() {
       <BusinessAvatar
         name={currentBusiness?.name || "S"}
         logoUrl={currentBusiness?.logo_url}
+        accentColor={currentBusiness?.settings?.accentColor}
       />
       <div className="flex flex-col flex-1 min-w-0 text-left">
         <span className="text-sm font-semibold text-[var(--foreground)] truncate">
@@ -136,39 +142,36 @@ export function BusinessSwitcher() {
         side="bottom"
         sideOffset={4}
       >
-        <DropdownMenuLabel className="text-muted-foreground text-xs">
-          {t("businessSwitcher.yourBusinesses")}
-        </DropdownMenuLabel>
-        {visibleMemberships.map((membership) => {
-          const isSelected = membership.business.id === currentBusiness?.id
-          return (
-            <DropdownMenuItem
-              key={membership.id}
-              onClick={() => setCurrentBusiness(membership.business)}
-              className="gap-2 p-2"
-            >
-              <BusinessAvatar
-                name={membership.business.name}
-                logoUrl={membership.business.logo_url}
-                size="sm"
-              />
-              <div className="flex flex-col flex-1 min-w-0">
-                <span className="truncate font-medium text-sm">
-                  {membership.business.name}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {formatRole(membership.role)}
-                </span>
-              </div>
-              {isSelected && (
-                <Check className="size-4 text-[var(--accent)]" weight="bold" />
-              )}
-            </DropdownMenuItem>
-          )
-        })}
+        {visibleMemberships.length > 0 && (
+          <DropdownMenuLabel className="text-muted-foreground text-xs">
+            {t("businessSwitcher.switchTo")}
+          </DropdownMenuLabel>
+        )}
+        {visibleMemberships.map((membership) => (
+          <DropdownMenuItem
+            key={membership.id}
+            onClick={() => setCurrentBusiness(membership.business)}
+            className="gap-2 p-2"
+          >
+            <BusinessAvatar
+              name={membership.business.name}
+              logoUrl={membership.business.logo_url}
+              accentColor={membership.business.settings?.accentColor}
+              size="sm"
+            />
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="truncate font-medium text-sm">
+                {membership.business.name}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {formatRole(membership.role)}
+              </span>
+            </div>
+          </DropdownMenuItem>
+        ))}
         {shouldShowViewAll && (
           <>
-            <DropdownMenuSeparator />
+            {visibleMemberships.length > 0 && <DropdownMenuSeparator />}
             <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault()

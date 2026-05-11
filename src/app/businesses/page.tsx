@@ -19,6 +19,7 @@ import { useListViewPreference } from "@/hooks/use-list-view-preference";
 import { useBusinessesList } from "@/hooks/use-businesses-list";
 import { useIsSuperadmin } from "@/lib/auth/use-is-superadmin";
 import { useBusiness } from "@/contexts/business-context";
+import { sortByRecentAccess } from "@/lib/recent-business-access";
 import { BusinessCard } from "@/components/businesses/business-card";
 import { BusinessTable } from "@/components/businesses/business-table";
 import { ImpersonateDialog } from "@/components/impersonation/impersonate-dialog";
@@ -60,8 +61,9 @@ export default function BusinessesPage() {
 
   const items = useMemo<BusinessListItem[]>(() => {
     const raw = data?.items ?? [];
-    if (statusFilter === "all") return raw;
-    return raw.filter((b) => b.status === statusFilter);
+    const filtered = statusFilter === "all" ? raw : raw.filter((b) => b.status === statusFilter);
+    // Surface most-recently-accessed businesses first within the current page.
+    return sortByRecentAccess(filtered);
   }, [data?.items, statusFilter]);
 
   const total = data?.total ?? 0;

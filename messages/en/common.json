@@ -30,6 +30,7 @@
   },
   "businessSwitcher": {
     "yourBusinesses": "Your businesses",
+    "switchTo": "Switch to",
     "viewAll": "View all ({count})"
   },
   "roles": {

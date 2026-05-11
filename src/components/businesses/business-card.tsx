@@ -59,15 +59,13 @@ export function BusinessCard({
   const statusVariant = STATUS_VARIANT[business.status] ?? "warning";
   const roleVariant = business.role ? ROLE_VARIANT[business.role] : null;
 
-  // Drop noise: "active" is the default, "owner" is implicit for an owner
-  // looking at their own businesses. Surface only meaningful signals.
+  // Drop noise: "active" is the default — surface only problems (pending /
+  // suspended) for regular viewers. Role is always informative.
   const showStatus = business.status !== "active" || !!showActiveBadge;
-  const showRole = !!roleVariant && business.role !== "owner";
+  const showRole = !!roleVariant;
 
   const accentColor = business.settings?.accentColor;
-  const avatarStyle = accentColor
-    ? { backgroundColor: accentColor }
-    : undefined;
+  const hasLogo = !!business.logo_url;
 
   // Primary action wraps the whole card: prefer "open" for members,
   // fall back to "impersonate" for superadmins on non-member businesses.
@@ -78,26 +76,28 @@ export function BusinessCard({
   const cardContent = (
     <>
       <div className="flex items-start gap-3">
-        <div
-          className={cn(
-            "h-12 w-12 shrink-0 rounded-xl overflow-hidden flex items-center justify-center text-white font-bold",
-            !accentColor && "bg-[var(--accent)]",
-          )}
-          style={avatarStyle}
-        >
-          {business.logo_url ? (
+        {hasLogo ? (
+          <div className="h-12 w-12 shrink-0 rounded-xl overflow-hidden bg-[var(--muted)]">
             <Image
-              src={business.logo_url}
+              src={business.logo_url!}
               alt={business.name}
               width={96}
               height={48}
               className="w-full h-full object-cover"
               unoptimized
             />
-          ) : (
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "h-12 w-12 shrink-0 rounded-xl flex items-center justify-center text-white font-bold",
+              !accentColor && "bg-[var(--accent)]",
+            )}
+            style={accentColor ? { backgroundColor: accentColor } : undefined}
+          >
             <span className="text-sm">{getInitials(business.name)}</span>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <h3 className="text-[15px] font-semibold text-[var(--foreground)] truncate leading-tight">

@@ -30,6 +30,7 @@
   },
   "businessSwitcher": {
     "yourBusinesses": "Vos entreprises",
+    "switchTo": "Basculer vers",
     "viewAll": "Voir tous ({count})"
   },
   "roles": {

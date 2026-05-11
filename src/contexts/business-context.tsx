@@ -1,15 +1,17 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
 import { applyTheme, getAccentFromSettings, getBackgroundFromSettings } from "@/utils/theme";
 import { businessKeys, fetchMemberships } from "@/hooks/use-business-query";
 import { getMyProfile } from "@/api";
+import { endImpersonation } from "@/api/impersonation";
 import { useImpersonation } from "@/contexts/impersonation-context";
 import { API_BASE_URL, getAuthHeaders } from "@/api/client";
 import { setLocale, SUPPORTED_LOCALES, type Locale } from "@/lib/locale";
+import { bumpRecentAccess, getRecentAccess, type RecentAccessMap } from "@/lib/recent-business-access";
 import { Business } from "@/types";
 
 type MembershipRole = "owner" | "admin" | "scanner";
@@ -56,6 +58,10 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     () => (typeof window !== "undefined" ? localStorage.getItem("currentBusinessId") : null)
   );
 
+  // Tracks the last time the user explicitly switched to each business so
+  // the switcher / list can sort by recent access. Lives in localStorage.
+  const [recentAccess, setRecentAccess] = useState<RecentAccessMap>(() => getRecentAccess());
+
   // Sync locale from DB during loading phase (before content renders)
   const [localeSynced, setLocaleSynced] = useState(false);
   useEffect(() => {
@@ -97,7 +103,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     enabled: !!user?.id && !isImpersonating,
   });
 
-  const memberships: Membership[] = isImpersonating && impersonatedBusiness && impersonationSession
+  const unsortedMemberships: Membership[] = isImpersonating && impersonatedBusiness && impersonationSession
     ? [{
         id: `imp-${impersonationSession.session_id}`,
         role: impersonationSession.target_role as MembershipRole,
@@ -108,6 +114,22 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         role: m.role as MembershipRole,
         business: m.businesses as unknown as Business,
       }));
+
+  // Sort by recent access: most-recently switched-to comes first. Ties
+  // (never accessed) fall back to active-first, then alphabetical.
+  const memberships = useMemo(() => {
+    return [...unsortedMemberships].sort((a, b) => {
+      const aT = recentAccess[a.business.id] ?? 0;
+      const bT = recentAccess[b.business.id] ?? 0;
+      if (aT !== bT) return bT - aT;
+      const aActive = a.business.status === "active" ? 1 : 0;
+      const bActive = b.business.status === "active" ? 1 : 0;
+      if (aActive !== bActive) return bActive - aActive;
+      return (a.business.name || "").localeCompare(b.business.name || "");
+    });
+  // We intentionally key off the raw membership ids + the recentAccess map.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unsortedMemberships.map((m) => m.business.id).join(","), recentAccess]);
 
   const activeMemberships = memberships.filter(
     (m) => m.business.status === "active"
@@ -128,6 +150,11 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
+
+    // Don't touch the stored selection until the memberships query has
+    // resolved — otherwise on refresh we would clobber a valid stored ID
+    // with the first active membership before knowing what's available.
+    if (isLoading) return;
 
     const storedMatch = memberships.find(
       (m) => m.business.id === currentBusinessId
@@ -151,7 +178,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("currentBusinessId");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, memberships.length, activeMemberships.length, isImpersonating, impersonatedBusiness?.id]);
+  }, [user?.id, isLoading, memberships.length, activeMemberships.length, isImpersonating, impersonatedBusiness?.id]);
 
   const membership =
     memberships.find((m) => m.business.id === currentBusinessId) ?? null;
@@ -203,8 +230,15 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   }, [currentBusiness?.id, currentBusiness?.status, isImpersonating]);
 
   const setCurrentBusiness = (business: Business) => {
+    // Switching businesses while impersonating ends the session — the
+    // operator is leaving the impersonated context, and the audit log
+    // should reflect that as a clean exit, not a silent drift.
+    if (isImpersonating) {
+      void endImpersonation();
+    }
     setCurrentBusinessId(business.id);
     localStorage.setItem("currentBusinessId", business.id);
+    setRecentAccess(bumpRecentAccess(business.id));
     const accentColor = getAccentFromSettings(business.settings);
     const secondaryColor = getBackgroundFromSettings(business.settings);
     applyTheme(accentColor, secondaryColor ?? undefined);
