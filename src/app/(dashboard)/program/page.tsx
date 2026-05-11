@@ -20,7 +20,7 @@ import {
 } from '@/components/redesign';
 
 export default function ProgramOverviewPage() {
-  const { program, designs, activeDesign, loading, isOwner } = useProgram();
+  const { program, activeDesign, loading, isOwner } = useProgram();
   const { currentBusiness } = useBusiness();
 
   const t = useTranslations('loyaltyProgram.overview');

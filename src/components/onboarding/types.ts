@@ -11,6 +11,8 @@ export interface WizardStepContextValue {
   setCanSkip: (canSkip: boolean) => void;
   /** Step declares it's mid-async-work; shell disables the footer accordingly. */
   setIsBusy: (busy: boolean) => void;
+  /** Override the primary CTA label on the footer for this step (e.g. "Let's go" on Welcome). Pass null to reset. */
+  setNextLabel: (label: string | null) => void;
   /** Step-initiated forward navigation (used when a UI control auto-advances). */
   advance: () => void;
   /** Step-initiated skip (same as footer skip; rarely needed from inside a step). */

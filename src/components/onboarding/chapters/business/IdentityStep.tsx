@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -46,10 +46,18 @@ export function IdentityStep() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [website, setWebsite] = useState('');
 
-  const derivedSlug = useMemo(() => slugify(name), [name]);
-  useEffect(() => {
-    if (!slugTouched) setSlug(derivedSlug);
-  }, [derivedSlug, slugTouched]);
+  // Keep the slug synced with the business name until the user edits the slug
+  // directly. We update both in the same event handler (no useEffect) so the
+  // render stays single-pass.
+  const handleNameChange = (next: string) => {
+    setName(next);
+    if (!slugTouched) setSlug(slugify(next));
+  };
+
+  const handleSlugChange = (next: string) => {
+    setSlug(next.toLowerCase().replace(SLUG_INPUT_RE, ''));
+    setSlugTouched(true);
+  };
 
   const isNameValid = name.trim().length > 0;
   const isSlugValid = slug.length >= 3 && slug.length <= 50 && SLUG_VALID_RE.test(slug);
@@ -152,7 +160,7 @@ export function IdentityStep() {
           <Input
             id="biz-name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => handleNameChange(e.target.value)}
             placeholder={t('fields.namePlaceholder')}
             autoComplete="organization"
             autoFocus
@@ -167,10 +175,7 @@ export function IdentityStep() {
           <Input
             id="biz-slug"
             value={slug}
-            onChange={(e) => {
-              setSlug(e.target.value.toLowerCase().replace(SLUG_INPUT_RE, ''));
-              setSlugTouched(true);
-            }}
+            onChange={(e) => handleSlugChange(e.target.value)}
             placeholder={t('fields.slugPlaceholder')}
             inputMode="url"
             autoComplete="off"
