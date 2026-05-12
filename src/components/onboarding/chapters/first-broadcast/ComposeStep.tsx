@@ -8,7 +8,7 @@ import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { createBroadcast, estimateRecipients, getBroadcast } from '@/api/notifications';
 import type { Broadcast } from '@/types/notification';
-import { useWizardStep } from '../../wizard-context';
+import { useWizardStep, useWizardDraft } from '../../wizard-context';
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60_000;
@@ -35,8 +35,10 @@ export function ComposeStep() {
   const businessId = currentBusiness?.id;
   const businessName = currentBusiness?.name ?? '';
 
-  const [title, setTitle] = useState<string>('');
-  const [body, setBody] = useState<string>('');
+  // Draft-backed so the message survives navigating back to the intro and
+  // forward again (or to/from any other step) without retyping.
+  const [title, setTitle] = useWizardDraft<string>('first-broadcast.title', () => '');
+  const [body, setBody] = useWizardDraft<string>('first-broadcast.body', () => '');
   const [reachable, setReachable] = useState<number | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
@@ -10,7 +10,7 @@ import {
   ProgramDetailsForm,
   type ProgramDetailsValue,
 } from '@/components/program/forms/ProgramDetailsForm';
-import { useWizardStep } from '../../wizard-context';
+import { useWizardStep, useWizardDraft } from '../../wizard-context';
 
 const DEFAULT_VALUE: ProgramDetailsValue = {
   programName: '',
@@ -35,8 +35,12 @@ export function ProgramStep() {
   const ctx = useWizardStep();
 
   // Stored edits override the server snapshot; null means "show server value."
-  // This avoids the setState-in-effect anti-pattern when program loads.
-  const [edits, setEdits] = useState<ProgramDetailsValue | null>(null);
+  // Draft-backed so an in-progress edit isn't wiped when the user navigates
+  // away before clicking Continue.
+  const [edits, setEdits] = useWizardDraft<ProgramDetailsValue | null>(
+    'program.edits',
+    () => null
+  );
 
   const value: ProgramDetailsValue = useMemo(
     () =>

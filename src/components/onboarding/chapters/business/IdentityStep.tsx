@@ -8,7 +8,7 @@ import { Check, Spinner, X } from '@phosphor-icons/react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { ImageUploader } from '@/components/design';
-import { useWizardStep } from '../../wizard-context';
+import { useWizardStep, useWizardDraft } from '../../wizard-context';
 import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
 import {
@@ -73,11 +73,16 @@ export function IdentityStep() {
 
   // Pre-fill from currentBusiness when present (e.g. business was created on
   // showcase before this wizard ran). In that case Identity becomes
-  // "confirm + commit" — no new business is created.
+  // "confirm + commit" — no new business is created. Drafts override the
+  // API-backed values so navigating Back→Forward keeps the typed input.
   const editingExisting = !!currentBusiness;
-  const [name, setName] = useState(() => currentBusiness?.name ?? '');
-  const [slug, setSlug] = useState(() => currentBusiness?.url_slug ?? '');
-  const [website, setWebsite] = useState('');
+  const [name, setName] = useWizardDraft('identity.name', () => currentBusiness?.name ?? '');
+  const [slug, setSlug] = useWizardDraft('identity.slug', () => currentBusiness?.url_slug ?? '');
+  const [website, setWebsite] = useWizardDraft(
+    'identity.website',
+    () =>
+      (currentBusiness?.settings?.identity_website as string | undefined) ?? ''
+  );
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(
     () => currentBusiness?.logo_url ?? null

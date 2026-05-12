@@ -18,6 +18,18 @@ export interface WizardStepContextValue {
    * Use to mute the Continue button until required fields validate.
    */
   setCanProceed: (canProceed: boolean) => void;
+  /**
+   * Read a previously-stashed value from the wizard-wide draft store. Returns
+   * `undefined` when nothing has been written for `key` yet. Use a namespaced
+   * key like `"identity.website"` to avoid collisions across steps.
+   */
+  getDraft: <T = unknown>(key: string) => T | undefined;
+  /**
+   * Write a value into the wizard-wide draft store. The draft survives
+   * sub-step navigation but lives in memory only — it clears when the wizard
+   * completes or the page reloads.
+   */
+  setDraft: (key: string, value: unknown) => void;
   /** Step-initiated forward navigation (used when a UI control auto-advances). */
   advance: () => void;
   /** Step-initiated skip (same as footer skip; rarely needed from inside a step). */

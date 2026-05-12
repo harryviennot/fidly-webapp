@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { OptionCard } from '../../OptionCard';
-import { useWizardStep } from '../../wizard-context';
+import { useWizardStep, useWizardDraft } from '../../wizard-context';
 
 const TYPE_OPTIONS = [
   { id: 'cafe', emoji: '☕' },
@@ -41,19 +41,26 @@ export function ProfileStep() {
   const { mutateAsync: updateBusiness } = useUpdateBusiness(currentBusiness?.id);
   const ctx = useWizardStep();
 
-  const [businessType, setBusinessType] = useState<string>(
+  // Drafts mirror the chip selections so navigating Back→Forward (or before
+  // the submit refreshes `currentBusiness`) preserves the user's answers.
+  const [businessType, setBusinessType] = useWizardDraft<string>(
+    'profile.businessType',
     () => currentBusiness?.settings?.business_type ?? ''
   );
-  const [businessTypeOther, setBusinessTypeOther] = useState<string>(
+  const [businessTypeOther, setBusinessTypeOther] = useWizardDraft<string>(
+    'profile.businessTypeOther',
     () => currentBusiness?.settings?.business_type_other ?? ''
   );
-  const [teamSize, setTeamSize] = useState<string>(
+  const [teamSize, setTeamSize] = useWizardDraft<string>(
+    'profile.teamSize',
     () => currentBusiness?.settings?.team_size ?? ''
   );
-  const [locationsCount, setLocationsCount] = useState<string>(
+  const [locationsCount, setLocationsCount] = useWizardDraft<string>(
+    'profile.locationsCount',
     () => currentBusiness?.settings?.locations_count ?? ''
   );
-  const [primaryGoal, setPrimaryGoal] = useState<string>(
+  const [primaryGoal, setPrimaryGoal] = useWizardDraft<string>(
+    'profile.primaryGoal',
     () => currentBusiness?.settings?.primary_goal ?? ''
   );
 

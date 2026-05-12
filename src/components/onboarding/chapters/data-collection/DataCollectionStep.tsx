@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
@@ -9,7 +9,7 @@ import {
   DataCollectionForm,
   type DataCollectionValue,
 } from '@/components/program/forms/DataCollectionForm';
-import { useWizardStep } from '../../wizard-context';
+import { useWizardStep, useWizardDraft } from '../../wizard-context';
 import type { FieldCollectionMode } from '@/types/business';
 
 const DEFAULTS: DataCollectionValue = {
@@ -35,15 +35,22 @@ export function DataCollectionStep() {
   const { mutateAsync: updateBusiness } = useUpdateBusiness(currentBusiness?.id);
   const ctx = useWizardStep();
 
-  const [value, setValue] = useState<DataCollectionValue>(() => {
-    const dc = currentBusiness?.settings?.customer_data_collection;
-    if (!dc) return DEFAULTS;
-    return {
-      collect_name: normalize(dc.collect_name),
-      collect_email: normalize(dc.collect_email),
-      collect_phone: normalize(dc.collect_phone),
-    };
-  });
+  // Draft-backed so toggling switches and navigating away preserves the
+  // choice — `useUpdateBusiness`'s React-Query invalidation doesn't push the
+  // change into the `currentBusiness` context, so re-seeding from the API
+  // alone would lose unsaved tweaks.
+  const [value, setValue] = useWizardDraft<DataCollectionValue>(
+    'data-collection.value',
+    () => {
+      const dc = currentBusiness?.settings?.customer_data_collection;
+      if (!dc) return DEFAULTS;
+      return {
+        collect_name: normalize(dc.collect_name),
+        collect_email: normalize(dc.collect_email),
+        collect_phone: normalize(dc.collect_phone),
+      };
+    }
+  );
 
   useEffect(() => {
     ctx.setCanSkip(true);

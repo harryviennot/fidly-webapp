@@ -17,6 +17,8 @@ import {
 } from './registry';
 import type { SubmitHandler, WizardStepContextValue } from './types';
 
+const DRAFT_STORAGE_KEY = 'stampeo:wizard-draft';
+
 interface WizardShellProps {
   slug: string[] | undefined;
 }
@@ -40,6 +42,55 @@ export function WizardShell({ slug }: WizardShellProps) {
     next: async () => {},
     skip: async () => {},
   });
+  // Wizard-wide draft store, persisted to localStorage so values survive:
+  //   - sub-step navigation (Back → Forward)
+  //   - page reload (browser refresh, accidental nav-away)
+  //   - the React-Query/BusinessProvider race where currentBusiness is
+  //     stale right after a mutation
+  // Cleared in `handleNext`/`handleSkip` on the final step (finalize).
+  const draftRef = useRef<Record<string, unknown> | null>(null);
+  if (draftRef.current === null) {
+    // Lazy init — runs once on first render. useRef doesn't accept a
+    // factory, so we guard with a null sentinel instead.
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+        draftRef.current = stored ? (JSON.parse(stored) as Record<string, unknown>) : {};
+      } catch {
+        draftRef.current = {};
+      }
+    } else {
+      draftRef.current = {};
+    }
+  }
+  const getDraft = useCallback(<T,>(key: string): T | undefined => {
+    return draftRef.current?.[key] as T | undefined;
+  }, []);
+  const setDraft = useCallback((key: string, value: unknown) => {
+    if (!draftRef.current) draftRef.current = {};
+    draftRef.current[key] = value;
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(
+          DRAFT_STORAGE_KEY,
+          JSON.stringify(draftRef.current)
+        );
+      } catch {
+        // localStorage can throw in private-mode/quota-exceeded; the in-memory
+        // ref still has the value, so navigation within this session works.
+      }
+    }
+  }, []);
+  const clearDraft = useCallback(() => {
+    draftRef.current = {};
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, []);
   const [canSkip, setCanSkip] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [nextLabel, setNextLabel] = useState<string | null>(null);
@@ -73,10 +124,12 @@ export function WizardShell({ slug }: WizardShellProps) {
       setIsBusy,
       setNextLabel,
       setCanProceed,
+      getDraft,
+      setDraft,
       advance: () => void handlersRef.current.next(),
       skip: () => void handlersRef.current.skip(),
     }),
-    [setCanProceed]
+    [setCanProceed, getDraft, setDraft]
   );
 
   // Reset per-step overrides when the URL changes — each step starts fresh
@@ -103,14 +156,16 @@ export function WizardShell({ slug }: WizardShellProps) {
       if (nextPath) {
         router.push(nextPath);
       } else {
-        // Last step — finalize and release to dashboard.
+        // Last step — finalize and release to dashboard. Drop the draft so
+        // a future second-business creation starts with a clean slate.
         await finalize();
+        clearDraft();
         router.push('/');
       }
     } finally {
       setIsBusy(false);
     }
-  }, [resolved, markCompleted, finalize, router]);
+  }, [resolved, markCompleted, finalize, router, clearDraft]);
 
   const handleSkip = useCallback(async () => {
     if (!resolved) return;
@@ -123,12 +178,13 @@ export function WizardShell({ slug }: WizardShellProps) {
         router.push(nextPath);
       } else {
         await finalize();
+        clearDraft();
         router.push('/');
       }
     } finally {
       setIsBusy(false);
     }
-  }, [resolved, markSkipped, finalize, router]);
+  }, [resolved, markSkipped, finalize, router, clearDraft]);
 
   const handleBack = useCallback(() => {
     if (!resolved) return;
@@ -153,11 +209,12 @@ export function WizardShell({ slug }: WizardShellProps) {
         }
       }
       await finalize();
+      clearDraft();
       router.push('/');
     } finally {
       setIsBusy(false);
     }
-  }, [resolved, markSkipped, finalize, router]);
+  }, [resolved, markSkipped, finalize, router, clearDraft]);
 
   // Keep the ref pointing at the latest handlers so the stable stepContext
   // can dispatch through `handlersRef.current.next()` without staleness.
