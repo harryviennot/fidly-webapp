@@ -623,7 +623,7 @@ html {
   font-size: 26px;
   line-height: 1.2;
 
-  @media (min-width: 768px) {
+  @media (min-width: 800px) {
     font-size: 28px;
   }
 }
@@ -648,7 +648,7 @@ html {
   font-size: 16px;
   line-height: 1.5;
 
-  @media (min-width: 768px) {
+  @media (min-width: 800px) {
     font-size: 16px;
   }
 }
@@ -660,7 +660,7 @@ html {
   font-size: 15px;
   line-height: 1.5;
 
-  @media (min-width: 768px) {
+  @media (min-width: 800px) {
     font-size: 16px;
   }
 }
@@ -673,7 +673,7 @@ html {
   font-size: 13px;
   line-height: 1.45;
 
-  @media (min-width: 768px) {
+  @media (min-width: 800px) {
     font-size: 13.5px;
   }
 }
@@ -685,7 +685,7 @@ html {
   font-size: 12px;
   line-height: 1.4;
 
-  @media (min-width: 768px) {
+  @media (min-width: 800px) {
     font-size: 12.5px;
   }
 }

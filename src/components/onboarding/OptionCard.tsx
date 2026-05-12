@@ -10,6 +10,11 @@ interface OptionCardProps {
   description?: string;
   emoji?: string;
   disabled?: boolean;
+  /**
+   * Tag rendered in the right-side slot in place of the selection check. Use
+   * for "Coming soon" / "Beta" style status pills on disabled chips.
+   */
+  badge?: string;
 }
 
 /**
@@ -20,7 +25,15 @@ interface OptionCardProps {
  *
  * Tap target ≥80pt to feel comfortable on phones (the 80% case).
  */
-export function OptionCard({ active, onClick, label, description, emoji, disabled }: OptionCardProps) {
+export function OptionCard({
+  active,
+  onClick,
+  label,
+  description,
+  emoji,
+  disabled,
+  badge,
+}: OptionCardProps) {
   return (
     <button
       type="button"
@@ -55,16 +68,22 @@ export function OptionCard({ active, onClick, label, description, emoji, disable
           <p className="mt-0.5 wiz-helper text-[#7A7A7A] leading-snug">{description}</p>
         ) : null}
       </div>
-      <span
-        className={cn(
-          'w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-all',
-          active
-            ? 'bg-[var(--accent)] text-white'
-            : 'border-[1.5px] border-[var(--border-dark)] bg-white'
-        )}
-      >
-        {active && <Check className="w-3 h-3" weight="bold" />}
-      </span>
+      {badge ? (
+        <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-[var(--paper)] border border-[var(--border)] wiz-micro font-semibold uppercase tracking-wider text-[#888]">
+          {badge}
+        </span>
+      ) : (
+        <span
+          className={cn(
+            'w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-all',
+            active
+              ? 'bg-[var(--accent)] text-white'
+              : 'border-[1.5px] border-[var(--border-dark)] bg-white'
+          )}
+        >
+          {active && <Check className="w-3 h-3" weight="bold" />}
+        </span>
+      )}
     </button>
   );
 }
