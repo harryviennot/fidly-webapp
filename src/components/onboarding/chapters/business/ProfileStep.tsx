@@ -22,7 +22,12 @@ const TYPE_OPTIONS = [
 
 const SIZE_OPTIONS = ['solo', 'small', 'medium', 'large'] as const;
 const LOCATIONS_OPTIONS = ['one', 'few', 'several', 'many'] as const;
-const GOAL_OPTIONS = ['retention', 'frequency', 'basket', 'acquisition'] as const;
+const GOAL_OPTIONS = [
+  { id: 'retention', emoji: '🔁' },
+  { id: 'frequency', emoji: '📈' },
+  { id: 'basket', emoji: '🛒' },
+  { id: 'acquisition', emoji: '🎯' },
+] as const;
 
 /**
  * Single profile screen — replaces v2's Type/Size/Locations/Objectives sub-
@@ -172,13 +177,14 @@ export function ProfileStep() {
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('goalLabel')}
         </h3>
-        <div className="flex flex-col gap-2">
-          {GOAL_OPTIONS.map((id) => (
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
+          {GOAL_OPTIONS.map((opt) => (
             <OptionCard
-              key={id}
-              active={primaryGoal === id}
-              onClick={() => setPrimaryGoal(id)}
-              label={t(`goalOptions.${id}`)}
+              key={opt.id}
+              active={primaryGoal === opt.id}
+              onClick={() => setPrimaryGoal(opt.id)}
+              emoji={opt.emoji}
+              label={t(`goalOptions.${opt.id}`)}
             />
           ))}
         </div>

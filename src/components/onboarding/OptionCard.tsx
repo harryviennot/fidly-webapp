@@ -45,7 +45,7 @@ export function OptionCard({ active, onClick, label, description, emoji, disable
       <div className="flex-1 min-w-0">
         <div
           className={cn(
-            'wiz-body font-semibold leading-tight',
+            'wiz-body leading-tight',
             active ? 'text-[var(--foreground)]' : 'text-[#333]'
           )}
         >
