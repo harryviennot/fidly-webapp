@@ -57,22 +57,32 @@ export function ProfileStep() {
     () => currentBusiness?.settings?.primary_goal ?? ''
   );
 
+  // All four chip groups must be answered. If the type is "Other", the
+  // free-text input must also be non-empty.
+  const isValid =
+    businessType !== '' &&
+    (businessType !== 'other' || businessTypeOther.trim().length > 0) &&
+    teamSize !== '' &&
+    locationsCount !== '' &&
+    primaryGoal !== '';
+
   useEffect(() => {
-    ctx.setCanSkip(true);
+    ctx.setCanSkip(false);
+    ctx.setCanProceed(isValid);
+  }, [ctx, isValid]);
+
+  useEffect(() => {
     ctx.setSubmitHandler(async () => {
-      if (!currentBusiness) return { ok: true };
-      // Build the settings patch — skip empty values so they don't overwrite
-      // anything previously set during another wizard run.
-      const patch: Record<string, unknown> = {};
-      if (businessType) patch.business_type = businessType;
-      if (businessType === 'other' && businessTypeOther.trim()) {
+      if (!currentBusiness || !isValid) return { ok: false };
+      const patch: Record<string, unknown> = {
+        business_type: businessType,
+        team_size: teamSize,
+        locations_count: locationsCount,
+        primary_goal: primaryGoal,
+      };
+      if (businessType === 'other') {
         patch.business_type_other = businessTypeOther.trim();
       }
-      if (teamSize) patch.team_size = teamSize;
-      if (locationsCount) patch.locations_count = locationsCount;
-      if (primaryGoal) patch.primary_goal = primaryGoal;
-
-      if (Object.keys(patch).length === 0) return { ok: true };
 
       try {
         await updateBusiness({
@@ -91,6 +101,7 @@ export function ProfileStep() {
     teamSize,
     locationsCount,
     primaryGoal,
+    isValid,
     currentBusiness,
     updateBusiness,
     ctx,

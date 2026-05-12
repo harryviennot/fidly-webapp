@@ -43,7 +43,7 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     id: 'business',
     subSteps: [
       { id: 'identity', required: true, Component: IdentityStep },
-      { id: 'profile', required: false, Component: ProfileStep },
+      { id: 'profile', required: true, Component: ProfileStep },
     ],
   },
   {

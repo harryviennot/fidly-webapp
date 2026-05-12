@@ -43,7 +43,23 @@ export function WizardShell({ slug }: WizardShellProps) {
   const [canSkip, setCanSkip] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [nextLabel, setNextLabel] = useState<string | null>(null);
-  const [canProceed, setCanProceed] = useState(true);
+  // canProceed is slug-keyed so the parent's slug-effect reset can't race
+  // with the child's mount-time setCanProceed call. Effect order would
+  // otherwise be: child sets `false`, then parent's [slug] effect runs and
+  // overwrites it with `true`. Deriving the value from the latest write +
+  // the current slug sidesteps the race entirely.
+  const slugKey = useMemo(() => (slug ?? []).join('/'), [slug]);
+  const slugKeyRef = useRef(slugKey);
+  slugKeyRef.current = slugKey;
+  const [canProceedState, setCanProceedState] = useState<{
+    slug: string;
+    value: boolean;
+  } | null>(null);
+  const canProceed =
+    canProceedState && canProceedState.slug === slugKey ? canProceedState.value : true;
+  const setCanProceed = useCallback((value: boolean) => {
+    setCanProceedState({ slug: slugKeyRef.current, value });
+  }, []);
 
   const resolved = useMemo(() => resolveSlug(slug), [slug]);
 
@@ -60,16 +76,16 @@ export function WizardShell({ slug }: WizardShellProps) {
       advance: () => void handlersRef.current.next(),
       skip: () => void handlersRef.current.skip(),
     }),
-    []
+    [setCanProceed]
   );
 
   // Reset per-step overrides when the URL changes — each step starts fresh
-  // and re-registers what it needs. canProceed resets to `true` so steps
-  // without validation don't accidentally inherit a disabled CTA.
+  // and re-registers what it needs. canProceed isn't reset here because
+  // it's slug-keyed (defaults to `true` for any slug a child hasn't
+  // written for yet).
   useEffect(() => {
     setCanSkip(false);
     setNextLabel(null);
-    setCanProceed(true);
     submitHandlerRef.current = null;
   }, [slug]);
 

@@ -620,11 +620,11 @@ html {
  * t('title')) and oversized inline glyphs like the chip emoji in
  * `OptionCard`. */
 @utility wiz-h {
-  font-size: 22px;
+  font-size: 26px;
   line-height: 1.2;
 
   @media (min-width: 768px) {
-    font-size: 26px;
+    font-size: 28px;
   }
 }
 
