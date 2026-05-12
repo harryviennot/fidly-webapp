@@ -1,13 +1,13 @@
 import type { ChapterDef, ResolvedStep, SubStepDef } from './types';
 import { WelcomeStep } from './chapters/welcome/WelcomeStep';
 import { IdentityStep } from './chapters/business/IdentityStep';
-import { BackfieldsStep } from './chapters/business/BackfieldsStep';
 import { TypeStep } from './chapters/business/TypeStep';
 import { SizeStep } from './chapters/business/SizeStep';
 import { LocationsStep } from './chapters/business/LocationsStep';
 import { ObjectivesStep } from './chapters/business/ObjectivesStep';
 import { ProgramStep } from './chapters/program/ProgramStep';
 import { DataCollectionStep } from './chapters/data-collection/DataCollectionStep';
+import { BackfieldsStep } from './chapters/backfields/BackfieldsStep';
 import { BrandingStep } from './chapters/design/BrandingStep';
 import { StampsStep } from './chapters/design/StampsStep';
 import { ContentStep } from './chapters/design/ContentStep';
@@ -52,7 +52,6 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     id: 'business',
     subSteps: [
       { id: 'identity', required: true, Component: IdentityStep },
-      { id: 'backfields', required: false, Component: BackfieldsStep },
       { id: 'type', required: false, Component: TypeStep },
       { id: 'size', required: false, Component: SizeStep },
       { id: 'locations', required: false, Component: LocationsStep },
@@ -66,6 +65,10 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
   {
     id: 'data-collection',
     subSteps: [{ id: 'data-collection', required: false, Component: DataCollectionStep }],
+  },
+  {
+    id: 'backfields',
+    subSteps: [{ id: 'backfields', required: false, Component: BackfieldsStep }],
   },
   {
     id: 'design',

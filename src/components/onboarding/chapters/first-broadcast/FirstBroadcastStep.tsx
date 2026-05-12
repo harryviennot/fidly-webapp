@@ -1,13 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CheckCircle, MegaphoneIcon, Users } from '@phosphor-icons/react';
+import { CheckCircle, MegaphoneIcon, Spinner, Users } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
-import { createBroadcast, estimateRecipients } from '@/api/notifications';
+import { createBroadcast, estimateRecipients, getBroadcast } from '@/api/notifications';
+import type { Broadcast } from '@/types/notification';
 import { useWizardStep } from '../../wizard-context';
+
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 60_000;
 
 /**
  * Chapter 9 — optional. Minimal inline broadcast composer:
@@ -38,6 +42,9 @@ export function FirstBroadcastStep() {
   const [sent, setSent] = useState(
     () => currentBusiness?.settings?.first_broadcast_sent === true
   );
+  const [broadcastId, setBroadcastId] = useState<string | null>(null);
+  const [delivery, setDelivery] = useState<Broadcast | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const effectiveTitle = title.trim() || businessName;
   const bodyValid = body.trim().length > 0;
@@ -62,12 +69,14 @@ export function FirstBroadcastStep() {
     if (!businessId || !bodyValid || sending) return;
     setSending(true);
     try {
-      await createBroadcast(businessId, {
+      const created = await createBroadcast(businessId, {
         title: effectiveTitle,
         body: body.trim(),
         target_filter: { all: true },
         immediate: true,
       });
+      setBroadcastId(created.id);
+      setDelivery(created);
       if (currentBusiness) {
         await updateBusinessSettings({
           settings: {
@@ -83,6 +92,41 @@ export function FirstBroadcastStep() {
       setSending(false);
     }
   }, [businessId, bodyValid, sending, effectiveTitle, body, currentBusiness, updateBusinessSettings, tErr]);
+
+  // Once sent, poll the broadcast every 2s until status="sent" or we hit
+  // the timeout. The worker pipeline goes scheduled → sending → sent and
+  // populates `apple_delivered` / `skipped_no_push` along the way.
+  useEffect(() => {
+    if (!businessId || !broadcastId) return;
+    if (delivery?.status === 'sent' || delivery?.status === 'failed') return;
+    const deadline = Date.now() + POLL_TIMEOUT_MS;
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled) return;
+      try {
+        const latest = await getBroadcast(businessId, broadcastId);
+        if (cancelled) return;
+        setDelivery(latest);
+        if (latest.status === 'sent' || latest.status === 'failed') {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+        }
+      } catch {
+        // ignore; retry next tick
+      }
+      if (Date.now() > deadline && pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+    };
+    pollTimerRef.current = setInterval(tick, POLL_INTERVAL_MS);
+    void tick();
+    return () => {
+      cancelled = true;
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    };
+  }, [businessId, broadcastId, delivery?.status]);
 
   const buttonLabel = useMemo(() => {
     if (sent) return t('sentLabel');
@@ -166,10 +210,62 @@ export function FirstBroadcastStep() {
           {buttonLabel}
         </button>
 
-        {sent && (
-          <p className="text-[12px] text-[#7A7A7A] text-center leading-relaxed">{t('sentHint')}</p>
-        )}
+        {sent && delivery && <DeliveryStatus delivery={delivery} t={t} />}
       </div>
+    </div>
+  );
+}
+
+interface DeliveryStatusProps {
+  delivery: Broadcast;
+  t: ReturnType<typeof useTranslations>;
+}
+
+/**
+ * Live delivery confirmation. Polls the broadcast status until `sent` so the
+ * owner sees the actual `apple_delivered` / `skipped_no_push` counters —
+ * concrete confirmation that the backend dispatched the push (vs. relying
+ * on iOS to surface a banner, which can be coalesced).
+ */
+function DeliveryStatus({ delivery, t }: DeliveryStatusProps) {
+  const inFlight =
+    delivery.status === 'draft' ||
+    delivery.status === 'scheduled' ||
+    delivery.status === 'sending';
+  const failed = delivery.status === 'failed' || delivery.status === 'cancelled';
+  const delivered = delivery.apple_delivered + delivery.google_delivered;
+
+  if (inFlight) {
+    return (
+      <div className="rounded-[10px] border border-[var(--accent-200)] bg-[var(--accent-light)]/40 px-3 py-2.5 flex items-center gap-2">
+        <Spinner className="w-4 h-4 text-[var(--accent)] animate-spin flex-shrink-0" weight="bold" />
+        <p className="text-[12.5px] text-[var(--foreground)]">{t('sendingProgress')}</p>
+      </div>
+    );
+  }
+
+  if (failed) {
+    return (
+      <div className="rounded-[10px] border border-red-200 bg-red-50 px-3 py-2.5">
+        <p className="text-[12.5px] text-red-800">{t('sendFailed')}</p>
+      </div>
+    );
+  }
+
+  // status === 'sent'
+  return (
+    <div className="rounded-[10px] border border-green-200 bg-green-50 px-3 py-3 flex flex-col gap-1.5">
+      <p className="text-[13px] font-semibold text-green-900 flex items-center gap-1.5">
+        <CheckCircle className="w-4 h-4" weight="fill" />
+        {t('deliveredTitle', { count: delivered })}
+      </p>
+      <p className="text-[11.5px] text-green-800 leading-relaxed">
+        {t('deliveredHint', {
+          delivered,
+          skipped: delivery.skipped_no_push,
+          total: delivery.total_recipients,
+        })}
+      </p>
     </div>
   );
 }

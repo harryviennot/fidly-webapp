@@ -43,10 +43,6 @@
               "logoHelp": "Square works best."
             }
           },
-          "backfields": {
-            "title": "What's on the back of your cards?",
-            "subtitle": "Phone, address, website, opening hours — set them once here, they show on every card. You can hide some per design later."
-          },
           "type": {
             "title": "What kind of business?",
             "subtitle": "Pick the closest match — we'll tune templates and copy to fit.",
@@ -112,6 +108,10 @@
       "data-collection": {
         "title": "What to collect from customers",
         "subtitle": "Pick the fields you want on the signup form."
+      },
+      "backfields": {
+        "title": "What's on the back of your cards?",
+        "subtitle": "Phone, address, website, opening hours — set them once here, they show on every card. You can hide some per design in the next step."
       },
       "design": {
         "title": "Brand your card",
@@ -210,7 +210,10 @@
         "sendingLabel": "Sending…",
         "sentLabel": "Broadcast sent",
         "noRecipientsLabel": "Nobody to send to yet",
-        "sentHint": "Open your phone — your broadcast should land in a few seconds."
+        "sendingProgress": "Dispatching the push — typically 10–20s.",
+        "sendFailed": "The broadcast couldn't be sent. Check your plan or try again.",
+        "deliveredTitle": "{count, plural, =0 {No pushes delivered yet} =1 {Pushed to 1 device} other {Pushed to # devices}}",
+        "deliveredHint": "{delivered} of {total} customers got the push. {skipped, plural, =0 {} =1 {1 customer skipped — they haven't installed the card.} other {# customers skipped — they haven't installed the card.}}"
       },
       "team": {
         "title": "Invite your team",

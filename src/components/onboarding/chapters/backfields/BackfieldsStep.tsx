@@ -20,7 +20,7 @@ import type { BusinessInfoEntry } from '@/types/business';
  * dashboard.
  */
 export function BackfieldsStep() {
-  const t = useTranslations('onboardingBusiness.chapters.business.steps.backfields');
+  const t = useTranslations('onboardingBusiness.chapters.backfields');
   const tErr = useTranslations('onboardingBusiness.errors');
   const { currentBusiness } = useBusiness();
   const { mutateAsync: updateBusiness } = useUpdateBusiness(currentBusiness?.id);

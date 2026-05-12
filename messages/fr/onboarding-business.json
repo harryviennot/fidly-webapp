@@ -43,10 +43,6 @@
               "logoHelp": "Format carré conseillé."
             }
           },
-          "backfields": {
-            "title": "Que mettre au dos de vos cartes ?",
-            "subtitle": "Téléphone, adresse, site web, horaires — définissez-les une fois ici, ils apparaissent sur toutes vos cartes. Vous pourrez en cacher par design plus tard."
-          },
           "type": {
             "title": "Quel type de commerce ?",
             "subtitle": "Choisissez le plus proche — on ajustera les modèles et la communication.",
@@ -112,6 +108,10 @@
       "data-collection": {
         "title": "Que collecter auprès des clients",
         "subtitle": "Choisissez les champs du formulaire d'inscription."
+      },
+      "backfields": {
+        "title": "Que mettre au dos de vos cartes ?",
+        "subtitle": "Téléphone, adresse, site web, horaires — définissez-les une fois ici, ils apparaissent sur toutes vos cartes. Vous pourrez en cacher par design à l'étape suivante."
       },
       "design": {
         "title": "Personnalisez votre carte",
@@ -210,7 +210,10 @@
         "sendingLabel": "Envoi en cours…",
         "sentLabel": "Diffusion envoyée",
         "noRecipientsLabel": "Personne à qui envoyer pour l'instant",
-        "sentHint": "Ouvrez votre téléphone — votre diffusion devrait arriver dans quelques secondes."
+        "sendingProgress": "On envoie le push — généralement 10 à 20 s.",
+        "sendFailed": "La diffusion n'a pas pu être envoyée. Vérifiez votre offre ou réessayez.",
+        "deliveredTitle": "{count, plural, =0 {Aucun push livré pour l'instant} =1 {Envoyé à 1 appareil} other {Envoyé à # appareils}}",
+        "deliveredHint": "{delivered} clients sur {total} ont reçu le push. {skipped, plural, =0 {} =1 {1 client ignoré — sa carte n'est pas installée.} other {# clients ignorés — ils n'ont pas installé leur carte.}}"
       },
       "team": {
         "title": "Invitez votre équipe",
