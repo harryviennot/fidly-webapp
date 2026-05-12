@@ -13,7 +13,7 @@ import { useWizardStep } from '../../wizard-context';
  * planned follow-up.
  */
 export function FirstBroadcastStep() {
-  const t = useTranslations('onboardingBusiness.chapters.firstBroadcast');
+  const t = useTranslations('onboardingBusiness.chapters.first-broadcast');
   const ctx = useWizardStep();
 
   useEffect(() => {

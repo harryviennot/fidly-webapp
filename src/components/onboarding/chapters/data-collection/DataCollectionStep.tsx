@@ -29,7 +29,7 @@ function normalize(value: FieldCollectionMode | boolean | undefined): FieldColle
  * required) so users who skip still have a working signup form.
  */
 export function DataCollectionStep() {
-  const t = useTranslations('onboardingBusiness.chapters.dataCollection');
+  const t = useTranslations('onboardingBusiness.chapters.data-collection');
   const tErr = useTranslations('onboardingBusiness.errors');
   const { currentBusiness } = useBusiness();
   const { mutateAsync: updateBusiness } = useUpdateBusiness(currentBusiness?.id);

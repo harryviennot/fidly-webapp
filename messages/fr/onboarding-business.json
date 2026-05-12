@@ -105,7 +105,7 @@
         "title": "Configurez votre programme",
         "subtitle": "Décidez combien de tampons sont nécessaires et ce que vos clients gagnent."
       },
-      "dataCollection": {
+      "data-collection": {
         "title": "Que collecter auprès des clients",
         "subtitle": "Choisissez les champs du formulaire d'inscription."
       },
@@ -171,16 +171,22 @@
       },
       "live-stamp": {
         "title": "Envoyez votre premier tampon",
-        "subtitle": "Le moment magique — tamponnez votre propre carte et regardez la notification arriver.",
+        "subtitle": "Tamponnez votre carte autant de fois que vous voulez — chaque tap déclenche une vraie notification push.",
         "prereqTitle": "Installez d'abord votre carte",
         "prereqBody": "Revenez à l'étape précédente pour ajouter la carte à votre wallet — sans ça, pas de notification possible.",
         "readyTitle": "Tamponnez-vous",
         "readyBody": "Tapez ci-dessous. Un vrai tampon part, votre téléphone vibre en quelques secondes.",
+        "keepStampingTitle": "Encore un tampon ?",
+        "keepStampingBody": "Chaque tap envoie un vrai push. Essayez-en quelques-uns — voyez le rythme des messages sur votre téléphone.",
         "sendCta": "Envoyer le tampon test",
+        "sendAnotherCta": "Envoyer un autre tampon",
         "watching": "On surveille votre tampon…",
-        "successTitle": "C'est arrivé !",
-        "successBody": "Votre téléphone affiche désormais {count} tampon(s). C'est exactement ce que verront vos clients — sans l'assistant.",
-        "fallback": "Pas de vibration ? Vérifiez votre téléphone — la livraison push peut prendre quelques secondes."
+        "cooldownCta": "Attendez {seconds}s pour la prochaine notif…",
+        "bypassCooldown": "Tamponner quand même (sans notif garantie)",
+        "coalesceHint": "Apple Wallet regroupe les mises à jour rapides — laissez ~20s entre les tampons pour que chacun vibre votre écran.",
+        "stampsLabel": "Tampons sur votre carte",
+        "justStamped": "Tampon ajouté !",
+        "fallback": "Pas de vibration ? Le push peut prendre quelques secondes. Réessayez dans un instant."
       },
       "first-broadcast": {
         "title": "Envoyez votre première diffusion",

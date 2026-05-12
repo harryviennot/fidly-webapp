@@ -105,7 +105,7 @@
         "title": "Set up your loyalty program",
         "subtitle": "Decide how many stamps it takes and what customers earn."
       },
-      "dataCollection": {
+      "data-collection": {
         "title": "What to collect from customers",
         "subtitle": "Pick the fields you want on the signup form."
       },
@@ -171,16 +171,22 @@
       },
       "live-stamp": {
         "title": "Send your first stamp",
-        "subtitle": "Now the wow moment — stamp your own card and watch the notification arrive.",
+        "subtitle": "Stamp your own card as many times as you like — every tap fires a real push notification.",
         "prereqTitle": "Install your card first",
         "prereqBody": "Go back to the previous step and add the card to your wallet so you can receive the test stamp.",
         "readyTitle": "Stamp yourself",
         "readyBody": "Tap below. We'll fire a real stamp; your phone should buzz within a few seconds.",
+        "keepStampingTitle": "Stamp again",
+        "keepStampingBody": "Each tap fires another real push. Try a few — see how the messages flow on your phone.",
         "sendCta": "Send the test stamp",
+        "sendAnotherCta": "Send another stamp",
         "watching": "Watching for the stamp…",
-        "successTitle": "It arrived!",
-        "successBody": "Your phone now shows {count} stamp(s). That's exactly what your customers will see — minus the wizard.",
-        "fallback": "No buzz yet? Check your phone — push delivery sometimes takes a few seconds."
+        "cooldownCta": "Wait {seconds}s for the next banner…",
+        "bypassCooldown": "Stamp anyway (banner may not show)",
+        "coalesceHint": "Apple Wallet groups rapid pass updates — leave ~20s between stamps so each one buzzes your lock screen.",
+        "stampsLabel": "Stamps on your card",
+        "justStamped": "Stamp added!",
+        "fallback": "Hmm, no buzz yet — push can take a few seconds. Try again in a moment."
       },
       "first-broadcast": {
         "title": "Send your first broadcast",
