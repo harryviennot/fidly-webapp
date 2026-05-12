@@ -131,7 +131,8 @@
           },
           "back": {
             "title": "What appears on the back of THIS design",
-            "subtitle": "Hide specific business info entries for this design, or add fields that only apply to it."
+            "subtitle": "Hide specific business info entries for this design, or add fields that only apply to it.",
+            "designOnlyExplain": "Fields added below live on this design only. They won't follow you if you switch to a different card design later."
           }
         }
       },

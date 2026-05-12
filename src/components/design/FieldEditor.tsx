@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { PassField } from '@/types';
 import { CaretUp, CaretDown, Trash, Plus } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 interface FieldEditorProps {
   title: string;
@@ -160,17 +159,15 @@ export default function FieldEditor({
       )}
 
       {totalVisible < maxFields && (
-        <Button
+        <button
           type="button"
-          variant="outline"
-          size="sm"
-          className="w-full border-dashed"
           onClick={addField}
           disabled={pendingField !== null}
+          className="w-full py-3 rounded-xl border-2 border-dashed border-[#D0CDC6] bg-[#FAFAF8] text-[#777] text-sm font-medium flex items-center justify-center gap-2 transition-all hover:bg-[#F0EDE7] hover:border-[#C0BDB6] hover:text-[#555] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Plus className="w-3.5 h-3.5 mr-1.5" />
+          <Plus className="w-4 h-4" weight="bold" />
           {t('addField')}
-        </Button>
+        </button>
       )}
     </div>
   );

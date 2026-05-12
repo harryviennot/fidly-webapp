@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useRef, useState, useEffect } from 'react';
-import { Plus } from '@phosphor-icons/react';
+import { Plus, Trash } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -232,9 +232,9 @@ function InfoEntryEditor({
 
         <button
           onClick={onRemove}
-          className="w-7 h-7 rounded-lg border border-transparent bg-transparent flex items-center justify-center text-[#CCC] shrink-0 transition-all hover:text-red-500 hover:bg-red-50 hover:border-red-200"
+          className="w-7 h-7 rounded-lg border border-transparent bg-transparent flex items-center justify-center text-muted-foreground shrink-0 transition-colors hover:text-destructive hover:bg-destructive/10"
         >
-          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4l6 6M10 4l-6 6"/></svg>
+          <Trash className="w-3.5 h-3.5" />
         </button>
       </div>
 

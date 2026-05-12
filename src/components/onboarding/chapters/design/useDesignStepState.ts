@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useBusiness } from '@/contexts/business-context';
 import { rgbToHex, hexToRgb, contrastRatio } from '@/lib/color-utils';
 import { useLogoPalette } from '@/hooks/use-logo-palette';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import type { DesignFormContextValue } from '@/components/design/forms/DesignFormContext';
 import type { CardDesign, CardDesignCreate } from '@/types';
 import type { BusinessInfoEntry } from '@/types/business';
@@ -51,6 +53,12 @@ export interface DesignStepState {
  */
 export function useDesignStepState(existingDesign: CardDesign | undefined): DesignStepState {
   const { currentBusiness } = useBusiness();
+  const t = useTranslations('designEditor.editor');
+  // Read the cached program to prefill the first secondary field with the
+  // reward name. By the time the user is on the design chapter they've
+  // already gone through the Program step, so `useDefaultProgram` resolves
+  // synchronously from the React Query cache.
+  const { data: program } = useDefaultProgram(currentBusiness?.id);
 
   const [formData, setFormData] = useState<CardDesignCreate>(() => {
     if (existingDesign) return { ...existingDesign };
@@ -59,6 +67,13 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
       organization_name: currentBusiness?.name ?? '',
       description: currentBusiness?.name ?? '',
       logo_url: currentBusiness?.logo_url ?? undefined,
+      secondary_fields: [
+        {
+          key: 'reward',
+          label: t('defaultRewardLabel'),
+          value: program?.reward_name ?? '',
+        },
+      ],
     };
   });
   const [customColors, setCustomColors] = useState<string[]>([]);

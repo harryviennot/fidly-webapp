@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { LabelWithTooltip } from '@/components/design/FieldTooltip';
 import { ColorPicker } from '@/components/design/ColorPicker';
 import {
@@ -108,16 +109,14 @@ export function StampsForm() {
         extraPresetsLabel={logoPresetsLabel}
       />
 
-      <ColorPicker
-        label={t('stampBorderColor')}
-        tooltip={t('stampBorderTooltip')}
-        colors={emptyStampColors}
-        value={borderColorHex}
-        onChange={(hex) => updateColorField('stamp_border_color', hex)}
+      <StampBorderField
+        borderColorHex={borderColorHex}
+        emptyStampHex={emptyStampHex}
         customColors={customColors}
+        logoPresets={logoPresets}
+        logoPresetsLabel={logoPresetsLabel}
+        onChange={(hex) => updateColorField('stamp_border_color', hex)}
         onCustomColor={addCustomColor}
-        extraPresets={logoPresets}
-        extraPresetsLabel={logoPresetsLabel}
       />
 
       <div className="flex flex-col gap-3">
@@ -150,6 +149,77 @@ export function StampsForm() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+interface StampBorderFieldProps {
+  borderColorHex: string;
+  emptyStampHex: string;
+  customColors: string[];
+  logoPresets: { name: string; value: string }[];
+  logoPresetsLabel: string | undefined;
+  onChange: (hex: string) => void;
+  onCustomColor: (hex: string) => void;
+}
+
+/**
+ * Stamp-border control with a "Show stamp border" switch. Frontend-only —
+ * the design row stores a border color always; the UI presents a "no
+ * border" state by setting the border color equal to the empty-stamp
+ * color so the stroke is visually invisible against the stamp fill.
+ *
+ * Behaviour:
+ *  - The switch is OFF when `borderColorHex === emptyStampHex` (auto-detected).
+ *  - Flipping OFF → ON: set border to white. If empty is already white (which
+ *    would immediately flip the switch back OFF), fall back to black.
+ *  - Flipping ON → OFF: set border to the current empty-stamp color.
+ *  - The color picker is hidden when the border is OFF.
+ */
+function StampBorderField({
+  borderColorHex,
+  emptyStampHex,
+  customColors,
+  logoPresets,
+  logoPresetsLabel,
+  onChange,
+  onCustomColor,
+}: StampBorderFieldProps) {
+  const t = useTranslations('designEditor.editor');
+  // Derived state — borderEnabled is purely a function of the two hex values
+  // so the switch position always agrees with what the user sees on the card.
+  const enabled = borderColorHex.toLowerCase() !== emptyStampHex.toLowerCase();
+
+  const toggle = (next: boolean) => {
+    if (!next) {
+      onChange(emptyStampHex);
+      return;
+    }
+    const isEmptyWhite = emptyStampHex.toLowerCase() === '#ffffff';
+    onChange(isEmptyWhite ? '#000000' : '#FFFFFF');
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <LabelWithTooltip tooltip={t('stampBorderTooltip')}>
+          {t('stampBorderEnabled')}
+        </LabelWithTooltip>
+        <Switch checked={enabled} onCheckedChange={toggle} />
+      </div>
+      {enabled && (
+        <ColorPicker
+          label={t('stampBorderColor')}
+          tooltip={t('stampBorderTooltip')}
+          colors={emptyStampColors}
+          value={borderColorHex}
+          onChange={onChange}
+          customColors={customColors}
+          onCustomColor={onCustomColor}
+          extraPresets={logoPresets}
+          extraPresetsLabel={logoPresetsLabel}
+        />
+      )}
     </div>
   );
 }

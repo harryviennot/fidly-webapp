@@ -52,7 +52,8 @@
       "uploading": "Uploading..."
     },
     "preview": {
-      "preview": "Preview"
+      "preview": "Preview",
+      "close": "Close"
     },
     "autoGenerate": {
       "idle": {
@@ -131,6 +132,7 @@
       "emptyStampTooltip": "Color for empty stamp circles (unfilled stamps)",
       "stampBorderColor": "Stamp Border Color",
       "stampBorderTooltip": "Border color for empty stamp circles",
+      "stampBorderEnabled": "Show stamp border",
       "stripBackground": "Strip Background",
       "stripBackgroundTooltip": "Optional pattern or texture displayed behind the stamps",
       "stripHint": "Pattern behind stamps. 1125x432px recommended",

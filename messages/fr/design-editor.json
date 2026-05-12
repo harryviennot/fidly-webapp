@@ -52,7 +52,8 @@
       "uploading": "Téléchargement..."
     },
     "preview": {
-      "preview": "Aperçu"
+      "preview": "Aperçu",
+      "close": "Fermer"
     },
     "autoGenerate": {
       "idle": {
@@ -131,6 +132,7 @@
       "emptyStampTooltip": "Couleur des cercles de tampons vides (non remplis)",
       "stampBorderColor": "Couleur de la bordure",
       "stampBorderTooltip": "Couleur de la bordure des cercles de tampons vides",
+      "stampBorderEnabled": "Afficher la bordure",
       "stripBackground": "Arrière-plan de la bande",
       "stripBackgroundTooltip": "Motif ou texture optionnel affiché derrière les tampons",
       "stripHint": "Motif derrière les tampons. 1125x432px recommandé",

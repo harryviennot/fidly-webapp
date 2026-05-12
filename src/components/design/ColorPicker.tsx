@@ -43,13 +43,6 @@ declare global {
   }
 }
 
-/**
- * Detects the EyeDropper API only in browsers that ship it (Chromium-based
- * as of 2026). Returns `false` during SSR and on Safari/Firefox so the
- * picker button is hidden rather than failing on click. Capability detection
- * has to happen post-hydration to avoid an SSR mismatch — the
- * `set-state-in-effect` rule is intentionally too strict for this idiom.
- */
 function useEyeDropperSupport(): boolean {
   const [supported, setSupported] = useState(false);
   useEffect(() => {
@@ -93,15 +86,15 @@ function Swatch({
 /**
  * Color picker for the design editor.
  *
- * Layout:
- *  1. Label row (with optional tooltip + annotation pill)
- *  2. "From your logo" preset row (only when `extraPresets` is non-empty)
- *  3. Standard preset palette + user-added custom colors + `+` (custom
- *     picker) + eyedropper (only when the browser exposes `window.EyeDropper`)
+ * Vertical reading order:
+ *   1. Label row
+ *   2. "From your logo" preset row (when populated)
+ *   3. Standard palette swatches + user-added custom colors
+ *   4. Action row: current color preview + hex input + "+" (custom picker)
+ *      + eyedropper (only on Chromium-class browsers).
  *
- * The standalone hex input row that used to live below the swatches is gone
- * — the custom-color popover has its own hex input, so there's no value in
- * a second one.
+ * The action row at the bottom is intentionally a single horizontal control
+ * cluster so the "where's the eyedropper?" question has a single answer.
  */
 export function ColorPicker({
   label,
@@ -115,10 +108,7 @@ export function ColorPicker({
   extraPresets,
   extraPresetsLabel,
 }: ColorPickerProps) {
-  // Popover-local pending color so dragging the picker doesn't spam
-  // `onCustomColor` until the user commits (closes the popover). Sync is
-  // done in `onOpenChange` rather than in an effect so we don't trip
-  // the `react-hooks/set-state-in-effect` rule.
+  const [customInput, setCustomInput] = useState('');
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [pendingPick, setPendingPick] = useState(value);
   const eyeDropperSupported = useEyeDropperSupport();
@@ -134,7 +124,13 @@ export function ColorPicker({
     }
   };
 
-  // Deduplicate custom colors against standard + extra presets.
+  const commitCustomColor = (hex: string) => {
+    onChange(hex);
+    onCustomColor?.(hex);
+  };
+
+  const displayHex = customInput || value.replace('#', '');
+
   const presetValues = new Set(
     [...colors, ...(extraPresets ?? [])].map((c) => c.value.toLowerCase())
   );
@@ -162,7 +158,10 @@ export function ColorPicker({
                 key={`extra-${color.value}`}
                 hex={color.value}
                 isSelected={value.toLowerCase() === color.value.toLowerCase()}
-                onClick={() => onChange(color.value)}
+                onClick={() => {
+                  onChange(color.value);
+                  setCustomInput('');
+                }}
                 title={color.name}
               />
             ))}
@@ -170,14 +169,16 @@ export function ColorPicker({
         </div>
       )}
 
-      {/* Standard preset palette + custom colors + custom-picker + eyedropper. */}
-      <div className="flex gap-2 flex-wrap items-center">
+      <div className="flex gap-2 flex-wrap">
         {colors.map((color) => (
           <Swatch
             key={color.value}
             hex={color.value}
             isSelected={value.toLowerCase() === color.value.toLowerCase()}
-            onClick={() => onChange(color.value)}
+            onClick={() => {
+              onChange(color.value);
+              setCustomInput('');
+            }}
             title={color.name}
           />
         ))}
@@ -186,10 +187,47 @@ export function ColorPicker({
             key={hex}
             hex={hex}
             isSelected={value.toLowerCase() === hex.toLowerCase()}
-            onClick={() => onChange(hex)}
+            onClick={() => {
+              onChange(hex);
+              setCustomInput('');
+            }}
             title={hex}
           />
         ))}
+      </div>
+
+      {/* Action row: live preview, hex input, custom-picker, eyedropper.
+          One row, left-to-right, so users always know where to look. */}
+      <div className="flex items-center gap-2">
+        <div
+          className="w-9 h-9 rounded-md flex-shrink-0"
+          style={{
+            backgroundColor: value,
+            border: `1px solid ${value.toLowerCase() === '#ffffff' ? '#DDD' : 'rgba(0,0,0,0.08)'}`,
+          }}
+        />
+        <div className="flex flex-1 min-w-0">
+          <span className="px-2 py-2 rounded-l-md border border-r-0 border-border bg-muted/50 text-xs text-muted-foreground select-none">
+            #
+          </span>
+          <input
+            type="text"
+            value={displayHex}
+            onChange={(e) => {
+              const v = e.target.value.replace('#', '').slice(0, 6);
+              setCustomInput(v);
+              if (isValidHex('#' + v)) onChange('#' + v);
+            }}
+            onBlur={() => {
+              if (customInput && isValidHex('#' + customInput)) {
+                commitCustomColor('#' + customInput);
+              }
+              setCustomInput('');
+            }}
+            placeholder={value.replace('#', '')}
+            className="flex-1 min-w-0 px-2.5 py-1.5 rounded-r-md border border-border bg-white text-xs text-foreground font-mono tracking-wider outline-none focus:border-[var(--accent)] transition-colors"
+          />
+        </div>
         <Popover
           open={popoverOpen}
           onOpenChange={(open) => {
@@ -205,14 +243,14 @@ export function ColorPicker({
             <button
               type="button"
               title="Custom color"
-              className="w-8 h-8 rounded-md border-2 border-dashed border-border flex items-center justify-center hover:border-muted-foreground transition-colors cursor-pointer bg-transparent flex-shrink-0"
+              className="w-9 h-9 rounded-md border border-border bg-white hover:bg-muted/50 flex items-center justify-center flex-shrink-0 transition-colors"
             >
-              <Plus className="w-3.5 h-3.5 text-muted-foreground" weight="bold" />
+              <Plus className="w-4 h-4 text-foreground" weight="bold" />
             </button>
           </PopoverTrigger>
           <PopoverContent
             className="w-[240px] p-3 flex flex-col gap-3"
-            align="start"
+            align="end"
             sideOffset={8}
           >
             <HexColorPicker
@@ -252,9 +290,9 @@ export function ColorPicker({
             type="button"
             onClick={pickFromScreen}
             title="Pick a color from anywhere on the page"
-            className="w-8 h-8 rounded-md border-2 border-dashed border-border flex items-center justify-center hover:border-muted-foreground transition-colors cursor-pointer bg-transparent flex-shrink-0"
+            className="w-9 h-9 rounded-md border border-border bg-white hover:bg-muted/50 flex items-center justify-center flex-shrink-0 transition-colors"
           >
-            <Eyedropper className="w-3.5 h-3.5 text-muted-foreground" weight="bold" />
+            <Eyedropper className="w-4 h-4 text-foreground" weight="bold" />
           </button>
         )}
       </div>

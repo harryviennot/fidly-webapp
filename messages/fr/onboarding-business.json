@@ -131,7 +131,8 @@
           },
           "back": {
             "title": "Ce qui apparaît au dos de CE design",
-            "subtitle": "Cachez des entrées spécifiques sur ce design, ou ajoutez des champs qui ne valent que pour lui."
+            "subtitle": "Cachez des entrées spécifiques sur ce design, ou ajoutez des champs qui ne valent que pour lui.",
+            "designOnlyExplain": "Les champs ajoutés ci-dessous sont liés à ce design uniquement. Ils ne suivront pas si vous changez de design plus tard."
           }
         }
       },

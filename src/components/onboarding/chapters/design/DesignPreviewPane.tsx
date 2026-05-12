@@ -9,6 +9,7 @@ import { useDefaultProgram } from '@/hooks/use-programs';
 import { useDesignForm } from '@/components/design/forms/DesignFormContext';
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -151,20 +152,35 @@ function MobilePreview({ showBack }: { showBack: boolean }) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent
         side="bottom"
-        className="h-[80vh] rounded-t-2xl flex flex-col gap-0"
+        showCloseButton={false}
+        className="h-[85vh] rounded-t-2xl flex flex-col gap-0 p-0"
       >
-        <SheetHeader className="px-4 pt-4 pb-2">
+        <SheetHeader className="px-4 pt-4 pb-2 flex-shrink-0">
           <SheetTitle className="wiz-h2 font-semibold">
             {t('preview')}
           </SheetTitle>
         </SheetHeader>
-        <div className="px-4 pb-3">
+        <div className="px-4 pb-3 flex-shrink-0">
           <AutoGenerateBar />
         </div>
-        <div className="flex-1 flex items-center justify-center px-6 pb-8 overflow-y-auto">
-          <div className="w-full max-w-[380px]">
+        {/* Scrollable card area: `min-h-0` lets the flex item shrink past its
+            children's intrinsic height so the close button below never gets
+            pushed off-screen and the card top isn't clipped by the auto-gen
+            bar above. */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-6">
+          <div className="w-full max-w-[340px] mx-auto py-4">
             <EditorCard {...cardProps} showBack={showBack} />
           </div>
+        </div>
+        <div className="px-4 py-3 border-t border-[var(--border-light)] flex-shrink-0 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+          <SheetClose asChild>
+            <button
+              type="button"
+              className="w-full inline-flex items-center justify-center rounded-[10px] bg-[var(--foreground)] py-3 wiz-body font-semibold text-white hover:bg-[var(--foreground)]/90 transition-colors"
+            >
+              {t('close')}
+            </button>
+          </SheetClose>
         </div>
       </SheetContent>
     </Sheet>
