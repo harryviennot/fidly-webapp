@@ -340,7 +340,7 @@ export function IdentityStep() {
       </header>
 
       <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-3">
           <Label htmlFor="biz-name" className="wiz-body-sm font-medium">
             {t('fields.name')}
           </Label>
@@ -355,19 +355,17 @@ export function IdentityStep() {
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <ImageUploader
-            label={t('fields.logo')}
-            value={logoPreviewUrl ?? undefined}
-            onUpload={handleLogoUpload}
-            onClear={logoPreviewUrl ? handleLogoClear : undefined}
-            accept="image/*"
-            hint={t('fields.logoHelp')}
-            enableCrop
-          />
-        </div>
+        <ImageUploader
+          label={t('fields.logo')}
+          value={logoPreviewUrl ?? undefined}
+          onUpload={handleLogoUpload}
+          onClear={logoPreviewUrl ? handleLogoClear : undefined}
+          accept="image/*"
+          hint={t('fields.logoHelp')}
+          enableCrop
+        />
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-3">
           <Label htmlFor="biz-website" className="wiz-body-sm font-medium">
             {t('fields.website')}
           </Label>
@@ -384,29 +382,31 @@ export function IdentityStep() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="biz-slug" className="wiz-body-sm font-medium">
-            {t('fields.slug')}
-          </Label>
-          <div className="relative">
-            <Input
-              id="biz-slug"
-              value={slug}
-              onChange={(e) => handleSlugChange(e.target.value)}
-              placeholder={t('fields.slugPlaceholder')}
-              inputMode="url"
-              autoComplete="off"
-              spellCheck={false}
-              readOnly={editingExisting}
-              disabled={editingExisting}
-              aria-invalid={slugStatus === 'taken' || slugStatus === 'invalid'}
-              className={cn(
-                'h-11 pr-10 transition-colors',
-                slugStatus === 'available' && 'border-green-500 focus-visible:border-green-500',
-                (slugStatus === 'taken' || slugStatus === 'invalid') &&
-                  'border-red-500 focus-visible:border-red-500'
-              )}
-            />
-            <SlugStatusIcon status={slugStatus} />
+          <div className="flex flex-col gap-3">
+            <Label htmlFor="biz-slug" className="wiz-body-sm font-medium">
+              {t('fields.slug')}
+            </Label>
+            <div className="relative">
+              <Input
+                id="biz-slug"
+                value={slug}
+                onChange={(e) => handleSlugChange(e.target.value)}
+                placeholder={t('fields.slugPlaceholder')}
+                inputMode="url"
+                autoComplete="off"
+                spellCheck={false}
+                readOnly={editingExisting}
+                disabled={editingExisting}
+                aria-invalid={slugStatus === 'taken' || slugStatus === 'invalid'}
+                className={cn(
+                  'h-11 pr-10 transition-colors',
+                  slugStatus === 'available' && 'border-green-500 focus-visible:border-green-500',
+                  (slugStatus === 'taken' || slugStatus === 'invalid') &&
+                    'border-red-500 focus-visible:border-red-500'
+                )}
+              />
+              <SlugStatusIcon status={slugStatus} />
+            </div>
           </div>
           <SlugStatusHint
             status={slugStatus}

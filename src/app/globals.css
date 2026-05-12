@@ -645,11 +645,11 @@ html {
  * test stamp" button, and any explanatory paragraph the user is meant
  * to read at normal size. */
 @utility wiz-body {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
 
   @media (min-width: 768px) {
-    font-size: 13px;
+    font-size: 16px;
   }
 }
 

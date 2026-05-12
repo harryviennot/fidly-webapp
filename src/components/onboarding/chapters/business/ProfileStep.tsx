@@ -117,7 +117,7 @@ export function ProfileStep() {
           ))}
         </div>
         {businessType === 'other' && (
-          <div className="flex flex-col gap-1.5 mt-1">
+          <div className="flex flex-col gap-3 mt-1">
             <label
               htmlFor="biz-type-other"
               className="wiz-body-sm font-medium text-[var(--foreground)]"

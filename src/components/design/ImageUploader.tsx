@@ -141,7 +141,7 @@ export default function ImageUploader({
   return (
     <div>
       {label && (
-        <label className="text-sm font-medium text-[var(--foreground)] mb-2 block">
+        <label className="wiz-body-sm font-medium text-[var(--foreground)] mb-3 block">
           {label}
         </label>
       )}

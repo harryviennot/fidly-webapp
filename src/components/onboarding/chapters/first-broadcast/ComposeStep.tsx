@@ -154,35 +154,39 @@ export function ComposeStep() {
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="bc-title" className="wiz-helper font-medium text-[#555]">
-              {t('titleLabel')}
-            </label>
-            <input
-              id="bc-title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={businessName || t('titlePlaceholder')}
-              disabled={sent}
-              className="h-11 rounded-[10px] border border-[var(--border)] bg-white px-3 wiz-body outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60"
-            />
+            <div className="flex flex-col gap-3">
+              <label htmlFor="bc-title" className="wiz-body-sm font-medium text-[var(--foreground)]">
+                {t('titleLabel')}
+              </label>
+              <input
+                id="bc-title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={businessName || t('titlePlaceholder')}
+                disabled={sent}
+                className="h-11 rounded-[10px] border border-[var(--border)] bg-white px-3 wiz-body outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60"
+              />
+            </div>
             <p className="wiz-micro text-[#999]">{t('titleHint')}</p>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="bc-body" className="wiz-helper font-medium text-[#555]">
-              {t('bodyLabel')}
-            </label>
-            <textarea
-              id="bc-body"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder={t('bodyPlaceholder')}
-              disabled={sent}
-              rows={3}
-              maxLength={200}
-              className="rounded-[10px] border border-[var(--border)] bg-white px-3 py-2.5 wiz-body leading-snug outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60 resize-none"
-            />
+            <div className="flex flex-col gap-3">
+              <label htmlFor="bc-body" className="wiz-body-sm font-medium text-[var(--foreground)]">
+                {t('bodyLabel')}
+              </label>
+              <textarea
+                id="bc-body"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder={t('bodyPlaceholder')}
+                disabled={sent}
+                rows={3}
+                maxLength={200}
+                className="rounded-[10px] border border-[var(--border)] bg-white px-3 py-2.5 wiz-body leading-snug outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60 resize-none"
+              />
+            </div>
             <p className="wiz-micro text-[#999]">{t('bodyHint', { remaining: 200 - body.length })}</p>
           </div>
         </div>
