@@ -64,8 +64,7 @@ export function BackStep() {
 
   return (
     <DesignFormProvider value={designContext}>
-      <div className="flex flex-col min-[1024px]:flex-row min-[1024px]:items-start gap-6 min-[1024px]:gap-8">
-        <DesignPreviewPane showBack />
+      <div className="flex flex-col min-[1024px]:flex-row gap-6 min-[1024px]:gap-8">
         <div className="flex-1 flex flex-col gap-6 min-w-0">
           <header className="flex flex-col gap-1">
             <h2 className="wiz-h font-semibold text-[var(--foreground)]">
@@ -75,6 +74,7 @@ export function BackStep() {
           </header>
           <BackForm />
         </div>
+        <DesignPreviewPane showBack />
       </div>
     </DesignFormProvider>
   );

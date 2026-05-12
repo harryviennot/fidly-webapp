@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { WizardProgress } from './WizardProgress';
 import { WizardFooter } from './WizardFooter';
 import { WizardStepProvider } from './wizard-context';
@@ -96,6 +97,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   const [canSkip, setCanSkip] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [nextLabel, setNextLabel] = useState<string | null>(null);
+  const [footerExtra, setFooterExtra] = useState<React.ReactNode | null>(null);
   // canProceed is slug-keyed so the parent's slug-effect reset can't race
   // with the child's mount-time setCanProceed call. Effect order would
   // otherwise be: child sets `false`, then parent's [slug] effect runs and
@@ -126,6 +128,7 @@ export function WizardShell({ slug }: WizardShellProps) {
       setIsBusy,
       setNextLabel,
       setCanProceed,
+      setFooterExtra,
       getDraft,
       setDraft,
       advance: () => void handlersRef.current.next(),
@@ -141,6 +144,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   useEffect(() => {
     setCanSkip(false);
     setNextLabel(null);
+    setFooterExtra(null);
     submitHandlerRef.current = null;
   }, [slug]);
 
@@ -301,7 +305,17 @@ export function WizardShell({ slug }: WizardShellProps) {
       />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-[640px] px-4 py-6 min-[768px]:px-6 min-[768px]:py-10">
+        {/*
+          The design chapter renders a sticky preview alongside the form, so
+          it needs more horizontal room. Other chapters keep the comfortable
+          single-column max-width so reading isn't wide-screen overwhelm.
+        */}
+        <div
+          className={cn(
+            'mx-auto w-full px-4 py-6 min-[768px]:px-6 min-[768px]:py-10',
+            chapter.id === 'design' ? 'max-w-[960px]' : 'max-w-[640px]'
+          )}
+        >
           <WizardStepProvider value={stepContext}>
             <StepComponent />
           </WizardStepProvider>
@@ -314,6 +328,7 @@ export function WizardShell({ slug }: WizardShellProps) {
         onNext={handleNext}
         onSkipAll={canSkipAll ? handleSkipAll : undefined}
         canSkip={canSkipThisStep}
+        extra={footerExtra}
         canSkipAll={canSkipAll}
         canProceed={canProceed}
         isBusy={isBusy}

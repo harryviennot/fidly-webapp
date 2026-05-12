@@ -37,6 +37,13 @@ export interface WizardStepContextValue {
    */
   setCanProceed: (canProceed: boolean) => void;
   /**
+   * Inject a node into the slot above the WizardFooter's main row — used
+   * by the design chapter to surface a "Preview card" button as an
+   * extension of the footer. Pass `null` to clear. The slot resets on
+   * step navigation so each step starts blank.
+   */
+  setFooterExtra: (node: React.ReactNode | null) => void;
+  /**
    * Read a previously-stashed value from the wizard-wide draft store. Returns
    * `undefined` when nothing has been written for `key` yet. Use a namespaced
    * key like `"identity.website"` to avoid collisions across steps.

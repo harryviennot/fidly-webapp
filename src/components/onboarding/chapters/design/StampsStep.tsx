@@ -60,8 +60,7 @@ export function StampsStep() {
 
   return (
     <DesignFormProvider value={designContext}>
-      <div className="flex flex-col min-[1024px]:flex-row min-[1024px]:items-start gap-6 min-[1024px]:gap-8">
-        <DesignPreviewPane />
+      <div className="flex flex-col min-[1024px]:flex-row gap-6 min-[1024px]:gap-8">
         <div className="flex-1 flex flex-col gap-6 min-w-0">
           <header className="flex flex-col gap-1">
             <h2 className="wiz-h font-semibold text-[var(--foreground)]">
@@ -71,6 +70,7 @@ export function StampsStep() {
           </header>
           <StampsForm />
         </div>
+        <DesignPreviewPane />
       </div>
     </DesignFormProvider>
   );

@@ -16,6 +16,12 @@ interface WizardFooterProps {
   isFirst: boolean;
   isLast: boolean;
   nextLabel?: string;
+  /**
+   * Optional content rendered as an extension row at the top of the footer.
+   * Currently used by the design chapter on mobile to surface the
+   * "Preview card" trigger as part of the sticky footer chrome.
+   */
+  extra?: React.ReactNode;
 }
 
 /**
@@ -39,11 +45,17 @@ export function WizardFooter({
   isFirst,
   isLast,
   nextLabel,
+  extra,
 }: WizardFooterProps) {
   const t = useTranslations('onboardingBusiness.footer');
 
   return (
     <footer className="sticky bottom-0 z-10 border-t border-[var(--border)] bg-[var(--background)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--background)]/80">
+      {extra && (
+        <div className="px-4 pt-3 pb-1 min-[768px]:px-6 border-b border-[var(--border-medium)]">
+          {extra}
+        </div>
+      )}
       {canSkipAll && onSkipAll ? (
         <div className="px-4 pt-2 text-center min-[768px]:text-right min-[768px]:px-6">
           <button

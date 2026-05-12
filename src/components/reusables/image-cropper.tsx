@@ -339,6 +339,11 @@ export function ImageCropper({
               ref={imgRef}
               src={imageSrc}
               alt="Crop preview"
+              // `crossOrigin` is required when the source is a remote URL
+              // (e.g. the user clicks "Adjust crop" and we re-open the
+              // cropper with the server-hosted image). Without it the
+              // canvas becomes tainted and `toBlob` throws SecurityError.
+              crossOrigin="anonymous"
               onLoad={onImageLoad}
               className="max-h-[45vh] sm:max-h-[55vh] max-w-full w-auto h-auto object-contain"
             />
