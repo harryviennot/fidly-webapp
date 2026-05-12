@@ -7,8 +7,10 @@ import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { BusinessInfoEditor } from '@/components/settings/BusinessInfoEditor';
+import { getMyProfile } from '@/api/profile';
 import { useWizardStep } from '../../wizard-context';
 import type { BusinessInfoEntry } from '@/types/business';
+import type { User } from '@/types';
 
 /**
  * Backfields chapter — optional. Sets up the business-level back-of-card
@@ -37,8 +39,24 @@ export function BackfieldsStep() {
   const { mutateAsync: updateBusiness } = useUpdateBusiness(currentBusiness?.id);
   const ctx = useWizardStep();
 
-  const ownerEmail = user?.email ?? '';
-  const ownerPhone = (user?.user_metadata?.phone as string | undefined) ?? '';
+  // Pull the DB-backed profile so we can read phone from public.users.phone
+  // (synced from auth.users.raw_user_meta_data.phone by the trigger). Falling
+  // back to user_metadata.phone covers freshly-signed-up sessions where the
+  // refetch hasn't landed yet.
+  const [profile, setProfile] = useState<User | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getMyProfile()
+      .then((data) => {
+        if (!cancelled) setProfile(data);
+      })
+      .catch(() => { /* leave null; fall back to user_metadata */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  const ownerEmail = user?.email ?? profile?.email ?? '';
+  const ownerPhone =
+    profile?.phone ?? (user?.user_metadata?.phone as string | undefined) ?? '';
   const identityWebsite =
     (currentBusiness?.settings?.identity_website as string | undefined) ?? '';
 
