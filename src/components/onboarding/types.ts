@@ -22,6 +22,17 @@ export type SubmitResult =
 
 export type SubmitHandler = () => Promise<SubmitResult>;
 
+/**
+ * Optional secondary CTA a step can pin into the wizard footer next to
+ * Continue. Styled by the footer (black bg, white text) so all steps stay
+ * visually consistent — the step only owns the content and the handler.
+ */
+export interface SecondaryAction {
+  label: string;
+  icon?: React.ReactNode;
+  onClick: () => void;
+}
+
 export interface WizardStepContextValue {
   /** Step registers a save handler; shell invokes it on "Save & continue". Pass null to clear. */
   setSubmitHandler: (fn: SubmitHandler | null) => void;
@@ -37,12 +48,12 @@ export interface WizardStepContextValue {
    */
   setCanProceed: (canProceed: boolean) => void;
   /**
-   * Inject a node into the slot above the WizardFooter's main row — used
-   * by the design chapter to surface a "Preview card" button as an
-   * extension of the footer. Pass `null` to clear. The slot resets on
+   * Register a secondary action button rendered next to Continue in the
+   * footer — same shape as Continue but black/white. Used by the design
+   * chapter's mobile preview trigger. Pass `null` to clear. Resets on
    * step navigation so each step starts blank.
    */
-  setFooterExtra: (node: React.ReactNode | null) => void;
+  setSecondaryAction: (action: SecondaryAction | null) => void;
   /**
    * Read a previously-stashed value from the wizard-wide draft store. Returns
    * `undefined` when nothing has been written for `key` yet. Use a namespaced

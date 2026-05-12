@@ -18,7 +18,7 @@ import {
   previousStepPath,
   resolveSlug,
 } from './registry';
-import type { BackgroundSave, SubmitHandler, WizardStepContextValue } from './types';
+import type { BackgroundSave, SecondaryAction, SubmitHandler, WizardStepContextValue } from './types';
 
 const DRAFT_STORAGE_KEY = 'stampeo:wizard-draft';
 
@@ -97,7 +97,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   const [canSkip, setCanSkip] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [nextLabel, setNextLabel] = useState<string | null>(null);
-  const [footerExtra, setFooterExtra] = useState<React.ReactNode | null>(null);
+  const [secondaryAction, setSecondaryAction] = useState<SecondaryAction | null>(null);
   // canProceed is slug-keyed so the parent's slug-effect reset can't race
   // with the child's mount-time setCanProceed call. Effect order would
   // otherwise be: child sets `false`, then parent's [slug] effect runs and
@@ -128,7 +128,7 @@ export function WizardShell({ slug }: WizardShellProps) {
       setIsBusy,
       setNextLabel,
       setCanProceed,
-      setFooterExtra,
+      setSecondaryAction,
       getDraft,
       setDraft,
       advance: () => void handlersRef.current.next(),
@@ -144,7 +144,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   useEffect(() => {
     setCanSkip(false);
     setNextLabel(null);
-    setFooterExtra(null);
+    setSecondaryAction(null);
     submitHandlerRef.current = null;
   }, [slug]);
 
@@ -328,7 +328,7 @@ export function WizardShell({ slug }: WizardShellProps) {
         onNext={handleNext}
         onSkipAll={canSkipAll ? handleSkipAll : undefined}
         canSkip={canSkipThisStep}
-        extra={footerExtra}
+        secondaryAction={secondaryAction}
         canSkipAll={canSkipAll}
         canProceed={canProceed}
         isBusy={isBusy}

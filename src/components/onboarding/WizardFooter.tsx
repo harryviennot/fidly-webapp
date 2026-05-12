@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { CaretLeftIcon } from '@phosphor-icons/react';
+import type { SecondaryAction } from './types';
 
 interface WizardFooterProps {
   onBack?: () => void;
@@ -17,11 +18,11 @@ interface WizardFooterProps {
   isLast: boolean;
   nextLabel?: string;
   /**
-   * Optional content rendered as an extension row at the top of the footer.
-   * Currently used by the design chapter on mobile to surface the
-   * "Preview card" trigger as part of the sticky footer chrome.
+   * Optional secondary CTA rendered next to Continue. Same dimensions as
+   * Continue but styled black/white. The design chapter uses this on mobile
+   * for the "Preview card" trigger.
    */
-  extra?: React.ReactNode;
+  secondaryAction?: SecondaryAction | null;
 }
 
 /**
@@ -45,17 +46,12 @@ export function WizardFooter({
   isFirst,
   isLast,
   nextLabel,
-  extra,
+  secondaryAction,
 }: WizardFooterProps) {
   const t = useTranslations('onboardingBusiness.footer');
 
   return (
     <footer className="sticky bottom-0 z-10 border-t border-[var(--border)] bg-[var(--background)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--background)]/80">
-      {extra && (
-        <div className="px-4 pt-3 pb-1 min-[768px]:px-6 border-b border-[var(--border-medium)]">
-          {extra}
-        </div>
-      )}
       {canSkipAll && onSkipAll ? (
         <div className="px-4 pt-2 text-center min-[768px]:text-right min-[768px]:px-6">
           <button
@@ -91,7 +87,22 @@ export function WizardFooter({
           </button>
         ) : null}
 
-        <div className="flex-1" />
+        {/* Spacer pushes Continue to the right on desktop. On mobile it
+            collapses so the primary CTA (and optional secondary action) can
+            fill the row via `flex-1`. */}
+        <div className="hidden min-[768px]:block min-[768px]:flex-1" />
+
+        {secondaryAction && (
+          <button
+            type="button"
+            onClick={secondaryAction.onClick}
+            disabled={isBusy}
+            className="flex-1 min-[768px]:flex-initial inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--foreground)] px-5 py-3 wiz-body font-semibold text-white shadow-sm transition-all duration-150 hover:bg-[var(--foreground)]/90 disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
+          >
+            {secondaryAction.icon}
+            {secondaryAction.label}
+          </button>
+        )}
 
         <button
           type="button"

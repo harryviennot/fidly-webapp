@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import { CreditCardIcon } from '@phosphor-icons/react';
 import { EditorCard } from '@/components/card/EditorCard';
@@ -84,14 +84,44 @@ function useCardProps() {
 
 function DesktopPreview({ showBack }: { showBack: boolean }) {
   const cardProps = useCardProps();
+  const asideRef = useRef<HTMLDivElement>(null);
+  // Horizontal centerline of the aside column in viewport coordinates.
+  // The inner card uses `position: fixed` (truly anchored to the viewport,
+  // not just sticky within the aside), so we measure where the reserved
+  // column lives and pin the card there. `null` while pre-measure → card
+  // is hidden via opacity to avoid a paint at the wrong spot.
+  const [centerX, setCenterX] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const aside = asideRef.current;
+    if (!aside) return;
+    const update = () => {
+      const rect = aside.getBoundingClientRect();
+      setCenterX(rect.left + rect.width / 2);
+    };
+    update();
+    // `document.body` resize covers viewport width changes + layout shifts
+    // (sidebar collapse, font load, etc.) without needing scroll listeners —
+    // `fixed` positioning ignores scroll, so left/x only moves on layout
+    // changes, never on scroll.
+    const ro = new ResizeObserver(update);
+    ro.observe(document.body);
+    window.addEventListener('resize', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
   return (
-    // Outer aside reserves the column width in the flex layout and stretches
-    // to the form column's height (requires the parent to drop `items-start`
-    // so flex defaults to stretch). The inner div is sticky-centered at
-    // viewport mid-height, so the card stays in view no matter how deep the
-    // user is in the form.
-    <aside className="w-[320px] flex-shrink-0 self-stretch">
-      <div className="sticky top-1/2 -translate-y-1/2 flex justify-center">
+    <aside ref={asideRef} className="w-[320px] flex-shrink-0">
+      <div
+        className="fixed top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity"
+        style={{
+          left: centerX ?? 0,
+          opacity: centerX === null ? 0 : 1,
+        }}
+      >
         <EditorCard {...cardProps} showBack={showBack} />
       </div>
     </aside>
@@ -104,22 +134,16 @@ function MobilePreview({ showBack }: { showBack: boolean }) {
   const cardProps = useCardProps();
   const [open, setOpen] = useState(false);
 
-  // The trigger is mounted as an *extension row* of the wizard footer so
-  // it sits naturally above the Back / Continue row — no fragile sticky
-  // positioning. The Sheet itself stays portalled to <body> by Radix so
-  // it covers the whole viewport.
+  // Register the trigger as the wizard footer's secondary action so it sits
+  // beside Continue with consistent styling. The shell clears the action on
+  // step change, but we also return a cleanup for unmount safety.
   useEffect(() => {
-    ctx.setFooterExtra(
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="w-full inline-flex items-center justify-center gap-2 py-2 wiz-body-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-      >
-        <CreditCardIcon className="w-4 h-4" weight="bold" />
-        {t('preview')}
-      </button>
-    );
-    return () => ctx.setFooterExtra(null);
+    ctx.setSecondaryAction({
+      label: t('preview'),
+      icon: <CreditCardIcon className="w-4 h-4" weight="bold" />,
+      onClick: () => setOpen(true),
+    });
+    return () => ctx.setSecondaryAction(null);
   }, [ctx, t]);
 
   return (
