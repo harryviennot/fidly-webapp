@@ -54,6 +54,26 @@
     "preview": {
       "preview": "Aperçu"
     },
+    "autoGenerate": {
+      "idle": {
+        "label": "Générer depuis le logo",
+        "loading": "Lecture du logo…",
+        "noLogo": "Ajoutez un logo pour générer"
+      },
+      "active": {
+        "counter": "Style {current} sur {total} — {name}",
+        "next": "Essayer un autre",
+        "cancel": "Annuler"
+      },
+      "variants": {
+        "light": "Clair",
+        "dark": "Sombre",
+        "bold": "Vif",
+        "mono": "Mono",
+        "soft": "Doux"
+      },
+      "fromLogo": "Depuis votre logo"
+    },
     "cardBack": {
       "noBackFields": "Aucun champ au dos configuré",
       "addFieldsHint": "Ajoutez des conditions, infos de contact ou d'autres détails",

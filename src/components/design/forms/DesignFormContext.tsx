@@ -3,6 +3,8 @@
 import { createContext, useContext } from 'react';
 import type { CardDesignCreate } from '@/types';
 import type { BusinessInfoEntry } from '@/types/business';
+import type { LogoPalette } from '@/lib/logo-palette';
+import type { ThemeVariant } from '@/lib/theme-variants';
 
 /**
  * Shared context for the four design sub-forms (Branding, Stamps, Content, Back).
@@ -54,6 +56,18 @@ export interface DesignFormContextValue {
 
   // ── Business info (BackForm) ─────────────────────────────────────────
   toggleBusinessInfoKey: (key: string) => void;
+
+  // ── Auto-generate from logo (Branding) ───────────────────────────────
+  /**
+   * Colors extracted from the current logo, used to power the "From your
+   * logo" preset row in ColorPicker and the auto-generate variants. `null`
+   * while extraction is in flight, or if it failed / there's no logo yet.
+   */
+  extractedPalette: LogoPalette | null;
+  /** True while a logo palette is being extracted. */
+  isPaletteLoading: boolean;
+  /** Apply a generated theme to all color fields in a single state commit. */
+  applyThemeVariant: (variant: ThemeVariant) => void;
 }
 
 const DesignFormContext = createContext<DesignFormContextValue | null>(null);

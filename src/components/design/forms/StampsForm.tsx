@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { CaretDown } from '@phosphor-icons/react';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ import {
 } from '@/components/design/StampIconPicker';
 import ImageUploader from '@/components/design/ImageUploader';
 import { accentColors, iconColors, emptyStampColors } from '@/lib/color-utils';
+import { paletteToSwatches } from '@/lib/logo-palette';
 import { useDesignForm } from './DesignFormContext';
 
 /**
@@ -21,6 +23,7 @@ import { useDesignForm } from './DesignFormContext';
  */
 export function StampsForm() {
   const t = useTranslations('designEditor.editor');
+  const tAuto = useTranslations('designEditor.autoGenerate');
   const {
     formData,
     accentHex,
@@ -36,7 +39,16 @@ export function StampsForm() {
     setIconColorOverridden,
     handleStripBackgroundUpload,
     handleStripBackgroundClear,
+    extractedPalette,
   } = useDesignForm();
+
+  const logoPresets = useMemo(() => {
+    return paletteToSwatches(extractedPalette).map((hex, i) => ({
+      name: `${tAuto('fromLogo')} ${i + 1}`,
+      value: hex,
+    }));
+  }, [extractedPalette, tAuto]);
+  const logoPresetsLabel = logoPresets.length > 0 ? tAuto('fromLogo') : undefined;
 
   return (
     <div className="space-y-4">
@@ -66,6 +78,8 @@ export function StampsForm() {
         onChange={(hex) => updateColorField('stamp_filled_color', hex)}
         customColors={customColors}
         onCustomColor={addCustomColor}
+        extraPresets={logoPresets}
+        extraPresetsLabel={logoPresetsLabel}
       />
 
       <ColorPicker

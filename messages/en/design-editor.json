@@ -54,6 +54,26 @@
     "preview": {
       "preview": "Preview"
     },
+    "autoGenerate": {
+      "idle": {
+        "label": "Auto-generate from logo",
+        "loading": "Reading your logo…",
+        "noLogo": "Upload a logo to auto-generate"
+      },
+      "active": {
+        "counter": "Style {current} of {total} — {name}",
+        "next": "Try another",
+        "cancel": "Cancel"
+      },
+      "variants": {
+        "light": "Light",
+        "dark": "Dark",
+        "bold": "Bold",
+        "mono": "Mono",
+        "soft": "Soft"
+      },
+      "fromLogo": "From your logo"
+    },
     "cardBack": {
       "noBackFields": "No back fields configured",
       "addFieldsHint": "Add terms, contact info, or other details",

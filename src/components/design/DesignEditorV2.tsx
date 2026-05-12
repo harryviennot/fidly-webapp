@@ -20,6 +20,8 @@ import { getEntryLabel, getEntryPreview } from '@/lib/business-info-utils';
 import type { BusinessInfoEntry } from '@/types/business';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { rgbToHex, hexToRgb, autoIconColor, contrastRatio } from '@/lib/color-utils';
+import { useLogoPalette } from '@/hooks/use-logo-palette';
+import type { ThemeVariant } from '@/lib/theme-variants';
 import { getDesignDraft, useDesignDraftPersistence } from '@/hooks/use-design-draft';
 import { DesignFormProvider, type DesignFormContextValue } from './forms/DesignFormContext';
 import { BrandingForm } from './forms/BrandingForm';
@@ -379,6 +381,21 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       updateField(key, hexToRgb(hexValue));
     };
 
+    const { palette: extractedPalette, isLoading: isPaletteLoading } = useLogoPalette(formData.logo_url);
+
+    const applyThemeVariant = (variant: ThemeVariant) => {
+      setFormData((prev) => ({
+        ...prev,
+        background_color: hexToRgb(variant.background),
+        foreground_color: hexToRgb(variant.foreground),
+        label_color: hexToRgb(variant.label),
+        stamp_filled_color: hexToRgb(variant.stampFilled),
+        stamp_empty_color: hexToRgb(variant.stampEmpty),
+        stamp_border_color: hexToRgb(variant.stampBorder),
+        icon_color: hexToRgb(variant.iconColor),
+      }));
+    };
+
     const handleActivate = async () => {
       if (!design || !currentBusiness?.id) return;
       if (!confirm(t('activateConfirm'))) return;
@@ -479,6 +496,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       handleStripBackgroundUpload,
       handleStripBackgroundClear,
       toggleBusinessInfoKey,
+      extractedPalette,
+      isPaletteLoading,
+      applyThemeVariant,
     };
 
     // ---- Preview Panel ----

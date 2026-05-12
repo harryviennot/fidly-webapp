@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useBusiness } from '@/contexts/business-context';
 import { rgbToHex, hexToRgb, contrastRatio } from '@/lib/color-utils';
+import { useLogoPalette } from '@/hooks/use-logo-palette';
 import type { DesignFormContextValue } from '@/components/design/forms/DesignFormContext';
 import type { CardDesign, CardDesignCreate } from '@/types';
 import type { BusinessInfoEntry } from '@/types/business';
+import type { ThemeVariant } from '@/lib/theme-variants';
 
 const DEFAULT_DESIGN: CardDesignCreate = {
   name: '',
@@ -72,6 +74,23 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingDesign?.id]);
 
+  const { palette: extractedPalette, isLoading: isPaletteLoading } = useLogoPalette(
+    formData.logo_url
+  );
+
+  const applyThemeVariant = (variant: ThemeVariant) => {
+    setFormData((prev) => ({
+      ...prev,
+      background_color: hexToRgb(variant.background),
+      foreground_color: hexToRgb(variant.foreground),
+      label_color: hexToRgb(variant.label),
+      stamp_filled_color: hexToRgb(variant.stampFilled),
+      stamp_empty_color: hexToRgb(variant.stampEmpty),
+      stamp_border_color: hexToRgb(variant.stampBorder),
+      icon_color: hexToRgb(variant.iconColor),
+    }));
+  };
+
   const bgHex = rgbToHex(formData.background_color || 'rgb(28, 28, 30)');
   const labelHex = rgbToHex(formData.label_color || 'rgb(255, 255, 255)');
   const textHex = rgbToHex(formData.foreground_color || 'rgb(255, 255, 255)');
@@ -131,6 +150,9 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
         return { ...prev, hidden_business_info_keys: next };
       });
     },
+    extractedPalette,
+    isPaletteLoading,
+    applyThemeVariant,
   };
 
   return {
