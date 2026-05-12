@@ -43,7 +43,7 @@ export function WizardProgress({
           {chapterTitle}
         </h1>
         {hasSubSteps && subStepTitle ? (
-          <p className="mt-1 wiz-helper text-[#7A7A7A]">
+          <p className="mt-1 wiz-helper text-[#7A7A7A] hidden min-[768px]:block">
             {`Step ${subStepIndex! + 1} of ${subStepCount} — ${subStepTitle}`}
           </p>
         ) : null}

@@ -265,13 +265,19 @@ export function ImageCropper({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
+      {/*
+       * Mobile-safe layout: a flex column capped at viewport height so the
+       * footer buttons stay visible even on small phones. The scrollable
+       * region is the image wrapper — if the crop area overflows, the
+       * dialog itself never scrolls past the Apply/Cancel row.
+       */}
+      <DialogContent className="sm:max-w-lg flex flex-col gap-3 sm:gap-4 p-4 sm:p-6 max-h-[calc(100dvh-2rem)] overflow-hidden">
+        <DialogHeader className="shrink-0">
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        <div className="flex items-center justify-center">
+        <div className="flex-1 min-h-0 overflow-y-auto flex items-center justify-center -mx-1 px-1">
           <ReactCrop
             crop={crop}
             onChange={(c) => {
@@ -334,13 +340,13 @@ export function ImageCropper({
               src={imageSrc}
               alt="Crop preview"
               onLoad={onImageLoad}
-              className="max-h-[55vh] max-w-full w-auto h-auto object-contain"
+              className="max-h-[45vh] sm:max-h-[55vh] max-w-full w-auto h-auto object-contain"
             />
           </ReactCrop>
         </div>
 
         {showAspectSlider && minAspect !== undefined && maxAspect !== undefined && (
-          <div className="space-y-2 px-1">
+          <div className="space-y-2 px-1 shrink-0">
             <div className="flex items-center justify-between">
               <Label className="text-sm text-muted-foreground">
                 Aspect Ratio
@@ -368,7 +374,7 @@ export function ImageCropper({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0 gap-2 sm:gap-0">
           <Button
             variant="outline"
             className="rounded-full"

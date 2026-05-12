@@ -28,7 +28,7 @@ export function OptionCard({ active, onClick, label, description, emoji, disable
       disabled={disabled}
       aria-pressed={active}
       className={cn(
-        'group relative flex items-start gap-3 w-full p-4 rounded-[12px] text-left transition-all duration-150 min-h-[64px]',
+        'group relative flex items-center gap-3 w-full p-4 rounded-[12px] text-left transition-all duration-150 min-h-[64px]',
         'border-[1.5px]',
         active
           ? 'border-[var(--accent)] bg-[var(--accent-light)]'
