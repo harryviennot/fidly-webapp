@@ -57,12 +57,18 @@ function useEyeDropperSupport(): boolean {
 }
 
 // Min / max bounds for the dynamic total-swatch budget. The actual cap is
-// computed from container width by `useFitCount`. The max is tuned so
-// mobile (which uses flex-wrap with 32px swatches + 8px gaps, ~7-8 per row
-// on a 360px-wide phone) tops out at two rows instead of three, and so
-// desktop columns don't feel cramped with too many tiny chips.
-const MIN_SWATCH_CAP = 10;
-const MAX_SWATCH_CAP = 14;
+// computed from container width by `useFitCount`. Min ensures the picker
+// always has at least a few colors; max prevents an absurdly wide column
+// (multi-monitor / external display) from showing 30+ tiny chips.
+const MIN_SWATCH_CAP = 8;
+const MAX_SWATCH_CAP = 22;
+// Per-item breathing room — bumped to 8px so spacing kicks in at moderate
+// widths instead of cramming. Each "slot" the fit math uses is therefore
+// SWATCH + GAP = 40px.
+const MIN_GAP = 8;
+// Mobile renders two grid rows with a separator on each, so the budget is
+// `perRowCount * MOBILE_ROW_COUNT`.
+const MOBILE_ROW_COUNT = 2;
 
 function Swatch({
   hex,
@@ -105,11 +111,11 @@ function Swatch({
  * desktop. Mobile (<640px) opts out and uses a wrapping 2-row layout.
  */
 /**
- * Returns the total swatch budget (logo + right combined) that fits in the
- * row at the current container width. Recomputes on every resize via
- * `ResizeObserver`, so a wider form column shows more swatches and a narrow
- * one doesn't overflow. Mobile caps at `MAX_SWATCH_CAP` and relies on
- * `flex-wrap` to handle overflow.
+ * Returns the total swatch budget (logo + right combined) that fits at the
+ * current container width. On desktop the row is single-line; on mobile the
+ * row splits into `MOBILE_ROW_COUNT` rows with a separator on each, so the
+ * budget multiplies. The 8px MIN_GAP makes the math feel "earlier" — the
+ * cap kicks in at moderate widths so swatches don't pack in.
  */
 function useFitCount(
   ref: React.RefObject<HTMLDivElement | null>,
@@ -122,22 +128,13 @@ function useFitCount(
     if (!el) return;
     const SWATCH = 32;
     const SEP = 3;
-    // 2px breathing room between every item — keeps swatches from kissing
-    // edge-to-edge when the row is dense enough that justify-between has
-    // no slack to distribute.
-    const MIN_GAP = 2;
     const calc = () => {
-      if (isMobile) {
-        setCount(MAX_SWATCH_CAP);
-        return;
-      }
       const width = el.offsetWidth;
-      // Per-item slot: swatch + breathing gap. Number of items fits when
-      //   total = n * SWATCH + (n - 1) * MIN_GAP + sepWidth <= width
       const sepWidth = hasSeparator ? SEP + MIN_GAP : 0;
       const available = width - sepWidth;
-      const fit = Math.floor((available + MIN_GAP) / (SWATCH + MIN_GAP));
-      setCount(Math.max(MIN_SWATCH_CAP, Math.min(MAX_SWATCH_CAP, fit)));
+      const perRow = Math.max(1, Math.floor((available + MIN_GAP) / (SWATCH + MIN_GAP)));
+      const total = perRow * (isMobile ? MOBILE_ROW_COUNT : 1);
+      setCount(Math.max(MIN_SWATCH_CAP, Math.min(MAX_SWATCH_CAP, total)));
     };
     calc();
     const ro = new ResizeObserver(calc);
@@ -268,36 +265,43 @@ export function ColorPicker({
           so slack distributes uniformly between every neighbour. The
           separator participates in that distribution, which keeps the gaps
           around it the same as the gaps between any two swatches.
-          Narrow: wrap to two rows with a consistent gap, and the separator
-          is hidden because it would break the wrap rhythm. */}
-      <div
-        ref={rowRef}
-        className={`flex items-center ${
-          isNarrow ? 'flex-wrap gap-2' : 'justify-between'
-        }`}
-      >
-        {logoVisible.map((color) => (
-          <Swatch
-            key={`logo-${color.value}`}
-            hex={color.value}
-            isSelected={value.toLowerCase() === color.value.toLowerCase()}
-            onClick={() => onChange(color.value)}
-            title={color.name}
+          Mobile: two equal-height rows; logos and right items are split
+          evenly across both rows so each row gets its own separator and
+          the layout stays symmetric. */}
+      {isNarrow ? (
+        <div ref={rowRef} className="flex flex-col gap-2">
+          <MobileRows
+            logoVisible={logoVisible}
+            rightVisible={rightVisible}
+            currentValue={value}
+            onChange={onChange}
           />
-        ))}
-        {logoVisible.length > 0 && rightVisible.length > 0 && !isNarrow && (
-          <div className="w-[3px] h-7 rounded-full bg-[var(--border-medium)]" />
-        )}
-        {rightVisible.map((item) => (
-          <Swatch
-            key={`r-${item.value}`}
-            hex={item.value}
-            isSelected={value.toLowerCase() === item.value.toLowerCase()}
-            onClick={() => onChange(item.value)}
-            title={item.name}
-          />
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div ref={rowRef} className="flex items-center justify-between">
+          {logoVisible.map((color) => (
+            <Swatch
+              key={`logo-${color.value}`}
+              hex={color.value}
+              isSelected={value.toLowerCase() === color.value.toLowerCase()}
+              onClick={() => onChange(color.value)}
+              title={color.name}
+            />
+          ))}
+          {logoVisible.length > 0 && rightVisible.length > 0 && (
+            <div className="w-[3px] h-7 rounded-full bg-[var(--border-medium)]" />
+          )}
+          {rightVisible.map((item) => (
+            <Swatch
+              key={`r-${item.value}`}
+              hex={item.value}
+              isSelected={value.toLowerCase() === item.value.toLowerCase()}
+              onClick={() => onChange(item.value)}
+              title={item.name}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Action row — current preview, hex input, custom picker, eyedropper. */}
       <div className="flex items-center gap-2">
@@ -402,6 +406,69 @@ export function ColorPicker({
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Splits logos + right swatches into exactly `MOBILE_ROW_COUNT` rows so the
+ * mobile layout stays symmetric (same number of items per row, separator on
+ * each row that has both zones). Floor-division on `rightPerRow` trims any
+ * odd item from the end — keeps the rows balanced rather than showing 10 on
+ * top and 9 on bottom.
+ */
+function MobileRows({
+  logoVisible,
+  rightVisible,
+  currentValue,
+  onChange,
+}: {
+  logoVisible: ColorPreset[];
+  rightVisible: { value: string; name: string }[];
+  currentValue: string;
+  onChange: (hex: string) => void;
+}) {
+  const logoPerRow = Math.ceil(logoVisible.length / MOBILE_ROW_COUNT);
+  const rightPerRow = Math.floor(rightVisible.length / MOBILE_ROW_COUNT);
+  const symmetricRights = rightVisible.slice(0, rightPerRow * MOBILE_ROW_COUNT);
+  return (
+    <>
+      {Array.from({ length: MOBILE_ROW_COUNT }, (_, rowIdx) => {
+        const rowLogos = logoVisible.slice(
+          rowIdx * logoPerRow,
+          (rowIdx + 1) * logoPerRow
+        );
+        const rowRights = symmetricRights.slice(
+          rowIdx * rightPerRow,
+          (rowIdx + 1) * rightPerRow
+        );
+        if (rowLogos.length === 0 && rowRights.length === 0) return null;
+        return (
+          <div key={rowIdx} className="flex items-center justify-between">
+            {rowLogos.map((color) => (
+              <Swatch
+                key={`logo-${color.value}`}
+                hex={color.value}
+                isSelected={currentValue.toLowerCase() === color.value.toLowerCase()}
+                onClick={() => onChange(color.value)}
+                title={color.name}
+              />
+            ))}
+            {rowLogos.length > 0 && rowRights.length > 0 && (
+              <div className="w-[3px] h-7 rounded-full bg-[var(--border-medium)]" />
+            )}
+            {rowRights.map((item) => (
+              <Swatch
+                key={`r-${item.value}`}
+                hex={item.value}
+                isSelected={currentValue.toLowerCase() === item.value.toLowerCase()}
+                onClick={() => onChange(item.value)}
+                title={item.name}
+              />
+            ))}
+          </div>
+        );
+      })}
+    </>
   );
 }
 

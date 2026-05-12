@@ -71,7 +71,9 @@ export async function extractLogoPalette(
       // bytes between them.
       const [vibrantResult, dominantColors] = await Promise.all([
         Vibrant.from(url).getPalette(),
-        extractDominantColors(url, 5),
+        // Cap at 4 so the ColorPicker can split logos symmetrically across
+        // the two rows on mobile (2 per row, each row with its own separator).
+        extractDominantColors(url, 4),
       ]);
       const palette: LogoPalette = {
         vibrant: vibrantResult.Vibrant?.hex ?? null,
