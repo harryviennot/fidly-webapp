@@ -14,7 +14,7 @@ const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60_000;
 
 /**
- * Chapter 9 — optional. Minimal inline broadcast composer:
+ * First-broadcast compose — optional. Minimal inline broadcast composer:
  *  - one body textarea (title defaults to the business name)
  *  - a live recipient count (everyone with an installed card)
  *  - a single "Send now" button that calls `createBroadcast` with
@@ -25,8 +25,8 @@ const POLL_TIMEOUT_MS = 60_000;
  * The wizard step exists to let owners feel what a broadcast does, not
  * to ship campaigns.
  */
-export function FirstBroadcastStep() {
-  const t = useTranslations('onboardingBusiness.chapters.first-broadcast');
+export function ComposeStep() {
+  const t = useTranslations('onboardingBusiness.chapters.first-broadcast.steps.compose');
   const tErr = useTranslations('onboardingBusiness.errors');
   const { currentBusiness } = useBusiness();
   const { mutateAsync: updateBusinessSettings } = useUpdateBusiness(currentBusiness?.id);
@@ -93,9 +93,6 @@ export function FirstBroadcastStep() {
     }
   }, [businessId, bodyValid, sending, effectiveTitle, body, currentBusiness, updateBusinessSettings, tErr]);
 
-  // Once sent, poll the broadcast every 2s until status="sent" or we hit
-  // the timeout. The worker pipeline goes scheduled → sending → sent and
-  // populates `apple_delivered` / `skipped_no_push` along the way.
   useEffect(() => {
     if (!businessId || !broadcastId) return;
     if (delivery?.status === 'sent' || delivery?.status === 'failed') return;
@@ -132,8 +129,8 @@ export function FirstBroadcastStep() {
     if (sent) return t('sentLabel');
     if (sending) return t('sendingLabel');
     if (reachable === 0) return t('noRecipientsLabel');
-    if (reachable && reachable > 0) return t('sendToCountCta', { count: reachable });
-    return t('sendCta');
+    if (reachable !== null) return t('sendCta', { count: reachable });
+    return t('sendCta', { count: 1 });
   }, [sent, sending, reachable, t]);
 
   return (
@@ -151,8 +148,7 @@ export function FirstBroadcastStep() {
             <MegaphoneIcon className="w-5 h-5 text-[var(--accent)]" weight="bold" />
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-semibold text-[var(--foreground)]">{t('composeTitle')}</p>
-            <p className="text-[12.5px] text-[#7A7A7A] leading-relaxed mt-0.5">{t('composeBody')}</p>
+            <p className="text-[12.5px] text-[#7A7A7A] leading-relaxed">{t('composeBody')}</p>
           </div>
         </div>
 
@@ -221,12 +217,6 @@ interface DeliveryStatusProps {
   t: ReturnType<typeof useTranslations>;
 }
 
-/**
- * Live delivery confirmation. Polls the broadcast status until `sent` so the
- * owner sees the actual `apple_delivered` / `skipped_no_push` counters —
- * concrete confirmation that the backend dispatched the push (vs. relying
- * on iOS to surface a banner, which can be coalesced).
- */
 function DeliveryStatus({ delivery, t }: DeliveryStatusProps) {
   const inFlight =
     delivery.status === 'draft' ||
@@ -252,7 +242,6 @@ function DeliveryStatus({ delivery, t }: DeliveryStatusProps) {
     );
   }
 
-  // status === 'sent'
   return (
     <div className="rounded-[10px] border border-green-200 bg-green-50 px-3 py-3 flex flex-col gap-1.5">
       <p className="text-[13px] font-semibold text-green-900 flex items-center gap-1.5">
@@ -261,6 +250,7 @@ function DeliveryStatus({ delivery, t }: DeliveryStatusProps) {
       </p>
       <p className="text-[11.5px] text-green-800 leading-relaxed">
         {t('deliveredHint', {
+          count: delivered,
           delivered,
           skipped: delivery.skipped_no_push,
           total: delivery.total_recipients,

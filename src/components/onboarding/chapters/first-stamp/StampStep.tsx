@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CheckCircle, Info, LightningIcon, Warning } from '@phosphor-icons/react';
+import { Bell, CheckCircle, Info, LightningIcon, Warning } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { addStamp, getCustomer } from '@/api/customers';
 import { useWizardStep } from '../../wizard-context';
@@ -22,19 +22,23 @@ const COOLDOWN_MS = 20_000;
 const COOLDOWN_TICK_MS = 1000;
 
 /**
- * Chapter 8 — optional. The wow moment. Fires a real /stamps call against
- * the demo customer the owner registered in Chapter 7; APNs/Google delivers
- * a push to the wallet pass on the same phone. We poll the customer once a
- * second after firing to confirm the stamp count incremented before
+ * Chapter 8 sub-step 2 — optional. The wow moment. Fires a real /stamps call
+ * against the demo customer the owner registered in sub-step 1; APNs/Google
+ * delivers a push to the wallet pass on the same phone. We poll the customer
+ * once a second after firing to confirm the stamp count incremented before
  * declaring success.
  *
  * The owner can stamp repeatedly — each tap fires another real stamp + push,
  * so they can play with notification cadence before leaving the wizard.
  *
- * Disabled if Chapter 7 wasn't completed (no demo_enrollment_id).
+ * Disabled if sub-step 1 wasn't completed (no demo_enrollment_id).
+ *
+ * v3 addition: after the first successful stamp, a `customisationHint`
+ * callout fades in once per session pointing the owner to the dashboard's
+ * notification customisation page.
  */
-export function LiveStampStep() {
-  const t = useTranslations('onboardingBusiness.chapters.live-stamp');
+export function StampStep() {
+  const t = useTranslations('onboardingBusiness.chapters.first-stamp.steps.stamp');
   const tErr = useTranslations('onboardingBusiness.errors');
   const { currentBusiness } = useBusiness();
   const { progress } = useWizardProgress();
@@ -49,6 +53,7 @@ export function LiveStampStep() {
   const [stamps, setStamps] = useState<number | null>(null);
   const [recentlyStamped, setRecentlyStamped] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [hasStampedThisSession, setHasStampedThisSession] = useState(false);
   const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -116,14 +121,13 @@ export function LiveStampStep() {
     setPhase('sending');
     setRecentlyStamped(false);
     try {
-      // Use the most-recent known count as the baseline so the poller waits
-      // for THIS stamp specifically (not just any historical increment).
       const baseline = stamps ?? 0;
       await addStamp(businessId!, enrollmentId!);
       const next = await pollForStamp(baseline);
       if (next !== null) {
         setStamps(next);
         setRecentlyStamped(true);
+        setHasStampedThisSession(true);
         setTimeout(() => setRecentlyStamped(false), RECENT_STAMP_FLASH_MS);
       } else {
         toast.message(t('fallback'));
@@ -135,7 +139,6 @@ export function LiveStampStep() {
     }
   }, [ready, phase, businessId, enrollmentId, stamps, pollForStamp, startCooldown, t, tErr]);
 
-  // Manual bypass — owner clicks to override the cooldown.
   const handleBypassCooldown = useCallback(() => {
     if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
     cooldownTimerRef.current = null;
@@ -165,6 +168,8 @@ export function LiveStampStep() {
           t={t}
         />
       )}
+
+      {hasStampedThisSession && <CustomisationHintCard t={t} />}
     </div>
   );
 }
@@ -269,6 +274,17 @@ function StampCard({
           <span>{t('coalesceHint')}</span>
         </p>
       )}
+    </div>
+  );
+}
+
+function CustomisationHintCard({ t }: { t: ReturnType<typeof useTranslations> }) {
+  return (
+    <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <span className="flex-shrink-0 w-8 h-8 rounded-full bg-white border border-[var(--border)] flex items-center justify-center">
+        <Bell className="w-4 h-4 text-[var(--accent)]" weight="duotone" />
+      </span>
+      <p className="text-[12.5px] text-[#444] leading-relaxed">{t('customisationHint')}</p>
     </div>
   );
 }

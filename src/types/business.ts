@@ -77,9 +77,11 @@ export interface BusinessSettings {
   first_broadcast_sent?: boolean;
   design_reviewed?: boolean;
   business_type?: string;
+  business_type_other?: string;
   team_size?: string;
   locations_count?: string;
   primary_goal?: string;
+  identity_website?: string;
   [key: string]: unknown;
 }
 

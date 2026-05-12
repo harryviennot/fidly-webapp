@@ -13,10 +13,10 @@ import type { BusinessInfoEntry } from '@/types/business';
 import type { User } from '@/types';
 
 /**
- * Backfields chapter — optional. Sets up the business-level back-of-card
- * info (phone, website, address, hours) once. These entries are inherited
- * by every card design; the Design → Back sub-step (Ch 5 step 4) later
- * toggles per-card visibility.
+ * Card-back info — optional. Sets up the business-level back-of-card info
+ * (phone, website, address, hours, terms) once. These entries are inherited
+ * by every card design; the Design → Back sub-step (Ch 6.4) later toggles
+ * per-card visibility.
  *
  * Reuses the dashboard's `BusinessInfoEditor` so the experience matches
  * `/settings` — owners build muscle memory before they ever hit the
@@ -24,15 +24,15 @@ import type { User } from '@/types';
  *
  * Pre-fills sensible defaults from data we already collected:
  *   - owner email (from Supabase auth)
- *   - owner phone (from `user_metadata.phone`, set during showcase signup)
+ *   - owner phone (from public.users.phone, sync'd from auth.users by trigger)
  *   - business website (written by IdentityStep when the owner typed one)
  *
  * Only seeds defaults when `settings.business_info` is still undefined
  * (first visit). After save the key exists — even an empty array — so we
  * don't re-seed entries the owner explicitly cleared.
  */
-export function BackfieldsStep() {
-  const t = useTranslations('onboardingBusiness.chapters.backfields');
+export function InfoStep() {
+  const t = useTranslations('onboardingBusiness.chapters.card-back.steps.info');
   const tErr = useTranslations('onboardingBusiness.errors');
   const { currentBusiness } = useBusiness();
   const { user } = useAuth();

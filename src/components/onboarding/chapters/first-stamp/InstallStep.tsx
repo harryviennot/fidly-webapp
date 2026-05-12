@@ -21,7 +21,7 @@ import { useWizardProgress } from '../../useWizardProgress';
 
 const POLL_INTERVAL_MS = 2000;
 const AUTO_ADVANCE_DELAY_MS = 1200;
-const NEXT_STEP_PATH = '/onboarding/business/live-stamp';
+const NEXT_STEP_PATH = '/onboarding/business/first-stamp/stamp';
 
 interface InstallUrls {
   passUrl?: string;
@@ -29,8 +29,8 @@ interface InstallUrls {
 }
 
 /**
- * Chapter 7 — optional. Two paths to the same outcome (`demo_customer_id` +
- * `demo_enrollment_id` set in setup_progress.payload):
+ * Chapter 8 sub-step 1 — optional. Two paths to the same outcome
+ * (`demo_customer_id` + `demo_enrollment_id` set in setup_progress.payload):
  *
  * - **Desktop**: shows the public signup URL + QR. Owner scans / shares it,
  *   a customer registers via showcase, the wizard's background poller picks
@@ -43,8 +43,8 @@ interface InstallUrls {
  * entries since this step opened — whichever path the owner takes, we
  * detect the resulting customer and store its id + enrollment id.
  */
-export function FirstCustomerStep() {
-  const t = useTranslations('onboardingBusiness.chapters.first-customer');
+export function InstallStep() {
+  const t = useTranslations('onboardingBusiness.chapters.first-stamp.steps.install');
   const tErr = useTranslations('onboardingBusiness.errors');
   const locale = useLocale();
   const isMobile = useIsMobile();
@@ -68,7 +68,6 @@ export function FirstCustomerStep() {
   const ownerEmail = user?.email ?? '';
   const ownerPhone = (user?.user_metadata?.phone as string | undefined) ?? '';
 
-  // Fetch the QR once on desktop. Skipped on mobile to save a round trip.
   useEffect(() => {
     if (isMobile || !businessId) return;
     getBusinessSignupQR(businessId)
@@ -76,10 +75,6 @@ export function FirstCustomerStep() {
       .catch(() => { /* QR stays null; skeleton renders */ });
   }, [isMobile, businessId]);
 
-  // Snapshot existing customer ids so we can tell "new since this step opened"
-  // from "already existed." Either the owner self-installs via the Quick
-  // Install button (which adds 1 customer) or someone registers through the
-  // public signup page (also adds 1). The freshest unseen id wins.
   const initialIdsRef = useRef<Set<string> | null>(null);
   useEffect(() => {
     if (!businessId || initialIdsRef.current !== null) return;
@@ -93,10 +88,6 @@ export function FirstCustomerStep() {
   }, [businessId]);
 
   // ── Phase A: detect new customer signup ──────────────────────────────
-  // Watch the customer list for any new id since the step mounted. Writes
-  // demo_customer_id + demo_enrollment_id via `updatePayload` (no completion
-  // yet — the step is only "done" once the wallet pass is actually installed,
-  // detected in Phase B below).
   const customerDetectedRef = useRef(false);
   useEffect(() => {
     if (!businessId) return;
@@ -114,7 +105,7 @@ export function FirstCustomerStep() {
         const unseen = res.data.find((c) => !initialIdsRef.current!.has(c.id));
         if (!unseen) return;
         const enrollmentId = unseen.enrollments?.[0]?.id;
-        if (!enrollmentId) return; // enrollment lag — retry next tick
+        if (!enrollmentId) return;
         customerDetectedRef.current = true;
         await updatePayload({
           demo_customer_id: unseen.id,
@@ -134,14 +125,10 @@ export function FirstCustomerStep() {
   }, [businessId, progress.payload.demo_customer_id, updatePayload]);
 
   // ── Phase B: detect wallet pass install ──────────────────────────────
-  // Polls /customers/{id}/wallet-status (push_registrations count) until at
-  // least one device has registered the pass — same signal the demo landing
-  // page uses to transition "pass_downloaded" → "pass_installed". Marks the
-  // step completed via `completeWithPayload` so the auto-advance fires.
   const installDetectedRef = useRef(false);
   const customerId = progress.payload.demo_customer_id;
   const alreadyCompleted = progress.completed.some(
-    (s) => s.chapter === 'first-customer' && s.step === 'first-customer'
+    (s) => s.chapter === 'first-stamp' && s.step === 'install'
   );
 
   useEffect(() => {
@@ -157,7 +144,7 @@ export function FirstCustomerStep() {
         if (!status.installed) return;
         installDetectedRef.current = true;
         await completeWithPayload(
-          { chapter: 'first-customer', step: 'first-customer' },
+          { chapter: 'first-stamp', step: 'install' },
           {}
         );
       } catch {
@@ -173,20 +160,17 @@ export function FirstCustomerStep() {
     };
   }, [businessId, customerId, alreadyCompleted, completeWithPayload]);
 
-  // Auto-advance once the install is confirmed (step in `completed`).
   useEffect(() => {
     if (!alreadyCompleted) return;
     const id = setTimeout(() => router.push(NEXT_STEP_PATH), AUTO_ADVANCE_DELAY_MS);
     return () => clearTimeout(id);
   }, [alreadyCompleted, router]);
 
-  // Manual escape hatch — owner clicks "I've installed it" if polling
-  // somehow misses the registration (slow APNs sync, ad-blockers, etc.).
   const handleManualConfirm = useCallback(async () => {
     if (!customerId || installDetectedRef.current) return;
     installDetectedRef.current = true;
     await completeWithPayload(
-      { chapter: 'first-customer', step: 'first-customer' },
+      { chapter: 'first-stamp', step: 'install' },
       {}
     );
   }, [customerId, completeWithPayload]);

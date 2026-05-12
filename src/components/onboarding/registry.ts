@@ -1,24 +1,22 @@
 import type { ChapterDef, ResolvedStep, SubStepDef } from './types';
 import { WelcomeStep } from './chapters/welcome/WelcomeStep';
 import { IdentityStep } from './chapters/business/IdentityStep';
-import { TypeStep } from './chapters/business/TypeStep';
-import { SizeStep } from './chapters/business/SizeStep';
-import { LocationsStep } from './chapters/business/LocationsStep';
-import { ObjectivesStep } from './chapters/business/ObjectivesStep';
+import { ProfileStep } from './chapters/business/ProfileStep';
 import { ProgramStep } from './chapters/program/ProgramStep';
 import { DataCollectionStep } from './chapters/data-collection/DataCollectionStep';
-import { BackfieldsStep } from './chapters/backfields/BackfieldsStep';
+import { IntroStep as CardBackIntroStep } from './chapters/card-back/IntroStep';
+import { InfoStep as CardBackInfoStep } from './chapters/card-back/InfoStep';
 import { BrandingStep } from './chapters/design/BrandingStep';
 import { StampsStep } from './chapters/design/StampsStep';
 import { ContentStep } from './chapters/design/ContentStep';
 import { BackStep } from './chapters/design/BackStep';
 import { IconStep } from './chapters/notifications/IconStep';
-import { TransactionalStep } from './chapters/notifications/TransactionalStep';
-import { MilestonesStep } from './chapters/notifications/MilestonesStep';
-import { FirstCustomerStep } from './chapters/first-customer/FirstCustomerStep';
-import { LiveStampStep } from './chapters/live-stamp/LiveStampStep';
-import { FirstBroadcastStep } from './chapters/first-broadcast/FirstBroadcastStep';
+import { InstallStep as FirstStampInstallStep } from './chapters/first-stamp/InstallStep';
+import { StampStep as FirstStampStampStep } from './chapters/first-stamp/StampStep';
+import { IntroStep as FirstBroadcastIntroStep } from './chapters/first-broadcast/IntroStep';
+import { ComposeStep as FirstBroadcastComposeStep } from './chapters/first-broadcast/ComposeStep';
 import { TeamStep } from './chapters/team/TeamStep';
+import { RecapStep } from './chapters/recap/RecapStep';
 import { PlanStep } from './chapters/plan/PlanStep';
 
 /**
@@ -30,18 +28,11 @@ import { PlanStep } from './chapters/plan/PlanStep';
  * required sub-steps are in `setup_progress.completed`, the footer surfaces
  * "Skip rest of setup."
  *
- * Coverage of the plan's 11-chapter map at this point:
- *  - Ch 1 Welcome ✓
- *  - Ch 2 Business: Identity only (Type/Size/Locations/Objectives TODO)
- *  - Ch 3 Program ✓
- *  - Ch 4 Data collection ✓
- *  - Ch 5 Design: Branding only (Stamps/Content/Back TODO)
- *  - Ch 6 Notifications: TODO
- *  - Ch 7 First customer: TODO
- *  - Ch 8 Live stamp: TODO
- *  - Ch 9 First broadcast: TODO
- *  - Ch 10 Team: TODO
- *  - Ch 11 Plan: TODO
+ * v3 shape:
+ *   welcome → business [identity, profile] → program → data-collection
+ *   → card-back [intro, info] → design [branding, stamps, content, back]
+ *   → notifications [icon] → first-stamp [install, stamp]
+ *   → first-broadcast [intro, compose] → team → recap → plan
  */
 export const WIZARD_CHAPTERS: ChapterDef[] = [
   {
@@ -52,10 +43,7 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     id: 'business',
     subSteps: [
       { id: 'identity', required: true, Component: IdentityStep },
-      { id: 'type', required: false, Component: TypeStep },
-      { id: 'size', required: false, Component: SizeStep },
-      { id: 'locations', required: false, Component: LocationsStep },
-      { id: 'objectives', required: false, Component: ObjectivesStep },
+      { id: 'profile', required: false, Component: ProfileStep },
     ],
   },
   {
@@ -67,8 +55,11 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     subSteps: [{ id: 'data-collection', required: false, Component: DataCollectionStep }],
   },
   {
-    id: 'backfields',
-    subSteps: [{ id: 'backfields', required: false, Component: BackfieldsStep }],
+    id: 'card-back',
+    subSteps: [
+      { id: 'intro', required: false, Component: CardBackIntroStep },
+      { id: 'info', required: false, Component: CardBackInfoStep },
+    ],
   },
   {
     id: 'design',
@@ -81,27 +72,29 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
   },
   {
     id: 'notifications',
+    subSteps: [{ id: 'icon', required: false, Component: IconStep }],
+  },
+  {
+    id: 'first-stamp',
     subSteps: [
-      { id: 'icon', required: false, Component: IconStep },
-      { id: 'transactional', required: false, Component: TransactionalStep },
-      { id: 'milestones', required: false, Component: MilestonesStep },
+      { id: 'install', required: false, Component: FirstStampInstallStep },
+      { id: 'stamp', required: false, Component: FirstStampStampStep },
     ],
   },
   {
-    id: 'first-customer',
-    subSteps: [{ id: 'first-customer', required: false, Component: FirstCustomerStep }],
-  },
-  {
-    id: 'live-stamp',
-    subSteps: [{ id: 'live-stamp', required: false, Component: LiveStampStep }],
-  },
-  {
     id: 'first-broadcast',
-    subSteps: [{ id: 'first-broadcast', required: false, Component: FirstBroadcastStep }],
+    subSteps: [
+      { id: 'intro', required: false, Component: FirstBroadcastIntroStep },
+      { id: 'compose', required: false, Component: FirstBroadcastComposeStep },
+    ],
   },
   {
     id: 'team',
     subSteps: [{ id: 'team', required: false, Component: TeamStep }],
+  },
+  {
+    id: 'recap',
+    subSteps: [{ id: 'recap', required: false, Component: RecapStep }],
   },
   {
     id: 'plan',
@@ -110,6 +103,20 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
 ];
 
 export const TOTAL_CHAPTERS = WIZARD_CHAPTERS.length;
+
+/**
+ * Legacy slug map for v2 → v3 chapter renames. Owners with an in-flight
+ * `setup_progress.last_step` referencing v2 paths re-anchor here so they don't
+ * land on an "unknown step" screen.
+ *
+ * Drop after roughly two weeks once any pending wizards have either completed
+ * or been touched again.
+ */
+const LEGACY_SLUG_MAP: Record<string, [string, string]> = {
+  'first-customer': ['first-stamp', 'install'],
+  'live-stamp': ['first-stamp', 'stamp'],
+  backfields: ['card-back', 'info'],
+};
 
 export function findChapter(chapterId: string): ChapterDef | undefined {
   return WIZARD_CHAPTERS.find((c) => c.id === chapterId);
@@ -126,10 +133,17 @@ export function findSubStep(chapter: ChapterDef, stepId?: string): SubStepDef | 
  *
  * Single-sub-step chapters accept either `[chapterId]` or `[chapterId, stepId]`.
  * Multi-sub-step chapters require `[chapterId, stepId]`.
+ *
+ * v2 → v3 slugs are remapped silently (see `LEGACY_SLUG_MAP`).
  */
 export function resolveSlug(slug: string[] | undefined): ResolvedStep | null {
   const segments = slug && slug.length > 0 ? slug : [WIZARD_CHAPTERS[0].id];
-  const [chapterId, stepId] = segments;
+  let [chapterId, stepId] = segments;
+
+  if (chapterId in LEGACY_SLUG_MAP) {
+    [chapterId, stepId] = LEGACY_SLUG_MAP[chapterId];
+  }
+
   const chapterIndex = WIZARD_CHAPTERS.findIndex((c) => c.id === chapterId);
   if (chapterIndex < 0) return null;
   const chapter = WIZARD_CHAPTERS[chapterIndex];

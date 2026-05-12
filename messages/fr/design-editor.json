@@ -50,6 +50,9 @@
       "remove": "Supprimer",
       "uploading": "Téléchargement..."
     },
+    "preview": {
+      "preview": "Aperçu"
+    },
     "cardBack": {
       "noBackFields": "Aucun champ au dos configuré",
       "addFieldsHint": "Ajoutez des conditions, infos de contact ou d'autres détails",

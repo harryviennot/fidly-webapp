@@ -3,10 +3,11 @@
     "footer": {
       "back": "Retour",
       "skip": "Passer",
-      "next": "Enregistrer et continuer",
-      "finish": "Terminer",
+      "next": "Continuer",
+      "finish": "Lancer mon programme",
       "saving": "Enregistrement…",
-      "skipAll": "Passer le reste de la configuration"
+      "skipAll": "Passer le reste de la configuration",
+      "gotIt": "Compris, on y va"
     },
     "errors": {
       "unknownStep": "Cette étape de configuration est introuvable. Retour au début.",
@@ -21,8 +22,8 @@
     "chapters": {
       "welcome": {
         "title": "Bienvenue sur Stampeo",
-        "subtitle": "On prépare votre programme de fidélité.",
-        "body": "En quelques minutes, une carte de fidélité à vos couleurs sera dans le wallet de vos clients — et un premier tampon arrivera sur votre téléphone.",
+        "subtitle": "En quelques minutes, votre carte de fidélité arrive dans le wallet de vos clients.",
+        "body": "On crée une carte à vos couleurs, on envoie un tampon sur votre téléphone, puis on y pousse une diffusion pour que vous viviez exactement ce que vos clients vivront. Les étapes obligatoires vous mettent en ligne. Le reste rend votre programme plus abouti dès le premier jour.",
         "cta": "C'est parti"
       },
       "business": {
@@ -40,13 +41,21 @@
               "website": "Site web (optionnel)",
               "websitePlaceholder": "https://…",
               "logo": "Logo",
-              "logoHelp": "Format carré conseillé."
+              "logoHelp": "Jusqu'à un ratio de 3:1.",
+              "slugChecking": "Vérification…",
+              "slugAvailable": "Disponible"
             }
           },
-          "type": {
-            "title": "Quel type de commerce ?",
-            "subtitle": "Choisissez le plus proche — on ajustera les modèles et la communication.",
-            "options": {
+          "profile": {
+            "title": "Parlez-nous de votre commerce",
+            "subtitle": "Quatre questions rapides pour adapter les modèles, recommandations et statistiques à votre activité.",
+            "typeLabel": "Quel type de commerce ?",
+            "sizeLabel": "Quelle est la taille de votre équipe ?",
+            "locationsLabel": "Combien d'établissements ?",
+            "goalLabel": "Quel est votre objectif principal ?",
+            "otherFreeText": "Autre (précisez)",
+            "otherPlaceholder": "Décrivez brièvement votre activité",
+            "typeOptions": {
               "cafe": "Café / Salon de thé",
               "restaurant": "Restaurant",
               "bakery": "Boulangerie / Pâtisserie",
@@ -54,184 +63,213 @@
               "retail": "Boutique / Commerce",
               "fitness": "Fitness / Studio",
               "services": "Services",
-              "other": "Autre chose"
-            }
-          },
-          "size": {
-            "title": "Quelle est la taille de votre équipe ?",
-            "subtitle": "Pour recommander qui devrait avoir un compte scanner.",
-            "options": {
-              "solo": { "label": "Juste moi", "description": "Activité en solo." },
-              "small": { "label": "2 à 5 personnes", "description": "Petite équipe." },
-              "medium": { "label": "6 à 20 personnes", "description": "Équipe en croissance." },
-              "large": { "label": "Plus de 20", "description": "Plusieurs équipes ou points de vente." }
-            }
-          },
-          "locations": {
-            "title": "Combien d'établissements ?",
-            "subtitle": "Tous vos établissements peuvent utiliser la même carte.",
-            "options": {
+              "other": "Autre"
+            },
+            "sizeOptions": {
+              "solo": "Juste moi",
+              "small": "2 à 5 personnes",
+              "medium": "6 à 20 personnes",
+              "large": "Plus de 20"
+            },
+            "locationsOptions": {
               "one": "Un seul",
-              "few": "2 à 5 établissements",
-              "several": "6 à 20 établissements",
+              "few": "2 à 5",
+              "several": "6 à 20",
               "many": "Plus de 20"
-            }
-          },
-          "objectives": {
-            "title": "Quel est votre objectif principal ?",
-            "subtitle": "On gardera les conseils et stats focalisés sur ce qui compte.",
-            "options": {
-              "retention": {
-                "label": "Fidéliser mes clients",
-                "description": "Transformer les nouveaux en habitués."
-              },
-              "frequency": {
-                "label": "Augmenter la fréquence",
-                "description": "Faire venir les habitués plus souvent."
-              },
-              "basket": {
-                "label": "Augmenter le panier moyen",
-                "description": "Encourager des achats plus importants."
-              },
-              "acquisition": {
-                "label": "Toucher de nouveaux clients",
-                "description": "Booster bouche-à-oreille et parrainages."
-              }
+            },
+            "goalOptions": {
+              "retention": "Fidéliser mes clients",
+              "frequency": "Augmenter la fréquence",
+              "basket": "Augmenter le panier moyen",
+              "acquisition": "Toucher de nouveaux clients"
             }
           }
         }
       },
       "program": {
         "title": "Configurez votre programme",
-        "subtitle": "Décidez combien de tampons sont nécessaires et ce que vos clients gagnent."
+        "subtitle": "Combien de tampons sont nécessaires, et ce que vos clients gagnent."
       },
       "data-collection": {
         "title": "Que collecter auprès des clients",
         "subtitle": "Choisissez les champs du formulaire d'inscription."
       },
-      "backfields": {
-        "title": "Que mettre au dos de vos cartes ?",
-        "subtitle": "Téléphone, adresse, site web, horaires — définissez-les une fois ici, ils apparaissent sur toutes vos cartes. Vous pourrez en cacher par design à l'étape suivante."
+      "card-back": {
+        "title": "Le verso de votre carte",
+        "steps": {
+          "intro": {
+            "title": "Votre carte a deux faces",
+            "subtitle": "La face avant porte les tampons. Le verso contient les infos pratiques.",
+            "body": "Quand vos clients tapent les trois points sur leur carte dans Apple Wallet (ou l'icône i sur Google Wallet), ils voient les infos de votre commerce : horaires, adresse, téléphone, site web, conditions générales, et tout ce qui mérite d'être affiché. Vous les définissez ici une seule fois, et elles apparaissent sur chaque design de votre carte. L'étape suivante vous permet d'en cacher certaines par design."
+          },
+          "info": {
+            "title": "Ajoutez les infos de votre commerce",
+            "subtitle": "Téléphone, adresse, horaires, site web, conditions générales, tout ce qui mérite d'être affiché. On a pré-rempli ce qu'on pouvait depuis votre compte."
+          }
+        }
       },
       "design": {
         "title": "Personnalisez votre carte",
         "steps": {
           "branding": {
-            "title": "Identité visuelle",
-            "subtitle": "Ajoutez votre logo et vos couleurs. Vous pourrez affiner plus tard."
+            "title": "Logo et couleurs",
+            "subtitle": "Ajoutez votre logo, choisissez vos couleurs. Les valeurs par défaut fonctionnent, vous pourrez affiner quand vous voulez."
           },
           "stamps": {
             "title": "Tampons",
-            "subtitle": "Choisissez les icônes de tampon et de récompense, ajustez les couleurs."
+            "subtitle": "Choisissez les icônes de tampon et de récompense, puis ajustez les couleurs."
           },
           "content": {
-            "title": "Contenu",
-            "subtitle": "Affichez des infos utiles en façade (limite, expiration, etc.)."
+            "title": "Infos en façade",
+            "subtitle": "Limite, expiration, ou toute autre info utile à afficher directement sur la carte."
           },
           "back": {
-            "title": "Verso de la carte",
-            "subtitle": "Choisissez les infos qui apparaissent quand vos clients tapent l'icône i."
+            "title": "Ce qui apparaît au dos de CE design",
+            "subtitle": "Cachez des entrées spécifiques sur ce design, ou ajoutez des champs qui ne valent que pour lui."
           }
         }
       },
       "notifications": {
-        "title": "Configurez les notifications",
+        "title": "Icône des notifications",
         "steps": {
           "icon": {
-            "title": "Icône des notifications",
-            "subtitle": "L'icône que vos clients verront quand leur carte sonne — souvent votre logo."
-          },
-          "transactional": {
-            "title": "Messages automatiques",
-            "subtitle": "Personnalisez le texte envoyé à chaque tampon, récompense débloquée ou utilisée."
-          },
-          "milestones": {
-            "title": "Paliers personnalisés",
-            "subtitle": "Optionnel. Ajoutez des notifications à des étapes précises (ex. « à mi-chemin »)."
+            "title": "Choisissez l'icône des notifications",
+            "subtitle": "Vos clients reçoivent un push à chaque tampon ou récompense gagnée. Cette icône apparaît à côté de chacun, alors la plupart des commerçants utilisent leur logo.",
+            "autoFilledHint": "Pré-rempli depuis votre logo. Remplaçable à tout moment.",
+            "dismissHint": "Fermer"
           }
         }
       },
-      "first-customer": {
-        "title": "Votre premier client",
-        "subtitle": "Partagez votre page client ou installez la carte vous-même — on détecte l'inscription automatiquement.",
-        "explanation": "Voici la page publique sur laquelle vos clients arriveront. Partagez le lien dans votre bio ou réseaux, imprimez le QR code à votre comptoir, ou ouvrez-le sur votre téléphone pour installer votre première carte.",
-        "signupUrlLabel": "Page client",
-        "copy": "Copier",
-        "copied": "Copié",
-        "qrTitle": "Imprimez ou affichez ce QR",
-        "qrBody": "Collez-le à votre point de vente, glissez-le sur votre menu, ou scannez-le avec votre téléphone pour vous enregistrer comme premier client.",
-        "quickInstallTitle": "Installer sur votre téléphone",
-        "quickInstallBody": "Raccourci — on vous enregistre avec les infos du compte et on vous donne les boutons wallet ci-dessous.",
-        "quickInstallCta": "Utiliser mes infos & installer",
-        "registering": "Enregistrement…",
-        "installTitle": "Ajoutez la carte à votre wallet",
-        "installBody": "Tapez un bouton ci-dessous. La carte arrive dans votre wallet, prête pour le tampon test à l'étape suivante.",
-        "addToAppleWallet": "Ajouter à Apple Wallet",
-        "addToGoogleWallet": "Ajouter à Google Wallet",
-        "pollingHint": "On détecte l'inscription automatiquement — gardez cet onglet ouvert.",
-        "watchingInstall": "Client détecté. On attend que la carte arrive dans votre wallet…",
-        "manualConfirmCta": "Je l'ai ajoutée à mon wallet",
-        "detected": "Carte installée — on passe à la suite dans un instant."
-      },
-      "live-stamp": {
-        "title": "Envoyez votre premier tampon",
-        "subtitle": "Tamponnez votre carte autant de fois que vous voulez — chaque tap déclenche une vraie notification push.",
-        "prereqTitle": "Installez d'abord votre carte",
-        "prereqBody": "Revenez à l'étape précédente pour ajouter la carte à votre wallet — sans ça, pas de notification possible.",
-        "readyTitle": "Tamponnez-vous",
-        "readyBody": "Tapez ci-dessous. Un vrai tampon part, votre téléphone vibre en quelques secondes.",
-        "keepStampingTitle": "Encore un tampon ?",
-        "keepStampingBody": "Chaque tap envoie un vrai push. Essayez-en quelques-uns — voyez le rythme des messages sur votre téléphone.",
-        "sendCta": "Envoyer le tampon test",
-        "sendAnotherCta": "Envoyer un autre tampon",
-        "watching": "On surveille votre tampon…",
-        "cooldownCta": "Attendez {seconds}s pour la prochaine notif…",
-        "bypassCooldown": "Tamponner quand même (sans notif garantie)",
-        "coalesceHint": "Apple Wallet regroupe les mises à jour rapides — laissez ~20s entre les tampons pour que chacun vibre votre écran.",
-        "stampsLabel": "Tampons sur votre carte",
-        "justStamped": "Tampon ajouté !",
-        "fallback": "Pas de vibration ? Le push peut prendre quelques secondes. Réessayez dans un instant."
+      "first-stamp": {
+        "title": "Faites le test",
+        "chapterIntro": "Installez votre carte, puis envoyez-vous un vrai tampon.",
+        "steps": {
+          "install": {
+            "title": "Mettez une carte sur un téléphone",
+            "subtitle": "La vôtre ou celle d'un vrai client. L'étape suivante nécessite qu'une carte soit installée quelque part.",
+            "explanation": "Voici la page publique sur laquelle vos clients arriveront. Partagez le lien dans votre bio ou réseaux, imprimez le QR à votre comptoir, ou ouvrez-le sur votre téléphone pour installer votre première carte maintenant.",
+            "signupUrlLabel": "Page client",
+            "copy": "Copier",
+            "copied": "Copié",
+            "qrTitle": "Imprimez ou affichez ce QR",
+            "qrBody": "Collez-le à votre point de vente, glissez-le sur votre menu, ou scannez-le avec votre téléphone pour vous enregistrer comme premier client.",
+            "quickInstallTitle": "Installer sur votre téléphone",
+            "quickInstallBody": "Le plus rapide. On vous enregistre avec les infos de votre compte et on vous donne les boutons wallet.",
+            "quickInstallCta": "Utiliser mes infos et installer",
+            "registering": "Enregistrement…",
+            "installTitle": "Ajoutez la carte à votre wallet",
+            "installBody": "Tapez un bouton ci-dessous. La carte arrive dans votre wallet, prête pour le tampon test à l'étape suivante.",
+            "addToAppleWallet": "Ajouter à Apple Wallet",
+            "addToGoogleWallet": "Ajouter à Google Wallet",
+            "pollingHint": "Gardez cet onglet ouvert. On détecte l'inscription automatiquement.",
+            "watchingInstall": "Client détecté. On attend que la carte arrive dans votre wallet…",
+            "manualConfirmCta": "Je l'ai ajoutée à mon wallet",
+            "detected": "Carte installée. On passe à la suite dans un instant."
+          },
+          "stamp": {
+            "title": "Tamponnez-vous",
+            "subtitle": "Chaque tap envoie un vrai push sur votre téléphone.",
+            "prereqTitle": "Installez d'abord votre carte",
+            "prereqBody": "Revenez à l'étape précédente et ajoutez la carte à votre wallet. Sans elle, aucun push ne peut arriver.",
+            "readyTitle": "Prêt à tamponner",
+            "readyBody": "Tapez ci-dessous. Un vrai tampon part, votre téléphone vibre en quelques secondes.",
+            "keepStampingTitle": "Encore un tampon ?",
+            "keepStampingBody": "Chaque tap envoie un vrai push. Essayez-en plusieurs, voyez le rythme des messages sur votre téléphone.",
+            "sendCta": "Envoyer le tampon test",
+            "sendAnotherCta": "Envoyer un autre tampon",
+            "watching": "On surveille votre tampon…",
+            "cooldownCta": "Attendez {seconds}s pour la prochaine notif…",
+            "bypassCooldown": "Tamponner quand même (sans notif garantie)",
+            "coalesceHint": "Apple Wallet regroupe les mises à jour rapides. Laissez environ 20s entre les tampons pour que chacun vibre votre écran.",
+            "stampsLabel": "Tampons sur votre carte",
+            "justStamped": "Tampon ajouté",
+            "fallback": "Pas de vibration ? Le push peut prendre quelques secondes. Réessayez dans un instant.",
+            "customisationHint": "Le texte de ce message ? Vous pouvez le modifier, en ajouter à des étapes précises, ou les désactiver. Tout se passe dans la page notifications de votre dashboard plus tard."
+          }
+        }
       },
       "first-broadcast": {
-        "title": "Envoyez votre première diffusion",
-        "subtitle": "Un message à tous les clients ayant installé votre carte — pas de segmentation, pas de planification, juste pour ressentir l'effet.",
-        "composeTitle": "Rédigez votre diffusion",
-        "composeBody": "Un message court que vous enverriez vraiment. Il part à tout le monde dès que vous tapez Envoyer.",
-        "titleLabel": "Titre",
-        "titlePlaceholder": "ex. Café du Coin",
-        "titleHint": "Reprend votre nom de commerce par défaut. Apparaît en gras sur l'écran verrouillé.",
-        "bodyLabel": "Message",
-        "bodyPlaceholder": "Happy hour aujourd'hui 17h–19h — montrez votre carte pour -20%.",
-        "bodyHint": "{remaining} caractères restants",
-        "estimating": "Comptage des destinataires…",
-        "recipientsLine": "{count, plural, =0 {Aucun client n'a encore installé sa carte — essayez d'abord Tampon en direct.} =1 {1 client recevra ce message} other {# clients recevront ce message}}",
-        "sendCta": "Envoyer à tout le monde",
-        "sendToCountCta": "Envoyer à {count, plural, =1 {1 client} other {# clients}}",
-        "sendingLabel": "Envoi en cours…",
-        "sentLabel": "Diffusion envoyée",
-        "noRecipientsLabel": "Personne à qui envoyer pour l'instant",
-        "sendingProgress": "On envoie le push — généralement 10 à 20 s.",
-        "sendFailed": "La diffusion n'a pas pu être envoyée. Vérifiez votre offre ou réessayez.",
-        "deliveredTitle": "{count, plural, =0 {Aucun push livré pour l'instant} =1 {Envoyé à 1 appareil} other {Envoyé à # appareils}}",
-        "deliveredHint": "{delivered} clients sur {total} ont reçu le push. {skipped, plural, =0 {} =1 {1 client ignoré — sa carte n'est pas installée.} other {# clients ignorés — ils n'ont pas installé leur carte.}}"
+        "title": "Votre première diffusion",
+        "steps": {
+          "intro": {
+            "title": "Les diffusions, en une minute",
+            "subtitle": "Une notification push que vous envoyez manuellement à toutes les cartes installées d'un coup.",
+            "whatItIsTitle": "Qu'est-ce que c'est",
+            "whatItIsBody": "Une notification push, envoyée à tous les clients qui ont votre carte installée. Utile pour les offres limitées, les événements, les nouveautés au menu, ou tout ce que vous publieriez sur vos réseaux.",
+            "differentFromTitle": "Différent des messages automatiques",
+            "differentFromBody": "Les messages tampon ajouté ou récompense gagnée partent tout seuls quand quelque chose se passe. Les diffusions, c'est l'inverse : vous choisissez le moment, vous choisissez le contenu.",
+            "audienceOfOneTitle": "Pour l'instant votre audience, c'est une personne",
+            "audienceOfOneBody": "La seule carte installée pour l'instant, c'est la vôtre. Donc la diffusion que vous allez écrire arrive sur votre propre téléphone. C'est exactement ce que vos vrais clients vivront quand vous aurez une vraie audience."
+          },
+          "compose": {
+            "title": "Rédigez une diffusion et envoyez-la-vous",
+            "subtitle": "Un message court. Il arrive sur votre téléphone dès que vous tapez sur envoyer.",
+            "composeBody": "Rédigez quelque chose que vous enverriez vraiment à des clients. Considérez votre téléphone comme le siège de test : le ton, le timing, la vibration, tout sera identique quand vous enverrez à une vraie audience plus tard.",
+            "titleLabel": "Titre",
+            "titlePlaceholder": "ex. Café du Coin",
+            "titleHint": "Reprend votre nom de commerce par défaut. Apparaît en gras sur l'écran verrouillé.",
+            "bodyLabel": "Message",
+            "bodyPlaceholder": "Happy hour aujourd'hui, 17h à 19h. Montrez votre carte pour -20%.",
+            "bodyHint": "{remaining} caractères restants",
+            "estimating": "Comptage des destinataires…",
+            "recipientsLine": "{count, plural, =0 {Aucune carte installée. Revenez à l'étape précédente.} =1 {Ce message arrive sur votre propre téléphone.} other {# clients recevront ce message.}}",
+            "sendCta": "{count, plural, =1 {L'envoyer sur mon téléphone} other {Envoyer à # clients}}",
+            "sendingLabel": "Envoi en cours…",
+            "sentLabel": "Diffusion envoyée",
+            "noRecipientsLabel": "Personne à qui envoyer pour l'instant",
+            "sendingProgress": "On envoie le push. Généralement 10 à 20 secondes.",
+            "sendFailed": "La diffusion n'a pas pu être envoyée. Réessayez dans un instant.",
+            "deliveredTitle": "{count, plural, =0 {Aucun push livré pour l'instant} =1 {Envoyé sur votre téléphone} other {Envoyé à # appareils}}",
+            "deliveredHint": "{count, plural, =1 {Exactement la même expérience que vos clients quand vous diffuserez à une vraie audience.} other {{delivered} clients sur {total} ont reçu le push. {skipped, plural, =0 {} =1 {1 client ignoré, carte non installée.} other {# clients ignorés, carte non installée.}}}}"
+          }
+        }
       },
       "team": {
-        "title": "Invitez votre équipe",
-        "subtitle": "Ajoutez admins ou scanners — ils pourront tamponner les clients à la caisse.",
-        "inviteLabel": "Ajoutez vos collaborateurs",
-        "inviteHint": "Envoyez une invitation par e-mail. Ils auront un accès scanner.",
+        "title": "Ajoutez votre équipe",
+        "subtitle": "Deux types d'accès, selon ce qu'ils ont à faire.",
+        "rolesTitle": "Choisissez le bon rôle",
+        "adminRole": {
+          "label": "Admin",
+          "description": "Accès complet au dashboard, comme vous. Peut modifier le programme, envoyer des diffusions, gérer l'équipe. Idéal pour les cofondateurs et managers."
+        },
+        "scannerRole": {
+          "label": "Scanner",
+          "description": "Uniquement l'écran de tamponnage sur leur téléphone. Pas de dashboard, pas de paramètres, pas de données clients. Idéal pour les équipes à la caisse."
+        },
+        "inviteLabel": "Envoyer une invitation",
+        "inviteHint": "Ils reçoivent un email avec le bon accès. Vous pouvez révoquer à tout moment.",
         "inviteCta": "Inviter"
       },
+      "recap": {
+        "title": "Regardez ce que vous avez construit",
+        "subtitle": "Un vrai programme de fidélité, sur de vrais téléphones, qui envoie de vraies notifications. Petit récap avant de parler offre.",
+        "cardLabel": "Votre carte",
+        "programLabel": "Votre programme",
+        "programDetail": "{totalStamps} tampons pour « {rewardName} »",
+        "stampsLabel": "{count, plural, =0 {Aucun tampon envoyé} =1 {1 tampon envoyé sur votre téléphone} other {# tampons envoyés sur votre téléphone}}",
+        "broadcastLabel": {
+          "sent": "Diffusion reçue sur votre téléphone",
+          "notSent": "Aucune diffusion envoyée"
+        },
+        "teamLabel": "{count, plural, =0 {Équipe : juste vous pour l'instant} =1 {Équipe : vous et 1 invitation en attente} other {Équipe : vous et # invitations en attente}}",
+        "tweakCta": "Envie d'ajuster quelque chose ?",
+        "tweakLink": {
+          "design": "Modifier le design",
+          "program": "Ajuster le programme",
+          "team": "Gérer l'équipe"
+        },
+        "nextLabel": "Dernière étape : choisissez votre offre"
+      },
       "plan": {
-        "title": "Choisissez votre plan",
-        "subtitle": "Vous êtes en essai Pro de 30 jours. Choisissez maintenant ou continuez l'essai.",
+        "title": "Choisissez votre offre",
+        "subtitle": "Vous êtes en essai Pro de 30 jours. Choisissez maintenant, ou continuez sur l'essai.",
         "keepTrialCta": "Plus tard",
         "recommendedBadge": "Recommandé",
         "perMonth": "/mois",
         "youdLose": "Vous perdriez :",
         "andMore": "+ {count} autre(s)…",
         "downgradeTitle": "Passer à Starter ?",
-        "downgradeBody": "Certaines fonctionnalités configurées ne seront plus disponibles :",
+        "downgradeBody": "Certaines fonctionnalités configurées ne sont pas disponibles sur Starter :",
         "downgradeNoLosses": "Aucune de vos configurations ne sera affectée.",
         "downgradeCancel": "Annuler",
         "downgradeConfirm": "Passer à Starter",

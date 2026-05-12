@@ -50,6 +50,9 @@
       "remove": "Remove",
       "uploading": "Uploading..."
     },
+    "preview": {
+      "preview": "Preview"
+    },
     "cardBack": {
       "noBackFields": "No back fields configured",
       "addFieldsHint": "Add terms, contact info, or other details",

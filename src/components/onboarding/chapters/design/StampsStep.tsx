@@ -11,6 +11,7 @@ import { DesignFormProvider } from '@/components/design/forms/DesignFormContext'
 import { StampsForm } from '@/components/design/forms/StampsForm';
 import { useWizardStep } from '../../wizard-context';
 import { useDesignStepState } from './useDesignStepState';
+import { DesignPreviewPane } from './DesignPreviewPane';
 
 /**
  * Chapter 5 step 2 — optional. Edits stamp / reward icons + colors + the
@@ -58,16 +59,19 @@ export function StampsStep() {
   }, [businessId, formData, pendingStripFile, existingDesign?.id, queryClient, setPendingStripFile, ctx, tErr]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
-          {t('title')}
-        </h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
-      </header>
-      <DesignFormProvider value={designContext}>
-        <StampsForm />
-      </DesignFormProvider>
-    </div>
+    <DesignFormProvider value={designContext}>
+      <div className="flex flex-col min-[1024px]:flex-row min-[1024px]:items-start gap-6 min-[1024px]:gap-8">
+        <DesignPreviewPane />
+        <div className="flex-1 flex flex-col gap-6 min-w-0">
+          <header className="flex flex-col gap-1">
+            <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
+              {t('title')}
+            </h2>
+            <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+          </header>
+          <StampsForm />
+        </div>
+      </div>
+    </DesignFormProvider>
   );
 }

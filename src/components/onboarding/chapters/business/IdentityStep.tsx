@@ -1,30 +1,51 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { Check, Spinner, X } from '@phosphor-icons/react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { ImageUploader } from '@/components/design';
 import { useWizardStep } from '../../wizard-context';
 import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
-import { createBusiness, updateBusiness } from '@/api/businesses';
+import {
+  checkSlugAvailability,
+  createBusiness,
+  updateBusiness,
+  uploadBusinessLogo,
+} from '@/api/businesses';
 import { detectBusinessLocale } from '@/lib/locale-detect';
+import { cn } from '@/lib/utils';
 import type { SetupProgress } from '@/types/business';
 
-const SLUG_INPUT_RE = /[^a-z0-9-]/g;
 const SLUG_VALID_RE = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+const SLUG_AVAILABILITY_DEBOUNCE_MS = 400;
 
-function slugify(input: string): string {
+type SlugStatus = 'idle' | 'invalid' | 'checking' | 'available' | 'taken';
+
+/**
+ * Normalise a typed slug value, applied on every keystroke. Same rules as the
+ * `name → slug` auto-derivation: lowercase, strip accents, drop disallowed
+ * characters, replace whitespace runs with single dashes, collapse repeated
+ * dashes, and refuse a leading dash (so the user can keep typing).
+ */
+function slugifyLive(input: string): string {
   return input
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
     .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/-+/g, '-')
+    .replace(/^-+/, '');
+}
+
+/** Trimming variant used when deriving the initial slug from the business name. */
+function slugify(input: string): string {
+  return slugifyLive(input).replace(/-+$/, '');
 }
 
 /**
@@ -50,6 +71,22 @@ export function IdentityStep() {
   const [slug, setSlug] = useState(() => currentBusiness?.url_slug ?? '');
   const [slugTouched, setSlugTouched] = useState(!!currentBusiness?.url_slug);
   const [website, setWebsite] = useState('');
+  const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(
+    () => currentBusiness?.logo_url ?? null
+  );
+
+  const handleLogoUpload = async (file: File) => {
+    setPendingLogoFile(file);
+    if (logoPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(logoPreviewUrl);
+    setLogoPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleLogoClear = () => {
+    setPendingLogoFile(null);
+    if (logoPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(logoPreviewUrl);
+    setLogoPreviewUrl(null);
+  };
 
   // Keep the slug synced with the business name until the user edits the slug
   // directly. We update both in the same event handler (no useEffect) so the
@@ -60,12 +97,84 @@ export function IdentityStep() {
   };
 
   const handleSlugChange = (next: string) => {
-    setSlug(next.toLowerCase().replace(SLUG_INPUT_RE, ''));
+    // Same slugify rules the name→slug derivation uses, so spaces and
+    // special chars become dashes live instead of being dropped silently.
+    setSlug(slugifyLive(next));
     setSlugTouched(true);
   };
 
   const isNameValid = name.trim().length > 0;
   const isSlugValid = slug.length >= 3 && slug.length <= 50 && SLUG_VALID_RE.test(slug);
+
+  // ── Live slug availability check ─────────────────────────────────────
+  // Debounced ping to /businesses/slug/{slug}/available. Owners updating an
+  // existing business don't see this (slug is read-only). The hint underneath
+  // the input flips between "available" / "taken" / "checking" / format-error
+  // so the owner gets feedback before they reach the submit handler.
+  //
+  // Server result is stored against the slug it was checked for, so derived
+  // state stays consistent when the user keeps typing while a request is in
+  // flight. Synchronous derived facts (empty, invalid format) skip the API.
+  const editingExisting = !!currentBusiness;
+  const [serverCheck, setServerCheck] = useState<{
+    slug: string;
+    available: boolean;
+    reason: string | null;
+  } | null>(null);
+  const [isCheckingSlug, setIsCheckingSlug] = useState(false);
+  const slugCheckIdRef = useRef(0);
+
+  useEffect(() => {
+    if (editingExisting || slug.length === 0 || !isSlugValid) {
+      setIsCheckingSlug(false);
+      return;
+    }
+    if (serverCheck && serverCheck.slug === slug) {
+      // Already have a fresh result for this exact value.
+      setIsCheckingSlug(false);
+      return;
+    }
+    setIsCheckingSlug(true);
+    const myCheckId = ++slugCheckIdRef.current;
+    const handle = window.setTimeout(async () => {
+      try {
+        const result = await checkSlugAvailability(slug);
+        // Drop the result if a newer keystroke has already kicked off another
+        // request — prevents flickering between stale and fresh values.
+        if (slugCheckIdRef.current !== myCheckId) return;
+        setServerCheck({
+          slug,
+          available: result.available,
+          reason: result.reason ?? null,
+        });
+        setIsCheckingSlug(false);
+      } catch {
+        if (slugCheckIdRef.current !== myCheckId) return;
+        // Network errors leave the indicator silent; submit-time check still runs.
+        setIsCheckingSlug(false);
+      }
+    }, SLUG_AVAILABILITY_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(handle);
+  }, [slug, isSlugValid, editingExisting, serverCheck]);
+
+  const slugStatus: SlugStatus = (() => {
+    if (editingExisting || slug.length === 0) return 'idle';
+    if (!isSlugValid) return 'invalid';
+    if (isCheckingSlug) return 'checking';
+    if (serverCheck && serverCheck.slug === slug) {
+      return serverCheck.available ? 'available' : 'taken';
+    }
+    return 'checking';
+  })();
+
+  const slugReason =
+    slugStatus === 'taken' && serverCheck && serverCheck.slug === slug
+      ? serverCheck.reason
+      : null;
+
+  const submitBlockedBySlug =
+    !editingExisting && (slugStatus === 'taken' || slugStatus === 'invalid');
 
   useEffect(() => {
     ctx.setCanSkip(false);
@@ -76,6 +185,10 @@ export function IdentityStep() {
       }
       if (!isSlugValid) {
         toast.error(tErr('slugInvalid'));
+        return { ok: false };
+      }
+      if (submitBlockedBySlug) {
+        toast.error(tErr('slugTaken'));
         return { ok: false };
       }
       try {
@@ -122,8 +235,8 @@ export function IdentityStep() {
             primary_locale: detectBusinessLocale(uiLocale),
           });
           // Stash the typed website in settings.identity_website so the
-          // Backfields chapter can pre-fill it. We don't write business_info
-          // here — Backfields treats `business_info === undefined` as "not
+          // Card-back chapter can pre-fill it. We don't write business_info
+          // here — InfoStep treats `business_info === undefined` as "not
           // seeded yet" and builds defaults from this stash + auth user.
           await updateBusiness(business.id, {
             settings: {
@@ -132,6 +245,18 @@ export function IdentityStep() {
               ...(websiteUrl ? { identity_website: websiteUrl } : {}),
             },
           });
+        }
+
+        if (pendingLogoFile) {
+          try {
+            const { url } = await uploadBusinessLogo(business.id, pendingLogoFile);
+            business = { ...business, logo_url: url };
+            setPendingLogoFile(null);
+          } catch (err) {
+            // Logo upload failure is non-fatal — the owner can retry from
+            // settings later. Surface a toast but let the step complete.
+            toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
+          }
         }
 
         await refetch();
@@ -164,8 +289,10 @@ export function IdentityStep() {
     name,
     slug,
     website,
+    pendingLogoFile,
     isNameValid,
     isSlugValid,
+    submitBlockedBySlug,
     ctx,
     currentBusiness,
     refetch,
@@ -207,19 +334,34 @@ export function IdentityStep() {
           <Label htmlFor="biz-slug" className="text-[13px] font-medium">
             {t('fields.slug')}
           </Label>
-          <Input
-            id="biz-slug"
-            value={slug}
-            onChange={(e) => handleSlugChange(e.target.value)}
-            placeholder={t('fields.slugPlaceholder')}
-            inputMode="url"
-            autoComplete="off"
-            spellCheck={false}
-            readOnly={!!currentBusiness}
-            disabled={!!currentBusiness}
-            className="h-11"
+          <div className="relative">
+            <Input
+              id="biz-slug"
+              value={slug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              placeholder={t('fields.slugPlaceholder')}
+              inputMode="url"
+              autoComplete="off"
+              spellCheck={false}
+              readOnly={!!currentBusiness}
+              disabled={!!currentBusiness}
+              aria-invalid={slugStatus === 'taken' || slugStatus === 'invalid'}
+              className={cn(
+                'h-11 pr-10 transition-colors',
+                slugStatus === 'available' && 'border-green-500 focus-visible:border-green-500',
+                (slugStatus === 'taken' || slugStatus === 'invalid') &&
+                  'border-red-500 focus-visible:border-red-500'
+              )}
+            />
+            <SlugStatusIcon status={slugStatus} />
+          </div>
+          <SlugStatusHint
+            status={slugStatus}
+            slugPreview={slugPreview}
+            reason={slugReason}
+            t={t}
+            tErr={tErr}
           />
-          <p className="text-[11.5px] text-[#999]">{t('fields.slugHelp', { slug: slugPreview })}</p>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -237,7 +379,75 @@ export function IdentityStep() {
             className="h-11"
           />
         </div>
+
+        <div className="flex flex-col gap-1.5">
+          <ImageUploader
+            label={t('fields.logo')}
+            value={logoPreviewUrl ?? undefined}
+            onUpload={handleLogoUpload}
+            onClear={logoPreviewUrl ? handleLogoClear : undefined}
+            accept="image/*"
+            hint={t('fields.logoHelp')}
+            enableCrop
+          />
+        </div>
       </div>
     </div>
   );
+}
+
+function SlugStatusIcon({ status }: { status: SlugStatus }) {
+  if (status === 'idle' || status === 'invalid') return null;
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center"
+    >
+      {status === 'checking' && (
+        <Spinner className="w-4 h-4 text-[#999] animate-spin" weight="bold" />
+      )}
+      {status === 'available' && (
+        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-500 text-white animate-in zoom-in-50 duration-200">
+          <Check className="w-3 h-3" weight="bold" />
+        </span>
+      )}
+      {status === 'taken' && (
+        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white animate-in zoom-in-50 duration-200">
+          <X className="w-3 h-3" weight="bold" />
+        </span>
+      )}
+    </div>
+  );
+}
+
+interface SlugStatusHintProps {
+  status: SlugStatus;
+  slugPreview: string;
+  reason: string | null;
+  t: ReturnType<typeof useTranslations>;
+  tErr: ReturnType<typeof useTranslations>;
+}
+
+function SlugStatusHint({ status, slugPreview, reason, t, tErr }: SlugStatusHintProps) {
+  if (status === 'taken') {
+    return (
+      <p className="text-[11.5px] text-red-600 font-medium">
+        {reason ?? tErr('slugTaken')}
+      </p>
+    );
+  }
+  if (status === 'invalid') {
+    return <p className="text-[11.5px] text-red-600 font-medium">{tErr('slugInvalid')}</p>;
+  }
+  if (status === 'checking') {
+    return <p className="text-[11.5px] text-[#999]">{t('fields.slugChecking')}</p>;
+  }
+  if (status === 'available') {
+    return (
+      <p className="text-[11.5px] text-green-600 font-medium">
+        {t('fields.slugAvailable')} — {t('fields.slugHelp', { slug: slugPreview })}
+      </p>
+    );
+  }
+  return <p className="text-[11.5px] text-[#999]">{t('fields.slugHelp', { slug: slugPreview })}</p>;
 }
