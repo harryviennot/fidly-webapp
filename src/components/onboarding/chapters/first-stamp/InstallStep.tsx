@@ -220,13 +220,13 @@ export function InstallStep() {
   return (
     <div className="flex flex-col gap-5">
       <header className="flex flex-col gap-1">
-        <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <p className="text-[13.5px] text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
+      <p className="wiz-body text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
 
       <SignupUrlCard url={signupUrl} copied={copied} onCopy={handleCopy} t={t} />
 
@@ -271,15 +271,15 @@ function SignupUrlCard({ url, copied, onCopy, t }: SignupUrlCardProps) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-white px-4 py-3 flex items-center gap-3">
       <div className="min-w-0 flex-1">
-        <p className="text-[10.5px] uppercase tracking-wider text-[#999] font-medium mb-0.5">
+        <p className="wiz-micro uppercase tracking-wider text-[#999] font-medium mb-0.5">
           {t('signupUrlLabel')}
         </p>
-        <p className="text-[13px] font-mono text-[var(--foreground)] truncate">{url}</p>
+        <p className="wiz-body-sm font-mono text-[var(--foreground)] truncate">{url}</p>
       </div>
       <button
         type="button"
         onClick={onCopy}
-        className="flex-shrink-0 inline-flex items-center gap-1 rounded-[8px] border border-[var(--border)] px-2.5 py-2 text-[12px] font-semibold hover:bg-[var(--paper-hover)] transition-colors min-h-[36px]"
+        className="flex-shrink-0 inline-flex items-center gap-1 rounded-[8px] border border-[var(--border)] px-2.5 py-2 wiz-helper font-semibold hover:bg-[var(--paper-hover)] transition-colors min-h-[36px]"
       >
         {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
         {copied ? t('copied') : t('copy')}
@@ -296,8 +296,8 @@ interface QrCardProps {
 function QrCard({ qrCode, t }: QrCardProps) {
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col items-center gap-3">
-      <p className="text-[14px] font-semibold text-[var(--foreground)] text-center">{t('qrTitle')}</p>
-      <p className="text-[12.5px] text-[#7A7A7A] text-center max-w-[320px] leading-relaxed">
+      <p className="wiz-body font-semibold text-[var(--foreground)] text-center">{t('qrTitle')}</p>
+      <p className="wiz-helper text-[#7A7A7A] text-center max-w-[320px] leading-relaxed">
         {t('qrBody')}
       </p>
       {qrCode ? (
@@ -326,8 +326,8 @@ function QuickInstallCard({ registering, onInstall, t }: QuickInstallCardProps) 
           <DeviceMobile className="w-5 h-5 text-[var(--accent)]" weight="bold" />
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-semibold text-[var(--foreground)]">{t('quickInstallTitle')}</p>
-          <p className="text-[12.5px] text-[#7A7A7A] leading-relaxed mt-0.5">
+          <p className="wiz-body font-semibold text-[var(--foreground)]">{t('quickInstallTitle')}</p>
+          <p className="wiz-helper text-[#7A7A7A] leading-relaxed mt-0.5">
             {t('quickInstallBody')}
           </p>
         </div>
@@ -336,7 +336,7 @@ function QuickInstallCard({ registering, onInstall, t }: QuickInstallCardProps) 
         type="button"
         onClick={onInstall}
         disabled={registering}
-        className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--accent)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[48px]"
+        className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--accent)] px-4 py-3 wiz-body font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[48px]"
       >
         {registering ? t('registering') : t('quickInstallCta')}
       </button>
@@ -352,7 +352,7 @@ function PollingHintCard({ t }: StatusCardProps) {
   return (
     <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] px-4 py-3 flex items-center gap-3">
       <Spinner className="w-4 h-4 text-[var(--accent)] flex-shrink-0 animate-spin" weight="bold" />
-      <p className="text-[12.5px] text-[#555]">{t('pollingHint')}</p>
+      <p className="wiz-helper text-[#555]">{t('pollingHint')}</p>
     </div>
   );
 }
@@ -366,12 +366,12 @@ function WatchingCard({ onManualConfirm, t }: WatchingCardProps) {
     <div className="rounded-[12px] border border-[var(--accent-200)] bg-[var(--accent-light)]/40 p-4 flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <Spinner className="w-4 h-4 text-[var(--accent)] flex-shrink-0 animate-spin" weight="bold" />
-        <p className="text-[13px] font-medium text-[var(--foreground)]">{t('watchingInstall')}</p>
+        <p className="wiz-body-sm font-medium text-[var(--foreground)]">{t('watchingInstall')}</p>
       </div>
       <button
         type="button"
         onClick={onManualConfirm}
-        className="text-[12px] text-[var(--accent)] hover:underline self-start"
+        className="wiz-helper text-[var(--accent)] hover:underline self-start"
       >
         {t('manualConfirmCta')}
       </button>
@@ -383,7 +383,7 @@ function DetectedCard({ t }: StatusCardProps) {
   return (
     <div className="rounded-[12px] border border-green-200 bg-green-50 px-4 py-3 flex items-center gap-3">
       <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" weight="fill" />
-      <p className="text-[13px] text-green-900 font-medium">{t('detected')}</p>
+      <p className="wiz-body-sm text-green-900 font-medium">{t('detected')}</p>
     </div>
   );
 }
@@ -401,8 +401,8 @@ function WalletInstallCard({ passUrl, googleWalletUrl, locale, t }: WalletInstal
 
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-3 items-center">
-      <p className="text-[14px] font-semibold text-[var(--foreground)] text-center">{t('installTitle')}</p>
-      <p className="text-[12.5px] text-[#7A7A7A] text-center max-w-[320px] leading-relaxed">
+      <p className="wiz-body font-semibold text-[var(--foreground)] text-center">{t('installTitle')}</p>
+      <p className="wiz-helper text-[#7A7A7A] text-center max-w-[320px] leading-relaxed">
         {t('installBody')}
       </p>
       <div className="flex flex-row flex-wrap items-center justify-center gap-3 py-1">

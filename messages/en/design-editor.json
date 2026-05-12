@@ -47,6 +47,7 @@
     "imageUploader": {
       "clickToUpload": "Click to upload",
       "change": "Change",
+      "recrop": "Adjust crop",
       "remove": "Remove",
       "uploading": "Uploading..."
     },

@@ -26,14 +26,14 @@ export function TeamStep() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-[14px] font-semibold text-[var(--foreground)]">
+        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('rolesTitle')}
         </h3>
         <div className="grid grid-cols-1 min-[640px]:grid-cols-2 gap-3">
@@ -52,8 +52,8 @@ export function TeamStep() {
 
       <div className="rounded-[12px] border border-[var(--border)] bg-white p-4 min-h-[64px] flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[14px] font-semibold text-[var(--foreground)]">{t('inviteLabel')}</p>
-          <p className="text-[12px] text-[#7A7A7A]">{t('inviteHint')}</p>
+          <p className="wiz-body font-semibold text-[var(--foreground)]">{t('inviteLabel')}</p>
+          <p className="wiz-helper text-[#7A7A7A]">{t('inviteHint')}</p>
         </div>
         <Button onClick={() => setDialogOpen(true)} variant="outline" size="sm" className="flex-shrink-0">
           <Plus className="w-4 h-4" weight="bold" />
@@ -88,9 +88,9 @@ function RoleCard({
         <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
           {icon}
         </span>
-        <p className="text-[14px] font-semibold text-[var(--foreground)]">{label}</p>
+        <p className="wiz-body font-semibold text-[var(--foreground)]">{label}</p>
       </div>
-      <p className="text-[12.5px] text-[#666] leading-relaxed">{description}</p>
+      <p className="wiz-helper text-[#666] leading-relaxed">{description}</p>
     </div>
   );
 }

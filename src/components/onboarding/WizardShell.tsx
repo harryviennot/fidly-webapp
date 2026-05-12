@@ -43,6 +43,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   const [canSkip, setCanSkip] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [nextLabel, setNextLabel] = useState<string | null>(null);
+  const [canProceed, setCanProceed] = useState(true);
 
   const resolved = useMemo(() => resolveSlug(slug), [slug]);
 
@@ -55,6 +56,7 @@ export function WizardShell({ slug }: WizardShellProps) {
       setCanSkip,
       setIsBusy,
       setNextLabel,
+      setCanProceed,
       advance: () => void handlersRef.current.next(),
       skip: () => void handlersRef.current.skip(),
     }),
@@ -62,10 +64,12 @@ export function WizardShell({ slug }: WizardShellProps) {
   );
 
   // Reset per-step overrides when the URL changes — each step starts fresh
-  // and re-registers what it needs.
+  // and re-registers what it needs. canProceed resets to `true` so steps
+  // without validation don't accidentally inherit a disabled CTA.
   useEffect(() => {
     setCanSkip(false);
     setNextLabel(null);
+    setCanProceed(true);
     submitHandlerRef.current = null;
   }, [slug]);
 
@@ -149,7 +153,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   if (!resolved) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6 text-center">
-        <p className="text-[14px] text-[#888]">{t('errors.unknownStep')}</p>
+        <p className="wiz-body text-[#888]">{t('errors.unknownStep')}</p>
       </div>
     );
   }
@@ -193,6 +197,7 @@ export function WizardShell({ slug }: WizardShellProps) {
         onSkipAll={canSkipAll ? handleSkipAll : undefined}
         canSkip={canSkipThisStep}
         canSkipAll={canSkipAll}
+        canProceed={canProceed}
         isBusy={isBusy}
         isFirst={chapterIndex === 0 && subStepIndex === 0}
         isLast={resolved.isLast}

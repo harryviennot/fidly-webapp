@@ -95,14 +95,14 @@ export function ProfileStep() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-[14px] font-semibold text-[var(--foreground)]">
+        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('typeLabel')}
         </h3>
         <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
@@ -120,7 +120,7 @@ export function ProfileStep() {
           <div className="flex flex-col gap-1.5 mt-1">
             <label
               htmlFor="biz-type-other"
-              className="text-[13px] font-medium text-[var(--foreground)]"
+              className="wiz-body-sm font-medium text-[var(--foreground)]"
             >
               {t('otherFreeText')}
             </label>
@@ -137,7 +137,7 @@ export function ProfileStep() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-[14px] font-semibold text-[var(--foreground)]">
+        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('sizeLabel')}
         </h3>
         <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
@@ -153,7 +153,7 @@ export function ProfileStep() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-[14px] font-semibold text-[var(--foreground)]">
+        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('locationsLabel')}
         </h3>
         <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
@@ -169,7 +169,7 @@ export function ProfileStep() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-[14px] font-semibold text-[var(--foreground)]">
+        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('goalLabel')}
         </h3>
         <div className="flex flex-col gap-2">

@@ -71,15 +71,15 @@ export function IconStep() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
       {showHint && (
         <div className="flex items-start gap-3 rounded-[10px] border border-[var(--accent)]/30 bg-[var(--accent-light)] px-3.5 py-2.5">
-          <p className="flex-1 text-[12.5px] leading-relaxed text-[var(--foreground)]">
+          <p className="flex-1 wiz-helper leading-relaxed text-[var(--foreground)]">
             {t('autoFilledHint')}
           </p>
           <button

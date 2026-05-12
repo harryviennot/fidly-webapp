@@ -29,10 +29,10 @@ export function IntroStep() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
       <div className="flex flex-col items-center gap-4 py-2">
@@ -45,24 +45,24 @@ export function IntroStep() {
       </div>
 
       <section className="flex flex-col gap-2">
-        <h3 className="text-[14px] font-semibold text-[var(--foreground)]">
+        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('whatItIsTitle')}
         </h3>
-        <p className="text-[13.5px] leading-relaxed text-[#444]">{t('whatItIsBody')}</p>
+        <p className="wiz-body leading-relaxed text-[#444]">{t('whatItIsBody')}</p>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h3 className="text-[14px] font-semibold text-[var(--foreground)]">
+        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('differentFromTitle')}
         </h3>
-        <p className="text-[13.5px] leading-relaxed text-[#444]">{t('differentFromBody')}</p>
+        <p className="wiz-body leading-relaxed text-[#444]">{t('differentFromBody')}</p>
       </section>
 
       <section className="flex flex-col gap-2 rounded-[12px] bg-[var(--paper)] border border-[var(--border-light)] p-4">
-        <h3 className="text-[14px] font-semibold text-[var(--foreground)]">
+        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('audienceOfOneTitle')}
         </h3>
-        <p className="text-[13.5px] leading-relaxed text-[#444]">{t('audienceOfOneBody')}</p>
+        <p className="wiz-body leading-relaxed text-[#444]">{t('audienceOfOneBody')}</p>
       </section>
     </div>
   );

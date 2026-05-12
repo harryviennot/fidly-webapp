@@ -18,14 +18,13 @@ export function LogoCropper(props: LogoCropperProps) {
     <ImageCropper
       {...props}
       title="Crop Logo"
-      description="Adjust the crop area and aspect ratio to fit your card design."
+      description="Drag the corners to choose the area to keep. Anything from square up to 3:1 wide works."
       filename="logo-cropped.png"
       applyLabel="Apply Crop"
       minAspect={1}
       maxAspect={3.2}
-      defaultAspect={2}
       outputHeight={150}
-      aspectLabels={{ min: 'Square', max: 'Wide' }}
+      hideAspectSlider
       minHeight={30}
     />
   );

@@ -17,7 +17,8 @@
       "createFailed": "Something went wrong creating your business. Please try again.",
       "saveFailed": "Couldn't save. Please try again.",
       "programNameRequired": "Give your program a name.",
-      "rewardRequired": "Set the reward customers will earn."
+      "rewardRequired": "Set the reward customers will earn.",
+      "slugTooShort": "A few more characters."
     },
     "chapters": {
       "welcome": {
@@ -35,10 +36,10 @@
             "fields": {
               "name": "Business name",
               "namePlaceholder": "e.g. Café du Coin",
-              "slug": "Web address",
+              "slug": "Your Stampeo page URL",
               "slugHelp": "Your card link will be stampeo.app/{slug}",
               "slugPlaceholder": "cafe-du-coin",
-              "website": "Website (optional)",
+              "website": "Your business website",
               "websitePlaceholder": "https://…",
               "logo": "Logo",
               "logoHelp": "Up to 3:1 wide.",

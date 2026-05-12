@@ -136,10 +136,10 @@ export function ComposeStep() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
       <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-4">
@@ -148,13 +148,13 @@ export function ComposeStep() {
             <MegaphoneIcon className="w-5 h-5 text-[var(--accent)]" weight="bold" />
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-[12.5px] text-[#7A7A7A] leading-relaxed">{t('composeBody')}</p>
+            <p className="wiz-helper text-[#7A7A7A] leading-relaxed">{t('composeBody')}</p>
           </div>
         </div>
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="bc-title" className="text-[12px] font-medium text-[#555]">
+            <label htmlFor="bc-title" className="wiz-helper font-medium text-[#555]">
               {t('titleLabel')}
             </label>
             <input
@@ -164,13 +164,13 @@ export function ComposeStep() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder={businessName || t('titlePlaceholder')}
               disabled={sent}
-              className="h-11 rounded-[10px] border border-[var(--border)] bg-white px-3 text-[14px] outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60"
+              className="h-11 rounded-[10px] border border-[var(--border)] bg-white px-3 wiz-body outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60"
             />
-            <p className="text-[11px] text-[#999]">{t('titleHint')}</p>
+            <p className="wiz-micro text-[#999]">{t('titleHint')}</p>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="bc-body" className="text-[12px] font-medium text-[#555]">
+            <label htmlFor="bc-body" className="wiz-helper font-medium text-[#555]">
               {t('bodyLabel')}
             </label>
             <textarea
@@ -181,15 +181,15 @@ export function ComposeStep() {
               disabled={sent}
               rows={3}
               maxLength={200}
-              className="rounded-[10px] border border-[var(--border)] bg-white px-3 py-2.5 text-[14px] leading-snug outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60 resize-none"
+              className="rounded-[10px] border border-[var(--border)] bg-white px-3 py-2.5 wiz-body leading-snug outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60 resize-none"
             />
-            <p className="text-[11px] text-[#999]">{t('bodyHint', { remaining: 200 - body.length })}</p>
+            <p className="wiz-micro text-[#999]">{t('bodyHint', { remaining: 200 - body.length })}</p>
           </div>
         </div>
 
         <PreviewBubble title={effectiveTitle} body={body || t('bodyPlaceholder')} />
 
-        <div className="flex items-center gap-2 rounded-[10px] bg-[var(--paper)] border border-[var(--border-light)] px-3 py-2 text-[12.5px]">
+        <div className="flex items-center gap-2 rounded-[10px] bg-[var(--paper)] border border-[var(--border-light)] px-3 py-2 wiz-helper">
           <Users className="w-4 h-4 text-[#888] flex-shrink-0" weight="bold" />
           <span className="text-[#555]">
             {reachable === null ? t('estimating') : t('recipientsLine', { count: reachable })}
@@ -200,7 +200,7 @@ export function ComposeStep() {
           type="button"
           onClick={handleSend}
           disabled={sent || sending || !bodyValid || reachable === 0}
-          className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[var(--accent)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[56px]"
+          className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[var(--accent)] px-4 py-3 wiz-body font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[56px]"
         >
           {sent && <CheckCircle className="w-4 h-4" weight="fill" />}
           {buttonLabel}
@@ -229,7 +229,7 @@ function DeliveryStatus({ delivery, t }: DeliveryStatusProps) {
     return (
       <div className="rounded-[10px] border border-[var(--accent-200)] bg-[var(--accent-light)]/40 px-3 py-2.5 flex items-center gap-2">
         <Spinner className="w-4 h-4 text-[var(--accent)] animate-spin flex-shrink-0" weight="bold" />
-        <p className="text-[12.5px] text-[var(--foreground)]">{t('sendingProgress')}</p>
+        <p className="wiz-helper text-[var(--foreground)]">{t('sendingProgress')}</p>
       </div>
     );
   }
@@ -237,18 +237,18 @@ function DeliveryStatus({ delivery, t }: DeliveryStatusProps) {
   if (failed) {
     return (
       <div className="rounded-[10px] border border-red-200 bg-red-50 px-3 py-2.5">
-        <p className="text-[12.5px] text-red-800">{t('sendFailed')}</p>
+        <p className="wiz-helper text-red-800">{t('sendFailed')}</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-[10px] border border-green-200 bg-green-50 px-3 py-3 flex flex-col gap-1.5">
-      <p className="text-[13px] font-semibold text-green-900 flex items-center gap-1.5">
+      <p className="wiz-body-sm font-semibold text-green-900 flex items-center gap-1.5">
         <CheckCircle className="w-4 h-4" weight="fill" />
         {t('deliveredTitle', { count: delivered })}
       </p>
-      <p className="text-[11.5px] text-green-800 leading-relaxed">
+      <p className="wiz-micro text-green-800 leading-relaxed">
         {t('deliveredHint', {
           count: delivered,
           delivered,
@@ -269,9 +269,9 @@ interface PreviewBubbleProps {
 function PreviewBubble({ title, body }: PreviewBubbleProps) {
   return (
     <div className="rounded-[14px] bg-[#1c1c1e]/95 text-white px-4 py-3 shadow-sm">
-      <p className="text-[10px] uppercase tracking-wider text-white/60 font-medium">Stampeo</p>
-      <p className="text-[13px] font-semibold leading-snug mt-0.5 line-clamp-1">{title}</p>
-      <p className="text-[12.5px] text-white/85 leading-snug mt-0.5 line-clamp-3 whitespace-pre-wrap">
+      <p className="wiz-micro uppercase tracking-wider text-white/60 font-medium">Stampeo</p>
+      <p className="wiz-body-sm font-semibold leading-snug mt-0.5 line-clamp-1">{title}</p>
+      <p className="wiz-helper text-white/85 leading-snug mt-0.5 line-clamp-3 whitespace-pre-wrap">
         {body}
       </p>
     </div>

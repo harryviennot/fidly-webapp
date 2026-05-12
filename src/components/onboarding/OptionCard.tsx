@@ -38,21 +38,21 @@ export function OptionCard({ active, onClick, label, description, emoji, disable
       )}
     >
       {emoji ? (
-        <span className="text-[22px] leading-none flex-shrink-0" aria-hidden="true">
+        <span className="wiz-h leading-none flex-shrink-0" aria-hidden="true">
           {emoji}
         </span>
       ) : null}
       <div className="flex-1 min-w-0">
         <div
           className={cn(
-            'text-[14px] font-semibold leading-tight',
+            'wiz-body font-semibold leading-tight',
             active ? 'text-[var(--foreground)]' : 'text-[#333]'
           )}
         >
           {label}
         </div>
         {description ? (
-          <p className="mt-0.5 text-[12px] text-[#7A7A7A] leading-snug">{description}</p>
+          <p className="mt-0.5 wiz-helper text-[#7A7A7A] leading-snug">{description}</p>
         ) : null}
       </div>
       <span

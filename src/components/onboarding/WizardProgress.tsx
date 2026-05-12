@@ -36,14 +36,14 @@ export function WizardProgress({
         style={{ width: `${percent}%` }}
       />
       <div className="px-4 py-3 min-[768px]:px-6 min-[768px]:py-4">
-        <p className="text-[12px] font-medium uppercase tracking-wider text-[#999]">
+        <p className="wiz-helper font-medium uppercase tracking-wider text-[#999]">
           {`Chapter ${chapterIndex + 1} of ${chapterCount}`}
         </p>
-        <h1 className="mt-1 text-[17px] min-[768px]:text-[19px] font-semibold leading-snug text-[var(--foreground)]">
+        <h1 className="mt-1 wiz-h2 font-semibold leading-snug text-[var(--foreground)]">
           {chapterTitle}
         </h1>
         {hasSubSteps && subStepTitle ? (
-          <p className="mt-1 text-[12.5px] text-[#7A7A7A]">
+          <p className="mt-1 wiz-helper text-[#7A7A7A]">
             {`Step ${subStepIndex! + 1} of ${subStepCount} — ${subStepTitle}`}
           </p>
         ) : null}

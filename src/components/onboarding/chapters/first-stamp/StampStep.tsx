@@ -149,10 +149,10 @@ export function StampStep() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h2 className="text-[20px] min-[768px]:text-[24px] font-semibold text-[var(--foreground)]">
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
       {!ready ? (
@@ -183,8 +183,8 @@ function PrereqCard({ t }: PrereqCardProps) {
     <div className="rounded-[12px] border border-amber-200 bg-amber-50 p-5 flex items-start gap-3">
       <Warning className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" weight="bold" />
       <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-amber-900">{t('prereqTitle')}</p>
-        <p className="text-[12.5px] text-amber-800 leading-relaxed mt-0.5">{t('prereqBody')}</p>
+        <p className="wiz-body font-semibold text-amber-900">{t('prereqTitle')}</p>
+        <p className="wiz-helper text-amber-800 leading-relaxed mt-0.5">{t('prereqBody')}</p>
       </div>
     </div>
   );
@@ -227,10 +227,10 @@ function StampCard({
           <LightningIcon className="w-5 h-5 text-[var(--accent)]" weight="bold" />
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-semibold text-[var(--foreground)]">
+          <p className="wiz-body font-semibold text-[var(--foreground)]">
             {hasAnyStamp ? t('keepStampingTitle') : t('readyTitle')}
           </p>
-          <p className="text-[12.5px] text-[#7A7A7A] leading-relaxed mt-0.5">
+          <p className="wiz-helper text-[#7A7A7A] leading-relaxed mt-0.5">
             {hasAnyStamp ? t('keepStampingBody') : t('readyBody')}
           </p>
         </div>
@@ -240,12 +240,12 @@ function StampCard({
         type="button"
         onClick={onSend}
         disabled={disabled}
-        className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[var(--accent)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[56px]"
+        className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[var(--accent)] px-4 py-3 wiz-body font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[56px]"
       >
         {label}
       </button>
 
-      <div className="flex items-center justify-center gap-3 text-[13px] flex-wrap">
+      <div className="flex items-center justify-center gap-3 wiz-body-sm flex-wrap">
         <div className="flex items-center gap-1.5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] px-3 py-1.5">
           <span className="text-[#999]">{t('stampsLabel')}</span>
           <span className="font-semibold tabular-nums text-[var(--foreground)]">
@@ -264,12 +264,12 @@ function StampCard({
         <button
           type="button"
           onClick={onBypassCooldown}
-          className="text-[11.5px] text-[#888] hover:text-[var(--foreground)] underline underline-offset-2 self-center"
+          className="wiz-micro text-[#888] hover:text-[var(--foreground)] underline underline-offset-2 self-center"
         >
           {t('bypassCooldown')}
         </button>
       ) : (
-        <p className="flex items-start gap-1.5 text-[11.5px] text-[#888] leading-relaxed">
+        <p className="flex items-start gap-1.5 wiz-micro text-[#888] leading-relaxed">
           <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" weight="bold" />
           <span>{t('coalesceHint')}</span>
         </p>
@@ -284,7 +284,7 @@ function CustomisationHintCard({ t }: { t: ReturnType<typeof useTranslations> })
       <span className="flex-shrink-0 w-8 h-8 rounded-full bg-white border border-[var(--border)] flex items-center justify-center">
         <Bell className="w-4 h-4 text-[var(--accent)]" weight="duotone" />
       </span>
-      <p className="text-[12.5px] text-[#444] leading-relaxed">{t('customisationHint')}</p>
+      <p className="wiz-helper text-[#444] leading-relaxed">{t('customisationHint')}</p>
     </div>
   );
 }

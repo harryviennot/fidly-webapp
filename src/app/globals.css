@@ -567,3 +567,56 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Launch-wizard text scale
+ *
+ * One utility per typographic role, each responsive. Change a single
+ * number here to retune all matching usages across the wizard at once,
+ * instead of editing dozens of `text-[Npx]` literals.
+ *
+ * Scope: `web/src/components/onboarding/**`. Other surfaces keep their
+ * own scale.
+ * ──────────────────────────────────────────────────────────────────── */
+@utility wiz-h {
+  font-size: 22px;
+  line-height: 1.2;
+  @media (min-width: 768px) {
+    font-size: 26px;
+  }
+}
+@utility wiz-h2 {
+  font-size: 16px;
+  line-height: 1.3;
+  @media (min-width: 768px) {
+    font-size: 18px;
+  }
+}
+@utility wiz-body {
+  font-size: 15px;
+  line-height: 1.5;
+  @media (min-width: 768px) {
+    font-size: 16px;
+  }
+}
+@utility wiz-body-sm {
+  font-size: 14px;
+  line-height: 1.5;
+  @media (min-width: 768px) {
+    font-size: 14.5px;
+  }
+}
+@utility wiz-helper {
+  font-size: 13px;
+  line-height: 1.45;
+  @media (min-width: 768px) {
+    font-size: 13.5px;
+  }
+}
+@utility wiz-micro {
+  font-size: 12px;
+  line-height: 1.4;
+  @media (min-width: 768px) {
+    font-size: 12.5px;
+  }
+}

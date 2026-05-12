@@ -10,6 +10,8 @@ interface WizardFooterProps {
   onSkipAll?: () => void;
   canSkip: boolean;
   canSkipAll: boolean;
+  /** When false, the primary CTA renders disabled. Defaults to `true`. */
+  canProceed?: boolean;
   isBusy: boolean;
   isFirst: boolean;
   isLast: boolean;
@@ -32,6 +34,7 @@ export function WizardFooter({
   onSkipAll,
   canSkip,
   canSkipAll,
+  canProceed = true,
   isBusy,
   isFirst,
   isLast,
@@ -47,7 +50,7 @@ export function WizardFooter({
             type="button"
             onClick={onSkipAll}
             disabled={isBusy}
-            className="text-[12px] text-[#888] hover:text-[var(--foreground)] underline underline-offset-2 disabled:opacity-50"
+            className="wiz-helper text-[#888] hover:text-[var(--foreground)] underline underline-offset-2 disabled:opacity-50"
           >
             {t('skipAll')}
           </button>
@@ -58,7 +61,7 @@ export function WizardFooter({
           type="button"
           onClick={onBack}
           disabled={isFirst || isBusy || !onBack}
-          className="inline-flex items-center gap-1 rounded-[10px] px-3 py-2.5 text-[13px] font-medium text-[#666] hover:text-[var(--foreground)] hover:bg-[var(--paper-hover)] transition-colors disabled:opacity-40 disabled:hover:bg-transparent min-h-[44px]"
+          className="inline-flex items-center gap-1 rounded-[10px] px-3 py-2.5 wiz-body-sm font-medium text-[#666] hover:text-[var(--foreground)] hover:bg-[var(--paper-hover)] transition-colors disabled:opacity-40 disabled:hover:bg-transparent min-h-[44px]"
           aria-label={t('back')}
         >
           <CaretLeftIcon className="h-4 w-4" weight="bold" />
@@ -70,7 +73,7 @@ export function WizardFooter({
             type="button"
             onClick={onSkip}
             disabled={isBusy}
-            className="rounded-[10px] px-3 py-2.5 text-[13px] font-medium text-[#888] hover:text-[var(--foreground)] hover:bg-[var(--paper-hover)] transition-colors disabled:opacity-40 min-h-[44px]"
+            className="rounded-[10px] px-3 py-2.5 wiz-body-sm font-medium text-[#888] hover:text-[var(--foreground)] hover:bg-[var(--paper-hover)] transition-colors disabled:opacity-40 min-h-[44px]"
           >
             {t('skip')}
           </button>
@@ -81,8 +84,8 @@ export function WizardFooter({
         <button
           type="button"
           onClick={onNext}
-          disabled={isBusy}
-          className="flex-1 min-[768px]:flex-initial inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white shadow-sm transition-all duration-150 hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
+          disabled={isBusy || !canProceed}
+          className="flex-1 min-[768px]:flex-initial inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--accent)] px-5 py-3 wiz-body font-semibold text-white shadow-sm transition-all duration-150 hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
         >
           {isBusy ? t('saving') : (nextLabel ?? (isLast ? t('finish') : t('next')))}
         </button>

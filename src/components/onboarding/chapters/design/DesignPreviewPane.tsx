@@ -51,7 +51,7 @@ export function DesignPreviewPane({ showBack = false }: DesignPreviewPaneProps) 
           aria-expanded={expanded}
           className="w-full flex items-center justify-between gap-3 text-left"
         >
-          <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-[var(--foreground)]">
+          <span className="inline-flex items-center gap-2 wiz-helper font-semibold text-[var(--foreground)]">
             <Eye className="w-4 h-4 text-[#888]" weight="bold" />
             {t('preview')}
           </span>

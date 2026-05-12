@@ -17,7 +17,8 @@
       "createFailed": "Une erreur est survenue à la création de votre commerce. Réessayez.",
       "saveFailed": "Impossible d'enregistrer. Réessayez.",
       "programNameRequired": "Donnez un nom à votre programme.",
-      "rewardRequired": "Indiquez la récompense que les clients gagneront."
+      "rewardRequired": "Indiquez la récompense que les clients gagneront.",
+      "slugTooShort": "Encore quelques caractères."
     },
     "chapters": {
       "welcome": {
@@ -35,10 +36,10 @@
             "fields": {
               "name": "Nom du commerce",
               "namePlaceholder": "ex. Café du Coin",
-              "slug": "Adresse web",
+              "slug": "L'URL de votre page Stampeo",
               "slugHelp": "Le lien de votre carte sera stampeo.app/{slug}",
               "slugPlaceholder": "cafe-du-coin",
-              "website": "Site web (optionnel)",
+              "website": "Votre site web",
               "websitePlaceholder": "https://…",
               "logo": "Logo",
               "logoHelp": "Jusqu'à un ratio de 3:1.",
