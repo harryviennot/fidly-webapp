@@ -85,6 +85,36 @@ export function useWizardProgress() {
     [progress, writeProgress]
   );
 
+  /**
+   * Atomic "mark step completed AND patch payload" — used by detection-driven
+   * advancement (e.g. FirstCustomerStep auto-advance) where the wizard shell's
+   * regular submit → markCompleted flow would race with a freshly-written
+   * payload and overwrite it. Reads `currentBusiness.settings.setup_progress`
+   * directly to avoid the stale-closure problem with `progress`.
+   */
+  const completeWithPayload = useCallback(
+    async (step: SetupStepRef, patch: Partial<SetupProgress['payload']>) => {
+      if (!currentBusiness) return;
+      const current: SetupProgress = currentBusiness.settings?.setup_progress ?? defaultProgress();
+      const key = stepKey(step);
+      const completed = current.completed.some((s) => stepKey(s) === key)
+        ? current.completed
+        : [...current.completed, step];
+      const skipped = current.skipped.filter((s) => stepKey(s) !== key);
+      const next: SetupProgress = {
+        ...current,
+        completed,
+        skipped,
+        last_step: step,
+        payload: { ...current.payload, ...patch },
+      };
+      await updateBusiness({
+        settings: { ...(currentBusiness.settings ?? {}), setup_progress: next },
+      });
+    },
+    [currentBusiness, updateBusiness]
+  );
+
   const isStepCompleted = useCallback(
     (step: SetupStepRef): boolean => {
       return progress.completed.some((s) => stepKey(s) === stepKey(step));
@@ -98,6 +128,7 @@ export function useWizardProgress() {
     markSkipped,
     finalize,
     updatePayload,
+    completeWithPayload,
     isStepCompleted,
   };
 }

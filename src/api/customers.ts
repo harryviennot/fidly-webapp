@@ -119,6 +119,33 @@ export function enrollmentIdFromPassUrl(passUrl: string | undefined | null): str
   return match?.[1] ?? null;
 }
 
+export interface WalletInstallStatus {
+  installed: boolean;
+  apple: boolean;
+  google: boolean;
+}
+
+/**
+ * Polled by the launch wizard's First Customer step to detect when the owner
+ * (or their demo customer) actually adds the card to their wallet. The
+ * backend reads `push_registrations` rows for the customer; presence of any
+ * registration = pass installed (same signal the demo landing page uses).
+ */
+export async function getCustomerWalletStatus(
+  businessId: string,
+  customerOrEnrollmentId: string
+): Promise<WalletInstallStatus> {
+  const response = await fetch(
+    `${API_BASE_URL}/customers/${businessId}/${customerOrEnrollmentId}/wallet-status`,
+    { headers: await getAuthHeaders() }
+  );
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to fetch wallet status'));
+  }
+  return response.json();
+}
+
 export async function voidStamp(
   businessId: string,
   enrollmentId: string,
