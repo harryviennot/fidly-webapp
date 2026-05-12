@@ -113,7 +113,10 @@ export function InfoStep() {
       if (!isDirty) return { ok: true };
 
       const baseSettings = currentBusiness.settings ?? {};
-      const snapshot = toSave;
+      // Drop any entry the owner added but never filled in — otherwise empty
+      // phone / email / blank hours rows would render as ghost lines on the
+      // back of every pass.
+      const snapshot = pruneEmptyEntries(toSave);
       return {
         ok: true,
         save: async () => {
@@ -146,4 +149,60 @@ export function InfoStep() {
       <BusinessInfoEditor value={value} onChange={setEdits} />
     </div>
   );
+}
+
+interface ScheduleRow {
+  days: string;
+  open: string;
+  close: string;
+  closed: boolean;
+}
+
+/**
+ * Strip entries the owner added but never filled in. Empty phone, email,
+ * website, address, and custom rows would otherwise persist to
+ * `settings.business_info` and render as ghost lines on every pass.
+ *
+ * For hours, drop any schedule row with a blank `days` field, then drop the
+ * whole hours entry if no schedule rows survived.
+ */
+function pruneEmptyEntries(entries: BusinessInfoEntry[]): BusinessInfoEntry[] {
+  const cleaned: BusinessInfoEntry[] = [];
+  for (const entry of entries) {
+    if (entry.type === 'hours') {
+      const schedule = ((entry.data.schedule as ScheduleRow[]) || []).filter(
+        (row) => (row.days ?? '').trim().length > 0
+      );
+      if (schedule.length > 0) {
+        cleaned.push({ ...entry, data: { ...entry.data, schedule } });
+      }
+      continue;
+    }
+    if (entry.type === 'website' && ((entry.data.url as string) ?? '').trim()) {
+      cleaned.push(entry);
+      continue;
+    }
+    if (entry.type === 'phone' && ((entry.data.number as string) ?? '').trim()) {
+      cleaned.push(entry);
+      continue;
+    }
+    if (entry.type === 'email' && ((entry.data.email as string) ?? '').trim()) {
+      cleaned.push(entry);
+      continue;
+    }
+    if (entry.type === 'address' && ((entry.data.address as string) ?? '').trim()) {
+      cleaned.push(entry);
+      continue;
+    }
+    if (entry.type === 'custom') {
+      const label = ((entry.data.label as string) ?? '').trim();
+      const value = ((entry.data.value as string) ?? '').trim();
+      // Keep if the owner gave us either a label or a value — both empty
+      // would render as a blank line.
+      if (label.length > 0 || value.length > 0) {
+        cleaned.push(entry);
+      }
+    }
+  }
+  return cleaned;
 }
