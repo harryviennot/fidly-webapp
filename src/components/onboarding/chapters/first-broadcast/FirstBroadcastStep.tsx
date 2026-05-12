@@ -1,24 +1,96 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { MegaphoneIcon, ArrowSquareOutIcon } from '@phosphor-icons/react';
+import { toast } from 'sonner';
+import { CheckCircle, MegaphoneIcon, Users } from '@phosphor-icons/react';
+import { useBusiness } from '@/contexts/business-context';
+import { useUpdateBusiness } from '@/hooks/use-business-query';
+import { createBroadcast, estimateRecipients } from '@/api/notifications';
 import { useWizardStep } from '../../wizard-context';
 
 /**
- * Chapter 9 — optional. v1 ships a deep link to the existing broadcast
- * composer rather than reimplementing it inline. The full inline experience
- * (compose + send to the demo customer + watch the push arrive) is the
- * planned follow-up.
+ * Chapter 9 — optional. Minimal inline broadcast composer:
+ *  - one body textarea (title defaults to the business name)
+ *  - a live recipient count (everyone with an installed card)
+ *  - a single "Send now" button that calls `createBroadcast` with
+ *    `immediate: true, target_filter: { all: true }` — backend enqueues
+ *    the worker and the push goes out to every customer with a wallet.
+ *
+ * No segmentation, no scheduling — those live on the dashboard composer.
+ * The wizard step exists to let owners feel what a broadcast does, not
+ * to ship campaigns.
  */
 export function FirstBroadcastStep() {
   const t = useTranslations('onboardingBusiness.chapters.first-broadcast');
+  const tErr = useTranslations('onboardingBusiness.errors');
+  const { currentBusiness } = useBusiness();
+  const { mutateAsync: updateBusinessSettings } = useUpdateBusiness(currentBusiness?.id);
   const ctx = useWizardStep();
+
+  const businessId = currentBusiness?.id;
+  const businessName = currentBusiness?.name ?? '';
+
+  const [title, setTitle] = useState<string>('');
+  const [body, setBody] = useState<string>('');
+  const [reachable, setReachable] = useState<number | null>(null);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(
+    () => currentBusiness?.settings?.first_broadcast_sent === true
+  );
+
+  const effectiveTitle = title.trim() || businessName;
+  const bodyValid = body.trim().length > 0;
+
+  useEffect(() => {
+    if (!businessId) return;
+    let cancelled = false;
+    estimateRecipients(businessId, { all: true })
+      .then((res) => {
+        if (cancelled) return;
+        setReachable(res.total);
+      })
+      .catch(() => { /* leave null */ });
+    return () => { cancelled = true; };
+  }, [businessId]);
 
   useEffect(() => {
     ctx.setCanSkip(true);
   }, [ctx]);
+
+  const handleSend = useCallback(async () => {
+    if (!businessId || !bodyValid || sending) return;
+    setSending(true);
+    try {
+      await createBroadcast(businessId, {
+        title: effectiveTitle,
+        body: body.trim(),
+        target_filter: { all: true },
+        immediate: true,
+      });
+      if (currentBusiness) {
+        await updateBusinessSettings({
+          settings: {
+            ...(currentBusiness.settings ?? {}),
+            first_broadcast_sent: true,
+          },
+        });
+      }
+      setSent(true);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
+    } finally {
+      setSending(false);
+    }
+  }, [businessId, bodyValid, sending, effectiveTitle, body, currentBusiness, updateBusinessSettings, tErr]);
+
+  const buttonLabel = useMemo(() => {
+    if (sent) return t('sentLabel');
+    if (sending) return t('sendingLabel');
+    if (reachable === 0) return t('noRecipientsLabel');
+    if (reachable && reachable > 0) return t('sendToCountCta', { count: reachable });
+    return t('sendCta');
+  }, [sent, sending, reachable, t]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -29,24 +101,93 @@ export function FirstBroadcastStep() {
         <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-3">
+      <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-4">
         <div className="flex items-start gap-3">
           <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
             <MegaphoneIcon className="w-5 h-5 text-[var(--accent)]" weight="bold" />
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-semibold text-[var(--foreground)]">{t('cardTitle')}</p>
-            <p className="text-[12.5px] text-[#7A7A7A] leading-relaxed mt-0.5">{t('cardBody')}</p>
+            <p className="text-[14px] font-semibold text-[var(--foreground)]">{t('composeTitle')}</p>
+            <p className="text-[12.5px] text-[#7A7A7A] leading-relaxed mt-0.5">{t('composeBody')}</p>
           </div>
         </div>
-        <Link
-          href="/program/broadcasts/new"
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--accent)] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors no-underline self-start min-h-[44px]"
+
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="bc-title" className="text-[12px] font-medium text-[#555]">
+              {t('titleLabel')}
+            </label>
+            <input
+              id="bc-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={businessName || t('titlePlaceholder')}
+              disabled={sent}
+              className="h-11 rounded-[10px] border border-[var(--border)] bg-white px-3 text-[14px] outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60"
+            />
+            <p className="text-[11px] text-[#999]">{t('titleHint')}</p>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="bc-body" className="text-[12px] font-medium text-[#555]">
+              {t('bodyLabel')}
+            </label>
+            <textarea
+              id="bc-body"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder={t('bodyPlaceholder')}
+              disabled={sent}
+              rows={3}
+              maxLength={200}
+              className="rounded-[10px] border border-[var(--border)] bg-white px-3 py-2.5 text-[14px] leading-snug outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60 resize-none"
+            />
+            <p className="text-[11px] text-[#999]">{t('bodyHint', { remaining: 200 - body.length })}</p>
+          </div>
+        </div>
+
+        <PreviewBubble title={effectiveTitle} body={body || t('bodyPlaceholder')} />
+
+        <div className="flex items-center gap-2 rounded-[10px] bg-[var(--paper)] border border-[var(--border-light)] px-3 py-2 text-[12.5px]">
+          <Users className="w-4 h-4 text-[#888] flex-shrink-0" weight="bold" />
+          <span className="text-[#555]">
+            {reachable === null ? t('estimating') : t('recipientsLine', { count: reachable })}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={sent || sending || !bodyValid || reachable === 0}
+          className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[var(--accent)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[56px]"
         >
-          {t('openComposer')}
-          <ArrowSquareOutIcon className="w-3.5 h-3.5" weight="bold" />
-        </Link>
+          {sent && <CheckCircle className="w-4 h-4" weight="fill" />}
+          {buttonLabel}
+        </button>
+
+        {sent && (
+          <p className="text-[12px] text-[#7A7A7A] text-center leading-relaxed">{t('sentHint')}</p>
+        )}
       </div>
+    </div>
+  );
+}
+
+interface PreviewBubbleProps {
+  title: string;
+  body: string;
+}
+
+/** Tiny lock-screen preview so the owner sees roughly what their customers will get. */
+function PreviewBubble({ title, body }: PreviewBubbleProps) {
+  return (
+    <div className="rounded-[14px] bg-[#1c1c1e]/95 text-white px-4 py-3 shadow-sm">
+      <p className="text-[10px] uppercase tracking-wider text-white/60 font-medium">Stampeo</p>
+      <p className="text-[13px] font-semibold leading-snug mt-0.5 line-clamp-1">{title}</p>
+      <p className="text-[12.5px] text-white/85 leading-snug mt-0.5 line-clamp-3 whitespace-pre-wrap">
+        {body}
+      </p>
     </div>
   );
 }

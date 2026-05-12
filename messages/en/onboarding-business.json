@@ -43,6 +43,10 @@
               "logoHelp": "Square works best."
             }
           },
+          "backfields": {
+            "title": "What's on the back of your cards?",
+            "subtitle": "Phone, address, website, opening hours — set them once here, they show on every card. You can hide some per design later."
+          },
           "type": {
             "title": "What kind of business?",
             "subtitle": "Pick the closest match — we'll tune templates and copy to fit.",
@@ -190,10 +194,23 @@
       },
       "first-broadcast": {
         "title": "Send your first broadcast",
-        "subtitle": "Broadcasts push a message to every customer who installed your card.",
-        "cardTitle": "Compose a broadcast",
-        "cardBody": "Pick a time, write your message, preview what customers see on their lock screen.",
-        "openComposer": "Open composer"
+        "subtitle": "One message to every customer with your card installed — no segmentation, no scheduling, just a feel for how it lands.",
+        "composeTitle": "Write your broadcast",
+        "composeBody": "Pick a short message you'd actually send. It goes to everyone with an installed card the moment you tap send.",
+        "titleLabel": "Title",
+        "titlePlaceholder": "e.g. Café du Coin",
+        "titleHint": "Defaults to your business name. Shows in bold on the lock-screen banner.",
+        "bodyLabel": "Message",
+        "bodyPlaceholder": "Happy hour today 5–7pm — show your card for 20% off.",
+        "bodyHint": "{remaining} characters left",
+        "estimating": "Counting recipients…",
+        "recipientsLine": "{count, plural, =0 {No customers have installed their card yet — try Live Stamp first.} =1 {1 customer will receive this} other {# customers will receive this}}",
+        "sendCta": "Send to everyone",
+        "sendToCountCta": "Send to {count, plural, =1 {1 customer} other {# customers}}",
+        "sendingLabel": "Sending…",
+        "sentLabel": "Broadcast sent",
+        "noRecipientsLabel": "Nobody to send to yet",
+        "sentHint": "Open your phone — your broadcast should land in a few seconds."
       },
       "team": {
         "title": "Invite your team",

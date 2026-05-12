@@ -1,6 +1,7 @@
 import type { ChapterDef, ResolvedStep, SubStepDef } from './types';
 import { WelcomeStep } from './chapters/welcome/WelcomeStep';
 import { IdentityStep } from './chapters/business/IdentityStep';
+import { BackfieldsStep } from './chapters/business/BackfieldsStep';
 import { TypeStep } from './chapters/business/TypeStep';
 import { SizeStep } from './chapters/business/SizeStep';
 import { LocationsStep } from './chapters/business/LocationsStep';
@@ -51,6 +52,7 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     id: 'business',
     subSteps: [
       { id: 'identity', required: true, Component: IdentityStep },
+      { id: 'backfields', required: false, Component: BackfieldsStep },
       { id: 'type', required: false, Component: TypeStep },
       { id: 'size', required: false, Component: SizeStep },
       { id: 'locations', required: false, Component: LocationsStep },

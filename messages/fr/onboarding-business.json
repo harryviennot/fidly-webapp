@@ -43,6 +43,10 @@
               "logoHelp": "Format carré conseillé."
             }
           },
+          "backfields": {
+            "title": "Que mettre au dos de vos cartes ?",
+            "subtitle": "Téléphone, adresse, site web, horaires — définissez-les une fois ici, ils apparaissent sur toutes vos cartes. Vous pourrez en cacher par design plus tard."
+          },
           "type": {
             "title": "Quel type de commerce ?",
             "subtitle": "Choisissez le plus proche — on ajustera les modèles et la communication.",
@@ -190,10 +194,23 @@
       },
       "first-broadcast": {
         "title": "Envoyez votre première diffusion",
-        "subtitle": "Les diffusions envoient un message à tous les clients ayant installé votre carte.",
-        "cardTitle": "Composer une diffusion",
-        "cardBody": "Choisissez un horaire, rédigez votre message, prévisualisez ce que verront vos clients.",
-        "openComposer": "Ouvrir le composeur"
+        "subtitle": "Un message à tous les clients ayant installé votre carte — pas de segmentation, pas de planification, juste pour ressentir l'effet.",
+        "composeTitle": "Rédigez votre diffusion",
+        "composeBody": "Un message court que vous enverriez vraiment. Il part à tout le monde dès que vous tapez Envoyer.",
+        "titleLabel": "Titre",
+        "titlePlaceholder": "ex. Café du Coin",
+        "titleHint": "Reprend votre nom de commerce par défaut. Apparaît en gras sur l'écran verrouillé.",
+        "bodyLabel": "Message",
+        "bodyPlaceholder": "Happy hour aujourd'hui 17h–19h — montrez votre carte pour -20%.",
+        "bodyHint": "{remaining} caractères restants",
+        "estimating": "Comptage des destinataires…",
+        "recipientsLine": "{count, plural, =0 {Aucun client n'a encore installé sa carte — essayez d'abord Tampon en direct.} =1 {1 client recevra ce message} other {# clients recevront ce message}}",
+        "sendCta": "Envoyer à tout le monde",
+        "sendToCountCta": "Envoyer à {count, plural, =1 {1 client} other {# clients}}",
+        "sendingLabel": "Envoi en cours…",
+        "sentLabel": "Diffusion envoyée",
+        "noRecipientsLabel": "Personne à qui envoyer pour l'instant",
+        "sentHint": "Ouvrez votre téléphone — votre diffusion devrait arriver dans quelques secondes."
       },
       "team": {
         "title": "Invitez votre équipe",
