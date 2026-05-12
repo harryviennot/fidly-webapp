@@ -2,13 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { BusinessInfoEditor } from '@/components/settings/BusinessInfoEditor';
 import { getMyProfile } from '@/api/profile';
-import { useWizardStep } from '../../wizard-context';
+import { useDirtySnapshot, useWizardStep } from '../../wizard-context';
 import type { BusinessInfoEntry } from '@/types/business';
 import type { User } from '@/types';
 
@@ -98,27 +97,43 @@ export function InfoStep() {
     return seedDefaults ?? [];
   }, [edits, currentBusiness, seedDefaults]);
 
+  // Persist whatever's currently visible — explicit edits OR the seed
+  // defaults (so they survive a "Continue" without editing). Setting the
+  // key, even to [], blocks re-seeding on future visits.
+  const toSave = useMemo<BusinessInfoEntry[]>(
+    () => edits ?? currentBusiness?.settings?.business_info ?? seedDefaults ?? [],
+    [edits, currentBusiness, seedDefaults]
+  );
+  const { isDirty, markSaved } = useDirtySnapshot('card-back.info', toSave);
+
   useEffect(() => {
     ctx.setCanSkip(true);
     ctx.setSubmitHandler(async () => {
       if (!currentBusiness) return { ok: false };
-      // Persist whatever's currently visible — explicit edits OR the seed
-      // defaults (so they survive a "Save & continue" without editing).
-      // Setting the key, even to [], blocks re-seeding on future visits.
-      const toSave =
-        edits ?? currentBusiness.settings?.business_info ?? seedDefaults ?? [];
-      try {
-        await updateBusiness({
-          settings: { ...(currentBusiness.settings ?? {}), business_info: toSave },
-        });
-        return { ok: true };
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
-        return { ok: false };
-      }
+      if (!isDirty) return { ok: true };
+
+      const baseSettings = currentBusiness.settings ?? {};
+      const snapshot = toSave;
+      return {
+        ok: true,
+        save: async () => {
+          try {
+            await updateBusiness({
+              settings: { ...baseSettings, business_info: snapshot },
+            });
+            markSaved();
+            return { ok: true };
+          } catch (err) {
+            return {
+              ok: false,
+              reason: err instanceof Error ? err.message : tErr('saveFailed'),
+            };
+          }
+        },
+      };
     });
     return () => ctx.setSubmitHandler(null);
-  }, [edits, currentBusiness, seedDefaults, updateBusiness, ctx, tErr]);
+  }, [toSave, isDirty, markSaved, currentBusiness, updateBusiness, ctx, tErr]);
 
   return (
     <div className="flex flex-col gap-6">

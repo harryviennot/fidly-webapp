@@ -56,3 +56,31 @@ export function useWizardDraft<T>(
   );
   return [value, setValue];
 }
+
+/**
+ * Returns a stable `isDirty` flag and a `markSaved` helper for a snapshot of
+ * the step's current form state, keyed against the wizard draft store.
+ *
+ *  - `isDirty` is `true` when the JSON of `current` differs from the value
+ *    last passed to `markSaved`.
+ *  - `markSaved()` records the current snapshot. Call it from the step's
+ *    `save` callback after the API write succeeds.
+ *
+ * Use this to skip the background save when the user navigates Back→Forward
+ * without editing anything. The saved snapshot persists in the draft store
+ * (localStorage), so it survives reload too.
+ */
+export function useDirtySnapshot<T>(
+  key: string,
+  current: T
+): { isDirty: boolean; markSaved: () => void } {
+  const ctx = useWizardStep();
+  const draftKey = `_saved.${key}`;
+  const currentJson = JSON.stringify(current);
+  const savedJson = ctx.getDraft<string>(draftKey);
+  const isDirty = savedJson !== currentJson;
+  const markSaved = useCallback(() => {
+    ctx.setDraft(draftKey, currentJson);
+  }, [ctx, draftKey, currentJson]);
+  return { isDirty, markSaved };
+}

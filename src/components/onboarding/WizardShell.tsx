@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { WizardProgress } from './WizardProgress';
 import { WizardFooter } from './WizardFooter';
 import { WizardStepProvider } from './wizard-context';
@@ -12,10 +13,11 @@ import {
   WIZARD_CHAPTERS,
   isRequiredFloorMet,
   nextStepPath,
+  pathForStep,
   previousStepPath,
   resolveSlug,
 } from './registry';
-import type { SubmitHandler, WizardStepContextValue } from './types';
+import type { BackgroundSave, SubmitHandler, WizardStepContextValue } from './types';
 
 const DRAFT_STORAGE_KEY = 'stampeo:wizard-draft';
 
@@ -145,27 +147,57 @@ export function WizardShell({ slug }: WizardShellProps) {
   const handleNext = useCallback(async () => {
     if (!resolved) return;
     setIsBusy(true);
+    let backgroundSave: BackgroundSave | undefined;
     try {
       if (submitHandlerRef.current) {
         const result = await submitHandlerRef.current();
-        if (!result.ok) return;
+        if (!result.ok) return; // validation failed — toast came from the step
+        backgroundSave = result.save;
       }
+
       const step = { chapter: resolved.chapter.id, step: resolved.subStep.id };
-      await markCompleted(step);
+      const stepPath = pathForStep(resolved.chapter, resolved.subStep);
       const nextPath = nextStepPath(resolved);
-      if (nextPath) {
-        router.push(nextPath);
-      } else {
-        // Last step — finalize and release to dashboard. Drop the draft so
-        // a future second-business creation starts with a clean slate.
+
+      if (!nextPath) {
+        // Last step — saves here MUST complete before we release to the
+        // dashboard, otherwise post-finalize state could be incomplete.
+        if (backgroundSave) {
+          const saveResult = await backgroundSave();
+          if (!saveResult.ok) {
+            toast.error(saveResult.reason || t('errors.saveFailed'));
+            return;
+          }
+        }
+        await markCompleted(step);
         await finalize();
         clearDraft();
         router.push('/');
+        return;
+      }
+
+      // Non-final step: navigate immediately, fire save in the background.
+      // Completion is recorded only after save success, so setup_progress
+      // never claims a step finished if its data didn't persist.
+      router.push(nextPath);
+
+      if (backgroundSave) {
+        void backgroundSave().then(async (saveResult) => {
+          if (saveResult.ok) {
+            await markCompleted(step);
+          } else {
+            toast.error(saveResult.reason || t('errors.saveFailed'));
+            router.push(stepPath);
+          }
+        });
+      } else {
+        // Nothing to save — record completion now.
+        await markCompleted(step);
       }
     } finally {
       setIsBusy(false);
     }
-  }, [resolved, markCompleted, finalize, router, clearDraft]);
+  }, [resolved, markCompleted, finalize, router, clearDraft, t]);
 
   const handleSkip = useCallback(async () => {
     if (!resolved) return;

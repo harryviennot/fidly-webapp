@@ -2,14 +2,17 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import {
   DataCollectionForm,
   type DataCollectionValue,
 } from '@/components/program/forms/DataCollectionForm';
-import { useWizardStep, useWizardDraft } from '../../wizard-context';
+import {
+  useDirtySnapshot,
+  useWizardDraft,
+  useWizardStep,
+} from '../../wizard-context';
 import type { FieldCollectionMode } from '@/types/business';
 
 const DEFAULTS: DataCollectionValue = {
@@ -52,25 +55,39 @@ export function DataCollectionStep() {
     }
   );
 
+  const { isDirty, markSaved } = useDirtySnapshot('data-collection', value);
+
   useEffect(() => {
     ctx.setCanSkip(true);
     ctx.setSubmitHandler(async () => {
       if (!currentBusiness) return { ok: false };
-      try {
-        await updateBusiness({
-          settings: {
-            ...(currentBusiness.settings ?? {}),
-            customer_data_collection: value,
-          },
-        });
-        return { ok: true };
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
-        return { ok: false };
-      }
+      if (!isDirty) return { ok: true };
+
+      const baseSettings = currentBusiness.settings ?? {};
+      const snapshot = value;
+      return {
+        ok: true,
+        save: async () => {
+          try {
+            await updateBusiness({
+              settings: {
+                ...baseSettings,
+                customer_data_collection: snapshot,
+              },
+            });
+            markSaved();
+            return { ok: true };
+          } catch (err) {
+            return {
+              ok: false,
+              reason: err instanceof Error ? err.message : tErr('saveFailed'),
+            };
+          }
+        },
+      };
     });
     return () => ctx.setSubmitHandler(null);
-  }, [currentBusiness, value, updateBusiness, ctx, tErr]);
+  }, [currentBusiness, value, isDirty, markSaved, updateBusiness, ctx, tErr]);
 
   return (
     <div className="flex flex-col gap-6">

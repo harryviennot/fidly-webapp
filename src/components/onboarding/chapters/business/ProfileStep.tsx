@@ -1,13 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { OptionCard } from '../../OptionCard';
-import { useWizardStep, useWizardDraft } from '../../wizard-context';
+import {
+  useDirtySnapshot,
+  useWizardDraft,
+  useWizardStep,
+} from '../../wizard-context';
 
 const TYPE_OPTIONS = [
   { id: 'cafe', emoji: '☕' },
@@ -73,6 +76,20 @@ export function ProfileStep() {
     locationsCount !== '' &&
     primaryGoal !== '';
 
+  // Snapshot of everything we'd send to the API. Compared against the last
+  // successful save so a Back → Forward without edits skips the write.
+  const snapshot = useMemo(
+    () => ({
+      business_type: businessType,
+      business_type_other: businessType === 'other' ? businessTypeOther.trim() : '',
+      team_size: teamSize,
+      locations_count: locationsCount,
+      primary_goal: primaryGoal,
+    }),
+    [businessType, businessTypeOther, teamSize, locationsCount, primaryGoal]
+  );
+  const { isDirty, markSaved } = useDirtySnapshot('profile', snapshot);
+
   useEffect(() => {
     ctx.setCanSkip(false);
     ctx.setCanProceed(isValid);
@@ -81,34 +98,48 @@ export function ProfileStep() {
   useEffect(() => {
     ctx.setSubmitHandler(async () => {
       if (!currentBusiness || !isValid) return { ok: false };
-      const patch: Record<string, unknown> = {
-        business_type: businessType,
-        team_size: teamSize,
-        locations_count: locationsCount,
-        primary_goal: primaryGoal,
-      };
-      if (businessType === 'other') {
-        patch.business_type_other = businessTypeOther.trim();
-      }
 
-      try {
-        await updateBusiness({
-          settings: { ...(currentBusiness.settings ?? {}), ...patch },
-        });
-        return { ok: true };
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
-        return { ok: false };
+      // No diff vs the last successful write → skip the API hop entirely.
+      if (!isDirty) return { ok: true };
+
+      // Validation passed; the heavy lifting runs in the background after
+      // the shell navigates. Capture snapshot values in the closure so the
+      // save sends the exact data the user saw at submit time.
+      const settingsPatch: Record<string, unknown> = {
+        business_type: snapshot.business_type,
+        team_size: snapshot.team_size,
+        locations_count: snapshot.locations_count,
+        primary_goal: snapshot.primary_goal,
+      };
+      if (snapshot.business_type === 'other') {
+        settingsPatch.business_type_other = snapshot.business_type_other;
       }
+      const baseSettings = currentBusiness.settings ?? {};
+
+      return {
+        ok: true,
+        save: async () => {
+          try {
+            await updateBusiness({
+              settings: { ...baseSettings, ...settingsPatch },
+            });
+            markSaved();
+            return { ok: true };
+          } catch (err) {
+            return {
+              ok: false,
+              reason: err instanceof Error ? err.message : tErr('saveFailed'),
+            };
+          }
+        },
+      };
     });
     return () => ctx.setSubmitHandler(null);
   }, [
-    businessType,
-    businessTypeOther,
-    teamSize,
-    locationsCount,
-    primaryGoal,
+    snapshot,
     isValid,
+    isDirty,
+    markSaved,
     currentBusiness,
     updateBusiness,
     ctx,

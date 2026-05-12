@@ -1,6 +1,24 @@
 import type { ComponentType } from 'react';
 
-export type SubmitResult = { ok: true } | { ok: false; reason?: string };
+/**
+ * Optional background-save function returned alongside `{ ok: true }` from a
+ * step's submit handler. The shell fires it AFTER navigating forward, so the
+ * user doesn't wait on the API. If it returns `{ ok: false }`, the shell
+ * redirects the user back to the originating step with a toast.
+ *
+ * Reserve background save for OPTIONAL info that's safe to retry after the
+ * fact (settings tweaks, profile chips, etc). Steps that create critical
+ * resources (e.g. the business row, a Stripe session) should NOT use this —
+ * they must complete before the user moves on, otherwise downstream steps
+ * have nothing to operate on.
+ */
+export type BackgroundSave = () => Promise<
+  { ok: true } | { ok: false; reason?: string }
+>;
+
+export type SubmitResult =
+  | { ok: true; save?: BackgroundSave }
+  | { ok: false; reason?: string };
 
 export type SubmitHandler = () => Promise<SubmitResult>;
 

@@ -10,7 +10,11 @@ import {
   ProgramDetailsForm,
   type ProgramDetailsValue,
 } from '@/components/program/forms/ProgramDetailsForm';
-import { useWizardStep, useWizardDraft } from '../../wizard-context';
+import {
+  useDirtySnapshot,
+  useWizardDraft,
+  useWizardStep,
+} from '../../wizard-context';
 
 const DEFAULT_VALUE: ProgramDetailsValue = {
   programName: '',
@@ -52,6 +56,8 @@ export function ProgramStep() {
     [edits, program]
   );
 
+  const { isDirty, markSaved } = useDirtySnapshot('program', value);
+
   useEffect(() => {
     ctx.setCanSkip(false);
     ctx.setSubmitHandler(async () => {
@@ -67,23 +73,40 @@ export function ProgramStep() {
         toast.error(tErr('rewardRequired'));
         return { ok: false };
       }
-      try {
-        await updateProgram({
-          programId: program.id,
-          data: {
-            name: value.programName,
-            config: { ...program.config, total_stamps: value.totalStamps, user_configured: true },
-            reward_name: value.rewardName,
-          },
-        });
-        return { ok: true };
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
-        return { ok: false };
-      }
+      if (!isDirty) return { ok: true };
+
+      const programId = program.id;
+      const programConfig = program.config;
+      const snapshot = value;
+      return {
+        ok: true,
+        save: async () => {
+          try {
+            await updateProgram({
+              programId,
+              data: {
+                name: snapshot.programName,
+                config: {
+                  ...programConfig,
+                  total_stamps: snapshot.totalStamps,
+                  user_configured: true,
+                },
+                reward_name: snapshot.rewardName,
+              },
+            });
+            markSaved();
+            return { ok: true };
+          } catch (err) {
+            return {
+              ok: false,
+              reason: err instanceof Error ? err.message : tErr('saveFailed'),
+            };
+          }
+        },
+      };
     });
     return () => ctx.setSubmitHandler(null);
-  }, [program, value, updateProgram, ctx, tErr]);
+  }, [program, value, isDirty, markSaved, updateProgram, ctx, tErr]);
 
   return (
     <div className="flex flex-col gap-6">
