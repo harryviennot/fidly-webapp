@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
 import { updateDesign, uploadStripBackground } from '@/api';
+import type { CardDesign } from '@/types';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
 import { StampsForm } from '@/components/design/forms/StampsForm';
 import { useWizardStep } from '../../wizard-context';
@@ -40,11 +41,19 @@ export function StampsStep() {
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
-        await updateDesign(businessId, existingDesign.id, data);
+        const updated = await updateDesign(businessId, existingDesign.id, data);
+        queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
+          if (!prev) return [updated];
+          return prev.map((d) => (d.id === existingDesign.id ? updated : d));
+        });
 
         if (pendingStripFile) {
           const result = await uploadStripBackground(businessId, existingDesign.id, pendingStripFile);
-          await updateDesign(businessId, existingDesign.id, { strip_background_url: result.url });
+          const withStrip = await updateDesign(businessId, existingDesign.id, { strip_background_url: result.url });
+          queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
+            if (!prev) return [withStrip];
+            return prev.map((d) => (d.id === existingDesign.id ? withStrip : d));
+          });
           setPendingStripFile(null);
         }
 

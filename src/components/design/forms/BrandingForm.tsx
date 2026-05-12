@@ -50,7 +50,7 @@ export function BrandingForm() {
     <div className="space-y-5">
       <AutoGenerateBar />
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-3">
         <LabelWithTooltip htmlFor="organization_name" tooltip={t('organizationTooltip')}>
           {t('organizationName')}
         </LabelWithTooltip>
@@ -62,7 +62,7 @@ export function BrandingForm() {
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-3">
         <LabelWithTooltip htmlFor="description" tooltip={t('cardDescriptionTooltip')}>
           {t('cardDescription')}
         </LabelWithTooltip>

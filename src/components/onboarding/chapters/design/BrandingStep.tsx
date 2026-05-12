@@ -116,12 +116,18 @@ export function BrandingStep() {
         let designId: string;
         if (existingDesign?.id) {
           designId = existingDesign.id;
-          await updateDesign(businessId, designId, cleaned);
+          const updated = await updateDesign(businessId, designId, cleaned);
+          // Sync the cache immediately so the next wizard step (which mounts
+          // a fresh `useDesignStepState`) initialises from the just-saved
+          // design, not the stale pre-update copy. Without this the user
+          // sees "their colors from a previous logo" until the background
+          // invalidate-refetch lands.
+          queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
+            if (!prev) return [updated];
+            return prev.map((d) => (d.id === designId ? updated : d));
+          });
         } else {
           const created = await createDesign(businessId, cleaned);
-          // Seed the cache synchronously so a Back → Forward navigation reads
-          // the new design and stays on the update path (prevents duplicate
-          // createDesign attempts under stale-cache conditions).
           queryClient.setQueryData<CardDesign[]>(
             designKeys.all(businessId),
             [created]
@@ -131,7 +137,14 @@ export function BrandingStep() {
 
         if (pendingLogoFile) {
           const result = await uploadLogo(businessId, designId, pendingLogoFile);
-          await updateDesign(businessId, designId, { ...cleaned, logo_url: result.url });
+          const withLogo = await updateDesign(businessId, designId, { ...cleaned, logo_url: result.url });
+          // Second sync — logo upload changes logo_url, the rest of the
+          // design state hasn't moved but we still want the cache to
+          // hold the freshest server-confirmed row.
+          queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
+            if (!prev) return [withLogo];
+            return prev.map((d) => (d.id === designId ? withLogo : d));
+          });
           setPendingLogoFile(null);
         }
 

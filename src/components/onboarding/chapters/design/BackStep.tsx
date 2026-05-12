@@ -8,6 +8,7 @@ import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
 import { updateDesign, activateDesign } from '@/api';
+import type { CardDesign } from '@/types';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
 import { BackForm } from '@/components/design/forms/BackForm';
 import { useWizardStep } from '../../wizard-context';
@@ -43,7 +44,11 @@ export function BackStep() {
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
-        await updateDesign(businessId, existingDesign.id, data);
+        const updated = await updateDesign(businessId, existingDesign.id, data);
+        queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
+          if (!prev) return [updated];
+          return prev.map((d) => (d.id === existingDesign.id ? updated : d));
+        });
         if (!existingDesign.is_active) {
           await activateDesign(businessId, existingDesign.id);
         }

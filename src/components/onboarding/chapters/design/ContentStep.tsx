@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
 import { updateDesign } from '@/api';
+import type { CardDesign } from '@/types';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
 import { ContentForm } from '@/components/design/forms/ContentForm';
 import { useWizardStep } from '../../wizard-context';
@@ -39,7 +40,11 @@ export function ContentStep() {
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
-        await updateDesign(businessId, existingDesign.id, data);
+        const updated = await updateDesign(businessId, existingDesign.id, data);
+        queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
+          if (!prev) return [updated];
+          return prev.map((d) => (d.id === existingDesign.id ? updated : d));
+        });
         queryClient.invalidateQueries({ queryKey: designKeys.all(businessId) });
         return { ok: true };
       } catch (err) {

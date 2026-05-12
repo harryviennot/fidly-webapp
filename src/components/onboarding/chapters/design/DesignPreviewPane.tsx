@@ -14,6 +14,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { useWizardStep } from '../../wizard-context';
+import { AutoGenerateBar } from '@/components/design/AutoGenerateBar';
 
 const LARGE_SCREEN_QUERY = '(min-width: 1024px)';
 
@@ -114,7 +115,7 @@ function DesktopPreview({ showBack }: { showBack: boolean }) {
   }, []);
 
   return (
-    <aside ref={asideRef} className="w-[320px] flex-shrink-0">
+    <aside ref={asideRef} className="w-[480px] flex-shrink-0">
       <div
         className="fixed top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity"
         style={{
@@ -157,8 +158,11 @@ function MobilePreview({ showBack }: { showBack: boolean }) {
             {t('preview')}
           </SheetTitle>
         </SheetHeader>
+        <div className="px-4 pb-3">
+          <AutoGenerateBar />
+        </div>
         <div className="flex-1 flex items-center justify-center px-6 pb-8 overflow-y-auto">
-          <div className="w-full max-w-[320px]">
+          <div className="w-full max-w-[380px]">
             <EditorCard {...cardProps} showBack={showBack} />
           </div>
         </div>

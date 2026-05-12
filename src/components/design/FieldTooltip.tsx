@@ -6,7 +6,6 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip';
-import { Label } from '@/components/ui/label';
 
 interface FieldTooltipProps {
   content: string;
@@ -40,7 +39,12 @@ interface LabelWithTooltipProps {
 export function LabelWithTooltip({ htmlFor, children, tooltip }: Readonly<LabelWithTooltipProps>) {
   return (
     <div className="flex items-center gap-1.5">
-      <Label htmlFor={htmlFor}>{children}</Label>
+      <label
+        htmlFor={htmlFor}
+        className="wiz-body-sm font-medium text-[var(--foreground)]"
+      >
+        {children}
+      </label>
       <FieldTooltip content={tooltip} />
     </div>
   );

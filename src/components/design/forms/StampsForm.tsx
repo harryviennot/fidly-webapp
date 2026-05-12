@@ -2,9 +2,7 @@
 
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { CaretDown } from '@phosphor-icons/react';
 import { Label } from '@/components/ui/label';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { LabelWithTooltip } from '@/components/design/FieldTooltip';
 import { ColorPicker } from '@/components/design/ColorPicker';
 import {
@@ -18,8 +16,11 @@ import { paletteToSwatches } from '@/lib/logo-palette';
 import { useDesignForm } from './DesignFormContext';
 
 /**
- * Stamps section: stamp + reward icon, stamp color, icon color, plus an
- * advanced collapsible (empty-stamp color, border color, strip background).
+ * Stamps section: stamp + reward icon, all stamp-related colors, and the
+ * optional strip background. v3 dropped the "Advanced options" collapsible
+ * — empty / border / strip controls are surfaced inline so users don't
+ * miss them. "From your logo" preset rows are wired into every color
+ * picker for consistency.
  */
 export function StampsForm() {
   const t = useTranslations('designEditor.editor');
@@ -31,11 +32,9 @@ export function StampsForm() {
     emptyStampHex,
     borderColorHex,
     customColors,
-    showAdvancedStamps,
     updateField,
     updateColorField,
     addCustomColor,
-    setShowAdvancedStamps,
     setIconColorOverridden,
     handleStripBackgroundUpload,
     handleStripBackgroundClear,
@@ -51,8 +50,8 @@ export function StampsForm() {
   const logoPresetsLabel = logoPresets.length > 0 ? tAuto('fromLogo') : undefined;
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3">
         <LabelWithTooltip tooltip={t('stampIconTooltip')}>{t('stampIcon')}</LabelWithTooltip>
         <StampIconPicker
           value={(formData.stamp_icon || 'checkmark') as StampIconType}
@@ -61,7 +60,7 @@ export function StampsForm() {
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-3">
         <LabelWithTooltip tooltip={t('rewardIconTooltip')}>{t('rewardIcon')}</LabelWithTooltip>
         <RewardIconPicker
           value={(formData.reward_icon || 'gift') as StampIconType}
@@ -93,76 +92,64 @@ export function StampsForm() {
         }}
         customColors={customColors}
         onCustomColor={addCustomColor}
+        extraPresets={logoPresets}
+        extraPresetsLabel={logoPresetsLabel}
       />
 
-      <Collapsible open={showAdvancedStamps} onOpenChange={setShowAdvancedStamps}>
-        <CollapsibleTrigger asChild>
-          <button
-            type="button"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors pt-1"
-          >
-            <CaretDown
-              className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvancedStamps ? 'rotate-180' : ''}`}
-              weight="bold"
-            />
-            {t('advancedOptions')}
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="collapsible-content px-2 -mx-2 pt-2">
-          <div className="space-y-4 pt-2">
-            <ColorPicker
-              label={t('emptyStampColor')}
-              tooltip={t('emptyStampTooltip')}
-              colors={emptyStampColors}
-              value={emptyStampHex}
-              onChange={(hex) => updateColorField('stamp_empty_color', hex)}
-              customColors={customColors}
-              onCustomColor={addCustomColor}
-            />
+      <ColorPicker
+        label={t('emptyStampColor')}
+        tooltip={t('emptyStampTooltip')}
+        colors={emptyStampColors}
+        value={emptyStampHex}
+        onChange={(hex) => updateColorField('stamp_empty_color', hex)}
+        customColors={customColors}
+        onCustomColor={addCustomColor}
+        extraPresets={logoPresets}
+        extraPresetsLabel={logoPresetsLabel}
+      />
 
-            <ColorPicker
-              label={t('stampBorderColor')}
-              tooltip={t('stampBorderTooltip')}
-              colors={emptyStampColors}
-              value={borderColorHex}
-              onChange={(hex) => updateColorField('stamp_border_color', hex)}
-              customColors={customColors}
-              onCustomColor={addCustomColor}
-            />
+      <ColorPicker
+        label={t('stampBorderColor')}
+        tooltip={t('stampBorderTooltip')}
+        colors={emptyStampColors}
+        value={borderColorHex}
+        onChange={(hex) => updateColorField('stamp_border_color', hex)}
+        customColors={customColors}
+        onCustomColor={addCustomColor}
+        extraPresets={logoPresets}
+        extraPresetsLabel={logoPresetsLabel}
+      />
 
-            <div className="space-y-2">
-              <LabelWithTooltip tooltip={t('stripBackgroundTooltip')}>
-                {t('stripBackground')}
-              </LabelWithTooltip>
-              <ImageUploader
-                label=""
-                value={formData.strip_background_url}
-                onUpload={handleStripBackgroundUpload}
-                onClear={handleStripBackgroundClear}
-                hint={t('stripHint')}
-              />
-              {formData.strip_background_url && (
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm">{t('opacity')}</Label>
-                    <span className="text-sm text-muted-foreground">
-                      {formData.strip_background_opacity ?? 40}%
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    className="styled-slider w-full"
-                    min={0}
-                    max={100}
-                    value={formData.strip_background_opacity ?? 40}
-                    onChange={(e) => updateField('strip_background_opacity', parseInt(e.target.value, 10))}
-                  />
-                </div>
-              )}
+      <div className="flex flex-col gap-3">
+        <LabelWithTooltip tooltip={t('stripBackgroundTooltip')}>
+          {t('stripBackground')}
+        </LabelWithTooltip>
+        <ImageUploader
+          label=""
+          value={formData.strip_background_url}
+          onUpload={handleStripBackgroundUpload}
+          onClear={handleStripBackgroundClear}
+          hint={t('stripHint')}
+        />
+        {formData.strip_background_url && (
+          <div className="flex flex-col gap-2 pt-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">{t('opacity')}</Label>
+              <span className="text-sm text-muted-foreground">
+                {formData.strip_background_opacity ?? 40}%
+              </span>
             </div>
+            <input
+              type="range"
+              className="styled-slider w-full"
+              min={0}
+              max={100}
+              value={formData.strip_background_opacity ?? 40}
+              onChange={(e) => updateField('strip_background_opacity', parseInt(e.target.value, 10))}
+            />
           </div>
-        </CollapsibleContent>
-      </Collapsible>
+        )}
+      </div>
     </div>
   );
 }

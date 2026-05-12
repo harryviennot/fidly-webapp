@@ -313,7 +313,7 @@ export function WizardShell({ slug }: WizardShellProps) {
         <div
           className={cn(
             'mx-auto w-full px-4 py-6 min-[768px]:px-6 min-[768px]:py-10',
-            chapter.id === 'design' ? 'max-w-[960px]' : 'max-w-[640px]'
+            chapter.id === 'design' ? 'max-w-[1140px]' : 'max-w-[640px]'
           )}
         >
           <WizardStepProvider value={stepContext}>
