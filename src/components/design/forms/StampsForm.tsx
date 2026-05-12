@@ -164,17 +164,19 @@ interface StampBorderFieldProps {
 }
 
 /**
- * Stamp-border control with a "Show stamp border" switch. Frontend-only —
- * the design row stores a border color always; the UI presents a "no
- * border" state by setting the border color equal to the empty-stamp
- * color so the stroke is visually invisible against the stamp fill.
+ * Stamp-border control. The switch sits on the *same row* as the section
+ * label so the field reads as one unit; flipping it off animates the color
+ * picker away below. Frontend-only — the design row stores a border color
+ * always; the "no border" state sets the border color equal to the empty-
+ * stamp color so the stroke is visually invisible.
  *
  * Behaviour:
  *  - The switch is OFF when `borderColorHex === emptyStampHex` (auto-detected).
- *  - Flipping OFF → ON: set border to white. If empty is already white (which
- *    would immediately flip the switch back OFF), fall back to black.
- *  - Flipping ON → OFF: set border to the current empty-stamp color.
- *  - The color picker is hidden when the border is OFF.
+ *  - OFF → ON: set border to white. If empty is already white (which would
+ *    immediately flip the switch back OFF in a loop), fall back to black.
+ *  - ON → OFF: set border to the current empty-stamp color.
+ *  - The color picker is hidden when OFF — collapsed via grid-rows trick
+ *    so the transition is smooth.
  */
 function StampBorderField({
   borderColorHex,
@@ -186,8 +188,6 @@ function StampBorderField({
   onCustomColor,
 }: StampBorderFieldProps) {
   const t = useTranslations('designEditor.editor');
-  // Derived state — borderEnabled is purely a function of the two hex values
-  // so the switch position always agrees with what the user sees on the card.
   const enabled = borderColorHex.toLowerCase() !== emptyStampHex.toLowerCase();
 
   const toggle = (next: boolean) => {
@@ -201,25 +201,35 @@ function StampBorderField({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <LabelWithTooltip tooltip={t('stampBorderTooltip')}>
-          {t('stampBorderEnabled')}
+          {t('stampBorderColor')}
         </LabelWithTooltip>
         <Switch checked={enabled} onCheckedChange={toggle} />
       </div>
-      {enabled && (
-        <ColorPicker
-          label={t('stampBorderColor')}
-          tooltip={t('stampBorderTooltip')}
-          colors={emptyStampColors}
-          value={borderColorHex}
-          onChange={onChange}
-          customColors={customColors}
-          onCustomColor={onCustomColor}
-          extraPresets={logoPresets}
-          extraPresetsLabel={logoPresetsLabel}
-        />
-      )}
+      <div
+        className={`grid transition-all duration-300 ease-out ${
+          enabled ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        {/* `-mx-3 px-3` widens the overflow-hidden clip box on both sides so
+            edge swatches' hover scale doesn't get cropped. The matching
+            padding keeps the picker's effective width the same as the
+            surrounding form column. */}
+        <div className="overflow-hidden -mx-3 px-3">
+          <ColorPicker
+            label=""
+            tooltip={t('stampBorderTooltip')}
+            colors={emptyStampColors}
+            value={borderColorHex}
+            onChange={onChange}
+            customColors={customColors}
+            onCustomColor={onCustomColor}
+            extraPresets={logoPresets}
+            extraPresetsLabel={logoPresetsLabel}
+          />
+        </div>
+      </div>
     </div>
   );
 }

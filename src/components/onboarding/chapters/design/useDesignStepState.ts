@@ -60,20 +60,30 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
   // synchronously from the React Query cache.
   const { data: program } = useDefaultProgram(currentBusiness?.id);
 
+  const defaultRewardField = () => ({
+    key: 'reward',
+    label: t('defaultRewardLabel'),
+    value: program?.reward_name ?? '',
+  });
+
   const [formData, setFormData] = useState<CardDesignCreate>(() => {
-    if (existingDesign) return { ...existingDesign };
+    if (existingDesign) {
+      const seeded = { ...existingDesign };
+      // Seed the reward field on existing designs that were created with
+      // empty secondary_fields (e.g. BrandingStep saved before Content was
+      // touched). Without this the Content sub-step opens to an empty form
+      // when the user already had a reward name set up in Program.
+      if (!seeded.secondary_fields || seeded.secondary_fields.length === 0) {
+        seeded.secondary_fields = [defaultRewardField()];
+      }
+      return seeded;
+    }
     return {
       ...DEFAULT_DESIGN,
       organization_name: currentBusiness?.name ?? '',
       description: currentBusiness?.name ?? '',
       logo_url: currentBusiness?.logo_url ?? undefined,
-      secondary_fields: [
-        {
-          key: 'reward',
-          label: t('defaultRewardLabel'),
-          value: program?.reward_name ?? '',
-        },
-      ],
+      secondary_fields: [defaultRewardField()],
     };
   });
   const [customColors, setCustomColors] = useState<string[]>([]);
@@ -131,9 +141,13 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
     updateField: (key, value) => setFormData((prev) => ({ ...prev, [key]: value })),
     updateColorField: (key, hex) => setFormData((prev) => ({ ...prev, [key]: hexToRgb(hex) })),
     addCustomColor: (hex) =>
-      setCustomColors((prev) =>
-        prev.some((c) => c.toLowerCase() === hex.toLowerCase()) ? prev : [...prev, hex]
-      ),
+      setCustomColors((prev) => {
+        // Newest-first: a freshly-picked color slots into position 0 of the
+        // right zone, immediately after the separator. If it already exists
+        // in the list, promote it to the front so it stays surfaced.
+        const filtered = prev.filter((c) => c.toLowerCase() !== hex.toLowerCase());
+        return [hex, ...filtered];
+      }),
     setShowAdvancedStamps,
     setIconColorOverridden: (v) => {
       setIconColorOverridden(v);

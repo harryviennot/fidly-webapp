@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { Plus, Eyedropper } from '@phosphor-icons/react';
 import { LabelWithTooltip } from './FieldTooltip';
@@ -12,18 +12,20 @@ import {
 import type { ColorPreset } from '@/lib/color-utils';
 
 interface ColorPickerProps {
+  /** Field label. Pass empty string to render the picker without a header
+   *  (used when the picker is nested inside another labelled control). */
   label: string;
   tooltip: string;
   colors: readonly ColorPreset[];
-  value: string; // hex
+  value: string;
   onChange: (hex: string) => void;
   annotation?: string;
   customColors?: string[];
   onCustomColor?: (hex: string) => void;
   /**
-   * Optional labeled row of preset swatches rendered above the standard
-   * palette. BrandingForm uses this to surface colors extracted from the
-   * user's logo as "From your logo" quick-picks.
+   * Logo-derived swatches surfaced as the left zone of the swatch row,
+   * labelled "From your logo". The right zone holds customs + standard
+   * presets. The two zones are separated by a thin vertical divider.
    */
   extraPresets?: ColorPreset[];
   extraPresetsLabel?: string;
@@ -54,23 +56,35 @@ function useEyeDropperSupport(): boolean {
   return supported;
 }
 
+// Min / max bounds for the dynamic total-swatch budget. The actual cap is
+// computed from container width by `useFitCount`. The max is tuned so
+// mobile (which uses flex-wrap with 32px swatches + 8px gaps, ~7-8 per row
+// on a 360px-wide phone) tops out at two rows instead of three, and so
+// desktop columns don't feel cramped with too many tiny chips.
+const MIN_SWATCH_CAP = 10;
+const MAX_SWATCH_CAP = 14;
+
 function Swatch({
   hex,
   isSelected,
   onClick,
   title,
+  size = 32,
 }: {
   hex: string;
   isSelected: boolean;
   onClick: () => void;
   title: string;
+  size?: number;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="w-8 h-8 rounded-md transition-all duration-200 hover:scale-110 focus:outline-none flex-shrink-0"
+      className="rounded-md transition-transform duration-150 ease-out hover:scale-110 active:scale-95 focus:outline-none flex-shrink-0"
       style={{
+        width: size,
+        height: size,
         backgroundColor: hex === '#00000000' ? 'transparent' : hex,
         border: isSelected ? '2.5px solid #fff' : '1.5px solid transparent',
         boxShadow: isSelected
@@ -84,17 +98,82 @@ function Swatch({
 }
 
 /**
+ * Width-aware swatch counter. Measures the inner row container and figures
+ * out how many right-zone swatches fit at the current viewport width. When
+ * the container shrinks (sidebar collapse, window resize), the right zone
+ * sheds swatches from the end so the row never wraps unexpectedly on
+ * desktop. Mobile (<640px) opts out and uses a wrapping 2-row layout.
+ */
+/**
+ * Returns the total swatch budget (logo + right combined) that fits in the
+ * row at the current container width. Recomputes on every resize via
+ * `ResizeObserver`, so a wider form column shows more swatches and a narrow
+ * one doesn't overflow. Mobile caps at `MAX_SWATCH_CAP` and relies on
+ * `flex-wrap` to handle overflow.
+ */
+function useFitCount(
+  ref: React.RefObject<HTMLDivElement | null>,
+  isMobile: boolean,
+  hasSeparator: boolean
+): number {
+  const [count, setCount] = useState(MIN_SWATCH_CAP);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const SWATCH = 32;
+    const SEP = 3;
+    // 2px breathing room between every item — keeps swatches from kissing
+    // edge-to-edge when the row is dense enough that justify-between has
+    // no slack to distribute.
+    const MIN_GAP = 2;
+    const calc = () => {
+      if (isMobile) {
+        setCount(MAX_SWATCH_CAP);
+        return;
+      }
+      const width = el.offsetWidth;
+      // Per-item slot: swatch + breathing gap. Number of items fits when
+      //   total = n * SWATCH + (n - 1) * MIN_GAP + sepWidth <= width
+      const sepWidth = hasSeparator ? SEP + MIN_GAP : 0;
+      const available = width - sepWidth;
+      const fit = Math.floor((available + MIN_GAP) / (SWATCH + MIN_GAP));
+      setCount(Math.max(MIN_SWATCH_CAP, Math.min(MAX_SWATCH_CAP, fit)));
+    };
+    calc();
+    const ro = new ResizeObserver(calc);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref, isMobile, hasSeparator]);
+  return count;
+}
+
+function useIsNarrow(): boolean {
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 639px)');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNarrow(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setNarrow(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+  return narrow;
+}
+
+/**
  * Color picker for the design editor.
  *
- * Vertical reading order:
- *   1. Label row
- *   2. "From your logo" preset row (when populated)
- *   3. Standard palette swatches + user-added custom colors
- *   4. Action row: current color preview + hex input + "+" (custom picker)
- *      + eyedropper (only on Chromium-class browsers).
+ * Row structure (top → bottom):
+ *   1. Field label (+ tooltip + optional annotation pill)
+ *   2. "From your logo" sub-label (only when extraPresets is populated)
+ *   3. Swatch row — left zone: logo presets (up to 3 + "+N" badge);
+ *      separator; right zone: recent customs (newest-first) followed by
+ *      standard preset palette. Width-adapts on desktop, wraps on mobile.
+ *   4. Action row — current color chip + hex input + custom picker (`+`)
+ *      + eyedropper (when the browser exposes `window.EyeDropper`).
  *
- * The action row at the bottom is intentionally a single horizontal control
- * cluster so the "where's the eyedropper?" question has a single answer.
+ * Most recent custom colors live immediately after the separator, so each
+ * pick pushes the standard palette one slot to the right.
  */
 export function ColorPicker({
   label,
@@ -106,12 +185,22 @@ export function ColorPicker({
   customColors = [],
   onCustomColor,
   extraPresets,
-  extraPresetsLabel,
+  extraPresetsLabel: _ignoredLabel,
 }: ColorPickerProps) {
+  void _ignoredLabel;
   const [customInput, setCustomInput] = useState('');
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [pendingPick, setPendingPick] = useState(value);
+  // Snapshot of `value` at the moment the popover opens. We need this
+  // because `onChange` fires on every drag of the react-colorful picker,
+  // so by the time the popover closes, `value === pendingPick` (they
+  // tracked together throughout the drag). The committed "did the user
+  // actually pick a new color?" question can only be answered against the
+  // pre-open value.
+  const popoverInitialValueRef = useRef(value);
   const eyeDropperSupported = useEyeDropperSupport();
+  const isNarrow = useIsNarrow();
+  const rowRef = useRef<HTMLDivElement>(null);
 
   const pickFromScreen = async () => {
     if (!window.EyeDropper) return;
@@ -131,73 +220,86 @@ export function ColorPicker({
 
   const displayHex = customInput || value.replace('#', '');
 
-  const presetValues = new Set(
-    [...colors, ...(extraPresets ?? [])].map((c) => c.value.toLowerCase())
-  );
-  const uniqueCustom = customColors.filter((c) => !presetValues.has(c.toLowerCase()));
+  // Left zone — every extracted logo color, inline. No overflow badge:
+  // when the logo yields 4-5 distinct colors, the right zone shrinks
+  // accordingly so the row stays a single line on desktop.
+  const logoVisible = extraPresets ?? [];
+  // Total swatch budget across both zones — width-derived so wider columns
+  // surface more colors and narrow ones don't overflow.
+  const totalCap = useFitCount(rowRef, isNarrow, logoVisible.length > 0);
+
+  // Right zone — newest-first customs, then standard presets, dedup against
+  // each other and against logo presets so the same color never appears twice.
+  const logoSet = new Set((extraPresets ?? []).map((c) => c.value.toLowerCase()));
+  const customSet = new Set<string>();
+  const rightItems: { value: string; name: string }[] = [];
+  for (const hex of customColors) {
+    const lower = hex.toLowerCase();
+    if (logoSet.has(lower) || customSet.has(lower)) continue;
+    customSet.add(lower);
+    rightItems.push({ value: hex, name: hex });
+  }
+  for (const preset of colors) {
+    const lower = preset.value.toLowerCase();
+    if (logoSet.has(lower) || customSet.has(lower)) continue;
+    customSet.add(lower);
+    rightItems.push({ value: preset.value, name: preset.name });
+  }
+  // Reserve enough budget so logo + right never exceeds the dynamic total.
+  const remainingBudget = Math.max(0, totalCap - logoVisible.length);
+  const rightVisible = rightItems.slice(0, remainingBudget);
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <LabelWithTooltip tooltip={tooltip}>{label}</LabelWithTooltip>
-        {annotation && (
-          <span className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
-            {annotation}
-          </span>
-        )}
-      </div>
-
-      {extraPresets && extraPresets.length > 0 && (
-        <div className="flex flex-col gap-1.5">
-          {extraPresetsLabel && (
-            <p className="wiz-micro text-[#888]">{extraPresetsLabel}</p>
+      {label && (
+        <div className="flex items-center gap-2">
+          <LabelWithTooltip tooltip={tooltip}>{label}</LabelWithTooltip>
+          {annotation && (
+            <span className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+              {annotation}
+            </span>
           )}
-          <div className="flex gap-2 flex-wrap">
-            {extraPresets.map((color) => (
-              <Swatch
-                key={`extra-${color.value}`}
-                hex={color.value}
-                isSelected={value.toLowerCase() === color.value.toLowerCase()}
-                onClick={() => {
-                  onChange(color.value);
-                  setCustomInput('');
-                }}
-                title={color.name}
-              />
-            ))}
-          </div>
         </div>
       )}
 
-      <div className="flex gap-2 flex-wrap">
-        {colors.map((color) => (
+
+      {/* Swatch row.
+          Desktop: every swatch is a direct flex child of `justify-between`,
+          so slack distributes uniformly between every neighbour. The
+          separator participates in that distribution, which keeps the gaps
+          around it the same as the gaps between any two swatches.
+          Narrow: wrap to two rows with a consistent gap, and the separator
+          is hidden because it would break the wrap rhythm. */}
+      <div
+        ref={rowRef}
+        className={`flex items-center ${
+          isNarrow ? 'flex-wrap gap-2' : 'justify-between'
+        }`}
+      >
+        {logoVisible.map((color) => (
           <Swatch
-            key={color.value}
+            key={`logo-${color.value}`}
             hex={color.value}
             isSelected={value.toLowerCase() === color.value.toLowerCase()}
-            onClick={() => {
-              onChange(color.value);
-              setCustomInput('');
-            }}
+            onClick={() => onChange(color.value)}
             title={color.name}
           />
         ))}
-        {uniqueCustom.map((hex) => (
+        {logoVisible.length > 0 && rightVisible.length > 0 && !isNarrow && (
+          <div className="w-[3px] h-7 rounded-full bg-[var(--border-medium)]" />
+        )}
+        {rightVisible.map((item) => (
           <Swatch
-            key={hex}
-            hex={hex}
-            isSelected={value.toLowerCase() === hex.toLowerCase()}
-            onClick={() => {
-              onChange(hex);
-              setCustomInput('');
-            }}
-            title={hex}
+            key={`r-${item.value}`}
+            hex={item.value}
+            isSelected={value.toLowerCase() === item.value.toLowerCase()}
+            onClick={() => onChange(item.value)}
+            title={item.name}
           />
         ))}
       </div>
 
-      {/* Action row: live preview, hex input, custom-picker, eyedropper.
-          One row, left-to-right, so users always know where to look. */}
+      {/* Action row — current preview, hex input, custom picker, eyedropper. */}
       <div className="flex items-center gap-2">
         <div
           className="w-9 h-9 rounded-md flex-shrink-0"
@@ -206,8 +308,8 @@ export function ColorPicker({
             border: `1px solid ${value.toLowerCase() === '#ffffff' ? '#DDD' : 'rgba(0,0,0,0.08)'}`,
           }}
         />
-        <div className="flex flex-1 min-w-0">
-          <span className="px-2 py-2 rounded-l-md border border-r-0 border-border bg-muted/50 text-xs text-muted-foreground select-none">
+        <div className="flex flex-1 min-w-0 h-9">
+          <span className="flex items-center px-2.5 rounded-l-md border border-r-0 border-border bg-muted/50 text-xs text-muted-foreground select-none">
             #
           </span>
           <input
@@ -225,7 +327,7 @@ export function ColorPicker({
               setCustomInput('');
             }}
             placeholder={value.replace('#', '')}
-            className="flex-1 min-w-0 px-2.5 py-1.5 rounded-r-md border border-border bg-white text-xs text-foreground font-mono tracking-wider outline-none focus:border-[var(--accent)] transition-colors"
+            className="flex-1 min-w-0 h-full px-2.5 rounded-r-md border border-border bg-white text-xs text-foreground font-mono tracking-wider outline-none focus:border-[var(--accent)] transition-colors"
           />
         </div>
         <Popover
@@ -233,8 +335,11 @@ export function ColorPicker({
           onOpenChange={(open) => {
             setPopoverOpen(open);
             if (open) {
+              popoverInitialValueRef.current = value;
               setPendingPick(value);
-            } else if (pendingPick.toLowerCase() !== value.toLowerCase()) {
+            } else if (
+              pendingPick.toLowerCase() !== popoverInitialValueRef.current.toLowerCase()
+            ) {
               onCustomColor?.(pendingPick);
             }
           }}
@@ -242,7 +347,7 @@ export function ColorPicker({
           <PopoverTrigger asChild>
             <button
               type="button"
-              title="Custom color"
+              title="New color"
               className="w-9 h-9 rounded-md border border-border bg-white hover:bg-muted/50 flex items-center justify-center flex-shrink-0 transition-colors"
             >
               <Plus className="w-4 h-4 text-foreground" weight="bold" />
@@ -299,3 +404,4 @@ export function ColorPicker({
     </div>
   );
 }
+

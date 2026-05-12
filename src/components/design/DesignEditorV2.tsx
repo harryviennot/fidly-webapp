@@ -180,8 +180,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const addCustomColor = useCallback((hex: string) => {
       setCustomColors((prev) => {
-        if (prev.some((c) => c.toLowerCase() === hex.toLowerCase())) return prev;
-        return [...prev, hex];
+        // Newest-first ordering: see useDesignStepState for the contract.
+        const filtered = prev.filter((c) => c.toLowerCase() !== hex.toLowerCase());
+        return [hex, ...filtered];
       });
     }, []);
 

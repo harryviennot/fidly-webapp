@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
@@ -36,6 +38,7 @@ export function InfoStep() {
   const { currentBusiness } = useBusiness();
   const { user } = useAuth();
   const { mutateAsync: updateBusiness } = useUpdateBusiness(currentBusiness?.id);
+  const queryClient = useQueryClient();
   const ctx = useWizardStep();
 
   // Pull the DB-backed profile so we can read phone from public.users.phone
@@ -117,26 +120,30 @@ export function InfoStep() {
       // phone / email / blank hours rows would render as ghost lines on the
       // back of every pass.
       const snapshot = pruneEmptyEntries(toSave);
-      return {
-        ok: true,
-        save: async () => {
-          try {
-            await updateBusiness({
-              settings: { ...baseSettings, business_info: snapshot },
-            });
-            markSaved();
-            return { ok: true };
-          } catch (err) {
-            return {
-              ok: false,
-              reason: err instanceof Error ? err.message : tErr('saveFailed'),
-            };
-          }
-        },
-      };
+      // Synchronous save (no `save` callback). The design chapter's BackStep
+      // depends on `currentBusiness.settings.business_info` being populated
+      // when the user lands on it — a background save would race with
+      // navigation and leave the back-fields list empty until the refetch
+      // catches up. Worth the small extra wait on Next.
+      try {
+        await updateBusiness({
+          settings: { ...baseSettings, business_info: snapshot },
+        });
+        // `useUpdateBusiness` calls `invalidateQueries` on success, but that
+        // only schedules a background refetch. Await the refetch here so
+        // `currentBusiness.settings.business_info` is fresh by the time the
+        // user lands on the design BackStep — otherwise the saved entries
+        // don't show up until the user manually reloads.
+        await queryClient.refetchQueries({ queryKey: ['business'] });
+        markSaved();
+        return { ok: true };
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
+        return { ok: false };
+      }
     });
     return () => ctx.setSubmitHandler(null);
-  }, [toSave, isDirty, markSaved, currentBusiness, updateBusiness, ctx, tErr]);
+  }, [toSave, isDirty, markSaved, currentBusiness, updateBusiness, queryClient, ctx, tErr]);
 
   return (
     <div className="flex flex-col gap-6">
