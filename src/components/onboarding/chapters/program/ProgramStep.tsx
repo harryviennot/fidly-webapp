@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { useBusiness } from '@/contexts/business-context';
@@ -20,10 +20,23 @@ import {
 } from '../../wizard-context';
 
 const DEFAULTS = {
-  programName: '',
   totalStamps: 10,
   rewardName: '',
 };
+
+const MAX_STAMPS = 21;
+
+/**
+ * Backend stock names we want to override with a business-personalised
+ * default. Anything else is treated as a user-set name and preserved.
+ */
+const PLACEHOLDER_PROGRAM_NAMES = new Set([
+  '',
+  'My Loyalty Program',
+  'New Loyalty Program',
+  'Programme',
+  'Programme de fidélité',
+]);
 
 /**
  * Chapter 3 — required. The wizard's standalone program form (separate from
@@ -34,9 +47,10 @@ const DEFAULTS = {
  * `StampsSelector`. The dashboard's existing form is unchanged.
  */
 export function ProgramStep() {
-  const t = useTranslations('onboardingBusiness.chapters.program');
+  const t = useTranslations('onboardingBusiness.chapters.program.steps.program');
   const tLp = useTranslations('loyaltyProgram');
   const tErr = useTranslations('onboardingBusiness.errors');
+  const locale = useLocale();
   const { currentBusiness } = useBusiness();
   const businessId = currentBusiness?.id;
   const { data: program } = useDefaultProgram(businessId);
@@ -45,14 +59,24 @@ export function ProgramStep() {
   const { mutateAsync: updateProgram } = useUpdateProgram(businessId);
   const ctx = useWizardStep();
 
-  // Drafted form state. Falls back to the program loaded from the server.
+  const businessName = currentBusiness?.name?.trim() ?? '';
+  const localizedSuffix = locale === 'fr' ? 'Fidélité' : 'Loyalty Program';
+  const defaultProgramName = businessName ? `${businessName} ${localizedSuffix}` : '';
+
+  // Drafted form state. Falls back to the program loaded from the server,
+  // except for the name where we prefer a business-personalised default over
+  // the backend's stock "My Loyalty Program" placeholder.
   const [programName, setProgramName] = useWizardDraft<string>(
     'program.programName',
-    () => program?.name ?? DEFAULTS.programName
+    () => {
+      const existing = program?.name?.trim();
+      if (existing && !PLACEHOLDER_PROGRAM_NAMES.has(existing)) return existing;
+      return defaultProgramName;
+    }
   );
   const [totalStamps, setTotalStamps] = useWizardDraft<number>(
     'program.totalStamps',
-    () => program?.config?.total_stamps ?? DEFAULTS.totalStamps
+    () => Math.min(program?.config?.total_stamps ?? DEFAULTS.totalStamps, MAX_STAMPS)
   );
   const [rewardName, setRewardName] = useWizardDraft<string>(
     'program.rewardName',
@@ -185,6 +209,7 @@ export function ProgramStep() {
               /* points/tiered are disabled — no-op */
             }}
             options={loyaltyTypeOptions}
+            layout="stack"
           />
         </WizardField>
 
@@ -193,6 +218,7 @@ export function ProgramStep() {
             value={totalStamps}
             onChange={setTotalStamps}
             activeDesign={activeDesign}
+            max={MAX_STAMPS}
             ariaLabel={tLp('stampsToEarn')}
           />
         </WizardField>
@@ -206,16 +232,6 @@ export function ProgramStep() {
             className="h-11"
           />
         </WizardField>
-
-        <div className="rounded-[12px] bg-[var(--paper)] border border-[var(--border-light)] px-4 py-3 wiz-body text-[#555] leading-relaxed">
-          <span className="text-[#8A8A8A]">{tLp('previewSentence')}</span>{' '}
-          <span className="font-semibold text-[var(--foreground)]">
-            {tLp('previewText', {
-              stamps: totalStamps,
-              reward: rewardName || tLp('rewardFallback'),
-            })}
-          </span>
-        </div>
       </div>
     </div>
   );

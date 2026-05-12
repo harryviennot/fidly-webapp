@@ -69,7 +69,7 @@ export function OptionCard({
         ) : null}
       </div>
       {badge ? (
-        <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-[var(--paper)] border border-[var(--border)] wiz-micro font-semibold uppercase tracking-wider text-[#888]">
+        <span className="flex-shrink-0 inline-flex items-center px-1.5 py-px rounded-full bg-[var(--paper)] border border-[var(--border)] text-[10px] font-semibold uppercase tracking-wide text-[#888] whitespace-nowrap leading-[1.4]">
           {badge}
         </span>
       ) : (

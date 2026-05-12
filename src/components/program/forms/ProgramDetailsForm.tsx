@@ -201,17 +201,6 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
           className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border-medium)] bg-white text-[13px] text-[#1A1A1A] outline-none focus:border-[var(--accent)] transition-colors min-h-[44px]"
         />
       </div>
-
-      {/* Preview sentence */}
-      <div className="px-4 py-3 rounded-lg bg-[var(--paper)] border border-[var(--border-light)] text-[13px] text-[#555] leading-[1.5]">
-        <span className="text-[#8A8A8A]">{t('previewSentence')}</span>{' '}
-        <span className="font-semibold text-[#1A1A1A]">
-          {t('previewText', {
-            stamps: value.totalStamps,
-            reward: value.rewardName || t('rewardFallback'),
-          })}
-        </span>
-      </div>
     </div>
   );
 }

@@ -47,12 +47,14 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
     ],
   },
   {
+    // Loyalty-program chapter groups everything that lives on the dashboard's
+    // /loyalty-program tab: the core mechanic + the data we collect from
+    // customers when they sign up.
     id: 'program',
-    subSteps: [{ id: 'program', required: true, Component: ProgramStep }],
-  },
-  {
-    id: 'data-collection',
-    subSteps: [{ id: 'data-collection', required: false, Component: DataCollectionStep }],
+    subSteps: [
+      { id: 'program', required: true, Component: ProgramStep },
+      { id: 'data-collection', required: false, Component: DataCollectionStep },
+    ],
   },
   {
     id: 'card-back',
@@ -116,6 +118,9 @@ const LEGACY_SLUG_MAP: Record<string, [string, string]> = {
   'first-customer': ['first-stamp', 'install'],
   'live-stamp': ['first-stamp', 'stamp'],
   backfields: ['card-back', 'info'],
+  // v2 had a standalone /data-collection chapter; v3 nests it under the
+  // loyalty program chapter to mirror the dashboard's tab grouping.
+  'data-collection': ['program', 'data-collection'],
 };
 
 export function findChapter(chapterId: string): ChapterDef | undefined {

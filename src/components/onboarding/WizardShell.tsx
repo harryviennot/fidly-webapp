@@ -255,6 +255,19 @@ export function WizardShell({ slug }: WizardShellProps) {
     handlersRef.current.skip = handleSkip;
   }, [handleNext, handleSkip]);
 
+  // Hydration gate. The draft store reads from localStorage, which exists
+  // only on the client — calling `getDraft` during SSR returns different
+  // values than during the first client render and React throws a
+  // hydration mismatch. Render an empty shell until after mount, then the
+  // real tree comes up with consistent client-side state.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) {
+    return <div className="min-h-[100dvh] bg-[var(--background)]" />;
+  }
+
   if (!resolved) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6 text-center">

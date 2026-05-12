@@ -88,12 +88,17 @@
         }
       },
       "program": {
-        "title": "Set up your loyalty program",
-        "subtitle": "How many stamps it takes, and what your customers earn."
-      },
-      "data-collection": {
-        "title": "What to collect from customers",
-        "subtitle": "Pick the fields you want on the signup form."
+        "title": "Loyalty program",
+        "steps": {
+          "program": {
+            "title": "Set up your loyalty program",
+            "subtitle": "How many stamps it takes, and what your customers earn."
+          },
+          "data-collection": {
+            "title": "What to collect from customers",
+            "subtitle": "Pick the fields you want on the signup form."
+          }
+        }
       },
       "card-back": {
         "title": "The back of your card",

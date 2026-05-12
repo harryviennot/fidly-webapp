@@ -88,12 +88,17 @@
         }
       },
       "program": {
-        "title": "Configurez votre programme",
-        "subtitle": "Combien de tampons sont nécessaires, et ce que vos clients gagnent."
-      },
-      "data-collection": {
-        "title": "Que collecter auprès des clients",
-        "subtitle": "Choisissez les champs du formulaire d'inscription."
+        "title": "Programme de fidélité",
+        "steps": {
+          "program": {
+            "title": "Configurez votre programme",
+            "subtitle": "Combien de tampons sont nécessaires, et ce que vos clients gagnent."
+          },
+          "data-collection": {
+            "title": "Que collecter auprès des clients",
+            "subtitle": "Choisissez les champs du formulaire d'inscription."
+          }
+        }
       },
       "card-back": {
         "title": "Le verso de votre carte",

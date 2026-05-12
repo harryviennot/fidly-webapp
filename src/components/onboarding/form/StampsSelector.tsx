@@ -6,6 +6,8 @@ import { computeCardColors } from '@/lib/card-utils';
 import { cn } from '@/lib/utils';
 import type { CardDesign } from '@/types';
 
+type CSSPropertiesWithVars = React.CSSProperties & Record<`--${string}`, string | number>;
+
 interface StampsSelectorProps {
   value: number;
   onChange: (next: number) => void;
@@ -23,10 +25,13 @@ const DEFAULT_MIN = 2;
 const DEFAULT_MAX = 21;
 
 /**
- * Stamp-count picker. Renders the row of stamp dots in the card's accent
- * color (filled when ≤ value), with a draggable slider underneath. Matches
- * the visual language of the wallet card preview so the relationship
- * between this control and the preview is obvious.
+ * Stamp-count picker. Renders the dots in a **two-row brick layout** — the
+ * top row holds `ceil(max/2)` stamps, the bottom row holds the remainder
+ * offset by half a stamp so the rows interlock instead of ending in a
+ * ragged "missing stamp" slot.
+ *
+ * The slider sits beneath the picker for fast coarse selection; tapping
+ * an individual dot is the fine control.
  */
 export function StampsSelector({
   value,
@@ -45,10 +50,15 @@ export function StampsSelector({
   const iconColorHex = colors?.iconColorHex ?? '#fff';
   const fillPercent = range === 0 ? 0 : ((value - min) / range) * 100;
 
+  // Brick split: top row gets the ceiling. 21 → 11 + 10. 20 → 10 + 10.
+  const row1Count = Math.ceil(max / 2);
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between">
-        <span className="wiz-helper text-[#888]">{min}–{max}</span>
+        <span className="wiz-helper text-[#888]">
+          {min}–{max}
+        </span>
         <span
           className="wiz-h font-bold tabular-nums leading-none"
           style={{ color: accentHex }}
@@ -57,42 +67,37 @@ export function StampsSelector({
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-[6px]">
-        {Array.from({ length: max }, (_, i) => {
-          const n = i + 1;
-          const isActive = n <= value;
-          const isLast = n === value;
-          const clickable = n >= min;
-          return (
-            <button
-              key={n}
-              type="button"
-              onClick={() => clickable && onChange(n)}
-              disabled={!clickable}
-              className={cn(
-                'w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200',
-                clickable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
-                !isActive && clickable && 'scale-[0.85] hover:scale-95'
-              )}
-              style={{
-                backgroundColor: isActive ? accentHex : 'var(--border)',
-                boxShadow: isActive ? `0 2px 8px ${accentHex}40` : 'none',
-                transitionDelay: isActive ? `${Math.min(i * 15, 150)}ms` : '0ms',
-              }}
-              aria-label={`${n} stamps`}
-            >
-              {isActive ? (
-                <StampIconSvg
-                  icon={isLast ? rewardIcon : stampIcon}
-                  className="w-3.5 h-3.5"
-                  color={iconColorHex}
-                />
-              ) : (
-                <span className="wiz-micro font-bold text-[#BBB]">{n}</span>
-              )}
-            </button>
-          );
-        })}
+      {/*
+        Brick container. Cell size is `clamp(min, fluid, max)` where the
+        fluid value computes the largest cell that lets row 1 (11 stamps +
+        10 gaps) fit inside the form column. So the dots grow with the
+        viewport — at 360 px they're ~26 px, at 390 px ~29 px, and they
+        cap at 38 px once there's room. Desktop bumps the gap up for
+        breathing room but keeps the same max cell size.
+
+        `items-center` does the brick interlock for free: row 2 has one
+        fewer dot, so centering both rows shifts the lower row right by
+        exactly `(cell + gap) / 2` — half the pitch between adjacent
+        stamps.
+      */}
+      <div
+        className={cn(
+          'flex flex-col items-center',
+          '[--stamp-gap:4px] min-[768px]:[--stamp-gap:6px]',
+          '[--stamp-cell:clamp(22px,calc((100vw-72px)/11),38px)]',
+          '[gap:var(--stamp-gap)]'
+        )}
+      >
+        <div className="flex [gap:var(--stamp-gap)]">
+          {Array.from({ length: row1Count }, (_, i) =>
+            renderStamp(i + 1)
+          )}
+        </div>
+        <div className="flex [gap:var(--stamp-gap)]">
+          {Array.from({ length: max - row1Count }, (_, i) =>
+            renderStamp(row1Count + i + 1)
+          )}
+        </div>
       </div>
 
       <input
@@ -103,7 +108,7 @@ export function StampsSelector({
         value={value}
         onChange={(e) => onChange(parseInt(e.target.value, 10))}
         className={cn(
-          'w-full h-1.5 rounded-full appearance-none cursor-pointer',
+          'w-full h-1.5 rounded-full appearance-none cursor-pointer mt-2',
           '[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-webkit-slider-thumb]:transition-shadow',
           '[&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-grab'
         )}
@@ -128,4 +133,44 @@ export function StampsSelector({
       `}</style>
     </div>
   );
+
+  function renderStamp(n: number) {
+    const isActive = n <= value;
+    const isLast = n === value;
+    const clickable = n >= min;
+    return (
+      <button
+        key={n}
+        type="button"
+        onClick={() => clickable && onChange(n)}
+        disabled={!clickable}
+        className={cn(
+          'rounded-full flex items-center justify-center transition-all duration-200',
+          '[width:var(--stamp-cell)] [height:var(--stamp-cell)]',
+          clickable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
+          !isActive && clickable && 'scale-[0.85] hover:scale-95'
+        )}
+        style={
+          {
+            backgroundColor: isActive ? accentHex : 'var(--border)',
+            boxShadow: isActive ? `0 2px 8px ${accentHex}40` : 'none',
+            transitionDelay: isActive
+              ? `${Math.min((n - 1) * 15, 150)}ms`
+              : '0ms',
+          } as CSSPropertiesWithVars
+        }
+        aria-label={`${n} stamps`}
+      >
+        {isActive ? (
+          <StampIconSvg
+            icon={isLast ? rewardIcon : stampIcon}
+            className="[width:calc(var(--stamp-cell)*0.55)] [height:calc(var(--stamp-cell)*0.55)]"
+            color={iconColorHex}
+          />
+        ) : (
+          <span className="text-[10px] font-bold text-[#BBB]">{n}</span>
+        )}
+      </button>
+    );
+  }
 }
