@@ -4,46 +4,94 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
+import { useAuth } from '@/contexts/auth-provider';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { BusinessInfoEditor } from '@/components/settings/BusinessInfoEditor';
 import { useWizardStep } from '../../wizard-context';
 import type { BusinessInfoEntry } from '@/types/business';
 
 /**
- * Chapter 2 sub-step — optional. Sets up the business-level back-of-card
+ * Backfields chapter — optional. Sets up the business-level back-of-card
  * info (phone, website, address, hours) once. These entries are inherited
- * by every card design; the wizard's Design → Back sub-step (Ch 5 step 4)
- * later toggles per-card visibility.
+ * by every card design; the Design → Back sub-step (Ch 5 step 4) later
+ * toggles per-card visibility.
  *
  * Reuses the dashboard's `BusinessInfoEditor` so the experience matches
  * `/settings` — owners build muscle memory before they ever hit the
  * dashboard.
+ *
+ * Pre-fills sensible defaults from data we already collected:
+ *   - owner email (from Supabase auth)
+ *   - owner phone (from `user_metadata.phone`, set during showcase signup)
+ *   - business website (written by IdentityStep when the owner typed one)
+ *
+ * Only seeds defaults when `settings.business_info` is still undefined
+ * (first visit). After save the key exists — even an empty array — so we
+ * don't re-seed entries the owner explicitly cleared.
  */
 export function BackfieldsStep() {
   const t = useTranslations('onboardingBusiness.chapters.backfields');
   const tErr = useTranslations('onboardingBusiness.errors');
   const { currentBusiness } = useBusiness();
+  const { user } = useAuth();
   const { mutateAsync: updateBusiness } = useUpdateBusiness(currentBusiness?.id);
   const ctx = useWizardStep();
 
-  // Stored edits override the server snapshot; null = "show server value."
-  // Same pattern as ProgramStep to avoid setState-in-effect when the business
-  // settings reload async.
+  const ownerEmail = user?.email ?? '';
+  const ownerPhone = (user?.user_metadata?.phone as string | undefined) ?? '';
+  const identityWebsite =
+    (currentBusiness?.settings?.identity_website as string | undefined) ?? '';
+
+  const seedDefaults = useMemo<BusinessInfoEntry[] | null>(() => {
+    if (!currentBusiness) return null;
+    // Already initialised — even an empty array signals the owner has been here.
+    if (currentBusiness.settings?.business_info !== undefined) return null;
+    const defaults: BusinessInfoEntry[] = [];
+    if (identityWebsite) {
+      defaults.push({
+        type: 'website',
+        key: 'website-default',
+        data: { url: identityWebsite },
+      });
+    }
+    if (ownerEmail) {
+      defaults.push({
+        type: 'email',
+        key: 'email-default',
+        data: { email: ownerEmail },
+      });
+    }
+    if (ownerPhone) {
+      defaults.push({
+        type: 'phone',
+        key: 'phone-default',
+        data: { number: ownerPhone },
+      });
+    }
+    return defaults;
+  }, [currentBusiness, identityWebsite, ownerEmail, ownerPhone]);
+
   const [edits, setEdits] = useState<BusinessInfoEntry[] | null>(null);
 
-  const value: BusinessInfoEntry[] = useMemo(
-    () => edits ?? (currentBusiness?.settings?.business_info ?? []),
-    [edits, currentBusiness]
-  );
+  const value: BusinessInfoEntry[] = useMemo(() => {
+    if (edits !== null) return edits;
+    const existing = currentBusiness?.settings?.business_info;
+    if (existing !== undefined) return existing;
+    return seedDefaults ?? [];
+  }, [edits, currentBusiness, seedDefaults]);
 
   useEffect(() => {
     ctx.setCanSkip(true);
     ctx.setSubmitHandler(async () => {
       if (!currentBusiness) return { ok: false };
-      if (edits === null) return { ok: true }; // untouched — nothing to save
+      // Persist whatever's currently visible — explicit edits OR the seed
+      // defaults (so they survive a "Save & continue" without editing).
+      // Setting the key, even to [], blocks re-seeding on future visits.
+      const toSave =
+        edits ?? currentBusiness.settings?.business_info ?? seedDefaults ?? [];
       try {
         await updateBusiness({
-          settings: { ...(currentBusiness.settings ?? {}), business_info: edits },
+          settings: { ...(currentBusiness.settings ?? {}), business_info: toSave },
         });
         return { ok: true };
       } catch (err) {
@@ -52,7 +100,7 @@ export function BackfieldsStep() {
       }
     });
     return () => ctx.setSubmitHandler(null);
-  }, [edits, currentBusiness, updateBusiness, ctx, tErr]);
+  }, [edits, currentBusiness, seedDefaults, updateBusiness, ctx, tErr]);
 
   return (
     <div className="flex flex-col gap-6">

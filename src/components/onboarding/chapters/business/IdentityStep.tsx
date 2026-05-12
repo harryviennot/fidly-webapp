@@ -91,16 +91,25 @@ export function IdentityStep() {
           payload: {},
         };
 
+        // Stash for Backfields to pre-fill. Sourced from whatever the owner
+        // typed in the form; if blank, also fall back to whatever value the
+        // business already has (showcase may have set it earlier).
+        const websiteUrl =
+          website.trim() ||
+          (currentBusiness?.settings?.identity_website as string | undefined) ||
+          '';
+
         let business;
         if (currentBusiness) {
           // Existing business (showcase or prior wizard run) — update name +
-          // setup_progress. Slug isn't mutable post-creation; the form pre-
-          // fills it but we don't try to change it.
+          // setup_progress + identity_website. Slug isn't mutable post-
+          // creation; the form pre-fills it but we don't try to change it.
           business = await updateBusiness(currentBusiness.id, {
             name: name.trim(),
             settings: {
               ...(currentBusiness.settings ?? {}),
               setup_progress: initialProgress,
+              ...(websiteUrl ? { identity_website: websiteUrl } : {}),
             },
           });
         } else {
@@ -109,13 +118,18 @@ export function IdentityStep() {
             url_slug: slug,
             subscription_tier: 'pro',
             settings: {},
-            website: website.trim() || undefined,
+            website: websiteUrl || undefined,
             primary_locale: detectBusinessLocale(uiLocale),
           });
+          // Stash the typed website in settings.identity_website so the
+          // Backfields chapter can pre-fill it. We don't write business_info
+          // here — Backfields treats `business_info === undefined` as "not
+          // seeded yet" and builds defaults from this stash + auth user.
           await updateBusiness(business.id, {
             settings: {
               ...(business.settings ?? {}),
               setup_progress: initialProgress,
+              ...(websiteUrl ? { identity_website: websiteUrl } : {}),
             },
           });
         }
