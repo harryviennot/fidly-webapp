@@ -13,7 +13,7 @@
     "qrCodeHint": "Les QR codes sont disponibles dans l'application scanner",
     "dataCollectionDescription": "Collectez ces informations lorsque les clients s'inscrivent à leur carte de fidélité.",
     "anonymousModeNote": "Ne collecter aucune donnée active le mode anonyme — les clients peuvent s'inscrire sans fournir aucune information.",
-    "anonymousModeWarning": "Le mode anonyme est actif. Les clients n'auront aucun formulaire à remplir, mais vous ne pourrez pas les identifier. Ils ne pourront pas récupérer une carte perdue ni la synchroniser entre appareils, et vous ne pourrez pas les contacter pour du marketing.",
+    "anonymousModeWarning": "Le mode anonyme est actif. Les clients n'auront aucun formulaire à remplir, mais vous ne pourrez pas les identifier. Ils ne pourront pas récupérer une carte perdue ni la synchroniser entre appareils, et vous ne pourrez pas les contacter.",
     "anonymousModeTitle": "Mode Anonyme actif",
     "rewardFallback": "une récompense",
     "recommended": "Recommandé",
@@ -171,7 +171,7 @@
       "email": "Email",
       "emailDescription": "Récupération de passe, campagnes email et recherche de clients",
       "phone": "Téléphone",
-      "phoneDescription": "Notifications SMS et campagnes"
+      "phoneDescription": "À collecter si vous comptez joindre vos clients vous-même — Stampeo n'envoie pas de SMS."
     },
     "requiredField": "Obligatoire",
     "optionalField": "Facultatif",

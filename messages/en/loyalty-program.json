@@ -13,7 +13,7 @@
     "qrCodeHint": "QR code downloads are available in the scanner app",
     "dataCollectionDescription": "Collect this information when customers sign up for their loyalty card.",
     "anonymousModeNote": "Collecting no data enables anonymous mode — customers can sign up without providing any information.",
-    "anonymousModeWarning": "Anonymous mode is active. Customers won't need to fill any form, but you won't be able to identify them. They won't be able to recover a lost card or sync across devices, and you won't be able to contact them for marketing.",
+    "anonymousModeWarning": "Anonymous mode is active. Customers won't need to fill any form, but you won't be able to identify them. They won't be able to recover a lost card or sync across devices, and you won't be able to contact them.",
     "anonymousModeTitle": "Anonymous Mode active",
     "rewardFallback": "a reward",
     "recommended": "Recommended",
@@ -171,7 +171,7 @@
       "email": "Email",
       "emailDescription": "Enable pass recovery, email campaigns, and customer lookup",
       "phone": "Phone",
-      "phoneDescription": "Enable SMS notifications and campaigns"
+      "phoneDescription": "Collect it if you'd like to reach customers yourself — Stampeo doesn't send SMS."
     },
     "requiredField": "Required",
     "optionalField": "Optional",
