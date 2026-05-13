@@ -81,6 +81,7 @@ export function BrandingForm() {
         onUpload={handleLogoUpload}
         onClear={handleLogoClear}
         hint={t('logoHint')}
+        accept="image/*"
         enableCrop
       />
 

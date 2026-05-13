@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+
 import { HexColorPicker } from 'react-colorful';
 import { Plus, Eyedropper } from '@phosphor-icons/react';
 import { LabelWithTooltip } from './FieldTooltip';
@@ -32,29 +33,6 @@ interface ColorPickerProps {
 }
 
 const isValidHex = (v: string) => /^#[0-9A-Fa-f]{6}$/.test(v);
-
-interface EyeDropperResult {
-  sRGBHex: string;
-}
-interface EyeDropperApi {
-  new (): { open: () => Promise<EyeDropperResult> };
-}
-declare global {
-  interface Window {
-    EyeDropper?: EyeDropperApi;
-  }
-}
-
-function useEyeDropperSupport(): boolean {
-  const [supported, setSupported] = useState(false);
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'EyeDropper' in window) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSupported(true);
-    }
-  }, []);
-  return supported;
-}
 
 // Min / max bounds for the dynamic total-swatch budget. The actual cap is
 // computed from container width by `useFitCount`. Min ensures the picker
@@ -195,19 +173,15 @@ export function ColorPicker({
   // actually pick a new color?" question can only be answered against the
   // pre-open value.
   const popoverInitialValueRef = useRef(value);
-  const eyeDropperSupported = useEyeDropperSupport();
   const isNarrow = useIsNarrow();
   const rowRef = useRef<HTMLDivElement>(null);
+  const nativePickerRef = useRef<HTMLInputElement>(null);
 
-  const pickFromScreen = async () => {
-    if (!window.EyeDropper) return;
-    try {
-      const result = await new window.EyeDropper().open();
-      onChange(result.sRGBHex);
-      onCustomColor?.(result.sRGBHex);
-    } catch {
-      // User pressed Escape — no-op.
-    }
+  // Opens the OS-native color picker via a hidden <input type="color">.
+  // On macOS Safari this surfaces the system picker, whose magnifier
+  // samples pixels from anywhere on screen — including other windows.
+  const openNativePicker = () => {
+    nativePickerRef.current?.click();
   };
 
   const commitCustomColor = (hex: string) => {
@@ -394,16 +368,23 @@ export function ColorPicker({
             </div>
           </PopoverContent>
         </Popover>
-        {eyeDropperSupported && (
-          <button
-            type="button"
-            onClick={pickFromScreen}
-            title="Pick a color from anywhere on the page"
-            className="w-9 h-9 rounded-md border border-border bg-white hover:bg-muted/50 flex items-center justify-center flex-shrink-0 transition-colors"
-          >
-            <Eyedropper className="w-4 h-4 text-foreground" weight="bold" />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={openNativePicker}
+          title="Pick a color from anywhere on screen (uses your OS color picker)"
+          className="w-9 h-9 rounded-md border border-border bg-white hover:bg-muted/50 flex items-center justify-center flex-shrink-0 transition-colors"
+        >
+          <Eyedropper className="w-4 h-4 text-foreground" weight="bold" />
+        </button>
+        <input
+          ref={nativePickerRef}
+          type="color"
+          value={isValidHex(value) ? value : '#000000'}
+          onChange={(e) => commitCustomColor(e.target.value)}
+          className="sr-only"
+          aria-hidden="true"
+          tabIndex={-1}
+        />
       </div>
     </div>
   );

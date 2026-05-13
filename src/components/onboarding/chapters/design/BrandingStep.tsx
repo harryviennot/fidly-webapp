@@ -54,7 +54,12 @@ export function BrandingStep() {
   // both records would share the same asset.
   const reusedLogoUrlRef = useRef<string | null>(null);
   useEffect(() => {
-    if (existingDesign) return; // Design already exists; respect its own logo.
+    // Only short-circuit when the existing design already has its OWN
+    // logo set — that's the case where we should respect the design's
+    // logo and not overwrite. When the design exists but has no logo
+    // yet (typical mid-onboarding), still pull the business logo so
+    // every new design ships with a logo by default.
+    if (existingDesign?.logo_url) return;
     const businessLogoUrl = currentBusiness?.logo_url;
     if (!businessLogoUrl) return;
     if (reusedLogoUrlRef.current === businessLogoUrl) return;

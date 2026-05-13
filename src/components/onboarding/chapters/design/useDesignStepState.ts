@@ -76,6 +76,14 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
       if (!seeded.secondary_fields || seeded.secondary_fields.length === 0) {
         seeded.secondary_fields = [defaultRewardField()];
       }
+      // Fall back to the business logo when the design itself has no logo
+      // yet — covers the case where Branding was saved before the logo
+      // got uploaded, or where the design was created out-of-band. The
+      // logo upload at submit-time will replace this with a fresh per-
+      // design copy.
+      if (!seeded.logo_url && currentBusiness?.logo_url) {
+        seeded.logo_url = currentBusiness.logo_url;
+      }
       return seeded;
     }
     return {
