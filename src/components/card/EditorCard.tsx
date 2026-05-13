@@ -153,10 +153,12 @@ function CardBack({ design, organizationName }: CardBackProps) {
                   backFields.map((field: PassField, index: number) => (
                     <div key={field.key || index} className="space-y-1">
                       <p
-                        className="text-[11px] font-bold uppercase tracking-wider"
+                        className="text-[11px] font-bold tracking-wider"
                         style={{ color: labelColor, opacity: 0.7 }}
                       >
-                        {field.label}
+                        {field.label
+                          ? field.label.charAt(0).toUpperCase() + field.label.slice(1)
+                          : field.label}
                       </p>
                       <p
                         className="text-sm whitespace-pre-wrap"

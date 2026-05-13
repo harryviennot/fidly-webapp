@@ -43,6 +43,13 @@ function useIsLargeScreen(): boolean {
 interface DesignPreviewPaneProps {
   /** Render the back of the card. Default: front. */
   showBack?: boolean;
+  /**
+   * Surface the auto-generate bar above the preview card on mobile. Only
+   * relevant on Branding / Stamps where colors are being chosen — on Content
+   * / Back the user is editing text, not colors, and the bar would be a
+   * distraction.
+   */
+  showAutoGenerate?: boolean;
 }
 
 /**
@@ -59,13 +66,16 @@ interface DesignPreviewPaneProps {
  * `showBack` flips the card to its back view — `BackStep` passes `true`,
  * the other sub-steps default to the front.
  */
-export function DesignPreviewPane({ showBack = false }: DesignPreviewPaneProps) {
+export function DesignPreviewPane({
+  showBack = false,
+  showAutoGenerate = false,
+}: DesignPreviewPaneProps) {
   const isLarge = useIsLargeScreen();
   // Single source of truth tied to the same 1024px breakpoint where the
   // form column has room for a side-by-side card. Avoids the previous
   // dead zone at 768–1023px where neither preview surface was rendered.
   if (isLarge) return <DesktopPreview showBack={showBack} />;
-  return <MobilePreview showBack={showBack} />;
+  return <MobilePreview showBack={showBack} showAutoGenerate={showAutoGenerate} />;
 }
 
 function useCardProps() {
@@ -130,7 +140,13 @@ function DesktopPreview({ showBack }: { showBack: boolean }) {
   );
 }
 
-function MobilePreview({ showBack }: { showBack: boolean }) {
+function MobilePreview({
+  showBack,
+  showAutoGenerate,
+}: {
+  showBack: boolean;
+  showAutoGenerate: boolean;
+}) {
   const t = useTranslations('designEditor.preview');
   const ctx = useWizardStep();
   const cardProps = useCardProps();
@@ -160,9 +176,11 @@ function MobilePreview({ showBack }: { showBack: boolean }) {
             {t('preview')}
           </SheetTitle>
         </SheetHeader>
-        <div className="px-4 pb-3 flex-shrink-0">
-          <AutoGenerateBar />
-        </div>
+        {showAutoGenerate && (
+          <div className="px-4 pb-3 flex-shrink-0">
+            <AutoGenerateBar />
+          </div>
+        )}
         {/* Scrollable card area: `min-h-0` lets the flex item shrink past its
             children's intrinsic height so the close button below never gets
             pushed off-screen and the card top isn't clipped by the auto-gen

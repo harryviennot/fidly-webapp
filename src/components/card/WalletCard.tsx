@@ -111,6 +111,14 @@ export function StampGrid({
   );
 }
 
+/** Capitalize the first letter of a user-typed label, preserve the rest as
+ *  typed. Replaces the previous all-caps CSS so labels read naturally
+ *  (e.g. "reward earned" → "Reward earned") instead of shouty. */
+function sentenceCase(s: string): string {
+  if (!s) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 interface SecondaryFieldsRowProps {
   fields: Array<{ key?: string; label: string; value: string }>;
   colors: ReturnType<typeof computeCardColors>;
@@ -172,10 +180,10 @@ function SecondaryFieldsRow({ fields, colors }: SecondaryFieldsRowProps) {
               }}
             >
               <div
-                className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300 whitespace-nowrap"
+                className="text-[8px] font-bold tracking-wider transition-colors duration-300 whitespace-nowrap"
                 style={{ color: colors.mutedTextColor }}
               >
-                {field.label}
+                {sentenceCase(field.label)}
               </div>
               <div
                 className="font-medium transition-colors duration-300 whitespace-nowrap"
@@ -372,6 +380,7 @@ export function WalletCard({
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
 
   const secondaryFields = design.secondary_fields || [];
+  const auxiliaryFields = design.auxiliary_fields || [];
 
   return (
     <div
@@ -467,6 +476,16 @@ export function WalletCard({
             {showSecondaryFields && secondaryFields.length > 0 && (
               <SecondaryFieldsRow
                 fields={secondaryFields.slice(0, 4)}
+                colors={colors}
+              />
+            )}
+
+            {/* Auxiliary Fields - second horizontal row, same shape as
+                secondary. Apple Wallet uses an auxiliary row below the
+                secondary row for less-important details. */}
+            {showSecondaryFields && auxiliaryFields.length > 0 && (
+              <SecondaryFieldsRow
+                fields={auxiliaryFields.slice(0, 4)}
                 colors={colors}
               />
             )}

@@ -79,7 +79,7 @@ export function StampsStep() {
           </header>
           <StampsForm />
         </div>
-        <DesignPreviewPane />
+        <DesignPreviewPane showAutoGenerate />
       </div>
     </DesignFormProvider>
   );
