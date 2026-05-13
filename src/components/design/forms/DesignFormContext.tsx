@@ -68,6 +68,20 @@ export interface DesignFormContextValue {
   isPaletteLoading: boolean;
   /** Apply a generated theme to all color fields in a single state commit. */
   applyThemeVariant: (variant: ThemeVariant) => void;
+  /**
+   * Shared auto-generate cycle state. Lifted to context so both the
+   * form-column bar and the mobile preview-sheet bar stay in sync — when
+   * one cycles or cancels, the other reflects it immediately. `null` =
+   * idle; non-null = active mid-cycle.
+   */
+  autoGenerateState: AutoGenerateState | null;
+  setAutoGenerateState: (next: AutoGenerateState | null) => void;
+}
+
+export interface AutoGenerateState {
+  palette: LogoPalette;
+  index: number;
+  snapshot: ThemeVariant;
 }
 
 const DesignFormContext = createContext<DesignFormContextValue | null>(null);

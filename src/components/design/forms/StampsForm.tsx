@@ -58,6 +58,7 @@ export function StampsForm() {
           value={(formData.stamp_icon || 'checkmark') as StampIconType}
           onChange={(icon) => updateField('stamp_icon', icon)}
           accentColor={accentHex}
+          iconColor={iconHex}
         />
       </div>
 
@@ -67,6 +68,7 @@ export function StampsForm() {
           value={(formData.reward_icon || 'gift') as StampIconType}
           onChange={(icon) => updateField('reward_icon', icon)}
           accentColor={accentHex}
+          iconColor={iconHex}
         />
       </div>
 

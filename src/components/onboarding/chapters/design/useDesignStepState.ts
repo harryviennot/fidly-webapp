@@ -6,7 +6,7 @@ import { useBusiness } from '@/contexts/business-context';
 import { rgbToHex, hexToRgb, contrastRatio } from '@/lib/color-utils';
 import { useLogoPalette } from '@/hooks/use-logo-palette';
 import { useDefaultProgram } from '@/hooks/use-programs';
-import type { DesignFormContextValue } from '@/components/design/forms/DesignFormContext';
+import type { AutoGenerateState, DesignFormContextValue } from '@/components/design/forms/DesignFormContext';
 import type { CardDesign, CardDesignCreate } from '@/types';
 import type { BusinessInfoEntry } from '@/types/business';
 import type { ThemeVariant } from '@/lib/theme-variants';
@@ -91,6 +91,7 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
   const [iconColorOverridden, setIconColorOverridden] = useState(false);
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [pendingStripFile, setPendingStripFile] = useState<File | null>(null);
+  const [autoGenerateState, setAutoGenerateState] = useState<AutoGenerateState | null>(null);
 
   // Re-seed if the design row changes underneath us (e.g. user nav'd into the
   // wizard from a separate tab that updated the design).
@@ -182,6 +183,8 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
     extractedPalette,
     isPaletteLoading,
     applyThemeVariant,
+    autoGenerateState,
+    setAutoGenerateState,
   };
 
   return {

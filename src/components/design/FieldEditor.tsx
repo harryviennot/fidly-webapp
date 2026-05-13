@@ -11,14 +11,6 @@ interface FieldEditorProps {
   fields: PassField[];
   onChange: (fields: PassField[]) => void;
   maxFields?: number;
-  /**
-   * Optional card colors. When provided, each field row is tinted with the
-   * card's bg/foreground colors so the form previews how the entry will
-   * appear on the actual pass — matches the "live preview" styling used by
-   * the business-info entries in BackForm.
-   */
-  cardBg?: string;
-  cardText?: string;
 }
 
 export default function FieldEditor({
@@ -26,8 +18,6 @@ export default function FieldEditor({
   fields,
   onChange,
   maxFields = 10,
-  cardBg,
-  cardText,
 }: FieldEditorProps) {
   const t = useTranslations('designEditor.fieldEditor');
   const [pendingField, setPendingField] = useState<PassField | null>(null);
@@ -72,14 +62,10 @@ export default function FieldEditor({
     setPendingField(null);
   };
 
-  const tinted = Boolean(cardBg && cardText);
-  // When tinted, inputs need a contrasting overlay so the field text remains
-  // legible regardless of how dark or light the card bg is. We use a
-  // semi-transparent white pane on top of the card color.
-  const inputClass = tinted
-    ? 'h-9 text-sm bg-white/85 backdrop-blur-sm border-0 placeholder:text-muted-foreground'
-    : 'h-9 text-sm';
-
+  // Neutral greyish card style — matches the BusinessInfoEditor cards in
+  // InfoStep so every input card across the wizard reads as the same
+  // visual family. Inputs sit on white so they remain crisp against the
+  // warm-grey surround.
   const fieldRow = (
     field: PassField,
     index: number,
@@ -91,10 +77,7 @@ export default function FieldEditor({
     <div
       key={field.key}
       data-field-id={field.key}
-      className={`flex items-center gap-2 rounded-xl p-2.5 transition-shadow ${
-        tinted ? 'shadow-sm' : 'bg-muted/30 border border-border'
-      }`}
-      style={tinted ? { backgroundColor: cardBg, color: cardText } : undefined}
+      className="flex items-center gap-2 rounded-xl p-3 bg-[#FAFAF8] border border-[#F0EFEB]"
     >
       {/* Reorder arrows */}
       <div className="flex flex-col gap-0.5 flex-shrink-0">
@@ -102,9 +85,7 @@ export default function FieldEditor({
           type="button"
           onClick={() => moveField(index, 'up')}
           disabled={disableReorder || index === 0}
-          className={`w-5 h-5 flex items-center justify-center rounded transition-colors disabled:opacity-30 disabled:cursor-default ${
-            tinted ? 'hover:bg-white/20' : 'text-muted-foreground hover:text-foreground'
-          }`}
+          className="w-5 h-5 flex items-center justify-center rounded text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-default"
           title={t('moveUp')}
         >
           <CaretUp className="w-3 h-3" weight="bold" />
@@ -113,9 +94,7 @@ export default function FieldEditor({
           type="button"
           onClick={() => moveField(index, 'down')}
           disabled={disableReorder || index === fields.length - 1}
-          className={`w-5 h-5 flex items-center justify-center rounded transition-colors disabled:opacity-30 disabled:cursor-default ${
-            tinted ? 'hover:bg-white/20' : 'text-muted-foreground hover:text-foreground'
-          }`}
+          className="w-5 h-5 flex items-center justify-center rounded text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-default"
           title={t('moveDown')}
         >
           <CaretDown className="w-3 h-3" weight="bold" />
@@ -127,7 +106,7 @@ export default function FieldEditor({
         placeholder={t('label')}
         value={field.label}
         onChange={(e) => onLabelChange(e.target.value)}
-        className={`${inputClass} font-semibold w-[35%] flex-shrink-0`}
+        className="h-9 text-sm font-semibold w-[35%] flex-shrink-0 bg-white"
       />
 
       {/* Value input */}
@@ -135,18 +114,14 @@ export default function FieldEditor({
         placeholder={t('value')}
         value={field.value}
         onChange={(e) => onValueChange(e.target.value)}
-        className={`${inputClass} flex-1 min-w-0`}
+        className="h-9 text-sm flex-1 min-w-0 bg-white"
       />
 
       {/* Delete button */}
       <button
         type="button"
         onClick={onRemove}
-        className={`w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 transition-colors ${
-          tinted
-            ? 'hover:bg-white/20'
-            : 'text-muted-foreground hover:text-destructive hover:bg-destructive/10'
-        }`}
+        className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex-shrink-0 transition-colors"
         title={t('remove')}
       >
         <Trash className="w-3.5 h-3.5" />

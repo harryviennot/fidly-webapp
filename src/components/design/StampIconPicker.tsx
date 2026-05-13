@@ -56,6 +56,10 @@ interface StampIconPickerProps {
   readonly value: StampIconType;
   readonly onChange: (icon: StampIconType) => void;
   readonly accentColor?: string;
+  /** Color of the icon glyph itself when the stamp is selected — should
+   *  match `design.icon_color` so the picker previews exactly what the
+   *  customer will see on their pass. Defaults to white. */
+  readonly iconColor?: string;
 }
 
 const stampIcons: { id: StampIconType; label: string; Icon: PhosphorIcon }[] = [
@@ -81,7 +85,12 @@ const stampIcons: { id: StampIconType; label: string; Icon: PhosphorIcon }[] = [
   { id: "scissors", label: "Scissors", Icon: Scissors },
 ];
 
-export function StampIconPicker({ value, onChange, accentColor = "#f97316" }: StampIconPickerProps) {
+export function StampIconPicker({
+  value,
+  onChange,
+  accentColor = "#f97316",
+  iconColor = "#ffffff",
+}: StampIconPickerProps) {
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-y-2 gap-x-1">
       {stampIcons.map(({ id, label, Icon }) => (
@@ -96,8 +105,9 @@ export function StampIconPicker({ value, onChange, accentColor = "#f97316" }: St
           aria-label={`Select ${label} stamp icon`}
         >
           <Icon
-            className={`w-4 h-4 ${value === id ? "text-white" : "text-foreground"}`}
+            className="w-4 h-4"
             weight="bold"
+            style={{ color: value === id ? iconColor : undefined }}
           />
         </button>
       ))}
@@ -147,6 +157,7 @@ interface RewardIconPickerProps {
   readonly value: StampIconType;
   readonly onChange: (icon: StampIconType) => void;
   readonly accentColor?: string;
+  readonly iconColor?: string;
 }
 
 const rewardIcons: { id: StampIconType; label: string; Icon: PhosphorIcon }[] = [
@@ -160,7 +171,12 @@ const rewardIcons: { id: StampIconType; label: string; Icon: PhosphorIcon }[] = 
   { id: "percent", label: "Discount", Icon: Percent },
 ];
 
-export function RewardIconPicker({ value, onChange, accentColor = "#f97316" }: RewardIconPickerProps) {
+export function RewardIconPicker({
+  value,
+  onChange,
+  accentColor = "#f97316",
+  iconColor = "#ffffff",
+}: RewardIconPickerProps) {
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-y-2 gap-x-1">
       {rewardIcons.map(({ id, label, Icon }) => (
@@ -175,7 +191,8 @@ export function RewardIconPicker({ value, onChange, accentColor = "#f97316" }: R
           aria-label={`Select ${label} reward icon`}
         >
           <Icon
-            className={`w-4 h-4 ${value === id ? "text-white" : "text-foreground"}`}
+            className="w-4 h-4"
+            style={{ color: value === id ? iconColor : undefined }}
             weight="bold"
           />
         </button>

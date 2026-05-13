@@ -55,8 +55,6 @@ export function BackForm({ hideSettingsLink, designOnlyExplain }: BackFormProps 
         fields={formData.back_fields || []}
         onChange={(f) => updateField('back_fields', f)}
         maxFields={10}
-        cardBg={bgHex}
-        cardText={textHex}
       />
     </div>
   );

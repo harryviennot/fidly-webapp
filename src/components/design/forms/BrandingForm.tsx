@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { LabelWithTooltip } from '@/components/design/FieldTooltip';
 import { ColorPicker } from '@/components/design/ColorPicker';
 import { AutoGenerateBar } from '@/components/design/AutoGenerateBar';
+import { InfoBox } from '@/components/reusables/info-box';
 import ImageUploader from '@/components/design/ImageUploader';
 import { backgroundColors, textColors } from '@/lib/color-utils';
 import { paletteToSwatches } from '@/lib/logo-palette';
@@ -108,7 +109,7 @@ export function BrandingForm() {
         extraPresetsLabel={logoPresetsLabel}
       />
       {labelContrast < 3 && (
-        <p className="text-xs text-amber-600 -mt-1">{t('lowContrastLabel')}</p>
+        <InfoBox variant="warning" message={t('lowContrastLabel')} />
       )}
 
       <ColorPicker
@@ -124,7 +125,7 @@ export function BrandingForm() {
         extraPresetsLabel={logoPresetsLabel}
       />
       {textContrast < 3 && (
-        <p className="text-xs text-amber-600 -mt-1">{t('lowContrastText')}</p>
+        <InfoBox variant="warning" message={t('lowContrastText')} />
       )}
     </div>
   );

@@ -23,7 +23,7 @@ import { rgbToHex, hexToRgb, autoIconColor, contrastRatio } from '@/lib/color-ut
 import { useLogoPalette } from '@/hooks/use-logo-palette';
 import type { ThemeVariant } from '@/lib/theme-variants';
 import { getDesignDraft, useDesignDraftPersistence } from '@/hooks/use-design-draft';
-import { DesignFormProvider, type DesignFormContextValue } from './forms/DesignFormContext';
+import { DesignFormProvider, type AutoGenerateState, type DesignFormContextValue } from './forms/DesignFormContext';
 import { BrandingForm } from './forms/BrandingForm';
 import { StampsForm } from './forms/StampsForm';
 import { ContentForm } from './forms/ContentForm';
@@ -168,6 +168,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
     const [pendingStripFile, setPendingStripFile] = useState<File | null>(null);
     const [customColors, setCustomColors] = useState<string[]>([]);
+    const [autoGenerateState, setAutoGenerateState] = useState<AutoGenerateState | null>(null);
 
     const previewDesign = useMemo(() => {
       const businessInfo = (currentBusiness?.settings?.business_info as BusinessInfoEntry[]) || [];
@@ -500,6 +501,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       extractedPalette,
       isPaletteLoading,
       applyThemeVariant,
+      autoGenerateState,
+      setAutoGenerateState,
     };
 
     // ---- Preview Panel ----
