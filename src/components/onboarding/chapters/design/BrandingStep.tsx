@@ -14,6 +14,7 @@ import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
 import { useDesignStepState } from './useDesignStepState';
 import { DesignPreviewPane } from './DesignPreviewPane';
+import { pruneEmptyLabelFields } from './pruneDesignFields';
 import type { CardDesign, CardDesignCreate } from '@/types';
 
 /**
@@ -100,12 +101,12 @@ export function BrandingStep() {
       try {
         const { translations, ...rest } = formData;
         void translations;
-        const cleaned: CardDesignCreate = {
+        const cleaned: CardDesignCreate = pruneEmptyLabelFields({
           ...rest,
           name: rest.name?.trim() || `${currentBusiness?.name ?? 'My'} card`,
           organization_name: rest.organization_name?.trim() || currentBusiness?.name || '',
           description: rest.description?.trim() || currentBusiness?.name || 'Loyalty card',
-        };
+        });
         if (cleaned.logo_url?.startsWith('blob:')) delete cleaned.logo_url;
         // Drop the business logo URL — we'll upload a fresh file under the
         // design via `pendingLogoFile` (queued above) so the two records hold

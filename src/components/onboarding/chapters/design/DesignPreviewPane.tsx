@@ -86,8 +86,19 @@ function useCardProps() {
   const previewStamps = totalStamps
     ? Math.max(1, Math.floor(totalStamps * 0.3))
     : 3;
+  // Strip fields whose label is empty — without a title the row would
+  // render as a free-floating value, which reads as visual noise. Keeps
+  // the preview honest while the user is still filling things in.
+  const isLabelled = (f: { label?: string | null }) =>
+    typeof f.label === 'string' && f.label.trim().length > 0;
+  const previewDesign = {
+    ...formData,
+    secondary_fields: (formData.secondary_fields ?? []).filter(isLabelled),
+    auxiliary_fields: (formData.auxiliary_fields ?? []).filter(isLabelled),
+    back_fields: (formData.back_fields ?? []).filter(isLabelled),
+  };
   return {
-    design: formData,
+    design: previewDesign,
     totalStamps,
     previewStamps,
     organizationName: currentBusiness?.name,

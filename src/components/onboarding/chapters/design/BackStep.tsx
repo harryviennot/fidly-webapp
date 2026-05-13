@@ -14,6 +14,7 @@ import { BackForm } from '@/components/design/forms/BackForm';
 import { useWizardStep } from '../../wizard-context';
 import { useDesignStepState } from './useDesignStepState';
 import { DesignPreviewPane } from './DesignPreviewPane';
+import { pruneEmptyLabelFields } from './pruneDesignFields';
 
 /**
  * Chapter 5 step 4 — optional. Edits card-back fields + business-info
@@ -39,8 +40,9 @@ export function BackStep() {
     ctx.setSubmitHandler(async () => {
       if (!businessId || !existingDesign?.id) return { ok: true };
       try {
-        const { translations, ...data } = formData;
+        const { translations, ...rest } = formData;
         void translations;
+        const data = pruneEmptyLabelFields(rest);
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 

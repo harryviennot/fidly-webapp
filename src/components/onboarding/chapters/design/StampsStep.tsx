@@ -13,6 +13,7 @@ import { StampsForm } from '@/components/design/forms/StampsForm';
 import { useWizardStep } from '../../wizard-context';
 import { useDesignStepState } from './useDesignStepState';
 import { DesignPreviewPane } from './DesignPreviewPane';
+import { pruneEmptyLabelFields } from './pruneDesignFields';
 
 /**
  * Chapter 5 step 2 — optional. Edits stamp / reward icons + colors + the
@@ -36,8 +37,9 @@ export function StampsStep() {
     ctx.setSubmitHandler(async () => {
       if (!businessId || !existingDesign?.id) return { ok: true };
       try {
-        const { translations, ...data } = formData;
+        const { translations, ...rest } = formData;
         void translations;
+        const data = pruneEmptyLabelFields(rest);
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 

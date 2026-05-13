@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useBusiness } from '@/contexts/business-context';
 import { rgbToHex, hexToRgb, contrastRatio } from '@/lib/color-utils';
 import { useLogoPalette } from '@/hooks/use-logo-palette';
 import { useDefaultProgram } from '@/hooks/use-programs';
+import { useWizardStep } from '../../wizard-context';
 import type { AutoGenerateState, DesignFormContextValue } from '@/components/design/forms/DesignFormContext';
 import type { CardDesign, CardDesignCreate } from '@/types';
 import type { BusinessInfoEntry } from '@/types/business';
@@ -51,9 +52,15 @@ export interface DesignStepState {
  *
  * Drop-in for: BrandingStep, StampsStep, ContentStep, BackStep.
  */
+/** Wizard draft-store key for the design chapter's custom-color history.
+ *  Shared across all four design sub-steps so user-picked colors survive
+ *  forward/back navigation and a page reload. */
+const CUSTOM_COLORS_DRAFT_KEY = 'design.customColors';
+
 export function useDesignStepState(existingDesign: CardDesign | undefined): DesignStepState {
   const { currentBusiness } = useBusiness();
   const t = useTranslations('designEditor.editor');
+  const wizardCtx = useWizardStep();
   // Read the cached program to prefill the first secondary field with the
   // reward name. By the time the user is on the design chapter they've
   // already gone through the Program step, so `useDefaultProgram` resolves
@@ -84,17 +91,28 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
       if (!seeded.logo_url && currentBusiness?.logo_url) {
         seeded.logo_url = currentBusiness.logo_url;
       }
+      // Prefer the loyalty program name as the card description. Falls back
+      // to the business name when the program hasn't been set up yet.
+      if (!seeded.description) {
+        seeded.description = program?.name ?? currentBusiness?.name ?? '';
+      }
       return seeded;
     }
     return {
       ...DEFAULT_DESIGN,
       organization_name: currentBusiness?.name ?? '',
-      description: currentBusiness?.name ?? '',
+      description: program?.name ?? currentBusiness?.name ?? '',
       logo_url: currentBusiness?.logo_url ?? undefined,
       secondary_fields: [defaultRewardField()],
     };
   });
-  const [customColors, setCustomColors] = useState<string[]>([]);
+  // Hydrate from the wizard draft store so the history persists across
+  // step navigation (and a reload, since the draft store is localStorage-
+  // backed). The sub-step component that owns this hook unmounts when the
+  // user navigates forward, which would otherwise wipe local-only state.
+  const [customColors, setCustomColors] = useState<string[]>(
+    () => wizardCtx.getDraft<string[]>(CUSTOM_COLORS_DRAFT_KEY) ?? []
+  );
   const [showAdvancedStamps, setShowAdvancedStamps] = useState(false);
   const [iconColorOverridden, setIconColorOverridden] = useState(false);
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
@@ -107,6 +125,41 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
     if (existingDesign) setFormData({ ...existingDesign });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingDesign?.id]);
+
+  // The state initialiser at mount may run before React Query has hydrated
+  // the program cache — in that race the reward field gets seeded with an
+  // empty value. Fill it in once the program data lands, but only when the
+  // field is still untouched (empty value), so we never clobber a user edit.
+  const rewardSyncedRef = useRef(false);
+  useEffect(() => {
+    if (rewardSyncedRef.current) return;
+    const rewardName = program?.reward_name;
+    if (!rewardName) return;
+    setFormData((prev) => {
+      const fields = prev.secondary_fields ?? [];
+      const idx = fields.findIndex((f) => f.key === 'reward');
+      if (idx === -1) {
+        rewardSyncedRef.current = true;
+        return prev;
+      }
+      if (fields[idx].value && fields[idx].value.trim().length > 0) {
+        rewardSyncedRef.current = true;
+        return prev;
+      }
+      const next = [...fields];
+      next[idx] = { ...next[idx], value: rewardName };
+      rewardSyncedRef.current = true;
+      return { ...prev, secondary_fields: next };
+    });
+  }, [program?.reward_name]);
+
+  // Mirror customColors into the wizard draft store on every change so the
+  // history is preserved across step navigation. `setDraft` is not a React
+  // setState — it writes to a ref-backed store + localStorage — so this
+  // doesn't trip the `set-state-in-effect` lint rule.
+  useEffect(() => {
+    wizardCtx.setDraft(CUSTOM_COLORS_DRAFT_KEY, customColors);
+  }, [customColors, wizardCtx]);
 
   const { palette: extractedPalette, isLoading: isPaletteLoading } = useLogoPalette(
     formData.logo_url

@@ -13,6 +13,7 @@ import { ContentForm } from '@/components/design/forms/ContentForm';
 import { useWizardStep } from '../../wizard-context';
 import { useDesignStepState } from './useDesignStepState';
 import { DesignPreviewPane } from './DesignPreviewPane';
+import { pruneEmptyLabelFields } from './pruneDesignFields';
 
 /**
  * Chapter 5 step 3 — optional. Edits the front-of-card secondary + auxiliary
@@ -35,8 +36,9 @@ export function ContentStep() {
     ctx.setSubmitHandler(async () => {
       if (!businessId || !existingDesign?.id) return { ok: true };
       try {
-        const { translations, ...data } = formData;
+        const { translations, ...rest } = formData;
         void translations;
+        const data = pruneEmptyLabelFields(rest);
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
