@@ -7,6 +7,8 @@ import { EditorCard } from '@/components/card/EditorCard';
 import { useBusiness } from '@/contexts/business-context';
 import { useDefaultProgram } from '@/hooks/use-programs';
 import { useDesignForm } from '@/components/design/forms/DesignFormContext';
+import type { BusinessInfoEntry } from '@/types/business';
+import type { PassField } from '@/types';
 import {
   Sheet,
   SheetClose,
@@ -80,8 +82,9 @@ export function DesignPreviewPane({
 
 function useCardProps() {
   const { currentBusiness } = useBusiness();
-  const { formData } = useDesignForm();
+  const { formData, businessInfo } = useDesignForm();
   const { data: program } = useDefaultProgram(currentBusiness?.id);
+  const tCardInfo = useTranslations('settings.cardInfo.types');
   const totalStamps = program?.config?.total_stamps;
   const previewStamps = totalStamps
     ? Math.max(1, Math.floor(totalStamps * 0.3))
@@ -91,11 +94,24 @@ function useCardProps() {
   // the preview honest while the user is still filling things in.
   const isLabelled = (f: { label?: string | null }) =>
     typeof f.label === 'string' && f.label.trim().length > 0;
+
+  // Card-specific back fields go FIRST, then the visible (non-hidden)
+  // business-info entries — mirrors the layout the real pass uses, where
+  // per-card content sits above the business-wide presets. The hidden
+  // toggle from BackForm is the source of truth for which presets render.
+  const hiddenKeys = new Set(formData.hidden_business_info_keys ?? []);
+  const businessBackFields = businessInfo
+    .filter((entry) => !hiddenKeys.has(entry.key))
+    .map((entry) => businessInfoToPassField(entry, tCardInfo));
+
   const previewDesign = {
     ...formData,
     secondary_fields: (formData.secondary_fields ?? []).filter(isLabelled),
     auxiliary_fields: (formData.auxiliary_fields ?? []).filter(isLabelled),
-    back_fields: (formData.back_fields ?? []).filter(isLabelled),
+    back_fields: [
+      ...(formData.back_fields ?? []).filter(isLabelled),
+      ...businessBackFields,
+    ],
   };
   // Don't pass `organizationName` — that prop OVERRIDES `design.organization_name`
   // in WalletCard, so passing currentBusiness.name made the preview ignore the
@@ -106,6 +122,61 @@ function useCardProps() {
     totalStamps,
     previewStamps,
   };
+}
+
+interface ScheduleRow {
+  days: string;
+  open?: string;
+  close?: string;
+  closed?: boolean;
+}
+
+/** Converts a business-info entry into a back-field {label, value} pair for
+ *  the preview. Uses the same per-type localised label as the dashboard's
+ *  settings page so the preview matches what'll render on the real pass. */
+function businessInfoToPassField(
+  entry: BusinessInfoEntry,
+  t: (key: string) => string
+): PassField {
+  const label =
+    entry.type === 'custom'
+      ? ((entry.data.label as string) || t('custom'))
+      : t(entry.type);
+  return {
+    key: entry.key,
+    label,
+    value: formatBusinessInfoValue(entry),
+  };
+}
+
+function formatBusinessInfoValue(entry: BusinessInfoEntry): string {
+  switch (entry.type) {
+    case 'website':
+      return (entry.data.url as string) || '';
+    case 'phone':
+      return (entry.data.number as string) || '';
+    case 'email':
+      return (entry.data.email as string) || '';
+    case 'address':
+      return (entry.data.address as string) || '';
+    case 'custom':
+      return (entry.data.value as string) || '';
+    case 'hours': {
+      const schedule = (entry.data.schedule as ScheduleRow[]) || [];
+      return schedule
+        .filter((row) => (row.days ?? '').trim().length > 0)
+        .map((row) => {
+          if (row.closed) return `${row.days}: —`;
+          const open = (row.open ?? '').trim();
+          const close = (row.close ?? '').trim();
+          if (!open && !close) return row.days;
+          return `${row.days}: ${open} – ${close}`;
+        })
+        .join('\n');
+    }
+    default:
+      return '';
+  }
 }
 
 function DesktopPreview({ showBack }: { showBack: boolean }) {

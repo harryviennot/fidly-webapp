@@ -23,12 +23,42 @@ interface ScheduleRow {
 interface BusinessInfoEditorProps {
   value: BusinessInfoEntry[];
   onChange: (entries: BusinessInfoEntry[]) => void;
+  /**
+   * Restrict the editor to a subset of types. When the only allowed type is
+   * `custom`, the add-type menu is bypassed entirely — clicking "Add"
+   * appends a new custom entry directly. Used by the design wizard's
+   * BackForm to reuse this component for card-specific (free-form) back
+   * fields, which only ever exist as the custom type.
+   */
+  allowedTypes?: readonly InfoType[];
+  /** Override the add-button label (defaults to `settings.cardInfo.addInfo`). */
+  addLabel?: string;
 }
 
-export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps) {
+export function BusinessInfoEditor({
+  value,
+  onChange,
+  allowedTypes,
+  addLabel,
+}: BusinessInfoEditorProps) {
   const t = useTranslations('settings.cardInfo');
   const usedPresetTypes = new Set(value.map((e) => e.type).filter((t) => t !== 'custom'));
-  const availableTypes = ALL_TYPES.filter((type) => type === 'custom' || !usedPresetTypes.has(type));
+  const allowedSet = allowedTypes ? new Set(allowedTypes) : null;
+  const availableTypes = ALL_TYPES.filter(
+    (type) =>
+      (!allowedSet || allowedSet.has(type)) &&
+      (type === 'custom' || !usedPresetTypes.has(type))
+  );
+  // Custom-only mode collapses the type-pick menu into a single "Add" button.
+  const customOnly = allowedSet?.size === 1 && allowedSet.has('custom');
+  // Per user request: disable the add button while the latest custom entry
+  // is still untouched (empty label). Stops the user from piling up empty
+  // rows that all need to be filled before the next save.
+  const lastEntry = value[value.length - 1];
+  const addDisabled =
+    customOnly &&
+    lastEntry?.type === 'custom' &&
+    !((lastEntry.data.label as string) || '').trim();
 
   const [animatingId, setAnimatingId] = useState<string | null>(null);
   const [animDir, setAnimDir] = useState<'up' | 'down' | null>(null);
@@ -48,7 +78,6 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
 
   const addEntry = (type: InfoType) => {
     const defaultData = getDefaultData(type, t);
-    // eslint-disable-next-line react-hooks/purity
     const uid = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
     const key = type === 'custom' ? `biz_custom_${uid}` : `biz_${type}`;
     onChange([...value, { type, key, data: defaultData }]);
@@ -119,12 +148,20 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
       {availableTypes.length > 0 && (
         <div className="relative" ref={addMenuRef}>
           <button
-            onClick={() => setAddMenuOpen(!addMenuOpen)}
-            className="w-full py-3 rounded-xl border-2 border-dashed border-[#D0CDC6] bg-[#FAFAF8] text-[#777] text-sm font-medium flex items-center justify-center gap-2 transition-all hover:bg-[#F0EDE7] hover:border-[#C0BDB6] hover:text-[#555]"
+            onClick={() => {
+              if (addDisabled) return;
+              if (customOnly) {
+                addEntry('custom');
+              } else {
+                setAddMenuOpen(!addMenuOpen);
+              }
+            }}
+            disabled={addDisabled}
+            className="w-full py-3 rounded-xl border-2 border-dashed border-[#D0CDC6] bg-[#FAFAF8] text-[#777] text-sm font-medium flex items-center justify-center gap-2 transition-all hover:enabled:bg-[#F0EDE7] hover:enabled:border-[#C0BDB6] hover:enabled:text-[#555] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Plus className="w-3.5 h-3.5" /> {t('addInfo')}
+            <Plus className="w-3.5 h-3.5" /> {addLabel ?? t('addInfo')}
           </button>
-          {addMenuOpen && (
+          {addMenuOpen && !customOnly && (
             <div
               className={cn(
                 'absolute left-0 right-0 z-50 bg-white rounded-xl border border-[#EEEDEA] shadow-lg overflow-hidden p-1.5',

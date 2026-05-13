@@ -1,15 +1,17 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { GearSix, Check } from '@phosphor-icons/react';
-import FieldEditor from '@/components/design/FieldEditor';
+import { BusinessInfoEditor } from '@/components/settings/BusinessInfoEditor';
 import {
   BUSINESS_INFO_TYPE_ICONS,
   getEntryLabel,
   getEntryPreview,
 } from '@/lib/business-info-utils';
 import type { BusinessInfoEntry } from '@/types/business';
+import type { PassField } from '@/types';
 import { useDesignForm } from './DesignFormContext';
 
 interface BackFormProps {
@@ -19,19 +21,47 @@ interface BackFormProps {
    * also lets the wizard surface its own explanation copy above the form.
    */
   hideSettingsLink?: boolean;
-  /** Optional copy rendered above FieldEditor to explain design-only fields. */
+  /** Optional copy rendered above the card-specific editor. */
   designOnlyExplain?: string;
 }
+
+const CUSTOM_ONLY: readonly ['custom'] = ['custom'];
 
 /**
  * Back-of-card section: card-specific back fields plus a visibility-toggle
  * list of business-info entries inherited from /settings.
+ *
+ * Card-specific back fields are stored as `PassField` (key/label/value) but
+ * rendered through `BusinessInfoEditor` in custom-only mode, so the form
+ * card matches the dashboard's back-of-card editor exactly (same chrome,
+ * same label + value inputs). The adapter below shuttles between the two
+ * shapes without leaking either type into the other component.
  */
 export function BackForm({ hideSettingsLink, designOnlyExplain }: BackFormProps = {}) {
   const t = useTranslations('designEditor.editor');
+  const tFE = useTranslations('designEditor.fieldEditor');
   const { formData, businessInfo, updateField, toggleBusinessInfoKey } =
     useDesignForm();
   const hiddenKeys = formData.hidden_business_info_keys || [];
+
+  const backFieldsAsEntries = useMemo<BusinessInfoEntry[]>(
+    () =>
+      (formData.back_fields || []).map((f) => ({
+        type: 'custom' as const,
+        key: f.key,
+        data: { label: f.label, value: f.value },
+      })),
+    [formData.back_fields]
+  );
+
+  const handleBackFieldsChange = (entries: BusinessInfoEntry[]) => {
+    const next: PassField[] = entries.map((entry) => ({
+      key: entry.key,
+      label: (entry.data.label as string) || '',
+      value: (entry.data.value as string) || '',
+    }));
+    updateField('back_fields', next);
+  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -48,12 +78,15 @@ export function BackForm({ hideSettingsLink, designOnlyExplain }: BackFormProps 
         <p className="wiz-helper text-[#888]">{designOnlyExplain}</p>
       )}
 
-      <FieldEditor
-        title={t('cardSpecific')}
-        fields={formData.back_fields || []}
-        onChange={(f) => updateField('back_fields', f)}
-        maxFields={10}
-      />
+      <div className="flex flex-col gap-2">
+        <span className="text-[15px] font-medium">{t('cardSpecific')}</span>
+        <BusinessInfoEditor
+          value={backFieldsAsEntries}
+          onChange={handleBackFieldsChange}
+          allowedTypes={CUSTOM_ONLY}
+          addLabel={tFE('addField')}
+        />
+      </div>
     </div>
   );
 }
@@ -66,10 +99,11 @@ interface BusinessInfoFieldsProps {
 }
 
 /**
- * Renders one row per business-info entry with the same neutral styling as
- * the FieldEditor cards below — same cream surface, same border — so the
- * whole back-of-card section reads as one coherent form. Hidden rows get
- * opacity 60% and an empty check box; visible rows get a filled check.
+ * Toggle list of business-info entries — clicking a row flips its visibility
+ * on the card back. Uses the same neutral surface as the editor cards below
+ * (`bg-[#FAFAF8] border border-[#F0EFEB]`) and the same bordered icon box as
+ * the BusinessInfoEditor entries (w-9 h-9 white square), so the back-of-card
+ * section reads as one coherent block. Check sits on the right.
  */
 function BusinessInfoFields({
   businessInfo,
@@ -117,6 +151,17 @@ function BusinessInfoFields({
                 isHidden ? 'opacity-60' : ''
               }`}
             >
+              <div className="w-9 h-9 rounded-lg bg-white border border-[#E8E5DE] flex items-center justify-center shrink-0">
+                <Icon className="w-4 h-4 text-[#777]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-semibold text-foreground">{getEntryLabel(entry)}</span>
+                {preview && (
+                  <p className="text-xs truncate text-muted-foreground">
+                    {preview}
+                  </p>
+                )}
+              </div>
               <div
                 className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 transition-all ${
                   isHidden
@@ -125,15 +170,6 @@ function BusinessInfoFields({
                 }`}
               >
                 {!isHidden && <Check className="w-3 h-3" weight="bold" />}
-              </div>
-              <Icon className="w-4 h-4 flex-shrink-0 text-foreground" />
-              <div className="flex-1 min-w-0">
-                <span className="text-sm font-semibold text-foreground">{getEntryLabel(entry)}</span>
-                {preview && (
-                  <p className="text-xs truncate text-muted-foreground">
-                    {preview}
-                  </p>
-                )}
               </div>
             </button>
           );
