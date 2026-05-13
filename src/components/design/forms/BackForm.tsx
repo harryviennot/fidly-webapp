@@ -29,7 +29,7 @@ interface BackFormProps {
  */
 export function BackForm({ hideSettingsLink, designOnlyExplain }: BackFormProps = {}) {
   const t = useTranslations('designEditor.editor');
-  const { formData, businessInfo, updateField, toggleBusinessInfoKey, bgHex, textHex } =
+  const { formData, businessInfo, updateField, toggleBusinessInfoKey } =
     useDesignForm();
   const hiddenKeys = formData.hidden_business_info_keys || [];
 
@@ -41,8 +41,6 @@ export function BackForm({ hideSettingsLink, designOnlyExplain }: BackFormProps 
         businessInfo={businessInfo}
         hiddenKeys={hiddenKeys}
         onToggleKey={toggleBusinessInfoKey}
-        cardBg={bgHex}
-        cardText={textHex}
         hideSettingsLink={hideSettingsLink}
       />
 
@@ -64,23 +62,19 @@ interface BusinessInfoFieldsProps {
   businessInfo: BusinessInfoEntry[];
   hiddenKeys: string[];
   onToggleKey: (key: string) => void;
-  cardBg: string;
-  cardText: string;
   hideSettingsLink?: boolean;
 }
 
 /**
- * Renders one row per business-info entry, with each visible row tinted in
- * the card's background + foreground colors so the user can preview at a
- * glance what'll appear on the card back. Hidden rows fall back to a muted
- * neutral so the active vs. hidden split reads instantly.
+ * Renders one row per business-info entry with the same neutral styling as
+ * the FieldEditor cards below — same cream surface, same border — so the
+ * whole back-of-card section reads as one coherent form. Hidden rows get
+ * opacity 60% and an empty check box; visible rows get a filled check.
  */
 function BusinessInfoFields({
   businessInfo,
   hiddenKeys,
   onToggleKey,
-  cardBg,
-  cardText,
   hideSettingsLink,
 }: BusinessInfoFieldsProps) {
   const t = useTranslations('designEditor.editor');
@@ -119,30 +113,24 @@ function BusinessInfoFields({
               key={entry.key}
               type="button"
               onClick={() => onToggleKey(entry.key)}
-              style={
-                isHidden
-                  ? undefined
-                  : { backgroundColor: cardBg, color: cardText }
-              }
-              className={`flex items-center gap-3 w-full p-3 rounded-xl cursor-pointer transition-all text-left ${
-                isHidden ? 'bg-muted/30 border border-border opacity-60' : 'border border-transparent shadow-sm'
+              className={`flex items-center gap-3 w-full p-3 rounded-xl cursor-pointer transition-all text-left bg-[#FAFAF8] border border-[#F0EFEB] ${
+                isHidden ? 'opacity-60' : ''
               }`}
             >
               <div
                 className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 transition-all ${
-                  isHidden ? 'bg-white border border-border' : ''
+                  isHidden
+                    ? 'bg-white border border-border'
+                    : 'bg-[var(--foreground)] text-white'
                 }`}
-                style={isHidden ? undefined : { backgroundColor: cardText, color: cardBg }}
               >
                 {!isHidden && <Check className="w-3 h-3" weight="bold" />}
               </div>
-              <Icon className="w-4 h-4 flex-shrink-0" />
+              <Icon className="w-4 h-4 flex-shrink-0 text-foreground" />
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-semibold">{getEntryLabel(entry)}</span>
+                <span className="text-sm font-semibold text-foreground">{getEntryLabel(entry)}</span>
                 {preview && (
-                  <p
-                    className={`text-xs truncate ${isHidden ? 'text-muted-foreground' : 'opacity-80'}`}
-                  >
+                  <p className="text-xs truncate text-muted-foreground">
                     {preview}
                   </p>
                 )}
