@@ -104,6 +104,7 @@
       "cardDescription": "Description de la carte *",
       "cardDescriptionTooltip": "Sur Apple Wallet, affiché comme titre sur la page d'info. Sur Google Wallet, affiché comme en-tête de la carte.",
       "cardDescriptionPlaceholder": "ex. : Carte de fidélité",
+      "defaultLoyaltyCardName": "Carte de fidélité",
       "logo": "Logo",
       "logoHint": "Apparaît en haut à gauche du pass. PNG, 160x50pt max",
       "backgroundColor": "Couleur de fond",

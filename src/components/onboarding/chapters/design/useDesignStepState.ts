@@ -91,17 +91,27 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
       if (!seeded.logo_url && currentBusiness?.logo_url) {
         seeded.logo_url = currentBusiness.logo_url;
       }
-      // Prefer the loyalty program name as the card description. Falls back
-      // to the business name when the program hasn't been set up yet.
+      // Internal design name defaults to the business name, never to a
+      // " card"-suffixed variant.
+      if (!seeded.name) {
+        seeded.name = currentBusiness?.name ?? '';
+      }
+      // Card description defaults to the loyalty program name, with the
+      // translated "Loyalty Card" string as the fallback when no program
+      // has been named yet.
       if (!seeded.description) {
-        seeded.description = program?.name ?? currentBusiness?.name ?? '';
+        seeded.description = program?.name ?? t('defaultLoyaltyCardName');
       }
       return seeded;
     }
     return {
       ...DEFAULT_DESIGN,
-      organization_name: currentBusiness?.name ?? '',
-      description: program?.name ?? currentBusiness?.name ?? '',
+      name: currentBusiness?.name ?? '',
+      // `organization_name` is the optional title shown at the top of the
+      // pass. Default to empty so the user types whatever they want — the
+      // preview reflects the input live and stays empty until they do.
+      organization_name: '',
+      description: program?.name ?? t('defaultLoyaltyCardName'),
       logo_url: currentBusiness?.logo_url ?? undefined,
       secondary_fields: [defaultRewardField()],
     };
@@ -152,6 +162,31 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
       return { ...prev, secondary_fields: next };
     });
   }, [program?.reward_name]);
+
+  // Same race fix for description ← program.name. When the program cache
+  // misses on first render, description gets seeded with the translated
+  // "Loyalty Card" fallback. Promote it to the program name once that data
+  // lands, but only if the current value is still the fallback string —
+  // never overwrite a user edit or a non-default existing description.
+  const descriptionSyncedRef = useRef(false);
+  useEffect(() => {
+    if (descriptionSyncedRef.current) return;
+    const programName = program?.name;
+    if (!programName) return;
+    const fallback = t('defaultLoyaltyCardName');
+    setFormData((prev) => {
+      const current = (prev.description ?? '').trim();
+      // Treat both empty and the translated fallback as "still default" —
+      // anything else is a user edit (or an existing non-default value) and
+      // must be preserved.
+      if (current.length > 0 && current !== fallback) {
+        descriptionSyncedRef.current = true;
+        return prev;
+      }
+      descriptionSyncedRef.current = true;
+      return { ...prev, description: programName };
+    });
+  }, [program?.name, t]);
 
   // Mirror customColors into the wizard draft store on every change so the
   // history is preserved across step navigation. `setDraft` is not a React

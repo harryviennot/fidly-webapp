@@ -97,11 +97,14 @@ function useCardProps() {
     auxiliary_fields: (formData.auxiliary_fields ?? []).filter(isLabelled),
     back_fields: (formData.back_fields ?? []).filter(isLabelled),
   };
+  // Don't pass `organizationName` — that prop OVERRIDES `design.organization_name`
+  // in WalletCard, so passing currentBusiness.name made the preview ignore the
+  // user's edits in the "Titre" field. Letting it fall through means the
+  // preview header is exactly what the user typed (empty if they haven't yet).
   return {
     design: previewDesign,
     totalStamps,
     previewStamps,
-    organizationName: currentBusiness?.name,
   };
 }
 

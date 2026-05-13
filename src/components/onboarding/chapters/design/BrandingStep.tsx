@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { createDesign, updateDesign, uploadLogo } from '@/api';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
 import { BrandingForm } from '@/components/design/forms/BrandingForm';
@@ -36,6 +37,7 @@ import type { CardDesign, CardDesignCreate } from '@/types';
 export function BrandingStep() {
   const t = useTranslations('onboardingBusiness.chapters.design.steps.branding');
   const tErr = useTranslations('onboardingBusiness.errors');
+  const tEditor = useTranslations('designEditor.editor');
   const { currentBusiness } = useBusiness();
   const businessId = currentBusiness?.id;
   const queryClient = useQueryClient();
@@ -43,6 +45,7 @@ export function BrandingStep() {
   const existingDesign = designs[0];
   const { mutateAsync: updateBusiness } = useUpdateBusiness(businessId);
   const { updatePayload } = useWizardProgress();
+  const { data: program } = useDefaultProgram(businessId);
   const ctx = useWizardStep();
 
   const { formData, pendingLogoFile, setPendingLogoFile, designContext } =
@@ -103,9 +106,14 @@ export function BrandingStep() {
         void translations;
         const cleaned: CardDesignCreate = pruneEmptyLabelFields({
           ...rest,
-          name: rest.name?.trim() || `${currentBusiness?.name ?? 'My'} card`,
-          organization_name: rest.organization_name?.trim() || currentBusiness?.name || '',
-          description: rest.description?.trim() || currentBusiness?.name || 'Loyalty card',
+          name: rest.name?.trim() || currentBusiness?.name || '',
+          // Optional title — allow empty. The card preview reflects this
+          // directly, so a blank value renders a header with just the logo.
+          organization_name: rest.organization_name?.trim() ?? '',
+          description:
+            rest.description?.trim() ||
+            program?.name ||
+            tEditor('defaultLoyaltyCardName'),
         });
         if (cleaned.logo_url?.startsWith('blob:')) delete cleaned.logo_url;
         // Drop the business logo URL — we'll upload a fresh file under the
@@ -178,12 +186,14 @@ export function BrandingStep() {
     pendingLogoFile,
     existingDesign?.id,
     currentBusiness,
+    program?.name,
     updateBusiness,
     updatePayload,
     queryClient,
     setPendingLogoFile,
     ctx,
     tErr,
+    tEditor,
   ]);
 
   return (
