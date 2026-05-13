@@ -1,5 +1,7 @@
 'use client';
 
+import { WizardLanguageSwitcher } from './WizardLanguageSwitcher';
+
 interface WizardProgressProps {
   chapterIndex: number;
   chapterCount: number;
@@ -35,18 +37,23 @@ export function WizardProgress({
         className="h-[3px] bg-[var(--accent)] transition-[width] duration-300 ease-out"
         style={{ width: `${percent}%` }}
       />
-      <div className="px-4 py-3 min-[768px]:px-6 min-[768px]:py-4">
-        <p className="wiz-helper font-medium uppercase tracking-wider text-[#999]">
-          {`Chapter ${chapterIndex + 1} of ${chapterCount}`}
-        </p>
-        <h1 className="mt-1 wiz-h2 font-semibold leading-snug text-[var(--foreground)]">
-          {chapterTitle}
-        </h1>
-        {hasSubSteps && subStepTitle ? (
-          <p className="mt-1 wiz-helper text-[#7A7A7A] hidden min-[768px]:block">
-            {`Step ${subStepIndex! + 1} of ${subStepCount} — ${subStepTitle}`}
+      <div className="flex items-start justify-between gap-3 px-4 py-3 min-[768px]:px-6 min-[768px]:py-4">
+        <div className="min-w-0 flex-1">
+          <p className="wiz-helper font-medium uppercase tracking-wider text-[#999]">
+            {`Chapter ${chapterIndex + 1} of ${chapterCount}`}
           </p>
-        ) : null}
+          <h1 className="mt-1 wiz-h2 font-semibold leading-snug text-[var(--foreground)]">
+            {chapterTitle}
+          </h1>
+          {hasSubSteps && subStepTitle ? (
+            <p className="mt-1 wiz-helper text-[#7A7A7A] hidden min-[768px]:block">
+              {`Step ${subStepIndex! + 1} of ${subStepCount} — ${subStepTitle}`}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex-shrink-0 pt-0.5">
+          <WizardLanguageSwitcher />
+        </div>
       </div>
     </header>
   );
