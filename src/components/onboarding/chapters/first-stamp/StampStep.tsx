@@ -26,11 +26,13 @@ const RECENT_STAMP_FLASH_MS = 3500;
 // the keep-stamping copy is back by the time the button is tappable again.
 const CELEBRATION_MS = 6500;
 // Apple Wallet coalesces pass-update pushes that arrive within ~30s. We
-// gate the button at 20s so each stamp reliably shows a lock-screen banner
-// (the back-field changeMessage). Pushes still fire if you bypass — iOS
-// just may not surface every one.
+// gate the button at 20s so each stamp reliably shows a lock-screen banner.
 const COOLDOWN_MS = 20_000;
 const COOLDOWN_TICK_MS = 1000;
+// Hard cap on stamps fired from this demo step. Two is enough to feel the
+// wow twice; more would just batch into Apple's coalesce window and ruin
+// the next chapter's broadcast push.
+const MAX_STAMPS = 2;
 
 /**
  * Chapter 8 sub-step 2 — optional. The wow moment. Fires a real /stamps call
@@ -136,6 +138,7 @@ export function StampStep() {
 
   const handleSendStamp = useCallback(async () => {
     if (!ready || phase !== 'idle') return;
+    if ((stamps ?? 0) >= MAX_STAMPS) return;
     setPhase('sending');
     setRecentlyStamped(false);
     try {
@@ -180,13 +183,6 @@ export function StampStep() {
     tErr,
   ]);
 
-  const handleBypassCooldown = useCallback(() => {
-    if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
-    cooldownTimerRef.current = null;
-    setCooldownRemaining(0);
-    setPhase('idle');
-  }, []);
-
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -207,7 +203,6 @@ export function StampStep() {
           showCelebration={showCelebration}
           design={design ?? null}
           onSend={handleSendStamp}
-          onBypassCooldown={handleBypassCooldown}
           t={t}
         />
       )}
@@ -241,7 +236,6 @@ interface StampCardProps {
   showCelebration: boolean;
   design: CardDesign | null;
   onSend: () => void;
-  onBypassCooldown: () => void;
   t: ReturnType<typeof useTranslations>;
 }
 
@@ -253,13 +247,13 @@ function StampCard({
   showCelebration,
   design,
   onSend,
-  onBypassCooldown,
   t,
 }: StampCardProps) {
   const sending = phase === 'sending';
   const onCooldown = phase === 'cooldown';
-  const disabled = sending || onCooldown;
   const hasAnyStamp = stamps !== null && stamps > 0;
+  const reachedMax = (stamps ?? 0) >= MAX_STAMPS;
+  const disabled = sending || onCooldown || reachedMax;
 
   let label: string;
   if (sending) label = t('watching');
@@ -269,7 +263,10 @@ function StampCard({
 
   let title: string;
   let body: string;
-  if (showCelebration) {
+  if (reachedMax && !showCelebration) {
+    title = t('demoCompleteTitle');
+    body = t('demoCompleteBody');
+  } else if (showCelebration) {
     title = t('firstStampLandedTitle');
     body = t('firstStampLandedBody');
   } else if (hasAnyStamp) {
@@ -290,14 +287,16 @@ function StampCard({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onSend}
-        disabled={disabled}
-        className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[var(--accent)] px-4 py-3 wiz-body font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[56px]"
-      >
-        {label}
-      </button>
+      {!reachedMax && (
+        <button
+          type="button"
+          onClick={onSend}
+          disabled={disabled}
+          className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[var(--accent)] px-4 py-3 wiz-body font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[56px]"
+        >
+          {label}
+        </button>
+      )}
 
       <div className="flex items-center justify-center gap-3 wiz-body-sm flex-wrap">
         <div className="flex items-center gap-1.5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] px-3 py-1.5">
@@ -318,16 +317,6 @@ function StampCard({
         <InfoBox variant="note" message={t('appleWalletHint')} />
         <InfoBox variant="note" message={t('googleWalletHint')} />
       </div>
-
-      {onCooldown && (
-        <button
-          type="button"
-          onClick={onBypassCooldown}
-          className="wiz-micro text-[#888] hover:text-[var(--foreground)] underline underline-offset-2 self-center"
-        >
-          {t('bypassCooldown')}
-        </button>
-      )}
     </div>
   );
 }
