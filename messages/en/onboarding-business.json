@@ -197,29 +197,33 @@
             "watchingInstall": "Customer detected. Waiting for the card to land in your wallet…",
             "manualConfirmCta": "I've added it to my wallet",
             "detected": "Card installed. Moving on in a moment.",
+            "detectedReturning": "Card installed.",
             "timeoutTitle": "Still here?",
             "timeoutBody": "We paused listening for new signups after 5 minutes. Tap retry to keep watching.",
             "retry": "Resume listening"
           },
           "stamp": {
             "title": "Stamp yourself",
-            "subtitle": "Every tap fires a real push to your phone.",
+            "subtitle": "Every tap fires a real notification to your phone.",
             "prereqTitle": "Install your card first",
-            "prereqBody": "Go back to the previous step and add the card to your wallet. Without it, no push lands.",
+            "prereqBody": "Go back to the previous step and add the card to your wallet. Without it, no notification lands.",
             "readyTitle": "Ready to stamp",
             "readyBody": "Tap below. We fire a real stamp; your phone buzzes within a few seconds.",
+            "firstStampLandedTitle": "Did you feel that?",
+            "firstStampLandedBody": "That buzz is what your customers will feel every time you stamp their card. Same notification, same timing, same flow. Send a few more to get the rhythm.",
             "keepStampingTitle": "Stamp again",
-            "keepStampingBody": "Each tap fires another real push. Try a few; see how the messages flow on your phone.",
+            "keepStampingBody": "Each tap fires another real notification. Try a few; see how the messages flow on your phone.",
             "sendCta": "Send the test stamp",
             "sendAnotherCta": "Send another stamp",
             "watching": "Watching for the stamp…",
-            "cooldownCta": "Wait {seconds}s for the next banner…",
-            "bypassCooldown": "Stamp anyway (banner may not show)",
-            "coalesceHint": "Apple Wallet groups rapid pass updates. Leave roughly 20s between stamps so each one buzzes your lock screen.",
+            "cooldownCta": "Wait {seconds}s for the next notification…",
+            "bypassCooldown": "Stamp anyway (notification may not show)",
+            "appleWalletHint": "Apple Wallet groups rapid updates. Leaving roughly 20s between stamps gives each notification its own buzz.",
+            "googleWalletHint": "On Google Wallet, the card only refreshes once closed. Close it and reopen to see the new stamp.",
             "stampsLabel": "Stamps on your card",
             "justStamped": "Stamp added",
-            "fallback": "No buzz yet? Push can take a few seconds. Try again in a moment.",
-            "customisationHint": "The text of that message? You can change it, add more at specific stamp counts, or turn them off. All from the notifications page in your dashboard later."
+            "fallback": "No buzz yet? The notification can take a few seconds. Try again in a moment.",
+            "customisationHint": "This is just the default message. You can rewrite it, add new ones at specific stamp counts, or turn notifications off entirely, anytime from the notifications page in your dashboard."
           }
         }
       },
@@ -228,21 +232,21 @@
         "steps": {
           "intro": {
             "title": "Broadcasts, in one minute",
-            "subtitle": "A push notification you send manually to every installed card at once.",
+            "subtitle": "A notification you send manually to every installed card at once.",
             "whatItIsTitle": "What it is",
-            "whatItIsBody": "One push notification, sent to every customer with your card installed. Useful for limited-time offers, events, new menu items, or anything you'd post on your socials.",
+            "whatItIsBody": "One notification, sent to every customer with your card installed. Useful for limited-time offers, events, new menu items, or anything you'd post on your socials.",
             "differentFromTitle": "Different from automatic messages",
             "differentFromBody": "Stamp-added and reward-earned messages fire by themselves when something happens. Broadcasts are the opposite: you decide when, you decide what.",
-            "audienceOfOneTitle": "Right now your audience is one person",
-            "audienceOfOneBody": "The only installed card so far is yours. So the broadcast you write next lands on your own phone. That's exactly the experience your real customers will get when you have an actual audience."
+            "audienceOfOneTitle": "Right now your audience is you",
+            "audienceOfOneBody": "The only installed card so far is yours. So the broadcast you write next lands on your own phone. That's exactly the experience your customers will get when you have an audience."
           },
           "compose": {
             "title": "Write a broadcast and send it to yourself",
             "subtitle": "One short message. It lands on your phone the moment you tap send.",
-            "composeBody": "Write something you'd actually send to customers. Treat your own phone as the test seat: the wording, the timing, the buzz, everything will be exactly the same when you send to a real audience later.",
+            "composeBody": "Write something you'd actually send to customers. It lands straight on your phone and on the back of your card.",
             "titleLabel": "Title",
             "titlePlaceholder": "e.g. Café du Coin",
-            "titleHint": "Defaults to your business name. Appears in bold on the lock-screen banner.",
+            "titleHint": "Defaults to your loyalty program name. Appears in bold on the lock screen.",
             "bodyLabel": "Message",
             "bodyPlaceholder": "Happy hour today, 5pm to 7pm. Show your card for 20% off.",
             "bodyHint": "{remaining} characters left",
@@ -255,7 +259,7 @@
             "sendingProgress": "Dispatching the push. Usually 10 to 20 seconds.",
             "sendFailed": "The broadcast couldn't be sent. Try again in a moment.",
             "deliveredTitle": "{count, plural, =0 {No pushes delivered yet} =1 {Pushed to your phone} other {Pushed to # devices}}",
-            "deliveredHint": "{count, plural, =1 {Same exact experience your customers will get when you broadcast to a real audience.} other {{delivered} of {total} customers got the push. {skipped, plural, =0 {} =1 {1 customer skipped, card not installed.} other {# customers skipped, card not installed.}}}}"
+            "deliveredHint": "{count, plural, =1 {Same exact experience your customers will get when you broadcast to an audience.} other {{delivered} of {total} customers got the push. {skipped, plural, =0 {} =1 {1 customer skipped, card not installed.} other {# customers skipped, card not installed.}}}}"
           }
         }
       },

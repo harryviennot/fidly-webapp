@@ -197,29 +197,33 @@
             "watchingInstall": "Client détecté. On attend que la carte arrive dans votre wallet…",
             "manualConfirmCta": "Je l'ai ajoutée à mon wallet",
             "detected": "Carte installée. On passe à la suite dans un instant.",
+            "detectedReturning": "Carte installée.",
             "timeoutTitle": "Toujours là ?",
             "timeoutBody": "On a arrêté d'écouter les nouvelles inscriptions après 5 minutes. Tapez « reprendre » pour continuer à surveiller.",
             "retry": "Reprendre l'écoute"
           },
           "stamp": {
             "title": "Tamponnez-vous",
-            "subtitle": "Chaque tap envoie un vrai push sur votre téléphone.",
+            "subtitle": "Chaque tap envoie une vraie notification sur votre téléphone.",
             "prereqTitle": "Installez d'abord votre carte",
-            "prereqBody": "Revenez à l'étape précédente et ajoutez la carte à votre wallet. Sans elle, aucun push ne peut arriver.",
+            "prereqBody": "Revenez à l'étape précédente et ajoutez la carte à votre wallet. Sans elle, aucune notification ne peut arriver.",
             "readyTitle": "Prêt à tamponner",
             "readyBody": "Tapez ci-dessous. Un vrai tampon part, votre téléphone vibre en quelques secondes.",
+            "firstStampLandedTitle": "Vous l'avez senti ?",
+            "firstStampLandedBody": "Cette vibration, c'est exactement ce que vos clients ressentent à chaque tampon. Même notification, même timing, même rythme. Envoyez-en quelques autres pour le sentir.",
             "keepStampingTitle": "Encore un tampon ?",
-            "keepStampingBody": "Chaque tap envoie un vrai push. Essayez-en plusieurs, voyez le rythme des messages sur votre téléphone.",
+            "keepStampingBody": "Chaque tap envoie une autre vraie notification. Essayez-en plusieurs, voyez le rythme des messages sur votre téléphone.",
             "sendCta": "Envoyer le tampon test",
             "sendAnotherCta": "Envoyer un autre tampon",
-            "watching": "On surveille votre tampon…",
-            "cooldownCta": "Attendez {seconds}s pour la prochaine notif…",
-            "bypassCooldown": "Tamponner quand même (sans notif garantie)",
-            "coalesceHint": "Apple Wallet regroupe les mises à jour rapides. Laissez environ 20s entre les tampons pour que chacun vibre votre écran.",
+            "watching": "Le tampon arrive…",
+            "cooldownCta": "Attendez {seconds}s pour la prochaine notification…",
+            "bypassCooldown": "Tamponner quand même (notification non garantie)",
+            "appleWalletHint": "Apple Wallet regroupe les mises à jour rapides. Environ 20s entre les tampons, et chaque notification a son propre buzz.",
+            "googleWalletHint": "Sur Google Wallet, la carte ne se met à jour qu'une fois fermée. Quittez-la et rouvrez-la pour voir le nouveau tampon.",
             "stampsLabel": "Tampons sur votre carte",
             "justStamped": "Tampon ajouté",
-            "fallback": "Pas de vibration ? Le push peut prendre quelques secondes. Réessayez dans un instant.",
-            "customisationHint": "Le texte de ce message ? Vous pouvez le modifier, en ajouter à des étapes précises, ou les désactiver. Tout se passe dans la page notifications de votre dashboard plus tard."
+            "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",
+            "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre dashboard."
           }
         }
       },
@@ -228,21 +232,21 @@
         "steps": {
           "intro": {
             "title": "Les diffusions, en une minute",
-            "subtitle": "Une notification push que vous envoyez manuellement à toutes les cartes installées d'un coup.",
+            "subtitle": "Une notification que vous envoyez manuellement à toutes les cartes installées d'un coup.",
             "whatItIsTitle": "Qu'est-ce que c'est",
-            "whatItIsBody": "Une notification push, envoyée à tous les clients qui ont votre carte installée. Utile pour les offres limitées, les événements, les nouveautés au menu, ou tout ce que vous publieriez sur vos réseaux.",
+            "whatItIsBody": "Une notification, envoyée à tous les clients qui ont votre carte installée. Utile pour les offres limitées, les événements, les nouveautés au menu, ou tout ce que vous publieriez sur vos réseaux.",
             "differentFromTitle": "Différent des messages automatiques",
             "differentFromBody": "Les messages tampon ajouté ou récompense gagnée partent tout seuls quand quelque chose se passe. Les diffusions, c'est l'inverse : vous choisissez le moment, vous choisissez le contenu.",
-            "audienceOfOneTitle": "Pour l'instant votre audience, c'est une personne",
-            "audienceOfOneBody": "La seule carte installée pour l'instant, c'est la vôtre. Donc la diffusion que vous allez écrire arrive sur votre propre téléphone. C'est exactement ce que vos vrais clients vivront quand vous aurez une vraie audience."
+            "audienceOfOneTitle": "Pour l'instant votre audience, c'est vous",
+            "audienceOfOneBody": "La seule carte installée pour l'instant, c'est la vôtre. Donc la diffusion que vous allez écrire arrive sur votre propre téléphone. C'est exactement ce que vos clients vivront quand vous aurez une audience."
           },
           "compose": {
             "title": "Rédigez une diffusion et envoyez-la-vous",
             "subtitle": "Un message court. Il arrive sur votre téléphone dès que vous tapez sur envoyer.",
-            "composeBody": "Rédigez quelque chose que vous enverriez vraiment à des clients. Considérez votre téléphone comme le siège de test : le ton, le timing, la vibration, tout sera identique quand vous enverrez à une vraie audience plus tard.",
+            "composeBody": "Rédigez quelque chose que vous enverriez vraiment à des clients. Elle arrive directement sur votre téléphone et au dos de votre carte.",
             "titleLabel": "Titre",
             "titlePlaceholder": "ex. Café du Coin",
-            "titleHint": "Reprend votre nom de commerce par défaut. Apparaît en gras sur l'écran verrouillé.",
+            "titleHint": "Reprend le nom de votre programme par défaut. Apparaît en gras sur l'écran verrouillé.",
             "bodyLabel": "Message",
             "bodyPlaceholder": "Happy hour aujourd'hui, 17h à 19h. Montrez votre carte pour -20%.",
             "bodyHint": "{remaining} caractères restants",
@@ -255,7 +259,7 @@
             "sendingProgress": "On envoie le push. Généralement 10 à 20 secondes.",
             "sendFailed": "La diffusion n'a pas pu être envoyée. Réessayez dans un instant.",
             "deliveredTitle": "{count, plural, =0 {Aucun push livré pour l'instant} =1 {Envoyé sur votre téléphone} other {Envoyé à # appareils}}",
-            "deliveredHint": "{count, plural, =1 {Exactement la même expérience que vos clients quand vous diffuserez à une vraie audience.} other {{delivered} clients sur {total} ont reçu le push. {skipped, plural, =0 {} =1 {1 client ignoré, carte non installée.} other {# clients ignorés, carte non installée.}}}}"
+            "deliveredHint": "{count, plural, =1 {Exactement la même expérience que vos clients quand vous diffuserez à une audience.} other {{delivered} clients sur {total} ont reçu le push. {skipped, plural, =0 {} =1 {1 client ignoré, carte non installée.} other {# clients ignorés, carte non installée.}}}}"
           }
         }
       },

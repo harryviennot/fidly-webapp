@@ -3,9 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Bell, CheckCircle, Info, LightningIcon, Warning } from '@phosphor-icons/react';
+import { CheckCircle, Warning } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { addStamp, getCustomer } from '@/api/customers';
+import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
+import { InfoBox } from '@/components/reusables/info-box';
+import { useActiveDesign } from '@/hooks/use-designs';
+import { computeCardColors } from '@/lib/card-utils';
+import type { CardDesign } from '@/types';
 import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
 
@@ -13,7 +18,13 @@ type Phase = 'idle' | 'sending' | 'cooldown';
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 10_000;
-const RECENT_STAMP_FLASH_MS = 2000;
+// Confirmation pill stays up long enough for the owner to actually read it.
+// Earlier 2s felt like it flickered, which undercut the "feel that?" moment.
+const RECENT_STAMP_FLASH_MS = 3500;
+// First-stamp celebration moment. Long enough to read "Did you feel that?"
+// + the body line but short enough to fade before the cooldown ends, so
+// the keep-stamping copy is back by the time the button is tappable again.
+const CELEBRATION_MS = 6500;
 // Apple Wallet coalesces pass-update pushes that arrive within ~30s. We
 // gate the button at 20s so each stamp reliably shows a lock-screen banner
 // (the back-field changeMessage). Pushes still fire if you bypass — iOS
@@ -49,12 +60,18 @@ export function StampStep() {
   const enrollmentId = progress.payload.demo_enrollment_id;
   const ready = !!businessId && !!customerId && !!enrollmentId;
 
+  const { data: design } = useActiveDesign(businessId);
+
   const [phase, setPhase] = useState<Phase>('idle');
   const [stamps, setStamps] = useState<number | null>(null);
   const [recentlyStamped, setRecentlyStamped] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [hasStampedThisSession, setHasStampedThisSession] = useState(false);
+  // True for ~CELEBRATION_MS after the *first* successful stamp this
+  // session. Drives the "Did you feel that?" copy in the action card.
+  const [showCelebration, setShowCelebration] = useState(false);
   const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const celebrationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     ctx.setCanSkip(true);
@@ -113,6 +130,7 @@ export function StampStep() {
   useEffect(() => {
     return () => {
       if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+      if (celebrationTimerRef.current) clearTimeout(celebrationTimerRef.current);
     };
   }, []);
 
@@ -127,8 +145,20 @@ export function StampStep() {
       if (next !== null) {
         setStamps(next);
         setRecentlyStamped(true);
-        setHasStampedThisSession(true);
         setTimeout(() => setRecentlyStamped(false), RECENT_STAMP_FLASH_MS);
+        // Celebrate the *first* stamp of the session only — subsequent
+        // stamps reuse the keep-stamping copy.
+        if (!hasStampedThisSession) {
+          setShowCelebration(true);
+          if (celebrationTimerRef.current) {
+            clearTimeout(celebrationTimerRef.current);
+          }
+          celebrationTimerRef.current = setTimeout(() => {
+            setShowCelebration(false);
+            celebrationTimerRef.current = null;
+          }, CELEBRATION_MS);
+        }
+        setHasStampedThisSession(true);
       } else {
         toast.message(t('fallback'));
       }
@@ -137,7 +167,18 @@ export function StampStep() {
       toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
       setPhase('idle');
     }
-  }, [ready, phase, businessId, enrollmentId, stamps, pollForStamp, startCooldown, t, tErr]);
+  }, [
+    ready,
+    phase,
+    businessId,
+    enrollmentId,
+    stamps,
+    pollForStamp,
+    startCooldown,
+    hasStampedThisSession,
+    t,
+    tErr,
+  ]);
 
   const handleBypassCooldown = useCallback(() => {
     if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
@@ -163,13 +204,15 @@ export function StampStep() {
           stamps={stamps}
           recentlyStamped={recentlyStamped}
           cooldownRemaining={cooldownRemaining}
+          showCelebration={showCelebration}
+          design={design ?? null}
           onSend={handleSendStamp}
           onBypassCooldown={handleBypassCooldown}
           t={t}
         />
       )}
 
-      {hasStampedThisSession && <CustomisationHintCard t={t} />}
+      {((stamps ?? 0) >= 1) && <CustomisationHintCard t={t} />}
     </div>
   );
 }
@@ -195,6 +238,8 @@ interface StampCardProps {
   stamps: number | null;
   recentlyStamped: boolean;
   cooldownRemaining: number;
+  showCelebration: boolean;
+  design: CardDesign | null;
   onSend: () => void;
   onBypassCooldown: () => void;
   t: ReturnType<typeof useTranslations>;
@@ -205,6 +250,8 @@ function StampCard({
   stamps,
   recentlyStamped,
   cooldownRemaining,
+  showCelebration,
+  design,
   onSend,
   onBypassCooldown,
   t,
@@ -220,19 +267,26 @@ function StampCard({
   else if (hasAnyStamp) label = t('sendAnotherCta');
   else label = t('sendCta');
 
+  let title: string;
+  let body: string;
+  if (showCelebration) {
+    title = t('firstStampLandedTitle');
+    body = t('firstStampLandedBody');
+  } else if (hasAnyStamp) {
+    title = t('keepStampingTitle');
+    body = t('keepStampingBody');
+  } else {
+    title = t('readyTitle');
+    body = t('readyBody');
+  }
+
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
-          <LightningIcon className="w-5 h-5 text-[var(--accent)]" weight="bold" />
-        </span>
+        <StampAvatar design={design} />
         <div className="flex-1 min-w-0">
-          <p className="wiz-body font-semibold text-[var(--foreground)]">
-            {hasAnyStamp ? t('keepStampingTitle') : t('readyTitle')}
-          </p>
-          <p className="wiz-helper text-[#7A7A7A] leading-relaxed mt-0.5">
-            {hasAnyStamp ? t('keepStampingBody') : t('readyBody')}
-          </p>
+          <p className="wiz-body font-semibold text-[var(--foreground)]">{title}</p>
+          <p className="wiz-helper text-[#7A7A7A] leading-relaxed mt-0.5">{body}</p>
         </div>
       </div>
 
@@ -260,7 +314,12 @@ function StampCard({
         )}
       </div>
 
-      {onCooldown ? (
+      <div className="flex flex-col gap-2">
+        <InfoBox variant="note" message={t('appleWalletHint')} />
+        <InfoBox variant="note" message={t('googleWalletHint')} />
+      </div>
+
+      {onCooldown && (
         <button
           type="button"
           onClick={onBypassCooldown}
@@ -268,23 +327,38 @@ function StampCard({
         >
           {t('bypassCooldown')}
         </button>
-      ) : (
-        <p className="flex items-start gap-1.5 wiz-micro text-[#888] leading-relaxed">
-          <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" weight="bold" />
-          <span>{t('coalesceHint')}</span>
-        </p>
       )}
     </div>
   );
 }
 
+/**
+ * Circular avatar in the action card header that mirrors a single stamp from
+ * the owner's chosen design — same fill, same icon, same icon color. Falls
+ * back to the accent token while the design query is still pending so the
+ * card doesn't pop in a blank circle on first render.
+ */
+function StampAvatar({ design }: { design: CardDesign | null }) {
+  const colors = design ? computeCardColors(design) : null;
+  const stampIcon = (design?.stamp_icon as StampIconType | undefined) ?? 'checkmark';
+  const backgroundColor = colors?.accentHex ?? 'var(--accent-light)';
+  const iconColor = colors?.iconColorHex ?? 'var(--accent)';
+  return (
+    <span
+      className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+      style={{ backgroundColor }}
+    >
+      <StampIconSvg icon={stampIcon} className="w-5 h-5" color={iconColor} />
+    </span>
+  );
+}
+
 function CustomisationHintCard({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
-    <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <span className="flex-shrink-0 w-8 h-8 rounded-full bg-white border border-[var(--border)] flex items-center justify-center">
-        <Bell className="w-4 h-4 text-[var(--accent)]" weight="duotone" />
-      </span>
-      <p className="wiz-helper text-[#444] leading-relaxed">{t('customisationHint')}</p>
-    </div>
+    <InfoBox
+      variant="note"
+      message={t('customisationHint')}
+      className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+    />
   );
 }

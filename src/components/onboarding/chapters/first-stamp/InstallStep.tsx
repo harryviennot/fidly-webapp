@@ -1,19 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import {
   CaretDownIcon,
-  CheckCircleIcon,
   CheckIcon,
   DeviceMobileIcon,
   DownloadSimpleIcon,
   FilePdfIcon,
   Spinner as SpinnerIcon,
 } from '@phosphor-icons/react';
+import { InfoBox } from '@/components/reusables/info-box';
 import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
 import { useIsMobileDevice } from '@/hooks/use-mobile-device';
@@ -33,7 +33,10 @@ import { useWizardProgress } from '../../useWizardProgress';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 const WATCH_TIMEOUT_MS = 5 * 60 * 1000;
-const AUTO_ADVANCE_DELAY_MS = 1200;
+// 3s gives the owner time to see the "Card installed" success state land
+// before the wizard advances. Shorter than this felt like a yank — the green
+// confirmation barely had time to register.
+const AUTO_ADVANCE_DELAY_MS = 3000;
 const NEXT_STEP_PATH = '/onboarding/business/first-stamp/stamp';
 
 interface InstallUrls {
@@ -95,6 +98,13 @@ export function InstallStep() {
   const alreadyCompleted = progress.completed.some(
     (s) => s.chapter === 'first-stamp' && s.step === 'install'
   );
+
+  // Snapshot of `alreadyCompleted` at mount. If the owner navigates *back*
+  // into a step they previously finished, the auto-advance effect would
+  // re-fire instantly and they'd never get to see the screen again. We only
+  // auto-advance when completion happens *during this mount*, i.e. the owner
+  // installed the card just now.
+  const completedOnEntryRef = useRef(alreadyCompleted);
 
   // ── QR fetch ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -197,7 +207,10 @@ export function InstallStep() {
   }, [alreadyCompleted, timedOut, watchTick]);
 
   // ── Auto-advance when fully done ────────────────────────────────────
+  // Only when the owner completes the step in this session — never on
+  // back-navigation (see `completedOnEntryRef`).
   useEffect(() => {
+    if (completedOnEntryRef.current) return;
     if (!alreadyCompleted) return;
     const id = setTimeout(() => router.push(NEXT_STEP_PATH), AUTO_ADVANCE_DELAY_MS);
     return () => clearTimeout(id);
@@ -299,7 +312,7 @@ export function InstallStep() {
       )}
 
       {alreadyCompleted ? (
-        <DetectedCard t={t} />
+        <DetectedCard returning={completedOnEntryRef.current} t={t} />
       ) : timedOut ? (
         <TimeoutCard onRetry={handleRetry} t={t} />
       ) : customerDetected ? (
@@ -510,12 +523,19 @@ function WatchingCard({ onManualConfirm, t }: WatchingCardProps) {
   );
 }
 
-function DetectedCard({ t }: StatusCardProps) {
+interface DetectedCardProps extends StatusCardProps {
+  /** True when the step was already completed at mount (back-nav). In that
+   *  case we drop "moving on in a moment" — there is no auto-advance and
+   *  promising one would be misleading. */
+  returning: boolean;
+}
+
+function DetectedCard({ returning, t }: DetectedCardProps) {
   return (
-    <div className="rounded-[12px] border border-green-200 bg-green-50 px-4 py-3 flex items-center gap-3">
-      <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" weight="fill" />
-      <p className="wiz-body-sm text-green-900 font-medium">{t('detected')}</p>
-    </div>
+    <InfoBox
+      variant="success"
+      message={t(returning ? 'detectedReturning' : 'detected')}
+    />
   );
 }
 

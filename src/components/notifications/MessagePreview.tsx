@@ -97,7 +97,7 @@ export function MessagePreview({
             <div className="flex items-baseline justify-between gap-2">
               <div
                 className={cn(
-                  'truncate font-semibold uppercase tracking-wide text-white/90',
+                  'truncate font-semibold text-white/90',
                   isLg ? 'text-[13px]' : 'text-[11px]'
                 )}
               >

@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CheckCircle, MegaphoneIcon, Spinner, Users } from '@phosphor-icons/react';
+import { CheckCircle, InfoIcon, MegaphoneIcon, Spinner } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { createBroadcast, estimateRecipients, getBroadcast } from '@/api/notifications';
 import type { Broadcast } from '@/types/notification';
+import { MessagePreview } from '@/components/notifications/MessagePreview';
 import { useWizardStep, useWizardDraft } from '../../wizard-context';
 
 const POLL_INTERVAL_MS = 2000;
@@ -34,11 +36,20 @@ export function ComposeStep() {
 
   const businessId = currentBusiness?.id;
   const businessName = currentBusiness?.name ?? '';
+  const { data: program } = useDefaultProgram(businessId);
+  // iOS surfaces the pass's `organizationName` (filled by the program name on
+  // the backend) as the push title, so the broadcast title also defaults to
+  // the program name — keeps wizard preview and real customer experience
+  // aligned. Falls back to the business name while the program query is
+  // loading so the placeholder never blinks empty.
+  const programName = program?.name ?? '';
 
   // Draft-backed so the message survives navigating back to the intro and
-  // forward again (or to/from any other step) without retyping.
+  // forward again (or to/from any other step) without retyping. Body is
+  // prefilled with the sample so the owner can send straight away without
+  // staring at an empty textarea.
   const [title, setTitle] = useWizardDraft<string>('first-broadcast.title', () => '');
-  const [body, setBody] = useWizardDraft<string>('first-broadcast.body', () => '');
+  const [body, setBody] = useWizardDraft<string>('first-broadcast.body', () => t('bodyPlaceholder'));
   const [reachable, setReachable] = useState<number | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(
@@ -48,7 +59,7 @@ export function ComposeStep() {
   const [delivery, setDelivery] = useState<Broadcast | null>(null);
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const effectiveTitle = title.trim() || businessName;
+  const effectiveTitle = title.trim() || programName || businessName;
   const bodyValid = body.trim().length > 0;
 
   useEffect(() => {
@@ -165,7 +176,7 @@ export function ComposeStep() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={businessName || t('titlePlaceholder')}
+                placeholder={programName || businessName || t('titlePlaceholder')}
                 disabled={sent}
                 className="h-11 rounded-[10px] border border-[var(--border)] bg-white px-3 wiz-body outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-60"
               />
@@ -193,11 +204,18 @@ export function ComposeStep() {
           </div>
         </div>
 
-        <PreviewBubble title={effectiveTitle} body={body || t('bodyPlaceholder')} />
+        <MessagePreview
+          iconUrl={currentBusiness?.icon_url ?? null}
+          iconOriginalUrl={currentBusiness?.icon_original_url ?? null}
+          programName={effectiveTitle}
+          businessName={businessName}
+          body={body || t('bodyPlaceholder')}
+          size="lg"
+        />
 
-        <div className="flex items-center gap-2 rounded-[10px] bg-[var(--paper)] border border-[var(--border-light)] px-3 py-2 wiz-helper">
-          <Users className="w-4 h-4 text-[#888] flex-shrink-0" weight="bold" />
-          <span className="text-[#555]">
+        <div className="flex items-start gap-2 rounded-[10px] border border-[var(--accent-200)] bg-[var(--accent-light)]/40 px-3 py-2.5 wiz-helper">
+          <InfoIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 mt-0.5" weight="fill" />
+          <span className="text-[var(--foreground)] leading-snug">
             {reachable === null ? t('estimating') : t('recipientsLine', { count: reachable })}
           </span>
         </div>
@@ -266,20 +284,3 @@ function DeliveryStatus({ delivery, t }: DeliveryStatusProps) {
   );
 }
 
-interface PreviewBubbleProps {
-  title: string;
-  body: string;
-}
-
-/** Tiny lock-screen preview so the owner sees roughly what their customers will get. */
-function PreviewBubble({ title, body }: PreviewBubbleProps) {
-  return (
-    <div className="rounded-[14px] bg-[#1c1c1e]/95 text-white px-4 py-3 shadow-sm">
-      <p className="wiz-micro uppercase tracking-wider text-white/60 font-medium">Stampeo</p>
-      <p className="wiz-body-sm font-semibold leading-snug mt-0.5 line-clamp-1">{title}</p>
-      <p className="wiz-helper text-white/85 leading-snug mt-0.5 line-clamp-3 whitespace-pre-wrap">
-        {body}
-      </p>
-    </div>
-  );
-}
