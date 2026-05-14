@@ -206,10 +206,14 @@ export function IconStep() {
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      {/* Card matches the ImageUploader container in the business Identity
+          step: same border, light surface, and padding. Wraps the column
+          headers, dropzone + preview row, and the action buttons in one
+          coherent panel. */}
+      <div className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-white/50 dark:bg-white/5 p-4">
         {/* Two-column header — section labels aligned with the columns below. */}
         <div className="flex gap-3 sm:gap-4">
-          <span className="w-[128px] shrink-0 text-[15px] font-medium text-[var(--foreground)]">
+          <span className="w-[96px] shrink-0 text-[15px] font-medium text-[var(--foreground)]">
             {t('uploadSectionTitle')}
           </span>
           <span className="flex-1 text-[15px] font-medium text-[var(--foreground)]">
@@ -217,7 +221,9 @@ export function IconStep() {
           </span>
         </div>
 
-        {/* Two-column content — square icon dropzone next to preview banner. */}
+        {/* Two-column content — square icon dropzone next to preview banner.
+            Preview uses `size="lg"` so it expands to fill the column instead
+            of being pinned at iOS-realistic 280px. */}
         <div className="flex gap-3 sm:gap-4 items-start">
           <IconDropzone
             src={previewSrc}
@@ -231,6 +237,7 @@ export function IconStep() {
               iconOriginalUrl={iconOriginalUrl}
               businessName={businessName}
               body={t('previewBody')}
+              size="lg"
             />
           </div>
         </div>
@@ -303,7 +310,7 @@ interface IconDropzoneProps {
 }
 
 /**
- * Square 128px dropzone. Empty → dashed border + plus icon + CTA + hint
+ * Square 96px dropzone. Empty → dashed border + plus icon + CTA + hint
  * stacked inside the box. With an image → solid border, image fills via
  * object-cover, no hint inside (it'd overlap the icon).
  *
@@ -316,7 +323,7 @@ function IconDropzone({ src, uploadLabel, hintLabel, onClick }: IconDropzoneProp
     <button
       type="button"
       onClick={onClick}
-      className={`relative aspect-square w-[128px] shrink-0 rounded-xl overflow-hidden transition-colors ${
+      className={`relative aspect-square w-[96px] shrink-0 rounded-xl overflow-hidden transition-colors ${
         src
           ? 'border border-[var(--border)] bg-white hover:border-[var(--accent)]'
           : 'border-2 border-dashed border-[var(--border)] bg-white/50 hover:border-[var(--accent)] hover:bg-[var(--accent)]/5'
@@ -327,21 +334,21 @@ function IconDropzone({ src, uploadLabel, hintLabel, onClick }: IconDropzoneProp
           key={src}
           src={src}
           alt=""
-          width={128}
-          height={128}
+          width={96}
+          height={96}
           className="h-full w-full object-cover"
           unoptimized
         />
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-1 p-3">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 p-2">
           <Plus
-            className="h-6 w-6 text-[var(--muted-foreground)]"
+            className="h-5 w-5 text-[var(--muted-foreground)]"
             weight="bold"
           />
-          <span className="text-xs font-medium text-[var(--muted-foreground)] text-center leading-snug">
+          <span className="text-[11px] font-medium text-[var(--muted-foreground)] text-center leading-tight">
             {uploadLabel}
           </span>
-          <span className="mt-auto text-[10px] text-[var(--muted-foreground)]/70 text-center leading-tight">
+          <span className="mt-auto text-[9px] text-[var(--muted-foreground)]/70 text-center leading-tight">
             {hintLabel}
           </span>
         </div>

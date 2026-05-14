@@ -27,6 +27,7 @@ import {
 import { createClient } from '@/utils/supabase/client';
 import { QRCodeSkeleton } from '@/components/ui/qr-code-skeleton';
 import { downloadQrPng, downloadQrPdf } from '@/lib/qr-download';
+import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
@@ -219,7 +220,7 @@ export function InstallStep() {
 
   const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(signupUrl);
+      await copyToClipboard(signupUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
