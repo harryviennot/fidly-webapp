@@ -1,72 +1,176 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { X } from '@phosphor-icons/react';
-import { IconUploadCard } from '@/components/notifications/IconUploadCard';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
+import { Warning, Plus, Crop } from '@phosphor-icons/react';
+import { MessagePreview } from '@/components/notifications/MessagePreview';
+import { ImageCropper } from '@/components/reusables/image-cropper';
 import { useBusiness } from '@/contexts/business-context';
-import { useUploadBusinessIcon } from '@/hooks/use-notifications';
-import { cropUrlToAspect } from '@/lib/image-crop';
+import {
+  useUploadBusinessIcon,
+  useDeleteBusinessIcon,
+} from '@/hooks/use-notifications';
+import { getImageAspect } from '@/lib/image-crop';
 import { useWizardStep } from '../../wizard-context';
 
+const ACCEPTED_TYPES = 'image/png,image/jpeg,image/jpg,image/webp';
+
 /**
- * Notification icon step — optional. The IconUploadCard handles its own
- * mutation (uploads happen instantly on file pick) so the wizard's "Continue"
- * just advances.
+ * Notification icon step — required.
  *
- * v3 addition: when the owner lands on this step for the first time and
- * `business.icon_url` is null but `business.logo_url` is set, we pre-fill the
- * icon by center-cropping the business logo to a 1:1 square and uploading it
- * non-interactively. The owner can replace it any time via the upload card.
+ *  - Logo is square (within 2%) → auto-upload as the icon. No friction.
+ *  - Logo is off-square → show the logo as a cover-cropped placeholder + a
+ *    warning banner. Continue is blocked until the owner crops or imports.
+ *  - No logo → empty dropzone. Continue blocked until they upload.
+ *
+ * Layout follows the sketch the user provided:
+ *
+ *   Your Icon          Preview
+ *   [ square box ]     [ notification banner ]
+ *   [ Modifier ] [ Recadrer ] [ Supprimer ]
+ *
+ * Action buttons share the same style as the ImageUploader in the business
+ * Identity step (first chapter), so the upload affordance is consistent
+ * across the wizard.
  */
 export function IconStep() {
   const t = useTranslations('onboardingBusiness.chapters.notifications.steps.icon');
+  const tToast = useTranslations('notifications.toasts');
   const ctx = useWizardStep();
+  const queryClient = useQueryClient();
   const { currentBusiness, refetch } = useBusiness();
-  const uploadIcon = useUploadBusinessIcon(currentBusiness?.id);
+  const uploadMutation = useUploadBusinessIcon(currentBusiness?.id);
+  const deleteMutation = useDeleteBusinessIcon(currentBusiness?.id);
 
-  const [prefillDismissed, setPrefillDismissed] = useState(false);
-  const [didPrefill, setDidPrefill] = useState(false);
-  const attemptedRef = useRef<string | null>(null);
+  const iconUrl = currentBusiness?.icon_url ?? null;
+  const iconOriginalUrl = currentBusiness?.icon_original_url ?? null;
+  const businessName = currentBusiness?.name ?? '';
+
+  const [needsCropping, setNeedsCropping] = useState(false);
+  const [logoBlobUrl, setLogoBlobUrl] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Latest picked-but-not-yet-uploaded file URL, retained so the cropper
+  // can reopen against it without re-reading the file.
+  const pickedBlobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    ctx.setCanSkip(true);
+    ctx.setCanSkip(false);
   }, [ctx]);
 
-  // One-shot prefill effect — runs once per `business.id` if the conditions
-  // match. We track the business id to avoid retrying after a deletion.
+  // Continue blocked until an icon is saved AND the off-square warning is gone.
+  useEffect(() => {
+    ctx.setCanProceed(!!iconUrl && !needsCropping);
+  }, [ctx, iconUrl, needsCropping]);
+
+  // One-shot logo aspect-check effect. 1:1 → auto-upload. Otherwise stash the
+  // blob URL for the cropper and surface the warning banner.
+  const aspectCheckedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!currentBusiness) return;
     if (currentBusiness.icon_url) return;
     if (!currentBusiness.logo_url) return;
-    if (attemptedRef.current === currentBusiness.id) return;
-    attemptedRef.current = currentBusiness.id;
+    if (aspectCheckedRef.current === currentBusiness.id) return;
+    aspectCheckedRef.current = currentBusiness.id;
 
     let cancelled = false;
+    let blobUrl: string | null = null;
     (async () => {
       try {
-        const file = await cropUrlToAspect(currentBusiness.logo_url!, {
-          aspect: 1,
-          outputWidth: 144,
-          outputHeight: 144,
-          filename: 'icon-from-logo.png',
-        });
+        const res = await fetch(currentBusiness.logo_url!, { cache: 'no-cache' });
+        if (!res.ok || cancelled) return;
+        const blob = await res.blob();
         if (cancelled) return;
-        await uploadIcon.mutateAsync(file);
+        const aspect = await getImageAspect(blob);
         if (cancelled) return;
-        await refetch();
-        if (!cancelled) setDidPrefill(true);
+        if (Math.abs(aspect - 1) < 0.02) {
+          const file = new File([blob], 'icon-from-logo.png', {
+            type: blob.type || 'image/png',
+          });
+          await uploadAndRefresh(file, { silent: true });
+        } else {
+          blobUrl = URL.createObjectURL(blob);
+          setLogoBlobUrl(blobUrl);
+          setNeedsCropping(true);
+        }
       } catch {
-        // Silently skip — owner can upload their own.
+        // CORS / network — owner can import manually.
       }
     })();
     return () => {
       cancelled = true;
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentBusiness?.id, currentBusiness?.icon_url, currentBusiness?.logo_url]);
 
-  const showHint = didPrefill && !prefillDismissed;
+  // `refetchQueries` (unlike `invalidateQueries`) awaits the actual refetch, so
+  // the next render sees the new `icon_url` and the `<Image>` remounts via
+  // the `key={src}` below.
+  const uploadAndRefresh = async (
+    file: File,
+    { silent = false }: { silent?: boolean } = {}
+  ) => {
+    try {
+      await uploadMutation.mutateAsync(file);
+      await queryClient.refetchQueries({ queryKey: ['business'] });
+      await refetch();
+      setNeedsCropping(false);
+      if (!silent) toast.success(tToast('iconUploaded'));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : tToast('iconUploadFailed'));
+      throw err;
+    }
+  };
+
+  const handleRemove = async () => {
+    try {
+      await deleteMutation.mutateAsync();
+      await queryClient.refetchQueries({ queryKey: ['business'] });
+      await refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : tToast('iconUploadFailed'));
+    }
+  };
+
+  const handlePick = () => fileInputRef.current?.click();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (!file) return;
+    if (pickedBlobUrlRef.current) URL.revokeObjectURL(pickedBlobUrlRef.current);
+    const url = URL.createObjectURL(file);
+    pickedBlobUrlRef.current = url;
+    setCropSrc(url);
+  };
+
+  const handleOpenCrop = () => {
+    // Priority order: a freshly picked file → the off-square logo blob →
+    // the uploaded icon's original (for recropping). First match wins.
+    const src =
+      pickedBlobUrlRef.current ?? logoBlobUrl ?? iconOriginalUrl ?? iconUrl;
+    if (src) setCropSrc(src);
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    setCropSrc(null);
+    await uploadAndRefresh(croppedFile);
+  };
+
+  const handleCropClose = (open: boolean) => {
+    if (!open) setCropSrc(null);
+  };
+
+  // Image source for the dropzone preview. After upload, prefer the
+  // uncropped original so recrops have the full resolution to work with.
+  const displayIconUrl = iconOriginalUrl || iconUrl;
+  const previewSrc = displayIconUrl ?? logoBlobUrl ?? null;
+  const canRemove = !!iconUrl;
+  const canRecrop = !!previewSrc;
 
   return (
     <div className="flex flex-col gap-6">
@@ -77,23 +181,172 @@ export function IconStep() {
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      {showHint && (
-        <div className="flex items-start gap-3 rounded-[10px] border border-[var(--accent)]/30 bg-[var(--accent-light)] px-3.5 py-2.5">
-          <p className="flex-1 wiz-helper leading-relaxed text-[var(--foreground)]">
-            {t('autoFilledHint')}
-          </p>
+      {needsCropping && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3.5">
+          <Warning
+            className="h-5 w-5 text-amber-600 shrink-0"
+            weight="fill"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-900">
+              {t('cropWarning.title')}
+            </p>
+            <p className="text-xs text-amber-900/80 leading-snug mt-0.5">
+              {t('cropWarning.body')}
+            </p>
+          </div>
           <button
             type="button"
-            onClick={() => setPrefillDismissed(true)}
-            className="shrink-0 -mr-1 p-1 text-[#666] hover:text-[#1a1a1a] transition-colors"
-            aria-label={t('dismissHint')}
+            onClick={handleOpenCrop}
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-amber-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-800 transition-colors"
           >
-            <X className="w-3.5 h-3.5" weight="bold" />
+            <Crop className="h-3.5 w-3.5" weight="bold" />
+            {t('cropWarning.cta')}
           </button>
         </div>
       )}
 
-      <IconUploadCard />
+      <div className="flex flex-col gap-3">
+        {/* Two-column header — section labels aligned with the columns below. */}
+        <div className="flex gap-3 sm:gap-4">
+          <span className="w-[128px] shrink-0 text-[15px] font-medium text-[var(--foreground)]">
+            {t('uploadSectionTitle')}
+          </span>
+          <span className="flex-1 text-[15px] font-medium text-[var(--foreground)]">
+            {t('previewLabel')}
+          </span>
+        </div>
+
+        {/* Two-column content — square icon dropzone next to preview banner. */}
+        <div className="flex gap-3 sm:gap-4 items-start">
+          <IconDropzone
+            src={previewSrc}
+            uploadLabel={t('uploadCta')}
+            hintLabel={t('uploadHint')}
+            onClick={handlePick}
+          />
+          <div className="flex-1 min-w-0">
+            <MessagePreview
+              iconUrl={iconUrl}
+              iconOriginalUrl={iconOriginalUrl}
+              businessName={businessName}
+              body={t('previewBody')}
+            />
+          </div>
+        </div>
+
+        {/* Action buttons — only when there's something to act on. Hidden in
+            the totally-empty state where clicking the dropzone is the only
+            interaction. Matches the button row used by ImageUploader in the
+            business Identity step so the styling stays consistent across the
+            wizard. */}
+        {previewSrc && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handlePick}
+              className="flex-1 sm:flex-initial px-4 py-2 text-sm font-semibold rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-colors min-h-[40px]"
+            >
+              {t('actions.change')}
+            </button>
+            {canRecrop && (
+              <button
+                type="button"
+                onClick={handleOpenCrop}
+                className="flex-1 sm:flex-initial px-4 py-2 text-sm font-semibold rounded-lg bg-[var(--paper)] text-[var(--foreground)] border border-[var(--border)] hover:bg-[var(--paper-hover)] transition-colors min-h-[40px]"
+              >
+                {t('actions.recrop')}
+              </button>
+            )}
+            {canRemove && (
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="flex-1 sm:flex-initial px-4 py-2 text-sm font-semibold rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors min-h-[40px]"
+              >
+                {t('actions.remove')}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ACCEPTED_TYPES}
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      {cropSrc && (
+        <ImageCropper
+          open={!!cropSrc}
+          onOpenChange={handleCropClose}
+          imageSrc={cropSrc}
+          onCropComplete={handleCropComplete}
+          aspect={1}
+          filename="icon-cropped.png"
+          minWidth={87}
+          minHeight={87}
+        />
+      )}
     </div>
   );
 }
+
+interface IconDropzoneProps {
+  src: string | null;
+  uploadLabel: string;
+  hintLabel: string;
+  onClick: () => void;
+}
+
+/**
+ * Square 128px dropzone. Empty → dashed border + plus icon + CTA + hint
+ * stacked inside the box. With an image → solid border, image fills via
+ * object-cover, no hint inside (it'd overlap the icon).
+ *
+ * `key={src}` forces `<Image>` to remount when the URL changes, so newly
+ * uploaded icons replace the prior one immediately (Next.js Image with
+ * `unoptimized` would otherwise sometimes hold on to the previous src).
+ */
+function IconDropzone({ src, uploadLabel, hintLabel, onClick }: IconDropzoneProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative aspect-square w-[128px] shrink-0 rounded-xl overflow-hidden transition-colors ${
+        src
+          ? 'border border-[var(--border)] bg-white hover:border-[var(--accent)]'
+          : 'border-2 border-dashed border-[var(--border)] bg-white/50 hover:border-[var(--accent)] hover:bg-[var(--accent)]/5'
+      }`}
+    >
+      {src ? (
+        <Image
+          key={src}
+          src={src}
+          alt=""
+          width={128}
+          height={128}
+          className="h-full w-full object-cover"
+          unoptimized
+        />
+      ) : (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-1 p-3">
+          <Plus
+            className="h-6 w-6 text-[var(--muted-foreground)]"
+            weight="bold"
+          />
+          <span className="text-xs font-medium text-[var(--muted-foreground)] text-center leading-snug">
+            {uploadLabel}
+          </span>
+          <span className="mt-auto text-[10px] text-[var(--muted-foreground)]/70 text-center leading-tight">
+            {hintLabel}
+          </span>
+        </div>
+      )}
+    </button>
+  );
+}
+

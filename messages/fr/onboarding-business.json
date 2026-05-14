@@ -147,9 +147,22 @@
         "steps": {
           "icon": {
             "title": "Choisissez l'icône des notifications",
-            "subtitle": "Vos clients reçoivent un push à chaque tampon ou récompense gagnée. Cette icône apparaît à côté de chacun, alors la plupart des commerçants utilisent leur logo.",
-            "autoFilledHint": "Pré-rempli depuis votre logo. Remplaçable à tout moment.",
-            "dismissHint": "Fermer"
+            "subtitle": "Vos clients reçoivent une notification à chaque tampon ou récompense gagnée. Cette icône apparaît à côté.",
+            "uploadSectionTitle": "Votre icône",
+            "uploadCta": "Cliquer pour importer",
+            "uploadHint": "PNG, minimum 87×87 pixels",
+            "previewLabel": "Aperçu",
+            "previewBody": "Tampon ajouté ! Vous avez 3 tampons sur 10.",
+            "cropWarning": {
+              "title": "Icône à recadrer",
+              "body": "Votre logo n'est pas carré. Recadrez-le pour continuer — ou importez une autre image.",
+              "cta": "Recadrer maintenant"
+            },
+            "actions": {
+              "change": "Modifier",
+              "recrop": "Recadrer",
+              "remove": "Supprimer"
+            }
           }
         }
       },
@@ -158,16 +171,22 @@
         "chapterIntro": "Installez votre carte, puis envoyez-vous un vrai tampon.",
         "steps": {
           "install": {
-            "title": "Mettez une carte sur un téléphone",
-            "subtitle": "La vôtre ou celle d'un vrai client. L'étape suivante nécessite qu'une carte soit installée quelque part.",
-            "explanation": "Voici la page publique sur laquelle vos clients arriveront. Partagez le lien dans votre bio ou réseaux, imprimez le QR à votre comptoir, ou ouvrez-le sur votre téléphone pour installer votre première carte maintenant.",
+            "title": "Votre carte est prête ! Essayons-la.",
+            "subtitle": "Suivez exactement le même parcours que vos clients.",
+            "explanation": "Ci-dessous, c'est la page publique sur laquelle vos clients arriveront après avoir scanné votre QR au comptoir ou cliqué sur votre lien. C'est là qu'ils s'inscrivent à votre programme de fidélité et reçoivent leur carte.",
+            "explanationActionDesktop": "Scannez le QR avec votre téléphone, ouvrez la page de votre commerce, et inscrivez-vous comme premier client. Votre carte arrive dans votre wallet, prête pour le tampon test à l'étape suivante.",
+            "explanationActionMobile": "Tapez sur le lien pour ouvrir la page de votre commerce, puis inscrivez-vous comme premier client. Votre carte arrive dans votre wallet, prête pour le tampon test à l'étape suivante. Une fois la carte installée, revenez ici.",
             "signupUrlLabel": "Page client",
             "copy": "Copier",
             "copied": "Copié",
             "qrTitle": "Imprimez ou affichez ce QR",
-            "qrBody": "Collez-le à votre point de vente, glissez-le sur votre menu, ou scannez-le avec votre téléphone pour vous enregistrer comme premier client.",
-            "quickInstallTitle": "Installer sur votre téléphone",
-            "quickInstallBody": "Le plus rapide. On vous enregistre avec les infos de votre compte et on vous donne les boutons wallet.",
+            "qrBody": "Plus tard, vous pourrez l'imprimer pour votre comptoir ou le glisser sur votre menu pour que vos clients s'inscrivent eux-mêmes.",
+            "qrShow": "Afficher le QR",
+            "qrHide": "Masquer le QR",
+            "downloadPng": "PNG",
+            "downloadPdf": "PDF",
+            "quickInstallTitle": "Juste la carte ? Sautez la page client",
+            "quickInstallBody": "On vous enregistre directement avec les infos de votre compte. Vous ne voyez pas le parcours client, mais vous avez la carte sur votre téléphone plus vite.",
             "quickInstallCta": "Utiliser mes infos et installer",
             "registering": "Enregistrement…",
             "installTitle": "Ajoutez la carte à votre wallet",
@@ -177,7 +196,10 @@
             "pollingHint": "Gardez cet onglet ouvert. On détecte l'inscription automatiquement.",
             "watchingInstall": "Client détecté. On attend que la carte arrive dans votre wallet…",
             "manualConfirmCta": "Je l'ai ajoutée à mon wallet",
-            "detected": "Carte installée. On passe à la suite dans un instant."
+            "detected": "Carte installée. On passe à la suite dans un instant.",
+            "timeoutTitle": "Toujours là ?",
+            "timeoutBody": "On a arrêté d'écouter les nouvelles inscriptions après 5 minutes. Tapez « reprendre » pour continuer à surveiller.",
+            "retry": "Reprendre l'écoute"
           },
           "stamp": {
             "title": "Tamponnez-vous",

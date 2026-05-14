@@ -147,9 +147,22 @@
         "steps": {
           "icon": {
             "title": "Pick the icon for notifications",
-            "subtitle": "Customers receive a push every time you stamp them or they earn a reward. This icon shows next to each one, so most owners use their logo.",
-            "autoFilledHint": "Auto-filled from your logo. Replace any time.",
-            "dismissHint": "Dismiss"
+            "subtitle": "Customers get a notification each time you stamp them or they earn a reward. This icon shows next to it.",
+            "uploadSectionTitle": "Your icon",
+            "uploadCta": "Click to import",
+            "uploadHint": "PNG, minimum 87×87 pixels",
+            "previewLabel": "Preview",
+            "previewBody": "Stamp collected! You have 3 of 10 stamps.",
+            "cropWarning": {
+              "title": "Icon needs cropping",
+              "body": "Your logo isn't square. Crop it to fit before continuing — or import a different image.",
+              "cta": "Crop now"
+            },
+            "actions": {
+              "change": "Change",
+              "recrop": "Recrop",
+              "remove": "Remove"
+            }
           }
         }
       },
@@ -158,16 +171,22 @@
         "chapterIntro": "Install your card, then send yourself a real stamp.",
         "steps": {
           "install": {
-            "title": "Get a card on a phone",
-            "subtitle": "Yours or a real customer's. The next step needs a card installed somewhere.",
-            "explanation": "This is the public page your customers will land on. Share the link in your bio or socials, print the QR at your counter, or open it on your own phone to install your first card right now.",
+            "title": "Your card is ready! Let's try it out.",
+            "subtitle": "Go through the exact flow your customers will.",
+            "explanation": "Below is the public page your customers will land on after scanning your QR at the counter or tapping your link. It's where they sign up for your loyalty program and get their card.",
+            "explanationActionDesktop": "Scan the QR with your own phone, open your business's page, and register yourself as your first customer. Your card lands in your wallet, ready for the test stamp on the next step.",
+            "explanationActionMobile": "Tap the link to open your business's page, then register yourself as your first customer. Your card lands in your wallet, ready for the test stamp on the next step. Once the card is installed, come back here.",
             "signupUrlLabel": "Customer page",
             "copy": "Copy",
             "copied": "Copied",
             "qrTitle": "Print or display this QR",
-            "qrBody": "Stick it at your point of sale, drop it on a menu, or scan it with your own phone to register as your first customer.",
-            "quickInstallTitle": "Install on your own phone",
-            "quickInstallBody": "Fastest path. We register you using your account details and hand you the wallet buttons.",
+            "qrBody": "Later, you can print it for your counter or drop it on a menu so customers can sign up themselves.",
+            "qrShow": "Show QR",
+            "qrHide": "Hide QR",
+            "downloadPng": "PNG",
+            "downloadPdf": "PDF",
+            "quickInstallTitle": "Just want the card? Skip the customer page",
+            "quickInstallBody": "We register you straight from your account info. You miss out on seeing the customer flow, but you get the card on your phone faster.",
             "quickInstallCta": "Use my info and install",
             "registering": "Registering…",
             "installTitle": "Add the card to your wallet",
@@ -177,7 +196,10 @@
             "pollingHint": "Keep this tab open. We detect the signup automatically.",
             "watchingInstall": "Customer detected. Waiting for the card to land in your wallet…",
             "manualConfirmCta": "I've added it to my wallet",
-            "detected": "Card installed. Moving on in a moment."
+            "detected": "Card installed. Moving on in a moment.",
+            "timeoutTitle": "Still here?",
+            "timeoutBody": "We paused listening for new signups after 5 minutes. Tap retry to keep watching.",
+            "retry": "Resume listening"
           },
           "stamp": {
             "title": "Stamp yourself",

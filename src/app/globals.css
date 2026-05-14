@@ -396,6 +396,32 @@ html {
   }
 }
 
+/* QR loading skeleton — diagonal wave on each cell, matching the
+   scanner-app QR skeleton timing (900ms cycle, ease-in-out). */
+.qr-skeleton-cell {
+  background-color: #e8e6e1;
+  border-radius: 3px;
+  animation: qr-skeleton-wave 900ms ease-in-out infinite;
+}
+
+@keyframes qr-skeleton-wave {
+  0%   { opacity: 0.2; }
+  50%  { opacity: 0.8; }
+  100% { opacity: 0.2; }
+}
+
+/* Copy-button success bounce — short scale-out + scale-in around 0
+   for the icon swap, plus a soft accent glow. */
+@keyframes copy-success-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.copy-success-pop {
+  animation: copy-success-pop 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 /* ===== Styled Range Slider ===== */
 
 .styled-slider {

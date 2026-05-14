@@ -213,7 +213,7 @@ function DesktopPreview({ showBack }: { showBack: boolean }) {
   return (
     <aside ref={asideRef} className="w-[480px] flex-shrink-0">
       <div
-        className="fixed top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity"
+        className="fixed top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity w-[320px]"
         style={{
           left: centerX ?? 0,
           opacity: centerX === null ? 0 : 1,
