@@ -7,7 +7,6 @@ import { GearSix, Check } from '@phosphor-icons/react';
 import { BusinessInfoEditor } from '@/components/settings/BusinessInfoEditor';
 import {
   BUSINESS_INFO_TYPE_ICONS,
-  getEntryLabel,
   getEntryPreview,
 } from '@/lib/business-info-utils';
 import type { BusinessInfoEntry } from '@/types/business';
@@ -112,6 +111,7 @@ function BusinessInfoFields({
   hideSettingsLink,
 }: BusinessInfoFieldsProps) {
   const t = useTranslations('designEditor.editor');
+  const tTypes = useTranslations('settings.cardInfo.types');
 
   if (businessInfo.length === 0) {
     return (
@@ -142,6 +142,14 @@ function BusinessInfoFields({
           const Icon =
             BUSINESS_INFO_TYPE_ICONS[entry.type as keyof typeof BUSINESS_INFO_TYPE_ICONS] ||
             BUSINESS_INFO_TYPE_ICONS.custom;
+          // Localised type label — custom entries use the user-typed label
+          // (the `Instagram` case the user pointed out), everything else
+          // pulls from `settings.cardInfo.types.{type}` so the back-of-card
+          // section reads in the same language as the rest of the wizard.
+          const label =
+            entry.type === 'custom'
+              ? ((entry.data.label as string) || tTypes('custom'))
+              : tTypes(entry.type);
           return (
             <button
               key={entry.key}
@@ -155,7 +163,7 @@ function BusinessInfoFields({
                 <Icon className="w-4 h-4 text-[#777]" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-semibold text-foreground">{getEntryLabel(entry)}</span>
+                <span className="text-sm font-semibold text-foreground">{label}</span>
                 {preview && (
                   <p className="text-xs truncate text-muted-foreground">
                     {preview}
