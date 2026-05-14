@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { CheckIcon, GlobeIcon, DownloadSimpleIcon, FilePdfIcon } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { getBusinessSignupQR } from '@/api/businesses';
+import { downloadQrPng, downloadQrPdf } from '@/lib/qr-download';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +29,9 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
 
   useEffect(() => {
     if (!currentBusiness?.id) return;
+    // Reset to skeleton while we re-fetch for a different business —
+    // legitimate setState-on-mount/-on-input-change, not a cascading render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQrLoading(true);
     getBusinessSignupQR(currentBusiness.id)
       .then((data) => setQrCode(data.qr_code))
@@ -59,30 +63,13 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
 
   const handleDownloadPng = () => {
     if (!qrCode) return;
-    const link = document.createElement('a');
-    link.href = qrCode;
-    link.download = `${businessName}-qr-code.png`;
-    link.click();
+    downloadQrPng(qrCode, businessName);
   };
 
   const handleDownloadPdf = async () => {
     if (!qrCode) return;
     try {
-      const { default: jsPDF } = await import('jspdf');
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-      doc.setFontSize(20);
-      doc.text(businessName, 105, 40, { align: 'center' });
-
-      // Convert data URL to raw base64 for jsPDF compatibility
-      const base64Data = qrCode.includes(',') ? qrCode.split(',')[1] : qrCode;
-      doc.addImage(base64Data, 'PNG', 52.5, 60, 100, 100);
-
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text(fullUrl, 105, 175, { align: 'center' });
-
-      doc.save(`${businessName}-qr-code.pdf`);
+      await downloadQrPdf(qrCode, businessName, fullUrl);
     } catch (err) {
       console.error('PDF generation failed:', err);
       toast.error('Failed to generate PDF');

@@ -9,7 +9,6 @@ import {
   CaretDownIcon,
   CheckCircleIcon,
   CheckIcon,
-  CopyIcon,
   DeviceMobileIcon,
   DownloadSimpleIcon,
   FilePdfIcon,
@@ -222,11 +221,12 @@ export function InstallStep() {
     try {
       await copyToClipboard(signupUrl);
       setCopied(true);
+      toast.success(t('copied'));
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error(tErr('saveFailed'));
     }
-  }, [signupUrl, tErr]);
+  }, [signupUrl, t, tErr]);
 
   const handleQuickInstall = useCallback(async () => {
     if (!businessId) return;
@@ -330,28 +330,20 @@ function SignupUrlCard({ url, copied, onCopy, t }: SignupUrlCardProps) {
       <button
         type="button"
         onClick={onCopy}
-        aria-live="polite"
         className={cn(
-          'flex-shrink-0 inline-flex items-center gap-1 rounded-[8px] border px-2.5 py-2 wiz-helper font-semibold min-h-[36px] transition-all duration-200',
+          'flex-shrink-0 px-4 py-2.5 rounded-lg border wiz-helper font-semibold cursor-pointer flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap',
           copied
-            ? 'border-[var(--accent)]/40 bg-[var(--accent-light)] text-[var(--accent)]'
-            : 'border-[var(--border)] hover:bg-[var(--paper-hover)] text-[var(--foreground)]'
+            ? 'bg-[var(--accent-light)] border-[var(--accent-light)] text-[var(--accent)]'
+            : 'bg-white border-[var(--border-medium)] text-[#555] hover:bg-[var(--paper)]'
         )}
       >
-        <span
-          key={copied ? 'check' : 'copy'}
-          className={cn(
-            'inline-flex items-center gap-1',
-            copied && 'copy-success-pop'
-          )}
-        >
-          {copied ? (
-            <CheckIcon className="w-3.5 h-3.5" weight="bold" />
-          ) : (
-            <CopyIcon className="w-3.5 h-3.5" />
-          )}
-          {copied ? t('copied') : t('copy')}
-        </span>
+        {copied ? (
+          <>
+            <CheckIcon className="w-3.5 h-3.5" /> {t('copied')}
+          </>
+        ) : (
+          t('copy')
+        )}
       </button>
     </div>
   );
