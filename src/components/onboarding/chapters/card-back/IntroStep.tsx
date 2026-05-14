@@ -43,7 +43,10 @@ export function IntroStep() {
         </div>
       </div>
 
-      <p className="wiz-body leading-relaxed text-[#444]">{t('body')}</p>
+      <div className="flex flex-col gap-3">
+        <p className="wiz-body leading-relaxed text-[#444]">{t('bodyP1')}</p>
+        <p className="wiz-body leading-relaxed text-[#444]">{t('bodyP2')}</p>
+      </div>
     </div>
   );
 }

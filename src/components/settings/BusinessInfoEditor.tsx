@@ -33,6 +33,9 @@ interface BusinessInfoEditorProps {
   allowedTypes?: readonly InfoType[];
   /** Override the add-button label (defaults to `settings.cardInfo.addInfo`). */
   addLabel?: string;
+  /** Override the empty-state copy shown when there are no entries
+   *  (defaults to `settings.cardInfo.noInfoYet`). */
+  emptyLabel?: string;
 }
 
 export function BusinessInfoEditor({
@@ -40,6 +43,7 @@ export function BusinessInfoEditor({
   onChange,
   allowedTypes,
   addLabel,
+  emptyLabel,
 }: BusinessInfoEditorProps) {
   const t = useTranslations('settings.cardInfo');
   const usedPresetTypes = new Set(value.map((e) => e.type).filter((t) => t !== 'custom'));
@@ -126,7 +130,7 @@ export function BusinessInfoEditor({
     <div className="space-y-3">
       {value.length === 0 && (
         <div className="px-4 py-7 rounded-xl border-2 border-dashed border-[#DEDBD5] bg-[#FAFAF8] text-center">
-          <div className="text-sm text-[#AAA]">{t('noInfoYet')}</div>
+          <div className="text-sm text-[#AAA]">{emptyLabel ?? t('noInfoYet')}</div>
         </div>
       )}
 

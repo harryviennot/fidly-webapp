@@ -105,12 +105,13 @@
         "steps": {
           "intro": {
             "title": "Your card has two sides",
-            "subtitle": "The front holds stamps. The back holds the practical stuff.",
-            "body": "When customers tap the three dots on the card in Apple Wallet (or the i icon on Google Wallet), they see your business info: hours, address, phone, website, terms and conditions, and anything else worth showing. You set it once here, and it appears on every design of your card. The next step lets you hide specific entries per design."
+            "subtitle": "Front for stamps, back for the practical info.",
+            "bodyP1": "On Apple Wallet, customers tap the three dots on the card to flip it. On Google Wallet, the i icon. Either way, they land on the info you put there: hours, address, phone, website, terms and conditions, anything worth showing.",
+            "bodyP2": "You'll add it all now, once. Later, when you design each card, you'll pick which entries to include and add extras that only apply to that design."
           },
           "info": {
             "title": "Add your business info",
-            "subtitle": "Phone, address, hours, website, terms and conditions, anything else worth showing. We pre-filled what we could from your account."
+            "subtitle": "These entries will be available on every design of your card. We pre-filled what we could from your account."
           }
         }
       },
@@ -131,8 +132,13 @@
           },
           "back": {
             "title": "What appears on the back of THIS design",
-            "subtitle": "Hide specific business info entries for this design, or add fields that only apply to it.",
-            "designOnlyExplain": "Fields added below live on this design only. They won't follow you if you switch to a different card design later."
+            "subtitle": "Pick which business info to show on this card, and add any extras that only apply here.",
+            "sharedSectionTitle": "Your business info",
+            "sharedSectionHelper": "Tick the ones to show on this design.",
+            "specificSectionTitle": "Specific to this design",
+            "specificSectionHelper": "Fields you add here only appear on this design.",
+            "specificEmpty": "Nothing yet. Add a field that should only appear on this design.",
+            "addFieldCta": "Add a field"
           }
         }
       },

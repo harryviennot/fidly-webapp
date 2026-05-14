@@ -105,12 +105,13 @@
         "steps": {
           "intro": {
             "title": "Votre carte a deux faces",
-            "subtitle": "La face avant porte les tampons. Le verso contient les infos pratiques.",
-            "body": "Quand vos clients tapent les trois points sur leur carte dans Apple Wallet (ou l'icône i sur Google Wallet), ils voient les infos de votre commerce : horaires, adresse, téléphone, site web, conditions générales, et tout ce qui mérite d'être affiché. Vous les définissez ici une seule fois, et elles apparaissent sur chaque design de votre carte. L'étape suivante vous permet d'en cacher certaines par design."
+            "subtitle": "À l'avant les tampons, à l'arrière les infos pratiques.",
+            "bodyP1": "Sur Apple Wallet, vos clients tapent les trois points sur leur carte pour la retourner. Sur Google Wallet, l'icône i. Dans les deux cas, ils tombent sur les infos que vous y placez : horaires, adresse, téléphone, site web, conditions générales, tout ce qui mérite d'être affiché.",
+            "bodyP2": "Vous allez les ajouter maintenant, une seule fois. Plus tard, à chaque design de votre carte, vous choisirez celles à inclure et vous pourrez ajouter des extras qui ne valent que pour ce design-là."
           },
           "info": {
             "title": "Ajoutez les infos de votre commerce",
-            "subtitle": "Téléphone, adresse, horaires, site web, conditions générales, tout ce qui mérite d'être affiché. On a pré-rempli ce qu'on pouvait depuis votre compte."
+            "subtitle": "Ces entrées seront disponibles sur chaque design de votre carte. On a pré-rempli ce qu'on pouvait depuis votre compte."
           }
         }
       },
@@ -131,8 +132,13 @@
           },
           "back": {
             "title": "Ce qui apparaît au dos de CE design",
-            "subtitle": "Cachez des entrées spécifiques sur ce design, ou ajoutez des champs qui ne valent que pour lui.",
-            "designOnlyExplain": "Les champs ajoutés ci-dessous sont liés à ce design uniquement. Ils ne suivront pas si vous changez de design plus tard."
+            "subtitle": "Choisissez les infos de commerce à afficher sur cette carte, et ajoutez celles qui ne valent que pour elle.",
+            "sharedSectionTitle": "Vos infos de commerce",
+            "sharedSectionHelper": "Cochez celles à afficher sur ce design.",
+            "specificSectionTitle": "Spécifique à ce design",
+            "specificSectionHelper": "Les champs ajoutés ici n'apparaissent que sur ce design.",
+            "specificEmpty": "Rien pour l'instant. Ajoutez un champ qui n'apparaîtra que sur ce design.",
+            "addFieldCta": "Ajouter un champ"
           }
         }
       },

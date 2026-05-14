@@ -13,15 +13,28 @@ import type { BusinessInfoEntry } from '@/types/business';
 import type { PassField } from '@/types';
 import { useDesignForm } from './DesignFormContext';
 
+/** Copy overrides for the back-of-card form. Each field has a default that
+ *  reads from `designEditor.editor.*`; the wizard passes its own onboarding
+ *  copy here so the same component reads in the language of the surface it's
+ *  embedded in. */
+interface BackFormCopy {
+  sharedSectionTitle?: string;
+  sharedSectionHelper?: string;
+  specificSectionTitle?: string;
+  specificSectionHelper?: string;
+  specificEmpty?: string;
+  addFieldCta?: string;
+}
+
 interface BackFormProps {
-  /**
-   * Hides the "Go to Settings" affordances. Used by the wizard's BackStep
-   * since the owner has no settings page to navigate to mid-onboarding;
-   * also lets the wizard surface its own explanation copy above the form.
-   */
+  /** Hides the "Go to Settings" affordances. Used by the wizard's BackStep
+   *  since the owner has no settings page to navigate to mid-onboarding. */
   hideSettingsLink?: boolean;
-  /** Optional copy rendered above the card-specific editor. */
-  designOnlyExplain?: string;
+  /** Skip the leading explainer paragraph. The wizard's subtitle + section
+   *  helpers already cover the same ground, so it's redundant there. */
+  hideTopDescription?: boolean;
+  /** Per-surface copy overrides (see `BackFormCopy`). */
+  copy?: BackFormCopy;
 }
 
 const CUSTOM_ONLY: readonly ['custom'] = ['custom'];
@@ -32,16 +45,27 @@ const CUSTOM_ONLY: readonly ['custom'] = ['custom'];
  *
  * Card-specific back fields are stored as `PassField` (key/label/value) but
  * rendered through `BusinessInfoEditor` in custom-only mode, so the form
- * card matches the dashboard's back-of-card editor exactly (same chrome,
- * same label + value inputs). The adapter below shuttles between the two
- * shapes without leaking either type into the other component.
+ * card matches the dashboard's back-of-card editor exactly. The adapter
+ * shuttles between the two shapes without leaking either type into the
+ * other component.
  */
-export function BackForm({ hideSettingsLink, designOnlyExplain }: BackFormProps = {}) {
+export function BackForm({
+  hideSettingsLink,
+  hideTopDescription,
+  copy,
+}: BackFormProps = {}) {
   const t = useTranslations('designEditor.editor');
   const tFE = useTranslations('designEditor.fieldEditor');
   const { formData, businessInfo, updateField, toggleBusinessInfoKey } =
     useDesignForm();
   const hiddenKeys = formData.hidden_business_info_keys || [];
+
+  const sharedSectionTitle = copy?.sharedSectionTitle ?? t('fromBusinessSettings');
+  const sharedSectionHelper = copy?.sharedSectionHelper;
+  const specificSectionTitle = copy?.specificSectionTitle ?? t('cardSpecific');
+  const specificSectionHelper = copy?.specificSectionHelper;
+  const specificEmpty = copy?.specificEmpty;
+  const addFieldCta = copy?.addFieldCta ?? tFE('addField');
 
   const backFieldsAsEntries = useMemo<BusinessInfoEntry[]>(
     () =>
@@ -64,26 +88,32 @@ export function BackForm({ hideSettingsLink, designOnlyExplain }: BackFormProps 
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="text-sm text-muted-foreground">{t('backDescription')}</p>
+      {!hideTopDescription && (
+        <p className="text-sm text-muted-foreground">{t('backDescription')}</p>
+      )}
 
       <BusinessInfoFields
         businessInfo={businessInfo}
         hiddenKeys={hiddenKeys}
         onToggleKey={toggleBusinessInfoKey}
         hideSettingsLink={hideSettingsLink}
+        title={sharedSectionTitle}
+        helper={sharedSectionHelper}
       />
 
-      {designOnlyExplain && (
-        <p className="wiz-helper text-[#888]">{designOnlyExplain}</p>
-      )}
-
       <div className="flex flex-col gap-2">
-        <span className="text-[15px] font-medium">{t('cardSpecific')}</span>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[15px] font-medium">{specificSectionTitle}</span>
+          {specificSectionHelper && (
+            <p className="text-xs text-muted-foreground">{specificSectionHelper}</p>
+          )}
+        </div>
         <BusinessInfoEditor
           value={backFieldsAsEntries}
           onChange={handleBackFieldsChange}
           allowedTypes={CUSTOM_ONLY}
-          addLabel={tFE('addField')}
+          addLabel={addFieldCta}
+          emptyLabel={specificEmpty}
         />
       </div>
     </div>
@@ -95,20 +125,23 @@ interface BusinessInfoFieldsProps {
   hiddenKeys: string[];
   onToggleKey: (key: string) => void;
   hideSettingsLink?: boolean;
+  title: string;
+  helper?: string;
 }
 
 /**
  * Toggle list of business-info entries — clicking a row flips its visibility
  * on the card back. Uses the same neutral surface as the editor cards below
- * (`bg-[#FAFAF8] border border-[#F0EFEB]`) and the same bordered icon box as
- * the BusinessInfoEditor entries (w-9 h-9 white square), so the back-of-card
- * section reads as one coherent block. Check sits on the right.
+ * and the same bordered icon box as the BusinessInfoEditor entries, so the
+ * back-of-card section reads as one coherent block. Check sits on the right.
  */
 function BusinessInfoFields({
   businessInfo,
   hiddenKeys,
   onToggleKey,
   hideSettingsLink,
+  title,
+  helper,
 }: BusinessInfoFieldsProps) {
   const t = useTranslations('designEditor.editor');
   const tTypes = useTranslations('settings.cardInfo.types');
@@ -132,8 +165,9 @@ function BusinessInfoFields({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <span className="text-[15px] font-medium">{t('fromBusinessSettings')}</span>
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[15px] font-medium">{title}</span>
+        {helper && <p className="text-xs text-muted-foreground">{helper}</p>}
       </div>
       <div className="flex flex-col gap-1.5">
         {businessInfo.map((entry) => {
@@ -142,10 +176,10 @@ function BusinessInfoFields({
           const Icon =
             BUSINESS_INFO_TYPE_ICONS[entry.type as keyof typeof BUSINESS_INFO_TYPE_ICONS] ||
             BUSINESS_INFO_TYPE_ICONS.custom;
-          // Localised type label — custom entries use the user-typed label
-          // (the `Instagram` case the user pointed out), everything else
-          // pulls from `settings.cardInfo.types.{type}` so the back-of-card
-          // section reads in the same language as the rest of the wizard.
+          // Localised type label — custom entries use the user-typed label,
+          // everything else pulls from `settings.cardInfo.types.{type}` so
+          // the back-of-card section reads in the same language as the rest
+          // of the wizard.
           const label =
             entry.type === 'custom'
               ? ((entry.data.label as string) || tTypes('custom'))

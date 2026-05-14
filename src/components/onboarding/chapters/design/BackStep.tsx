@@ -79,7 +79,18 @@ export function BackStep() {
             </h2>
             <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
           </header>
-          <BackForm hideSettingsLink designOnlyExplain={t('designOnlyExplain')} />
+          <BackForm
+            hideSettingsLink
+            hideTopDescription
+            copy={{
+              sharedSectionTitle: t('sharedSectionTitle'),
+              sharedSectionHelper: t('sharedSectionHelper'),
+              specificSectionTitle: t('specificSectionTitle'),
+              specificSectionHelper: t('specificSectionHelper'),
+              specificEmpty: t('specificEmpty'),
+              addFieldCta: t('addFieldCta'),
+            }}
+          />
         </div>
         <DesignPreviewPane showBack />
       </div>
