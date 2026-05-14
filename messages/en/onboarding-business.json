@@ -266,24 +266,22 @@
       "team": {
         "title": "Bring your team in",
         "subtitle": "Two kinds of access, depending on what they need to do.",
-        "rolesTitle": "Pick the right role",
+        "rolesTitle": "The two roles",
         "adminRole": {
           "label": "Admin",
-          "description": "Full dashboard access, same as you. Can change the program, send broadcasts, manage the team. Good for co-founders and managers."
+          "description": "Can handle customers, send broadcasts, and grow the team. Can't change the program, edit the cards, or touch billing. Good for marketing or operations staff."
         },
         "scannerRole": {
           "label": "Scanner",
-          "description": "Only the stamping screen on their phone. No dashboard, no settings, no customer data. Good for staff working the counter."
+          "description": "Stamps customers from a dedicated app on their phone. No dashboard access, no customer data, no settings. Good for staff working the counter."
         },
         "inviteLabel": "Send an invite",
-        "inviteHint": "They get an email with the right access. You can revoke at any time.",
+        "inviteHint": "They get an email invitation. You can remove their access anytime.",
         "inviteCta": "Invite"
       },
       "recap": {
         "title": "Look at what you've built",
         "subtitle": "A real loyalty program, on real phones, sending real notifications. Quick recap before we talk plans.",
-        "cardLabel": "Your card",
-        "programLabel": "Your program",
         "programDetail": "{totalStamps} stamps for \"{rewardName}\"",
         "stampsLabel": "{count, plural, =0 {No stamps sent yet} =1 {1 stamp sent to your phone} other {# stamps sent to your phone}}",
         "broadcastLabel": {
@@ -291,12 +289,6 @@
           "notSent": "No broadcast sent yet"
         },
         "teamLabel": "{count, plural, =0 {Team: just you for now} =1 {Team: you and 1 invitation pending} other {Team: you and # invitations pending}}",
-        "tweakCta": "Want to tweak something?",
-        "tweakLink": {
-          "design": "Edit the design",
-          "program": "Adjust the program",
-          "team": "Manage the team"
-        },
         "nextLabel": "Last step: pick a plan"
       },
       "plan": {

@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import {
-  ArrowSquareOut,
   Broadcast as BroadcastIcon,
-  PaintBrush,
   Stamp as StampIcon,
   Users,
 } from '@phosphor-icons/react';
 import { EditorCard } from '@/components/card/EditorCard';
+import { BusinessUrlCard } from '@/components/program/BusinessUrlCard';
 import { useBusiness } from '@/contexts/business-context';
 import { useActiveDesign } from '@/hooks/use-designs';
 import { useDefaultProgram } from '@/hooks/use-programs';
@@ -86,11 +84,8 @@ export function RecapStep() {
       </header>
 
       {design && (
-        <section className="flex flex-col gap-3">
-          <h3 className="wiz-helper uppercase tracking-wider text-[#999] font-semibold">
-            {t('cardLabel')}
-          </h3>
-          <div className="flex justify-center py-4 rounded-[16px] bg-[var(--paper)] border border-[var(--border-light)]">
+        <div className="flex flex-col items-center gap-3 rounded-[16px] border border-[var(--border-light)] bg-[var(--paper)] px-4 py-5">
+          <div className="w-full max-w-[260px]">
             <EditorCard
               design={design}
               previewStamps={Math.min(stampsSent, totalStamps)}
@@ -98,25 +93,21 @@ export function RecapStep() {
               organizationName={currentBusiness?.name}
             />
           </div>
-        </section>
-      )}
-
-      {program && (
-        <section className="flex flex-col gap-2">
-          <h3 className="wiz-helper uppercase tracking-wider text-[#999] font-semibold">
-            {t('programLabel')}
-          </h3>
-          <p className="wiz-body font-medium text-[var(--foreground)]">
-            {t('programDetail', { totalStamps, rewardName: rewardName || '—' })}
-          </p>
-        </section>
+          {program && (
+            <p className="wiz-helper text-center text-[#7A7A7A]">
+              {t('programDetail', { totalStamps, rewardName: rewardName || '—' })}
+            </p>
+          )}
+        </div>
       )}
 
       <section className="flex flex-col gap-2">
-        <StatRow
-          icon={<StampIcon className="w-4 h-4 text-[var(--accent)]" weight="bold" />}
-          label={t('stampsLabel', { count: stampsSent })}
-        />
+        {stampsSent > 0 && (
+          <StatRow
+            icon={<StampIcon className="w-4 h-4 text-[var(--accent)]" weight="bold" />}
+            label={t('stampsLabel', { count: stampsSent })}
+          />
+        )}
         <StatRow
           icon={<BroadcastIcon className="w-4 h-4 text-[var(--accent)]" weight="bold" />}
           label={
@@ -131,17 +122,7 @@ export function RecapStep() {
         />
       </section>
 
-      <section className="flex flex-col gap-3 rounded-[12px] border border-[var(--border)] bg-white p-4">
-        <h3 className="wiz-body-sm font-semibold text-[var(--foreground)] flex items-center gap-1.5">
-          <PaintBrush className="w-3.5 h-3.5 text-[#888]" weight="bold" />
-          {t('tweakCta')}
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <TweakLink href="/loyalty-program/design" label={t('tweakLink.design')} />
-          <TweakLink href="/loyalty-program/settings" label={t('tweakLink.program')} />
-          <TweakLink href="/team" label={t('tweakLink.team')} />
-        </div>
-      </section>
+      <BusinessUrlCard />
     </div>
   );
 }
@@ -152,19 +133,5 @@ function StatRow({ icon, label }: { icon: React.ReactNode; label: string }) {
       <span className="flex-shrink-0">{icon}</span>
       <p className="wiz-body text-[var(--foreground)]">{label}</p>
     </div>
-  );
-}
-
-function TweakLink({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center justify-between gap-2 rounded-[10px] border border-[var(--border)] px-3 py-2.5 wiz-helper font-medium text-[var(--foreground)] hover:bg-[var(--paper-hover)] transition-colors"
-    >
-      <span>{label}</span>
-      <ArrowSquareOut className="w-3.5 h-3.5 text-[#888]" weight="bold" />
-    </Link>
   );
 }

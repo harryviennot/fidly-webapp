@@ -33,9 +33,9 @@ export function TeamStep() {
       </header>
 
       <section className="flex flex-col gap-3">
-        <h3 className="wiz-body font-semibold text-[var(--foreground)]">
+        <p className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('rolesTitle')}
-        </h3>
+        </p>
         <div className="grid grid-cols-1 min-[640px]:grid-cols-2 gap-3">
           <RoleCard
             icon={<ShieldCheckered className="w-5 h-5 text-[var(--accent)]" weight="bold" />}

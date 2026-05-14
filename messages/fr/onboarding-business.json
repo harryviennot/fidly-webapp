@@ -266,24 +266,22 @@
       "team": {
         "title": "Ajoutez votre équipe",
         "subtitle": "Deux types d'accès, selon ce qu'ils ont à faire.",
-        "rolesTitle": "Choisissez le bon rôle",
+        "rolesTitle": "Les deux rôles",
         "adminRole": {
           "label": "Admin",
-          "description": "Accès complet au dashboard, comme vous. Peut modifier le programme, envoyer des diffusions, gérer l'équipe. Idéal pour les cofondateurs et managers."
+          "description": "Peut gérer les clients, envoyer des diffusions, agrandir l'équipe. Ne peut pas modifier le programme, éditer les cartes, ni accéder à la facturation. Idéal pour le marketing ou les opérations."
         },
         "scannerRole": {
           "label": "Scanner",
-          "description": "Uniquement l'écran de tamponnage sur leur téléphone. Pas de dashboard, pas de paramètres, pas de données clients. Idéal pour les équipes à la caisse."
+          "description": "Tamponne les clients depuis une application dédiée sur leur téléphone. Pas d'accès au dashboard, pas de données clients, pas de paramètres. Idéal pour les équipes à la caisse."
         },
         "inviteLabel": "Envoyer une invitation",
-        "inviteHint": "Ils reçoivent un email avec le bon accès. Vous pouvez révoquer à tout moment.",
+        "inviteHint": "Ils reçoivent une invitation par email. Vous pouvez retirer leur accès à tout moment.",
         "inviteCta": "Inviter"
       },
       "recap": {
         "title": "Regardez ce que vous avez construit",
         "subtitle": "Un vrai programme de fidélité, sur de vrais téléphones, qui envoie de vraies notifications. Petit récap avant de parler offre.",
-        "cardLabel": "Votre carte",
-        "programLabel": "Votre programme",
         "programDetail": "{totalStamps} tampons pour « {rewardName} »",
         "stampsLabel": "{count, plural, =0 {Aucun tampon envoyé} =1 {1 tampon envoyé sur votre téléphone} other {# tampons envoyés sur votre téléphone}}",
         "broadcastLabel": {
@@ -291,12 +289,6 @@
           "notSent": "Aucune diffusion envoyée"
         },
         "teamLabel": "{count, plural, =0 {Équipe : juste vous pour l'instant} =1 {Équipe : vous et 1 invitation en attente} other {Équipe : vous et # invitations en attente}}",
-        "tweakCta": "Envie d'ajuster quelque chose ?",
-        "tweakLink": {
-          "design": "Modifier le design",
-          "program": "Ajuster le programme",
-          "team": "Gérer l'équipe"
-        },
         "nextLabel": "Dernière étape : choisissez votre offre"
       },
       "plan": {
