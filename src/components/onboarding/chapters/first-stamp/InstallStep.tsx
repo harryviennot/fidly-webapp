@@ -13,6 +13,7 @@ import {
   FilePdfIcon,
   Spinner as SpinnerIcon,
 } from '@phosphor-icons/react';
+import { Card } from '@/components/ui/card';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
@@ -333,7 +334,7 @@ interface SignupUrlCardProps {
 
 function SignupUrlCard({ url, copied, onCopy, t }: SignupUrlCardProps) {
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white px-4 py-3 flex items-center gap-3">
+    <Card hover={false} className="px-4 py-3 flex items-center gap-3">
       <div className="min-w-0 flex-1">
         <p className="wiz-micro uppercase tracking-wider text-[#999] font-medium mb-0.5">
           {t('signupUrlLabel')}
@@ -358,7 +359,7 @@ function SignupUrlCard({ url, copied, onCopy, t }: SignupUrlCardProps) {
           t('copy')
         )}
       </button>
-    </div>
+    </Card>
   );
 }
 
@@ -397,7 +398,7 @@ function QrCard({ qrCode, signupUrl, businessName, collapsedByDefault, t }: QrCa
   }, [qrCode, businessName, signupUrl, pdfBusy]);
 
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-3">
+    <Card hover={false} className="p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className="wiz-body font-semibold text-[var(--foreground)]">{t('qrTitle')}</p>
@@ -452,7 +453,7 @@ function QrCard({ qrCode, signupUrl, businessName, collapsedByDefault, t }: QrCa
           {t('downloadPdf')}
         </button>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -464,7 +465,7 @@ interface QuickInstallCardProps {
 
 function QuickInstallCard({ registering, onInstall, t }: QuickInstallCardProps) {
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-3">
+    <Card hover={false} className="p-5 flex flex-col gap-3">
       <div className="flex items-start gap-3">
         <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
           <DeviceMobileIcon className="w-5 h-5 text-[var(--accent)]" weight="bold" />
@@ -484,7 +485,7 @@ function QuickInstallCard({ registering, onInstall, t }: QuickInstallCardProps) 
       >
         {registering ? t('registering') : t('quickInstallCta')}
       </button>
-    </div>
+    </Card>
   );
 }
 
@@ -494,10 +495,10 @@ interface StatusCardProps {
 
 function PollingHintCard({ t }: StatusCardProps) {
   return (
-    <div className="rounded-[12px] border border-[var(--border-light)] bg-[var(--paper)] px-4 py-3 flex items-center gap-3">
+    <Card hover={false} className="bg-[var(--paper)] px-4 py-3 flex items-center gap-3">
       <SpinnerIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 animate-spin" weight="bold" />
       <p className="wiz-helper text-[#555]">{t('pollingHint')}</p>
-    </div>
+    </Card>
   );
 }
 
@@ -507,7 +508,10 @@ interface WatchingCardProps extends StatusCardProps {
 
 function WatchingCard({ onManualConfirm, t }: WatchingCardProps) {
   return (
-    <div className="rounded-[12px] border border-[var(--accent-200)] bg-[var(--accent-light)]/40 p-4 flex flex-col gap-3">
+    <Card
+      hover={false}
+      className="border-[var(--accent-200)] bg-[var(--accent-light)]/40 p-4 flex flex-col gap-3"
+    >
       <div className="flex items-center gap-3">
         <SpinnerIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 animate-spin" weight="bold" />
         <p className="wiz-body-sm font-medium text-[var(--foreground)]">{t('watchingInstall')}</p>
@@ -519,7 +523,7 @@ function WatchingCard({ onManualConfirm, t }: WatchingCardProps) {
       >
         {t('manualConfirmCta')}
       </button>
-    </div>
+    </Card>
   );
 }
 
@@ -545,7 +549,7 @@ interface TimeoutCardProps extends StatusCardProps {
 
 function TimeoutCard({ onRetry, t }: TimeoutCardProps) {
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-[var(--paper)] p-4 flex flex-col gap-3">
+    <Card hover={false} className="bg-[var(--paper)] p-4 flex flex-col gap-3">
       <div>
         <p className="wiz-body font-semibold text-[var(--foreground)]">{t('timeoutTitle')}</p>
         <p className="wiz-helper text-[#555] leading-relaxed mt-0.5">{t('timeoutBody')}</p>
@@ -557,7 +561,7 @@ function TimeoutCard({ onRetry, t }: TimeoutCardProps) {
       >
         {t('retry')}
       </button>
-    </div>
+    </Card>
   );
 }
 
@@ -573,7 +577,7 @@ function WalletInstallCard({ passUrl, googleWalletUrl, locale, t }: WalletInstal
   const googleSrc = locale === 'fr' ? '/GoogleWalletFR.svg' : '/GoogleWallet.svg';
 
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-3 items-center">
+    <Card hover={false} className="p-5 flex flex-col gap-3 items-center">
       <p className="wiz-body font-semibold text-[var(--foreground)] text-center">{t('installTitle')}</p>
       <p className="wiz-helper text-[#7A7A7A] text-center max-w-[320px] leading-relaxed">
         {t('installBody')}
@@ -605,6 +609,6 @@ function WalletInstallCard({ passUrl, googleWalletUrl, locale, t }: WalletInstal
           </a>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

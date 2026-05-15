@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { updateDesign, activateDesign } from '@/api';
 import type { CardDesign } from '@/types';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
@@ -30,10 +31,11 @@ export function BackStep() {
   const queryClient = useQueryClient();
   const { data: designs = [] } = useDesigns(businessId);
   const existingDesign = designs[0];
+  const { data: program } = useDefaultProgram(businessId);
   const { mutateAsync: updateBusiness } = useUpdateBusiness(businessId);
   const ctx = useWizardStep();
 
-  const { formData, designContext } = useDesignStepState(existingDesign);
+  const { formData, designContext } = useDesignStepState(existingDesign, 'back');
 
   useEffect(() => {
     ctx.setCanSkip(true);
@@ -46,7 +48,13 @@ export function BackStep() {
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
-        const updated = await updateDesign(businessId, existingDesign.id, data);
+        // Per-step saves during the design chapter skip strip regen; the
+        // chapter-exit hook fires one explicit regen call when the user
+        // leaves the chapter (BackStep + activation will also kick a regen
+        // server-side if needed).
+        const updated = await updateDesign(businessId, existingDesign.id, data, {
+          regenerateStrips: false,
+        });
         queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
           if (!prev) return [updated];
           return prev.map((d) => (d.id === existingDesign.id ? updated : d));
@@ -68,6 +76,10 @@ export function BackStep() {
     });
     return () => ctx.setSubmitHandler(null);
   }, [businessId, formData, existingDesign, currentBusiness, updateBusiness, queryClient, ctx, tErr]);
+
+  if (program === undefined) {
+    return null;
+  }
 
   return (
     <DesignFormProvider value={designContext}>

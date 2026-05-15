@@ -66,6 +66,21 @@ export interface WizardStepContextValue {
    * completes or the page reloads.
    */
   setDraft: (key: string, value: unknown) => void;
+  /**
+   * Mark a sub-step key (e.g. `"design.branding"`) as having been visited.
+   * Persisted under the draft store so it survives reload. Used by the design
+   * editor to decide whether to apply initial defaults: defaults only apply
+   * the first time the user sees a sub-step.
+   */
+  markStepSeen: (stepKey: string) => void;
+  /** Read whether a sub-step key has been marked seen. */
+  hasStepBeenSeen: (stepKey: string) => boolean;
+  /**
+   * The id of the chapter currently being rendered. Exposed so steps can
+   * detect chapter transitions (e.g. fire a one-shot regen call when the
+   * design chapter is left).
+   */
+  currentChapterId: string | null;
   /** Step-initiated forward navigation (used when a UI control auto-advances). */
   advance: () => void;
   /** Step-initiated skip (same as footer skip; rarely needed from inside a step). */

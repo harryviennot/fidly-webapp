@@ -52,8 +52,31 @@ export async function createDesign(businessId: string, data: CardDesignCreate): 
   return response.json();
 }
 
-export async function updateDesign(businessId: string, designId: string, data: CardDesignUpdate): Promise<CardDesign> {
-  const response = await fetch(`${API_BASE_URL}/designs/${businessId}/${designId}`, {
+export interface UpdateDesignOptions {
+  /**
+   * When `false`, the backend persists the update but does NOT queue a strip
+   * regeneration even if strip-affecting fields changed. The onboarding
+   * wizard passes `false` on every per-step save so the design chapter only
+   * triggers one explicit regeneration (`regenerateStripsForDesign`) when
+   * the user leaves the chapter. Defaults to `true` everywhere else so
+   * dashboard edits behave as before.
+   */
+  regenerateStrips?: boolean;
+}
+
+export async function updateDesign(
+  businessId: string,
+  designId: string,
+  data: CardDesignUpdate,
+  options: UpdateDesignOptions = {}
+): Promise<CardDesign> {
+  const params = new URLSearchParams();
+  if (options.regenerateStrips === false) {
+    params.set('regenerate_strips', 'false');
+  }
+  const query = params.toString();
+  const url = `${API_BASE_URL}/designs/${businessId}/${designId}${query ? `?${query}` : ''}`;
+  const response = await fetch(url, {
     method: 'PUT',
     headers: await getAuthHeaders(),
     body: JSON.stringify(data),
@@ -62,6 +85,32 @@ export async function updateDesign(businessId: string, designId: string, data: C
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throwApiError(error, 'Failed to update design');
+  }
+
+  return response.json();
+}
+
+/**
+ * Trigger a single strip regeneration on the design. No-ops server-side when
+ * a regen is already in flight. The onboarding wizard fires this once when
+ * the user leaves the design chapter so the many per-step saves coalesce
+ * into one render.
+ */
+export async function regenerateStripsForDesign(
+  businessId: string,
+  designId: string
+): Promise<CardDesign> {
+  const response = await fetch(
+    `${API_BASE_URL}/designs/${businessId}/${designId}/regenerate-strips`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to regenerate strips');
   }
 
   return response.json();

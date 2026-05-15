@@ -7,7 +7,50 @@
       "finish": "Lancer mon programme",
       "saving": "Enregistrement…",
       "skipAll": "Passer le reste de la configuration",
-      "gotIt": "Compris, on y va"
+      "gotIt": "Compris, on y va",
+      "cta": {
+        "welcome": {
+          "welcome": "Configurer mon programme"
+        },
+        "business": {
+          "identity": "Continuer",
+          "profile": "Enregistrer mon profil"
+        },
+        "program": {
+          "program": "Enregistrer mon programme",
+          "data-collection": "Enregistrer mes champs"
+        },
+        "card-back": {
+          "intro": "Continuer",
+          "info": "Enregistrer le dos de ma carte"
+        },
+        "design": {
+          "branding": "Concevoir ma carte",
+          "stamps": "Enregistrer mes tampons",
+          "content": "Enregistrer le contenu de ma carte",
+          "back": "Enregistrer le dos de ma carte"
+        },
+        "notifications": {
+          "icon": "Enregistrer mon icône"
+        },
+        "first-stamp": {
+          "install": "J'ai installé ma carte",
+          "stamp": "M'envoyer un tampon"
+        },
+        "first-broadcast": {
+          "intro": "Composer ma diffusion",
+          "compose": "Continuer"
+        },
+        "team": {
+          "team": "Inviter mon équipe"
+        },
+        "recap": {
+          "recap": "Je suis prêt"
+        },
+        "plan": {
+          "plan": "Lancer mon programme"
+        }
+      }
     },
     "errors": {
       "unknownStep": "Cette étape de configuration est introuvable. Retour au début.",

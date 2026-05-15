@@ -19,6 +19,16 @@ interface StampsSelectorProps {
   max?: number;
   /** Optional name for the visually-hidden range input. */
   ariaLabel?: string;
+  /**
+   * How to color the filled stamp dots and active slider track:
+   *  - `'design'` (default): derive from `activeDesign` via `computeCardColors`.
+   *    Used everywhere the picker reflects the user's chosen card colors
+   *    (dashboard design editor, design preview).
+   *  - `'accent'`: use `var(--accent)` and white icons. Used in the
+   *    onboarding wizard's loyalty-program step so the picker matches the
+   *    Continue button accent before the user has picked any card colors.
+   */
+  dotColorMode?: 'design' | 'accent';
 }
 
 const DEFAULT_MIN = 2;
@@ -40,14 +50,29 @@ export function StampsSelector({
   min = DEFAULT_MIN,
   max = DEFAULT_MAX,
   ariaLabel,
+  dotColorMode = 'design',
 }: StampsSelectorProps) {
   const id = useId();
   const range = max - min;
   const stampIcon = (activeDesign?.stamp_icon || 'checkmark') as StampIconType;
   const rewardIcon = (activeDesign?.reward_icon || 'gift') as StampIconType;
   const colors = activeDesign ? computeCardColors(activeDesign) : null;
-  const accentHex = colors?.accentHex ?? '#4A7C59';
-  const iconColorHex = colors?.iconColorHex ?? '#fff';
+  // `--accent` is set on the onboarding layout (orange) and updated when the
+  // user picks design colors. Using the CSS variable keeps the picker in
+  // sync with the wizard's Continue button without recomputing here.
+  const accentHex = dotColorMode === 'accent'
+    ? 'var(--accent)'
+    : colors?.accentHex ?? 'var(--accent)';
+  const iconColorHex = dotColorMode === 'accent'
+    ? '#fff'
+    : colors?.iconColorHex ?? '#fff';
+  // The dot/slider shadows want a translucent accent. With a hex value we
+  // append `50` (32% alpha) directly; with a CSS variable we need
+  // `color-mix` because `var(--accent)50` is not valid CSS.
+  const accentAlpha = (alphaPct: number) =>
+    dotColorMode === 'accent'
+      ? `color-mix(in srgb, var(--accent) ${alphaPct}%, transparent)`
+      : `${accentHex}${Math.round((alphaPct / 100) * 255).toString(16).padStart(2, '0')}`;
   const fillPercent = range === 0 ? 0 : ((value - min) / range) * 100;
 
   // Brick split: top row gets the ceiling. 21 → 11 + 10. 20 → 10 + 10.
@@ -121,14 +146,14 @@ export function StampsSelector({
       <style>{`
         #${id}::-webkit-slider-thumb {
           background: ${accentHex} !important;
-          box-shadow: 0 2px 6px ${accentHex}50;
+          box-shadow: 0 2px 6px ${accentAlpha(31)};
         }
         #${id}::-webkit-slider-thumb:hover {
-          box-shadow: 0 2px 10px ${accentHex}70;
+          box-shadow: 0 2px 10px ${accentAlpha(44)};
         }
         #${id}::-moz-range-thumb {
           background: ${accentHex} !important;
-          box-shadow: 0 2px 6px ${accentHex}50;
+          box-shadow: 0 2px 6px ${accentAlpha(31)};
         }
       `}</style>
     </div>
@@ -153,7 +178,7 @@ export function StampsSelector({
         style={
           {
             backgroundColor: isActive ? accentHex : 'var(--border)',
-            boxShadow: isActive ? `0 2px 8px ${accentHex}40` : 'none',
+            boxShadow: isActive ? `0 2px 8px ${accentAlpha(25)}` : 'none',
             transitionDelay: isActive
               ? `${Math.min((n - 1) * 15, 150)}ms`
               : '0ms',

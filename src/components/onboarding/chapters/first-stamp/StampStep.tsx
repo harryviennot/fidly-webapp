@@ -7,6 +7,7 @@ import { CheckCircle, Warning } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { addStamp, getCustomer } from '@/api/customers';
 import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
+import { Card } from '@/components/ui/card';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useActiveDesign } from '@/hooks/use-designs';
 import { computeCardColors } from '@/lib/card-utils';
@@ -78,6 +79,17 @@ export function StampStep() {
   useEffect(() => {
     ctx.setCanSkip(true);
   }, [ctx]);
+
+  // Once the owner has felt at least one stamp, the footer's
+  // "Send me a stamp" copy stops making sense — they already did. Flip
+  // back to the default "Continue" by clearing the override so the shell's
+  // i18n fallback (footer.next) takes over. Pre-send we leave the action-
+  // verb label in place to nudge them toward the inline send button.
+  useEffect(() => {
+    if ((stamps ?? 0) > 0) {
+      ctx.setNextLabel(null);
+    }
+  }, [stamps, ctx]);
 
   // Load the initial stamp count so the badge isn't blank before the first tap.
   useEffect(() => {
@@ -218,13 +230,13 @@ interface PrereqCardProps {
 
 function PrereqCard({ t }: PrereqCardProps) {
   return (
-    <div className="rounded-[12px] border border-amber-200 bg-amber-50 p-5 flex items-start gap-3">
+    <Card hover={false} className="border-amber-200 bg-amber-50 p-5 flex items-start gap-3">
       <Warning className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" weight="bold" />
       <div className="flex-1 min-w-0">
         <p className="wiz-body font-semibold text-amber-900">{t('prereqTitle')}</p>
         <p className="wiz-helper text-amber-800 leading-relaxed mt-0.5">{t('prereqBody')}</p>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -278,7 +290,7 @@ function StampCard({
   }
 
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-4">
+    <Card hover={false} className="p-5 flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <StampAvatar design={design} />
         <div className="flex-1 min-w-0">
@@ -314,10 +326,10 @@ function StampCard({
       </div>
 
       <div className="flex flex-col gap-2">
-        <InfoBox variant="note" message={t('appleWalletHint')} />
-        <InfoBox variant="note" message={t('googleWalletHint')} />
+        <InfoBox variant="info" message={t('appleWalletHint')} />
+        <InfoBox variant="info" message={t('googleWalletHint')} />
       </div>
-    </div>
+    </Card>
   );
 }
 

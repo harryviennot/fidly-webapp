@@ -220,6 +220,7 @@ export function ProgramStep() {
             activeDesign={activeDesign}
             max={MAX_STAMPS}
             ariaLabel={tLp('stampsToEarn')}
+            dotColorMode="accent"
           />
         </WizardField>
 

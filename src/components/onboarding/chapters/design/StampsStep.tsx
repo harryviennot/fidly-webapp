@@ -5,8 +5,12 @@ import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useBusiness } from '@/contexts/business-context';
+import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { updateDesign, uploadStripBackground } from '@/api';
+import { applyTheme, getThemeColor } from '@/utils/theme';
+import { rgbToHex } from '@/lib/color-utils';
 import type { CardDesign } from '@/types';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
 import { StampsForm } from '@/components/design/forms/StampsForm';
@@ -27,10 +31,12 @@ export function StampsStep() {
   const queryClient = useQueryClient();
   const { data: designs = [] } = useDesigns(businessId);
   const existingDesign = designs[0];
+  const { data: program } = useDefaultProgram(businessId);
+  const { mutateAsync: updateBusiness } = useUpdateBusiness(businessId);
   const ctx = useWizardStep();
 
   const { formData, pendingStripFile, setPendingStripFile, designContext } =
-    useDesignStepState(existingDesign);
+    useDesignStepState(existingDesign, 'stamps');
 
   useEffect(() => {
     ctx.setCanSkip(true);
@@ -43,7 +49,12 @@ export function StampsStep() {
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
-        const updated = await updateDesign(businessId, existingDesign.id, data);
+        // Per-step saves during the design chapter skip strip regen; the
+        // chapter-exit hook fires one explicit regen call when the user
+        // leaves the chapter.
+        const updated = await updateDesign(businessId, existingDesign.id, data, {
+          regenerateStrips: false,
+        });
         queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
           if (!prev) return [updated];
           return prev.map((d) => (d.id === existingDesign.id ? updated : d));
@@ -51,7 +62,12 @@ export function StampsStep() {
 
         if (pendingStripFile) {
           const result = await uploadStripBackground(businessId, existingDesign.id, pendingStripFile);
-          const withStrip = await updateDesign(businessId, existingDesign.id, { strip_background_url: result.url });
+          const withStrip = await updateDesign(
+            businessId,
+            existingDesign.id,
+            { strip_background_url: result.url },
+            { regenerateStrips: false }
+          );
           queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
             if (!prev) return [withStrip];
             return prev.map((d) => (d.id === existingDesign.id ? withStrip : d));
@@ -60,6 +76,28 @@ export function StampsStep() {
         }
 
         queryClient.invalidateQueries({ queryKey: designKeys.all(businessId) });
+        // Stamps step touches strip-affecting fields (icon, colors,
+        // strip_background). Mark dirty so the chapter-exit hook triggers
+        // a single regen.
+        ctx.setDraft('design.stripDirty', true);
+
+        // Persist updated colors to business.settings. Stamps step lets the
+        // user fine-tune the stamp-filled color, so the theme accent may
+        // have shifted since Branding ran. Re-running getThemeColor here
+        // keeps the contrast swap honest.
+        if (currentBusiness) {
+          const stampFilledHex = rgbToHex(data.stamp_filled_color || 'rgb(249, 115, 22)');
+          const bgHex = rgbToHex(data.background_color || 'rgb(28, 28, 30)');
+          const themeAccent = getThemeColor(stampFilledHex, bgHex);
+          await updateBusiness({
+            settings: {
+              ...(currentBusiness.settings ?? {}),
+              accentColor: themeAccent,
+              backgroundColor: bgHex,
+            },
+          });
+          applyTheme(themeAccent, bgHex);
+        }
         return { ok: true };
       } catch (err) {
         toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
@@ -67,7 +105,13 @@ export function StampsStep() {
       }
     });
     return () => ctx.setSubmitHandler(null);
-  }, [businessId, formData, pendingStripFile, existingDesign?.id, queryClient, setPendingStripFile, ctx, tErr]);
+  }, [businessId, formData, pendingStripFile, existingDesign?.id, currentBusiness, updateBusiness, queryClient, setPendingStripFile, ctx, tErr]);
+
+  // Gate render on program data so the design state initialiser sees the
+  // resolved program name. See BrandingStep for the rationale.
+  if (program === undefined) {
+    return null;
+  }
 
   return (
     <DesignFormProvider value={designContext}>

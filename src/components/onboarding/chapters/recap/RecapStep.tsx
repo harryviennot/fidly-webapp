@@ -9,6 +9,7 @@ import {
 } from '@phosphor-icons/react';
 import { EditorCard } from '@/components/card/EditorCard';
 import { BusinessUrlCard } from '@/components/program/BusinessUrlCard';
+import { Card } from '@/components/ui/card';
 import { useBusiness } from '@/contexts/business-context';
 import { useActiveDesign } from '@/hooks/use-designs';
 import { useDefaultProgram } from '@/hooks/use-programs';
@@ -84,7 +85,7 @@ export function RecapStep() {
       </header>
 
       {design && (
-        <div className="flex flex-col items-center gap-3 rounded-[16px] border border-[var(--border-light)] bg-[var(--paper)] px-4 py-5">
+        <div className="flex flex-col items-center gap-3">
           <div className="w-full max-w-[260px]">
             <EditorCard
               design={design}
@@ -129,9 +130,12 @@ export function RecapStep() {
 
 function StatRow({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] bg-[var(--paper)] border border-[var(--border-light)]">
+    <Card
+      hover={false}
+      className="flex items-center gap-2.5 px-3 py-2.5 bg-[var(--paper)]"
+    >
       <span className="flex-shrink-0">{icon}</span>
       <p className="wiz-body text-[var(--foreground)]">{label}</p>
-    </div>
+    </Card>
   );
 }

@@ -1,0 +1,11 @@
+{
+  "pricing": {
+    "foundingPartner": "FONDATEUR",
+    "forLife": "/mois à vie",
+    "perMonth": "/mois",
+    "countdown": {
+      "daysHours": "Tarif fondateur — fin dans {days}j {hours}h",
+      "hoursMinutes": "Tarif fondateur — fin dans {hours}h {minutes}m"
+    }
+  }
+}

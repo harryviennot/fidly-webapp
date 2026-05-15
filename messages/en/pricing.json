@@ -1,0 +1,11 @@
+{
+  "pricing": {
+    "foundingPartner": "FOUNDING PARTNER",
+    "forLife": "/mo for life",
+    "perMonth": "/mo",
+    "countdown": {
+      "daysHours": "Founding pricing closes in {days}d {hours}h",
+      "hoursMinutes": "Founding pricing closes in {hours}h {minutes}m"
+    }
+  }
+}

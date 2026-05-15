@@ -162,7 +162,10 @@ export function DataCollectionStep() {
             <div
               key={field.key}
               className={cn(
-                'flex flex-col min-[640px]:flex-row min-[640px]:items-center gap-3 min-[640px]:gap-3.5 px-4 py-4 rounded-[12px] border-[1.5px] transition-colors',
+                // Match OptionCard tokens: 1.5px border, 12px radius, 64px min
+                // tap target, white when enabled / paper when off. Keeps the
+                // tri-state radio + Switch on the right untouched.
+                'flex flex-col min-[640px]:flex-row min-[640px]:items-center gap-3 min-[640px]:gap-3.5 px-4 py-4 rounded-[12px] border-[1.5px] transition-colors min-h-[64px]',
                 isEnabled
                   ? 'border-[var(--border)] bg-white'
                   : 'border-[var(--border-light)] bg-[var(--paper)]'
@@ -179,7 +182,7 @@ export function DataCollectionStep() {
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                     <span
                       className={cn(
-                        'wiz-body-sm font-semibold',
+                        'wiz-body leading-tight',
                         isEnabled ? 'text-[var(--foreground)]' : 'text-[#888]'
                       )}
                     >
@@ -191,7 +194,7 @@ export function DataCollectionStep() {
                       </span>
                     )}
                   </div>
-                  <p className="wiz-body-sm text-[#7A7A7A] leading-snug">
+                  <p className="wiz-helper text-[#7A7A7A] leading-snug">
                     {tLp(
                       `dataFields.${field.key === 'collect_name' ? 'nameDescription' : field.key === 'collect_email' ? 'emailDescription' : 'phoneDescription'}`
                     )}

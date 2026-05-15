@@ -25,6 +25,7 @@ export default getRequestConfig(async () => {
       ...(await import(`../../messages/${locale}/businessesPage.json`)).default,
       ...(await import(`../../messages/${locale}/impersonation.json`)).default,
       ...(await import(`../../messages/${locale}/onboarding-business.json`)).default,
+      ...(await import(`../../messages/${locale}/pricing.json`)).default,
     },
   };
 });

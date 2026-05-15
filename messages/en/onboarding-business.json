@@ -7,7 +7,50 @@
       "finish": "Launch my program",
       "saving": "Saving…",
       "skipAll": "Skip rest of setup",
-      "gotIt": "Got it, let's go"
+      "gotIt": "Got it, let's go",
+      "cta": {
+        "welcome": {
+          "welcome": "Set up my program"
+        },
+        "business": {
+          "identity": "Continue",
+          "profile": "Save my profile"
+        },
+        "program": {
+          "program": "Save my program",
+          "data-collection": "Save my fields"
+        },
+        "card-back": {
+          "intro": "Continue",
+          "info": "Save my back side info"
+        },
+        "design": {
+          "branding": "Design my card",
+          "stamps": "Save my stamps",
+          "content": "Save my card content",
+          "back": "Save my back side"
+        },
+        "notifications": {
+          "icon": "Save my icon"
+        },
+        "first-stamp": {
+          "install": "I've installed my card",
+          "stamp": "Send me a stamp"
+        },
+        "first-broadcast": {
+          "intro": "Compose my broadcast",
+          "compose": "Continue"
+        },
+        "team": {
+          "team": "Invite my team"
+        },
+        "recap": {
+          "recap": "I'm ready"
+        },
+        "plan": {
+          "plan": "Launch my program"
+        }
+      }
     },
     "errors": {
       "unknownStep": "We couldn't find that setup step. Take me back to the start.",

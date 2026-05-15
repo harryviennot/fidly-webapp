@@ -1,138 +1,91 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check, Warning } from '@phosphor-icons/react';
+import { Check } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { FoundingCountdown } from '@/components/ui/founding-countdown';
 import { useBusiness } from '@/contexts/business-context';
-import { changeTier, createCheckoutSession } from '@/api/billing';
-import { useMilestones, useNotificationTemplates } from '@/hooks/use-notifications';
-import { useDesigns } from '@/hooks/use-designs';
-import { computeStarterReverts, type RevertItem } from '@/lib/tier-revert';
+import { changeTier } from '@/api/billing';
+import {
+  effectivePrice,
+  isFoundingProgramOpen,
+  type TierId,
+} from '@/lib/pricing';
 import { useWizardStep } from '../../wizard-context';
-import { useWizardProgress } from '../../useWizardProgress';
 import { cn } from '@/lib/utils';
 
-type Tier = 'starter' | 'growth' | 'pro';
-
-interface TierCard {
-  id: Tier;
-  price: number;
+interface TierConfig {
+  id: TierId;
   features: string[];
   recommended?: boolean;
 }
 
-const TIERS: TierCard[] = [
+const TIERS: TierConfig[] = [
   {
     id: 'starter',
-    price: 20,
     features: ['starter.feat1', 'starter.feat2', 'starter.feat3'],
   },
   {
     id: 'growth',
-    price: 40,
     features: ['growth.feat1', 'growth.feat2', 'growth.feat3', 'growth.feat4'],
+    recommended: true,
   },
   {
     id: 'pro',
-    price: 60,
     features: ['pro.feat1', 'pro.feat2', 'pro.feat3', 'pro.feat4', 'pro.feat5'],
-    recommended: true,
   },
 ];
 
 /**
- * Chapter 11 — final step. Lets the user pick a plan or stay on the Pro
- * trial. Downgrade-to-Starter goes through a confirmation modal that lists
- * what they'd lose (computed from current usage via `tier-revert.ts`).
+ * Final wizard step. Picks the subscription tier and finalises the wizard.
  *
- * "Continue with trial" is the wizard's footer CTA — clicking it finalises
- * the wizard without any tier change.
+ * Non-blocking: the chosen tier is PATCHed onto the business and the wizard
+ * advances straight to the dashboard. No Stripe checkout, no payment-method
+ * gate — the user links a card later from the dashboard's billing tab.
+ *
+ * Founding partner pricing is read off `business.is_founding_partner`. The
+ * flag is set server-side at signup and is grandfathered for life — this
+ * step never updates it. When the program window has passed
+ * (`FOUNDING_PROGRAM_END_DATE`), the discount + countdown disappear
+ * automatically even for businesses still marked as founding partners.
  */
 export function PlanStep() {
   const t = useTranslations('onboardingBusiness.chapters.plan');
+  const tPricing = useTranslations('pricing');
   const tErr = useTranslations('onboardingBusiness.errors');
-  const { currentBusiness } = useBusiness();
-  const businessId = currentBusiness?.id;
-  const { finalize } = useWizardProgress();
+  const { currentBusiness, refetch: refetchBusiness } = useBusiness();
   const ctx = useWizardStep();
 
-  const { data: templatesData } = useNotificationTemplates(businessId);
-  const { data: milestonesData } = useMilestones(businessId);
-  const { data: designs = [] } = useDesigns(businessId);
-
-  const reverts = useMemo<RevertItem[]>(() => {
-    const customizedCount = (templatesData?.items ?? []).filter((tpl) => tpl.is_customized).length;
-    const milestones = milestonesData?.items?.length ?? 0;
-    const activeDesign = designs.find((d) => d.is_active);
-    const extra = Math.max(0, designs.length - 1);
-    const hasStrip = !!activeDesign?.strip_background_url;
-    return computeStarterReverts({
-      customNotificationTemplates: customizedCount,
-      milestoneCount: milestones,
-      hasCustomStripBackground: hasStrip,
-      extraDesignsCount: extra,
-    });
-  }, [templatesData, milestonesData, designs]);
-
-  const [pendingTier, setPendingTier] = useState<Tier | null>(null);
-  const [acting, setActing] = useState(false);
+  const isFoundingPartner = !!currentBusiness?.is_founding_partner;
+  const showFoundingPricing = isFoundingPartner && isFoundingProgramOpen();
 
   useEffect(() => {
-    ctx.setCanSkip(false);
-    ctx.setNextLabel(t('keepTrialCta'));
-    // "Save & continue" on this step just finalises (keep trial).
+    // Continue button on this step matches the standard finish label
+    // ("Launch my program"). The user picks a tier via the cards below and
+    // we navigate forward to finalize the wizard.
     ctx.setSubmitHandler(async () => ({ ok: true }));
     return () => ctx.setSubmitHandler(null);
-  }, [ctx, t]);
+  }, [ctx]);
 
-  const handlePickTier = async (tier: Tier) => {
-    if (!businessId) return;
-    if (tier === 'starter') {
-      setPendingTier('starter');
-      return;
-    }
-    setActing(true);
+  const handlePickTier = async (tier: TierId) => {
+    if (!currentBusiness?.id) return;
     try {
-      // Finalise the wizard before redirecting so when the user returns
-      // from Stripe checkout they land on / without bouncing into the
-      // wizard again.
-      await finalize();
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const { checkout_url } = await createCheckoutSession(
-        businessId,
-        tier,
-        `${origin}/?upgraded=${tier}`,
-        `${origin}/?upgrade_canceled=1`
-      );
-      window.location.href = checkout_url;
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
-    } finally {
-      setActing(false);
-    }
-  };
-
-  const handleConfirmDowngrade = async () => {
-    if (!businessId) return;
-    setActing(true);
-    try {
-      await changeTier(businessId, 'starter');
-      setPendingTier(null);
+      // Use the dedicated billing endpoint so the backend handles tier-change
+      // bookkeeping (Stripe metadata, entitlement recompute, etc.) consistently
+      // with the dashboard's billing tab. Skip the call when the tier hasn't
+      // changed — saves a needless server roundtrip.
+      if (currentBusiness.subscription_tier !== tier) {
+        await changeTier(currentBusiness.id, tier);
+        await refetchBusiness();
+      }
+      // ctx.advance() runs the wizard's handleNext, which on the last step
+      // finalises and routes to /.
       ctx.advance();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
-    } finally {
-      setActing(false);
     }
   };
 
@@ -145,121 +98,113 @@ export function PlanStep() {
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
+      {showFoundingPricing && (
+        <div className="flex justify-center">
+          <FoundingCountdown variant="badge" />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 min-[1024px]:grid-cols-3 gap-3">
-        {TIERS.map((card) => (
-          <TierCardView
-            key={card.id}
-            card={card}
-            label={t(`tiers.${card.id}.label`)}
-            tagline={t(`tiers.${card.id}.tagline`)}
-            features={card.features.map((k) => t(`tiers.${k}`))}
-            cta={t(`tiers.${card.id}.cta`)}
-            recommendedLabel={t('recommendedBadge')}
-            youdLoseLabel={t('youdLose')}
-            moreLabel={(n) => t('andMore', { count: n })}
-            pricePerMonth={t('perMonth')}
-            disabled={acting}
-            onPick={() => handlePickTier(card.id)}
-            isStarter={card.id === 'starter'}
-            starterReverts={card.id === 'starter' ? reverts : undefined}
-          />
-        ))}
+        {TIERS.map((tier) => {
+          const { displayPrice, regularPrice, isFoundingDiscount } = effectivePrice(
+            tier.id,
+            isFoundingPartner
+          );
+          return (
+            <TierCardView
+              key={tier.id}
+              tier={tier}
+              label={t(`tiers.${tier.id}.label`)}
+              tagline={t(`tiers.${tier.id}.tagline`)}
+              features={tier.features.map((k) => t(`tiers.${k}`))}
+              cta={t(`tiers.${tier.id}.cta`)}
+              recommendedLabel={t('recommendedBadge')}
+              displayPrice={displayPrice}
+              regularPrice={regularPrice}
+              isFoundingDiscount={isFoundingDiscount}
+              foundingLabel={tPricing('foundingPartner')}
+              forLifeLabel={tPricing('forLife')}
+              perMonthLabel={tPricing('perMonth')}
+              onPick={() => handlePickTier(tier.id)}
+            />
+          );
+        })}
       </div>
-
-      <Dialog open={pendingTier === 'starter'} onOpenChange={(o) => !o && setPendingTier(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Warning className="w-5 h-5 text-amber-600" weight="bold" />
-              {t('downgradeTitle')}
-            </DialogTitle>
-            <DialogDescription>{t('downgradeBody')}</DialogDescription>
-          </DialogHeader>
-
-          {reverts.length > 0 ? (
-            <ul className="space-y-2 pt-1">
-              {reverts.map((item) => (
-                <li key={item.key} className="flex gap-2 wiz-body-sm">
-                  <span className="text-amber-600 leading-none mt-0.5">•</span>
-                  <div>
-                    <p className="font-semibold text-[var(--foreground)]">{item.label}</p>
-                    <p className="text-[#7A7A7A]">{item.detail}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="wiz-body-sm text-[#7A7A7A]">{t('downgradeNoLosses')}</p>
-          )}
-
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setPendingTier(null)} disabled={acting}>
-              {t('downgradeCancel')}
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDowngrade} disabled={acting}>
-              {acting ? '…' : t('downgradeConfirm')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
 
 interface TierCardViewProps {
-  card: TierCard;
+  tier: TierConfig;
   label: string;
   tagline: string;
   features: string[];
   cta: string;
   recommendedLabel: string;
-  youdLoseLabel: string;
-  moreLabel: (n: number) => string;
-  pricePerMonth: string;
-  disabled: boolean;
-  isStarter: boolean;
-  starterReverts?: RevertItem[];
+  displayPrice: number;
+  regularPrice: number;
+  isFoundingDiscount: boolean;
+  foundingLabel: string;
+  forLifeLabel: string;
+  perMonthLabel: string;
   onPick: () => void;
 }
 
 function TierCardView({
-  card,
+  tier,
   label,
   tagline,
   features,
   cta,
   recommendedLabel,
-  youdLoseLabel,
-  moreLabel,
-  pricePerMonth,
-  disabled,
-  isStarter,
-  starterReverts,
+  displayPrice,
+  regularPrice,
+  isFoundingDiscount,
+  foundingLabel,
+  forLifeLabel,
+  perMonthLabel,
   onPick,
 }: TierCardViewProps) {
   return (
-    <div
+    <Card
+      hover={false}
       className={cn(
-        'relative flex flex-col gap-4 rounded-[16px] border-[1.5px] bg-white p-5 transition-all duration-150',
-        card.recommended
-          ? 'border-[var(--accent)] shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)]'
-          : 'border-[var(--border)]'
+        'relative flex flex-col gap-4 p-5 transition-all duration-150',
+        tier.recommended
+          ? 'border-[1.5px] border-[var(--accent)] shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)]'
+          : 'border-[1.5px]'
       )}
     >
-      {card.recommended && (
+      {tier.recommended && (
         <span className="absolute -top-2.5 left-5 inline-flex items-center gap-1 rounded-full bg-[var(--accent)] px-2.5 py-0.5 wiz-micro font-bold uppercase tracking-wider text-white">
           {recommendedLabel}
         </span>
       )}
 
       <div className="flex flex-col gap-1">
-        <p className="wiz-body font-semibold text-[var(--foreground)]">{label}</p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="wiz-body font-semibold text-[var(--foreground)]">{label}</p>
+          {isFoundingDiscount && (
+            <span className="inline-flex items-center rounded-full bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] font-bold uppercase tracking-wider px-1.5 py-px">
+              {foundingLabel}
+            </span>
+          )}
+        </div>
         <p className="wiz-helper text-[#7A7A7A]">{tagline}</p>
       </div>
 
-      <div className="flex items-baseline gap-1">
-        <span className="wiz-h font-bold tabular-nums text-[var(--foreground)]">€{card.price}</span>
-        <span className="wiz-helper text-[#7A7A7A]">{pricePerMonth}</span>
+      <div className="flex items-baseline gap-1.5 flex-wrap">
+        {isFoundingDiscount && (
+          <span className="wiz-body-sm text-[#9A9A9A] line-through tabular-nums">
+            €{regularPrice}
+          </span>
+        )}
+        <span className="wiz-h font-bold tabular-nums text-[var(--foreground)]">
+          €{displayPrice}
+        </span>
+        <span className="wiz-helper text-[#7A7A7A]">
+          {isFoundingDiscount ? forLifeLabel : perMonthLabel}
+        </span>
       </div>
 
       <ul className="flex flex-col gap-1.5">
@@ -271,26 +216,14 @@ function TierCardView({
         ))}
       </ul>
 
-      {isStarter && starterReverts && starterReverts.length > 0 && (
-        <div className="rounded-[10px] bg-amber-50 border border-amber-200 px-3 py-2.5">
-          <p className="wiz-micro font-semibold text-amber-900 mb-1">{youdLoseLabel}</p>
-          <ul className="wiz-micro text-amber-800 space-y-0.5">
-            {starterReverts.slice(0, 3).map((item) => (
-              <li key={item.key}>• {item.label}</li>
-            ))}
-            {starterReverts.length > 3 && <li>{moreLabel(starterReverts.length - 3)}</li>}
-          </ul>
-        </div>
-      )}
-
       <Button
         onClick={onPick}
-        disabled={disabled}
-        variant={card.recommended ? 'gradient' : 'outline'}
+        variant={tier.recommended ? 'gradient' : 'outline'}
         className="w-full mt-auto min-h-[44px]"
       >
         {cta}
       </Button>
-    </div>
+    </Card>
   );
 }
+

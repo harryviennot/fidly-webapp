@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { WizardStepContextValue } from './types';
 
 const WizardStepContext = createContext<WizardStepContextValue | null>(null);
@@ -84,3 +84,32 @@ export function useDirtySnapshot<T>(
   }, [ctx, draftKey, currentJson]);
   return { isDirty, markSaved };
 }
+
+/**
+ * Marks a sub-step key as seen on first mount, and reports whether it was
+ * seen on a previous visit. Used by the design editor to decide whether
+ * defaults should apply — defaults only run the first time the user sees a
+ * sub-step, otherwise they would clobber whatever the user already saved.
+ *
+ *     const { seen, markSeen } = useStepSeen('design.branding');
+ *     // `seen` reflects the value BEFORE this mount marked it.
+ */
+export function useStepSeen(stepKey: string): { seen: boolean; markSeen: () => void } {
+  const ctx = useWizardStep();
+  // Snapshot the seen flag at first render via lazy-init useState. Reading
+  // the value through useState instead of a ref keeps the linter happy and
+  // ensures the value is frozen for the life of this mount even after the
+  // post-render effect flips the underlying draft entry to true.
+  const [seen] = useState<boolean>(() => ctx.hasStepBeenSeen(stepKey));
+  useEffect(() => {
+    ctx.markStepSeen(stepKey);
+    // Mark-once-on-mount semantics; depending on ctx is fine because the
+    // shell context is stable across navigation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepKey]);
+  return {
+    seen,
+    markSeen: () => ctx.markStepSeen(stepKey),
+  };
+}
+

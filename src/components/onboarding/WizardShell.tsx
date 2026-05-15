@@ -5,14 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useBusiness } from '@/contexts/business-context';
+import { regenerateStripsForDesign } from '@/api/designs';
 import { WizardProgress } from './WizardProgress';
 import { WizardFooter } from './WizardFooter';
 import { WizardStepProvider } from './wizard-context';
 import { useWizardProgress } from './useWizardProgress';
 import {
   TOTAL_CHAPTERS,
-  WIZARD_CHAPTERS,
-  isRequiredFloorMet,
+  getStepCtaKey,
   nextStepPath,
   pathForStep,
   previousStepPath,
@@ -39,6 +40,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   const router = useRouter();
   const t = useTranslations('onboardingBusiness');
   const { progress, markCompleted, markSkipped, finalize } = useWizardProgress();
+  const { currentBusiness } = useBusiness();
 
   const submitHandlerRef = useRef<SubmitHandler | null>(null);
   const handlersRef = useRef<{ next: () => Promise<void>; skip: () => Promise<void> }>({
@@ -94,10 +96,16 @@ export function WizardShell({ slug }: WizardShellProps) {
       }
     }
   }, []);
-  const [canSkip, setCanSkip] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [nextLabel, setNextLabel] = useState<string | null>(null);
   const [secondaryAction, setSecondaryAction] = useState<SecondaryAction | null>(null);
+  // Skip + Skip-all are no longer rendered. Existing step components still
+  // call `setCanSkip(true)` on mount — accept the calls and discard so we
+  // don't have to rip every call site out. The footer no longer reads any
+  // skip-related state.
+  const setCanSkip = useCallback((_value: boolean) => {
+    void _value;
+  }, []);
   // canProceed is slug-keyed so the parent's slug-effect reset can't race
   // with the child's mount-time setCanProceed call. Effect order would
   // otherwise be: child sets `false`, then parent's [slug] effect runs and
@@ -118,6 +126,25 @@ export function WizardShell({ slug }: WizardShellProps) {
 
   const resolved = useMemo(() => resolveSlug(slug), [slug]);
 
+  // Step-seen tracking. Persisted via the draft store under `_seen` so it
+  // survives sub-step navigation, reload, and the React tree being torn down
+  // and rebuilt. Cleared on `finalize()` along with the rest of the draft.
+  const markStepSeen = useCallback(
+    (stepKey: string) => {
+      const current = (getDraft<Record<string, boolean>>('_seen') ?? {}) as Record<string, boolean>;
+      if (current[stepKey]) return;
+      setDraft('_seen', { ...current, [stepKey]: true });
+    },
+    [getDraft, setDraft]
+  );
+  const hasStepBeenSeen = useCallback(
+    (stepKey: string) => {
+      const current = getDraft<Record<string, boolean>>('_seen');
+      return !!current?.[stepKey];
+    },
+    [getDraft]
+  );
+
   // Stable context — child steps can hold this reference without re-running effects on every nav.
   const stepContext = useMemo<WizardStepContextValue>(
     () => ({
@@ -131,22 +158,64 @@ export function WizardShell({ slug }: WizardShellProps) {
       setSecondaryAction,
       getDraft,
       setDraft,
+      markStepSeen,
+      hasStepBeenSeen,
+      currentChapterId: resolved?.chapter.id ?? null,
       advance: () => void handlersRef.current.next(),
       skip: () => void handlersRef.current.skip(),
     }),
-    [setCanProceed, getDraft, setDraft]
+    [setCanProceed, setCanSkip, getDraft, setDraft, markStepSeen, hasStepBeenSeen, resolved]
   );
 
   // Reset per-step overrides when the URL changes — each step starts fresh
   // and re-registers what it needs. canProceed isn't reset here because
   // it's slug-keyed (defaults to `true` for any slug a child hasn't
-  // written for yet).
+  // written for yet). The default Continue label comes from
+  // `getStepCtaKey` — steps that need a different label can still call
+  // `ctx.setNextLabel` to override.
   useEffect(() => {
-    setCanSkip(false);
-    setNextLabel(null);
     setSecondaryAction(null);
     submitHandlerRef.current = null;
-  }, [slug]);
+    if (resolved) {
+      const key = getStepCtaKey(resolved.chapter.id, resolved.subStep.id);
+      try {
+        // Some chapters use a nested object (e.g. first-broadcast.compose
+        // has pre/post variants). For those, callers override via
+        // setNextLabel after mount; here we attempt the simple-string form
+        // and fall back to null (footer's i18n default kicks in).
+        const label = t(key);
+        setNextLabel(label === key ? null : label);
+      } catch {
+        setNextLabel(null);
+      }
+    } else {
+      setNextLabel(null);
+    }
+  }, [slug, resolved, t]);
+
+  // Design-chapter exit: fire one explicit regenerate-strips call when the
+  // user leaves the chapter, so all the per-step saves (which passed
+  // `regenerate_strips=false`) coalesce into a single render. `design.stripDirty`
+  // is set by each design sub-step on a successful save; we clear it after
+  // a successful trigger and best-effort log failures (the next save would
+  // re-trigger anyway).
+  const prevChapterIdRef = useRef<string | null>(resolved?.chapter.id ?? null);
+  useEffect(() => {
+    const prev = prevChapterIdRef.current;
+    const next = resolved?.chapter.id ?? null;
+    if (prev === 'design' && next !== null && next !== 'design') {
+      const stripDirty = !!getDraft<boolean>('design.stripDirty');
+      const designId = (progress?.payload as { design_id?: string } | undefined)?.design_id;
+      const businessId = currentBusiness?.id;
+      if (stripDirty && designId && businessId) {
+        setDraft('design.stripDirty', false);
+        void regenerateStripsForDesign(businessId, designId).catch((err) => {
+          console.error('Strip regeneration on design-chapter exit failed', err);
+        });
+      }
+    }
+    prevChapterIdRef.current = next;
+  }, [resolved?.chapter.id, getDraft, setDraft, progress, currentBusiness?.id]);
 
   const handleNext = useCallback(async () => {
     if (!resolved) return;
@@ -203,6 +272,15 @@ export function WizardShell({ slug }: WizardShellProps) {
     }
   }, [resolved, markCompleted, finalize, router, clearDraft, t]);
 
+  const handleBack = useCallback(() => {
+    if (!resolved) return;
+    const prev = previousStepPath(resolved);
+    if (prev) router.push(prev);
+  }, [resolved, router]);
+
+  // Steps that auto-advance through a control still call `ctx.skip()`. With
+  // the Skip affordance removed, treat skip as a plain forward navigation so
+  // those flows keep working without a footer button.
   const handleSkip = useCallback(async () => {
     if (!resolved) return;
     setIsBusy(true);
@@ -217,36 +295,6 @@ export function WizardShell({ slug }: WizardShellProps) {
         clearDraft();
         router.push('/');
       }
-    } finally {
-      setIsBusy(false);
-    }
-  }, [resolved, markSkipped, finalize, router, clearDraft]);
-
-  const handleBack = useCallback(() => {
-    if (!resolved) return;
-    const prev = previousStepPath(resolved);
-    if (prev) router.push(prev);
-  }, [resolved, router]);
-
-  const handleSkipAll = useCallback(async () => {
-    if (!resolved) return;
-    setIsBusy(true);
-    try {
-      // Walk remaining sub-steps, mark each as skipped so the dashboard
-      // checklist surfaces them with deep-link CTAs. Then finalize.
-      const startChapterIdx = resolved.chapterIndex;
-      const startSubIdx = resolved.subStepIndex;
-      for (let ci = startChapterIdx; ci < WIZARD_CHAPTERS.length; ci++) {
-        const chapter = WIZARD_CHAPTERS[ci];
-        const subStart = ci === startChapterIdx ? startSubIdx : 0;
-        for (let si = subStart; si < chapter.subSteps.length; si++) {
-          const sub = chapter.subSteps[si];
-          await markSkipped({ chapter: chapter.id, step: sub.id });
-        }
-      }
-      await finalize();
-      clearDraft();
-      router.push('/');
     } finally {
       setIsBusy(false);
     }
@@ -286,13 +334,6 @@ export function WizardShell({ slug }: WizardShellProps) {
   const subStepTitle =
     chapter.subSteps.length > 1 ? t(`chapters.${chapter.id}.steps.${subStep.id}.title`) : undefined;
 
-  const requiredFloorMet = isRequiredFloorMet(progress.completed);
-  const isCurrentRequired = subStep.required;
-  // "Skip rest of setup" is offered once the required floor is met AND the current step is not the very last one.
-  const canSkipAll = requiredFloorMet && !resolved.isLast;
-  // Per-step skip is allowed only when the step itself is not required, AND the step has explicitly opted in via setCanSkip(true).
-  const canSkipThisStep = !isCurrentRequired && canSkip;
-
   return (
     <div className="flex min-h-[100dvh] flex-col bg-[var(--background)]">
       <WizardProgress
@@ -324,12 +365,8 @@ export function WizardShell({ slug }: WizardShellProps) {
 
       <WizardFooter
         onBack={handleBack}
-        onSkip={handleSkip}
         onNext={handleNext}
-        onSkipAll={canSkipAll ? handleSkipAll : undefined}
-        canSkip={canSkipThisStep}
         secondaryAction={secondaryAction}
-        canSkipAll={canSkipAll}
         canProceed={canProceed}
         isBusy={isBusy}
         isFirst={chapterIndex === 0 && subStepIndex === 0}

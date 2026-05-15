@@ -9,6 +9,8 @@ import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
 import { useDefaultProgram } from '@/hooks/use-programs';
 import { createDesign, updateDesign, uploadLogo } from '@/api';
+import { applyTheme, getThemeColor } from '@/utils/theme';
+import { rgbToHex } from '@/lib/color-utils';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
 import { BrandingForm } from '@/components/design/forms/BrandingForm';
 import { useWizardStep } from '../../wizard-context';
@@ -37,7 +39,6 @@ import type { CardDesign, CardDesignCreate } from '@/types';
 export function BrandingStep() {
   const t = useTranslations('onboardingBusiness.chapters.design.steps.branding');
   const tErr = useTranslations('onboardingBusiness.errors');
-  const tEditor = useTranslations('designEditor.editor');
   const { currentBusiness } = useBusiness();
   const businessId = currentBusiness?.id;
   const queryClient = useQueryClient();
@@ -49,7 +50,7 @@ export function BrandingStep() {
   const ctx = useWizardStep();
 
   const { formData, pendingLogoFile, setPendingLogoFile, designContext } =
-    useDesignStepState(existingDesign);
+    useDesignStepState(existingDesign, 'branding');
 
   // Reuse the business logo as the design logo on first entry. The seeded
   // `formData.logo_url` already references the business URL (from
@@ -97,6 +98,15 @@ export function BrandingStep() {
     setPendingLogoFile,
   ]);
 
+  // Description is a hard requirement on Branding — the wallet pass needs
+  // *something* below the logo, and saving an empty description is exactly
+  // what produced the historical "loyalty program" mystery default. Gate
+  // Continue until the user has typed something.
+  useEffect(() => {
+    const hasDescription = !!(formData.description ?? '').trim();
+    ctx.setCanProceed(hasDescription);
+  }, [formData.description, ctx]);
+
   useEffect(() => {
     ctx.setCanSkip(false);
     ctx.setSubmitHandler(async () => {
@@ -106,14 +116,18 @@ export function BrandingStep() {
         void translations;
         const cleaned: CardDesignCreate = pruneEmptyLabelFields({
           ...rest,
+          // Internal admin label — back-fills from the business name when
+          // empty so the dashboard's design list stays readable.
           name: rest.name?.trim() || currentBusiness?.name || '',
-          // Optional title — allow empty. The card preview reflects this
-          // directly, so a blank value renders a header with just the logo.
+          // Card title and card description are saved exactly as typed.
+          // No business-name fallback, no program-name fallback, no
+          // translated "Loyalty Card" fallback. Defaults have repeatedly
+          // backfired (saved value gets reread on revisit and shows up as
+          // a clobbered "default" the user never picked) — empty is the
+          // safer baseline. The wallet pass simply renders with just the
+          // logo header when the title is blank.
           organization_name: rest.organization_name?.trim() ?? '',
-          description:
-            rest.description?.trim() ||
-            program?.name ||
-            tEditor('defaultLoyaltyCardName'),
+          description: rest.description?.trim() ?? '',
         });
         if (cleaned.logo_url?.startsWith('blob:')) delete cleaned.logo_url;
         // Drop the business logo URL — we'll upload a fresh file under the
@@ -130,7 +144,12 @@ export function BrandingStep() {
         let designId: string;
         if (existingDesign?.id) {
           designId = existingDesign.id;
-          const updated = await updateDesign(businessId, designId, cleaned);
+          // Skip the per-save strip regen during onboarding — the chapter-
+          // exit hook fires one explicit regenerate-strips call so all the
+          // user's color/icon edits coalesce into a single render.
+          const updated = await updateDesign(businessId, designId, cleaned, {
+            regenerateStrips: false,
+          });
           // Sync the cache immediately so the next wizard step (which mounts
           // a fresh `useDesignStepState`) initialises from the just-saved
           // design, not the stale pre-update copy. Without this the user
@@ -151,7 +170,12 @@ export function BrandingStep() {
 
         if (pendingLogoFile) {
           const result = await uploadLogo(businessId, designId, pendingLogoFile);
-          const withLogo = await updateDesign(businessId, designId, { ...cleaned, logo_url: result.url });
+          const withLogo = await updateDesign(
+            businessId,
+            designId,
+            { ...cleaned, logo_url: result.url },
+            { regenerateStrips: false }
+          );
           // Second sync — logo upload changes logo_url, the rest of the
           // design state hasn't moved but we still want the cache to
           // hold the freshest server-confirmed row.
@@ -163,15 +187,31 @@ export function BrandingStep() {
         }
 
         if (currentBusiness) {
+          // Persist the picked colors to business.settings so the dashboard
+          // and the rest of the wizard pick them up. `getThemeColor` falls
+          // back to the background when the stamp-filled color has poor
+          // contrast on white, so the resulting accent stays readable.
+          const stampFilledHex = rgbToHex(cleaned.stamp_filled_color || 'rgb(249, 115, 22)');
+          const bgHex = rgbToHex(cleaned.background_color || 'rgb(28, 28, 30)');
+          const themeAccent = getThemeColor(stampFilledHex, bgHex);
           await updateBusiness({
             settings: {
               ...(currentBusiness.settings ?? {}),
               design_reviewed: true,
+              accentColor: themeAccent,
+              backgroundColor: bgHex,
             },
           });
+          // Update the wizard chrome live — the orange seed from the
+          // layout's mount-effect is replaced with the business's chosen
+          // palette as soon as the user saves Branding.
+          applyTheme(themeAccent, bgHex);
         }
         await updatePayload({ design_id: designId });
         queryClient.invalidateQueries({ queryKey: designKeys.all(businessId) });
+        // Mark the design chapter dirty so the shell fires a single
+        // regenerate-strips call when the user exits the chapter.
+        ctx.setDraft('design.stripDirty', true);
 
         return { ok: true };
       } catch (err) {
@@ -186,15 +226,22 @@ export function BrandingStep() {
     pendingLogoFile,
     existingDesign?.id,
     currentBusiness,
-    program?.name,
     updateBusiness,
     updatePayload,
     queryClient,
     setPendingLogoFile,
     ctx,
     tErr,
-    tEditor,
   ]);
+
+  // Gate render on program data so defaults compute against the loaded
+  // program. Without this guard the lazy `useState` in `useDesignStepState`
+  // would seed an empty description and the user would see "Loyalty Card"
+  // for a frame before the program-name sync ran. Blocking the first paint
+  // is cheaper than fixing it after the fact with band-aid effects.
+  if (program === undefined) {
+    return null;
+  }
 
   return (
     <DesignFormProvider value={designContext}>

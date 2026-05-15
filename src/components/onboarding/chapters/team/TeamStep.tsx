@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { DeviceMobile, Plus, ShieldCheckered } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { useBusiness } from '@/contexts/business-context';
 import { InviteDialog } from '@/components/team/invite-dialog';
 import { useWizardStep } from '../../wizard-context';
@@ -50,7 +51,7 @@ export function TeamStep() {
         </div>
       </section>
 
-      <div className="rounded-[12px] border border-[var(--border)] bg-white p-4 min-h-[64px] flex items-center justify-between gap-3">
+      <Card hover={false} className="p-4 min-h-[64px] flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="wiz-body font-semibold text-[var(--foreground)]">{t('inviteLabel')}</p>
           <p className="wiz-helper text-[#7A7A7A]">{t('inviteHint')}</p>
@@ -59,7 +60,7 @@ export function TeamStep() {
           <Plus className="w-4 h-4" weight="bold" />
           {t('inviteCta')}
         </Button>
-      </div>
+      </Card>
 
       {currentBusiness && (
         <InviteDialog
@@ -83,7 +84,7 @@ function RoleCard({
   description: string;
 }) {
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white p-4 flex flex-col gap-2">
+    <Card hover={false} className="p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
           {icon}
@@ -91,6 +92,6 @@ function RoleCard({
         <p className="wiz-body font-semibold text-[var(--foreground)]">{label}</p>
       </div>
       <p className="wiz-helper text-[#666] leading-relaxed">{description}</p>
-    </div>
+    </Card>
   );
 }

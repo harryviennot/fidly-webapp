@@ -201,6 +201,18 @@ export function previousStepPath(current: ResolvedStep): string | null {
 }
 
 /**
+ * Translate a chapter + sub-step pair into the i18n key for the wizard
+ * footer's primary CTA. Centralised so every per-step label change is a
+ * single edit in `onboarding-business.json` rather than a hunt across step
+ * components. Steps that need to swap labels dynamically (e.g. broadcast's
+ * "Send / Sent / Continue") still call `setNextLabel` themselves; this
+ * provides the default the shell falls back to on slug change.
+ */
+export function getStepCtaKey(chapterId: string, subStepId: string): string {
+  return `footer.cta.${chapterId}.${subStepId}`;
+}
+
+/**
  * Check whether all required sub-steps across all chapters are in the
  * `completed` list. Used to gate the "Skip rest of setup" affordance.
  */

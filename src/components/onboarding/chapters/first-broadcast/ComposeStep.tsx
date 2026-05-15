@@ -10,6 +10,8 @@ import { useDefaultProgram } from '@/hooks/use-programs';
 import { createBroadcast, estimateRecipients, getBroadcast } from '@/api/notifications';
 import type { Broadcast } from '@/types/notification';
 import { MessagePreview } from '@/components/notifications/MessagePreview';
+import { Card } from '@/components/ui/card';
+import { InfoBox } from '@/components/reusables/info-box';
 import { useWizardStep, useWizardDraft } from '../../wizard-context';
 
 const POLL_INTERVAL_MS = 2000;
@@ -155,15 +157,20 @@ export function ComposeStep() {
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <div className="rounded-[12px] border border-[var(--border)] bg-white p-5 flex flex-col gap-4">
-        <div className="flex items-start gap-3">
-          <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
-            <MegaphoneIcon className="w-5 h-5 text-[var(--accent)]" weight="bold" />
-          </span>
-          <div className="flex-1 min-w-0">
-            <p className="wiz-helper text-[#7A7A7A] leading-relaxed">{t('composeBody')}</p>
+      <Card hover={false} className="p-5 flex flex-col gap-4">
+        {/* Compose-body intro disappears once the broadcast lands — the user
+            has already lived the experience the copy described, so leaving
+            it visible is redundant. */}
+        {!sent && (
+          <div className="flex items-start gap-3">
+            <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
+              <MegaphoneIcon className="w-5 h-5 text-[var(--accent)]" weight="bold" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="wiz-helper text-[#7A7A7A] leading-relaxed">{t('composeBody')}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
@@ -213,12 +220,17 @@ export function ComposeStep() {
           size="lg"
         />
 
-        <div className="flex items-start gap-2 rounded-[10px] border border-[var(--accent-200)] bg-[var(--accent-light)]/40 px-3 py-2.5 wiz-helper">
-          <InfoIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 mt-0.5" weight="fill" />
-          <span className="text-[var(--foreground)] leading-snug">
-            {reachable === null ? t('estimating') : t('recipientsLine', { count: reachable })}
-          </span>
-        </div>
+        {/* Recipients line — only meaningful before send. After send the
+            DeliveryStatus block carries the same information in its own
+            success/failure phrasing. */}
+        {!sent && (
+          <div className="flex items-start gap-2 rounded-[10px] border border-[var(--accent-200)] bg-[var(--accent-light)]/40 px-3 py-2.5 wiz-helper">
+            <InfoIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 mt-0.5" weight="fill" />
+            <span className="text-[var(--foreground)] leading-snug">
+              {reachable === null ? t('estimating') : t('recipientsLine', { count: reachable })}
+            </span>
+          </div>
+        )}
 
         <button
           type="button"
@@ -231,7 +243,7 @@ export function ComposeStep() {
         </button>
 
         {sent && delivery && <DeliveryStatus delivery={delivery} t={t} />}
-      </div>
+      </Card>
     </div>
   );
 }
@@ -251,36 +263,31 @@ function DeliveryStatus({ delivery, t }: DeliveryStatusProps) {
 
   if (inFlight) {
     return (
-      <div className="rounded-[10px] border border-[var(--accent-200)] bg-[var(--accent-light)]/40 px-3 py-2.5 flex items-center gap-2">
-        <Spinner className="w-4 h-4 text-[var(--accent)] animate-spin flex-shrink-0" weight="bold" />
-        <p className="wiz-helper text-[var(--foreground)]">{t('sendingProgress')}</p>
-      </div>
+      <InfoBox
+        variant="info"
+        icon={
+          <Spinner className="w-4 h-4 text-[var(--info)] animate-spin" weight="bold" />
+        }
+        message={t('sendingProgress')}
+      />
     );
   }
 
   if (failed) {
-    return (
-      <div className="rounded-[10px] border border-red-200 bg-red-50 px-3 py-2.5">
-        <p className="wiz-helper text-red-800">{t('sendFailed')}</p>
-      </div>
-    );
+    return <InfoBox variant="error" message={t('sendFailed')} />;
   }
 
   return (
-    <div className="rounded-[10px] border border-green-200 bg-green-50 px-3 py-3 flex flex-col gap-1.5">
-      <p className="wiz-body-sm font-semibold text-green-900 flex items-center gap-1.5">
-        <CheckCircle className="w-4 h-4" weight="fill" />
-        {t('deliveredTitle', { count: delivered })}
-      </p>
-      <p className="wiz-micro text-green-800 leading-relaxed">
-        {t('deliveredHint', {
-          count: delivered,
-          delivered,
-          skipped: delivery.skipped_no_push,
-          total: delivery.total_recipients,
-        })}
-      </p>
-    </div>
+    <InfoBox
+      variant="success"
+      title={t('deliveredTitle', { count: delivered })}
+      message={t('deliveredHint', {
+        count: delivered,
+        delivered,
+        skipped: delivery.skipped_no_push,
+        total: delivery.total_recipients,
+      })}
+    />
   );
 }
 

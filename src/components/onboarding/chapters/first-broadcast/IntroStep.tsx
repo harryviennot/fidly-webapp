@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { MegaphoneIcon } from '@phosphor-icons/react';
+import { Card } from '@/components/ui/card';
 import { useWizardStep } from '../../wizard-context';
 
 /**
@@ -58,12 +59,12 @@ export function IntroStep() {
         <p className="wiz-body leading-relaxed text-[#444]">{t('differentFromBody')}</p>
       </section>
 
-      <section className="flex flex-col gap-2 rounded-[12px] bg-[var(--paper)] border border-[var(--border-light)] p-4">
+      <Card hover={false} className="flex flex-col gap-2 bg-[var(--paper)] p-4 shadow-none">
         <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('audienceOfOneTitle')}
         </h3>
         <p className="wiz-body leading-relaxed text-[#444]">{t('audienceOfOneBody')}</p>
-      </section>
+      </Card>
     </div>
   );
 }

@@ -121,17 +121,17 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
 
       {/* Link view */}
       {!showQR ? (
-        <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-[var(--border-medium)] bg-[var(--paper)]">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-[var(--border-medium)] bg-[var(--paper)]">
             <GlobeIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />
-            <span className="text-[13px] font-medium text-[#1A1A1A] flex-1 truncate">
+            <span className="text-[13px] font-medium text-[#1A1A1A] flex-1 min-w-0 truncate">
               {fullUrl}
             </span>
           </div>
           <button
             onClick={handleCopy}
             className={cn(
-              'px-4 py-2.5 rounded-lg border text-[12px] font-semibold cursor-pointer flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap',
+              'flex-shrink-0 px-4 py-2.5 rounded-lg border text-[12px] font-semibold cursor-pointer flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap',
               copied
                 ? 'bg-[var(--accent-light)] border-[var(--accent-light)] text-[var(--accent)]'
                 : 'bg-white border-[var(--border-medium)] text-[#555] hover:bg-[var(--paper)]'

@@ -13,7 +13,7 @@ import {
   useUploadBusinessIcon,
   useDeleteBusinessIcon,
 } from '@/hooks/use-notifications';
-import { getImageAspect } from '@/lib/image-crop';
+import { cropToAspect, getImageAspect } from '@/lib/image-crop';
 import { useWizardStep } from '../../wizard-context';
 
 const ACCEPTED_TYPES = 'image/png,image/jpeg,image/jpg,image/webp';
@@ -50,7 +50,10 @@ export function IconStep() {
   const businessName = currentBusiness?.name ?? '';
 
   const [needsCropping, setNeedsCropping] = useState(false);
-  const [logoBlobUrl, setLogoBlobUrl] = useState<string | null>(null);
+  // Kept around as a fallback source for the cropper if a future code path
+  // needs to re-open the auto-cropped logo. Today the auto-crop completes
+  // synchronously inside the effect and we never stash the raw blob.
+  const [logoBlobUrl] = useState<string | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Latest picked-but-not-yet-uploaded file URL, retained so the cropper
@@ -66,8 +69,17 @@ export function IconStep() {
     ctx.setCanProceed(!!iconUrl && !needsCropping);
   }, [ctx, iconUrl, needsCropping]);
 
-  // One-shot logo aspect-check effect. 1:1 → auto-upload. Otherwise stash the
-  // blob URL for the cropper and surface the warning banner.
+  // First-visit prefill: center-crop the business logo to 1:1 and upload it
+  // as the notification icon. No manual cropping step — the user can always
+  // hit "Recadrer" if they want to fine-tune. Off-square logos get the
+  // largest centred square; already-square logos pass through.
+  //
+  // We gate by `icon_url` (already set → user/server has an icon, don't
+  // touch it) and by `aspectCheckedRef` (once per business per mount, so
+  // remounts and React StrictMode double-effects don't re-upload). We
+  // deliberately do NOT gate by step-seen — `_seen` is for "stop seeding
+  // form defaults," and stale draft entries from prior onboarding sessions
+  // would otherwise wedge this auto-upload off entirely.
   const aspectCheckedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!currentBusiness) return;
@@ -77,7 +89,6 @@ export function IconStep() {
     aspectCheckedRef.current = currentBusiness.id;
 
     let cancelled = false;
-    let blobUrl: string | null = null;
     (async () => {
       try {
         const res = await fetch(currentBusiness.logo_url!, { cache: 'no-cache' });
@@ -87,14 +98,23 @@ export function IconStep() {
         const aspect = await getImageAspect(blob);
         if (cancelled) return;
         if (Math.abs(aspect - 1) < 0.02) {
+          // Already square — upload as-is.
           const file = new File([blob], 'icon-from-logo.png', {
             type: blob.type || 'image/png',
           });
           await uploadAndRefresh(file, { silent: true });
         } else {
-          blobUrl = URL.createObjectURL(blob);
-          setLogoBlobUrl(blobUrl);
-          setNeedsCropping(true);
+          // Center-crop to 1:1 and upload silently. No warning, no manual
+          // step — the largest centred square is a sensible default and
+          // the user can always recrop from the action row.
+          const cropped = await cropToAspect(blob, {
+            aspect: 1,
+            outputWidth: 512,
+            filename: 'icon-from-logo.png',
+            mimeType: blob.type || 'image/png',
+          });
+          if (cancelled) return;
+          await uploadAndRefresh(cropped, { silent: true });
         }
       } catch {
         // CORS / network — owner can import manually.
@@ -102,7 +122,6 @@ export function IconStep() {
     })();
     return () => {
       cancelled = true;
-      if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentBusiness?.id, currentBusiness?.icon_url, currentBusiness?.logo_url]);

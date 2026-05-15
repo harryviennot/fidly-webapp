@@ -6,11 +6,110 @@ import { useBusiness } from '@/contexts/business-context';
 import { rgbToHex, hexToRgb, contrastRatio } from '@/lib/color-utils';
 import { useLogoPalette } from '@/hooks/use-logo-palette';
 import { useDefaultProgram } from '@/hooks/use-programs';
-import { useWizardStep } from '../../wizard-context';
+import { useStepSeen, useWizardStep } from '../../wizard-context';
 import type { AutoGenerateState, DesignFormContextValue } from '@/components/design/forms/DesignFormContext';
 import type { CardDesign, CardDesignCreate } from '@/types';
-import type { BusinessInfoEntry } from '@/types/business';
+import type { BusinessInfoEntry, Business } from '@/types/business';
+import type { LoyaltyProgram } from '@/types/program';
 import type { ThemeVariant } from '@/lib/theme-variants';
+
+export type DesignSubStepKey = 'branding' | 'stamps' | 'content' | 'back';
+
+interface ComputeInitialFormDataArgs {
+  existingDesign: CardDesign | undefined;
+  currentBusiness: Business | null | undefined;
+  program: LoyaltyProgram | null | undefined;
+  /** Whether the user has previously visited this sub-step (and thus seen
+   *  the defaults render at least once). Defaults are skipped when `true` —
+   *  any missing values are kept as-is rather than reseeded. */
+  seen: boolean;
+  /** Translation function for the editor namespace (`designEditor.editor`). */
+  t: (key: string) => string;
+}
+
+/**
+ * Pure initial-state builder for a design wizard sub-step. Extracted so the
+ * default behaviour is testable without React. Lives outside the hook so the
+ * lazy `useState` initialiser can call it once on first render.
+ *
+ * Default rules:
+ *   - When an `existingDesign` row already exists, the saved values win for
+ *     every field. The user has been here before; their data is the source
+ *     of truth.
+ *   - When the design row exists but a specific field is empty AND `seen`
+ *     is false, fall back to the contextual default (program name for
+ *     description, business logo for logo, reward field with program reward
+ *     for secondary_fields).
+ *   - When no design exists yet, seed from `DEFAULT_DESIGN` with the same
+ *     contextual defaults for the empty fields.
+ *   - Once `seen` is true, every empty field stays empty. The user removed
+ *     the value on purpose; do not resurrect the default.
+ */
+export function computeInitialFormData({
+  existingDesign,
+  currentBusiness,
+  program,
+  seen,
+  t,
+}: ComputeInitialFormDataArgs): CardDesignCreate {
+  const defaultRewardField = () => ({
+    key: 'reward',
+    label: t('defaultRewardLabel'),
+    value: program?.reward_name ?? '',
+  });
+
+  if (existingDesign) {
+    const seeded = { ...existingDesign } as CardDesignCreate;
+    // Internal admin label — never overwrites a saved value. Falls back to
+    // the business name when blank so the dashboard's design list stays
+    // readable. This is independent of the `organization_name` (title)
+    // shown on the wallet pass, which intentionally stays empty.
+    if (!seeded.name) {
+      seeded.name = currentBusiness?.name ?? '';
+    }
+    // Fall back to the business logo when the design has no logo yet —
+    // BrandingStep materialises this URL into a fresh File on upload so
+    // the two records hold independent assets.
+    if (!seeded.logo_url && currentBusiness?.logo_url) {
+      seeded.logo_url = currentBusiness.logo_url;
+    }
+    // First-time defaults — only on initial visit. The user's deliberate
+    // empties stick around once `seen` is true.
+    //
+    // We seed `description` with the program name and the reward
+    // secondary field with the program reward. `organization_name` (the
+    // wallet title) stays empty — there's no good universal default for it.
+    //
+    // Note: this is a UI-level prefill, not a save-time fallback.
+    // BrandingStep saves exactly what's in the input, so the historical
+    // loop where "default" got saved and then re-read as a stuck value
+    // can't repeat — if the user edits or clears the field, that's what
+    // gets persisted.
+    if (!seen) {
+      if (!seeded.description && program?.name) {
+        seeded.description = program.name;
+      }
+      if (!seeded.secondary_fields || seeded.secondary_fields.length === 0) {
+        seeded.secondary_fields = [defaultRewardField()];
+      }
+    }
+    return seeded;
+  }
+
+  // No design exists yet — seed from DEFAULT_DESIGN with first-visit
+  // contextual prefills. See note above for the seeding rationale.
+  const base: CardDesignCreate = {
+    ...DEFAULT_DESIGN,
+    name: currentBusiness?.name ?? '',
+    organization_name: '',
+    logo_url: currentBusiness?.logo_url ?? undefined,
+  };
+  if (!seen) {
+    if (program?.name) base.description = program.name;
+    base.secondary_fields = [defaultRewardField()];
+  }
+  return base;
+}
 
 const DEFAULT_DESIGN: CardDesignCreate = {
   name: '',
@@ -57,65 +156,34 @@ export interface DesignStepState {
  *  forward/back navigation and a page reload. */
 const CUSTOM_COLORS_DRAFT_KEY = 'design.customColors';
 
-export function useDesignStepState(existingDesign: CardDesign | undefined): DesignStepState {
+export function useDesignStepState(
+  existingDesign: CardDesign | undefined,
+  stepKey: DesignSubStepKey
+): DesignStepState {
   const { currentBusiness } = useBusiness();
   const t = useTranslations('designEditor.editor');
   const wizardCtx = useWizardStep();
   // Read the cached program to prefill the first secondary field with the
-  // reward name. By the time the user is on the design chapter they've
-  // already gone through the Program step, so `useDefaultProgram` resolves
-  // synchronously from the React Query cache.
+  // reward name. The design chapter is gated behind the program step at the
+  // step-component level (early-return until program loads), so by the time
+  // this hook runs the program data is in cache.
   const { data: program } = useDefaultProgram(currentBusiness?.id);
 
-  const defaultRewardField = () => ({
-    key: 'reward',
-    label: t('defaultRewardLabel'),
-    value: program?.reward_name ?? '',
-  });
+  // Step-seen tracks whether the user has visited this sub-step before. We
+  // snapshot the pre-mount value so defaults apply on the very first render
+  // (where `seen` is false) and the post-render `markSeen` doesn't flip the
+  // value mid-tree.
+  const { seen } = useStepSeen(`design.${stepKey}`);
 
-  const [formData, setFormData] = useState<CardDesignCreate>(() => {
-    if (existingDesign) {
-      const seeded = { ...existingDesign };
-      // Seed the reward field on existing designs that were created with
-      // empty secondary_fields (e.g. BrandingStep saved before Content was
-      // touched). Without this the Content sub-step opens to an empty form
-      // when the user already had a reward name set up in Program.
-      if (!seeded.secondary_fields || seeded.secondary_fields.length === 0) {
-        seeded.secondary_fields = [defaultRewardField()];
-      }
-      // Fall back to the business logo when the design itself has no logo
-      // yet — covers the case where Branding was saved before the logo
-      // got uploaded, or where the design was created out-of-band. The
-      // logo upload at submit-time will replace this with a fresh per-
-      // design copy.
-      if (!seeded.logo_url && currentBusiness?.logo_url) {
-        seeded.logo_url = currentBusiness.logo_url;
-      }
-      // Internal design name defaults to the business name, never to a
-      // " card"-suffixed variant.
-      if (!seeded.name) {
-        seeded.name = currentBusiness?.name ?? '';
-      }
-      // Card description defaults to the loyalty program name, with the
-      // translated "Loyalty Card" string as the fallback when no program
-      // has been named yet.
-      if (!seeded.description) {
-        seeded.description = program?.name ?? t('defaultLoyaltyCardName');
-      }
-      return seeded;
-    }
-    return {
-      ...DEFAULT_DESIGN,
-      name: currentBusiness?.name ?? '',
-      // `organization_name` is the optional title shown at the top of the
-      // pass. Default to empty so the user types whatever they want — the
-      // preview reflects the input live and stays empty until they do.
-      organization_name: '',
-      description: program?.name ?? t('defaultLoyaltyCardName'),
-      logo_url: currentBusiness?.logo_url ?? undefined,
-      secondary_fields: [defaultRewardField()],
-    };
-  });
+  const [formData, setFormData] = useState<CardDesignCreate>(() =>
+    computeInitialFormData({
+      existingDesign,
+      currentBusiness,
+      program,
+      seen,
+      t,
+    })
+  );
   // Hydrate from the wizard draft store so the history persists across
   // step navigation (and a reload, since the draft store is localStorage-
   // backed). The sub-step component that owns this hook unmounts when the
@@ -129,64 +197,35 @@ export function useDesignStepState(existingDesign: CardDesign | undefined): Desi
   const [pendingStripFile, setPendingStripFile] = useState<File | null>(null);
   const [autoGenerateState, setAutoGenerateState] = useState<AutoGenerateState | null>(null);
 
-  // Re-seed if the design row changes underneath us (e.g. user nav'd into the
-  // wizard from a separate tab that updated the design).
+  // Re-seed only when the design *row* changes (e.g. user nav'd into the
+  // wizard from a separate tab that saved a different design). Crucially,
+  // we capture the design id at mount and skip the effect on first render
+  // — otherwise the lazy `useState` initial value gets clobbered by the
+  // re-seed firing on the same id.
+  const initialDesignIdRef = useRef<string | undefined>(existingDesign?.id);
   useEffect(() => {
-    if (existingDesign) setFormData({ ...existingDesign });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingDesign?.id]);
-
-  // The state initialiser at mount may run before React Query has hydrated
-  // the program cache — in that race the reward field gets seeded with an
-  // empty value. Fill it in once the program data lands, but only when the
-  // field is still untouched (empty value), so we never clobber a user edit.
-  const rewardSyncedRef = useRef(false);
-  useEffect(() => {
-    if (rewardSyncedRef.current) return;
-    const rewardName = program?.reward_name;
-    if (!rewardName) return;
-    setFormData((prev) => {
-      const fields = prev.secondary_fields ?? [];
-      const idx = fields.findIndex((f) => f.key === 'reward');
-      if (idx === -1) {
-        rewardSyncedRef.current = true;
-        return prev;
-      }
-      if (fields[idx].value && fields[idx].value.trim().length > 0) {
-        rewardSyncedRef.current = true;
-        return prev;
-      }
-      const next = [...fields];
-      next[idx] = { ...next[idx], value: rewardName };
-      rewardSyncedRef.current = true;
-      return { ...prev, secondary_fields: next };
-    });
-  }, [program?.reward_name]);
-
-  // Same race fix for description ← program.name. When the program cache
-  // misses on first render, description gets seeded with the translated
-  // "Loyalty Card" fallback. Promote it to the program name once that data
-  // lands, but only if the current value is still the fallback string —
-  // never overwrite a user edit or a non-default existing description.
-  const descriptionSyncedRef = useRef(false);
-  useEffect(() => {
-    if (descriptionSyncedRef.current) return;
-    const programName = program?.name;
-    if (!programName) return;
-    const fallback = t('defaultLoyaltyCardName');
-    setFormData((prev) => {
-      const current = (prev.description ?? '').trim();
-      // Treat both empty and the translated fallback as "still default" —
-      // anything else is a user edit (or an existing non-default value) and
-      // must be preserved.
-      if (current.length > 0 && current !== fallback) {
-        descriptionSyncedRef.current = true;
-        return prev;
-      }
-      descriptionSyncedRef.current = true;
-      return { ...prev, description: programName };
-    });
-  }, [program?.name, t]);
+    const currentId = existingDesign?.id;
+    if (currentId === initialDesignIdRef.current) return;
+    initialDesignIdRef.current = currentId;
+    if (existingDesign) {
+      // Cross-tab update — the external design row has been replaced under
+      // us, so we recompute defaults from the freshly-fetched data. `seen`
+      // is true here (we have a prior visit's worth of state), so the pure
+      // builder respects user-emptied fields. This is a legitimate
+      // setState-in-effect: the React state is being kept in sync with the
+      // external row, not derived from another piece of React state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData(
+        computeInitialFormData({
+          existingDesign,
+          currentBusiness,
+          program,
+          seen: true,
+          t,
+        })
+      );
+    }
+  }, [existingDesign, currentBusiness, program, t]);
 
   // Mirror customColors into the wizard draft store on every change so the
   // history is preserved across step navigation. `setDraft` is not a React
