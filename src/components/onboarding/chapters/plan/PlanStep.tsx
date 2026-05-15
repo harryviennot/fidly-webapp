@@ -95,7 +95,9 @@ export function PlanStep() {
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">
+          {showFoundingPricing ? t('subtitleFounding') : t('subtitle')}
+        </p>
       </header>
 
       {showFoundingPricing && (

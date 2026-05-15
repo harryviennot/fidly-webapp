@@ -263,6 +263,14 @@ export function IdentityStep() {
             settings: {},
             website: websiteUrl || undefined,
             primary_locale: detectBusinessLocale(uiLocale),
+            // Opt every new signup into founding-partner pricing. The
+            // backend gates the flag on `is_founding_program_open()` so
+            // requests after the cutoff are silently coerced to false —
+            // sending `true` here is the same as "FP if the program is
+            // still open." Without this, new businesses created via the
+            // wizard never get the flag set even during the open window,
+            // and the plan step shows standard pricing for everyone.
+            is_founding_partner: true,
           });
           // Stash the typed website in settings.identity_website so the
           // Card-back chapter can pre-fill it. We don't write business_info

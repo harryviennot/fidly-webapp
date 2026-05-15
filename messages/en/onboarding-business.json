@@ -346,7 +346,8 @@
       },
       "plan": {
         "title": "Choose your plan",
-        "subtitle": "You're on a 30-day Pro trial. Pick a plan now, or keep exploring on the trial.",
+        "subtitle": "Pick a plan now, or keep exploring on your 30-day Pro trial. You can change anytime.",
+        "subtitleFounding": "Founding partners get 50% off — locked for life. Pick a plan now to claim the discount, or keep exploring on your 30-day Pro trial.",
         "keepTrialCta": "Decide later",
         "recommendedBadge": "Recommended",
         "perMonth": "/mo",

@@ -52,6 +52,13 @@ export interface BusinessCreatePayload {
   logo_url?: string | null;
   website?: string;
   primary_locale?: 'fr' | 'en';
+  /**
+   * Opt into founding-partner pricing at signup. Backend revalidates against
+   * `is_founding_program_open()` and the user's reseller flag — passing
+   * `true` after the cutoff is silently coerced to `false`, so it's always
+   * safe to send `true`.
+   */
+  is_founding_partner?: boolean;
 }
 
 export async function createBusiness(payload: BusinessCreatePayload): Promise<Business> {

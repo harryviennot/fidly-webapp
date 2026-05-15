@@ -346,7 +346,8 @@
       },
       "plan": {
         "title": "Choisissez votre offre",
-        "subtitle": "Vous êtes en essai Pro de 30 jours. Choisissez maintenant, ou continuez sur l'essai.",
+        "subtitle": "Choisissez votre offre maintenant, ou continuez à explorer pendant votre essai Pro de 30 jours. Vous pouvez changer à tout moment.",
+        "subtitleFounding": "Les partenaires fondateurs bénéficient de -50% — à vie. Choisissez une offre maintenant pour profiter de la remise, ou continuez à explorer pendant votre essai Pro de 30 jours.",
         "keepTrialCta": "Plus tard",
         "recommendedBadge": "Recommandé",
         "perMonth": "/mois",
