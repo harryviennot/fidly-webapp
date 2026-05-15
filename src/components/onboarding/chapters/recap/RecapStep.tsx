@@ -89,7 +89,11 @@ export function RecapStep() {
           <div className="w-full max-w-[260px]">
             <EditorCard
               design={design}
-              previewStamps={Math.min(stampsSent, totalStamps)}
+              // Show the card fully stamped — the recap is about
+              // celebrating what they built, not auditing how many test
+              // stamps they fired. A half-stamped card on the trophy step
+              // reads as "incomplete."
+              previewStamps={totalStamps}
               totalStamps={totalStamps}
               organizationName={currentBusiness?.name}
             />
@@ -109,14 +113,16 @@ export function RecapStep() {
             label={t('stampsLabel', { count: stampsSent })}
           />
         )}
-        <StatRow
-          icon={<BroadcastIcon className="w-4 h-4 text-[var(--accent)]" weight="bold" />}
-          label={
-            broadcastSent
-              ? t('broadcastLabel.sent')
-              : t('broadcastLabel.notSent')
-          }
-        />
+        {/* Hide the broadcast row entirely when nothing was sent — the
+            "No broadcast sent yet" copy reads as a missed task on the
+            celebration step. Showing the row only on success keeps the
+            recap focused on wins. */}
+        {broadcastSent && (
+          <StatRow
+            icon={<BroadcastIcon className="w-4 h-4 text-[var(--accent)]" weight="bold" />}
+            label={t('broadcastLabel.sent')}
+          />
+        )}
         <StatRow
           icon={<Users className="w-4 h-4 text-[var(--accent)]" weight="bold" />}
           label={t('teamLabel', { count: pendingInvitesCount })}

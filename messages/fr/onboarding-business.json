@@ -264,6 +264,15 @@
             "cooldownCta": "Attendez {seconds}s pour la prochaine notification…",
             "appleWalletHint": "Apple Wallet regroupe les mises à jour rapides. Environ 20s entre les tampons, et chaque notification a son propre buzz.",
             "googleWalletHint": "Sur Google Wallet, la carte ne se met à jour qu'une fois fermée. Quittez-la et rouvrez-la pour voir le nouveau tampon.",
+            "deliveryDisclosure": {
+              "summary": "La notification n'apparaît pas ? Le tampon est bien enregistré.",
+              "appleTitle": "Sur Apple Wallet",
+              "appleBody": "Apple regroupe les mises à jour rapides et choisit le moment de les livrer selon la batterie, le Wi-Fi et le réseau cellulaire. La bannière peut arriver en quelques secondes — ou en quelques minutes. La carte sur l'écran verrouillé se met à jour d'elle-même dès que les conditions le permettent.",
+              "googleTitle": "Sur Google Wallet",
+              "googleBody": "La carte ne se met à jour qu'après avoir été fermée. Quittez le wallet et rouvrez la carte pour voir le nouveau tampon.",
+              "reassuranceTitle": "Le tampon est enregistré",
+              "reassuranceBody": "Même si la notification ou l'aperçu de la carte n'a pas encore rattrapé son retard, le décompte est déjà sauvegardé côté serveur. À la prochaine fois que vous scannez ce client, vous verrez le vrai décompte, à jour."
+            },
             "stampsLabel": "Tampons sur votre carte",
             "justStamped": "Tampon ajouté",
             "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",

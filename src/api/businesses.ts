@@ -125,10 +125,26 @@ export interface SignupQRResponse {
   business_name: string;
 }
 
-export async function getBusinessSignupQR(businessId: string): Promise<SignupQRResponse> {
-  const response = await fetch(`${API_BASE_URL}/businesses/${businessId}/signup-qr`, {
-    headers: await getAuthHeaders(),
-  });
+export async function getBusinessSignupQR(
+  businessId: string,
+  /**
+   * Optional URL to encode into the QR. Use when the caller has built a
+   * specific public URL (e.g. NEXT_PUBLIC_SHOWCASE_URL + slug) and wants
+   * the QR to match the link it displays alongside. Backend validates that
+   * the URL ends with the business's url_slug; otherwise it falls back to
+   * the server-side default.
+   */
+  signupUrl?: string
+): Promise<SignupQRResponse> {
+  const params = new URLSearchParams();
+  if (signupUrl) params.set('signup_url', signupUrl);
+  const query = params.toString();
+  const response = await fetch(
+    `${API_BASE_URL}/businesses/${businessId}/signup-qr${query ? `?${query}` : ''}`,
+    {
+      headers: await getAuthHeaders(),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));

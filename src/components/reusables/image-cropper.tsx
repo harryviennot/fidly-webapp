@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import {
@@ -119,11 +120,14 @@ export function ImageCropper({
   onOpenChange,
   imageSrc,
   onCropComplete,
-  title = 'Crop image',
+  // Title/labels default to the localised `imageCropper` namespace strings
+  // — see the resolution below. Callers can still pass explicit overrides
+  // when a more context-specific label is wanted (e.g. "Crop your logo").
+  title,
   description,
   filename = 'cropped.png',
-  applyLabel = 'Apply',
-  cancelLabel = 'Cancel',
+  applyLabel,
+  cancelLabel,
   aspect: fixedAspect,
   minAspect,
   maxAspect,
@@ -135,6 +139,10 @@ export function ImageCropper({
   minWidth = 50,
   minHeight = 50,
 }: ImageCropperProps) {
+  const tCropper = useTranslations('imageCropper');
+  const resolvedTitle = title ?? tCropper('title');
+  const resolvedApplyLabel = applyLabel ?? tCropper('apply');
+  const resolvedCancelLabel = cancelLabel ?? tCropper('cancel');
   const imgRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -273,7 +281,7 @@ export function ImageCropper({
        */}
       <DialogContent className="sm:max-w-lg flex flex-col gap-3 sm:gap-4 p-4 sm:p-6 max-h-[calc(100dvh-2rem)] overflow-hidden">
         <DialogHeader className="shrink-0">
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>{resolvedTitle}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
@@ -354,7 +362,7 @@ export function ImageCropper({
           <div className="space-y-2 px-1 shrink-0">
             <div className="flex items-center justify-between">
               <Label className="text-sm text-muted-foreground">
-                Aspect Ratio
+                {tCropper('aspectRatio')}
               </Label>
               <span className="text-sm font-medium tabular-nums">
                 {sliderAspect.toFixed(1)}:1
@@ -379,20 +387,20 @@ export function ImageCropper({
           </div>
         )}
 
-        <DialogFooter className="shrink-0 gap-2 sm:gap-0">
+        <DialogFooter className="shrink-0 gap-2 sm:gap-3">
           <Button
             variant="outline"
             className="rounded-full"
             onClick={() => onOpenChange(false)}
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </Button>
           <Button
             className="rounded-full"
             onClick={handleConfirm}
             disabled={!completedCrop}
           >
-            {applyLabel}
+            {resolvedApplyLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

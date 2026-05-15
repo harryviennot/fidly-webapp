@@ -108,12 +108,16 @@ export function InstallStep() {
   const completedOnEntryRef = useRef(alreadyCompleted);
 
   // ── QR fetch ────────────────────────────────────────────────────────
+  // Pass the browser-side `signupUrl` so the QR encodes the exact same
+  // string we display next to it. The backend default would use its own
+  // `settings.showcase_url`, which in dev (nip.io subdomains) doesn't
+  // match the browser-side `NEXT_PUBLIC_SHOWCASE_URL`.
   useEffect(() => {
     if (!businessId) return;
-    getBusinessSignupQR(businessId)
+    getBusinessSignupQR(businessId, signupUrl)
       .then((data) => setQrCode(data.qr_code))
       .catch(() => { /* skeleton stays */ });
-  }, [businessId]);
+  }, [businessId, signupUrl]);
 
   // ── Phase A: realtime customer detection ────────────────────────────
   // Subscribe to INSERTs on `customers` filtered by business_id. When a row

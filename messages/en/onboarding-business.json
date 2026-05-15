@@ -264,6 +264,15 @@
             "cooldownCta": "Wait {seconds}s for the next notification…",
             "appleWalletHint": "Apple Wallet groups rapid updates. Leaving roughly 20s between stamps gives each notification its own buzz.",
             "googleWalletHint": "On Google Wallet, the card only refreshes once closed. Close it and reopen to see the new stamp.",
+            "deliveryDisclosure": {
+              "summary": "Notification didn't appear? The stamp was still recorded.",
+              "appleTitle": "On Apple Wallet",
+              "appleBody": "Apple groups rapid updates and decides when to deliver them based on battery, Wi-Fi, and cellular conditions. A banner may land in seconds — or minutes. The pass on the lock screen refreshes on its own as soon as the device wakes with good conditions.",
+              "googleTitle": "On Google Wallet",
+              "googleBody": "The pass only refreshes after it's been closed. Close the wallet and reopen the card to see the new stamp.",
+              "reassuranceTitle": "The stamp is registered",
+              "reassuranceBody": "Even if the notification or the on-card preview hasn't caught up, the count is already saved on the server. When you scan this customer next time, you'll see the real, up-to-date count."
+            },
             "stampsLabel": "Stamps on your card",
             "justStamped": "Stamp added",
             "fallback": "No buzz yet? The notification can take a few seconds. Try again in a moment.",

@@ -53,5 +53,11 @@
     "createBusinessCta": "Create a new business",
     "contactSupport": "Contact support"
   },
-  "poweredBy": "Powered by"
+  "poweredBy": "Powered by",
+  "imageCropper": {
+    "title": "Crop image",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "aspectRatio": "Aspect Ratio"
+  }
 }

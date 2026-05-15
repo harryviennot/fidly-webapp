@@ -3,14 +3,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CheckCircle, Warning } from '@phosphor-icons/react';
+import { CaretDown, CheckCircle, Info, Warning } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { addStamp, getCustomer } from '@/api/customers';
 import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
 import { Card } from '@/components/ui/card';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useActiveDesign } from '@/hooks/use-designs';
 import { computeCardColors } from '@/lib/card-utils';
+import { cn } from '@/lib/utils';
 import type { CardDesign } from '@/types';
 import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
@@ -325,11 +331,80 @@ function StampCard({
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <InfoBox variant="info" message={t('appleWalletHint')} />
-        <InfoBox variant="info" message={t('googleWalletHint')} />
-      </div>
+      <WalletDeliveryDisclosure t={t} />
     </Card>
+  );
+}
+
+/**
+ * Single collapsed disclosure replacing the previous pair of always-visible
+ * Apple/Google hint boxes. Keeps the action card focused on the moment
+ * (send the stamp, see it land) while still giving the owner a single
+ * place to learn why the notification might be delayed — Apple coalescing,
+ * battery state, network type — and the reassurance that the stamp itself
+ * was recorded server-side regardless.
+ */
+function WalletDeliveryDisclosure({ t }: { t: ReturnType<typeof useTranslations> }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className="rounded-lg border border-[var(--border-light)] bg-[var(--paper)]">
+        <CollapsibleTrigger className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left wiz-helper text-[var(--foreground)] hover:bg-[var(--paper-hover)] transition-colors rounded-lg">
+          <span className="flex items-center gap-2 min-w-0">
+            <Info className="w-4 h-4 text-[#8A8A8A] flex-shrink-0" weight="fill" />
+            <span className="font-semibold leading-snug">
+              {t('deliveryDisclosure.summary')}
+            </span>
+          </span>
+          <CaretDown
+            className={cn(
+              'w-3.5 h-3.5 text-[#8A8A8A] transition-transform flex-shrink-0',
+              open && 'rotate-180'
+            )}
+            weight="bold"
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-3 pb-3 pt-0 flex flex-col gap-3">
+          <DisclosureBlock
+            title={t('deliveryDisclosure.appleTitle')}
+            body={t('deliveryDisclosure.appleBody')}
+          />
+          <DisclosureBlock
+            title={t('deliveryDisclosure.googleTitle')}
+            body={t('deliveryDisclosure.googleBody')}
+          />
+          <DisclosureBlock
+            title={t('deliveryDisclosure.reassuranceTitle')}
+            body={t('deliveryDisclosure.reassuranceBody')}
+            emphasis
+          />
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+}
+
+function DisclosureBlock({
+  title,
+  body,
+  emphasis = false,
+}: {
+  title: string;
+  body: string;
+  emphasis?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <p
+        className={cn(
+          'wiz-helper font-semibold leading-snug',
+          emphasis ? 'text-[var(--accent)]' : 'text-[var(--foreground)]'
+        )}
+      >
+        {title}
+      </p>
+      <p className="wiz-helper text-[#666] leading-relaxed">{body}</p>
+    </div>
   );
 }
 

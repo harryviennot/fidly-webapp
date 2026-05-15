@@ -13,7 +13,7 @@ import {
   useUploadBusinessIcon,
   useDeleteBusinessIcon,
 } from '@/hooks/use-notifications';
-import { cropToAspect, getImageAspect } from '@/lib/image-crop';
+import { createBusinessIconFromLogo } from '@/api/notifications';
 import { useWizardStep } from '../../wizard-context';
 
 const ACCEPTED_TYPES = 'image/png,image/jpeg,image/jpg,image/webp';
@@ -80,44 +80,32 @@ export function IconStep() {
   // deliberately do NOT gate by step-seen — `_seen` is for "stop seeding
   // form defaults," and stale draft entries from prior onboarding sessions
   // would otherwise wedge this auto-upload off entirely.
-  const aspectCheckedRef = useRef<string | null>(null);
+  // First-visit prefill: ask the backend to derive the icon from the
+  // business's stored logo. Server-side does the work: download the logo
+  // bytes from Supabase, center-crop to 1:1 with Pillow, re-encode as PNG
+  // regardless of the source format (JPEG, WEBP, anything). The previous
+  // client-side canvas approach silently failed whenever the Supabase
+  // logo URL didn't return CORS-permissive headers — canvas became tainted
+  // and `toBlob` threw SecurityError, leaving the dropzone empty.
+  const prefillAttemptedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!currentBusiness) return;
     if (currentBusiness.icon_url) return;
     if (!currentBusiness.logo_url) return;
-    if (aspectCheckedRef.current === currentBusiness.id) return;
-    aspectCheckedRef.current = currentBusiness.id;
+    if (prefillAttemptedRef.current === currentBusiness.id) return;
+    prefillAttemptedRef.current = currentBusiness.id;
 
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(currentBusiness.logo_url!, { cache: 'no-cache' });
-        if (!res.ok || cancelled) return;
-        const blob = await res.blob();
+        await createBusinessIconFromLogo(currentBusiness.id);
         if (cancelled) return;
-        const aspect = await getImageAspect(blob);
-        if (cancelled) return;
-        if (Math.abs(aspect - 1) < 0.02) {
-          // Already square — upload as-is.
-          const file = new File([blob], 'icon-from-logo.png', {
-            type: blob.type || 'image/png',
-          });
-          await uploadAndRefresh(file, { silent: true });
-        } else {
-          // Center-crop to 1:1 and upload silently. No warning, no manual
-          // step — the largest centred square is a sensible default and
-          // the user can always recrop from the action row.
-          const cropped = await cropToAspect(blob, {
-            aspect: 1,
-            outputWidth: 512,
-            filename: 'icon-from-logo.png',
-            mimeType: blob.type || 'image/png',
-          });
-          if (cancelled) return;
-          await uploadAndRefresh(cropped, { silent: true });
-        }
-      } catch {
-        // CORS / network — owner can import manually.
+        await queryClient.refetchQueries({ queryKey: ['business'] });
+        await refetch();
+      } catch (err) {
+        // Backend failure (no logo on storage, malformed image, etc.).
+        // Owner can still upload manually.
+        console.warn('Icon auto-prefill from logo failed', err);
       }
     })();
     return () => {

@@ -33,11 +33,13 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
     // legitimate setState-on-mount/-on-input-change, not a cascading render.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setQrLoading(true);
-    getBusinessSignupQR(currentBusiness.id)
+    // Pass the browser-side URL so the QR encodes exactly what's shown
+    // next to it. See InstallStep for the rationale (nip.io divergence).
+    getBusinessSignupQR(currentBusiness.id, fullUrl)
       .then((data) => setQrCode(data.qr_code))
       .catch(() => {/* QR will stay null, skeleton hidden */})
       .finally(() => setQrLoading(false));
-  }, [currentBusiness?.id]);
+  }, [currentBusiness?.id, fullUrl]);
 
   const handleCopy = async () => {
     try {
