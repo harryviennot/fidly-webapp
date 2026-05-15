@@ -11,6 +11,8 @@ interface WizardFieldProps {
   helper?: React.ReactNode;
   /** Red error line. Takes precedence over `helper` when set. */
   error?: React.ReactNode;
+  /** When true, an accent asterisk is appended to the label. */
+  required?: boolean;
   children: React.ReactNode;
 }
 
@@ -25,7 +27,14 @@ interface WizardFieldProps {
  *     <Input id="biz-name" … />
  *   </WizardField>
  */
-export function WizardField({ label, htmlFor, helper, error, children }: WizardFieldProps) {
+export function WizardField({
+  label,
+  htmlFor,
+  helper,
+  error,
+  required,
+  children,
+}: WizardFieldProps) {
   const hasFooter = error !== undefined || helper !== undefined;
   return (
     <div className="flex flex-col gap-1.5">
@@ -36,6 +45,14 @@ export function WizardField({ label, htmlFor, helper, error, children }: WizardF
             className="wiz-body-sm font-medium text-[var(--foreground)]"
           >
             {label}
+            {required && (
+              <span
+                aria-hidden="true"
+                className="ml-0.5 text-[var(--accent)]"
+              >
+                *
+              </span>
+            )}
           </label>
         )}
         {children}

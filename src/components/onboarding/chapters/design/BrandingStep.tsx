@@ -191,12 +191,18 @@ export function BrandingStep() {
           // and the rest of the wizard pick them up. `getThemeColor` falls
           // back to the background when the stamp-filled color has poor
           // contrast on white, so the resulting accent stays readable.
+          //
+          // CRITICAL: send ONLY the keys we're changing — do NOT spread
+          // `currentBusiness.settings`. The cached `currentBusiness` can
+          // be stale relative to recent saves (e.g. DataCollectionStep's
+          // background save fired moments earlier), and the backend's
+          // shallow-merge would happily resurrect old values from our
+          // stale spread.
           const stampFilledHex = rgbToHex(cleaned.stamp_filled_color || 'rgb(249, 115, 22)');
           const bgHex = rgbToHex(cleaned.background_color || 'rgb(28, 28, 30)');
           const themeAccent = getThemeColor(stampFilledHex, bgHex);
           await updateBusiness({
             settings: {
-              ...(currentBusiness.settings ?? {}),
               design_reviewed: true,
               accentColor: themeAccent,
               backgroundColor: bgHex,

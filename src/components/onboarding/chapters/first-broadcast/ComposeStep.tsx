@@ -93,9 +93,9 @@ export function ComposeStep() {
       setBroadcastId(created.id);
       setDelivery(created);
       if (currentBusiness) {
+        // Diff-only update — see DataCollectionStep for the race rationale.
         await updateBusinessSettings({
           settings: {
-            ...(currentBusiness.settings ?? {}),
             first_broadcast_sent: true,
           },
         });

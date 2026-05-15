@@ -114,14 +114,16 @@ export function ProfileStep() {
       if (snapshot.business_type === 'other') {
         settingsPatch.business_type_other = snapshot.business_type_other;
       }
-      const baseSettings = currentBusiness.settings ?? {};
 
       return {
         ok: true,
         save: async () => {
           try {
+            // Diff-only update — backend shallow-merges, so unrelated
+            // settings keys stay intact even when our `currentBusiness`
+            // cache lags a recent save from another step.
             await updateBusiness({
-              settings: { ...baseSettings, ...settingsPatch },
+              settings: settingsPatch,
             });
             markSaved();
             return { ok: true };

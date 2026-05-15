@@ -115,7 +115,6 @@ export function InfoStep() {
       if (!currentBusiness) return { ok: false };
       if (!isDirty) return { ok: true };
 
-      const baseSettings = currentBusiness.settings ?? {};
       // Drop any entry the owner added but never filled in — otherwise empty
       // phone / email / blank hours rows would render as ghost lines on the
       // back of every pass.
@@ -126,8 +125,12 @@ export function InfoStep() {
       // navigation and leave the back-fields list empty until the refetch
       // catches up. Worth the small extra wait on Next.
       try {
+        // Diff-only update — backend shallow-merges into the stored
+        // settings, so unrelated keys (e.g. customer_data_collection from
+        // a prior step) stay intact even if our `currentBusiness` cache
+        // is mid-refresh.
         await updateBusiness({
-          settings: { ...baseSettings, business_info: snapshot },
+          settings: { business_info: snapshot },
         });
         // `useUpdateBusiness` calls `invalidateQueries` on success, but that
         // only schedules a background refetch. Await the refetch here so

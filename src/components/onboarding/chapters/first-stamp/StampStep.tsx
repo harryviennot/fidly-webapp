@@ -432,7 +432,7 @@ function StampAvatar({ design }: { design: CardDesign | null }) {
 function CustomisationHintCard({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
     <InfoBox
-      variant="note"
+      variant="info"
       message={t('customisationHint')}
       className="animate-in fade-in slide-in-from-bottom-2 duration-300"
     />

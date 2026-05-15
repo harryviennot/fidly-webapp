@@ -244,10 +244,13 @@ export function IdentityStep() {
           // Existing business (showcase or prior wizard run) — update name +
           // setup_progress + identity_website. Slug isn't mutable post-
           // creation; the form pre-fills it but we don't try to change it.
+          // Diff-only update — backend shallow-merges, so other settings
+          // keys (e.g. customer_data_collection from a returning user
+          // session) stay intact instead of being clobbered by a stale
+          // `currentBusiness.settings` spread.
           business = await updateBusiness(currentBusiness.id, {
             name: name.trim(),
             settings: {
-              ...(currentBusiness.settings ?? {}),
               setup_progress: initialProgress,
               ...(websiteUrl ? { identity_website: websiteUrl } : {}),
             },

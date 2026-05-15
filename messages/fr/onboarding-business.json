@@ -35,7 +35,7 @@
         },
         "first-stamp": {
           "install": "J'ai installé ma carte",
-          "stamp": "M'envoyer un tampon"
+          "stamp": "Continuer"
         },
         "first-broadcast": {
           "intro": "Composer ma diffusion",
@@ -256,8 +256,8 @@
             "firstStampLandedBody": "Cette vibration, c'est exactement ce que vos clients ressentent à chaque tampon. Même notification, même timing, même rythme. Envoyez-en encore un pour bien sentir le rythme.",
             "keepStampingTitle": "Encore un",
             "keepStampingBody": "Un dernier tap envoie une deuxième vraie notification. Le petit délai entre les deux est ce qui permet à chacune de vibrer séparément au lieu d'être fusionnées.",
-            "demoCompleteTitle": "Ça suffit pour la démo",
-            "demoCompleteBody": "Vous avez ressenti l'effet deux fois. Vos vrais clients ne tamponneront pas eux-mêmes — ils ne feront que recevoir. Continuez quand vous êtes prêt.",
+            "demoCompleteTitle": "Parfait, vous tenez le rythme",
+            "demoCompleteBody": "C'est exactement la sensation que vos clients auront à chaque tampon. Quand vous voulez, on passe à la suite.",
             "sendCta": "Envoyer le tampon test",
             "sendAnotherCta": "Envoyer un autre tampon",
             "watching": "Le tampon arrive…",

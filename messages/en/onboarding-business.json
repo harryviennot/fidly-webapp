@@ -35,7 +35,7 @@
         },
         "first-stamp": {
           "install": "I've installed my card",
-          "stamp": "Send me a stamp"
+          "stamp": "Continue"
         },
         "first-broadcast": {
           "intro": "Compose my broadcast",
@@ -256,8 +256,8 @@
             "firstStampLandedBody": "That buzz is what your customers will feel every time you stamp their card. Same notification, same timing, same flow. Send one more to get the rhythm.",
             "keepStampingTitle": "Send one more",
             "keepStampingBody": "One more tap fires a second real notification. The short wait between them is what makes each one buzz on its own instead of getting merged.",
-            "demoCompleteTitle": "That's enough for the demo",
-            "demoCompleteBody": "You've felt the wow twice. Real customers won't be stamping themselves — they'll just receive. Continue when you're ready.",
+            "demoCompleteTitle": "You've got the feel for it",
+            "demoCompleteBody": "That's the buzz your customers will feel every time. Whenever you're ready, we'll move on.",
             "sendCta": "Send the test stamp",
             "sendAnotherCta": "Send another stamp",
             "watching": "Watching for the stamp…",

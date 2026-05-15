@@ -80,15 +80,20 @@ export function DataCollectionStep() {
       if (!currentBusiness) return { ok: false };
       if (!isDirty) return { ok: true };
 
-      const baseSettings = currentBusiness.settings ?? {};
       const snapshot = value;
       return {
         ok: true,
         save: async () => {
           try {
+            // Send ONLY the key we're changing. Spreading
+            // `currentBusiness.settings` here was the source of a race: when
+            // a later step (e.g. BrandingStep) fired its own save with a
+            // stale spread of `currentBusiness.settings`, the backend's
+            // shallow merge would overwrite the freshly-saved
+            // `customer_data_collection`. The backend already merges
+            // top-level settings keys, so we just need to send the diff.
             await updateBusiness({
               settings: {
-                ...baseSettings,
                 customer_data_collection: snapshot,
               },
             });

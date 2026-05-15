@@ -37,9 +37,13 @@ export function useWizardProgress() {
   const writeProgress = useCallback(
     async (next: SetupProgress) => {
       if (!currentBusiness) return;
+      // Send ONLY setup_progress. The backend shallow-merges into the
+      // stored settings, so other keys stay intact. Spreading
+      // `currentBusiness.settings` here used to race other in-flight
+      // saves (DataCollectionStep especially) — our stale spread would
+      // resurrect old values the other save had just overwritten.
       await updateBusiness({
         settings: {
-          ...(currentBusiness.settings ?? {}),
           setup_progress: next,
         },
       });
@@ -108,8 +112,9 @@ export function useWizardProgress() {
         last_step: step,
         payload: { ...current.payload, ...patch },
       };
+      // Diff-only update — see writeProgress above for the rationale.
       await updateBusiness({
-        settings: { ...(currentBusiness.settings ?? {}), setup_progress: next },
+        settings: { setup_progress: next },
       });
     },
     [currentBusiness, updateBusiness]

@@ -86,12 +86,12 @@ export function StampsStep() {
         // have shifted since Branding ran. Re-running getThemeColor here
         // keeps the contrast swap honest.
         if (currentBusiness) {
+          // Send ONLY the diff — see BrandingStep for the race rationale.
           const stampFilledHex = rgbToHex(data.stamp_filled_color || 'rgb(249, 115, 22)');
           const bgHex = rgbToHex(data.background_color || 'rgb(28, 28, 30)');
           const themeAccent = getThemeColor(stampFilledHex, bgHex);
           await updateBusiness({
             settings: {
-              ...(currentBusiness.settings ?? {}),
               accentColor: themeAccent,
               backgroundColor: bgHex,
             },

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { LogoCropper } from './LogoCropper';
 import {
   ImageCropper,
   type ImageCropperProps,
@@ -13,6 +12,26 @@ type CropPropsPassthrough = Omit<
   ImageCropperProps,
   'open' | 'onOpenChange' | 'imageSrc' | 'onCropComplete'
 >;
+
+/**
+ * Default crop configuration used when `enableCrop` is set without explicit
+ * `cropProps`. Targets a card-design logo: variable aspect from 1:1 up to
+ * 3.2:1, fixed output height (150px) so the wallet pass renders sharp. The
+ * title + description come from the shared `imageCropper` namespace so the
+ * whole cropper UI ships one cohesive set of strings.
+ */
+function buildLogoCropProps(t: ReturnType<typeof useTranslations>): CropPropsPassthrough {
+  return {
+    title: t('logoTitle'),
+    description: t('logoDescription'),
+    filename: 'logo-cropped.png',
+    minAspect: 1,
+    maxAspect: 3.2,
+    outputHeight: 150,
+    hideAspectSlider: true,
+    minHeight: 30,
+  };
+}
 
 interface ImageUploaderProps {
   label: string;
@@ -24,9 +43,9 @@ interface ImageUploaderProps {
   /** When true, opens a crop dialog before uploading. */
   enableCrop?: boolean;
   /**
-   * Optional crop configuration. When provided, the generic `ImageCropper` is
-   * used instead of the logo-specific `LogoCropper`. Pass `aspect={1}` for a
-   * square-locked crop (e.g. notification icon).
+   * Optional crop configuration. When provided, overrides the default
+   * logo-style crop (1:1 to 3.2:1, output height 150) — pass `aspect={1}`
+   * for a square-locked crop (e.g. notification icon).
    */
   cropProps?: CropPropsPassthrough;
 }
@@ -42,6 +61,7 @@ export default function ImageUploader({
   cropProps,
 }: ImageUploaderProps) {
   const t = useTranslations('designEditor.imageUploader');
+  const tCropper = useTranslations('imageCropper');
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -216,22 +236,13 @@ export default function ImageUploader({
       {error && <div className="text-sm text-red-600 mt-1">{error}</div>}
 
       {enableCrop && cropSrc && (
-        cropProps ? (
-          <ImageCropper
-            open={!!cropSrc}
-            onOpenChange={handleCropClose}
-            imageSrc={cropSrc}
-            onCropComplete={handleCropComplete}
-            {...cropProps}
-          />
-        ) : (
-          <LogoCropper
-            open={!!cropSrc}
-            onOpenChange={handleCropClose}
-            imageSrc={cropSrc}
-            onCropComplete={handleCropComplete}
-          />
-        )
+        <ImageCropper
+          open={!!cropSrc}
+          onOpenChange={handleCropClose}
+          imageSrc={cropSrc}
+          onCropComplete={handleCropComplete}
+          {...(cropProps ?? buildLogoCropProps(tCropper))}
+        />
       )}
     </div>
   );

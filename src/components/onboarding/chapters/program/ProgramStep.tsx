@@ -192,7 +192,7 @@ export function ProgramStep() {
       </header>
 
       <div className="flex flex-col gap-6">
-        <WizardField label={tLp('programName')} htmlFor="program-name">
+        <WizardField label={tLp('programName')} htmlFor="program-name" required>
           <Input
             id="program-name"
             value={programName}
@@ -224,7 +224,7 @@ export function ProgramStep() {
           />
         </WizardField>
 
-        <WizardField label={tLp('rewardLabel')} htmlFor="program-reward">
+        <WizardField label={tLp('rewardLabel')} htmlFor="program-reward" required>
           <Input
             id="program-reward"
             value={rewardName}

@@ -64,7 +64,8 @@ export function BackStep() {
         }
         if (currentBusiness && !currentBusiness.settings?.design_reviewed) {
           await updateBusiness({
-            settings: { ...(currentBusiness.settings ?? {}), design_reviewed: true },
+            // Diff-only update — see DataCollectionStep for the race rationale.
+            settings: { design_reviewed: true },
           });
         }
         queryClient.invalidateQueries({ queryKey: designKeys.all(businessId) });

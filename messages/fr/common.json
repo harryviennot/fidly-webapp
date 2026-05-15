@@ -58,6 +58,8 @@
     "title": "Recadrer l'image",
     "apply": "Valider",
     "cancel": "Annuler",
-    "aspectRatio": "Format"
+    "aspectRatio": "Format",
+    "logoTitle": "Recadrer votre logo",
+    "logoDescription": "Faites glisser les coins pour choisir la zone à garder. Du carré jusqu'à un ratio 3:1 fonctionne."
   }
 }
