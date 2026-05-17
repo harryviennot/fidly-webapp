@@ -58,7 +58,7 @@ export function StampStep() {
   const ctx = useWizardStep();
 
   const businessId = currentBusiness?.id;
-  const { installs, installedCount, refetch } = useBusinessInstalls(businessId);
+  const { installs, installedCount, refetch, loading: installsLoading } = useBusinessInstalls(businessId);
   const installedWithEnrollment = useMemo(
     () => installs.filter((i) => i.installed && i.enrollment_id),
     [installs]
@@ -208,7 +208,9 @@ export function StampStep() {
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      {!ready ? (
+      {installsLoading ? (
+        <StampCardSkeleton />
+      ) : !ready ? (
         <PrereqCard t={t} />
       ) : (
         <StampCard
@@ -232,6 +234,33 @@ export function StampStep() {
 
 interface PrereqCardProps {
   t: ReturnType<typeof useTranslations>;
+}
+
+/**
+ * Skeleton mirror of <StampCard> so the page doesn't flash a "no card
+ * installed" warning while `useBusinessInstalls` is still fetching. Same
+ * outer shape, same vertical rhythm — just shimmer blocks where real
+ * content lands. Avoids the layout shift the warning-then-card flicker
+ * used to cause.
+ */
+function StampCardSkeleton() {
+  return (
+    <Card hover={false} className="p-5 flex flex-col gap-4">
+      <div className="flex items-start gap-3">
+        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--paper)] animate-pulse" />
+        <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1">
+          <span className="block h-4 w-2/5 rounded bg-[var(--paper)] animate-pulse" />
+          <span className="block h-3 w-4/5 rounded bg-[var(--paper)] animate-pulse" />
+          <span className="block h-3 w-3/5 rounded bg-[var(--paper)] animate-pulse" />
+        </div>
+      </div>
+      <span className="block h-14 w-full rounded-[10px] bg-[var(--paper)] animate-pulse" />
+      <div className="flex items-center justify-center">
+        <span className="block h-7 w-32 rounded-full bg-[var(--paper)] animate-pulse" />
+      </div>
+      <span className="block h-10 w-full rounded-lg bg-[var(--paper)] animate-pulse" />
+    </Card>
+  );
 }
 
 function PrereqCard({ t }: PrereqCardProps) {

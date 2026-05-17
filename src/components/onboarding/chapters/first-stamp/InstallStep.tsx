@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -11,9 +10,9 @@ import {
   DeviceMobileIcon,
   DownloadSimpleIcon,
   FilePdfIcon,
+  Spinner as SpinnerIcon,
 } from '@phosphor-icons/react';
 import { Card } from '@/components/ui/card';
-import { InfoBox } from '@/components/reusables/info-box';
 import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
 import { useIsMobileDevice } from '@/hooks/use-mobile-device';
@@ -26,12 +25,6 @@ import { cn } from '@/lib/utils';
 import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
 import { useBusinessInstalls } from './useBusinessInstalls';
-
-// 3s gives the owner time to see the "Card installed" success state land
-// before the wizard advances. Shorter than this felt like a yank — the green
-// confirmation barely had time to register.
-const AUTO_ADVANCE_DELAY_MS = 3000;
-const NEXT_STEP_PATH = '/onboarding/business/first-stamp/stamp';
 
 interface InstallUrls {
   passUrl?: string;
@@ -64,7 +57,6 @@ export function InstallStep() {
   const tErr = useTranslations('onboardingBusiness.errors');
   const locale = useLocale();
   const isMobileDevice = useIsMobileDevice();
-  const router = useRouter();
   const { currentBusiness } = useBusiness();
   const { user } = useAuth();
   const { completeWithPayload, uncompleteStep, isStepCompleted } = useWizardProgress();
@@ -94,10 +86,6 @@ export function InstallStep() {
   const ownerPhone = (user?.user_metadata?.phone as string | undefined) ?? '';
 
   const stepCompleted = isStepCompleted({ chapter: 'first-stamp', step: 'install' });
-  // Snapshot at mount so the auto-advance effect doesn't yank the owner
-  // out of the page on back-navigation. Only the *first* time they hit
-  // the installed state in a given mount should we advance.
-  const completedOnEntryRef = useRef(stepCompleted);
 
   // ── QR fetch ────────────────────────────────────────────────────────
   // Pass the browser-side `signupUrl` so the QR encodes the exact same
@@ -130,14 +118,6 @@ export function InstallStep() {
   useEffect(() => {
     if (installedCount >= 1 && install.passUrl) setInstall({});
   }, [installedCount, install.passUrl]);
-
-  // ── Auto-advance when we cross from 0 → ≥1 in this mount ────────────
-  useEffect(() => {
-    if (completedOnEntryRef.current) return;
-    if (installedCount < 1) return;
-    const id = setTimeout(() => router.push(NEXT_STEP_PATH), AUTO_ADVANCE_DELAY_MS);
-    return () => clearTimeout(id);
-  }, [installedCount, router]);
 
   useEffect(() => {
     ctx.setCanSkip(true);
@@ -205,12 +185,8 @@ export function InstallStep() {
 
       {showInstallUi && (
         <>
-          {!hasInstalls && (
-            <>
-              <p className="wiz-body text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
-              <p className="wiz-body text-[var(--foreground)] leading-relaxed">{actionCopy}</p>
-            </>
-          )}
+          <p className="wiz-body text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
+          <p className="wiz-body text-[var(--foreground)] leading-relaxed">{actionCopy}</p>
 
           <SignupUrlCard url={signupUrl} copied={copied} onCopy={handleCopy} t={t} />
 
@@ -238,13 +214,45 @@ export function InstallStep() {
               t={t}
             />
           )}
+
+          {/* Always-on listener feedback while the install UI is exposed.
+              Reassures the owner that we'll detect the install automatically
+              the moment a push registration lands — either from this
+              device (quick-install) or from another phone scanning the QR. */}
+          {install.passUrl ? (
+            <WatchingCard t={t} />
+          ) : (
+            <PollingHintCard t={t} />
+          )}
         </>
       )}
 
-      {hasInstalls && !completedOnEntryRef.current && (
-        <InfoBox variant="success" message={t('detected')} />
-      )}
     </div>
+  );
+}
+
+interface StatusCardProps {
+  t: ReturnType<typeof useTranslations>;
+}
+
+function PollingHintCard({ t }: StatusCardProps) {
+  return (
+    <Card hover={false} className="bg-[var(--paper)] px-4 py-3 flex items-center gap-3">
+      <SpinnerIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 animate-spin" weight="bold" />
+      <p className="wiz-helper text-[#555]">{t('pollingHint')}</p>
+    </Card>
+  );
+}
+
+function WatchingCard({ t }: StatusCardProps) {
+  return (
+    <Card
+      hover={false}
+      className="border-[var(--accent-200)] bg-[var(--accent-light)]/40 p-4 flex items-center gap-3"
+    >
+      <SpinnerIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 animate-spin" weight="bold" />
+      <p className="wiz-body-sm font-medium text-[var(--foreground)]">{t('watchingInstall')}</p>
+    </Card>
   );
 }
 
