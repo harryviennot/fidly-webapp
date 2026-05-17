@@ -74,11 +74,18 @@ export function useDesignReady(
     }
     let cancelled = false;
 
-    // Skip the redundant initial fetch when the caller has already handed us
-    // a row — `useDesigns` is the canonical source for that, and a second
-    // `getDesign` over the wire would just refetch what we already have.
-    // Realtime keeps the cache (and our local state) in sync from here on.
-    if (!initialDesign) {
+    // Skip the redundant initial fetch only when the seeded row is *already*
+    // ready — in that case the cache is trustworthy and a second `getDesign`
+    // would just refetch what we already have. If the seed is still
+    // `regenerating`, we MUST refetch on mount: the backend may have flipped
+    // status to `ready` and broadcast its realtime UPDATE before we got a
+    // chance to subscribe (e.g. user navigated away from BackStep, strips
+    // finished while they were on another step, then they returned). That
+    // missed event would otherwise leave the hook stuck in the loader
+    // forever, with the cached row lying about a regeneration that's
+    // already complete server-side.
+    const seedIsStale = !initialDesign || initialDesign.strip_status === 'regenerating';
+    if (seedIsStale) {
       setLoading(true);
       (async () => {
         try {
@@ -87,6 +94,15 @@ export function useDesignReady(
           setDesign(fresh);
           if (fresh.strip_status !== 'regenerating') {
             sawReadyRef.current = true;
+            // Mirror into the React Query cache so other consumers
+            // (`useDesigns`) stop reporting the stale regenerating row.
+            queryClient.setQueryData<CardDesign[]>(
+              designKeys.all(businessId),
+              (cached) => {
+                if (!cached) return [fresh];
+                return cached.map((d) => (d.id === designId ? fresh : d));
+              }
+            );
           }
         } catch {
           // Non-fatal — stay in loading state; realtime updates may still land.

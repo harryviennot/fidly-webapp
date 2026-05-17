@@ -68,7 +68,7 @@
           "compose": "Continuer"
         },
         "team": {
-          "team": "Inviter mon équipe"
+          "team": "Continuer"
         },
         "recap": {
           "recap": "Je suis prêt"
@@ -125,6 +125,7 @@
             "sizeLabel": "Quelle est la taille de votre équipe ?",
             "locationsLabel": "Combien d'établissements ?",
             "goalLabel": "Quel est votre objectif principal ?",
+            "heardFromLabel": "Comment nous avez-vous connus ?",
             "otherFreeText": "Autre (précisez)",
             "otherPlaceholder": "Décrivez brièvement votre activité",
             "typeOptions": {
@@ -154,6 +155,16 @@
               "frequency": "Augmenter la fréquence",
               "basket": "Augmenter le panier moyen",
               "acquisition": "Toucher de nouveaux clients"
+            },
+            "heardFromOptions": {
+              "tiktok": "TikTok",
+              "instagram": "Instagram",
+              "google": "Recherche Google",
+              "ai": "Recommandation IA",
+              "friend": "Un ami",
+              "stampeo_business": "Un commerce Stampeo",
+              "advertisement": "Une publicité",
+              "other": "Autre"
             }
           }
         }
@@ -295,7 +306,7 @@
             "sendCta": "Envoyer un tampon test",
             "sendAnotherCta": "Envoyer un autre tampon",
             "watching": "Le tampon arrive…",
-            "cooldownCta": "Apple limite l'envoi à une notification toutes les quinze secondes pour préserver les téléphones de vos clients. Prochain tampon disponible dans {seconds}s.",
+            "cooldownCta": "Prochain tampon disponible dans {seconds}s.",
             "appleWalletHint": "Apple Wallet regroupe les mises à jour rapides. Environ 20 secondes entre les tampons, et chaque notification a son propre buzz.",
             "googleWalletHint": "Sur Google Wallet, la carte ne se met à jour qu'une fois fermée. Quittez l'application et rouvrez votre carte pour voir le nouveau tampon.",
             "deliveryDisclosure": {

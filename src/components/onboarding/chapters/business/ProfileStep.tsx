@@ -32,6 +32,17 @@ const GOAL_OPTIONS = [
   { id: 'acquisition', emoji: '🎯' },
 ] as const;
 
+const HEARD_FROM_OPTIONS = [
+  { id: 'tiktok', emoji: '🎵' },
+  { id: 'instagram', emoji: '📸' },
+  { id: 'google', emoji: '🔍' },
+  { id: 'ai', emoji: '🤖' },
+  { id: 'friend', emoji: '👋' },
+  { id: 'stampeo_business', emoji: '🃏' },
+  { id: 'advertisement', emoji: '📢' },
+  { id: 'other', emoji: '✨' },
+] as const;
+
 /**
  * Single profile screen — replaces v2's Type/Size/Locations/Objectives sub-
  * steps. Four chip groups, optional. Picking the "Other" type chip reveals a
@@ -66,15 +77,20 @@ export function ProfileStep() {
     'profile.primaryGoal',
     () => currentBusiness?.settings?.primary_goal ?? ''
   );
+  const [heardFrom, setHeardFrom] = useWizardDraft<string>(
+    'profile.heardFrom',
+    () => currentBusiness?.settings?.heard_from ?? ''
+  );
 
-  // All four chip groups must be answered. If the type is "Other", the
+  // All chip groups must be answered. If the type is "Other", the
   // free-text input must also be non-empty.
   const isValid =
     businessType !== '' &&
     (businessType !== 'other' || businessTypeOther.trim().length > 0) &&
     teamSize !== '' &&
     locationsCount !== '' &&
-    primaryGoal !== '';
+    primaryGoal !== '' &&
+    heardFrom !== '';
 
   // Snapshot of everything we'd send to the API. Compared against the last
   // successful save so a Back → Forward without edits skips the write.
@@ -85,8 +101,9 @@ export function ProfileStep() {
       team_size: teamSize,
       locations_count: locationsCount,
       primary_goal: primaryGoal,
+      heard_from: heardFrom,
     }),
-    [businessType, businessTypeOther, teamSize, locationsCount, primaryGoal]
+    [businessType, businessTypeOther, teamSize, locationsCount, primaryGoal, heardFrom]
   );
   const { isDirty, markSaved } = useDirtySnapshot('profile', snapshot);
 
@@ -110,6 +127,7 @@ export function ProfileStep() {
         team_size: snapshot.team_size,
         locations_count: snapshot.locations_count,
         primary_goal: snapshot.primary_goal,
+        heard_from: snapshot.heard_from,
       };
       if (snapshot.business_type === 'other') {
         settingsPatch.business_type_other = snapshot.business_type_other;
@@ -241,6 +259,24 @@ export function ProfileStep() {
               onClick={() => setPrimaryGoal(opt.id)}
               emoji={opt.emoji}
               label={t(`goalOptions.${opt.id}`)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3 animate-slide-up delay-300">
+        <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
+          {t('heardFromLabel')}
+          <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
+        </h3>
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
+          {HEARD_FROM_OPTIONS.map((opt) => (
+            <OptionCard
+              key={opt.id}
+              active={heardFrom === opt.id}
+              onClick={() => setHeardFrom(opt.id)}
+              emoji={opt.emoji}
+              label={t(`heardFromOptions.${opt.id}`)}
             />
           ))}
         </div>

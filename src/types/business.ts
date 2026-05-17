@@ -79,6 +79,7 @@ export interface BusinessSettings {
   team_size?: string;
   locations_count?: string;
   primary_goal?: string;
+  heard_from?: string;
   identity_website?: string;
   [key: string]: unknown;
 }

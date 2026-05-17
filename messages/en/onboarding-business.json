@@ -3,7 +3,7 @@
     "defaults": {
       "rewardName": {
         "cafe": "Free drink",
-        "restaurant": "-25% on the bill",
+        "restaurant": "25% off the bill",
         "bakery": "Free pastry",
         "beauty": "Free treatment",
         "retail": "Discount voucher",
@@ -13,13 +13,13 @@
       },
       "broadcastBody": {
         "cafe": "Happy hour today, 5pm to 7pm. Show your card for 20% off.",
-        "restaurant": "Today's menu is served until 10pm — book your table!",
-        "bakery": "Fresh pastries out of the oven. Come grab one this morning!",
-        "beauty": "This week: -15% on all our treatments. Book your slot.",
-        "retail": "New collection in store! Come discover it today.",
-        "fitness": "New group class this week. Book your spot now.",
-        "services": "Take advantage of our current offer: free quote until end of month.",
-        "other": "Something new to share with you! Stop by this week."
+        "restaurant": "Tonight's menu is served until 10pm. Book your table now.",
+        "bakery": "Fresh pastries out of the oven this morning. Come grab one.",
+        "beauty": "This week: 15% off all treatments. Book your slot.",
+        "retail": "New collection in store. Come and have a look today.",
+        "fitness": "New group class added this week. Reserve your spot.",
+        "services": "Free quote until the end of the month. Get in touch.",
+        "other": "Something new to share. Stop by this week."
       }
     },
     "footer": {
@@ -28,7 +28,7 @@
       "next": "Continue",
       "finish": "Launch my program",
       "saving": "Saving…",
-      "skipAll": "Skip rest of setup",
+      "skipAll": "Skip the rest",
       "gotIt": "Got it, let's go",
       "cta": {
         "welcome": {
@@ -44,16 +44,16 @@
         },
         "card-back": {
           "intro": "Continue",
-          "info": "Save my back side info"
+          "info": "Save my details"
         },
         "design": {
           "branding": "Design my card",
           "branding_short": "Continue",
           "stamps": "Save my stamps",
           "stamps_short": "Continue",
-          "content": "Save my card content",
+          "content": "Save my content",
           "content_short": "Continue",
-          "back": "Save my back side",
+          "back": "Save the back",
           "back_short": "Continue"
         },
         "notifications": {
@@ -68,10 +68,10 @@
           "compose": "Continue"
         },
         "team": {
-          "team": "Invite my team"
+          "team": "Skip"
         },
         "recap": {
-          "recap": "I'm ready"
+          "recap": "Choose my plan"
         },
         "plan": {
           "plan": "Launch my program"
@@ -79,11 +79,11 @@
       }
     },
     "errors": {
-      "unknownStep": "We couldn't find that setup step. Take me back to the start.",
-      "slugTaken": "That web address is already taken.",
+      "unknownStep": "We can't find that setup step. Let's start from the beginning.",
+      "slugTaken": "That address is already taken.",
       "slugInvalid": "Use lowercase letters, numbers, and hyphens only.",
       "nameRequired": "Give your business a name.",
-      "createFailed": "Something went wrong creating your business. Please try again.",
+      "createFailed": "Something went wrong setting up your business. Please try again.",
       "saveFailed": "Couldn't save. Please try again.",
       "programNameRequired": "Give your program a name.",
       "rewardRequired": "Set the reward customers will earn.",
@@ -92,8 +92,8 @@
     "chapters": {
       "welcome": {
         "title": "Welcome to Stampeo",
-        "subtitle": "In a few minutes, your loyalty card lands in your customers' wallets.",
-        "body": "We'll build a branded digital card, send a stamp to your own phone, then push a broadcast to it so you feel exactly what your customers will. The required steps get you live. Everything else makes your program more polished from day one.",
+        "subtitle": "Your digital loyalty card, ready in about 10 minutes.",
+        "body": "We'll build your card, install it on your own phone, send you a real stamp, and let you broadcast your first message. By the end you'll know exactly what your customers will see, feel, and do. Then you choose a plan.",
         "cta": "Let's go"
       },
       "business": {
@@ -101,30 +101,31 @@
         "steps": {
           "identity": {
             "title": "Identity",
-            "subtitle": "Tell us what your business is called and where to find it.",
+            "subtitle": "The basics. We use this on your card, your customer page, and your dashboard.",
             "fields": {
               "name": "Business name",
               "nameHelp": "The name your customers see on their card.",
               "namePlaceholder": "e.g. Café du Coin",
-              "slug": "Your Stampeo page URL",
-              "slugHelp": "Your customers' page will live at stampeo.app/{slug}. Pick something short and easy to remember.",
+              "slug": "Your customer page address",
+              "slugHelp": "Your customer page will live at stampeo.app/{slug}. Pick something short and memorable.",
               "slugPlaceholder": "cafe-du-coin",
-              "website": "Your business website",
-              "websiteHelp": "Will show on the back of your customers' card.",
+              "website": "Your website",
+              "websiteHelp": "Shown on the back of your card.",
               "websitePlaceholder": "https://…",
               "logo": "Logo",
-              "logoHelp": "Landscape, up to 3:1. PNG or JPG.",
+              "logoHelp": "Landscape, up to 3:1 ratio. PNG or JPG.",
               "slugChecking": "Checking…",
               "slugAvailable": "Available"
             }
           },
           "profile": {
             "title": "Tell us about your business",
-            "subtitle": "Four quick questions so we can tune templates, recommendations, and metrics to fit.",
+            "subtitle": "Four quick questions so we can tailor the card style, defaults, and reports to your industry.",
             "typeLabel": "What kind of business?",
             "sizeLabel": "How big is your team?",
             "locationsLabel": "How many locations?",
             "goalLabel": "What's your main goal?",
+            "heardFromLabel": "How did you hear about us?",
             "otherFreeText": "Other (tell us)",
             "otherPlaceholder": "Briefly describe what you do",
             "typeOptions": {
@@ -152,8 +153,18 @@
             "goalOptions": {
               "retention": "Keep customers coming back",
               "frequency": "Increase visit frequency",
-              "basket": "Grow average ticket",
+              "basket": "Grow average spend",
               "acquisition": "Reach new customers"
+            },
+            "heardFromOptions": {
+              "tiktok": "TikTok",
+              "instagram": "Instagram",
+              "google": "Google search",
+              "ai": "AI recommendation",
+              "friend": "A friend",
+              "stampeo_business": "A Stampeo business",
+              "advertisement": "Advertisement",
+              "other": "Other"
             }
           }
         }
@@ -163,11 +174,11 @@
         "steps": {
           "program": {
             "title": "Set up your loyalty program",
-            "subtitle": "How many stamps it takes, and what your customers earn."
+            "subtitle": "Pick how customers earn, name your program, and define the reward."
           },
           "data-collection": {
             "title": "What to collect from customers",
-            "subtitle": "Pick the fields you want on the signup form."
+            "subtitle": "Pick the fields on your sign-up form. Fewer fields means more sign-ups."
           }
         }
       },
@@ -176,13 +187,13 @@
         "steps": {
           "intro": {
             "title": "Your card has two sides",
-            "subtitle": "Front for stamps, back for the practical info.",
-            "bodyP1": "On Apple Wallet, customers tap the three dots on the card to flip it. On Google Wallet, the i icon. Either way, they land on the info you put there: hours, address, phone, website, terms and conditions, anything worth showing.",
-            "bodyP2": "You'll add it all now, once. Later, when you design each card, you'll pick which entries to include and add extras that only apply to that design."
+            "subtitle": "Front for stamps. Back for everything else.",
+            "bodyP1": "Customers flip the card to see your hours, address, phone, website, terms, and anything else worth showing. On Apple Wallet they tap the three dots. On Google Wallet they tap the i icon.",
+            "bodyP2": "You'll add your details once, here. They'll be available on every card you ever create. Later, when you design a specific card, you can pick which details to show and add extras that only apply to that card."
           },
           "info": {
-            "title": "Add your business info",
-            "subtitle": "These entries will be available on every design of your card. We pre-filled what we could from your account."
+            "title": "Your business details",
+            "subtitle": "Available on every card. We've pre-filled what we already know from your account."
           }
         }
       },
@@ -191,25 +202,25 @@
         "steps": {
           "branding": {
             "title": "Logo and colors",
-            "subtitle": "Drop your logo, pick your colors. The defaults work; refine whenever you want."
+            "subtitle": "Drop in your logo, pick your colors. The defaults work; you can refine anytime."
           },
           "stamps": {
-            "title": "Stamps",
-            "subtitle": "Pick stamp and reward icons, then tune their colors."
+            "title": "Stamps and rewards",
+            "subtitle": "Pick stamp and reward icons, then choose your color."
           },
           "content": {
             "title": "Extra info on the front",
-            "subtitle": "Limit, expiry, anything else worth surfacing on the card itself.",
-            "technicalNote": "On Apple Wallet, these fields render below the stamps. On Google Wallet, just above the QR code."
+            "subtitle": "Short fields next to the stamps. The reward, an expiry, a limit, anything worth showing.",
+            "technicalNote": "On Apple Wallet these appear below the stamps. On Google Wallet they appear above the QR code."
           },
           "back": {
-            "title": "What appears on the back of THIS design",
-            "subtitle": "Pick which business info to show on this card, and add any extras that only apply here.",
-            "sharedSectionTitle": "Your business info",
-            "sharedSectionHelper": "Tick the ones to show on this design.",
-            "specificSectionTitle": "Specific to this design",
-            "specificSectionHelper": "Fields you add here only appear on this design.",
-            "specificEmpty": "Nothing yet. Add a field that should only appear on this design.",
+            "title": "What appears on the back of this card",
+            "subtitle": "Pick which business details to show. Add anything that only applies to this card.",
+            "sharedSectionTitle": "Your business details",
+            "sharedSectionHelper": "Tick the ones to show on this card.",
+            "specificSectionTitle": "Just for this card",
+            "specificSectionHelper": "Fields you add here only appear on this card.",
+            "specificEmpty": "Nothing yet. Add a field that should only appear on this card.",
             "addFieldCta": "Add a field"
           }
         }
@@ -218,16 +229,16 @@
         "title": "Notification icon",
         "steps": {
           "icon": {
-            "title": "Pick the icon for notifications",
-            "subtitle": "Customers get a notification each time you stamp them or they earn a reward. This icon shows next to it.",
+            "title": "Choose your notification icon",
+            "subtitle": "Shown next to every notification you send: stamp added, reward earned, broadcast.",
             "uploadSectionTitle": "Your icon",
-            "uploadCta": "Click to import",
-            "uploadHint": "PNG, minimum 87×87 pixels",
+            "uploadCta": "Click to upload",
+            "uploadHint": "PNG, minimum 87×87 pixels. Square shapes work best.",
             "previewLabel": "Preview",
             "previewBody": "Stamp collected! You have 3 of 10 stamps.",
             "cropWarning": {
-              "title": "Icon needs cropping",
-              "body": "Your logo isn't square. Crop it to fit before continuing — or import a different image.",
+              "title": "Crop your icon",
+              "body": "Your image isn't square. Crop it before continuing, or upload a different one.",
               "cta": "Crop now"
             },
             "actions": {
@@ -240,35 +251,35 @@
       },
       "first-stamp": {
         "title": "Take it for a spin",
-        "chapterIntro": "Install your card, then send yourself a real stamp.",
+        "chapterIntro": "Install your card. Then send yourself a real stamp.",
         "steps": {
           "install": {
-            "title": "Your card is ready! Let's try it out.",
+            "title": "Your card is ready. Let's try it.",
             "subtitle": "Go through the exact flow your customers will.",
             "loadingTitle": "Getting your card ready…",
-            "loadingSubtitle": "We're finalizing the render of your custom design.",
-            "loadingHint": "This only takes a few seconds. Feel free to wait here.",
-            "explanation": "Below is the public page your customers will land on after scanning your QR at the counter or tapping your link. It's where they sign up for your loyalty program and get their card.",
-            "explanationActionDesktop": "Scan the QR with your own phone, open your business's page, and register yourself as your first customer. Your card lands in your wallet, ready for the test stamp on the next step.",
-            "explanationActionMobile": "Tap the link to open your business's page, then register yourself as your first customer. Your card lands in your wallet, ready for the test stamp on the next step. Once the card is installed, come back here.",
+            "loadingSubtitle": "Finalising your custom design.",
+            "loadingHint": "Just a few seconds. Stay here.",
+            "explanation": "The link below opens your customer page. It's where people land after scanning your QR code or tapping your link, and where they sign up for your loyalty program.",
+            "explanationActionDesktop": "Scan the QR with your phone, sign up as your first customer, and your card will land in your wallet. Come back here when it's installed.",
+            "explanationActionMobile": "Tap the link to open your customer page, sign up as your first customer, and your card will land in your wallet. Come back here when it's installed.",
             "signupUrlLabel": "Customer page",
             "copy": "Copy",
             "copied": "Copied",
             "qrTitle": "Print or display this QR",
-            "qrBody": "Later, you can print it for your counter or drop it on a menu so customers can sign up themselves.",
+            "qrBody": "Later, print it for your counter or drop it on a menu so customers can sign up themselves.",
             "qrShow": "Show QR",
             "qrHide": "Hide QR",
             "downloadPng": "Save as PNG",
             "downloadPdf": "Save as PDF",
             "quickInstallTitle": "Just want the card? Skip the customer page",
-            "quickInstallBody": "We register you straight from your account info. You miss out on seeing the customer flow, but you get the card on your phone faster.",
+            "quickInstallBody": "We can install it directly using your account info. You'll save a minute, but you'll miss seeing the customer flow.",
             "quickInstallCta": "Use my info and install",
             "registering": "Registering…",
             "installTitle": "Add the card to your wallet",
             "installBody": "Tap a button below. The card lands in your wallet, ready for the test stamp on the next step.",
             "addToAppleWallet": "Add to Apple Wallet",
             "addToGoogleWallet": "Add to Google Wallet",
-            "pollingHint": "Keep this tab open. We detect the signup automatically.",
+            "pollingHint": "Keep this tab open. We detect the sign-up automatically.",
             "watchingInstall": "Customer detected. Waiting for the card to land in your wallet…",
             "manualConfirmCta": "I've added it to my wallet",
             "detected": "Card installed. Moving on in a moment.",
@@ -276,42 +287,42 @@
             "installedSummary": "{count, plural, =1 {Your card is installed on 1 device.} other {Your card is installed on # devices.}}",
             "installAnotherCta": "Install on another device",
             "timeoutTitle": "Still here?",
-            "timeoutBody": "We paused listening for new signups after 5 minutes. Tap retry to keep watching.",
+            "timeoutBody": "We paused listening for new sign-ups after 5 minutes. Tap retry to keep watching.",
             "retry": "Resume listening"
           },
           "stamp": {
-            "title": "Stamp yourself",
-            "subtitle": "Every tap fires a real notification to your phone.",
+            "title": "Send yourself a stamp",
+            "subtitle": "Each tap fires a real notification to your phone. Exactly what your customers will get.",
             "prereqTitle": "Install your card first",
-            "prereqBody": "Go back to the previous step and add the card to your wallet. Without it, no notification lands.",
+            "prereqBody": "Go back to the previous step and add the card to your wallet. Without it, no notification can land.",
             "readyTitle": "Ready to stamp",
-            "readyBody": "Tap below. We fire a real stamp; your phone buzzes within a few seconds.",
-            "firstStampLandedTitle": "Did you feel that?",
-            "firstStampLandedBody": "That buzz is what your customers will feel every time you stamp their card. Same notification, same timing, same flow. Send one more to get the rhythm.",
+            "readyBody": "Tap below. Your phone buzzes within a few seconds.",
+            "firstStampLandedTitle": "That's the feel",
+            "firstStampLandedBody": "That's exactly what your customers will feel every time you stamp them. Same buzz, same timing, same flow. Send one more to get the rhythm.",
             "keepStampingTitle": "Send one more",
-            "keepStampingBody": "One more tap fires a second real notification. The short wait between them is what makes each one buzz on its own instead of getting merged.",
+            "keepStampingBody": "Another tap fires a second real notification. The short wait between them is what keeps each one buzzing on its own.",
             "demoCompleteTitle": "You've got the feel for it",
-            "demoCompleteBody": "That's the buzz your customers will feel every time. Whenever you're ready, we'll move on.",
+            "demoCompleteBody": "Whenever you're ready, we'll move on.",
             "sendCta": "Send the test stamp",
             "sendAnotherCta": "Send another stamp",
             "watching": "Watching for the stamp…",
-            "cooldownCta": "Wait {seconds}s for the next notification…",
-            "appleWalletHint": "Apple Wallet groups rapid updates. Leaving roughly 20s between stamps gives each notification its own buzz.",
-            "googleWalletHint": "On Google Wallet, the card only refreshes once closed. Close it and reopen to see the new stamp.",
+            "cooldownCta": "Next stamp in {seconds}s",
+            "appleWalletHint": "Apple Wallet groups rapid updates. Leaving roughly 20 seconds between stamps gives each notification its own buzz.",
+            "googleWalletHint": "On Google Wallet, the card only refreshes once closed. Close and reopen to see the new stamp.",
             "deliveryDisclosure": {
               "summary": "Notification didn't appear? The stamp was still recorded.",
               "appleTitle": "On Apple Wallet",
-              "appleBody": "Apple groups rapid updates and decides when to deliver them based on battery, Wi-Fi, and cellular conditions. A banner may land in seconds — or minutes. The pass on the lock screen refreshes on its own as soon as the device wakes with good conditions.",
+              "appleBody": "Apple groups updates based on battery, Wi-Fi, and cellular conditions. A banner may take seconds or minutes. The card on your lock screen refreshes as soon as your phone wakes with a good signal.",
               "googleTitle": "On Google Wallet",
-              "googleBody": "The pass only refreshes after it's been closed. Close the wallet and reopen the card to see the new stamp.",
-              "reassuranceTitle": "The stamp is registered",
-              "reassuranceBody": "Even if the notification or the on-card preview hasn't caught up, the count is already saved on the server. When you scan this customer next time, you'll see the real, up-to-date count."
+              "googleBody": "The card only refreshes after it's been closed. Close the wallet and reopen the card to see the new stamp.",
+              "reassuranceTitle": "The stamp is saved",
+              "reassuranceBody": "Even if the notification or the card preview hasn't caught up, the count is already on our server. Next time you scan this customer, you'll see the real, up-to-date count."
             },
             "stampsLabel": "Stamps on your card",
             "justStamped": "Stamp added",
             "multiDeviceHint": "{count, plural, =1 {} other {Each tap stamps all # installed devices at once.}}",
-            "fallback": "No buzz yet? The notification can take a few seconds. Try again in a moment.",
-            "customisationHint": "This is just the default message. You can rewrite it, add new ones at specific stamp counts, or turn notifications off entirely, anytime from the notifications page in your dashboard."
+            "fallback": "No buzz yet? Notifications can take a few seconds. Try again in a moment.",
+            "customisationHint": "This is the default message. You can rewrite it, add custom messages at specific stamp counts, or turn notifications off entirely from your notifications settings."
           }
         }
       },
@@ -319,32 +330,32 @@
         "title": "Your first broadcast",
         "steps": {
           "intro": {
-            "title": "Broadcasts, in one minute",
-            "subtitle": "A notification you send manually to every installed card at once.",
+            "title": "Broadcasts, explained",
+            "subtitle": "One message you send manually to every customer who has your card.",
             "whatItIsTitle": "What it is",
-            "whatItIsBody": "One notification, sent to every customer with your card installed. Useful for limited-time offers, events, new menu items, or anything you'd post on your socials.",
-            "differentFromTitle": "Different from automatic messages",
-            "differentFromBody": "Stamp-added and reward-earned messages fire by themselves when something happens. Broadcasts are the opposite: you decide when, you decide what.",
+            "whatItIsBody": "A single notification sent to every customer who has your card installed. Useful for limited-time offers, events, new menu items, or anything you'd post on social media.",
+            "differentFromTitle": "Different from automatic notifications",
+            "differentFromBody": "Stamp and reward notifications fire by themselves when something happens. Broadcasts are the opposite: you decide when, you decide what.",
             "audienceOfOneTitle": "Right now your audience is you",
-            "audienceOfOneBody": "The only installed card so far is yours. So the broadcast you write next lands on your own phone. That's exactly the experience your customers will get when you have an audience."
+            "audienceOfOneBody": "The only installed card so far is yours, so this broadcast will land on your own phone. That's the same experience your audience will get later."
           },
           "compose": {
-            "title": "Write a broadcast and send it to yourself",
+            "title": "Write a broadcast",
             "subtitle": "One short message. It lands on your phone the moment you tap send.",
-            "composeBody": "Write something you'd actually send to customers. It lands straight on your phone and on the back of your card.",
+            "composeBody": "Write something you'd actually send to customers. It lands straight on their phone and on the back of their card.",
             "titleLabel": "Title",
-            "titlePlaceholder": "e.g. Café du Coin",
-            "titleHint": "Defaults to your loyalty program name. Appears in bold on the lock screen.",
+            "titlePlaceholder": "e.g. Happy hour today",
+            "titleHint": "Shows in bold on the lock screen. Be specific. Defaults to your program name.",
             "bodyLabel": "Message",
             "bodyPlaceholder": "Happy hour today, 5pm to 7pm. Show your card for 20% off.",
             "bodyHint": "{remaining} characters left",
             "estimating": "Counting recipients…",
-            "recipientsLine": "{count, plural, =0 {No installed cards yet. Try the previous step first.} =1 {This lands on your own phone.} other {# installed customers will receive this.}}",
-            "sendCta": "{count, plural, =1 {Send it to my phone} other {Send to # customers}}",
+            "recipientsLine": "{count, plural, =0 {No installed cards yet. Try the previous step first.} =1 {This will land on your own phone.} other {# installed customers will receive this.}}",
+            "sendCta": "{count, plural, =1 {Send to my phone} other {Send to # customers}}",
             "sendingLabel": "Sending…",
             "sentLabel": "Broadcast sent",
             "noRecipientsLabel": "Nobody to send to yet",
-            "sendingProgress": "Dispatching the push. Usually 10 to 20 seconds.",
+            "sendingProgress": "Dispatching. Usually 10 to 20 seconds.",
             "sendFailed": "The broadcast couldn't be sent. Try again in a moment.",
             "deliveredTitle": "{count, plural, =0 {No pushes delivered yet} =1 {Pushed to your phone} other {Pushed to # devices}}",
             "deliveredHint": "{count, plural, =1 {Same exact experience your customers will get when you broadcast to an audience.} other {{delivered} of {total} customers got the push. {skipped, plural, =0 {} =1 {1 customer skipped, card not installed.} other {# customers skipped, card not installed.}}}}"
@@ -352,24 +363,24 @@
         }
       },
       "team": {
-        "title": "Bring your team in",
-        "subtitle": "Two kinds of access, depending on what they need to do.",
+        "title": "Bring in your team",
+        "subtitle": "Two access levels, depending on what each person needs to do.",
         "rolesTitle": "The two roles",
         "adminRole": {
           "label": "Admin",
-          "description": "Can handle customers, send broadcasts, and grow the team. Can't change the program, edit the cards, or touch billing. Good for marketing or operations staff."
+          "description": "Handles customers, sends broadcasts, and invites people. Can't change the loyalty rules, edit cards, or touch billing. Good for managers and marketing staff."
         },
         "scannerRole": {
           "label": "Scanner",
-          "description": "Stamps customers from a dedicated app on their phone. No dashboard access, no customer data, no settings. Good for staff working the counter."
+          "description": "Stamps customers from a dedicated app on their phone. No dashboard, no customer data, no settings. Good for staff working the counter."
         },
         "inviteLabel": "Send an invite",
-        "inviteHint": "They get an email invitation. You can remove their access anytime.",
+        "inviteHint": "They get an email invitation. You can revoke their access anytime.",
         "inviteCta": "Invite"
       },
       "recap": {
-        "title": "Look at what you've built",
-        "subtitle": "A real loyalty program, on real phones, sending real notifications. Quick recap before we talk plans.",
+        "title": "You've built a real loyalty program",
+        "subtitle": "Real card, real phones, real notifications. Quick recap before we talk plans.",
         "programDetail": "{totalStamps} stamps for \"{rewardName}\"",
         "stampsLabel": "{count, plural, =0 {No stamps sent yet} =1 {1 stamp sent to your phone} other {# stamps sent to your phone}}",
         "broadcastLabel": {
@@ -382,21 +393,21 @@
       "plan": {
         "title": "Choose your plan",
         "subtitle": "Pick a plan now, or keep exploring on your 30-day Pro trial. You can change anytime.",
-        "subtitleFounding": "Founding partners get 50% off — locked for life. Pick a plan now to claim the discount, or keep exploring on your 30-day Pro trial.",
+        "subtitleFounding": "Founding partners get 50% off, locked in for as long as your subscription stays active. Pick a plan now to claim the rate, or keep exploring on your 30-day Pro trial.",
         "keepTrialCta": "Decide later",
-        "recommendedBadge": "Recommended",
+        "recommendedBadge": "Most popular",
         "perMonth": "/mo",
         "youdLose": "You'd lose:",
         "andMore": "+ {count} more…",
         "confirmTitle": "Launch on {tierName}?",
-        "confirmBodyReverts": "On {tierName}, some of what's set up on your Pro trial will change:",
+        "confirmBodyReverts": "On {tierName}, some of what you set up during your Pro trial will change:",
         "confirmBodyNoLosses": "Everything you've set up will work on {tierName}.",
         "confirmCancel": "Choose another plan",
         "confirmCta": "Launch my program",
         "tiers": {
           "starter": {
             "label": "Starter",
-            "tagline": "The essentials.",
+            "tagline": "Everything you need to launch.",
             "cta": "Pick Starter",
             "feat1": "1 card design",
             "feat2": "Default notification messages",
@@ -404,7 +415,7 @@
           },
           "growth": {
             "label": "Growth",
-            "tagline": "Scale your loyalty.",
+            "tagline": "For businesses ready to grow.",
             "cta": "Pick Growth",
             "feat1": "Multiple card designs",
             "feat2": "Custom notification messages",
@@ -415,7 +426,7 @@
             "label": "Pro",
             "tagline": "Everything, unlocked.",
             "cta": "Pick Pro",
-            "feat1": "Unlimited designs + milestones",
+            "feat1": "Unlimited designs and milestones",
             "feat2": "Unlimited broadcasts",
             "feat3": "Unlimited team",
             "feat4": "Geofenced reminders",
