@@ -352,7 +352,7 @@
           "notSent": "Aucune diffusion envoyée"
         },
         "teamLabel": "{count, plural, =0 {Équipe : juste vous pour le moment} =1 {Équipe : vous et 1 invitation en attente} other {Équipe : vous et # invitations en attente}}",
-        "nextLabel": "Choisissez votre offre"
+        "nextLabel": "Choisir mon offre"
       },
       "plan": {
         "title": "Choisissez votre offre",
