@@ -7,8 +7,7 @@ import { EditorCard } from '@/components/card/EditorCard';
 import { useBusiness } from '@/contexts/business-context';
 import { useDefaultProgram } from '@/hooks/use-programs';
 import { useDesignForm } from '@/components/design/forms/DesignFormContext';
-import type { BusinessInfoEntry } from '@/types/business';
-import type { PassField } from '@/types';
+import { entryToBackPassField } from '@/lib/business-info-utils';
 import {
   Sheet,
   SheetClose,
@@ -102,7 +101,7 @@ function useCardProps() {
   const hiddenKeys = new Set(formData.hidden_business_info_keys ?? []);
   const businessBackFields = businessInfo
     .filter((entry) => !hiddenKeys.has(entry.key))
-    .map((entry) => businessInfoToPassField(entry, tCardInfo));
+    .map((entry) => entryToBackPassField(entry, tCardInfo));
 
   const previewDesign = {
     ...formData,
@@ -122,61 +121,6 @@ function useCardProps() {
     totalStamps,
     previewStamps,
   };
-}
-
-interface ScheduleRow {
-  days: string;
-  open?: string;
-  close?: string;
-  closed?: boolean;
-}
-
-/** Converts a business-info entry into a back-field {label, value} pair for
- *  the preview. Uses the same per-type localised label as the dashboard's
- *  settings page so the preview matches what'll render on the real pass. */
-function businessInfoToPassField(
-  entry: BusinessInfoEntry,
-  t: (key: string) => string
-): PassField {
-  const label =
-    entry.type === 'custom'
-      ? ((entry.data.label as string) || t('custom'))
-      : t(entry.type);
-  return {
-    key: entry.key,
-    label,
-    value: formatBusinessInfoValue(entry),
-  };
-}
-
-function formatBusinessInfoValue(entry: BusinessInfoEntry): string {
-  switch (entry.type) {
-    case 'website':
-      return (entry.data.url as string) || '';
-    case 'phone':
-      return (entry.data.number as string) || '';
-    case 'email':
-      return (entry.data.email as string) || '';
-    case 'address':
-      return (entry.data.address as string) || '';
-    case 'custom':
-      return (entry.data.value as string) || '';
-    case 'hours': {
-      const schedule = (entry.data.schedule as ScheduleRow[]) || [];
-      return schedule
-        .filter((row) => (row.days ?? '').trim().length > 0)
-        .map((row) => {
-          if (row.closed) return `${row.days}: —`;
-          const open = (row.open ?? '').trim();
-          const close = (row.close ?? '').trim();
-          if (!open && !close) return row.days;
-          return `${row.days}: ${open} – ${close}`;
-        })
-        .join('\n');
-    }
-    default:
-      return '';
-  }
 }
 
 function DesktopPreview({ showBack }: { showBack: boolean }) {

@@ -16,6 +16,8 @@ import { useActiveDesign } from '@/hooks/use-designs';
 import { useDefaultProgram } from '@/hooks/use-programs';
 import { getCustomers } from '@/api/customers';
 import { getPendingInvitations } from '@/api/invitations';
+import { entryToBackPassField } from '@/lib/business-info-utils';
+import type { BusinessInfoEntry } from '@/types/business';
 import { useWizardStep } from '../../wizard-context';
 
 /**
@@ -26,6 +28,7 @@ import { useWizardStep } from '../../wizard-context';
 export function RecapStep() {
   const t = useTranslations('onboardingBusiness.chapters.recap');
   const tDesign = useTranslations('designEditor.editor');
+  const tCardInfo = useTranslations('settings.cardInfo.types');
   const ctx = useWizardStep();
   const { currentBusiness } = useBusiness();
 
@@ -82,6 +85,27 @@ export function RecapStep() {
   const totalStamps = program?.config?.total_stamps ?? 10;
   const rewardName = program?.reward_name ?? '';
 
+  // Mirror DesignPreviewPane: the back of the card shows card-specific
+  // back_fields FIRST, then the business-info entries the owner enabled
+  // for this card (i.e. not in hidden_business_info_keys). Without this
+  // merge, brand-new cards — which start with empty back_fields — show
+  // a blank back in the recap even when the owner has populated their
+  // business info in settings.
+  const backDesign = design
+    ? (() => {
+        const businessInfo =
+          (currentBusiness?.settings?.business_info as BusinessInfoEntry[]) || [];
+        const hiddenKeys = new Set(design.hidden_business_info_keys ?? []);
+        const businessBackFields = businessInfo
+          .filter((entry) => !hiddenKeys.has(entry.key))
+          .map((entry) => entryToBackPassField(entry, tCardInfo));
+        return {
+          ...design,
+          back_fields: [...(design.back_fields ?? []), ...businessBackFields],
+        };
+      })()
+    : null;
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -93,21 +117,33 @@ export function RecapStep() {
 
       {design && (
         <div className="flex flex-col items-center gap-3">
-          <div className="w-full max-w-[260px]">
-            <EditorCard
-              design={design}
-              // Show the card fully stamped — the recap is about
-              // celebrating what they built, not auditing how many test
-              // stamps they fired. A half-stamped card on the trophy step
-              // reads as "incomplete."
-              previewStamps={totalStamps}
-              totalStamps={totalStamps}
-              showBack={showBack}
-              // Let the title fall through to `design.organization_name`
-              // (same approach as DesignPreviewPane). Passing the business
-              // name would inject a title the user explicitly left blank
-              // in the design editor.
-            />
+          {/* card-flip pattern (see DesignEditorV2): keep both faces in the
+              DOM so the back inherits the front's outer dimensions — toggling
+              `showBack` alone re-mounts the wrapper and the back ends up with
+              a different shadow/margin profile than the front. */}
+          <div className="w-full max-w-[260px] card-flip-container">
+            <div className={`card-flip-inner ${showBack ? 'flipped' : ''}`}>
+              <div className="card-flip-front">
+                <EditorCard
+                  design={design}
+                  // Show the card fully stamped — the recap is about
+                  // celebrating what they built, not auditing how many test
+                  // stamps they fired. A half-stamped card on the trophy step
+                  // reads as "incomplete."
+                  previewStamps={totalStamps}
+                  totalStamps={totalStamps}
+                  showBack={false}
+                />
+              </div>
+              <div className="card-flip-back">
+                <EditorCard
+                  design={backDesign ?? design}
+                  previewStamps={totalStamps}
+                  totalStamps={totalStamps}
+                  showBack
+                />
+              </div>
+            </div>
           </div>
           <button
             type="button"

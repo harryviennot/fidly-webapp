@@ -83,8 +83,12 @@ function getCroppedCanvas(
     outW = outputWidth;
     outH = Math.round(outW / aspect);
   } else {
+    // Derive H from W via `aspect` rather than rounding both sides
+    // independently. With aspect=1 and large naturals, independent
+    // rounding produces off-by-one canvases (e.g. 1080x1079) that the
+    // backend's square check rejects.
     outW = Math.round(srcW);
-    outH = Math.round(srcH);
+    outH = Math.round(outW / aspect);
   }
 
   canvas.width = outW;
