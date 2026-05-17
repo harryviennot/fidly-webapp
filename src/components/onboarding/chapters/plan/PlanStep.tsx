@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Check } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -18,57 +18,75 @@ import { useWizardStep } from '../../wizard-context';
 const TIERS: readonly TierId[] = ['starter', 'growth', 'pro'] as const;
 
 /**
- * Final wizard step. Picks the subscription tier and finalises the wizard.
+ * Final wizard step. Selecting a tier here is LOCAL only — no API call —
+ * until the user clicks "Launch my program" (the footer Continue). At that
+ * point we fire a single `changeTier` request and finalise the wizard.
+ * No confirmation dialog: the user has already committed by reading the
+ * cards and pressing Launch.
+ *
+ * Why this flow:
+ *  - Every new business is created on a Pro trial so feature limits never
+ *    block the wizard's setup steps. The plan step is when we lock that
+ *    in or downgrade to Starter / Growth.
+ *  - Each card click only mutates local React state — the user can flip
+ *    selection a few times to compare price + features without hitting
+ *    `/billing/change-tier` every time.
+ *  - Continue is disabled until the user has picked a tier — being "on Pro"
+ *    isn't a choice; it's a default. We force the explicit pick before
+ *    they leave the wizard.
  *
  * Visual contract mirrors the showcase landing site's `FoundingPartnerStep`
- * (`showcase/components/onboarding/steps/FoundingPartnerStep.tsx` on the
- * `dev` branch) so customers see the same plan picker they previewed before
- * signing up:
- *  - 3 cards in a `md:grid-cols-3` grid, capped at `max-w-4xl`
- *  - Growth is the highlighted tier (accent ring + "MOST POPULAR" badge)
- *  - Pro is locked behind a "COMING SOON" pill, dimmed to 50%
- *  - Founding-partner pricing: strikethrough regular price + bold founding
- *    price + "/mo for life" — gated on the business's `is_founding_partner`
- *    flag AND `isFoundingProgramOpen()`. After the cutoff, the discount UI
- *    disappears even for existing FPs (their underlying Stripe price stays
- *    locked server-side).
- *
- * Non-blocking: picking a tier PATCHes `subscription_tier` via the existing
- * billing endpoint and advances the wizard. No Stripe checkout, no payment
- * gate — payment method is linked later from the dashboard's billing tab.
+ * on the `dev` branch.
  */
 export function PlanStep() {
   const t = useTranslations('onboardingBusiness.chapters.plan');
   const tp = useTranslations('pricing');
   const tErr = useTranslations('onboardingBusiness.errors');
-  const { currentBusiness, refetch: refetchBusiness } = useBusiness();
+  const { currentBusiness } = useBusiness();
   const ctx = useWizardStep();
 
+  const businessId = currentBusiness?.id;
+  const currentTier = currentBusiness?.subscription_tier;
   const isFoundingPartner = !!currentBusiness?.is_founding_partner;
   const foundingOpen = isFoundingProgramOpen();
   const showFoundingPricing = isFoundingPartner && foundingOpen;
+  const showcaseUrl =
+    process.env.NEXT_PUBLIC_SHOWCASE_URL || 'https://stampeo.app';
+
+  // Pre-select if the user has already chosen Starter / Growth in a prior
+  // visit. For the default Pro trial we leave selection blank so the user
+  // is forced to make an explicit pick.
+  const [selectedTier, setSelectedTier] = useState<TierId | null>(() => {
+    if (currentTier === 'starter' || currentTier === 'growth') return currentTier;
+    return null;
+  });
 
   useEffect(() => {
-    // No pre-submit work — picking a tier inside the grid is the action.
-    // We still register an ok-handler so the footer Continue (which
-    // finalises with the current tier) advances cleanly.
-    ctx.setSubmitHandler(async () => ({ ok: true }));
-    return () => ctx.setSubmitHandler(null);
-  }, [ctx]);
+    ctx.setCanProceed(!!selectedTier);
+  }, [ctx, selectedTier]);
 
-  const handleSelectTier = async (tier: TierId) => {
-    if (!currentBusiness?.id) return;
-    if (tier === 'pro') return; // disabled — coming soon
-    try {
-      if (currentBusiness.subscription_tier !== tier) {
-        await changeTier(currentBusiness.id, tier);
-        await refetchBusiness();
+  useEffect(() => {
+    ctx.setSubmitHandler(async () => {
+      if (!selectedTier || !businessId) return { ok: false };
+
+      // No tier change → just finalise, skip the API call.
+      if (currentTier === selectedTier) return { ok: true };
+
+      try {
+        await changeTier(businessId, selectedTier);
+        return { ok: true };
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
+        return {
+          ok: false,
+          reason: err instanceof Error ? err.message : tErr('saveFailed'),
+        };
       }
-      ctx.advance();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
-    }
-  };
+    });
+    return () => ctx.setSubmitHandler(null);
+  }, [ctx, selectedTier, businessId, currentTier, tErr]);
+
+  const hasSelection = selectedTier !== null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -92,15 +110,46 @@ export function PlanStep() {
             key={tier}
             tier={tier}
             isFoundingPartner={isFoundingPartner}
-            onSelect={() => handleSelectTier(tier)}
+            isSelected={selectedTier === tier}
+            hasSelection={hasSelection}
+            onSelect={() => {
+              if (tier === 'pro') return; // disabled — coming soon
+              setSelectedTier(tier);
+            }}
             tp={tp}
           />
         ))}
       </div>
 
-      <p className="wiz-helper text-center text-[#9A9A9A] max-w-2xl mx-auto">
-        {tp('ctaSubtext')}
-      </p>
+      <div className="flex flex-col items-center gap-2 max-w-2xl mx-auto text-center">
+        <p className="wiz-helper text-[#7A7A7A]">
+          {tp('ctaSubtext')}
+        </p>
+        <p className="text-[11px] text-[#9A9A9A] leading-relaxed">
+          {tp.rich('legalNotice', {
+            terms: (chunks) => (
+              <a
+                href={`${showcaseUrl}/terms`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-[var(--foreground)] transition-colors"
+              >
+                {chunks}
+              </a>
+            ),
+            privacy: (chunks) => (
+              <a
+                href={`${showcaseUrl}/privacy`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-[var(--foreground)] transition-colors"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
+        </p>
+      </div>
     </div>
   );
 }
@@ -108,48 +157,96 @@ export function PlanStep() {
 interface TierCardProps {
   tier: TierId;
   isFoundingPartner: boolean;
+  isSelected: boolean;
+  /** True when ANY tier has been selected — used to demote Growth's
+   *  default "recommended" treatment so two cards don't fight for the
+   *  accent color simultaneously. */
+  hasSelection: boolean;
   onSelect: () => void;
   tp: ReturnType<typeof useTranslations>;
 }
 
-function TierCard({ tier, isFoundingPartner, onSelect, tp }: TierCardProps) {
+function TierCard({
+  tier,
+  isFoundingPartner,
+  isSelected,
+  hasSelection,
+  onSelect,
+  tp,
+}: TierCardProps) {
   const isPro = tier === 'pro';
   const isGrowth = tier === 'growth';
+
+  // Growth always carries the "most popular" framing — accent-colored when
+  // nothing is selected (or when Growth itself is the pick), black-toned
+  // when a different tier is selected so the chosen card stays
+  // unambiguous but Growth doesn't lose its recommendation badge entirely.
+  const isGrowthAccented = isGrowth && (isSelected || !hasSelection);
+  const isGrowthDimmed = isGrowth && hasSelection && !isSelected;
+
+  // Resolve the outer border color in a single expression so the border-
+  // WIDTH stays `border-2` on every card and selecting a tier doesn't
+  // bump dimensions on its neighbours (no ring-vs-border layout swap).
+  // Growth-dimmed gets a muted neutral instead of pure foreground so it
+  // still reads as "recommended" without competing with the chosen card.
+  const borderColorClass = isPro
+    ? 'border-[var(--border)]'
+    : isSelected
+      ? 'border-[var(--accent)]'
+      : isGrowthAccented
+        ? 'border-[var(--accent)]'
+        : isGrowthDimmed
+          ? 'border-[#9A9A9A]'
+          : 'border-[var(--border)]';
 
   const { displayPrice, regularPrice, isFoundingDiscount } = effectivePrice(
     tier,
     isFoundingPartner
   );
 
-  // Features come from i18n as an array. `tp.raw` returns the parsed JSON
-  // value so we can iterate the list directly.
   const features = (tp.raw(`${tier}.features`) as string[]) ?? [];
 
   return (
     <div
       className={cn(
-        'relative flex flex-col rounded-2xl border p-5 bg-white transition-all',
-        isPro
-          ? 'opacity-50 border-[var(--border)]'
-          : isGrowth
-            ? 'border-[var(--accent)] shadow-lg ring-1 ring-[var(--accent)]'
-            : 'border-[var(--border)]'
+        'relative flex flex-col rounded-2xl border-2 p-5 bg-white transition-colors',
+        borderColorClass,
+        isPro && 'opacity-50',
+        isSelected && 'shadow-lg',
+        isGrowthAccented && !isSelected && 'shadow-md'
       )}
     >
-      {isGrowth && (
+      {/* Top badge: SELECTED beats COMING SOON beats POPULAR (Growth keeps
+          its popular badge whether it's the chosen tier or someone else
+          was picked — only Growth itself becoming the selected card
+          replaces the badge with "SELECTED"). */}
+      {isSelected && !isPro ? (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-white whitespace-nowrap">
-            {tp('popular')}
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-white whitespace-nowrap">
+            <Check className="w-3 h-3" weight="bold" />
+            {tp('selected')}
           </span>
         </div>
-      )}
-      {isPro && (
+      ) : isPro ? (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--paper)] text-[#7A7A7A] whitespace-nowrap">
             {tp('comingSoon')}
           </span>
         </div>
-      )}
+      ) : isGrowth ? (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span
+            className={cn(
+              'text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full whitespace-nowrap',
+              isGrowthDimmed
+                ? 'bg-[#9A9A9A] text-white'
+                : 'bg-[var(--accent)] text-white'
+            )}
+          >
+            {tp('popular')}
+          </span>
+        </div>
+      ) : null}
 
       <div className="mb-4 mt-1">
         <h3
@@ -231,7 +328,7 @@ function TierCard({ tier, isFoundingPartner, onSelect, tp }: TierCardProps) {
       </div>
 
       {isPro ? (
-        <div className="w-full py-3 px-4 text-center wiz-body-sm font-semibold rounded-full border-2 border-[var(--border)] text-[#9A9A9A] cursor-not-allowed">
+        <div className="w-full h-11 px-4 flex items-center justify-center wiz-body-sm font-semibold rounded-full border-2 border-[var(--border)] text-[#9A9A9A] cursor-not-allowed">
           {tp('ctaComingSoon')}
         </div>
       ) : (
@@ -239,13 +336,20 @@ function TierCard({ tier, isFoundingPartner, onSelect, tp }: TierCardProps) {
           type="button"
           onClick={onSelect}
           className={cn(
-            'w-full py-3 px-4 wiz-body-sm font-semibold rounded-full transition-all duration-200',
-            isGrowth
-              ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:scale-[1.01] hover:shadow-lg hover:shadow-[var(--accent)]/25'
-              : 'border-2 border-[var(--foreground)] text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-white'
+            // Fixed height + flex layout — keeps the button identical in
+            // size whether it renders "Commencer" or the "✓ Sélectionné"
+            // icon+label combo. Without `h-11` the inline-flex wrapper for
+            // the selected state shifts the button height by a hair.
+            'w-full h-11 px-4 flex items-center justify-center gap-1.5 wiz-body-sm font-semibold rounded-full transition-colors duration-200 border-2',
+            isSelected
+              ? 'bg-[var(--accent)] border-[var(--accent)] text-white cursor-default shadow-md shadow-[var(--accent)]/25'
+              : isGrowthAccented
+                ? 'bg-[var(--accent)] border-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:border-[var(--accent-hover)] hover:shadow-lg hover:shadow-[var(--accent)]/25'
+                : 'bg-white border-[var(--foreground)] text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-white'
           )}
         >
-          {tp('cta')}
+          {isSelected && <Check className="w-3.5 h-3.5" weight="bold" />}
+          {isSelected ? tp('selected') : tp('cta')}
         </button>
       )}
     </div>

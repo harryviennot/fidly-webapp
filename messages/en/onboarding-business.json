@@ -356,11 +356,11 @@
         "perMonth": "/mo",
         "youdLose": "You'd lose:",
         "andMore": "+ {count} more…",
-        "downgradeTitle": "Switch to Starter?",
-        "downgradeBody": "Some of what you've set up isn't available on Starter:",
-        "downgradeNoLosses": "Nothing you've configured will change.",
-        "downgradeCancel": "Cancel",
-        "downgradeConfirm": "Switch to Starter",
+        "confirmTitle": "Launch on {tierName}?",
+        "confirmBodyReverts": "On {tierName}, some of what's set up on your Pro trial will change:",
+        "confirmBodyNoLosses": "Everything you've set up will work on {tierName}.",
+        "confirmCancel": "Choose another plan",
+        "confirmCta": "Launch my program",
         "tiers": {
           "starter": {
             "label": "Starter",

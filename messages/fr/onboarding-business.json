@@ -356,11 +356,11 @@
         "perMonth": "/mois",
         "youdLose": "Vous perdriez :",
         "andMore": "+ {count} autre(s)…",
-        "downgradeTitle": "Passer à Starter ?",
-        "downgradeBody": "Certaines fonctionnalités configurées ne sont pas disponibles sur Starter :",
-        "downgradeNoLosses": "Aucune de vos configurations ne sera affectée.",
-        "downgradeCancel": "Annuler",
-        "downgradeConfirm": "Passer à Starter",
+        "confirmTitle": "Lancer sur {tierName} ?",
+        "confirmBodyReverts": "Sur {tierName}, certaines fonctionnalités de votre essai Pro vont changer :",
+        "confirmBodyNoLosses": "Tout ce que vous avez configuré fonctionnera sur {tierName}.",
+        "confirmCancel": "Choisir une autre offre",
+        "confirmCta": "Lancer mon programme",
         "tiers": {
           "starter": {
             "label": "Starter",

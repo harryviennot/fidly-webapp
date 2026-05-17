@@ -86,3 +86,16 @@ export function computeStarterReverts(args: ComputeRevertsArgs = {}): RevertItem
 
   return items;
 }
+
+/**
+ * Returns the reverts the user would experience when going from a Pro trial
+ * to Growth. Pro features that aren't shipped yet (multi-location,
+ * geofencing, etc.) are intentionally not listed — Growth keeps everything
+ * a wizard-completer has actually configured. Returns an empty list today;
+ * left as a function so callers can branch on tier consistently and the
+ * confirm dialog renders the "Everything will work on Growth" copy path.
+ */
+export function computeGrowthReverts(_args: ComputeRevertsArgs = {}): RevertItem[] {
+  void _args;
+  return [];
+}
