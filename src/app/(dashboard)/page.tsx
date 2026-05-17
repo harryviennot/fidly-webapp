@@ -94,7 +94,7 @@ export default function DashboardPage() {
             label: t("dashboard.openScanner"),
             icon: <QrCodeIcon className="w-4 h-4" weight="bold" />,
             href: process.env.NEXT_PUBLIC_SCAN_URL,
-            variant: "secondary",
+            variant: "primary",
           },
         ] : undefined}
       />

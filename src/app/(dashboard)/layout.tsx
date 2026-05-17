@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { AppSidebar, DashboardHeader } from "@/components/dashboard";
+import { AppSidebar } from "@/components/dashboard";
 import { RoleGuard } from "@/components/auth/role-guard";
 import { useBusiness } from "../../contexts/business-context";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -142,7 +142,6 @@ export default function AdminLayout({
           {currentBusiness.billing_status === "suspended" && <SuspendedBanner />}
           <OverLimitBanner />
           <TrialMobileBanner />
-          <DashboardHeader />
           <main className="p-4 md:p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>

@@ -15,6 +15,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Eye, SlidersHorizontal, Palette, Stamp, TextT, ArrowUDownLeft } from '@phosphor-icons/react';
 import { getEntryLabel, getEntryPreview } from '@/lib/business-info-utils';
 import type { BusinessInfoEntry } from '@/types/business';
@@ -718,7 +719,10 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         {/* Header row — always full-width above both columns */}
         {(headerLeft || headerRight) && (
           <div className="flex items-center justify-between mb-5">
-            {headerLeft}
+            <div className="flex items-center gap-2 min-w-0">
+              <SidebarTrigger className="md:hidden -ml-1 shrink-0" />
+              {headerLeft}
+            </div>
             <div className="flex items-center gap-3">
               <span
                 className={`text-xs text-muted-foreground transition-opacity duration-300 ${draftStatus === 'saved' ? 'opacity-100' : 'opacity-0'
