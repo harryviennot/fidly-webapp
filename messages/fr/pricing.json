@@ -1,11 +1,53 @@
 {
   "pricing": {
     "foundingPartner": "FONDATEUR",
-    "forLife": "/mois à vie",
+    "popular": "LE PLUS POPULAIRE",
+    "comingSoon": "BIENTÔT",
     "perMonth": "/mois",
+    "forLife": "/mois à vie",
+    "cta": "Commencer",
+    "ctaComingSoon": "Bientôt disponible",
+    "ctaSubtext": "Sans carte bancaire · Annulez quand vous voulez",
+    "legalNotice": "En confirmant votre abonnement, vous acceptez nos <terms>Conditions d'utilisation</terms> et reconnaissez notre <privacy>Politique de confidentialité</privacy>.",
     "countdown": {
       "daysHours": "Tarif fondateur — fin dans {days}j {hours}h",
       "hoursMinutes": "Tarif fondateur — fin dans {hours}h {minutes}m"
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Tout ce qu'il faut pour lancer votre programme de fidélité",
+      "featuresLabel": "Tout inclus :",
+      "features": [
+        "1 modèle de carte actif",
+        "Clients et scans illimités",
+        "2 membres d'équipe (propriétaire + 1)",
+        "Notifications push automatiques",
+        "Tableau de bord et statistiques de base"
+      ]
+    },
+    "growth": {
+      "name": "Growth",
+      "tagline": "Pour les commerces prêts à développer leur relation client",
+      "featuresLabel": "Tout le plan Starter, plus :",
+      "features": [
+        "Tampons ou points (au choix)",
+        "Membres d'équipe illimités",
+        "Messages de notification personnalisés",
+        "3 campagnes promo/mois",
+        "Tendances et analytiques"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "Multi-établissement, segmentation et outils avancés",
+      "featuresLabel": "Tout le plan Growth, plus :",
+      "features": [
+        "Plusieurs modèles de carte actifs",
+        "Support multi-établissement",
+        "Notifications de géolocalisation",
+        "Campagnes illimitées + segmentation",
+        "Analytiques avancées et rétention"
+      ]
     }
   }
 }
