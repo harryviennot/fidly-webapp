@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "bun run scripts/dev.ts",
+    "publicdev": "PUBLIC_DEV=1 bun run scripts/dev.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

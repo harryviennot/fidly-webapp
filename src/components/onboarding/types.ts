@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 /**
  * Optional background-save function returned alongside `{ ok: true }` from a
@@ -40,8 +40,18 @@ export interface WizardStepContextValue {
   setCanSkip: (canSkip: boolean) => void;
   /** Step declares it's mid-async-work; shell disables the footer accordingly. */
   setIsBusy: (busy: boolean) => void;
-  /** Override the primary CTA label on the footer for this step (e.g. "Let's go" on Welcome). Pass null to reset. */
-  setNextLabel: (label: string | null) => void;
+  /**
+   * Override the primary CTA label on the footer for this step (e.g.
+   * "Let's go" on Welcome). Pass `null` to reset to the shell's default.
+   *
+   * Accepts a ReactNode so callers can render responsive variants — e.g.
+   * a `<>` fragment with two spans, one visible on mobile and one on
+   * desktop. The shell uses this pattern internally for the design
+   * chapter so the long "Concevoir ma carte" / "Enregistrer mes
+   * tampons" labels collapse to a short "Continue" / "Continuer" on
+   * mobile where they'd otherwise wrap to two lines.
+   */
+  setNextLabel: (label: ReactNode) => void;
   /**
    * Step declares whether the primary CTA should be enabled. Default `true`.
    * Use to mute the Continue button until required fields validate.

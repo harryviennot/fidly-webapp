@@ -26,9 +26,13 @@
         },
         "design": {
           "branding": "Design my card",
+          "branding_short": "Continue",
           "stamps": "Save my stamps",
+          "stamps_short": "Continue",
           "content": "Save my card content",
-          "back": "Save my back side"
+          "content_short": "Continue",
+          "back": "Save my back side",
+          "back_short": "Continue"
         },
         "notifications": {
           "icon": "Save my icon"
@@ -244,6 +248,8 @@
             "manualConfirmCta": "I've added it to my wallet",
             "detected": "Card installed. Moving on in a moment.",
             "detectedReturning": "Card installed.",
+            "installedSummary": "{count, plural, =1 {Your card is installed on 1 device.} other {Your card is installed on # devices.}}",
+            "installAnotherCta": "Install on another device",
             "timeoutTitle": "Still here?",
             "timeoutBody": "We paused listening for new signups after 5 minutes. Tap retry to keep watching.",
             "retry": "Resume listening"
@@ -278,6 +284,7 @@
             },
             "stampsLabel": "Stamps on your card",
             "justStamped": "Stamp added",
+            "multiDeviceHint": "{count, plural, =1 {} other {Each tap stamps all # installed devices at once.}}",
             "fallback": "No buzz yet? The notification can take a few seconds. Try again in a moment.",
             "customisationHint": "This is just the default message. You can rewrite it, add new ones at specific stamp counts, or turn notifications off entirely, anytime from the notifications page in your dashboard."
           }

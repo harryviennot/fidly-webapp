@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { CaretLeftIcon } from '@phosphor-icons/react';
 import type { SecondaryAction } from './types';
@@ -12,7 +13,7 @@ interface WizardFooterProps {
   isBusy: boolean;
   isFirst: boolean;
   isLast: boolean;
-  nextLabel?: string;
+  nextLabel?: ReactNode;
   /**
    * Optional secondary CTA rendered next to Continue. Same dimensions as
    * Continue but styled black/white. The design chapter uses this on mobile

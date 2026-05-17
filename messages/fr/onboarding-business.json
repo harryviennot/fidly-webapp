@@ -26,9 +26,13 @@
         },
         "design": {
           "branding": "Concevoir ma carte",
+          "branding_short": "Continuer",
           "stamps": "Enregistrer mes tampons",
+          "stamps_short": "Continuer",
           "content": "Enregistrer le contenu de ma carte",
-          "back": "Enregistrer le dos de ma carte"
+          "content_short": "Continuer",
+          "back": "Enregistrer le dos de ma carte",
+          "back_short": "Continuer"
         },
         "notifications": {
           "icon": "Enregistrer mon icône"
@@ -244,6 +248,8 @@
             "manualConfirmCta": "Je l'ai ajoutée à mon téléphone",
             "detected": "Carte installée. On passe à la suite dans un instant.",
             "detectedReturning": "Carte installée.",
+            "installedSummary": "{count, plural, =1 {Votre carte est installée sur 1 téléphone.} other {Votre carte est installée sur # téléphones.}}",
+            "installAnotherCta": "Installer sur un autre téléphone",
             "timeoutTitle": "Toujours là ?",
             "timeoutBody": "On a arrêté d'écouter les nouvelles inscriptions après 5 minutes. Appuyez sur « reprendre » pour continuer à surveiller.",
             "retry": "Reprendre l'écoute"
@@ -278,6 +284,7 @@
             },
             "stampsLabel": "Tampons sur votre carte",
             "justStamped": "Tampon ajouté",
+            "multiDeviceHint": "{count, plural, =1 {} other {Chaque appui tamponne les # téléphones installés à la fois.}}",
             "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",
             "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre tableau de bord."
           }
