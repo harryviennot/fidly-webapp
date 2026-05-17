@@ -101,9 +101,6 @@ export function InstallStep() {
   const [install, setInstall] = useState<InstallUrls>({});
   const [registering, setRegistering] = useState(false);
   const [copied, setCopied] = useState(false);
-  // When ≥1 device is installed, the install UI collapses behind a CTA.
-  // Toggling this re-exposes it so the owner can install on another phone.
-  const [showInstallAnother, setShowInstallAnother] = useState(false);
 
   const ownerName = (user?.user_metadata?.name as string | undefined) ?? '';
   const ownerEmail = user?.email ?? '';
@@ -213,7 +210,6 @@ export function InstallStep() {
         return;
       }
       setInstall({ passUrl: response.pass_url, googleWalletUrl: response.google_wallet_url });
-      setShowInstallAnother(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
     } finally {
@@ -222,10 +218,6 @@ export function InstallStep() {
   }, [businessId, ownerName, ownerEmail, ownerPhone, tErr]);
 
   const hasInstalls = installedCount >= 1;
-  // When we already have installs, hide the install UI behind the
-  // "install on another device" toggle to keep the page calm. Always
-  // expose it when there are zero installs.
-  const showInstallUi = !hasInstalls || showInstallAnother || !!install.passUrl;
   const actionCopy = isMobileDevice
     ? t('explanationActionMobile')
     : t('explanationActionDesktop');
@@ -243,57 +235,47 @@ export function InstallStep() {
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      {hasInstalls && (
-        <InstalledSummaryCard
-          count={installedCount}
-          showInstallAnother={showInstallAnother}
-          onToggleInstallAnother={() => setShowInstallAnother((v) => !v)}
+      <p className="wiz-body text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
+      <p className="wiz-body text-[var(--foreground)] leading-relaxed">{actionCopy}</p>
+
+      <SignupUrlCard url={signupUrl} copied={copied} onCopy={handleCopy} t={t} />
+
+      <QrCard
+        qrCode={qrCode}
+        signupUrl={signupUrl}
+        businessName={businessName}
+        collapsedByDefault={isMobileDevice}
+        t={t}
+      />
+
+      {isMobileDevice && !install.passUrl && (
+        <QuickInstallCard
+          registering={registering}
+          onInstall={handleQuickInstall}
           t={t}
         />
       )}
 
-      {showInstallUi && (
-        <>
-          <p className="wiz-body text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
-          <p className="wiz-body text-[var(--foreground)] leading-relaxed">{actionCopy}</p>
+      {isMobileDevice && install.passUrl && (
+        <WalletInstallCard
+          passUrl={install.passUrl}
+          googleWalletUrl={install.googleWalletUrl}
+          locale={locale}
+          t={t}
+        />
+      )}
 
-          <SignupUrlCard url={signupUrl} copied={copied} onCopy={handleCopy} t={t} />
-
-          <QrCard
-            qrCode={qrCode}
-            signupUrl={signupUrl}
-            businessName={businessName}
-            collapsedByDefault={isMobileDevice}
-            t={t}
-          />
-
-          {isMobileDevice && !install.passUrl && (
-            <QuickInstallCard
-              registering={registering}
-              onInstall={handleQuickInstall}
-              t={t}
-            />
-          )}
-
-          {isMobileDevice && install.passUrl && (
-            <WalletInstallCard
-              passUrl={install.passUrl}
-              googleWalletUrl={install.googleWalletUrl}
-              locale={locale}
-              t={t}
-            />
-          )}
-
-          {/* Always-on listener feedback while the install UI is exposed.
-              Reassures the owner that we'll detect the install automatically
-              the moment a push registration lands — either from this
-              device (quick-install) or from another phone scanning the QR. */}
-          {install.passUrl ? (
-            <WatchingCard t={t} />
-          ) : (
-            <PollingHintCard t={t} />
-          )}
-        </>
+      {/* Listener feedback / installed confirmation at the bottom.
+          Once ≥1 device has the pass we swap in the success summary, but
+          keep all of the instructional content above visible so adding
+          another device is a continuation of the same screen rather than a
+          context-switch behind a CTA. */}
+      {hasInstalls ? (
+        <InstalledSummaryCard count={installedCount} t={t} />
+      ) : install.passUrl ? (
+        <WatchingCard t={t} />
+      ) : (
+        <PollingHintCard t={t} />
       )}
 
     </div>
@@ -371,37 +353,21 @@ function WatchingCard({ t }: StatusCardProps) {
 
 interface InstalledSummaryCardProps {
   count: number;
-  showInstallAnother: boolean;
-  onToggleInstallAnother: () => void;
   t: ReturnType<typeof useTranslations>;
 }
 
-function InstalledSummaryCard({
-  count,
-  showInstallAnother,
-  onToggleInstallAnother,
-  t,
-}: InstalledSummaryCardProps) {
+function InstalledSummaryCard({ count, t }: InstalledSummaryCardProps) {
   return (
     <Card
       hover={false}
-      className="border-[var(--accent-200)] bg-[var(--accent-light)]/40 p-4 flex items-center justify-between gap-3 flex-wrap"
+      className="border-[var(--accent-200)] bg-[var(--accent-light)]/40 p-4 flex items-center gap-3"
     >
-      <div className="flex items-center gap-3 min-w-0">
-        <span className="flex-shrink-0 w-9 h-9 rounded-full bg-[var(--accent)] flex items-center justify-center">
-          <CheckIcon className="w-5 h-5 text-white" weight="bold" />
-        </span>
-        <p className="wiz-body font-medium text-[var(--foreground)]">
-          {t('installedSummary', { count })}
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={onToggleInstallAnother}
-        className="wiz-helper font-semibold text-[var(--accent)] hover:underline"
-      >
-        {showInstallAnother ? t('qrHide') : t('installAnotherCta')}
-      </button>
+      <span className="flex-shrink-0 w-9 h-9 rounded-full bg-[var(--accent)] flex items-center justify-center">
+        <CheckIcon className="w-5 h-5 text-white" weight="bold" />
+      </span>
+      <p className="wiz-body font-medium text-[var(--foreground)]">
+        {t('installedSummary', { count })}
+      </p>
     </Card>
   );
 }
