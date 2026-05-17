@@ -151,7 +151,7 @@ export function IconStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
@@ -162,7 +162,7 @@ export function IconStep() {
           step: same border, light surface, padding. Mobile stacks icon on
           top of preview so neither column gets squeezed; desktop keeps the
           side-by-side layout. */}
-      <div className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-white/50 dark:bg-white/5 p-4">
+      <div className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-white/50 dark:bg-white/5 p-4 animate-slide-up delay-80">
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-4 sm:items-start">
           {/* Icon section */}
           <div className="flex flex-col gap-2 sm:w-[96px] sm:shrink-0">

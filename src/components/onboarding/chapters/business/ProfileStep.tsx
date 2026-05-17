@@ -150,14 +150,14 @@ export function ProfileStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3 animate-slide-up delay-80">
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('typeLabel')}
           <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
@@ -194,7 +194,7 @@ export function ProfileStep() {
         )}
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3 animate-slide-up delay-160">
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('sizeLabel')}
           <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
@@ -211,7 +211,7 @@ export function ProfileStep() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3 animate-slide-up delay-240">
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('locationsLabel')}
           <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
@@ -228,7 +228,7 @@ export function ProfileStep() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3 animate-slide-up delay-300">
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('goalLabel')}
           <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>

@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import {
@@ -19,17 +18,16 @@ import { useAuth } from '@/contexts/auth-provider';
 import { useIsMobileDevice } from '@/hooks/use-mobile-device';
 import { getBusinessSignupQR } from '@/api/businesses';
 import { createPublicCustomer } from '@/api/customers';
-import { activateDesign } from '@/api/designs';
 import { QRCodeSkeleton } from '@/components/ui/qr-code-skeleton';
 import { downloadQrPng, downloadQrPdf } from '@/lib/qr-download';
 import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
-import { useDesigns, designKeys } from '@/hooks/use-designs';
-import type { CardDesign } from '@/types';
+import { useDesigns } from '@/hooks/use-designs';
 import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
 import { useBusinessInstalls } from './useBusinessInstalls';
 import { useDesignReady } from './useDesignReady';
+import { useEnsureActiveDesign } from './useEnsureActiveDesign';
 
 interface InstallUrls {
   passUrl?: string;
@@ -62,7 +60,6 @@ export function InstallStep() {
   const tErr = useTranslations('onboardingBusiness.errors');
   const locale = useLocale();
   const isMobileDevice = useIsMobileDevice();
-  const queryClient = useQueryClient();
   const { currentBusiness } = useBusiness();
   const { user } = useAuth();
   const { completeWithPayload, uncompleteStep, isStepCompleted } = useWizardProgress();
@@ -120,19 +117,29 @@ export function InstallStep() {
       .catch(() => { /* skeleton stays */ });
   }, [businessId, signupUrl]);
 
-  // ── Derive completion from installedCount ──────────────────────────
-  // Single direction: installedCount drives stepCompleted, not vice versa.
-  // We wait for the initial install fetch to finish to avoid uncompleting
-  // a real install during the loading window between mount and first
-  // refetch.
+  // ── Derive completion from installedCount + active design ──────────
+  // Single direction: install state drives stepCompleted, not vice versa.
+  // Activation is gated alongside installedCount so the user can't click
+  // Next on an inactive design — that scenario shipped a pass referencing
+  // a draft design and the wizard appeared broken on StampStep. We wait
+  // for the initial install fetch to finish to avoid uncompleting a real
+  // install during the loading window between mount and first refetch.
   useEffect(() => {
     if (installsLoading) return;
-    if (installedCount >= 1 && !stepCompleted) {
+    const installReady = installedCount >= 1 && isActive;
+    if (installReady && !stepCompleted) {
       void completeWithPayload({ chapter: 'first-stamp', step: 'install' }, {});
-    } else if (installedCount === 0 && stepCompleted) {
+    } else if (!installReady && stepCompleted) {
       void uncompleteStep({ chapter: 'first-stamp', step: 'install' });
     }
-  }, [installedCount, installsLoading, stepCompleted, completeWithPayload, uncompleteStep]);
+  }, [
+    installedCount,
+    isActive,
+    installsLoading,
+    stepCompleted,
+    completeWithPayload,
+    uncompleteStep,
+  ]);
 
   // ── Clear transient install URLs once we see an actual install ──────
   // Otherwise the "Add to Wallet" buttons linger forever on mobile.
@@ -145,35 +152,10 @@ export function InstallStep() {
   }, [ctx]);
 
   // Activation is deferred from BackStep to here — it requires strips to be
-  // ready (the backend returns 400 otherwise). Fire activate exactly once
-  // per (businessId, designId) once strips finish rendering. `activatingRef`
-  // guards against React Strict Mode's double-invoke and any rapid
-  // re-renders during the brief window before the response writes back into
-  // the cache.
-  const activatingRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!businessId || !designId || !designReady || isActive) return;
-    if (activatingRef.current === designId) return;
-    activatingRef.current = designId;
-    (async () => {
-      try {
-        const activated = await activateDesign(businessId, designId);
-        queryClient.setQueryData<CardDesign[]>(
-          designKeys.all(businessId),
-          (prev) => {
-            if (!prev) return [activated];
-            return prev.map((d) => (d.id === designId ? activated : d));
-          }
-        );
-      } catch (err) {
-        // Surface the error but don't block — the user can retry by going
-        // back to BackStep or refreshing. Reset the ref so a later effect
-        // re-run (e.g. after a manual navigation) can try again.
-        activatingRef.current = null;
-        toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
-      }
-    })();
-  }, [businessId, designId, designReady, isActive, queryClient, tErr]);
+  // ready (the backend returns 400 otherwise). The shared hook runs on
+  // every mount of either chapter step so the wizard self-heals if the
+  // user lands directly on StampStep with an inactive design.
+  useEnsureActiveDesign(businessId, designId, designReady, isActive);
 
   // Loader gates solely on strip readiness. We intentionally do NOT block on
   // `isActive` here — activation runs in the background via the effect above
@@ -228,41 +210,49 @@ export function InstallStep() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <p className="wiz-body text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
-      <p className="wiz-body text-[var(--foreground)] leading-relaxed">{actionCopy}</p>
+      <p className="wiz-body text-[var(--foreground)] leading-relaxed animate-slide-up delay-80">{t('explanation')}</p>
+      <p className="wiz-body text-[var(--foreground)] leading-relaxed animate-slide-up delay-160">{actionCopy}</p>
 
-      <SignupUrlCard url={signupUrl} copied={copied} onCopy={handleCopy} t={t} />
+      <div className="animate-slide-up delay-240">
+        <SignupUrlCard url={signupUrl} copied={copied} onCopy={handleCopy} t={t} />
+      </div>
 
-      <QrCard
-        qrCode={qrCode}
-        signupUrl={signupUrl}
-        businessName={businessName}
-        collapsedByDefault={isMobileDevice}
-        t={t}
-      />
-
-      {isMobileDevice && !install.passUrl && (
-        <QuickInstallCard
-          registering={registering}
-          onInstall={handleQuickInstall}
+      <div className="animate-slide-up delay-300">
+        <QrCard
+          qrCode={qrCode}
+          signupUrl={signupUrl}
+          businessName={businessName}
+          collapsedByDefault={isMobileDevice}
           t={t}
         />
+      </div>
+
+      {isMobileDevice && !install.passUrl && (
+        <div className="animate-slide-up delay-400">
+          <QuickInstallCard
+            registering={registering}
+            onInstall={handleQuickInstall}
+            t={t}
+          />
+        </div>
       )}
 
       {isMobileDevice && install.passUrl && (
-        <WalletInstallCard
-          passUrl={install.passUrl}
-          googleWalletUrl={install.googleWalletUrl}
-          locale={locale}
-          t={t}
-        />
+        <div className="animate-slide-up delay-400">
+          <WalletInstallCard
+            passUrl={install.passUrl}
+            googleWalletUrl={install.googleWalletUrl}
+            locale={locale}
+            t={t}
+          />
+        </div>
       )}
 
       {/* Listener feedback / installed confirmation at the bottom.
@@ -270,13 +260,15 @@ export function InstallStep() {
           keep all of the instructional content above visible so adding
           another device is a continuation of the same screen rather than a
           context-switch behind a CTA. */}
-      {hasInstalls ? (
-        <InstalledSummaryCard count={installedCount} t={t} />
-      ) : install.passUrl ? (
-        <WatchingCard t={t} />
-      ) : (
-        <PollingHintCard t={t} />
-      )}
+      <div className="animate-slide-up delay-500">
+        {hasInstalls ? (
+          <InstalledSummaryCard count={installedCount} t={t} />
+        ) : install.passUrl ? (
+          <WatchingCard t={t} />
+        ) : (
+          <PollingHintCard t={t} />
+        )}
+      </div>
 
     </div>
   );

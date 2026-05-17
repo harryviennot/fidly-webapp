@@ -21,13 +21,13 @@ export function WelcomeStep() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 animate-slide-up">
         <h2 className="wiz-h font-semibold leading-tight text-[var(--foreground)]">
           {t('title')}
         </h2>
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </div>
-      <p className="wiz-body leading-relaxed text-[var(--foreground)]/80">{t('body')}</p>
+      <p className="wiz-body leading-relaxed text-[var(--foreground)]/80 animate-slide-up delay-80">{t('body')}</p>
     </div>
   );
 }

@@ -254,13 +254,15 @@ export function BrandingStep() {
   return (
     <DesignFormProvider value={designContext}>
       <DesignChapterLayout>
-        <header className="flex flex-col gap-1">
+        <header className="flex flex-col gap-1 animate-slide-up">
           <h2 className="wiz-h font-semibold text-[var(--foreground)]">
             {t('title')}
           </h2>
           <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
         </header>
-        <BrandingForm />
+        <div className="animate-slide-up delay-80">
+          <BrandingForm />
+        </div>
       </DesignChapterLayout>
     </DesignFormProvider>
   );

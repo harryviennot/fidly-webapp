@@ -27,14 +27,14 @@ export function IntroStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <div className="flex flex-col items-center gap-4 py-4">
+      <div className="flex flex-col items-center gap-4 py-4 animate-slide-up delay-80">
         <div
           className="flex items-center justify-center w-20 h-20 rounded-2xl bg-[var(--accent-light)]"
           aria-hidden="true"
@@ -43,7 +43,7 @@ export function IntroStep() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 animate-slide-up delay-160">
         <p className="wiz-body leading-relaxed text-[#444]">{t('bodyP1')}</p>
         <p className="wiz-body leading-relaxed text-[#444]">{t('bodyP2')}</p>
       </div>

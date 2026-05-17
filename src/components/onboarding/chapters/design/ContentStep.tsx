@@ -72,14 +72,16 @@ export function ContentStep() {
     <DesignFormProvider value={designContext}>
       <div className="flex flex-col min-[1024px]:flex-row gap-6 min-[1024px]:gap-8">
         <div className="flex-1 flex flex-col gap-6 min-w-0">
-          <header className="flex flex-col gap-1">
+          <header className="flex flex-col gap-1 animate-slide-up">
             <h2 className="wiz-h font-semibold text-[var(--foreground)]">
               {t('title')}
             </h2>
             <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
             <p className="wiz-micro text-[#999] mt-3">{t('technicalNote')}</p>
           </header>
-          <ContentForm />
+          <div className="animate-slide-up delay-80">
+            <ContentForm />
+          </div>
         </div>
         <DesignPreviewPane />
       </div>

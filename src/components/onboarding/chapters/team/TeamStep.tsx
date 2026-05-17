@@ -26,14 +26,14 @@ export function TeamStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3 animate-slide-up delay-80">
         <p className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('rolesTitle')}
         </p>
@@ -51,7 +51,7 @@ export function TeamStep() {
         </div>
       </section>
 
-      <Card hover={false} className="p-4 min-h-[64px] flex items-center justify-between gap-3">
+      <Card hover={false} className="p-4 min-h-[64px] flex items-center justify-between gap-3 animate-slide-up delay-160">
         <div className="min-w-0">
           <p className="wiz-body font-semibold text-[var(--foreground)]">{t('inviteLabel')}</p>
           <p className="wiz-helper text-[#7A7A7A]">{t('inviteHint')}</p>

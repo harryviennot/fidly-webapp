@@ -135,7 +135,7 @@ export function DataCollectionStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
@@ -159,7 +159,7 @@ export function DataCollectionStep() {
         />
       </AnimatedWarningSlot>
 
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2.5 animate-slide-up delay-80">
         {FIELDS.map((field) => {
           const mode = value[field.key];
           const isEnabled = mode !== 'off';

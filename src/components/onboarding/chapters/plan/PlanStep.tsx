@@ -90,7 +90,7 @@ export function PlanStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col items-center gap-2 text-center">
+      <header className="flex flex-col items-center gap-2 text-center animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
@@ -104,7 +104,7 @@ export function PlanStep() {
         )}
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 max-w-4xl mx-auto w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 max-w-4xl mx-auto w-full animate-slide-up delay-80">
         {TIERS.map((tier) => (
           <TierCard
             key={tier}
@@ -121,7 +121,7 @@ export function PlanStep() {
         ))}
       </div>
 
-      <div className="flex flex-col items-center gap-2 max-w-2xl mx-auto text-center">
+      <div className="flex flex-col items-center gap-2 max-w-2xl mx-auto text-center animate-slide-up delay-160">
         <p className="wiz-helper text-[#7A7A7A]">
           {tp('ctaSubtext')}
         </p>

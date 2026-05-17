@@ -29,14 +29,14 @@ export function IntroStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <div className="flex flex-col items-center gap-4 py-2">
+      <div className="flex flex-col items-center gap-4 py-2 animate-slide-up delay-80">
         <div
           className="flex items-center justify-center w-20 h-20 rounded-2xl bg-[var(--accent-light)]"
           aria-hidden="true"
@@ -45,21 +45,21 @@ export function IntroStep() {
         </div>
       </div>
 
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col gap-2 animate-slide-up delay-160">
         <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('whatItIsTitle')}
         </h3>
         <p className="wiz-body leading-relaxed text-[#444]">{t('whatItIsBody')}</p>
       </section>
 
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col gap-2 animate-slide-up delay-240">
         <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('differentFromTitle')}
         </h3>
         <p className="wiz-body leading-relaxed text-[#444]">{t('differentFromBody')}</p>
       </section>
 
-      <Card hover={false} className="flex flex-col gap-2 bg-[var(--paper)] p-4 shadow-none">
+      <Card hover={false} className="flex flex-col gap-2 bg-[var(--paper)] p-4 shadow-none animate-slide-up delay-300">
         <h3 className="wiz-body font-semibold text-[var(--foreground)]">
           {t('audienceOfOneTitle')}
         </h3>

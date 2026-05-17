@@ -14,12 +14,14 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { InfoBox } from '@/components/reusables/info-box';
-import { useActiveDesign } from '@/hooks/use-designs';
+import { useActiveDesign, useDesigns } from '@/hooks/use-designs';
 import { computeCardColors } from '@/lib/card-utils';
 import { cn } from '@/lib/utils';
 import type { CardDesign } from '@/types';
 import { useWizardStep } from '../../wizard-context';
 import { useBusinessInstalls, type BusinessInstall } from './useBusinessInstalls';
+import { useDesignReady } from './useDesignReady';
+import { useEnsureActiveDesign } from './useEnsureActiveDesign';
 
 type Phase = 'idle' | 'sending' | 'cooldown';
 
@@ -74,6 +76,21 @@ export function StampStep() {
   const ready = installedWithEnrollment.length >= 1;
 
   const { data: design } = useActiveDesign(businessId);
+
+  // Defensive activation: if the user landed here directly (revisit after
+  // install was already marked complete) and the design is somehow not
+  // active — race with InstallStep's effect, server-side deactivation,
+  // whatever — heal it here too. Without this, stamps fan out to a pass
+  // pointing at a draft design and the wizard appears broken.
+  const { data: designs = [] } = useDesigns(businessId);
+  const wizardDesign = designs[0];
+  const wizardDesignId = wizardDesign?.id;
+  const { ready: designReady, isActive: designIsActive } = useDesignReady(
+    businessId,
+    wizardDesignId,
+    wizardDesign
+  );
+  useEnsureActiveDesign(businessId, wizardDesignId, designReady, designIsActive);
 
   const [phase, setPhase] = useState<Phase>('idle');
   const [recentlyStamped, setRecentlyStamped] = useState(false);
@@ -201,31 +218,33 @@ export function StampStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      {installsLoading ? (
-        <StampCardSkeleton />
-      ) : !ready ? (
-        <PrereqCard t={t} />
-      ) : (
-        <StampCard
-          phase={phase}
-          stamps={stamps}
-          installedCount={installedCount}
-          installs={installedWithEnrollment}
-          recentlyStamped={recentlyStamped}
-          cooldownRemaining={cooldownRemaining}
-          showCelebration={showCelebration}
-          design={design ?? null}
-          onSend={handleSendStamp}
-          t={t}
-        />
-      )}
+      <div className="animate-slide-up delay-80">
+        {installsLoading ? (
+          <StampCardSkeleton />
+        ) : !ready ? (
+          <PrereqCard t={t} />
+        ) : (
+          <StampCard
+            phase={phase}
+            stamps={stamps}
+            installedCount={installedCount}
+            installs={installedWithEnrollment}
+            recentlyStamped={recentlyStamped}
+            cooldownRemaining={cooldownRemaining}
+            showCelebration={showCelebration}
+            design={design ?? null}
+            onSend={handleSendStamp}
+            t={t}
+          />
+        )}
+      </div>
 
       {((stamps ?? 0) >= 1) && <CustomisationHintCard t={t} />}
     </div>

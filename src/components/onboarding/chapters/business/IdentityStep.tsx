@@ -348,14 +348,14 @@ export function IdentityStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 animate-slide-up delay-80">
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-col gap-3">
             <Label htmlFor="biz-name" className="wiz-body-sm font-medium">

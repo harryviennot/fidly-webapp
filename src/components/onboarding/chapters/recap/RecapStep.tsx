@@ -108,7 +108,7 @@ export function RecapStep() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
@@ -116,7 +116,7 @@ export function RecapStep() {
       </header>
 
       {design && (
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3 animate-slide-up delay-80">
           {/* card-flip pattern (see DesignEditorV2): keep both faces in the
               DOM so the back inherits the front's outer dimensions — toggling
               `showBack` alone re-mounts the wrapper and the back ends up with
@@ -161,7 +161,7 @@ export function RecapStep() {
         </div>
       )}
 
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col gap-2 animate-slide-up delay-160">
         {stampsSent > 0 && (
           <StatRow
             icon={<StampIcon className="w-4 h-4 text-[var(--accent)]" weight="bold" />}
@@ -184,7 +184,9 @@ export function RecapStep() {
         />
       </section>
 
-      <BusinessUrlCard />
+      <div className="animate-slide-up delay-240">
+        <BusinessUrlCard />
+      </div>
     </div>
   );
 }
