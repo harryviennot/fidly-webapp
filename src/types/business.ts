@@ -58,8 +58,6 @@ export interface SetupProgress {
   skipped: SetupStepRef[];
   payload: {
     design_id?: string;
-    demo_customer_id?: string;
-    demo_enrollment_id?: string;
   };
 }
 

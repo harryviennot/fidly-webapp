@@ -13,10 +13,9 @@ import { Card } from '@/components/ui/card';
 import { useBusiness } from '@/contexts/business-context';
 import { useActiveDesign } from '@/hooks/use-designs';
 import { useDefaultProgram } from '@/hooks/use-programs';
-import { getCustomer } from '@/api/customers';
+import { getCustomers } from '@/api/customers';
 import { getPendingInvitations } from '@/api/invitations';
 import { useWizardStep } from '../../wizard-context';
-import { useWizardProgress } from '../../useWizardProgress';
 
 /**
  * Recap chapter — visual summary before plan-pick. No mutations. Just renders
@@ -27,14 +26,12 @@ export function RecapStep() {
   const t = useTranslations('onboardingBusiness.chapters.recap');
   const ctx = useWizardStep();
   const { currentBusiness } = useBusiness();
-  const { progress } = useWizardProgress();
 
   const businessId = currentBusiness?.id;
   const { data: design } = useActiveDesign(businessId);
   const { data: program } = useDefaultProgram(businessId);
 
   const broadcastSent = currentBusiness?.settings?.first_broadcast_sent === true;
-  const customerId = progress.payload.demo_customer_id;
 
   const [stampsSent, setStampsSent] = useState<number>(0);
   const [pendingInvitesCount, setPendingInvitesCount] = useState<number>(0);
@@ -47,18 +44,25 @@ export function RecapStep() {
     };
   }, [ctx, t]);
 
+  // Total stamps fired in the wizard = sum of every demo customer's
+  // enrollment stamps. Pre-launch the only customers a business has are
+  // the wizard's own demo installs, so this maps 1:1 to "stamps you sent
+  // yourself".
   useEffect(() => {
-    if (!businessId || !customerId) return;
+    if (!businessId) return;
     let cancelled = false;
-    getCustomer(businessId, customerId)
-      .then((customer) => {
+    getCustomers(businessId, 100, 0)
+      .then((page) => {
         if (cancelled) return;
-        const count = customer.enrollments?.[0]?.progress?.stamps ?? customer.stamps ?? 0;
-        setStampsSent(count);
+        const total = (page.data ?? []).reduce(
+          (sum, c) => sum + (c.enrollments?.[0]?.progress?.stamps ?? c.stamps ?? 0),
+          0
+        );
+        setStampsSent(total);
       })
       .catch(() => { /* leave at 0 */ });
     return () => { cancelled = true; };
-  }, [businessId, customerId]);
+  }, [businessId]);
 
   useEffect(() => {
     if (!businessId) return;

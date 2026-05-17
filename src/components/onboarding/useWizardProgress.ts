@@ -63,6 +63,20 @@ export function useWizardProgress() {
     [progress, writeProgress]
   );
 
+  const uncompleteStep = useCallback(
+    async (step: SetupStepRef) => {
+      if (!currentBusiness) return;
+      const current: SetupProgress = currentBusiness.settings?.setup_progress ?? defaultProgress();
+      const key = stepKey(step);
+      if (!current.completed.some((s) => stepKey(s) === key)) return;
+      const completed = current.completed.filter((s) => stepKey(s) !== key);
+      await updateBusiness({
+        settings: { setup_progress: { ...current, completed } },
+      });
+    },
+    [currentBusiness, updateBusiness]
+  );
+
   const markSkipped = useCallback(
     async (step: SetupStepRef) => {
       const key = stepKey(step);
@@ -130,6 +144,7 @@ export function useWizardProgress() {
   return {
     progress,
     markCompleted,
+    uncompleteStep,
     markSkipped,
     finalize,
     updatePayload,

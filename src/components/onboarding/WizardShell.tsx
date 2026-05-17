@@ -97,7 +97,7 @@ export function WizardShell({ slug }: WizardShellProps) {
     }
   }, []);
   const [isBusy, setIsBusy] = useState(false);
-  const [nextLabel, setNextLabel] = useState<string | null>(null);
+  const [nextLabel, setNextLabel] = useState<React.ReactNode>(null);
   const [secondaryAction, setSecondaryAction] = useState<SecondaryAction | null>(null);
   // Skip + Skip-all are no longer rendered. Existing step components still
   // call `setCanSkip(true)` on mount — accept the calls and discard so we
@@ -179,12 +179,38 @@ export function WizardShell({ slug }: WizardShellProps) {
     if (resolved) {
       const key = getStepCtaKey(resolved.chapter.id, resolved.subStep.id);
       try {
-        // Some chapters use a nested object (e.g. first-broadcast.compose
-        // has pre/post variants). For those, callers override via
-        // setNextLabel after mount; here we attempt the simple-string form
-        // and fall back to null (footer's i18n default kicks in).
-        const label = t(key);
-        setNextLabel(label === key ? null : label);
+        const fullLabel = t(key);
+        if (fullLabel === key) {
+          setNextLabel(null);
+          return;
+        }
+        // Responsive short-label fallback is design-chapter-only. The
+        // long "Concevoir ma carte" / "Enregistrer le contenu de ma
+        // carte" labels wrap onto two lines on phones; every other
+        // chapter's CTA fits a single line so we leave them untouched.
+        // Limiting the lookup to this one chapter also stops the
+        // dev-warning every time a non-design step's `_short` sibling
+        // turns out not to exist.
+        let shortLabel: string | null = null;
+        if (resolved.chapter.id === 'design') {
+          const shortKey = `${key}_short`;
+          try {
+            const candidate = t(shortKey);
+            shortLabel = candidate === shortKey ? null : candidate;
+          } catch {
+            shortLabel = null;
+          }
+        }
+        if (shortLabel) {
+          setNextLabel(
+            <>
+              <span className="hidden min-[640px]:inline">{fullLabel}</span>
+              <span className="min-[640px]:hidden">{shortLabel}</span>
+            </>
+          );
+        } else {
+          setNextLabel(fullLabel);
+        }
       } catch {
         setNextLabel(null);
       }

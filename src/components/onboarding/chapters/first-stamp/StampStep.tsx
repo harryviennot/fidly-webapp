@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { CaretDown, CheckCircle, Info, Warning } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
-import { addStamp, getCustomer } from '@/api/customers';
+import { addStamp } from '@/api/customers';
 import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
 import { Card } from '@/components/ui/card';
 import {
@@ -19,7 +19,7 @@ import { computeCardColors } from '@/lib/card-utils';
 import { cn } from '@/lib/utils';
 import type { CardDesign } from '@/types';
 import { useWizardStep } from '../../wizard-context';
-import { useWizardProgress } from '../../useWizardProgress';
+import { useBusinessInstalls, type BusinessInstall } from './useBusinessInstalls';
 
 type Phase = 'idle' | 'sending' | 'cooldown';
 
@@ -42,37 +42,40 @@ const COOLDOWN_TICK_MS = 1000;
 const MAX_STAMPS = 2;
 
 /**
- * Chapter 8 sub-step 2 — optional. The wow moment. Fires a real /stamps call
- * against the demo customer the owner registered in sub-step 1; APNs/Google
- * delivers a push to the wallet pass on the same phone. We poll the customer
- * once a second after firing to confirm the stamp count incremented before
- * declaring success.
+ * Chapter 7 sub-step 2 — optional. The wow moment. Fans out a real /stamps
+ * call to every installed demo customer of this business so every device the
+ * owner enrolled buzzes at once. We track per-customer stamp progress via
+ * `useBusinessInstalls` and poll after each tap until the counts move (or
+ * the poll deadline elapses).
  *
- * The owner can stamp repeatedly — each tap fires another real stamp + push,
- * so they can play with notification cadence before leaving the wizard.
- *
- * Disabled if sub-step 1 wasn't completed (no demo_enrollment_id).
- *
- * v3 addition: after the first successful stamp, a `customisationHint`
- * callout fades in once per session pointing the owner to the dashboard's
- * notification customisation page.
+ * Disabled if there are zero installed customers — the owner needs to install
+ * their own card first.
  */
 export function StampStep() {
   const t = useTranslations('onboardingBusiness.chapters.first-stamp.steps.stamp');
   const tErr = useTranslations('onboardingBusiness.errors');
   const { currentBusiness } = useBusiness();
-  const { progress } = useWizardProgress();
   const ctx = useWizardStep();
 
   const businessId = currentBusiness?.id;
-  const customerId = progress.payload.demo_customer_id;
-  const enrollmentId = progress.payload.demo_enrollment_id;
-  const ready = !!businessId && !!customerId && !!enrollmentId;
+  const { installs, installedCount, refetch } = useBusinessInstalls(businessId);
+  const installedWithEnrollment = useMemo(
+    () => installs.filter((i) => i.installed && i.enrollment_id),
+    [installs]
+  );
+
+  // Canonical stamp count for the action card: highest stamp count among
+  // installed customers. They all move together when the fan-out succeeds,
+  // and "max" beats "min" if one stamp call partially fails (we'll surface
+  // the partial result in the toast).
+  const stamps = installedWithEnrollment.length
+    ? Math.max(0, ...installedWithEnrollment.map((i) => i.stamps))
+    : null;
+  const ready = installedWithEnrollment.length >= 1;
 
   const { data: design } = useActiveDesign(businessId);
 
   const [phase, setPhase] = useState<Phase>('idle');
-  const [stamps, setStamps] = useState<number | null>(null);
   const [recentlyStamped, setRecentlyStamped] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [hasStampedThisSession, setHasStampedThisSession] = useState(false);
@@ -89,45 +92,31 @@ export function StampStep() {
   // Once the owner has felt at least one stamp, the footer's
   // "Send me a stamp" copy stops making sense — they already did. Flip
   // back to the default "Continue" by clearing the override so the shell's
-  // i18n fallback (footer.next) takes over. Pre-send we leave the action-
-  // verb label in place to nudge them toward the inline send button.
+  // i18n fallback (footer.next) takes over.
   useEffect(() => {
     if ((stamps ?? 0) > 0) {
       ctx.setNextLabel(null);
     }
   }, [stamps, ctx]);
 
-  // Load the initial stamp count so the badge isn't blank before the first tap.
-  useEffect(() => {
-    if (!businessId || !customerId) return;
-    let cancelled = false;
-    getCustomer(businessId, customerId)
-      .then((customer) => {
-        if (cancelled) return;
-        const count = customer.enrollments?.[0]?.progress?.stamps ?? customer.stamps ?? 0;
-        setStamps(count);
-      })
-      .catch(() => { /* leave null */ });
-    return () => { cancelled = true; };
-  }, [businessId, customerId]);
-
   const pollForStamp = useCallback(
-    async (initial: number): Promise<number | null> => {
-      if (!businessId || !customerId) return null;
+    async (baseline: number): Promise<boolean> => {
       const deadline = Date.now() + POLL_TIMEOUT_MS;
       while (Date.now() < deadline) {
-        try {
-          const customer = await getCustomer(businessId, customerId);
-          const total = customer.enrollments?.[0]?.progress?.stamps ?? customer.stamps ?? 0;
-          if (total > initial) return total;
-        } catch {
-          // ignore; retry
-        }
+        await refetch();
+        const current = Math.max(
+          0,
+          ...installedWithEnrollment.map((i) => i.stamps)
+        );
+        if (current > baseline) return true;
         await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
       }
-      return null;
+      return false;
     },
-    [businessId, customerId]
+    // installedWithEnrollment is intentionally NOT in deps — we capture a
+    // fresh snapshot via refetch() on each loop iteration. Adding it would
+    // restart polling every tick.
+    [refetch, installedWithEnrollment]
   );
 
   const startCooldown = useCallback(() => {
@@ -155,20 +144,29 @@ export function StampStep() {
   }, []);
 
   const handleSendStamp = useCallback(async () => {
-    if (!ready || phase !== 'idle') return;
+    if (!ready || phase !== 'idle' || !businessId) return;
     if ((stamps ?? 0) >= MAX_STAMPS) return;
     setPhase('sending');
     setRecentlyStamped(false);
+    const baseline = stamps ?? 0;
+    // Snapshot enrollments to fan out across — refetches during polling
+    // would otherwise narrow/widen the set mid-stamp.
+    const targets = installedWithEnrollment;
     try {
-      const baseline = stamps ?? 0;
-      await addStamp(businessId!, enrollmentId!);
-      const next = await pollForStamp(baseline);
-      if (next !== null) {
-        setStamps(next);
+      const results = await Promise.allSettled(
+        targets.map((i) => addStamp(businessId, i.enrollment_id!))
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      const succeeded = targets.length - failed;
+      if (failed > 0) {
+        toast.error(
+          `Stamped ${succeeded} of ${targets.length} devices. ${failed} failed.`
+        );
+      }
+      const moved = await pollForStamp(baseline);
+      if (moved) {
         setRecentlyStamped(true);
         setTimeout(() => setRecentlyStamped(false), RECENT_STAMP_FLASH_MS);
-        // Celebrate the *first* stamp of the session only — subsequent
-        // stamps reuse the keep-stamping copy.
         if (!hasStampedThisSession) {
           setShowCelebration(true);
           if (celebrationTimerRef.current) {
@@ -180,7 +178,7 @@ export function StampStep() {
           }, CELEBRATION_MS);
         }
         setHasStampedThisSession(true);
-      } else {
+      } else if (succeeded > 0) {
         toast.message(t('fallback'));
       }
       startCooldown();
@@ -192,8 +190,8 @@ export function StampStep() {
     ready,
     phase,
     businessId,
-    enrollmentId,
     stamps,
+    installedWithEnrollment,
     pollForStamp,
     startCooldown,
     hasStampedThisSession,
@@ -216,6 +214,8 @@ export function StampStep() {
         <StampCard
           phase={phase}
           stamps={stamps}
+          installedCount={installedCount}
+          installs={installedWithEnrollment}
           recentlyStamped={recentlyStamped}
           cooldownRemaining={cooldownRemaining}
           showCelebration={showCelebration}
@@ -249,6 +249,8 @@ function PrereqCard({ t }: PrereqCardProps) {
 interface StampCardProps {
   phase: Phase;
   stamps: number | null;
+  installedCount: number;
+  installs: BusinessInstall[];
   recentlyStamped: boolean;
   cooldownRemaining: number;
   showCelebration: boolean;
@@ -260,6 +262,8 @@ interface StampCardProps {
 function StampCard({
   phase,
   stamps,
+  installedCount,
+  installs,
   recentlyStamped,
   cooldownRemaining,
   showCelebration,
@@ -305,6 +309,12 @@ function StampCard({
         </div>
       </div>
 
+      {installedCount > 1 && (
+        <p className="wiz-helper text-[var(--accent)] font-medium">
+          {t('multiDeviceHint', { count: installedCount })}
+        </p>
+      )}
+
       {!reachedMax && (
         <button
           type="button"
@@ -330,6 +340,22 @@ function StampCard({
           </span>
         )}
       </div>
+
+      {/* When more than one device is installed, surface the per-device list
+          so the owner can see all of them moving in lockstep. */}
+      {installs.length > 1 && (
+        <div className="flex flex-col gap-1.5 rounded-lg border border-[var(--border-light)] bg-[var(--paper)] px-3 py-2">
+          {installs.map((i) => (
+            <div
+              key={i.customer_id}
+              className="flex items-center justify-between gap-2 wiz-helper"
+            >
+              <span className="text-[#666] truncate">{i.name || i.email || i.customer_id.slice(0, 8)}</span>
+              <span className="font-semibold tabular-nums text-[var(--foreground)]">{i.stamps}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <WalletDeliveryDisclosure t={t} />
     </Card>

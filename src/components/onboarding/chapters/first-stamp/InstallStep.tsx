@@ -11,7 +11,6 @@ import {
   DeviceMobileIcon,
   DownloadSimpleIcon,
   FilePdfIcon,
-  Spinner as SpinnerIcon,
 } from '@phosphor-icons/react';
 import { Card } from '@/components/ui/card';
 import { InfoBox } from '@/components/reusables/info-box';
@@ -19,21 +18,15 @@ import { useBusiness } from '@/contexts/business-context';
 import { useAuth } from '@/contexts/auth-provider';
 import { useIsMobileDevice } from '@/hooks/use-mobile-device';
 import { getBusinessSignupQR } from '@/api/businesses';
-import {
-  createPublicCustomer,
-  enrollmentIdFromPassUrl,
-  getCustomer,
-} from '@/api/customers';
-import { createClient } from '@/utils/supabase/client';
+import { createPublicCustomer } from '@/api/customers';
 import { QRCodeSkeleton } from '@/components/ui/qr-code-skeleton';
 import { downloadQrPng, downloadQrPdf } from '@/lib/qr-download';
 import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import { useBusinessInstalls } from './useBusinessInstalls';
 
-const WATCH_TIMEOUT_MS = 5 * 60 * 1000;
 // 3s gives the owner time to see the "Card installed" success state land
 // before the wizard advances. Shorter than this felt like a yank — the green
 // confirmation barely had time to register.
@@ -46,26 +39,25 @@ interface InstallUrls {
 }
 
 /**
- * Chapter 8 sub-step 1 — "Take it for a spin".
+ * Chapter 7 sub-step 1 — "Take it for a spin".
  *
  * The customer-flow narrative drives the layout: we show the public signup
  * URL + QR so the owner can walk the same path their customers will. On a
  * touch device we also expose a "Just want the card?" quick-install that
  * registers the owner directly from their account info.
  *
- * Detection is realtime-based (Supabase `postgres_changes`) — no polling:
- *   - Phase A: subscribe to INSERT on `customers` filtered by business_id.
- *     On hit, fetch the customer once to pull the enrollment_id (enrollments
- *     isn't readable to members, so we go through the API).
- *   - Phase B: subscribe to INSERT on `push_registrations` filtered by the
- *     detected customer_id. First Apple/Google registration → step complete.
- *
- * A 5-minute timeout closes both channels so a forgotten tab doesn't hold a
- * websocket open forever. The user gets a "Still here?" retry card.
- *
- * Device-flow split is touch/pointer-based, not viewport-based, so a narrow
- * desktop browser still sees the desktop UX (Apple/Google Wallet aren't
- * installable on desktop OSes).
+ * State model:
+ *   - `useBusinessInstalls(businessId)` is the source of truth for which
+ *     customers exist and whether their pass is currently installed (i.e.
+ *     has at least one `push_registrations` row). It subscribes to
+ *     realtime so external installs (QR scan from another device) show up
+ *     without a refresh.
+ *   - `step.completed` is *derived* from `installedCount >= 1`. If every
+ *     pass is removed (registrations all gone), the step un-completes so
+ *     the owner can re-install.
+ *   - The wizard does NOT pin a single "demo customer" — every customer
+ *     this business has is treated as a real install. Multi-device just
+ *     adds more rows; nothing is overwritten or orphaned.
  */
 export function InstallStep() {
   const t = useTranslations('onboardingBusiness.chapters.first-stamp.steps.install');
@@ -75,7 +67,7 @@ export function InstallStep() {
   const router = useRouter();
   const { currentBusiness } = useBusiness();
   const { user } = useAuth();
-  const { progress, completeWithPayload, updatePayload } = useWizardProgress();
+  const { completeWithPayload, uncompleteStep, isStepCompleted } = useWizardProgress();
   const ctx = useWizardStep();
 
   const businessId = currentBusiness?.id;
@@ -84,28 +76,28 @@ export function InstallStep() {
   const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || 'https://stampeo.app';
   const signupUrl = useMemo(() => `${showcaseUrl}/${slug ?? ''}`, [showcaseUrl, slug]);
 
+  const { installedCount, loading: installsLoading } = useBusinessInstalls(businessId);
+
   const [qrCode, setQrCode] = useState<string | null>(null);
+  // Transient state for the just-tapped quick-install: the wallet links the
+  // user needs to actually open Apple/Google Wallet. Cleared once an
+  // installed pass shows up in `installedCount`.
   const [install, setInstall] = useState<InstallUrls>({});
   const [registering, setRegistering] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [timedOut, setTimedOut] = useState(false);
-  const [watchTick, setWatchTick] = useState(0);
+  // When ≥1 device is installed, the install UI collapses behind a CTA.
+  // Toggling this re-exposes it so the owner can install on another phone.
+  const [showInstallAnother, setShowInstallAnother] = useState(false);
 
   const ownerName = (user?.user_metadata?.name as string | undefined) ?? '';
   const ownerEmail = user?.email ?? '';
   const ownerPhone = (user?.user_metadata?.phone as string | undefined) ?? '';
 
-  const customerId = progress.payload.demo_customer_id;
-  const alreadyCompleted = progress.completed.some(
-    (s) => s.chapter === 'first-stamp' && s.step === 'install'
-  );
-
-  // Snapshot of `alreadyCompleted` at mount. If the owner navigates *back*
-  // into a step they previously finished, the auto-advance effect would
-  // re-fire instantly and they'd never get to see the screen again. We only
-  // auto-advance when completion happens *during this mount*, i.e. the owner
-  // installed the card just now.
-  const completedOnEntryRef = useRef(alreadyCompleted);
+  const stepCompleted = isStepCompleted({ chapter: 'first-stamp', step: 'install' });
+  // Snapshot at mount so the auto-advance effect doesn't yank the owner
+  // out of the page on back-navigation. Only the *first* time they hit
+  // the installed state in a given mount should we advance.
+  const completedOnEntryRef = useRef(stepCompleted);
 
   // ── QR fetch ────────────────────────────────────────────────────────
   // Pass the browser-side `signupUrl` so the QR encodes the exact same
@@ -119,117 +111,33 @@ export function InstallStep() {
       .catch(() => { /* skeleton stays */ });
   }, [businessId, signupUrl]);
 
-  // ── Phase A: realtime customer detection ────────────────────────────
-  // Subscribe to INSERTs on `customers` filtered by business_id. When a row
-  // arrives we fetch it via the API (enrollments isn't member-readable, so
-  // we can't read enrollment_id from the realtime payload alone).
+  // ── Derive completion from installedCount ──────────────────────────
+  // Single direction: installedCount drives stepCompleted, not vice versa.
+  // We wait for the initial install fetch to finish to avoid uncompleting
+  // a real install during the loading window between mount and first
+  // refetch.
   useEffect(() => {
-    if (!businessId || customerId || alreadyCompleted || timedOut) return;
+    if (installsLoading) return;
+    if (installedCount >= 1 && !stepCompleted) {
+      void completeWithPayload({ chapter: 'first-stamp', step: 'install' }, {});
+    } else if (installedCount === 0 && stepCompleted) {
+      void uncompleteStep({ chapter: 'first-stamp', step: 'install' });
+    }
+  }, [installedCount, installsLoading, stepCompleted, completeWithPayload, uncompleteStep]);
 
-    const supabase = createClient();
-    let cancelled = false;
-
-    const channel: RealtimeChannel = supabase
-      .channel(`onboarding-install-${businessId}-${watchTick}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'customers',
-          filter: `business_id=eq.${businessId}`,
-        },
-        async (payload) => {
-          if (cancelled) return;
-          const inserted = payload.new as { id?: string };
-          if (!inserted?.id) return;
-          try {
-            const customer = await getCustomer(businessId, inserted.id);
-            if (cancelled) return;
-            const enrollmentId = customer.enrollments?.[0]?.id;
-            if (!enrollmentId) return;
-            await updatePayload({
-              demo_customer_id: customer.id,
-              demo_enrollment_id: enrollmentId,
-            });
-          } catch {
-            // Insert without enrollment yet → next realtime event on
-            // push_registrations will re-trigger via the customerId effect
-            // once the enrollment lands. Worst case the user can refresh.
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      cancelled = true;
-      supabase.removeChannel(channel);
-    };
-  }, [businessId, customerId, alreadyCompleted, timedOut, watchTick, updatePayload]);
-
-  // ── Phase B: realtime wallet-install detection ──────────────────────
-  // Once we have a customer_id, watch push_registrations for the first row
-  // matching it. Any row (apple OR google) means the pass is installed.
+  // ── Clear transient install URLs once we see an actual install ──────
+  // Otherwise the "Add to Wallet" buttons linger forever on mobile.
   useEffect(() => {
-    if (!businessId || !customerId || alreadyCompleted || timedOut) return;
+    if (installedCount >= 1 && install.passUrl) setInstall({});
+  }, [installedCount, install.passUrl]);
 
-    const supabase = createClient();
-    let resolved = false;
-
-    const finish = async () => {
-      if (resolved) return;
-      resolved = true;
-      await completeWithPayload({ chapter: 'first-stamp', step: 'install' }, {});
-    };
-
-    const channel: RealtimeChannel = supabase
-      .channel(`onboarding-install-wallet-${customerId}-${watchTick}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'push_registrations',
-          filter: `customer_id=eq.${customerId}`,
-        },
-        () => { void finish(); }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [businessId, customerId, alreadyCompleted, timedOut, watchTick, completeWithPayload]);
-
-  // ── 5-minute watch timeout ──────────────────────────────────────────
-  // Hard stop after 5 min so a forgotten tab doesn't hold a websocket open
-  // indefinitely. The "Retry" button bumps watchTick which re-subscribes
-  // both channels and resets the timer.
-  useEffect(() => {
-    if (alreadyCompleted || timedOut) return;
-    const id = setTimeout(() => setTimedOut(true), WATCH_TIMEOUT_MS);
-    return () => clearTimeout(id);
-  }, [alreadyCompleted, timedOut, watchTick]);
-
-  // ── Auto-advance when fully done ────────────────────────────────────
-  // Only when the owner completes the step in this session — never on
-  // back-navigation (see `completedOnEntryRef`).
+  // ── Auto-advance when we cross from 0 → ≥1 in this mount ────────────
   useEffect(() => {
     if (completedOnEntryRef.current) return;
-    if (!alreadyCompleted) return;
+    if (installedCount < 1) return;
     const id = setTimeout(() => router.push(NEXT_STEP_PATH), AUTO_ADVANCE_DELAY_MS);
     return () => clearTimeout(id);
-  }, [alreadyCompleted, router]);
-
-  const handleRetry = useCallback(() => {
-    setTimedOut(false);
-    setWatchTick((n) => n + 1);
-  }, []);
-
-  const handleManualConfirm = useCallback(async () => {
-    if (!customerId) return;
-    await completeWithPayload({ chapter: 'first-stamp', step: 'install' }, {});
-  }, [customerId, completeWithPayload]);
+  }, [installedCount, router]);
 
   useEffect(() => {
     ctx.setCanSkip(true);
@@ -259,20 +167,20 @@ export function InstallStep() {
         toast.error(tErr('saveFailed'));
         return;
       }
-      const enrollmentId = enrollmentIdFromPassUrl(response.pass_url);
-      await updatePayload({
-        demo_customer_id: response.customer_id,
-        demo_enrollment_id: enrollmentId ?? undefined,
-      });
       setInstall({ passUrl: response.pass_url, googleWalletUrl: response.google_wallet_url });
+      setShowInstallAnother(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
     } finally {
       setRegistering(false);
     }
-  }, [businessId, ownerName, ownerEmail, ownerPhone, updatePayload, tErr]);
+  }, [businessId, ownerName, ownerEmail, ownerPhone, tErr]);
 
-  const customerDetected = !!customerId;
+  const hasInstalls = installedCount >= 1;
+  // When we already have installs, hide the install UI behind the
+  // "install on another device" toggle to keep the page calm. Always
+  // expose it when there are zero installs.
+  const showInstallUi = !hasInstalls || showInstallAnother || !!install.passUrl;
   const actionCopy = isMobileDevice
     ? t('explanationActionMobile')
     : t('explanationActionDesktop');
@@ -286,46 +194,94 @@ export function InstallStep() {
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      <p className="wiz-body text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
-      <p className="wiz-body text-[var(--foreground)] leading-relaxed">{actionCopy}</p>
-
-      <SignupUrlCard url={signupUrl} copied={copied} onCopy={handleCopy} t={t} />
-
-      <QrCard
-        qrCode={qrCode}
-        signupUrl={signupUrl}
-        businessName={businessName}
-        collapsedByDefault={isMobileDevice}
-        t={t}
-      />
-
-      {isMobileDevice && !install.passUrl && !customerDetected && (
-        <QuickInstallCard
-          registering={registering}
-          onInstall={handleQuickInstall}
+      {hasInstalls && (
+        <InstalledSummaryCard
+          count={installedCount}
+          showInstallAnother={showInstallAnother}
+          onToggleInstallAnother={() => setShowInstallAnother((v) => !v)}
           t={t}
         />
       )}
 
-      {isMobileDevice && install.passUrl && !alreadyCompleted && (
-        <WalletInstallCard
-          passUrl={install.passUrl}
-          googleWalletUrl={install.googleWalletUrl}
-          locale={locale}
-          t={t}
-        />
+      {showInstallUi && (
+        <>
+          {!hasInstalls && (
+            <>
+              <p className="wiz-body text-[var(--foreground)] leading-relaxed">{t('explanation')}</p>
+              <p className="wiz-body text-[var(--foreground)] leading-relaxed">{actionCopy}</p>
+            </>
+          )}
+
+          <SignupUrlCard url={signupUrl} copied={copied} onCopy={handleCopy} t={t} />
+
+          <QrCard
+            qrCode={qrCode}
+            signupUrl={signupUrl}
+            businessName={businessName}
+            collapsedByDefault={isMobileDevice}
+            t={t}
+          />
+
+          {isMobileDevice && !install.passUrl && (
+            <QuickInstallCard
+              registering={registering}
+              onInstall={handleQuickInstall}
+              t={t}
+            />
+          )}
+
+          {isMobileDevice && install.passUrl && (
+            <WalletInstallCard
+              passUrl={install.passUrl}
+              googleWalletUrl={install.googleWalletUrl}
+              locale={locale}
+              t={t}
+            />
+          )}
+        </>
       )}
 
-      {alreadyCompleted ? (
-        <DetectedCard returning={completedOnEntryRef.current} t={t} />
-      ) : timedOut ? (
-        <TimeoutCard onRetry={handleRetry} t={t} />
-      ) : customerDetected ? (
-        <WatchingCard onManualConfirm={handleManualConfirm} t={t} />
-      ) : (
-        <PollingHintCard t={t} />
+      {hasInstalls && !completedOnEntryRef.current && (
+        <InfoBox variant="success" message={t('detected')} />
       )}
     </div>
+  );
+}
+
+interface InstalledSummaryCardProps {
+  count: number;
+  showInstallAnother: boolean;
+  onToggleInstallAnother: () => void;
+  t: ReturnType<typeof useTranslations>;
+}
+
+function InstalledSummaryCard({
+  count,
+  showInstallAnother,
+  onToggleInstallAnother,
+  t,
+}: InstalledSummaryCardProps) {
+  return (
+    <Card
+      hover={false}
+      className="border-[var(--accent-200)] bg-[var(--accent-light)]/40 p-4 flex items-center justify-between gap-3 flex-wrap"
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="flex-shrink-0 w-9 h-9 rounded-full bg-[var(--accent)] flex items-center justify-center">
+          <CheckIcon className="w-5 h-5 text-white" weight="bold" />
+        </span>
+        <p className="wiz-body font-medium text-[var(--foreground)]">
+          {t('installedSummary', { count })}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onToggleInstallAnother}
+        className="wiz-helper font-semibold text-[var(--accent)] hover:underline"
+      >
+        {showInstallAnother ? t('qrHide') : t('installAnotherCta')}
+      </button>
+    </Card>
   );
 }
 
@@ -488,82 +444,6 @@ function QuickInstallCard({ registering, onInstall, t }: QuickInstallCardProps) 
         className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--accent)] px-4 py-3 wiz-body font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 min-h-[48px]"
       >
         {registering ? t('registering') : t('quickInstallCta')}
-      </button>
-    </Card>
-  );
-}
-
-interface StatusCardProps {
-  t: ReturnType<typeof useTranslations>;
-}
-
-function PollingHintCard({ t }: StatusCardProps) {
-  return (
-    <Card hover={false} className="bg-[var(--paper)] px-4 py-3 flex items-center gap-3">
-      <SpinnerIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 animate-spin" weight="bold" />
-      <p className="wiz-helper text-[#555]">{t('pollingHint')}</p>
-    </Card>
-  );
-}
-
-interface WatchingCardProps extends StatusCardProps {
-  onManualConfirm: () => void;
-}
-
-function WatchingCard({ onManualConfirm, t }: WatchingCardProps) {
-  return (
-    <Card
-      hover={false}
-      className="border-[var(--accent-200)] bg-[var(--accent-light)]/40 p-4 flex flex-col gap-3"
-    >
-      <div className="flex items-center gap-3">
-        <SpinnerIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0 animate-spin" weight="bold" />
-        <p className="wiz-body-sm font-medium text-[var(--foreground)]">{t('watchingInstall')}</p>
-      </div>
-      <button
-        type="button"
-        onClick={onManualConfirm}
-        className="wiz-helper text-[var(--accent)] hover:underline self-start"
-      >
-        {t('manualConfirmCta')}
-      </button>
-    </Card>
-  );
-}
-
-interface DetectedCardProps extends StatusCardProps {
-  /** True when the step was already completed at mount (back-nav). In that
-   *  case we drop "moving on in a moment" — there is no auto-advance and
-   *  promising one would be misleading. */
-  returning: boolean;
-}
-
-function DetectedCard({ returning, t }: DetectedCardProps) {
-  return (
-    <InfoBox
-      variant="success"
-      message={t(returning ? 'detectedReturning' : 'detected')}
-    />
-  );
-}
-
-interface TimeoutCardProps extends StatusCardProps {
-  onRetry: () => void;
-}
-
-function TimeoutCard({ onRetry, t }: TimeoutCardProps) {
-  return (
-    <Card hover={false} className="bg-[var(--paper)] p-4 flex flex-col gap-3">
-      <div>
-        <p className="wiz-body font-semibold text-[var(--foreground)]">{t('timeoutTitle')}</p>
-        <p className="wiz-helper text-[#555] leading-relaxed mt-0.5">{t('timeoutBody')}</p>
-      </div>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="self-start inline-flex items-center gap-1.5 rounded-[10px] bg-[var(--accent)] px-4 py-2.5 wiz-body-sm font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors min-h-[40px]"
-      >
-        {t('retry')}
       </button>
     </Card>
   );

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { Warning, Plus, Crop } from '@phosphor-icons/react';
+import { Plus, SpinnerGap } from '@phosphor-icons/react';
 import { MessagePreview } from '@/components/notifications/MessagePreview';
 import { ImageCropper } from '@/components/reusables/image-cropper';
 import { useBusiness } from '@/contexts/business-context';
@@ -13,28 +13,31 @@ import {
   useUploadBusinessIcon,
   useDeleteBusinessIcon,
 } from '@/hooks/use-notifications';
-import { createBusinessIconFromLogo } from '@/api/notifications';
+import { cn } from '@/lib/utils';
 import { useWizardStep } from '../../wizard-context';
 
-const ACCEPTED_TYPES = 'image/png,image/jpeg,image/jpg,image/webp';
+// Any browser-decodable image is fair game. The cropper re-encodes to PNG
+// via `canvas.toBlob('image/png')` and the backend's icon service runs the
+// bytes through PIL anyway, so HEIC / GIF / SVG / AVIF (when supported by
+// the browser) all land as a normalised RGBA PNG on storage.
+const ACCEPTED_TYPES = 'image/*';
 
 /**
  * Notification icon step — required.
  *
- *  - Logo is square (within 2%) → auto-upload as the icon. No friction.
- *  - Logo is off-square → show the logo as a cover-cropped placeholder + a
- *    warning banner. Continue is blocked until the owner crops or imports.
- *  - No logo → empty dropzone. Continue blocked until they upload.
+ * The owner picks a file, crops it to 1:1 in the shared `ImageCropper`,
+ * and the cropped PNG is uploaded as the business's notification icon.
+ * No auto-prefill from the business logo: the user has explicitly asked
+ * for the upload to be deliberate, so the dropzone starts empty even
+ * when a logo exists.
  *
- * Layout follows the sketch the user provided:
- *
- *   Your Icon          Preview
- *   [ square box ]     [ notification banner ]
- *   [ Modifier ] [ Recadrer ] [ Supprimer ]
- *
- * Action buttons share the same style as the ImageUploader in the business
- * Identity step (first chapter), so the upload affordance is consistent
- * across the wizard.
+ * UX notes:
+ *  - Mobile (<640px) stacks "Your icon" above "Preview" so neither
+ *    column gets squeezed. Desktop keeps the side-by-side layout.
+ *  - Manual uploads show a pulsing dropzone the moment the user
+ *    confirms the crop — the picked file's blob URL feeds the
+ *    preview instantly, with `animate-pulse` running until the
+ *    server roundtrip + refetch finish.
  */
 export function IconStep() {
   const t = useTranslations('onboardingBusiness.chapters.notifications.steps.icon');
@@ -49,12 +52,14 @@ export function IconStep() {
   const iconOriginalUrl = currentBusiness?.icon_original_url ?? null;
   const businessName = currentBusiness?.name ?? '';
 
-  const [needsCropping, setNeedsCropping] = useState(false);
-  // Kept around as a fallback source for the cropper if a future code path
-  // needs to re-open the auto-cropped logo. Today the auto-crop completes
-  // synchronously inside the effect and we never stash the raw blob.
-  const [logoBlobUrl] = useState<string | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  // Blob URL of the freshly-cropped file, kept around for the brief window
+  // between the cropper closing and the upload roundtrip completing so the
+  // dropzone shows the new image instantly with a pulsing overlay (rather
+  // than the previous icon or an empty box).
+  const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Latest picked-but-not-yet-uploaded file URL, retained so the cropper
   // can reopen against it without re-reading the file.
@@ -64,68 +69,22 @@ export function IconStep() {
     ctx.setCanSkip(false);
   }, [ctx]);
 
-  // Continue blocked until an icon is saved AND the off-square warning is gone.
+  // Continue blocked until an icon is saved server-side.
   useEffect(() => {
-    ctx.setCanProceed(!!iconUrl && !needsCropping);
-  }, [ctx, iconUrl, needsCropping]);
+    ctx.setCanProceed(!!iconUrl);
+  }, [ctx, iconUrl]);
 
-  // First-visit prefill: center-crop the business logo to 1:1 and upload it
-  // as the notification icon. No manual cropping step — the user can always
-  // hit "Recadrer" if they want to fine-tune. Off-square logos get the
-  // largest centred square; already-square logos pass through.
-  //
-  // We gate by `icon_url` (already set → user/server has an icon, don't
-  // touch it) and by `aspectCheckedRef` (once per business per mount, so
-  // remounts and React StrictMode double-effects don't re-upload). We
-  // deliberately do NOT gate by step-seen — `_seen` is for "stop seeding
-  // form defaults," and stale draft entries from prior onboarding sessions
-  // would otherwise wedge this auto-upload off entirely.
-  // First-visit prefill: ask the backend to derive the icon from the
-  // business's stored logo. Server-side does the work: download the logo
-  // bytes from Supabase, center-crop to 1:1 with Pillow, re-encode as PNG
-  // regardless of the source format (JPEG, WEBP, anything). The previous
-  // client-side canvas approach silently failed whenever the Supabase
-  // logo URL didn't return CORS-permissive headers — canvas became tainted
-  // and `toBlob` threw SecurityError, leaving the dropzone empty.
-  const prefillAttemptedRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!currentBusiness) return;
-    if (currentBusiness.icon_url) return;
-    if (!currentBusiness.logo_url) return;
-    if (prefillAttemptedRef.current === currentBusiness.id) return;
-    prefillAttemptedRef.current = currentBusiness.id;
-
-    let cancelled = false;
-    (async () => {
-      try {
-        await createBusinessIconFromLogo(currentBusiness.id);
-        if (cancelled) return;
-        await queryClient.refetchQueries({ queryKey: ['business'] });
-        await refetch();
-      } catch (err) {
-        // Backend failure (no logo on storage, malformed image, etc.).
-        // Owner can still upload manually.
-        console.warn('Icon auto-prefill from logo failed', err);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentBusiness?.id, currentBusiness?.icon_url, currentBusiness?.logo_url]);
-
-  // `refetchQueries` (unlike `invalidateQueries`) awaits the actual refetch, so
-  // the next render sees the new `icon_url` and the `<Image>` remounts via
-  // the `key={src}` below.
   const uploadAndRefresh = async (
     file: File,
     { silent = false }: { silent?: boolean } = {}
   ) => {
     try {
       await uploadMutation.mutateAsync(file);
+      // `refetchQueries` (unlike `invalidateQueries`) awaits the actual
+      // refetch, so the next render sees the new `icon_url` and the
+      // `<Image>` remounts via the `key={src}` below.
       await queryClient.refetchQueries({ queryKey: ['business'] });
       await refetch();
-      setNeedsCropping(false);
       if (!silent) toast.success(tToast('iconUploaded'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : tToast('iconUploadFailed'));
@@ -156,16 +115,26 @@ export function IconStep() {
   };
 
   const handleOpenCrop = () => {
-    // Priority order: a freshly picked file → the off-square logo blob →
-    // the uploaded icon's original (for recropping). First match wins.
-    const src =
-      pickedBlobUrlRef.current ?? logoBlobUrl ?? iconOriginalUrl ?? iconUrl;
+    // Priority: freshly picked file → uploaded icon's original (for
+    // recropping) → current icon URL. First match wins.
+    const src = pickedBlobUrlRef.current ?? iconOriginalUrl ?? iconUrl;
     if (src) setCropSrc(src);
   };
 
   const handleCropComplete = async (croppedFile: File) => {
     setCropSrc(null);
-    await uploadAndRefresh(croppedFile);
+    // Show the cropped image immediately in the dropzone (with a pulse
+    // animation while the upload roundtrip + refetch run). Revoking the
+    // blob URL after the refetch finishes means the dropzone seamlessly
+    // hands off to the server-rendered icon URL.
+    const blob = URL.createObjectURL(croppedFile);
+    setPendingPreviewUrl(blob);
+    try {
+      await uploadAndRefresh(croppedFile);
+    } finally {
+      URL.revokeObjectURL(blob);
+      setPendingPreviewUrl(null);
+    }
   };
 
   const handleCropClose = (open: boolean) => {
@@ -175,9 +144,10 @@ export function IconStep() {
   // Image source for the dropzone preview. After upload, prefer the
   // uncropped original so recrops have the full resolution to work with.
   const displayIconUrl = iconOriginalUrl || iconUrl;
-  const previewSrc = displayIconUrl ?? logoBlobUrl ?? null;
-  const canRemove = !!iconUrl;
-  const canRecrop = !!previewSrc;
+  const previewSrc = pendingPreviewUrl ?? displayIconUrl ?? null;
+  const isUploading = uploadMutation.isPending;
+  const canRemove = !!iconUrl && !isUploading;
+  const canRecrop = !!previewSrc && !isUploading;
 
   return (
     <div className="flex flex-col gap-6">
@@ -188,58 +158,34 @@ export function IconStep() {
         <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
-      {needsCropping && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3.5">
-          <Warning
-            className="h-5 w-5 text-amber-600 shrink-0"
-            weight="fill"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-amber-900">
-              {t('cropWarning.title')}
-            </p>
-            <p className="text-xs text-amber-900/80 leading-snug mt-0.5">
-              {t('cropWarning.body')}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleOpenCrop}
-            className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-amber-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-800 transition-colors"
-          >
-            <Crop className="h-3.5 w-3.5" weight="bold" />
-            {t('cropWarning.cta')}
-          </button>
-        </div>
-      )}
-
       {/* Card matches the ImageUploader container in the business Identity
-          step: same border, light surface, and padding. Wraps the column
-          headers, dropzone + preview row, and the action buttons in one
-          coherent panel. */}
+          step: same border, light surface, padding. Mobile stacks icon on
+          top of preview so neither column gets squeezed; desktop keeps the
+          side-by-side layout. */}
       <div className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-white/50 dark:bg-white/5 p-4">
-        {/* Two-column header — section labels aligned with the columns below. */}
-        <div className="flex gap-3 sm:gap-4">
-          <span className="w-[96px] shrink-0 text-[15px] font-medium text-[var(--foreground)]">
-            {t('uploadSectionTitle')}
-            <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
-          </span>
-          <span className="flex-1 text-[15px] font-medium text-[var(--foreground)]">
-            {t('previewLabel')}
-          </span>
-        </div>
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-4 sm:items-start">
+          {/* Icon section */}
+          <div className="flex flex-col gap-2 sm:w-[96px] sm:shrink-0">
+            <span className="text-[15px] font-medium text-[var(--foreground)]">
+              {t('uploadSectionTitle')}
+              <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">
+                *
+              </span>
+            </span>
+            <IconDropzone
+              src={previewSrc}
+              uploadLabel={t('uploadCta')}
+              hintLabel={t('uploadHint')}
+              isLoading={isUploading}
+              onClick={handlePick}
+            />
+          </div>
 
-        {/* Two-column content — square icon dropzone next to preview banner.
-            Preview uses `size="lg"` so it expands to fill the column instead
-            of being pinned at iOS-realistic 280px. */}
-        <div className="flex gap-3 sm:gap-4 items-start">
-          <IconDropzone
-            src={previewSrc}
-            uploadLabel={t('uploadCta')}
-            hintLabel={t('uploadHint')}
-            onClick={handlePick}
-          />
-          <div className="flex-1 min-w-0">
+          {/* Preview section */}
+          <div className="flex flex-col gap-2 flex-1 min-w-0">
+            <span className="text-[15px] font-medium text-[var(--foreground)]">
+              {t('previewLabel')}
+            </span>
             <MessagePreview
               iconUrl={iconUrl}
               iconOriginalUrl={iconOriginalUrl}
@@ -252,15 +198,14 @@ export function IconStep() {
 
         {/* Action buttons — only when there's something to act on. Hidden in
             the totally-empty state where clicking the dropzone is the only
-            interaction. Matches the button row used by ImageUploader in the
-            business Identity step so the styling stays consistent across the
-            wizard. */}
+            interaction. */}
         {previewSrc && (
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handlePick}
-              className="flex-1 sm:flex-initial px-4 py-2 text-sm font-semibold rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-colors min-h-[40px]"
+              disabled={isUploading}
+              className="flex-1 sm:flex-initial px-4 py-2 text-sm font-semibold rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-colors min-h-[40px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('actions.change')}
             </button>
@@ -314,6 +259,7 @@ interface IconDropzoneProps {
   src: string | null;
   uploadLabel: string;
   hintLabel: string;
+  isLoading?: boolean;
   onClick: () => void;
 }
 
@@ -322,20 +268,34 @@ interface IconDropzoneProps {
  * stacked inside the box. With an image → solid border, image fills via
  * object-cover, no hint inside (it'd overlap the icon).
  *
+ * When `isLoading` is true (server-side icon upload in flight) the
+ * dropzone pulses and a translucent overlay with a spinning glyph sits
+ * on top of the preview so the owner gets immediate "we're working on
+ * it" feedback without losing sight of the cropped image.
+ *
  * `key={src}` forces `<Image>` to remount when the URL changes, so newly
  * uploaded icons replace the prior one immediately (Next.js Image with
  * `unoptimized` would otherwise sometimes hold on to the previous src).
  */
-function IconDropzone({ src, uploadLabel, hintLabel, onClick }: IconDropzoneProps) {
+function IconDropzone({
+  src,
+  uploadLabel,
+  hintLabel,
+  isLoading = false,
+  onClick,
+}: IconDropzoneProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`relative aspect-square w-[96px] shrink-0 rounded-xl overflow-hidden transition-colors ${
+      disabled={isLoading}
+      className={cn(
+        'relative aspect-square w-[96px] shrink-0 rounded-xl overflow-hidden transition-colors',
         src
           ? 'border border-[var(--border)] bg-white hover:border-[var(--accent)]'
-          : 'border-2 border-dashed border-[var(--border)] bg-white/50 hover:border-[var(--accent)] hover:bg-[var(--accent)]/5'
-      }`}
+          : 'border-2 border-dashed border-[var(--border)] bg-white/50 hover:border-[var(--accent)] hover:bg-[var(--accent)]/5',
+        isLoading && 'animate-pulse cursor-progress'
+      )}
     >
       {src ? (
         <Image
@@ -361,7 +321,15 @@ function IconDropzone({ src, uploadLabel, hintLabel, onClick }: IconDropzoneProp
           </span>
         </div>
       )}
+
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/15 backdrop-blur-[2px]">
+          <SpinnerGap
+            className="h-6 w-6 text-white animate-spin drop-shadow-md"
+            weight="bold"
+          />
+        </div>
+      )}
     </button>
   );
 }
-
