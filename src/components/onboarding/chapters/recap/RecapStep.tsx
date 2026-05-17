@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Broadcast as BroadcastIcon,
+  Eye,
   Stamp as StampIcon,
   Users,
 } from '@phosphor-icons/react';
@@ -24,6 +25,7 @@ import { useWizardStep } from '../../wizard-context';
  */
 export function RecapStep() {
   const t = useTranslations('onboardingBusiness.chapters.recap');
+  const tDesign = useTranslations('designEditor.editor');
   const ctx = useWizardStep();
   const { currentBusiness } = useBusiness();
 
@@ -35,6 +37,7 @@ export function RecapStep() {
 
   const [stampsSent, setStampsSent] = useState<number>(0);
   const [pendingInvitesCount, setPendingInvitesCount] = useState<number>(0);
+  const [showBack, setShowBack] = useState(false);
 
   useEffect(() => {
     ctx.setCanSkip(true);
@@ -99,12 +102,21 @@ export function RecapStep() {
               // reads as "incomplete."
               previewStamps={totalStamps}
               totalStamps={totalStamps}
+              showBack={showBack}
               // Let the title fall through to `design.organization_name`
               // (same approach as DesignPreviewPane). Passing the business
               // name would inject a title the user explicitly left blank
               // in the design editor.
             />
           </div>
+          <button
+            type="button"
+            onClick={() => setShowBack((v) => !v)}
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#7A7A7A] hover:text-[var(--foreground)] transition-colors"
+          >
+            <Eye className="w-3.5 h-3.5" weight="bold" />
+            {showBack ? tDesign('viewFront') : tDesign('viewBack')}
+          </button>
           {program && (
             <p className="wiz-helper text-center text-[#7A7A7A]">
               {t('programDetail', { totalStamps, rewardName: rewardName || '—' })}

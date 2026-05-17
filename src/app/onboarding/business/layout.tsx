@@ -37,12 +37,12 @@ export default function OnboardingBusinessLayout({ children }: { children: React
     }
   }, [authLoading, businessLoading, user, currentBusiness, router]);
 
-  // Apply the wizard's orange theme on mount; reset on unmount so the
-  // dashboard's green accent (set in globals.css) takes over after wizard
-  // completion. If the business already has saved design colors from a
-  // previous visit, those win — the design step's applyTheme on mount also
-  // overrides this, but seeding from settings here avoids a flicker on
-  // re-entry.
+  // Apply the wizard's orange theme on mount. On unmount, hand the theme
+  // back to the saved business colors so the dashboard renders the user's
+  // accent immediately — the BusinessProvider's theme effect only re-fires
+  // when `currentBusiness.id`/`settings` change, and neither changes on
+  // wizard → dashboard transition, so a plain `resetTheme()` here would
+  // leave the dashboard on defaults until the next reload.
   useEffect(() => {
     const settings = (currentBusiness?.settings ?? {}) as Record<string, unknown>;
     const savedAccent = getAccentFromSettings(settings);
@@ -53,7 +53,14 @@ export default function OnboardingBusinessLayout({ children }: { children: React
         : STAMPEO_BRAND_ACCENT;
     applyTheme(seedAccent, savedBg ?? undefined);
     return () => {
-      resetTheme();
+      const latest = (currentBusiness?.settings ?? {}) as Record<string, unknown>;
+      const accent = getAccentFromSettings(latest);
+      const bg = getBackgroundFromSettings(latest);
+      if (accent || bg) {
+        applyTheme(accent, bg ?? undefined);
+      } else {
+        resetTheme();
+      }
     };
   }, [currentBusiness?.settings]);
 
