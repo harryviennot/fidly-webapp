@@ -78,11 +78,19 @@ export function InstallStep() {
   // always the row we activate at install time. Both `useDesigns` and
   // `useDesignReady` read the same cache key; the realtime hook mirrors
   // backend UPDATEs into it so `is_active` and `strip_status` stay fresh
-  // without a manual refetch.
+  // without a manual refetch. We pass `wizardDesign` straight into
+  // `useDesignReady` as its initial seed so a remount whose cache is already
+  // hot skips the loader on the very first paint (avoids the one-frame
+  // "loader → install" flash that would otherwise happen while the hook's
+  // internal `getDesign` is in flight).
   const { data: designs = [] } = useDesigns(businessId);
   const wizardDesign = designs[0];
   const designId = wizardDesign?.id;
-  const { ready: designReady, isActive } = useDesignReady(businessId, designId);
+  const { ready: designReady, isActive } = useDesignReady(
+    businessId,
+    designId,
+    wizardDesign
+  );
 
   const { installedCount, loading: installsLoading } = useBusinessInstalls(businessId);
 

@@ -29,29 +29,43 @@ interface UseDesignReadyResult {
  * background task flips `strip_status` back to `ready`, so the UI can switch
  * out of the loader the moment the work lands.
  *
- * Resilient to remounts: every mount kicks off a fresh `getDesign` read AND
- * resubscribes to the channel. If the user closes the wizard mid-regen and
- * comes back later, the initial read returns `strip_status='ready'` and we
- * surface that immediately without waiting for a realtime event.
+ * Pass `initialDesign` to seed the hook with the row the caller already has
+ * (typically from `useDesigns`, which is populated by BackStep's
+ * `setQueryData`). When provided, the hook computes `ready` from it on the
+ * very first render — eliminating the one-frame "loader → install" flash that
+ * would otherwise appear before the internal `getDesign` settled.
  *
- * Pass `enabled=false` when the design id isn't known yet (e.g. business
- * cache still loading); the hook reports `loading=true` until enabled.
+ * Resilient to remounts: every mount also kicks off a fresh `getDesign` read
+ * AND resubscribes to the channel. If the user closes the wizard mid-regen
+ * and comes back later, the initial read returns `strip_status='ready'` and
+ * we surface that immediately without waiting for a realtime event.
+ *
+ * Pass an undefined `designId` when the design id isn't known yet (e.g.
+ * business cache still loading); the hook reports `loading=true` until set.
  */
 export function useDesignReady(
   businessId: string | undefined,
-  designId: string | undefined
+  designId: string | undefined,
+  initialDesign?: CardDesign | null
 ): UseDesignReadyResult {
   const queryClient = useQueryClient();
-  const [design, setDesign] = useState<CardDesign | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Seed local state from `initialDesign` so the first render already reflects
+  // the cached row. Without this, we'd briefly render `design=null` →
+  // `ready=false` → loader for one frame, then flip to the install UI as
+  // soon as the internal `getDesign` resolves.
+  const [design, setDesign] = useState<CardDesign | null>(initialDesign ?? null);
+  const [loading, setLoading] = useState(!initialDesign);
   // Sticky-ready flag: flips true the first time we observe a non-regenerating
   // `strip_status` for this mount. Once flipped, it ignores later events that
   // would otherwise drop us back into the loader — that scenario (UI was
   // showing install, then suddenly went back to loading and got stuck) was
   // reported in dev when the `activate` endpoint's set_active two-step
   // update fired a transient row state that the realtime channel re-broadcast
-  // before the matching "ready" update could land.
-  const sawReadyRef = useRef(false);
+  // before the matching "ready" update could land. Seed from the initial
+  // design so a fast-path mount skips the loader entirely.
+  const sawReadyRef = useRef(
+    !!initialDesign && initialDesign.strip_status !== 'regenerating'
+  );
 
   useEffect(() => {
     if (!businessId || !designId) {
@@ -59,28 +73,28 @@ export function useDesignReady(
       return;
     }
     let cancelled = false;
-    setLoading(true);
-    // Reset the sticky flag whenever the (businessId, designId) pair changes
-    // — a new design legitimately starts in a regenerating window of its own
-    // and shouldn't inherit the previous row's "ready" sticky.
-    sawReadyRef.current = false;
 
-    // Initial read: covers the "user came back later, regen already done"
-    // case so we don't show the loader needlessly.
-    (async () => {
-      try {
-        const fresh = await getDesign(businessId, designId);
-        if (cancelled) return;
-        setDesign(fresh);
-        if (fresh.strip_status !== 'regenerating') {
-          sawReadyRef.current = true;
+    // Skip the redundant initial fetch when the caller has already handed us
+    // a row — `useDesigns` is the canonical source for that, and a second
+    // `getDesign` over the wire would just refetch what we already have.
+    // Realtime keeps the cache (and our local state) in sync from here on.
+    if (!initialDesign) {
+      setLoading(true);
+      (async () => {
+        try {
+          const fresh = await getDesign(businessId, designId);
+          if (cancelled) return;
+          setDesign(fresh);
+          if (fresh.strip_status !== 'regenerating') {
+            sawReadyRef.current = true;
+          }
+        } catch {
+          // Non-fatal — stay in loading state; realtime updates may still land.
+        } finally {
+          if (!cancelled) setLoading(false);
         }
-      } catch {
-        // Non-fatal — stay in loading state; realtime updates may still land.
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
+      })();
+    }
 
     const supabase = createClient();
     const channel: RealtimeChannel = supabase
@@ -118,6 +132,12 @@ export function useDesignReady(
       cancelled = true;
       supabase.removeChannel(channel);
     };
+    // `initialDesign` is intentionally excluded from deps: it only seeds the
+    // first mount (via the useState/useRef initialisers above). Including it
+    // would tear down and reconnect the realtime channel every time the
+    // caller's reference churned (e.g. on each `useDesigns` refetch),
+    // wasting websocket frames for no behavioural change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessId, designId, queryClient]);
 
   // Sticky-ready: once a mount has observed a non-regenerating state, treat
