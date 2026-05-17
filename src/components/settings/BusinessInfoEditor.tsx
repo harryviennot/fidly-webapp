@@ -175,7 +175,7 @@ export function BusinessInfoEditor({
               )}
             >
               <div className="px-3 py-1.5 text-[10px] font-semibold text-[#AAA] uppercase tracking-wider">
-                Choose field type
+                {t('chooseFieldType')}
               </div>
               {availableTypes.map((type) => {
                 const Icon = BUSINESS_INFO_TYPE_ICONS[type];

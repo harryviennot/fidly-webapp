@@ -356,19 +356,22 @@ export function IdentityStep() {
       </header>
 
       <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-3">
-          <Label htmlFor="biz-name" className="wiz-body-sm font-medium">
-            {t('fields.name')}
-          </Label>
-          <Input
-            id="biz-name"
-            value={name}
-            onChange={(e) => handleNameChange(e.target.value)}
-            placeholder={t('fields.namePlaceholder')}
-            autoComplete="organization"
-            autoFocus
-            className="h-11"
-          />
+        <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-3">
+            <Label htmlFor="biz-name" className="wiz-body-sm font-medium">
+              {t('fields.name')}
+              <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
+            </Label>
+            <Input
+              id="biz-name"
+              value={name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder={t('fields.namePlaceholder')}
+              autoComplete="organization"
+              autoFocus
+              className="h-11"
+            />
+          </div>
         </div>
 
         <ImageUploader
@@ -381,26 +384,32 @@ export function IdentityStep() {
           enableCrop
         />
 
-        <div className="flex flex-col gap-3">
-          <Label htmlFor="biz-website" className="wiz-body-sm font-medium">
-            {t('fields.website')}
-          </Label>
-          <Input
-            id="biz-website"
-            type="url"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-            placeholder={t('fields.websitePlaceholder')}
-            inputMode="url"
-            autoComplete="url"
-            className="h-11"
-          />
+        <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-3">
+            <Label htmlFor="biz-website" className="wiz-body-sm font-medium">
+              {t('fields.website')}
+            </Label>
+            <Input
+              id="biz-website"
+              type="url"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder={t('fields.websitePlaceholder')}
+              inputMode="url"
+              autoComplete="url"
+              className="h-11"
+            />
+          </div>
+          <p className="wiz-micro text-[#999]">{t('fields.websiteHelp')}</p>
         </div>
 
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-col gap-3">
             <Label htmlFor="biz-slug" className="wiz-body-sm font-medium">
               {t('fields.slug')}
+              {!editingExisting && (
+                <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
+              )}
             </Label>
             <div className="relative">
               <Input
@@ -418,7 +427,7 @@ export function IdentityStep() {
                   'h-11 pr-10 transition-colors',
                   slugStatus === 'available' && 'border-green-500 focus-visible:border-green-500',
                   (slugStatus === 'taken' || slugStatus === 'invalid') &&
-                    'border-red-500 focus-visible:border-red-500'
+                  'border-red-500 focus-visible:border-red-500'
                 )}
               />
               <SlugStatusIcon status={slugStatus} />

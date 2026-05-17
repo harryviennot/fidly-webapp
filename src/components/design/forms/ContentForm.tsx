@@ -15,7 +15,6 @@ export function ContentForm() {
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="text-sm text-muted-foreground">{t('contentDescription')}</p>
       <FieldEditor
         title={t('frontDetails')}
         fields={formData.secondary_fields || []}

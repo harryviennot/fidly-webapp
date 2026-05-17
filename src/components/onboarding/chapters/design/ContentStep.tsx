@@ -77,6 +77,7 @@ export function ContentStep() {
               {t('title')}
             </h2>
             <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
+            <p className="wiz-micro text-[#999] mt-3">{t('technicalNote')}</p>
           </header>
           <ContentForm />
         </div>

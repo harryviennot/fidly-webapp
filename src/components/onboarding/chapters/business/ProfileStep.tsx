@@ -160,6 +160,7 @@ export function ProfileStep() {
       <section className="flex flex-col gap-3">
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('typeLabel')}
+          <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
         </h3>
         <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
           {TYPE_OPTIONS.map((opt) => (
@@ -179,6 +180,7 @@ export function ProfileStep() {
               className="wiz-body-sm font-medium text-[var(--foreground)]"
             >
               {t('otherFreeText')}
+              <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
             </label>
             <Input
               id="biz-type-other"
@@ -195,6 +197,7 @@ export function ProfileStep() {
       <section className="flex flex-col gap-3">
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('sizeLabel')}
+          <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
         </h3>
         <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
           {SIZE_OPTIONS.map((id) => (
@@ -211,6 +214,7 @@ export function ProfileStep() {
       <section className="flex flex-col gap-3">
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('locationsLabel')}
+          <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
         </h3>
         <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
           {LOCATIONS_OPTIONS.map((id) => (
@@ -227,6 +231,7 @@ export function ProfileStep() {
       <section className="flex flex-col gap-3">
         <h3 className="wiz-body-sm font-medium text-[var(--foreground)]">
           {t('goalLabel')}
+          <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
         </h3>
         <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
           {GOAL_OPTIONS.map((opt) => (

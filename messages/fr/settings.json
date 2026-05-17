@@ -21,6 +21,7 @@
       "title": "Informations de la carte",
       "description": "Ces informations apparaîtront au dos des cartes de fidélité de vos clients",
       "addInfo": "Ajouter une info",
+      "chooseFieldType": "Choisir le type d'information",
       "noInfoYet": "Aucune info ajoutée. Ajoutez les détails de votre entreprise pour les afficher au dos des cartes de fidélité.",
       "moveUp": "Monter",
       "moveDown": "Descendre",

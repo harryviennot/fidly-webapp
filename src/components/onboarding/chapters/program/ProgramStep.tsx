@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { useBusiness } from '@/contexts/business-context';
@@ -36,6 +36,7 @@ const PLACEHOLDER_PROGRAM_NAMES = new Set([
   'New Loyalty Program',
   'Programme',
   'Programme de fidélité',
+  'Fidélité',
 ]);
 
 /**
@@ -50,7 +51,6 @@ export function ProgramStep() {
   const t = useTranslations('onboardingBusiness.chapters.program.steps.program');
   const tLp = useTranslations('loyaltyProgram');
   const tErr = useTranslations('onboardingBusiness.errors');
-  const locale = useLocale();
   const { currentBusiness } = useBusiness();
   const businessId = currentBusiness?.id;
   const { data: program } = useDefaultProgram(businessId);
@@ -60,8 +60,7 @@ export function ProgramStep() {
   const ctx = useWizardStep();
 
   const businessName = currentBusiness?.name?.trim() ?? '';
-  const localizedSuffix = locale === 'fr' ? 'Fidélité' : 'Loyalty Program';
-  const defaultProgramName = businessName ? `${businessName} ${localizedSuffix}` : '';
+  const defaultProgramName = businessName ? tLp('defaultProgramName', { businessName }) : '';
 
   // Drafted form state. Falls back to the program loaded from the server,
   // except for the name where we prefer a business-personalised default over
@@ -192,7 +191,12 @@ export function ProgramStep() {
       </header>
 
       <div className="flex flex-col gap-6">
-        <WizardField label={tLp('programName')} htmlFor="program-name" required>
+        <WizardField
+          label={tLp('programName')}
+          htmlFor="program-name"
+          helper={tLp('programNameHelp')}
+          required
+        >
           <Input
             id="program-name"
             value={programName}

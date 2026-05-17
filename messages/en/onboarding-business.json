@@ -78,14 +78,16 @@
             "subtitle": "Tell us what your business is called and where to find it.",
             "fields": {
               "name": "Business name",
+              "nameHelp": "The name your customers see on their card.",
               "namePlaceholder": "e.g. Café du Coin",
               "slug": "Your Stampeo page URL",
-              "slugHelp": "Your card link will be stampeo.app/{slug}",
+              "slugHelp": "Your customers' page will live at stampeo.app/{slug}. Pick something short and easy to remember.",
               "slugPlaceholder": "cafe-du-coin",
               "website": "Your business website",
+              "websiteHelp": "Will show on the back of your customers' card.",
               "websitePlaceholder": "https://…",
               "logo": "Logo",
-              "logoHelp": "Up to 3:1 wide.",
+              "logoHelp": "Landscape, up to 3:1. PNG or JPG.",
               "slugChecking": "Checking…",
               "slugAvailable": "Available"
             }
@@ -171,7 +173,8 @@
           },
           "content": {
             "title": "Extra info on the front",
-            "subtitle": "Limit, expiry, anything else worth surfacing on the card itself."
+            "subtitle": "Limit, expiry, anything else worth surfacing on the card itself.",
+            "technicalNote": "On Apple Wallet, these fields render below the stamps. On Google Wallet, just above the QR code."
           },
           "back": {
             "title": "What appears on the back of THIS design",

@@ -222,6 +222,7 @@ export function IconStep() {
         <div className="flex gap-3 sm:gap-4">
           <span className="w-[96px] shrink-0 text-[15px] font-medium text-[var(--foreground)]">
             {t('uploadSectionTitle')}
+            <span aria-hidden="true" className="ml-0.5 text-[var(--accent)]">*</span>
           </span>
           <span className="flex-1 text-[15px] font-medium text-[var(--foreground)]">
             {t('previewLabel')}

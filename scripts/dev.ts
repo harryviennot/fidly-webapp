@@ -6,7 +6,7 @@ import { resolve } from "path";
 config({ path: resolve(process.cwd(), ".env.local") });
 
 const cookieDomain = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || "";
-// Extract IP from cookie domain (e.g., ".10.196.9.69.nip.io" -> "10.196.9.69")
+// Extract IP from cookie domain (e.g., ".192.0.0.2.nip.io" -> "192.0.0.2")
 const ipMatch = /\.?(\d+\.\d+\.\d+\.\d+)\.nip\.io/.exec(cookieDomain);
 const ip = ipMatch?.[1];
 

@@ -7,10 +7,10 @@
       "finish": "Lancer mon programme",
       "saving": "Enregistrement…",
       "skipAll": "Passer le reste de la configuration",
-      "gotIt": "Compris, on y va",
+      "gotIt": "Continuer",
       "cta": {
         "welcome": {
-          "welcome": "Configurer mon programme"
+          "welcome": "C'est parti"
         },
         "business": {
           "identity": "Continuer",
@@ -22,7 +22,7 @@
         },
         "card-back": {
           "intro": "Continuer",
-          "info": "Enregistrer le dos de ma carte"
+          "info": "Enregistrer le verso de ma carte"
         },
         "design": {
           "branding": "Concevoir ma carte",
@@ -60,52 +60,54 @@
       "createFailed": "Une erreur est survenue à la création de votre commerce. Réessayez.",
       "saveFailed": "Impossible d'enregistrer. Réessayez.",
       "programNameRequired": "Donnez un nom à votre programme.",
-      "rewardRequired": "Indiquez la récompense que les clients gagneront.",
+      "rewardRequired": "Indiquez la récompense que vos clients gagneront.",
       "slugTooShort": "Encore quelques caractères."
     },
     "chapters": {
       "welcome": {
         "title": "Bienvenue sur Stampeo",
-        "subtitle": "En quelques minutes, votre carte de fidélité arrive dans le wallet de vos clients.",
-        "body": "On crée une carte à vos couleurs, on envoie un tampon sur votre téléphone, puis on y pousse une diffusion pour que vous viviez exactement ce que vos clients vivront. Les étapes obligatoires vous mettent en ligne. Le reste rend votre programme plus abouti dès le premier jour.",
+        "subtitle": "Votre programme de fidélité sera prêt en quinze minutes.",
+        "body": "Vous allez créer votre carte à vos couleurs, recevoir un vrai tampon sur votre téléphone, et envoyer une vraie promotion. Tout se passe sur votre propre appareil, exactement comme vos clients le vivront.\n\nLes étapes essentielles suffisent pour lancer votre programme. Les autres lui donnent du soin et de la finition.",
         "cta": "C'est parti"
       },
       "business": {
         "title": "Votre commerce",
         "steps": {
           "identity": {
-            "title": "Identité",
-            "subtitle": "Indiquez le nom de votre commerce et son adresse.",
+            "title": "Identité de votre commerce",
+            "subtitle": "Le nom, le logo et l'adresse de votre page publique.",
             "fields": {
               "name": "Nom du commerce",
+              "nameHelp": "Le nom que verront vos clients sur leur carte.",
               "namePlaceholder": "ex. Café du Coin",
-              "slug": "L'URL de votre page Stampeo",
-              "slugHelp": "Le lien de votre carte sera stampeo.app/{slug}",
+              "slug": "Adresse de votre page Stampeo",
+              "slugHelp": "L'adresse de la page de vos clients sera stampeo.app/{slug}. Choisissez-la courte et facile à retenir.",
               "slugPlaceholder": "cafe-du-coin",
-              "website": "Votre site web",
+              "website": "Votre site web (optionnel)",
+              "websiteHelp": "S'affichera au dos de la carte de vos clients.",
               "websitePlaceholder": "https://…",
               "logo": "Logo",
-              "logoHelp": "Jusqu'à un ratio de 3:1.",
+              "logoHelp": "Format paysage, jusqu'à 3:1. PNG ou JPG.",
               "slugChecking": "Vérification…",
               "slugAvailable": "Disponible"
             }
           },
           "profile": {
-            "title": "Parlez-nous de votre commerce",
-            "subtitle": "Quatre questions rapides pour adapter les modèles, recommandations et statistiques à votre activité.",
-            "typeLabel": "Quel type de commerce ?",
+            "title": "Votre activité en quatre clics",
+            "subtitle": "On adapte les modèles, les recommandations et les statistiques à votre métier.",
+            "typeLabel": "Quel type de commerce tenez-vous ?",
             "sizeLabel": "Quelle est la taille de votre équipe ?",
             "locationsLabel": "Combien d'établissements ?",
             "goalLabel": "Quel est votre objectif principal ?",
             "otherFreeText": "Autre (précisez)",
             "otherPlaceholder": "Décrivez brièvement votre activité",
             "typeOptions": {
-              "cafe": "Café / Salon de thé",
+              "cafe": "Café ou salon de thé",
               "restaurant": "Restaurant",
-              "bakery": "Boulangerie / Pâtisserie",
-              "beauty": "Beauté / Coiffure",
-              "retail": "Boutique / Commerce",
-              "fitness": "Fitness / Studio",
+              "bakery": "Boulangerie ou pâtisserie",
+              "beauty": "Beauté ou coiffure",
+              "retail": "Boutique ou commerce",
+              "fitness": "Fitness ou studio",
               "services": "Services",
               "other": "Autre"
             },
@@ -134,12 +136,12 @@
         "title": "Programme de fidélité",
         "steps": {
           "program": {
-            "title": "Configurez votre programme",
-            "subtitle": "Combien de tampons sont nécessaires, et ce que vos clients gagnent."
+            "title": "Votre programme de fidélité",
+            "subtitle": "Combien de tampons pour gagner quoi, et comment."
           },
           "data-collection": {
-            "title": "Que collecter auprès des clients",
-            "subtitle": "Choisissez les champs du formulaire d'inscription."
+            "title": "Que demander à vos clients",
+            "subtitle": "À l'inscription, vos clients remplissent un court formulaire. C'est vous qui décidez de son contenu."
           }
         }
       },
@@ -147,14 +149,14 @@
         "title": "Le verso de votre carte",
         "steps": {
           "intro": {
-            "title": "Votre carte a deux faces",
-            "subtitle": "À l'avant les tampons, à l'arrière les infos pratiques.",
-            "bodyP1": "Sur Apple Wallet, vos clients tapent les trois points sur leur carte pour la retourner. Sur Google Wallet, l'icône i. Dans les deux cas, ils tombent sur les infos que vous y placez : horaires, adresse, téléphone, site web, conditions générales, tout ce qui mérite d'être affiché.",
-            "bodyP2": "Vous allez les ajouter maintenant, une seule fois. Plus tard, à chaque design de votre carte, vous choisirez celles à inclure et vous pourrez ajouter des extras qui ne valent que pour ce design-là."
+            "title": "Le verso de votre carte",
+            "subtitle": "Tout ce qui n'est pas un tampon est rangé au dos.",
+            "bodyP1": "Vos clients consultent le verso de leur carte en appuyant sur les trois points dans Apple Wallet, ou sur l'icône info dans Google Wallet. Ils y trouvent les informations que vous y placez : horaires, adresse, téléphone, site web, conditions, et tout ce que vous voulez rendre visible.",
+            "bodyP2": "Vous saisissez ces informations une seule fois maintenant. Elles seront disponibles pour chaque carte que vous créerez à l'avenir."
           },
           "info": {
-            "title": "Ajoutez les infos de votre commerce",
-            "subtitle": "Ces entrées seront disponibles sur chaque design de votre carte. On a pré-rempli ce qu'on pouvait depuis votre compte."
+            "title": "Les informations de votre commerce",
+            "subtitle": "On a pré-rempli ce qu'on a pu depuis votre profil. Modifiez, complétez ou retirez à votre convenance."
           }
         }
       },
@@ -163,25 +165,26 @@
         "steps": {
           "branding": {
             "title": "Logo et couleurs",
-            "subtitle": "Ajoutez votre logo, choisissez vos couleurs. Les valeurs par défaut fonctionnent, vous pourrez affiner quand vous voulez."
+            "subtitle": "L'identité visuelle de votre carte. Les couleurs proposées par défaut conviennent déjà. Ajustez-les si vous voulez."
           },
           "stamps": {
-            "title": "Tampons",
-            "subtitle": "Choisissez les icônes de tampon et de récompense, puis ajustez les couleurs."
+            "title": "Tampons et récompense",
+            "subtitle": "Choisissez les icônes et la couleur principale. Ces choix donnent le ton de votre carte."
           },
           "content": {
-            "title": "Infos en façade",
-            "subtitle": "Limite, expiration, ou toute autre info utile à afficher directement sur la carte."
+            "title": "Informations visibles en façade",
+            "subtitle": "Petites mentions affichées directement sur la carte, sans avoir à la retourner. Idéal pour la récompense en cours, la date de fin, ou une promotion.",
+            "technicalNote": "Sur Apple Wallet, ces champs s'affichent sous les tampons. Sur Google Wallet, juste au-dessus du QR code."
           },
           "back": {
-            "title": "Ce qui apparaît au dos de CE design",
-            "subtitle": "Choisissez les infos de commerce à afficher sur cette carte, et ajoutez celles qui ne valent que pour elle.",
-            "sharedSectionTitle": "Vos infos de commerce",
+            "title": "Verso de ce design",
+            "subtitle": "Les informations de votre commerce, déjà saisies au chapitre précédent, apparaîtront ici par défaut. Si vous voulez ajouter quelque chose qui n'existe que pour ce design (par exemple les conditions d'une promotion ponctuelle), c'est ici.",
+            "sharedSectionTitle": "Vos informations de commerce",
             "sharedSectionHelper": "Cochez celles à afficher sur ce design.",
             "specificSectionTitle": "Spécifique à ce design",
             "specificSectionHelper": "Les champs ajoutés ici n'apparaissent que sur ce design.",
-            "specificEmpty": "Rien pour l'instant. Ajoutez un champ qui n'apparaîtra que sur ce design.",
-            "addFieldCta": "Ajouter un champ"
+            "specificEmpty": "Aucun champ pour l'instant.",
+            "addFieldCta": "Ajouter un champ propre à ce design"
           }
         }
       },
@@ -189,16 +192,16 @@
         "title": "Icône des notifications",
         "steps": {
           "icon": {
-            "title": "Choisissez l'icône des notifications",
-            "subtitle": "Vos clients reçoivent une notification à chaque tampon ou récompense gagnée. Cette icône apparaît à côté.",
+            "title": "Icône des notifications",
+            "subtitle": "À chaque tampon ou récompense, vos clients reçoivent une notification sur leur téléphone. Voici l'icône qui l'accompagnera.",
             "uploadSectionTitle": "Votre icône",
-            "uploadCta": "Cliquer pour importer",
-            "uploadHint": "PNG, minimum 87×87 pixels",
+            "uploadCta": "Glissez votre image ici, ou appuyez pour la choisir",
+            "uploadHint": "PNG, 87 par 87 pixels minimum.",
             "previewLabel": "Aperçu",
-            "previewBody": "Tampon ajouté ! Vous avez 3 tampons sur 10.",
+            "previewBody": "Tampon ajouté. Vous avez 3 tampons sur 10.",
             "cropWarning": {
               "title": "Icône à recadrer",
-              "body": "Votre logo n'est pas carré. Recadrez-le pour continuer — ou importez une autre image.",
+              "body": "Votre logo n'est pas carré. Recadrez-le pour continuer, ou importez une autre image.",
               "cta": "Recadrer maintenant"
             },
             "actions": {
@@ -214,69 +217,69 @@
         "chapterIntro": "Installez votre carte, puis envoyez-vous un vrai tampon.",
         "steps": {
           "install": {
-            "title": "Votre carte est prête ! Essayons-la.",
-            "subtitle": "Suivez exactement le même parcours que vos clients.",
-            "explanation": "Ci-dessous, c'est la page publique sur laquelle vos clients arriveront après avoir scanné votre QR au comptoir ou cliqué sur votre lien. C'est là qu'ils s'inscrivent à votre programme de fidélité et reçoivent leur carte.",
-            "explanationActionDesktop": "Scannez le QR avec votre téléphone, ouvrez la page de votre commerce, et inscrivez-vous comme premier client. Votre carte arrive dans votre wallet, prête pour le tampon test à l'étape suivante.",
-            "explanationActionMobile": "Tapez sur le lien pour ouvrir la page de votre commerce, puis inscrivez-vous comme premier client. Votre carte arrive dans votre wallet, prête pour le tampon test à l'étape suivante. Une fois la carte installée, revenez ici.",
-            "signupUrlLabel": "Page client",
+            "title": "Votre carte est prête. Essayons-la.",
+            "subtitle": "Vous allez vivre exactement le même parcours que vos clients.",
+            "explanation": "L'adresse ci-dessous est celle de votre page publique. C'est là que vos clients arrivent après avoir scanné votre QR ou cliqué sur votre lien. C'est là qu'ils s'inscrivent et reçoivent leur carte.",
+            "explanationActionDesktop": "Scannez le QR avec votre téléphone, ouvrez votre page publique et inscrivez-vous comme premier client. Une fois inscrit, votre carte arrivera sur votre téléphone et vous pourrez passer à l'étape suivante.",
+            "explanationActionMobile": "Appuyez sur le lien pour ouvrir votre page comme premier client. Une fois inscrit, votre carte arrivera sur votre téléphone et vous pourrez passer à l'étape suivante.",
+            "signupUrlLabel": "Adresse de votre page publique",
             "copy": "Copier",
             "copied": "Copié",
-            "qrTitle": "Imprimez ou affichez ce QR",
-            "qrBody": "Plus tard, vous pourrez l'imprimer pour votre comptoir ou le glisser sur votre menu pour que vos clients s'inscrivent eux-mêmes.",
+            "qrTitle": "Imprimez ou affichez votre QR",
+            "qrBody": "Plus tard, imprimez ce QR pour votre comptoir, ou glissez-le sur votre menu. Vos clients pourront s'inscrire seuls.",
             "qrShow": "Afficher le QR",
             "qrHide": "Masquer le QR",
-            "downloadPng": "Enregistrer en PNG",
-            "downloadPdf": "Enregistrer en PDF",
-            "quickInstallTitle": "Juste la carte ? Sautez la page client",
-            "quickInstallBody": "On vous enregistre directement avec les infos de votre compte. Vous ne voyez pas le parcours client, mais vous avez la carte sur votre téléphone plus vite.",
-            "quickInstallCta": "Utiliser mes infos et installer",
+            "downloadPng": "Télécharger en PNG",
+            "downloadPdf": "Télécharger en PDF",
+            "quickInstallTitle": "Vous voulez aller plus vite ?",
+            "quickInstallBody": "Installez la carte directement. On vous inscrit avec les informations de votre compte. Vous n'aurez pas vu le parcours client, mais votre carte sera prête en deux secondes.",
+            "quickInstallCta": "Installer la carte directement",
             "registering": "Enregistrement…",
-            "installTitle": "Ajoutez la carte à votre wallet",
-            "installBody": "Tapez un bouton ci-dessous. La carte arrive dans votre wallet, prête pour le tampon test à l'étape suivante.",
+            "installTitle": "Ajoutez la carte à votre téléphone",
+            "installBody": "Appuyez sur un bouton ci-dessous. La carte arrive sur votre téléphone, prête pour le tampon test à l'étape suivante.",
             "addToAppleWallet": "Ajouter à Apple Wallet",
             "addToGoogleWallet": "Ajouter à Google Wallet",
-            "pollingHint": "Gardez cet onglet ouvert. On détecte l'inscription automatiquement.",
-            "watchingInstall": "Client détecté. On attend que la carte arrive dans votre wallet…",
-            "manualConfirmCta": "Je l'ai ajoutée à mon wallet",
+            "pollingHint": "Gardez cet onglet ouvert. On détecte automatiquement l'installation de votre carte.",
+            "watchingInstall": "Client détecté. On attend que la carte arrive sur votre téléphone…",
+            "manualConfirmCta": "Je l'ai ajoutée à mon téléphone",
             "detected": "Carte installée. On passe à la suite dans un instant.",
             "detectedReturning": "Carte installée.",
             "timeoutTitle": "Toujours là ?",
-            "timeoutBody": "On a arrêté d'écouter les nouvelles inscriptions après 5 minutes. Tapez « reprendre » pour continuer à surveiller.",
+            "timeoutBody": "On a arrêté d'écouter les nouvelles inscriptions après 5 minutes. Appuyez sur « reprendre » pour continuer à surveiller.",
             "retry": "Reprendre l'écoute"
           },
           "stamp": {
-            "title": "Tamponnez-vous",
-            "subtitle": "Chaque tap envoie une vraie notification sur votre téléphone.",
+            "title": "Tamponnez votre carte",
+            "subtitle": "Chaque appui envoie une vraie notification sur votre téléphone.",
             "prereqTitle": "Installez d'abord votre carte",
-            "prereqBody": "Revenez à l'étape précédente et ajoutez la carte à votre wallet. Sans elle, aucune notification ne peut arriver.",
+            "prereqBody": "Revenez à l'étape précédente et ajoutez la carte à votre téléphone. Sans elle, aucune notification ne peut arriver.",
             "readyTitle": "Prêt à tamponner",
-            "readyBody": "Tapez ci-dessous. Un vrai tampon part, votre téléphone vibre en quelques secondes.",
-            "firstStampLandedTitle": "Vous l'avez senti ?",
-            "firstStampLandedBody": "Cette vibration, c'est exactement ce que vos clients ressentent à chaque tampon. Même notification, même timing, même rythme. Envoyez-en encore un pour bien sentir le rythme.",
+            "readyBody": "Appuyez sur le bouton ci-dessous. Une vraie notification arrivera sur votre téléphone en quelques secondes.",
+            "firstStampLandedTitle": "Vous l'avez senti.",
+            "firstStampLandedBody": "Cette vibration, c'est exactement ce que vos clients ressentiront à chaque tampon. Même notification, même timing. Faites-en un deuxième pour bien sentir le rythme.",
             "keepStampingTitle": "Encore un",
-            "keepStampingBody": "Un dernier tap envoie une deuxième vraie notification. Le petit délai entre les deux est ce qui permet à chacune de vibrer séparément au lieu d'être fusionnées.",
-            "demoCompleteTitle": "Parfait, vous tenez le rythme",
-            "demoCompleteBody": "C'est exactement la sensation que vos clients auront à chaque tampon. Quand vous voulez, on passe à la suite.",
-            "sendCta": "Envoyer le tampon test",
+            "keepStampingBody": "Un dernier appui envoie une deuxième vraie notification. Le petit délai entre les deux est ce qui permet à chacune de vibrer séparément au lieu d'être fusionnées.",
+            "demoCompleteTitle": "C'est exactement ça.",
+            "demoCompleteBody": "Vous venez de vivre ce que vivront vos clients. Quand vous êtes prêt, on continue.",
+            "sendCta": "Envoyer un tampon test",
             "sendAnotherCta": "Envoyer un autre tampon",
             "watching": "Le tampon arrive…",
-            "cooldownCta": "Attendez {seconds}s pour la prochaine notification…",
-            "appleWalletHint": "Apple Wallet regroupe les mises à jour rapides. Environ 20s entre les tampons, et chaque notification a son propre buzz.",
-            "googleWalletHint": "Sur Google Wallet, la carte ne se met à jour qu'une fois fermée. Quittez-la et rouvrez-la pour voir le nouveau tampon.",
+            "cooldownCta": "Apple limite l'envoi à une notification toutes les quinze secondes pour préserver les téléphones de vos clients. Prochain tampon disponible dans {seconds}s.",
+            "appleWalletHint": "Apple Wallet regroupe les mises à jour rapides. Environ 20 secondes entre les tampons, et chaque notification a son propre buzz.",
+            "googleWalletHint": "Sur Google Wallet, la carte ne se met à jour qu'une fois fermée. Quittez l'application et rouvrez votre carte pour voir le nouveau tampon.",
             "deliveryDisclosure": {
-              "summary": "La notification n'apparaît pas ? Le tampon est bien enregistré.",
+              "summary": "La notification n'arrive pas ? Le tampon est bien enregistré, ne vous inquiétez pas.",
               "appleTitle": "Sur Apple Wallet",
-              "appleBody": "Apple regroupe les mises à jour rapides et choisit le moment de les livrer selon la batterie, le Wi-Fi et le réseau cellulaire. La bannière peut arriver en quelques secondes — ou en quelques minutes. La carte sur l'écran verrouillé se met à jour d'elle-même dès que les conditions le permettent.",
+              "appleBody": "Apple choisit le meilleur moment pour livrer la notification en fonction de la batterie, du Wi-Fi et du réseau. Elle arrive en quelques secondes à quelques minutes. La carte sur l'écran verrouillé se met à jour dès que les conditions le permettent.",
               "googleTitle": "Sur Google Wallet",
-              "googleBody": "La carte ne se met à jour qu'après avoir été fermée. Quittez le wallet et rouvrez la carte pour voir le nouveau tampon.",
-              "reassuranceTitle": "Le tampon est enregistré",
-              "reassuranceBody": "Même si la notification ou l'aperçu de la carte n'a pas encore rattrapé son retard, le décompte est déjà sauvegardé côté serveur. À la prochaine fois que vous scannez ce client, vous verrez le vrai décompte, à jour."
+              "googleBody": "La carte ne se met à jour qu'après avoir été fermée. Quittez l'application et rouvrez votre carte pour voir le nouveau tampon.",
+              "reassuranceTitle": "Dans tous les cas, le tampon est enregistré",
+              "reassuranceBody": "Même si la notification tarde, le décompte est sauvegardé immédiatement. À la prochaine visite de ce client, vous verrez le bon nombre de tampons."
             },
             "stampsLabel": "Tampons sur votre carte",
             "justStamped": "Tampon ajouté",
             "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",
-            "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre dashboard."
+            "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre tableau de bord."
           }
         }
       },
@@ -284,70 +287,70 @@
         "title": "Votre première diffusion",
         "steps": {
           "intro": {
-            "title": "Les diffusions, en une minute",
-            "subtitle": "Une notification que vous envoyez manuellement à toutes les cartes installées d'un coup.",
-            "whatItIsTitle": "Qu'est-ce que c'est",
-            "whatItIsBody": "Une notification, envoyée à tous les clients qui ont votre carte installée. Utile pour les offres limitées, les événements, les nouveautés au menu, ou tout ce que vous publieriez sur vos réseaux.",
-            "differentFromTitle": "Différent des messages automatiques",
-            "differentFromBody": "Les messages tampon ajouté ou récompense gagnée partent tout seuls quand quelque chose se passe. Les diffusions, c'est l'inverse : vous choisissez le moment, vous choisissez le contenu.",
-            "audienceOfOneTitle": "Pour l'instant votre audience, c'est vous",
-            "audienceOfOneBody": "La seule carte installée pour l'instant, c'est la vôtre. Donc la diffusion que vous allez écrire arrive sur votre propre téléphone. C'est exactement ce que vos clients vivront quand vous aurez une audience."
+            "title": "Les diffusions, en bref",
+            "subtitle": "Une notification que vous envoyez quand vous voulez, à tous vos clients d'un coup.",
+            "whatItIsTitle": "Qu'est-ce qu'une diffusion",
+            "whatItIsBody": "Un message court, envoyé en une seule fois à tous les clients qui ont votre carte installée. Utile pour annoncer une promotion, un événement, un nouveau produit, ou tout ce que vous publieriez sur vos réseaux sociaux.",
+            "differentFromTitle": "La différence avec les notifications automatiques",
+            "differentFromBody": "Les messages « tampon ajouté » ou « récompense gagnée » partent tout seuls, dès qu'un client mérite une notification. Les diffusions, c'est l'inverse : vous choisissez le moment, et vous choisissez le contenu.",
+            "audienceOfOneTitle": "Pour l'instant, vous êtes votre seule cliente",
+            "audienceOfOneBody": "La seule carte installée, c'est la vôtre. La diffusion que vous allez écrire arrivera donc sur votre propre téléphone. C'est exactement l'expérience qu'auront vos vrais clients quand vous aurez une audience."
           },
           "compose": {
-            "title": "Rédigez une diffusion et envoyez-la-vous",
-            "subtitle": "Un message court. Il arrive sur votre téléphone dès que vous tapez sur envoyer.",
-            "composeBody": "Rédigez quelque chose que vous enverriez vraiment à des clients. Elle arrive directement sur votre téléphone et au dos de votre carte.",
+            "title": "Rédigez votre diffusion et envoyez-vous-la",
+            "subtitle": "Un message court. Il arrive sur votre téléphone dès que vous appuyez sur envoyer.",
+            "composeBody": "Écrivez quelque chose que vous enverriez vraiment à vos clients. Le message arrive directement sur leur téléphone et se range au dos de leur carte.",
             "titleLabel": "Titre",
             "titlePlaceholder": "ex. Café du Coin",
-            "titleHint": "Reprend le nom de votre programme par défaut. Apparaît en gras sur l'écran verrouillé.",
+            "titleHint": "Reprend le nom de votre programme par défaut. S'affiche en gras dans la notification.",
             "bodyLabel": "Message",
-            "bodyPlaceholder": "Happy hour aujourd'hui, 17h à 19h. Montrez votre carte pour -20%.",
+            "bodyPlaceholder": "Happy hour aujourd'hui, 17h à 19h. Présentez votre carte pour profiter de 20% de réduction.",
             "bodyHint": "{remaining} caractères restants",
             "estimating": "Comptage des destinataires…",
-            "recipientsLine": "{count, plural, =0 {Aucune carte installée. Revenez à l'étape précédente.} =1 {Ce message arrive sur votre propre téléphone.} other {# clients recevront ce message.}}",
-            "sendCta": "{count, plural, =1 {L'envoyer sur mon téléphone} other {Envoyer à # clients}}",
+            "recipientsLine": "{count, plural, =0 {Aucune carte installée. Revenez à l'étape précédente.} =1 {Cette diffusion arrive sur votre propre téléphone.} other {# clients recevront ce message.}}",
+            "sendCta": "{count, plural, =1 {Envoyer sur mon téléphone} other {Envoyer à # clients}}",
             "sendingLabel": "Envoi en cours…",
             "sentLabel": "Diffusion envoyée",
             "noRecipientsLabel": "Personne à qui envoyer pour l'instant",
-            "sendingProgress": "On envoie le push. Généralement 10 à 20 secondes.",
+            "sendingProgress": "On envoie la notification. Généralement 10 à 20 secondes.",
             "sendFailed": "La diffusion n'a pas pu être envoyée. Réessayez dans un instant.",
-            "deliveredTitle": "{count, plural, =0 {Aucun push livré pour l'instant} =1 {Envoyé sur votre téléphone} other {Envoyé à # appareils}}",
-            "deliveredHint": "{count, plural, =1 {Exactement la même expérience que vos clients quand vous diffuserez à une audience.} other {{delivered} clients sur {total} ont reçu le push. {skipped, plural, =0 {} =1 {1 client ignoré, carte non installée.} other {# clients ignorés, carte non installée.}}}}"
+            "deliveredTitle": "{count, plural, =0 {Aucune notification livrée pour l'instant} =1 {Reçue sur votre téléphone} other {Envoyée à # appareils}}",
+            "deliveredHint": "{count, plural, =1 {C'est exactement l'expérience qu'auront vos clients quand vous diffuserez à votre audience.} other {{delivered} clients sur {total} ont reçu la notification. {skipped, plural, =0 {} =1 {1 client ignoré, carte non installée.} other {# clients ignorés, carte non installée.}}}}"
           }
         }
       },
       "team": {
-        "title": "Ajoutez votre équipe",
-        "subtitle": "Deux types d'accès, selon ce qu'ils ont à faire.",
+        "title": "Votre équipe",
+        "subtitle": "Deux niveaux d'accès, selon ce que vos collaborateurs doivent faire.",
         "rolesTitle": "Les deux rôles",
         "adminRole": {
-          "label": "Admin",
-          "description": "Peut gérer les clients, envoyer des diffusions, agrandir l'équipe. Ne peut pas modifier le programme, éditer les cartes, ni accéder à la facturation. Idéal pour le marketing ou les opérations."
+          "label": "Administrateur",
+          "description": "Gère les clients, envoie les diffusions, ajoute des membres à l'équipe. N'a pas accès à la configuration du programme, à la conception des cartes, ni à la facturation. Idéal pour les personnes en charge du marketing ou des opérations."
         },
         "scannerRole": {
           "label": "Scanner",
-          "description": "Tamponne les clients depuis une application dédiée sur leur téléphone. Pas d'accès au dashboard, pas de données clients, pas de paramètres. Idéal pour les équipes à la caisse."
+          "description": "Tamponne les clients depuis une application dédiée sur son téléphone. Pas d'accès au tableau de bord, ni aux données clients, ni aux paramètres. Idéal pour les équipes au comptoir ou en caisse."
         },
         "inviteLabel": "Envoyer une invitation",
-        "inviteHint": "Ils reçoivent une invitation par email. Vous pouvez retirer leur accès à tout moment.",
-        "inviteCta": "Inviter"
+        "inviteHint": "Vos collaborateurs reçoivent un email avec un lien d'inscription. Vous pouvez retirer leur accès à tout moment.",
+        "inviteCta": "Inviter quelqu'un"
       },
       "recap": {
-        "title": "Regardez ce que vous avez construit",
-        "subtitle": "Un vrai programme de fidélité, sur de vrais téléphones, qui envoie de vraies notifications. Petit récap avant de parler offre.",
+        "title": "Voilà ce que vous venez de construire",
+        "subtitle": "Un vrai programme de fidélité, sur de vrais téléphones, avec de vraies notifications. Récapitulons avant de parler offre.",
         "programDetail": "{totalStamps} tampons pour « {rewardName} »",
-        "stampsLabel": "{count, plural, =0 {Aucun tampon envoyé} =1 {1 tampon envoyé sur votre téléphone} other {# tampons envoyés sur votre téléphone}}",
+        "stampsLabel": "{count, plural, =0 {Aucun tampon envoyé} =1 {1 tampon envoyé et reçu sur votre téléphone} other {# tampons envoyés et reçus sur votre téléphone}}",
         "broadcastLabel": {
-          "sent": "Diffusion reçue sur votre téléphone",
+          "sent": "1 diffusion envoyée à votre audience (vous, pour l'instant)",
           "notSent": "Aucune diffusion envoyée"
         },
-        "teamLabel": "{count, plural, =0 {Équipe : juste vous pour l'instant} =1 {Équipe : vous et 1 invitation en attente} other {Équipe : vous et # invitations en attente}}",
-        "nextLabel": "Dernière étape : choisissez votre offre"
+        "teamLabel": "{count, plural, =0 {Équipe : juste vous pour le moment} =1 {Équipe : vous et 1 invitation en attente} other {Équipe : vous et # invitations en attente}}",
+        "nextLabel": "Choisissez votre offre"
       },
       "plan": {
         "title": "Choisissez votre offre",
-        "subtitle": "Choisissez votre offre maintenant, ou continuez à explorer pendant votre essai Pro de 30 jours. Vous pouvez changer à tout moment.",
-        "subtitleFounding": "Les partenaires fondateurs bénéficient de -50% — à vie. Choisissez une offre maintenant pour profiter de la remise, ou continuez à explorer pendant votre essai Pro de 30 jours.",
+        "subtitle": "Choisissez votre offre maintenant, ou explorez Stampeo pendant les 30 jours d'essai gratuit sans engagement.",
+        "subtitleFounding": "Tarif fondateur : 50% de réduction à vie. Choisissez maintenant pour bloquer la remise, ou explorez Stampeo pendant les 30 jours d'essai gratuit sans engagement.",
         "keepTrialCta": "Plus tard",
         "recommendedBadge": "Recommandé",
         "perMonth": "/mois",
@@ -361,30 +364,33 @@
         "tiers": {
           "starter": {
             "label": "Starter",
-            "tagline": "L'essentiel.",
-            "cta": "Choisir Starter",
-            "feat1": "1 carte de fidélité",
-            "feat2": "Messages de notification par défaut",
-            "feat3": "Solo ou petite équipe"
+            "tagline": "Tout ce qu'il faut pour lancer votre programme.",
+            "cta": "Commencer",
+            "feat1": "1 modèle de carte",
+            "feat2": "Clients et tampons illimités",
+            "feat3": "2 membres d'équipe (vous + 1)",
+            "feat4": "Notifications automatiques",
+            "feat5": "Tableau de bord et statistiques de base"
           },
           "growth": {
             "label": "Growth",
-            "tagline": "Faites grandir votre fidélité.",
-            "cta": "Choisir Growth",
-            "feat1": "Plusieurs cartes de fidélité",
-            "feat2": "Messages personnalisés",
-            "feat3": "Diffusions (limitées)",
-            "feat4": "Invitations d'équipe"
+            "tagline": "Pour les commerces qui veulent vraiment animer leur relation client.",
+            "cta": "Commencer",
+            "feat1": "Tampons ou points (au choix)",
+            "feat2": "Membres d'équipe illimités",
+            "feat3": "Messages de notification personnalisés",
+            "feat4": "3 campagnes par mois",
+            "feat5": "Statistiques avancées et tendances"
           },
           "pro": {
             "label": "Pro",
-            "tagline": "Tout, débloqué.",
-            "cta": "Choisir Pro",
-            "feat1": "Designs et paliers illimités",
-            "feat2": "Diffusions illimitées",
-            "feat3": "Équipe illimitée",
-            "feat4": "Rappels géolocalisés",
-            "feat5": "Support prioritaire"
+            "tagline": "Pour les commerces à plusieurs établissements, ou qui veulent des outils marketing avancés.",
+            "cta": "Me prévenir au lancement",
+            "feat1": "Plusieurs modèles de carte",
+            "feat2": "Gestion multi-établissements",
+            "feat3": "Notifications géolocalisées",
+            "feat4": "Campagnes illimitées et segmentation",
+            "feat5": "Analyse de rétention"
           }
         }
       }
