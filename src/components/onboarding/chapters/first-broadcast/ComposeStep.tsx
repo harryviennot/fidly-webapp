@@ -63,7 +63,11 @@ export function ComposeStep() {
   // forward again (or to/from any other step) without retyping. Body is
   // prefilled with the sample so the owner can send straight away without
   // staring at an empty textarea.
-  const [title, setTitle] = useWizardDraft<string>('first-broadcast.title', () => '');
+  // setTitle currently unused — the title input is commented out (iOS pulls
+  // the push title from the pass's organizationName). Kept the draft hook so
+  // any owner who had typed a title pre-removal still sees it as the
+  // effectiveTitle fallback. Re-add setter if the field comes back.
+  const [title] = useWizardDraft<string>('first-broadcast.title', () => '');
   const [body, setBody] = useWizardDraft<string>('first-broadcast.body', () => defaultBody);
   const [reachable, setReachable] = useState<number | null>(null);
   const [sending, setSending] = useState(false);
@@ -186,6 +190,10 @@ export function ComposeStep() {
         )}
 
         <div className="flex flex-col gap-3">
+          {/* Title field hidden — iOS pulls the push title from the pass's
+              organizationName (program name) anyway, so editing it here was
+              cosmetic and added an extra input the owner had to think about.
+              `effectiveTitle` below still falls back to programName/businessName.
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-col gap-3">
               <label htmlFor="bc-title" className="wiz-body-sm font-medium text-[var(--foreground)]">
@@ -203,6 +211,7 @@ export function ComposeStep() {
             </div>
             <p className="wiz-micro text-[#999]">{t('titleHint')}</p>
           </div>
+          */}
 
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-col gap-3">
