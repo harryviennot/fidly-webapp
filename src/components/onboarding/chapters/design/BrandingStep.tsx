@@ -215,9 +215,11 @@ export function BrandingStep() {
         }
         await updatePayload({ design_id: designId });
         queryClient.invalidateQueries({ queryKey: designKeys.all(businessId) });
-        // Mark the design chapter dirty so the shell fires a single
-        // regenerate-strips call when the user exits the chapter.
-        ctx.setDraft('design.stripDirty', true);
+        // Note: regenerate_strips=false stays on BrandingStep because logo
+        // upload is the heavy save. The strip pre-gen kicked off by
+        // createDesign already covers the initial state; StampsStep is
+        // where strip-affecting fields actually change, and that's where
+        // the regen now lives (default true).
 
         return { ok: true };
       } catch (err) {

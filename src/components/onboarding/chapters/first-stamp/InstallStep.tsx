@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import {
@@ -18,13 +19,17 @@ import { useAuth } from '@/contexts/auth-provider';
 import { useIsMobileDevice } from '@/hooks/use-mobile-device';
 import { getBusinessSignupQR } from '@/api/businesses';
 import { createPublicCustomer } from '@/api/customers';
+import { activateDesign } from '@/api/designs';
 import { QRCodeSkeleton } from '@/components/ui/qr-code-skeleton';
 import { downloadQrPng, downloadQrPdf } from '@/lib/qr-download';
 import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
+import { useDesigns, designKeys } from '@/hooks/use-designs';
+import type { CardDesign } from '@/types';
 import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
 import { useBusinessInstalls } from './useBusinessInstalls';
+import { useDesignReady } from './useDesignReady';
 
 interface InstallUrls {
   passUrl?: string;
@@ -57,6 +62,7 @@ export function InstallStep() {
   const tErr = useTranslations('onboardingBusiness.errors');
   const locale = useLocale();
   const isMobileDevice = useIsMobileDevice();
+  const queryClient = useQueryClient();
   const { currentBusiness } = useBusiness();
   const { user } = useAuth();
   const { completeWithPayload, uncompleteStep, isStepCompleted } = useWizardProgress();
@@ -67,6 +73,16 @@ export function InstallStep() {
   const businessName = currentBusiness?.name ?? 'business';
   const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || 'https://stampeo.app';
   const signupUrl = useMemo(() => `${showcaseUrl}/${slug ?? ''}`, [showcaseUrl, slug]);
+
+  // The wizard creates exactly one design in BrandingStep, so designs[0] is
+  // always the row we activate at install time. Both `useDesigns` and
+  // `useDesignReady` read the same cache key; the realtime hook mirrors
+  // backend UPDATEs into it so `is_active` and `strip_status` stay fresh
+  // without a manual refetch.
+  const { data: designs = [] } = useDesigns(businessId);
+  const wizardDesign = designs[0];
+  const designId = wizardDesign?.id;
+  const { ready: designReady, isActive } = useDesignReady(businessId, designId);
 
   const { installedCount, loading: installsLoading } = useBusinessInstalls(businessId);
 
@@ -123,6 +139,47 @@ export function InstallStep() {
     ctx.setCanSkip(true);
   }, [ctx]);
 
+  // Activation is deferred from BackStep to here — it requires strips to be
+  // ready (the backend returns 400 otherwise). Fire activate exactly once
+  // per (businessId, designId) once strips finish rendering. `activatingRef`
+  // guards against React Strict Mode's double-invoke and any rapid
+  // re-renders during the brief window before the response writes back into
+  // the cache.
+  const activatingRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!businessId || !designId || !designReady || isActive) return;
+    if (activatingRef.current === designId) return;
+    activatingRef.current = designId;
+    (async () => {
+      try {
+        const activated = await activateDesign(businessId, designId);
+        queryClient.setQueryData<CardDesign[]>(
+          designKeys.all(businessId),
+          (prev) => {
+            if (!prev) return [activated];
+            return prev.map((d) => (d.id === designId ? activated : d));
+          }
+        );
+      } catch (err) {
+        // Surface the error but don't block — the user can retry by going
+        // back to BackStep or refreshing. Reset the ref so a later effect
+        // re-run (e.g. after a manual navigation) can try again.
+        activatingRef.current = null;
+        toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
+      }
+    })();
+  }, [businessId, designId, designReady, isActive, queryClient, tErr]);
+
+  // Loader gates solely on strip readiness. We intentionally do NOT block on
+  // `isActive` here — activation runs in the background via the effect above
+  // and the activate API completes in a few hundred ms, so the install UI
+  // can render immediately once strips are ready. Gating on isActive caused
+  // a stuck-loader bug: the backend's `set_active` two-step (deactivate-all
+  // then activate-one) emits a transient is_active=false realtime event, and
+  // missing the follow-up event would trap the page in the loader until a
+  // hard refresh.
+  const cardReady = designReady;
+
   const handleCopy = useCallback(async () => {
     try {
       await copyToClipboard(signupUrl);
@@ -164,6 +221,10 @@ export function InstallStep() {
   const actionCopy = isMobileDevice
     ? t('explanationActionMobile')
     : t('explanationActionDesktop');
+
+  if (!cardReady) {
+    return <CardReadyLoader t={t} />;
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -233,6 +294,50 @@ export function InstallStep() {
 
 interface StatusCardProps {
   t: ReturnType<typeof useTranslations>;
+}
+
+/**
+ * Renders while `strip_status === 'regenerating'` on the wizard's design.
+ * Replaces the install UI with a calm "preparing your card" state: an
+ * accent-coloured card silhouette pulses behind a centred spinner, with a
+ * title + subtitle that explain what's happening. Realtime takes care of
+ * dismissing this — the parent flips `cardReady` to true the moment the
+ * backend posts the UPDATE that sets strip_status back to 'ready'.
+ */
+function CardReadyLoader({ t }: StatusCardProps) {
+  return (
+    <div className="flex flex-col items-center gap-6 py-8">
+      <header className="flex flex-col gap-1 text-center">
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">
+          {t('loadingTitle')}
+        </h2>
+        <p className="wiz-body text-[#7A7A7A]">{t('loadingSubtitle')}</p>
+      </header>
+
+      <div className="relative w-full max-w-[320px] aspect-[1.586/1]">
+        {/* Card silhouette pulses in the accent colour so it visually
+            mirrors the design the user just configured, without us having
+            to thread the actual CardDesign through here. */}
+        <div className="absolute inset-0 rounded-2xl bg-[var(--accent-light)] animate-pulse" />
+        <div
+          className="absolute inset-0 rounded-2xl border border-[var(--accent-200)] opacity-60"
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="flex items-center justify-center w-14 h-14 rounded-full bg-[var(--accent)] shadow-lg">
+            <SpinnerIcon
+              className="w-7 h-7 text-white animate-spin"
+              weight="bold"
+            />
+          </span>
+        </div>
+      </div>
+
+      <p className="wiz-helper text-[#999] text-center max-w-[280px]">
+        {t('loadingHint')}
+      </p>
+    </div>
+  );
 }
 
 function PollingHintCard({ t }: StatusCardProps) {

@@ -245,6 +245,9 @@
           "install": {
             "title": "Votre carte est prête. Essayons-la.",
             "subtitle": "Vous allez vivre exactement le même parcours que vos clients.",
+            "loadingTitle": "On prépare votre carte…",
+            "loadingSubtitle": "On finalise le rendu de votre design personnalisé.",
+            "loadingHint": "Cela ne prend que quelques secondes. Vous pouvez rester sur cette page.",
             "explanation": "L'adresse ci-dessous est celle de votre page publique. C'est là que vos clients arrivent après avoir scanné votre QR ou cliqué sur votre lien. C'est là qu'ils s'inscrivent et reçoivent leur carte.",
             "explanationActionDesktop": "Scannez le QR avec votre téléphone, ouvrez votre page publique et inscrivez-vous comme premier client. Une fois inscrit, votre carte arrivera sur votre téléphone et vous pourrez passer à l'étape suivante.",
             "explanationActionMobile": "Appuyez sur le lien pour ouvrir votre page comme premier client. Une fois inscrit, votre carte arrivera sur votre téléphone et vous pourrez passer à l'étape suivante.",

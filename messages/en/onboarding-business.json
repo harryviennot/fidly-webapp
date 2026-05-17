@@ -245,6 +245,9 @@
           "install": {
             "title": "Your card is ready! Let's try it out.",
             "subtitle": "Go through the exact flow your customers will.",
+            "loadingTitle": "Getting your card ready…",
+            "loadingSubtitle": "We're finalizing the render of your custom design.",
+            "loadingHint": "This only takes a few seconds. Feel free to wait here.",
             "explanation": "Below is the public page your customers will land on after scanning your QR at the counter or tapping your link. It's where they sign up for your loyalty program and get their card.",
             "explanationActionDesktop": "Scan the QR with your own phone, open your business's page, and register yourself as your first customer. Your card lands in your wallet, ready for the test stamp on the next step.",
             "explanationActionMobile": "Tap the link to open your business's page, then register yourself as your first customer. Your card lands in your wallet, ready for the test stamp on the next step. Once the card is installed, come back here.",

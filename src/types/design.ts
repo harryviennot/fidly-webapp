@@ -55,6 +55,11 @@ export interface CardDesign {
   // Translations
   translations?: Record<string, DesignTranslation>;
 
+  // Strip image generation status. `regenerating` while the backend is
+  // rebuilding strip PNGs after a stamp/color/icon change; `ready` once
+  // they're cached and a fresh pkpass can be served.
+  strip_status?: 'ready' | 'regenerating';
+
   created_at?: string;
   updated_at?: string;
 

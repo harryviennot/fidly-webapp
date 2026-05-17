@@ -8,7 +8,7 @@ import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
 import { useDefaultProgram } from '@/hooks/use-programs';
-import { updateDesign, activateDesign } from '@/api';
+import { updateDesign } from '@/api';
 import type { CardDesign } from '@/types';
 import { DesignFormProvider } from '@/components/design/forms/DesignFormContext';
 import { BackForm } from '@/components/design/forms/BackForm';
@@ -48,20 +48,26 @@ export function BackStep() {
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
-        // Per-step saves during the design chapter skip strip regen; the
-        // chapter-exit hook fires one explicit regen call when the user
-        // leaves the chapter (BackStep + activation will also kick a regen
-        // server-side if needed).
-        const updated = await updateDesign(businessId, existingDesign.id, data, {
-          regenerateStrips: false,
-        });
+        // BackStep saves with regen=true (default) so any back-field tweaks
+        // that don't touch strip-affecting columns are no-ops on the strip
+        // pipeline, and any that do (rare) queue a fresh regen. Strip regen
+        // for stamp_icon / color changes is queued earlier by StampsStep.
+        const updated = await updateDesign(businessId, existingDesign.id, data);
         queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
           if (!prev) return [updated];
           return prev.map((d) => (d.id === existingDesign.id ? updated : d));
         });
-        if (!existingDesign.is_active) {
-          await activateDesign(businessId, existingDesign.id);
-        }
+
+        // Activation is intentionally deferred to InstallStep. The activate
+        // endpoint refuses to run while strip_status === 'regenerating'
+        // (returns 400), and StampsStep queues a regen on every fresh
+        // chapter run. Doing it here would either need a blocking poll
+        // (rejected as bad UX — regen can take a minute) or eat a 400 toast
+        // for any fast-clicking user. Instead, InstallStep subscribes to the
+        // design row via Supabase realtime, shows a "getting your card
+        // ready" loader until strip_status === 'ready', and only then fires
+        // activateDesign. That ties activation to the same gate that
+        // controls whether the pkpass can ship fresh strips.
         if (currentBusiness && !currentBusiness.settings?.design_reviewed) {
           await updateBusiness({
             // Diff-only update — see DataCollectionStep for the race rationale.

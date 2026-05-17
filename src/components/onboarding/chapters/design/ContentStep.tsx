@@ -44,12 +44,12 @@ export function ContentStep() {
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
-        // Per-step saves during the design chapter skip strip regen; the
-        // chapter-exit hook fires one explicit regen call when the user
-        // leaves the chapter.
-        const updated = await updateDesign(businessId, existingDesign.id, data, {
-          regenerateStrips: false,
-        });
+        // ContentStep edits secondary / auxiliary fields — these aren't in
+        // the backend's `strip_affecting_fields` set, so the default
+        // regenerate_strips=true behaviour is a no-op on the strip
+        // pipeline. Letting it default keeps the code simple and avoids
+        // having to track stripDirty state across steps.
+        const updated = await updateDesign(businessId, existingDesign.id, data);
         queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
           if (!prev) return [updated];
           return prev.map((d) => (d.id === existingDesign.id ? updated : d));

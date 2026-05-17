@@ -49,12 +49,16 @@ export function StampsStep() {
         if (data.logo_url?.startsWith('blob:')) delete data.logo_url;
         if (data.strip_background_url?.startsWith('blob:')) delete data.strip_background_url;
 
-        // Per-step saves during the design chapter skip strip regen; the
-        // chapter-exit hook fires one explicit regen call when the user
-        // leaves the chapter.
-        const updated = await updateDesign(businessId, existingDesign.id, data, {
-          regenerateStrips: false,
-        });
+        // StampsStep is where strip-affecting fields actually change (icon,
+        // colors, strip_background). Save with the default regenerate_strips
+        // behaviour so the backend queues a fresh strip render here — by
+        // the time the user has read Content + Back the PNGs are usually
+        // ready, and BackStep polls strip_status briefly before activating
+        // to absorb any remaining lag. Skipping regen here (the old
+        // chapter-exit coalesce) was the reason a non-default stamp icon
+        // showed correctly in the preview but pinned to the default on the
+        // installed pkpass.
+        const updated = await updateDesign(businessId, existingDesign.id, data);
         queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
           if (!prev) return [updated];
           return prev.map((d) => (d.id === existingDesign.id ? updated : d));
@@ -65,8 +69,7 @@ export function StampsStep() {
           const withStrip = await updateDesign(
             businessId,
             existingDesign.id,
-            { strip_background_url: result.url },
-            { regenerateStrips: false }
+            { strip_background_url: result.url }
           );
           queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (prev) => {
             if (!prev) return [withStrip];
@@ -76,10 +79,6 @@ export function StampsStep() {
         }
 
         queryClient.invalidateQueries({ queryKey: designKeys.all(businessId) });
-        // Stamps step touches strip-affecting fields (icon, colors,
-        // strip_background). Mark dirty so the chapter-exit hook triggers
-        // a single regen.
-        ctx.setDraft('design.stripDirty', true);
 
         // Persist updated colors to business.settings. Stamps step lets the
         // user fine-tune the stamp-filled color, so the theme accent may

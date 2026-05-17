@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useBusiness } from '@/contexts/business-context';
-import { regenerateStripsForDesign } from '@/api/designs';
 import { WizardProgress } from './WizardProgress';
 import { WizardFooter } from './WizardFooter';
 import { WizardStepProvider } from './wizard-context';
@@ -40,7 +39,7 @@ interface WizardShellProps {
 export function WizardShell({ slug }: WizardShellProps) {
   const router = useRouter();
   const t = useTranslations('onboardingBusiness');
-  const { progress, markCompleted, markSkipped, finalize } = useWizardProgress();
+  const { markCompleted, markSkipped, finalize } = useWizardProgress();
   const { currentBusiness } = useBusiness();
 
   const submitHandlerRef = useRef<SubmitHandler | null>(null);
@@ -263,30 +262,6 @@ export function WizardShell({ slug }: WizardShellProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slugKey, t]);
-
-  // Design-chapter exit: fire one explicit regenerate-strips call when the
-  // user leaves the chapter, so all the per-step saves (which passed
-  // `regenerate_strips=false`) coalesce into a single render. `design.stripDirty`
-  // is set by each design sub-step on a successful save; we clear it after
-  // a successful trigger and best-effort log failures (the next save would
-  // re-trigger anyway).
-  const prevChapterIdRef = useRef<string | null>(resolved?.chapter.id ?? null);
-  useEffect(() => {
-    const prev = prevChapterIdRef.current;
-    const next = resolved?.chapter.id ?? null;
-    if (prev === 'design' && next !== null && next !== 'design') {
-      const stripDirty = !!getDraft<boolean>('design.stripDirty');
-      const designId = (progress?.payload as { design_id?: string } | undefined)?.design_id;
-      const businessId = currentBusiness?.id;
-      if (stripDirty && designId && businessId) {
-        setDraft('design.stripDirty', false);
-        void regenerateStripsForDesign(businessId, designId).catch((err) => {
-          console.error('Strip regeneration on design-chapter exit failed', err);
-        });
-      }
-    }
-    prevChapterIdRef.current = next;
-  }, [resolved?.chapter.id, getDraft, setDraft, progress, currentBusiness?.id]);
 
   const handleNext = useCallback(async () => {
     if (!resolved) return;
