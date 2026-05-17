@@ -34,7 +34,14 @@ export function BrandingForm() {
     handleLogoUpload,
     handleLogoClear,
     extractedPalette,
+    palette,
   } = useDesignForm();
+  // Wizard overrides the swatch palette with a per-business-type one; the
+  // dashboard editor leaves `palette` undefined and falls back to the
+  // universal `designColors` aliases below.
+  const bgPalette = palette ?? backgroundColors;
+  const labelPalette = palette ?? textColors;
+  const textPalette = palette ?? textColors;
 
   // Convert the extracted palette into a "From your logo" row of preset
   // swatches surfaced inside each color picker. Memoised so identity is
@@ -88,7 +95,7 @@ export function BrandingForm() {
       <ColorPicker
         label={t('backgroundColor')}
         tooltip={t('backgroundTooltip')}
-        colors={backgroundColors}
+        colors={bgPalette}
         value={bgHex}
         onChange={(hex) => updateColorField('background_color', hex)}
         customColors={customColors}
@@ -100,7 +107,7 @@ export function BrandingForm() {
       <ColorPicker
         label={t('labelColor')}
         tooltip={t('labelTooltip')}
-        colors={textColors}
+        colors={labelPalette}
         value={labelHex}
         onChange={(hex) => updateColorField('label_color', hex)}
         annotation={t('appleOnly')}
@@ -116,7 +123,7 @@ export function BrandingForm() {
       <ColorPicker
         label={t('textColor')}
         tooltip={t('textTooltip')}
-        colors={textColors}
+        colors={textPalette}
         value={textHex}
         onChange={(hex) => updateColorField('foreground_color', hex)}
         annotation={t('appleOnly')}

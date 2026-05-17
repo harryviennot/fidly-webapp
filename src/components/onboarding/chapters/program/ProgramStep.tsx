@@ -18,11 +18,10 @@ import {
   useWizardDraft,
   useWizardStep,
 } from '../../wizard-context';
-
-const DEFAULTS = {
-  totalStamps: 10,
-  rewardName: '',
-};
+import {
+  getBusinessTypeDefaults,
+  PROFILE_BUSINESS_TYPE_DRAFT_KEY,
+} from '../../businessTypeDefaults';
 
 const MAX_STAMPS = 21;
 
@@ -51,6 +50,7 @@ export function ProgramStep() {
   const t = useTranslations('onboardingBusiness.chapters.program.steps.program');
   const tLp = useTranslations('loyaltyProgram');
   const tErr = useTranslations('onboardingBusiness.errors');
+  const tDef = useTranslations('onboardingBusiness.defaults');
   const { currentBusiness } = useBusiness();
   const businessId = currentBusiness?.id;
   const { data: program } = useDefaultProgram(businessId);
@@ -61,6 +61,14 @@ export function ProgramStep() {
 
   const businessName = currentBusiness?.name?.trim() ?? '';
   const defaultProgramName = businessName ? tLp('defaultProgramName', { businessName }) : '';
+  // Smart defaults seeded from step 2's business-type chip. Read the draft
+  // first — ProfileStep writes the picked chip synchronously, so the value is
+  // always current even when the background save to `settings.business_type`
+  // hasn't landed yet on the first mount of this step.
+  const draftedBusinessType = ctx.getDraft<string>(PROFILE_BUSINESS_TYPE_DRAFT_KEY);
+  const bizDefaults = getBusinessTypeDefaults(
+    draftedBusinessType || currentBusiness?.settings?.business_type
+  );
 
   // Drafted form state. Falls back to the program loaded from the server,
   // except for the name where we prefer a business-personalised default over
@@ -75,11 +83,11 @@ export function ProgramStep() {
   );
   const [totalStamps, setTotalStamps] = useWizardDraft<number>(
     'program.totalStamps',
-    () => Math.min(program?.config?.total_stamps ?? DEFAULTS.totalStamps, MAX_STAMPS)
+    () => Math.min(program?.config?.total_stamps ?? bizDefaults.totalStamps, MAX_STAMPS)
   );
   const [rewardName, setRewardName] = useWizardDraft<string>(
     'program.rewardName',
-    () => program?.reward_name ?? DEFAULTS.rewardName
+    () => program?.reward_name || tDef(bizDefaults.rewardNameKey)
   );
 
   // Only one type is currently active; the others render as disabled chips

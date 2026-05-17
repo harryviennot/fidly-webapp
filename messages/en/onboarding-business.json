@@ -1,5 +1,27 @@
 {
   "onboardingBusiness": {
+    "defaults": {
+      "rewardName": {
+        "cafe": "Free drink",
+        "restaurant": "-25% on the bill",
+        "bakery": "Free pastry",
+        "beauty": "Free treatment",
+        "retail": "Discount voucher",
+        "fitness": "Free session",
+        "services": "Free service",
+        "other": "Free reward"
+      },
+      "broadcastBody": {
+        "cafe": "Happy hour today, 5pm to 7pm. Show your card for 20% off.",
+        "restaurant": "Today's menu is served until 10pm — book your table!",
+        "bakery": "Fresh pastries out of the oven. Come grab one this morning!",
+        "beauty": "This week: -15% on all our treatments. Book your slot.",
+        "retail": "New collection in store! Come discover it today.",
+        "fitness": "New group class this week. Book your spot now.",
+        "services": "Take advantage of our current offer: free quote until end of month.",
+        "other": "Something new to share with you! Stop by this week."
+      }
+    },
     "footer": {
       "back": "Back",
       "skip": "Skip",

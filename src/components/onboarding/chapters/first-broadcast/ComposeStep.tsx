@@ -13,6 +13,10 @@ import { MessagePreview } from '@/components/notifications/MessagePreview';
 import { Card } from '@/components/ui/card';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useWizardStep, useWizardDraft } from '../../wizard-context';
+import {
+  getBusinessTypeDefaults,
+  PROFILE_BUSINESS_TYPE_DRAFT_KEY,
+} from '../../businessTypeDefaults';
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60_000;
@@ -32,6 +36,7 @@ const POLL_TIMEOUT_MS = 60_000;
 export function ComposeStep() {
   const t = useTranslations('onboardingBusiness.chapters.first-broadcast.steps.compose');
   const tErr = useTranslations('onboardingBusiness.errors');
+  const tDef = useTranslations('onboardingBusiness.defaults');
   const { currentBusiness } = useBusiness();
   const { mutateAsync: updateBusinessSettings } = useUpdateBusiness(currentBusiness?.id);
   const ctx = useWizardStep();
@@ -45,13 +50,21 @@ export function ComposeStep() {
   // aligned. Falls back to the business name while the program query is
   // loading so the placeholder never blinks empty.
   const programName = program?.name ?? '';
+  // Step-2 smart defaults — sample broadcast tailored to the business type.
+  // Read the draft first; ProfileStep writes the chip selection synchronously
+  // and the settings cache lags behind the background save.
+  const draftedBusinessType = ctx.getDraft<string>(PROFILE_BUSINESS_TYPE_DRAFT_KEY);
+  const bizDefaults = getBusinessTypeDefaults(
+    draftedBusinessType || currentBusiness?.settings?.business_type
+  );
+  const defaultBody = tDef(bizDefaults.broadcastBodyKey);
 
   // Draft-backed so the message survives navigating back to the intro and
   // forward again (or to/from any other step) without retyping. Body is
   // prefilled with the sample so the owner can send straight away without
   // staring at an empty textarea.
   const [title, setTitle] = useWizardDraft<string>('first-broadcast.title', () => '');
-  const [body, setBody] = useWizardDraft<string>('first-broadcast.body', () => t('bodyPlaceholder'));
+  const [body, setBody] = useWizardDraft<string>('first-broadcast.body', () => defaultBody);
   const [reachable, setReachable] = useState<number | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(
@@ -200,7 +213,7 @@ export function ComposeStep() {
                 id="bc-body"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder={t('bodyPlaceholder')}
+                placeholder={defaultBody}
                 disabled={sent}
                 rows={3}
                 maxLength={200}
@@ -216,7 +229,7 @@ export function ComposeStep() {
           iconOriginalUrl={currentBusiness?.icon_original_url ?? null}
           programName={effectiveTitle}
           businessName={businessName}
-          body={body || t('bodyPlaceholder')}
+          body={body || defaultBody}
           size="lg"
         />
 

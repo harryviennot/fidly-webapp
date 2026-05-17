@@ -3,6 +3,7 @@
 import { createContext, useContext } from 'react';
 import type { CardDesignCreate } from '@/types';
 import type { BusinessInfoEntry } from '@/types/business';
+import type { ColorPreset } from '@/lib/color-utils';
 import type { LogoPalette } from '@/lib/logo-palette';
 import type { ThemeVariant } from '@/lib/theme-variants';
 
@@ -76,6 +77,16 @@ export interface DesignFormContextValue {
    */
   autoGenerateState: AutoGenerateState | null;
   setAutoGenerateState: (next: AutoGenerateState | null) => void;
+
+  // ── Optional palette override ────────────────────────────────────────
+  /**
+   * Optional custom palette for the ColorPickers in BrandingForm / StampsForm.
+   * The wizard plugs in a per-business-type palette here so the swatch row
+   * reflects step-2's chip selection (e.g. café shows warm browns first).
+   * When `undefined` (dashboard editor), the forms fall back to the universal
+   * `designColors` palette from `color-utils.ts`.
+   */
+  palette?: readonly ColorPreset[];
 }
 
 export interface AutoGenerateState {

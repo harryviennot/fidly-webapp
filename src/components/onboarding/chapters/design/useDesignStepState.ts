@@ -12,6 +12,11 @@ import type { CardDesign, CardDesignCreate } from '@/types';
 import type { BusinessInfoEntry, Business } from '@/types/business';
 import type { LoyaltyProgram } from '@/types/program';
 import type { ThemeVariant } from '@/lib/theme-variants';
+import {
+  type BusinessTypeDefaults,
+  getBusinessTypeDefaults,
+  PROFILE_BUSINESS_TYPE_DRAFT_KEY,
+} from '../../businessTypeDefaults';
 
 export type DesignSubStepKey = 'branding' | 'stamps' | 'content' | 'back';
 
@@ -25,6 +30,8 @@ interface ComputeInitialFormDataArgs {
   seen: boolean;
   /** Translation function for the editor namespace (`designEditor.editor`). */
   t: (key: string) => string;
+  /** Step-2 smart defaults that seed colours + icons on first visit. */
+  bizDefaults: BusinessTypeDefaults;
 }
 
 /**
@@ -51,6 +58,7 @@ export function computeInitialFormData({
   program,
   seen,
   t,
+  bizDefaults,
 }: ComputeInitialFormDataArgs): CardDesignCreate {
   const defaultRewardField = () => ({
     key: 'reward',
@@ -97,9 +105,12 @@ export function computeInitialFormData({
   }
 
   // No design exists yet — seed from DEFAULT_DESIGN with first-visit
-  // contextual prefills. See note above for the seeding rationale.
+  // contextual prefills. See note above for the seeding rationale. Background,
+  // stamp-filled colour and the two icons come from step 2's smart defaults
+  // so a café owner sees a coffee card and a beauty salon sees a rose one
+  // before they touch anything.
   const base: CardDesignCreate = {
-    ...DEFAULT_DESIGN,
+    ...buildDefaultDesign(bizDefaults),
     name: currentBusiness?.name ?? '',
     organization_name: '',
     logo_url: currentBusiness?.logo_url ?? undefined,
@@ -111,23 +122,25 @@ export function computeInitialFormData({
   return base;
 }
 
-const DEFAULT_DESIGN: CardDesignCreate = {
-  name: '',
-  organization_name: '',
-  description: '',
-  foreground_color: 'rgb(255, 255, 255)',
-  background_color: 'rgb(28, 28, 30)',
-  label_color: 'rgb(255, 255, 255)',
-  stamp_filled_color: 'rgb(249, 115, 22)',
-  stamp_empty_color: 'rgb(255, 255, 255)',
-  stamp_border_color: 'rgb(255, 255, 255)',
-  stamp_icon: 'checkmark',
-  reward_icon: 'gift',
-  icon_color: 'rgb(255, 255, 255)',
-  secondary_fields: [],
-  auxiliary_fields: [],
-  back_fields: [],
-};
+function buildDefaultDesign(bizDefaults: BusinessTypeDefaults): CardDesignCreate {
+  return {
+    name: '',
+    organization_name: '',
+    description: '',
+    foreground_color: 'rgb(255, 255, 255)',
+    background_color: bizDefaults.backgroundColor,
+    label_color: 'rgb(255, 255, 255)',
+    stamp_filled_color: bizDefaults.stampFilledColor,
+    stamp_empty_color: 'rgb(255, 255, 255)',
+    stamp_border_color: 'rgb(255, 255, 255)',
+    stamp_icon: bizDefaults.stampIcon,
+    reward_icon: bizDefaults.rewardIcon,
+    icon_color: 'rgb(255, 255, 255)',
+    secondary_fields: [],
+    auxiliary_fields: [],
+    back_fields: [],
+  };
+}
 
 export interface DesignStepState {
   /** Form data being edited. Seeded from `existingDesign` on first render. */
@@ -168,6 +181,19 @@ export function useDesignStepState(
   // step-component level (early-return until program loads), so by the time
   // this hook runs the program data is in cache.
   const { data: program } = useDefaultProgram(currentBusiness?.id);
+  // Step-2 smart defaults — palette + initial colour seeds + icon seeds for
+  // first-visit users. Once an existing design row exists, its saved values
+  // override these (handled inside `computeInitialFormData`).
+  //
+  // Read the wizard draft before falling back to the persisted settings: the
+  // draft is updated synchronously the moment ProfileStep's chip is clicked,
+  // whereas `settings.business_type` lags by a few hundred ms behind the
+  // background save. Without this, the design step that mounts immediately
+  // after Continue seeds defaults from the universal `other` profile.
+  const draftedBusinessType = wizardCtx.getDraft<string>(PROFILE_BUSINESS_TYPE_DRAFT_KEY);
+  const bizDefaults = getBusinessTypeDefaults(
+    draftedBusinessType || currentBusiness?.settings?.business_type
+  );
 
   // Step-seen tracks whether the user has visited this sub-step before. We
   // snapshot the pre-mount value so defaults apply on the very first render
@@ -182,6 +208,7 @@ export function useDesignStepState(
       program,
       seen,
       t,
+      bizDefaults,
     })
   );
   // Hydrate from the wizard draft store so the history persists across
@@ -222,10 +249,11 @@ export function useDesignStepState(
           program,
           seen: true,
           t,
+          bizDefaults,
         })
       );
     }
-  }, [existingDesign, currentBusiness, program, t]);
+  }, [existingDesign, currentBusiness, program, t, bizDefaults]);
 
   // Mirror customColors into the wizard draft store on every change so the
   // history is preserved across step navigation. `setDraft` is not a React
@@ -320,6 +348,7 @@ export function useDesignStepState(
     applyThemeVariant,
     autoGenerateState,
     setAutoGenerateState,
+    palette: bizDefaults.palette,
   };
 
   return {

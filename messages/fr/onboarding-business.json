@@ -1,5 +1,27 @@
 {
   "onboardingBusiness": {
+    "defaults": {
+      "rewardName": {
+        "cafe": "Boisson offerte",
+        "restaurant": "-25% sur l'addition",
+        "bakery": "Viennoiserie offerte",
+        "beauty": "Soin offert",
+        "retail": "Bon de réduction",
+        "fitness": "Séance offerte",
+        "services": "Prestation offerte",
+        "other": "Récompense offerte"
+      },
+      "broadcastBody": {
+        "cafe": "Happy hour aujourd'hui, 17h à 19h. Présentez votre carte pour profiter de 20% de réduction.",
+        "restaurant": "Notre menu du jour est servi jusqu'à 22h — réservez votre table !",
+        "bakery": "Viennoiseries tout juste sorties du four. Passez les déguster ce matin !",
+        "beauty": "Offre cette semaine : -15% sur tous nos soins. Réservez votre créneau.",
+        "retail": "Nouvelle collection en boutique ! Venez la découvrir aujourd'hui.",
+        "fitness": "Nouveau cours collectif cette semaine. Réservez votre place dès maintenant.",
+        "services": "Profitez de notre offre du moment : devis gratuit jusqu'à fin du mois.",
+        "other": "Une nouveauté à vous annoncer ! Passez nous voir cette semaine."
+      }
+    },
     "footer": {
       "back": "Retour",
       "skip": "Passer",

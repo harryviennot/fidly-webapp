@@ -12,13 +12,14 @@ import { WizardFooter } from './WizardFooter';
 import { WizardStepProvider } from './wizard-context';
 import { useWizardProgress } from './useWizardProgress';
 import {
-  TOTAL_CHAPTERS,
   getStepCtaKey,
+  getVisibleChapters,
   nextStepPath,
   pathForStep,
   previousStepPath,
   resolveSlug,
 } from './registry';
+import { PROFILE_TEAM_SIZE_DRAFT_KEY } from './businessTypeDefaults';
 import type { BackgroundSave, SecondaryAction, SubmitHandler, WizardStepContextValue } from './types';
 
 const DRAFT_STORAGE_KEY = 'stampeo:wizard-draft';
@@ -124,7 +125,41 @@ export function WizardShell({ slug }: WizardShellProps) {
     setCanProceedState({ slug: slugKeyRef.current, value });
   }, []);
 
-  const resolved = useMemo(() => resolveSlug(slug), [slug]);
+  // Filter the chapter list based on step-2 answers (currently: hide the
+  // `team` chapter for solo owners). Read the wizard-draft team_size first —
+  // ProfileStep writes the chip synchronously, so the draft is current the
+  // moment the user clicks the chip, whereas `settings.team_size` lags by
+  // a few hundred ms behind the background save. `slug` is in the deps as a
+  // navigation tripwire: the draft itself isn't reactive, but every Continue
+  // changes the slug, which forces the memo to re-read the draft on the next
+  // step's first render. Without the slug dep the memo would cache the wrong
+  // value through the entire stale-cache window.
+  //
+  // IMPORTANT: dep on `settings?.team_size` (the string), NOT on
+  // `settings` (the object). Settings reference churns on every background
+  // save (logo upload, design_reviewed flag, accent color, ...). If we
+  // depended on the whole object, this memo would return a new array on
+  // every save → `resolved` memo would get a new identity → the slug-change
+  // effect below would re-fire and CLEAR `submitHandlerRef.current` after
+  // child effects re-registered it. Net result: the user clicks Continue,
+  // `submitHandlerRef.current` is null, the step's submit handler never
+  // runs, the step is still marked completed (`markCompleted` in the
+  // `else` branch of handleNext), and the user advances with a half-saved
+  // state. That's how Basic Fit ended up with `is_active=false` after a
+  // wizard run that supposedly passed BackStep.
+  const visibleChapters = useMemo(
+    () =>
+      getVisibleChapters(
+        currentBusiness?.settings,
+        getDraft<string>(PROFILE_TEAM_SIZE_DRAFT_KEY)
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentBusiness?.settings?.team_size, slug, getDraft]
+  );
+  const resolved = useMemo(
+    () => resolveSlug(slug, visibleChapters),
+    [slug, visibleChapters]
+  );
 
   // Step-seen tracking. Persisted via the draft store under `_seen` so it
   // survives sub-step navigation, reload, and the React tree being torn down
@@ -173,6 +208,15 @@ export function WizardShell({ slug }: WizardShellProps) {
   // written for yet). The default Continue label comes from
   // `getStepCtaKey` — steps that need a different label can still call
   // `ctx.setNextLabel` to override.
+  //
+  // DEPS: keyed on the primitive `slugKey` (and `t`) only — NOT on
+  // `resolved`. `resolved` is a memo whose identity can change when
+  // `visibleChapters` does, even if the underlying step is unchanged.
+  // Depending on it would clear `submitHandlerRef` after children
+  // re-register it (parent effects run after child effects), and a
+  // subsequent Continue click would silently skip the step's submit
+  // handler while still marking the step completed. Use the primitive
+  // `slugKey` so this fires only on real navigations.
   useEffect(() => {
     setSecondaryAction(null);
     submitHandlerRef.current = null;
@@ -217,7 +261,8 @@ export function WizardShell({ slug }: WizardShellProps) {
     } else {
       setNextLabel(null);
     }
-  }, [slug, resolved, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slugKey, t]);
 
   // Design-chapter exit: fire one explicit regenerate-strips call when the
   // user leaves the chapter, so all the per-step saves (which passed
@@ -256,7 +301,7 @@ export function WizardShell({ slug }: WizardShellProps) {
 
       const step = { chapter: resolved.chapter.id, step: resolved.subStep.id };
       const stepPath = pathForStep(resolved.chapter, resolved.subStep);
-      const nextPath = nextStepPath(resolved);
+      const nextPath = nextStepPath(resolved, visibleChapters);
 
       if (!nextPath) {
         // Last step — saves here MUST complete before we release to the
@@ -296,13 +341,13 @@ export function WizardShell({ slug }: WizardShellProps) {
     } finally {
       setIsBusy(false);
     }
-  }, [resolved, markCompleted, finalize, router, clearDraft, t]);
+  }, [resolved, markCompleted, finalize, router, clearDraft, t, visibleChapters]);
 
   const handleBack = useCallback(() => {
     if (!resolved) return;
-    const prev = previousStepPath(resolved);
+    const prev = previousStepPath(resolved, visibleChapters);
     if (prev) router.push(prev);
-  }, [resolved, router]);
+  }, [resolved, router, visibleChapters]);
 
   // Steps that auto-advance through a control still call `ctx.skip()`. With
   // the Skip affordance removed, treat skip as a plain forward navigation so
@@ -313,7 +358,7 @@ export function WizardShell({ slug }: WizardShellProps) {
     try {
       const step = { chapter: resolved.chapter.id, step: resolved.subStep.id };
       await markSkipped(step);
-      const nextPath = nextStepPath(resolved);
+      const nextPath = nextStepPath(resolved, visibleChapters);
       if (nextPath) {
         router.push(nextPath);
       } else {
@@ -324,7 +369,7 @@ export function WizardShell({ slug }: WizardShellProps) {
     } finally {
       setIsBusy(false);
     }
-  }, [resolved, markSkipped, finalize, router, clearDraft]);
+  }, [resolved, markSkipped, finalize, router, clearDraft, visibleChapters]);
 
   // Keep the ref pointing at the latest handlers so the stable stepContext
   // can dispatch through `handlersRef.current.next()` without staleness.
@@ -347,6 +392,21 @@ export function WizardShell({ slug }: WizardShellProps) {
   }
 
   if (!resolved) {
+    // The `team` chapter is hidden for solo owners (see getVisibleChapters).
+    // If a stale bookmark / cached URL points at `/team`, send them onward to
+    // the next visible chapter instead of stranding them on "unknown step".
+    // Read both sources (draft + settings) so the redirect fires immediately
+    // after the chip is picked, not only once the background save has landed.
+    const draftedTeamSize = getDraft<string>(PROFILE_TEAM_SIZE_DRAFT_KEY);
+    const effectiveTeamSize =
+      draftedTeamSize || currentBusiness?.settings?.team_size;
+    if (slug?.[0] === 'team' && effectiveTeamSize === 'solo') {
+      const recap = resolveSlug(['recap'], visibleChapters);
+      if (recap) {
+        router.replace(pathForStep(recap.chapter, recap.subStep));
+        return <div className="min-h-[100dvh] bg-[var(--background)]" />;
+      }
+    }
     return (
       <div className="flex min-h-screen items-center justify-center p-6 text-center">
         <p className="wiz-body text-[#888]">{t('errors.unknownStep')}</p>
@@ -364,7 +424,7 @@ export function WizardShell({ slug }: WizardShellProps) {
     <div className="flex min-h-[100dvh] flex-col bg-[var(--background)]">
       <WizardProgress
         chapterIndex={chapterIndex}
-        chapterCount={TOTAL_CHAPTERS}
+        chapterCount={visibleChapters.length}
         chapterTitle={chapterTitle}
         subStepIndex={subStepIndex}
         subStepCount={chapter.subSteps.length}

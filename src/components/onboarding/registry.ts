@@ -1,3 +1,4 @@
+import type { BusinessSettings } from '@/types/business';
 import type { ChapterDef, ResolvedStep, SubStepDef } from './types';
 import { WelcomeStep } from './chapters/welcome/WelcomeStep';
 import { IdentityStep } from './chapters/business/IdentityStep';
@@ -107,6 +108,34 @@ export const WIZARD_CHAPTERS: ChapterDef[] = [
 export const TOTAL_CHAPTERS = WIZARD_CHAPTERS.length;
 
 /**
+ * Filter `WIZARD_CHAPTERS` based on step-2 answers. Currently:
+ *   - `team_size === 'solo'` hides the entire `team` chapter so solo owners
+ *     don't see the invite affordance. They can still re-enable team access
+ *     from the dashboard later — this only shapes the wizard journey.
+ *
+ * The optional `draftTeamSize` arg is the wizard-draft mirror of the chip
+ * selection (`profile.teamSize`). ProfileStep writes it synchronously while
+ * the persisted `settings.team_size` is updated via a background save, so the
+ * draft is "what the user just picked" and takes precedence. Falling back to
+ * `settings` covers re-entry after the save lands and lets non-wizard callers
+ * (which never set the draft) still get the right answer.
+ *
+ * Always returns a non-empty array. Pass the result through to `resolveSlug`,
+ * `nextStepPath`, `previousStepPath`, and `isRequiredFloorMet` so navigation,
+ * the progress bar, and the "required floor met" check all agree on which
+ * chapters exist for this user.
+ */
+export function getVisibleChapters(
+  settings: BusinessSettings | null | undefined,
+  draftTeamSize?: string | null
+): ChapterDef[] {
+  const effectiveTeamSize = draftTeamSize || settings?.team_size;
+  const isSolo = effectiveTeamSize === 'solo';
+  if (!isSolo) return WIZARD_CHAPTERS;
+  return WIZARD_CHAPTERS.filter((c) => c.id !== 'team');
+}
+
+/**
  * Legacy slug map for v2 → v3 chapter renames. Owners with an in-flight
  * `setup_progress.last_step` referencing v2 paths re-anchor here so they don't
  * land on an "unknown step" screen.
@@ -123,8 +152,11 @@ const LEGACY_SLUG_MAP: Record<string, [string, string]> = {
   'data-collection': ['program', 'data-collection'],
 };
 
-export function findChapter(chapterId: string): ChapterDef | undefined {
-  return WIZARD_CHAPTERS.find((c) => c.id === chapterId);
+export function findChapter(
+  chapterId: string,
+  chapters: ChapterDef[] = WIZARD_CHAPTERS
+): ChapterDef | undefined {
+  return chapters.find((c) => c.id === chapterId);
 }
 
 export function findSubStep(chapter: ChapterDef, stepId?: string): SubStepDef | undefined {
@@ -140,25 +172,32 @@ export function findSubStep(chapter: ChapterDef, stepId?: string): SubStepDef | 
  * Multi-sub-step chapters require `[chapterId, stepId]`.
  *
  * v2 → v3 slugs are remapped silently (see `LEGACY_SLUG_MAP`).
+ *
+ * `chapters` defaults to the full registry; pass the filtered list returned by
+ * `getVisibleChapters(settings)` so chapters hidden for the user (e.g. team for
+ * solo) resolve as unknown — the wizard shell will then redirect away.
  */
-export function resolveSlug(slug: string[] | undefined): ResolvedStep | null {
-  const segments = slug && slug.length > 0 ? slug : [WIZARD_CHAPTERS[0].id];
+export function resolveSlug(
+  slug: string[] | undefined,
+  chapters: ChapterDef[] = WIZARD_CHAPTERS
+): ResolvedStep | null {
+  const segments = slug && slug.length > 0 ? slug : [chapters[0].id];
   let [chapterId, stepId] = segments;
 
   if (chapterId in LEGACY_SLUG_MAP) {
     [chapterId, stepId] = LEGACY_SLUG_MAP[chapterId];
   }
 
-  const chapterIndex = WIZARD_CHAPTERS.findIndex((c) => c.id === chapterId);
+  const chapterIndex = chapters.findIndex((c) => c.id === chapterId);
   if (chapterIndex < 0) return null;
-  const chapter = WIZARD_CHAPTERS[chapterIndex];
+  const chapter = chapters[chapterIndex];
 
   const subStepIndex = stepId
     ? chapter.subSteps.findIndex((s) => s.id === stepId)
     : 0;
   if (subStepIndex < 0) return null;
 
-  const isLastChapter = chapterIndex === WIZARD_CHAPTERS.length - 1;
+  const isLastChapter = chapterIndex === chapters.length - 1;
   const isLastSubStep = subStepIndex === chapter.subSteps.length - 1;
 
   return {
@@ -178,23 +217,35 @@ export function pathForStep(chapter: ChapterDef, subStep: SubStepDef): string {
 }
 
 /** Path to navigate to when advancing from the current step. Returns null when there is no next step. */
-export function nextStepPath(current: ResolvedStep): string | null {
-  const { chapter, chapterIndex, subStepIndex } = current;
+export function nextStepPath(
+  current: ResolvedStep,
+  chapters: ChapterDef[] = WIZARD_CHAPTERS
+): string | null {
+  const { chapter, subStepIndex } = current;
   if (subStepIndex < chapter.subSteps.length - 1) {
     return pathForStep(chapter, chapter.subSteps[subStepIndex + 1]);
   }
-  const nextChapter = WIZARD_CHAPTERS[chapterIndex + 1];
+  // `current.chapterIndex` is relative to the chapter list it was resolved
+  // against — re-look-up here so we walk the same list we were handed. Avoids
+  // off-by-one bugs when a caller mixes `WIZARD_CHAPTERS` and the filtered
+  // visible list.
+  const idx = chapters.findIndex((c) => c.id === chapter.id);
+  const nextChapter = idx >= 0 ? chapters[idx + 1] : undefined;
   if (!nextChapter) return null;
   return pathForStep(nextChapter, nextChapter.subSteps[0]);
 }
 
 /** Path to navigate to when going back. Returns null when at the very first step. */
-export function previousStepPath(current: ResolvedStep): string | null {
-  const { chapter, chapterIndex, subStepIndex } = current;
+export function previousStepPath(
+  current: ResolvedStep,
+  chapters: ChapterDef[] = WIZARD_CHAPTERS
+): string | null {
+  const { chapter, subStepIndex } = current;
   if (subStepIndex > 0) {
     return pathForStep(chapter, chapter.subSteps[subStepIndex - 1]);
   }
-  const prevChapter = WIZARD_CHAPTERS[chapterIndex - 1];
+  const idx = chapters.findIndex((c) => c.id === chapter.id);
+  const prevChapter = idx > 0 ? chapters[idx - 1] : undefined;
   if (!prevChapter) return null;
   const lastSub = prevChapter.subSteps[prevChapter.subSteps.length - 1];
   return pathForStep(prevChapter, lastSub);
@@ -217,9 +268,10 @@ export function getStepCtaKey(chapterId: string, subStepId: string): string {
  * `completed` list. Used to gate the "Skip rest of setup" affordance.
  */
 export function isRequiredFloorMet(
-  completed: Array<{ chapter: string; step?: string }>
+  completed: Array<{ chapter: string; step?: string }>,
+  chapters: ChapterDef[] = WIZARD_CHAPTERS
 ): boolean {
-  for (const chapter of WIZARD_CHAPTERS) {
+  for (const chapter of chapters) {
     for (const sub of chapter.subSteps) {
       if (!sub.required) continue;
       const found = completed.some(

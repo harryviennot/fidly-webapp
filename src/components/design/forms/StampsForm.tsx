@@ -40,7 +40,13 @@ export function StampsForm() {
     handleStripBackgroundUpload,
     handleStripBackgroundClear,
     extractedPalette,
+    palette,
   } = useDesignForm();
+  // Wizard overrides with a per-business-type palette; dashboard falls back
+  // to the universal `designColors` aliases below.
+  const accentPalette = palette ?? accentColors;
+  const iconPalette = palette ?? iconColors;
+  const emptyPalette = palette ?? emptyStampColors;
 
   const logoPresets = useMemo(() => {
     return paletteToSwatches(extractedPalette).map((hex, i) => ({
@@ -75,7 +81,7 @@ export function StampsForm() {
       <ColorPicker
         label={t('stampColor')}
         tooltip={t('stampColorTooltip')}
-        colors={accentColors}
+        colors={accentPalette}
         value={accentHex}
         onChange={(hex) => updateColorField('stamp_filled_color', hex)}
         customColors={customColors}
@@ -87,7 +93,7 @@ export function StampsForm() {
       <ColorPicker
         label={t('iconColor')}
         tooltip={t('iconColorTooltip')}
-        colors={iconColors}
+        colors={iconPalette}
         value={iconHex}
         onChange={(hex) => {
           setIconColorOverridden(true);
@@ -102,7 +108,7 @@ export function StampsForm() {
       <ColorPicker
         label={t('emptyStampColor')}
         tooltip={t('emptyStampTooltip')}
-        colors={emptyStampColors}
+        colors={emptyPalette}
         value={emptyStampHex}
         onChange={(hex) => updateColorField('stamp_empty_color', hex)}
         customColors={customColors}
@@ -117,6 +123,7 @@ export function StampsForm() {
         customColors={customColors}
         logoPresets={logoPresets}
         logoPresetsLabel={logoPresetsLabel}
+        palette={emptyPalette}
         onChange={(hex) => updateColorField('stamp_border_color', hex)}
         onCustomColor={addCustomColor}
       />
@@ -161,6 +168,7 @@ interface StampBorderFieldProps {
   customColors: string[];
   logoPresets: { name: string; value: string }[];
   logoPresetsLabel: string | undefined;
+  palette: readonly { name: string; value: string }[];
   onChange: (hex: string) => void;
   onCustomColor: (hex: string) => void;
 }
@@ -186,6 +194,7 @@ function StampBorderField({
   customColors,
   logoPresets,
   logoPresetsLabel,
+  palette,
   onChange,
   onCustomColor,
 }: StampBorderFieldProps) {
@@ -222,7 +231,7 @@ function StampBorderField({
           <ColorPicker
             label=""
             tooltip={t('stampBorderTooltip')}
-            colors={emptyStampColors}
+            colors={palette}
             value={borderColorHex}
             onChange={onChange}
             customColors={customColors}
