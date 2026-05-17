@@ -22,7 +22,6 @@ import { useCustomers } from "@/hooks/use-customers";
 import { useActivityStats } from "@/hooks/use-activity-stats";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useDesigns } from "@/hooks/use-designs";
-import { useDefaultProgram } from "@/hooks/use-programs";
 import { getMyProfile } from "@/api";
 import type { User } from "@/types";
 import {
@@ -35,7 +34,6 @@ import {
   // ChartCard,
   // LegendItem,
 } from "@/components/redesign";
-import { SetupChecklist } from "@/components/program/SetupChecklist";
 import { computeCardColors } from "@/lib/card-utils";
 import type { StampIconType } from "@/components/design/StampIconPicker";
 
@@ -61,11 +59,6 @@ export default function DashboardPage() {
   const { data: txns, isLoading: txnsLoading } = useTransactions(businessId, 10);
   const { data: designs = [] } = useDesigns(businessId);
   const activeDesign = designs.find((d) => d.is_active);
-  const { data: program } = useDefaultProgram(businessId);
-
-  const isOwner = currentRole === "owner";
-  const setupDone = currentBusiness?.settings?.setup_progress?.completed_at != null;
-  const checklistVariant = setupDone ? "banner" : "expanded";
 
   // User profile for welcome message
   const [profile, setProfile] = useState<User | null>(null);
@@ -105,18 +98,6 @@ export default function DashboardPage() {
           },
         ] : undefined}
       />
-
-      {/* Setup checklist — owner-only, promoted from /program. Variant adapts to setup completion state. */}
-      {isOwner && (
-        <SetupChecklist
-          program={program ?? undefined}
-          activeDesign={activeDesign}
-          designs={designs}
-          totalCustomers={totalCustomers}
-          variant={checklistVariant}
-          delay={0}
-        />
-      )}
 
       {/* Two-column layout — right column starts at top alongside stat cards */}
       <div className="flex gap-[14px] flex-col min-[1080px]:flex-row min-[1080px]:items-start">
