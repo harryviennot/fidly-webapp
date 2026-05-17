@@ -95,7 +95,10 @@ export function RecapStep() {
               // reads as "incomplete."
               previewStamps={totalStamps}
               totalStamps={totalStamps}
-              organizationName={currentBusiness?.name}
+              // Let the title fall through to `design.organization_name`
+              // (same approach as DesignPreviewPane). Passing the business
+              // name would inject a title the user explicitly left blank
+              // in the design editor.
             />
           </div>
           {program && (
