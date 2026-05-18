@@ -50,7 +50,6 @@ export interface BusinessCreatePayload {
   subscription_tier: 'starter' | 'growth' | 'pro';
   settings?: Record<string, unknown>;
   logo_url?: string | null;
-  website?: string;
   primary_locale?: 'fr' | 'en';
   /**
    * Opt into founding-partner pricing at signup. Backend revalidates against

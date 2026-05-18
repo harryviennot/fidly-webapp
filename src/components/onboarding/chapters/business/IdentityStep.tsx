@@ -261,7 +261,6 @@ export function IdentityStep() {
             url_slug: slug,
             subscription_tier: 'pro',
             settings: {},
-            website: websiteUrl || undefined,
             primary_locale: detectBusinessLocale(uiLocale),
             // Opt every new signup into founding-partner pricing. The
             // backend gates the flag on `is_founding_program_open()` so
