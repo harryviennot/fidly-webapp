@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 export interface PageHeaderAction {
@@ -25,13 +26,16 @@ interface PageHeaderProps {
 export function PageHeader({ title, subtitle, actions, action, className }: PageHeaderProps) {
   return (
     <div className={cn("flex items-start justify-between gap-4", className)}>
-      <div>
-        <h1 className="text-[24px] md:text-[28px] font-bold text-[#1A1A1A] tracking-tight leading-tight" style={{ letterSpacing: -0.5 }}>
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-md text-[#A0A0A0] mt-0.5">{subtitle}</p>
-        )}
+      <div className="flex items-start gap-2 min-w-0">
+        <SidebarTrigger className="md:hidden -ml-1 mt-0.5 shrink-0" />
+        <div className="min-w-0">
+          <h1 className="text-[20px] md:text-[28px] font-bold text-[#1A1A1A] tracking-tight leading-tight" style={{ letterSpacing: -0.5 }}>
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-md text-[#A0A0A0] mt-0.5">{subtitle}</p>
+          )}
+        </div>
       </div>
       {(actions?.length || action) && (
         <div className="shrink-0 flex items-center gap-2">

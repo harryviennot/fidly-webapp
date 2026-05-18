@@ -2,9 +2,10 @@
 
 import { useTranslations } from 'next-intl';
 import { useRef, useState, useEffect } from 'react';
-import { Plus } from '@phosphor-icons/react';
+import { Plus, Trash } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 import type { BusinessInfoEntry } from '@/types/business';
 import { BUSINESS_INFO_TYPE_ICONS } from '@/lib/business-info-utils';
 
@@ -22,12 +23,46 @@ interface ScheduleRow {
 interface BusinessInfoEditorProps {
   value: BusinessInfoEntry[];
   onChange: (entries: BusinessInfoEntry[]) => void;
+  /**
+   * Restrict the editor to a subset of types. When the only allowed type is
+   * `custom`, the add-type menu is bypassed entirely — clicking "Add"
+   * appends a new custom entry directly. Used by the design wizard's
+   * BackForm to reuse this component for card-specific (free-form) back
+   * fields, which only ever exist as the custom type.
+   */
+  allowedTypes?: readonly InfoType[];
+  /** Override the add-button label (defaults to `settings.cardInfo.addInfo`). */
+  addLabel?: string;
+  /** Override the empty-state copy shown when there are no entries
+   *  (defaults to `settings.cardInfo.noInfoYet`). */
+  emptyLabel?: string;
 }
 
-export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps) {
+export function BusinessInfoEditor({
+  value,
+  onChange,
+  allowedTypes,
+  addLabel,
+  emptyLabel,
+}: BusinessInfoEditorProps) {
   const t = useTranslations('settings.cardInfo');
   const usedPresetTypes = new Set(value.map((e) => e.type).filter((t) => t !== 'custom'));
-  const availableTypes = ALL_TYPES.filter((type) => type === 'custom' || !usedPresetTypes.has(type));
+  const allowedSet = allowedTypes ? new Set(allowedTypes) : null;
+  const availableTypes = ALL_TYPES.filter(
+    (type) =>
+      (!allowedSet || allowedSet.has(type)) &&
+      (type === 'custom' || !usedPresetTypes.has(type))
+  );
+  // Custom-only mode collapses the type-pick menu into a single "Add" button.
+  const customOnly = allowedSet?.size === 1 && allowedSet.has('custom');
+  // Per user request: disable the add button while the latest custom entry
+  // is still untouched (empty label). Stops the user from piling up empty
+  // rows that all need to be filled before the next save.
+  const lastEntry = value[value.length - 1];
+  const addDisabled =
+    customOnly &&
+    lastEntry?.type === 'custom' &&
+    !((lastEntry.data.label as string) || '').trim();
 
   const [animatingId, setAnimatingId] = useState<string | null>(null);
   const [animDir, setAnimDir] = useState<'up' | 'down' | null>(null);
@@ -47,7 +82,6 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
 
   const addEntry = (type: InfoType) => {
     const defaultData = getDefaultData(type, t);
-    // eslint-disable-next-line react-hooks/purity
     const uid = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
     const key = type === 'custom' ? `biz_custom_${uid}` : `biz_${type}`;
     onChange([...value, { type, key, data: defaultData }]);
@@ -96,7 +130,7 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
     <div className="space-y-3">
       {value.length === 0 && (
         <div className="px-4 py-7 rounded-xl border-2 border-dashed border-[#DEDBD5] bg-[#FAFAF8] text-center">
-          <div className="text-sm text-[#AAA]">{t('noInfoYet')}</div>
+          <div className="text-sm text-[#AAA]">{emptyLabel ?? t('noInfoYet')}</div>
         </div>
       )}
 
@@ -118,15 +152,30 @@ export function BusinessInfoEditor({ value, onChange }: BusinessInfoEditorProps)
       {availableTypes.length > 0 && (
         <div className="relative" ref={addMenuRef}>
           <button
-            onClick={() => setAddMenuOpen(!addMenuOpen)}
-            className="w-full py-3 rounded-xl border-2 border-dashed border-[#D0CDC6] bg-[#FAFAF8] text-[#777] text-sm font-medium flex items-center justify-center gap-2 transition-all hover:bg-[#F0EDE7] hover:border-[#C0BDB6] hover:text-[#555]"
+            onClick={() => {
+              if (addDisabled) return;
+              if (customOnly) {
+                addEntry('custom');
+              } else {
+                setAddMenuOpen(!addMenuOpen);
+              }
+            }}
+            disabled={addDisabled}
+            className="w-full py-3 rounded-xl border-2 border-dashed border-[#D0CDC6] bg-[#FAFAF8] text-[#777] text-sm font-medium flex items-center justify-center gap-2 transition-all hover:enabled:bg-[#F0EDE7] hover:enabled:border-[#C0BDB6] hover:enabled:text-[#555] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Plus className="w-3.5 h-3.5" /> {t('addInfo')}
+            <Plus className="w-3.5 h-3.5" /> {addLabel ?? t('addInfo')}
           </button>
-          {addMenuOpen && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 z-50 bg-white rounded-xl border border-[#EEEDEA] shadow-lg overflow-hidden p-1.5">
+          {addMenuOpen && !customOnly && (
+            <div
+              className={cn(
+                'absolute left-0 right-0 z-50 bg-white rounded-xl border border-[#EEEDEA] shadow-lg overflow-hidden p-1.5',
+                // Drop down when there's little above the button (few entries),
+                // pop up otherwise so the menu doesn't push content off-screen.
+                value.length <= 1 ? 'top-full mt-2' : 'bottom-full mb-2'
+              )}
+            >
               <div className="px-3 py-1.5 text-[10px] font-semibold text-[#AAA] uppercase tracking-wider">
-                Choose field type
+                {t('chooseFieldType')}
               </div>
               {availableTypes.map((type) => {
                 const Icon = BUSINESS_INFO_TYPE_ICONS[type];
@@ -193,32 +242,45 @@ function InfoEntryEditor({
   if (isRemoving) { transform = 'translateX(40px)'; opacity = 0; }
 
   return (
-    <div style={{ transform, opacity, transition }} className="flex items-start gap-3 p-4 rounded-xl bg-[#FAFAF8] border border-[#F0EFEB]">
-      {/* Up/down buttons */}
-      <div className="flex flex-col gap-1 pt-1 shrink-0">
+    <div
+      style={{ transform, opacity, transition }}
+      className="flex flex-col gap-3 p-4 rounded-xl bg-[#FAFAF8] border border-[#F0EFEB]"
+    >
+      {/* Header row: arrows, icon, title, remove — all aligned on one line */}
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-1 shrink-0">
+          <button
+            onClick={() => onMove('up')} disabled={index === 0}
+            className="w-6 h-6 rounded-md border border-[#E8E5DE] bg-white flex items-center justify-center text-[#999] disabled:text-[#DDD] disabled:bg-[#F8F7F5] disabled:cursor-default hover:enabled:bg-[#F0EDE7] hover:enabled:text-[#555] transition-all"
+          >
+            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 8l4-4 4 4"/></svg>
+          </button>
+          <button
+            onClick={() => onMove('down')} disabled={index === total - 1}
+            className="w-6 h-6 rounded-md border border-[#E8E5DE] bg-white flex items-center justify-center text-[#999] disabled:text-[#DDD] disabled:bg-[#F8F7F5] disabled:cursor-default hover:enabled:bg-[#F0EDE7] hover:enabled:text-[#555] transition-all"
+          >
+            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 4l4 4 4-4"/></svg>
+          </button>
+        </div>
+
+        <div className="w-9 h-9 rounded-lg bg-white border border-[#E8E5DE] flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4 text-[#777]" />
+        </div>
+
+        <div className="flex-1 min-w-0 text-sm font-semibold text-[#1A1A1A] truncate">
+          {title}
+        </div>
+
         <button
-          onClick={() => onMove('up')} disabled={index === 0}
-          className="w-6 h-6 rounded-md border border-[#E8E5DE] bg-white flex items-center justify-center text-[#999] disabled:text-[#DDD] disabled:bg-[#F8F7F5] disabled:cursor-default hover:enabled:bg-[#F0EDE7] hover:enabled:text-[#555] transition-all"
+          onClick={onRemove}
+          className="w-7 h-7 rounded-lg border border-transparent bg-transparent flex items-center justify-center text-muted-foreground shrink-0 transition-colors hover:text-destructive hover:bg-destructive/10"
         >
-          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 8l4-4 4 4"/></svg>
-        </button>
-        <button
-          onClick={() => onMove('down')} disabled={index === total - 1}
-          className="w-6 h-6 rounded-md border border-[#E8E5DE] bg-white flex items-center justify-center text-[#999] disabled:text-[#DDD] disabled:bg-[#F8F7F5] disabled:cursor-default hover:enabled:bg-[#F0EDE7] hover:enabled:text-[#555] transition-all"
-        >
-          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 4l4 4 4-4"/></svg>
+          <Trash className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* Icon */}
-      <div className="w-9 h-9 rounded-lg bg-white border border-[#E8E5DE] flex items-center justify-center shrink-0 mt-0.5">
-        <Icon className="w-4 h-4 text-[#777]" />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-[#1A1A1A] mb-2">{title}</div>
-
+      {/* Form row: takes full card width */}
+      <div>
         {entry.type === 'hours' && (
           <HoursEditor data={entry.data} onChange={onUpdate} />
         )}
@@ -260,14 +322,6 @@ function InfoEntryEditor({
           />
         )}
       </div>
-
-      {/* Remove button */}
-      <button
-        onClick={onRemove}
-        className="w-7 h-7 rounded-lg border border-transparent bg-transparent flex items-center justify-center text-[#CCC] shrink-0 mt-0.5 transition-all hover:text-red-500 hover:bg-red-50 hover:border-red-200"
-      >
-        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4l6 6M10 4l-6 6"/></svg>
-      </button>
     </div>
   );
 }
@@ -289,7 +343,7 @@ function SimpleFieldEditor({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       type={type}
-      className="h-9 text-sm"
+      className="h-10 text-sm px-3 py-2"
     />
   );
 }
@@ -327,61 +381,68 @@ function HoursEditor({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {schedule.map((row, index) => (
-        <div key={index} className="space-y-1.5">
-          {/* Line 1: days + closed toggle + remove */}
+        <div key={index} className="flex flex-col gap-3 p-4 rounded-lg bg-white border border-[#EEEDEA]">
+          {/* Line 1: days input + remove */}
           <div className="flex items-center gap-2">
             <Input
               value={row.days}
               onChange={(e) => updateRow(index, { days: e.target.value })}
               placeholder={t('daysPlaceholder')}
-              className="h-8 text-xs flex-1 min-w-0"
+              className="h-11 text-sm px-3 py-2 flex-1 min-w-0"
             />
-            <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => removeRow(index)}
+              className="w-9 h-9 rounded-md border-none bg-transparent flex items-center justify-center text-[#999] shrink-0 hover:text-red-500 hover:bg-red-50 transition-all"
+              aria-label="Remove row"
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 2l10 10M12 2l-10 10"/></svg>
+            </button>
+          </div>
+
+          {/*
+            Line 2: time range OR closed banner, plus the closed toggle.
+            On mobile (<480px) the toggle drops below the time inputs so each
+            row has its own line. On wider screens it sits inline on the right.
+          */}
+          <div className="flex flex-col gap-3 min-[480px]:flex-row min-[480px]:items-center min-[480px]:gap-3">
+            {row.closed ? (
+              <div className="flex-1 flex items-center justify-center py-2 px-3 rounded-lg bg-red-50 border border-red-200 min-h-[44px]">
+                <span className="text-sm text-red-500 font-medium">{t('closed')}</span>
+              </div>
+            ) : (
+              <div className="flex-1 flex items-center gap-2 min-w-0">
+                <Input
+                  type="time"
+                  value={row.open}
+                  onChange={(e) => updateRow(index, { open: e.target.value })}
+                  className="h-11 text-sm px-3 py-2 flex-1 min-w-0"
+                />
+                <span className="text-[#999] text-sm shrink-0">–</span>
+                <Input
+                  type="time"
+                  value={row.close}
+                  onChange={(e) => updateRow(index, { close: e.target.value })}
+                  className="h-11 text-sm px-3 py-2 flex-1 min-w-0"
+                />
+              </div>
+            )}
+            <label className="flex items-center gap-2 self-end min-[480px]:self-auto shrink-0 cursor-pointer">
               <Switch
                 checked={row.closed}
                 onCheckedChange={(closed) => updateRow(index, { closed })}
-                className="scale-75"
               />
-              <span className="text-[10px] text-[#AAA] w-8 shrink-0">{t('closed')}</span>
-            </div>
-            <button
-              onClick={() => removeRow(index)}
-              className="w-6 h-6 rounded-md border-none bg-transparent flex items-center justify-center text-[#CCC] shrink-0 hover:text-red-500 hover:bg-red-50 transition-all"
-            >
-              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 2l8 8M10 2l-8 8"/></svg>
-            </button>
+              <span className="text-sm text-[#666] font-medium">{t('closed')}</span>
+            </label>
           </div>
-          {/* Line 2: time range (only when open) */}
-          {row.closed ? (
-            <div className="flex items-center justify-center py-1 px-2 rounded-lg bg-red-50 border border-red-200">
-              <span className="text-xs text-red-500 font-medium">{t('closed')}</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <Input
-                type="time"
-                value={row.open}
-                onChange={(e) => updateRow(index, { open: e.target.value })}
-                className="h-8 text-xs flex-1 min-w-0"
-              />
-              <span className="text-[#CCC] text-xs shrink-0">–</span>
-              <Input
-                type="time"
-                value={row.close}
-                onChange={(e) => updateRow(index, { close: e.target.value })}
-                className="h-8 text-xs flex-1 min-w-0"
-              />
-            </div>
-          )}
         </div>
       ))}
       <button
         onClick={addRow}
-        className="w-full py-2 rounded-lg border-2 border-dashed border-[#D8D5CE] bg-[#FAFAF8] text-[#999] text-xs font-medium flex items-center justify-center gap-1.5 transition-all hover:bg-[#F0EDE7] hover:border-[#C0BDB6] hover:text-[#666]"
+        className="w-full py-3 rounded-lg border-2 border-dashed border-[#D8D5CE] bg-[#FAFAF8] text-[#888] text-sm font-medium flex items-center justify-center gap-2 transition-all hover:bg-[#F0EDE7] hover:border-[#C0BDB6] hover:text-[#555]"
       >
-        <Plus className="w-3 h-3" /> {t('addRow')}
+        <Plus className="w-3.5 h-3.5" /> {t('addRow')}
       </button>
     </div>
   );
@@ -401,14 +462,14 @@ function CustomFieldEditor({
         value={(data.label as string) || ''}
         onChange={(e) => onChange({ ...data, label: e.target.value })}
         placeholder={t('labelPlaceholder')}
-        className="h-9 text-sm"
+        className="h-10 text-sm px-3 py-2"
       />
       <textarea
         value={(data.value as string) || ''}
         onChange={(e) => onChange({ ...data, value: e.target.value })}
         placeholder={t('valuePlaceholder')}
         rows={2}
-        className="min-h-[36px] border border-input bg-background text-sm rounded-md px-3 py-2 w-full resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="min-h-[40px] border border-[var(--border)] bg-white/50 dark:bg-white/5 text-sm rounded-xl px-3 py-2 w-full resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 focus-visible:border-[var(--accent)]"
         style={{ fieldSizing: 'content' } as React.CSSProperties}
       />
     </div>

@@ -1,0 +1,88 @@
+'use client';
+
+import type { ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
+import { CaretLeftIcon } from '@phosphor-icons/react';
+import type { SecondaryAction } from './types';
+
+interface WizardFooterProps {
+  onBack?: () => void;
+  onNext: () => void;
+  /** When false, the primary CTA renders disabled. Defaults to `true`. */
+  canProceed?: boolean;
+  isBusy: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  nextLabel?: ReactNode;
+  /**
+   * Optional secondary CTA rendered next to Continue. Same dimensions as
+   * Continue but styled black/white. The design chapter uses this on mobile
+   * for the "Preview card" trigger.
+   */
+  secondaryAction?: SecondaryAction | null;
+}
+
+/**
+ * Sticky bottom CTA bar. Primary "Save & continue" lives in the thumb zone on
+ * mobile (full-width) and right-aligns on desktop. There is no Skip — every
+ * optional step has a Continue that records skip-equivalent state when the
+ * step is empty, which means a separate Skip button only added noise.
+ *
+ * `pb-[env(safe-area-inset-bottom)]` adds bottom padding equal to the iPhone
+ * home-indicator inset so the primary CTA never sits under the indicator.
+ */
+export function WizardFooter({
+  onBack,
+  onNext,
+  canProceed = true,
+  isBusy,
+  isFirst,
+  isLast,
+  nextLabel,
+  secondaryAction,
+}: WizardFooterProps) {
+  const t = useTranslations('onboardingBusiness.footer');
+
+  return (
+    <footer className="sticky bottom-0 z-10 border-t border-[var(--border)] bg-[var(--background)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--background)]/80">
+      <div className="flex items-center gap-2 px-4 py-3 min-[768px]:px-6 min-[768px]:py-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={isFirst || isBusy || !onBack}
+          className="inline-flex items-center gap-1 rounded-[10px] px-3 py-2.5 wiz-body-sm font-medium text-[#666] hover:text-[var(--foreground)] hover:bg-[var(--paper-hover)] transition-colors disabled:opacity-40 disabled:hover:bg-transparent min-h-[44px]"
+          aria-label={t('back')}
+        >
+          <CaretLeftIcon className="h-4 w-4" weight="bold" />
+          <span className="hidden min-[480px]:inline">{t('back')}</span>
+        </button>
+
+        {/* Spacer pushes Continue to the right on desktop. On mobile it
+            collapses so the primary CTA (and optional secondary action) can
+            fill the row via `flex-1`. */}
+        <div className="hidden min-[768px]:block min-[768px]:flex-1" />
+
+        {secondaryAction && (
+          <button
+            type="button"
+            onClick={secondaryAction.onClick}
+            disabled={isBusy}
+            className="flex-1 min-[768px]:flex-initial inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--foreground)] px-5 py-3 wiz-body font-semibold text-white shadow-sm transition-all duration-150 hover:bg-[var(--foreground)]/90 disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
+          >
+            {secondaryAction.icon}
+            {secondaryAction.label}
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={isBusy || !canProceed}
+          className="flex-1 min-[768px]:flex-initial inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[var(--accent)] px-5 py-3 wiz-body font-semibold text-white shadow-sm transition-all duration-150 hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
+        >
+          {isBusy ? t('saving') : (nextLabel ?? (isLast ? t('finish') : t('next')))}
+        </button>
+      </div>
+    </footer>
+  );
+}

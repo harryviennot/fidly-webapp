@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { AppSidebar, DashboardHeader } from "@/components/dashboard";
+import { AppSidebar } from "@/components/dashboard";
 import { RoleGuard } from "@/components/auth/role-guard";
 import { useBusiness } from "../../contexts/business-context";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -15,14 +17,47 @@ import { OverLimitBanner } from "@/components/billing/OverLimitBanner";
 import { ImpersonationBanner } from "@/components/impersonation/impersonation-banner";
 import { useImpersonationBeacon } from "@/hooks/use-impersonation-beacon";
 
+function wizardResumePath(setupProgress: { last_step?: { chapter: string; step?: string } } | undefined): string {
+  const last = setupProgress?.last_step;
+  if (!last?.chapter) return "/onboarding/business/welcome";
+  return last.step ? `/onboarding/business/${last.chapter}/${last.step}` : `/onboarding/business/${last.chapter}`;
+}
+
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { loading, currentBusiness, error, hasActiveMembership } = useBusiness();
+  const router = useRouter();
+  const {
+    loading,
+    currentBusiness,
+    error,
+    hasActiveMembership,
+    hasAnyMembership,
+    currentRole,
+    isImpersonating,
+  } = useBusiness();
   const t = useTranslations();
   useImpersonationBeacon();
+
+  const setupProgress = currentBusiness?.settings?.setup_progress;
+  const needsWizard =
+    !!currentBusiness &&
+    currentRole === "owner" &&
+    !isImpersonating &&
+    !setupProgress?.completed_at;
+  // A signed-in user with zero memberships has just come from /signup —
+  // ship them into the wizard to create their first business.
+  const needsWizardNoBusiness = !loading && !hasAnyMembership && !isImpersonating;
+
+  useEffect(() => {
+    if (needsWizard) {
+      router.replace(wizardResumePath(setupProgress));
+    } else if (needsWizardNoBusiness) {
+      router.replace("/onboarding/business/welcome");
+    }
+  }, [needsWizard, needsWizardNoBusiness, router, setupProgress]);
 
   // Show loading state
   if (loading) {
@@ -50,9 +85,22 @@ export default function AdminLayout({
     );
   }
 
-  // No usable business — zero memberships, only suspended, or only pending.
-  // Show the explicit empty state with a "create new business" CTA rather
-  // than auto-redirecting or silently rendering a suspended business.
+  // Brand-new user (zero memberships): the useEffect above redirects them to
+  // the launch wizard; render the loading shell in the interim so we don't
+  // flash NoActiveBusinessState.
+  if (needsWizardNoBusiness) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
+          <p className="mt-4 text-sm text-[var(--muted-foreground)]">{t("status.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Users with memberships but none active (suspended / pending only). Show
+  // the empty state so they can resolve the situation.
   if (!hasActiveMembership || !currentBusiness) {
     return <NoActiveBusinessState />;
   }
@@ -71,6 +119,20 @@ export default function AdminLayout({
     return <SuspendedPage />;
   }
 
+  // Owner with an incomplete launch wizard cannot reach the dashboard. The
+  // useEffect above triggers the redirect; render a loading shell in the
+  // interim so the dashboard chrome never flashes.
+  if (needsWizard) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
+          <p className="mt-4 text-sm text-[var(--muted-foreground)]">{t("status.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <RoleGuard>
       <SidebarProvider>
@@ -80,7 +142,6 @@ export default function AdminLayout({
           {currentBusiness.billing_status === "suspended" && <SuspendedBanner />}
           <OverLimitBanner />
           <TrialMobileBanner />
-          <DashboardHeader />
           <main className="p-4 md:p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>

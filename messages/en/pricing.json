@@ -1,0 +1,54 @@
+{
+  "pricing": {
+    "foundingPartner": "FOUNDING PARTNER",
+    "popular": "MOST POPULAR",
+    "comingSoon": "COMING SOON",
+    "perMonth": "/mo",
+    "forLife": "/mo for life",
+    "cta": "Get started",
+    "selected": "Selected",
+    "ctaComingSoon": "Coming soon",
+    "ctaSubtext": "No credit card required · Cancel anytime",
+    "legalNotice": "By confirming your subscription, you accept our <terms>Terms of Service</terms> and acknowledge our <privacy>Privacy Policy</privacy>.",
+    "countdown": {
+      "daysHours": "Founding pricing closes in {days}d {hours}h",
+      "hoursMinutes": "Founding pricing closes in {hours}h {minutes}m"
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Everything you need to launch your loyalty program",
+      "featuresLabel": "Everything included:",
+      "features": [
+        "1 active card template",
+        "Unlimited customers & scans",
+        "2 team members (owner + 1)",
+        "Automatic push notifications",
+        "Basic dashboard & stats"
+      ]
+    },
+    "growth": {
+      "name": "Growth",
+      "tagline": "For businesses ready to scale their customer relationships",
+      "featuresLabel": "Everything in Starter, plus:",
+      "features": [
+        "Stamps or points (choose one)",
+        "Unlimited team members",
+        "Custom notification messages",
+        "8 promo campaigns/month",
+        "Trends & analytics"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "Multi-location, segmentation, and advanced tools",
+      "featuresLabel": "Everything in Growth, plus:",
+      "features": [
+        "Multiple active card templates",
+        "Multi-location support",
+        "Geofencing notifications",
+        "Unlimited campaigns + segmentation",
+        "Advanced analytics & retention"
+      ]
+    }
+  }
+}

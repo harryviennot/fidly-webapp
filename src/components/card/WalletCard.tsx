@@ -372,6 +372,7 @@ export function WalletCard({
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
 
   const secondaryFields = design.secondary_fields || [];
+  const auxiliaryFields = design.auxiliary_fields || [];
 
   return (
     <div
@@ -467,6 +468,16 @@ export function WalletCard({
             {showSecondaryFields && secondaryFields.length > 0 && (
               <SecondaryFieldsRow
                 fields={secondaryFields.slice(0, 4)}
+                colors={colors}
+              />
+            )}
+
+            {/* Auxiliary Fields - second horizontal row, same shape as
+                secondary. Apple Wallet uses an auxiliary row below the
+                secondary row for less-important details. */}
+            {showSecondaryFields && auxiliaryFields.length > 0 && (
+              <SecondaryFieldsRow
+                fields={auxiliaryFields.slice(0, 4)}
                 colors={colors}
               />
             )}

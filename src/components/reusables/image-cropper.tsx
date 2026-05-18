@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import {
@@ -36,6 +37,11 @@ export interface ImageCropperProps {
   defaultAspect?: number;
   /** Optional labels shown under the slider ends. */
   aspectLabels?: { min: string; max: string };
+  /**
+   * Suppress the aspect-ratio slider UI while still clamping the dragged
+   * crop to [minAspect, maxAspect]. Use when the corner handles are enough.
+   */
+  hideAspectSlider?: boolean;
 
   /**
    * Output sizing rules:
@@ -77,8 +83,12 @@ function getCroppedCanvas(
     outW = outputWidth;
     outH = Math.round(outW / aspect);
   } else {
+    // Derive H from W via `aspect` rather than rounding both sides
+    // independently. With aspect=1 and large naturals, independent
+    // rounding produces off-by-one canvases (e.g. 1080x1079) that the
+    // backend's square check rejects.
     outW = Math.round(srcW);
-    outH = Math.round(srcH);
+    outH = Math.round(outW / aspect);
   }
 
   canvas.width = outW;
@@ -114,29 +124,41 @@ export function ImageCropper({
   onOpenChange,
   imageSrc,
   onCropComplete,
-  title = 'Crop image',
+  // Title/labels default to the localised `imageCropper` namespace strings
+  // — see the resolution below. Callers can still pass explicit overrides
+  // when a more context-specific label is wanted (e.g. "Crop your logo").
+  title,
   description,
   filename = 'cropped.png',
-  applyLabel = 'Apply',
-  cancelLabel = 'Cancel',
+  applyLabel,
+  cancelLabel,
   aspect: fixedAspect,
   minAspect,
   maxAspect,
   defaultAspect,
   aspectLabels,
+  hideAspectSlider = false,
   outputHeight,
   outputWidth,
   minWidth = 50,
   minHeight = 50,
 }: ImageCropperProps) {
+  const tCropper = useTranslations('imageCropper');
+  const resolvedTitle = title ?? tCropper('title');
+  const resolvedApplyLabel = applyLabel ?? tCropper('apply');
+  const resolvedCancelLabel = cancelLabel ?? tCropper('cancel');
   const imgRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
 
-  const hasSlider =
+  // Variable-aspect mode (clamps the drag to [minAspect, maxAspect]).
+  const hasVariableAspect =
     fixedAspect === undefined &&
     minAspect !== undefined &&
     maxAspect !== undefined;
+  // The slider UI is independent of the clamping — hide it when the caller
+  // wants corner-drag-only.
+  const showAspectSlider = hasVariableAspect && !hideAspectSlider;
   const initialSliderAspect =
     defaultAspect ?? (minAspect !== undefined && maxAspect !== undefined
       ? (minAspect + maxAspect) / 2
@@ -147,8 +169,48 @@ export function ImageCropper({
   const onImageLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       const { width, height } = e.currentTarget;
-      const cropHeight = Math.min(height * 0.9, (width * 0.9) / aspect);
-      const cropWidth = cropHeight * aspect;
+
+      // Start with the largest crop the constraints allow. The previous 0.9
+      // multiplier left a visible gap even when the whole image was usable;
+      // here we go edge-to-edge whenever possible.
+      let cropWidth: number;
+      let cropHeight: number;
+
+      if (fixedAspect !== undefined) {
+        const sourceAspect = width / height;
+        if (sourceAspect >= fixedAspect) {
+          cropHeight = height;
+          cropWidth = height * fixedAspect;
+        } else {
+          cropWidth = width;
+          cropHeight = width / fixedAspect;
+        }
+      } else if (
+        minAspect !== undefined &&
+        maxAspect !== undefined
+      ) {
+        const sourceAspect = width / height;
+        if (sourceAspect > maxAspect) {
+          cropHeight = height;
+          cropWidth = height * maxAspect;
+        } else if (sourceAspect < minAspect) {
+          cropWidth = width;
+          cropHeight = width / minAspect;
+        } else {
+          cropWidth = width;
+          cropHeight = height;
+        }
+        // Keep the slider value in sync with the actual crop so the clamp
+        // logic doesn't immediately try to reshape it.
+        const initialAspect = cropWidth / cropHeight;
+        if (Math.abs(initialAspect - sliderAspect) > 0.01) {
+          setSliderAspect(initialAspect);
+        }
+      } else {
+        cropWidth = width;
+        cropHeight = height;
+      }
+
       setCrop({
         unit: 'px',
         x: (width - cropWidth) / 2,
@@ -157,7 +219,11 @@ export function ImageCropper({
         height: cropHeight,
       });
     },
-    [aspect]
+    // sliderAspect intentionally omitted — we only want to read its current
+    // value on first load; re-running this on every slider tick would fight
+    // the user's drags.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fixedAspect, minAspect, maxAspect]
   );
 
   const handleAspectChange = useCallback((newAspect: number) => {
@@ -182,7 +248,7 @@ export function ImageCropper({
     // crop may have a different ratio than `aspect` (which tracks the
     // slider). Use the actual dragged ratio to keep the output faithful.
     const effectiveAspect =
-      hasSlider && completedCrop.width > 0 && completedCrop.height > 0
+      hasVariableAspect && completedCrop.width > 0 && completedCrop.height > 0
         ? completedCrop.width / completedCrop.height
         : aspect;
     const canvas = getCroppedCanvas(
@@ -201,7 +267,7 @@ export function ImageCropper({
   }, [
     completedCrop,
     aspect,
-    hasSlider,
+    hasVariableAspect,
     onCropComplete,
     onOpenChange,
     filename,
@@ -211,13 +277,19 @@ export function ImageCropper({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+      {/*
+       * Mobile-safe layout: a flex column capped at viewport height so the
+       * footer buttons stay visible even on small phones. The scrollable
+       * region is the image wrapper — if the crop area overflows, the
+       * dialog itself never scrolls past the Apply/Cancel row.
+       */}
+      <DialogContent className="sm:max-w-lg flex flex-col gap-3 sm:gap-4 p-4 sm:p-6 max-h-[calc(100dvh-2rem)] overflow-hidden">
+        <DialogHeader className="shrink-0">
+          <DialogTitle>{resolvedTitle}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        <div className="flex items-center justify-center">
+        <div className="flex-1 min-h-0 overflow-y-auto flex items-center justify-center -mx-1 px-1">
           <ReactCrop
             crop={crop}
             onChange={(c) => {
@@ -225,7 +297,7 @@ export function ImageCropper({
               // can't drag a ratio outside [minAspect, maxAspect]. We shrink
               // the long side whenever the requested shape exceeds a bound.
               if (
-                hasSlider &&
+                hasVariableAspect &&
                 minAspect !== undefined &&
                 maxAspect !== undefined &&
                 c.width > 0 &&
@@ -249,7 +321,7 @@ export function ImageCropper({
               // must not store an out-of-range shape.
               let clamped = c;
               if (
-                hasSlider &&
+                hasVariableAspect &&
                 minAspect !== undefined &&
                 maxAspect !== undefined &&
                 c.width > 0 &&
@@ -270,7 +342,7 @@ export function ImageCropper({
             }}
             // Fixed-aspect mode locks the ratio. Variable-aspect mode lets
             // users drag freely so resizing also reshapes the crop.
-            aspect={hasSlider ? undefined : aspect}
+            aspect={hasVariableAspect ? undefined : aspect}
             minWidth={minWidth}
             minHeight={minHeight}
           >
@@ -279,17 +351,22 @@ export function ImageCropper({
               ref={imgRef}
               src={imageSrc}
               alt="Crop preview"
+              // `crossOrigin` is required when the source is a remote URL
+              // (e.g. the user clicks "Adjust crop" and we re-open the
+              // cropper with the server-hosted image). Without it the
+              // canvas becomes tainted and `toBlob` throws SecurityError.
+              crossOrigin="anonymous"
               onLoad={onImageLoad}
-              className="max-h-[55vh] max-w-full w-auto h-auto object-contain"
+              className="max-h-[45vh] sm:max-h-[55vh] max-w-full w-auto h-auto object-contain"
             />
           </ReactCrop>
         </div>
 
-        {hasSlider && minAspect !== undefined && maxAspect !== undefined && (
-          <div className="space-y-2 px-1">
+        {showAspectSlider && minAspect !== undefined && maxAspect !== undefined && (
+          <div className="space-y-2 px-1 shrink-0">
             <div className="flex items-center justify-between">
               <Label className="text-sm text-muted-foreground">
-                Aspect Ratio
+                {tCropper('aspectRatio')}
               </Label>
               <span className="text-sm font-medium tabular-nums">
                 {sliderAspect.toFixed(1)}:1
@@ -314,20 +391,20 @@ export function ImageCropper({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0 gap-2 sm:gap-3">
           <Button
             variant="outline"
             className="rounded-full"
             onClick={() => onOpenChange(false)}
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </Button>
           <Button
             className="rounded-full"
             onClick={handleConfirm}
             disabled={!completedCrop}
           >
-            {applyLabel}
+            {resolvedApplyLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

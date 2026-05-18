@@ -103,20 +103,33 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     enabled: !!user?.id && !isImpersonating,
   });
 
-  const unsortedMemberships: Membership[] = isImpersonating && impersonatedBusiness && impersonationSession
-    ? [{
+  // Memoised so the sort below only re-runs when the underlying memberships
+  // actually change ref (after a refetch). Without this memo the inline
+  // `.map(...)` recreated `unsortedMemberships` on every render, which would
+  // force the sort to re-run on every render.
+  const unsortedMemberships = useMemo<Membership[]>(() => {
+    if (isImpersonating && impersonatedBusiness && impersonationSession) {
+      return [{
         id: `imp-${impersonationSession.session_id}`,
         role: impersonationSession.target_role as MembershipRole,
         business: impersonatedBusiness,
-      }]
-    : rawMemberships.map((m) => ({
-        id: m.id,
-        role: m.role as MembershipRole,
-        business: m.businesses as unknown as Business,
-      }));
+      }];
+    }
+    return rawMemberships.map((m) => ({
+      id: m.id,
+      role: m.role as MembershipRole,
+      business: m.businesses as unknown as Business,
+    }));
+  }, [isImpersonating, impersonatedBusiness, impersonationSession, rawMemberships]);
 
   // Sort by recent access: most-recently switched-to comes first. Ties
   // (never accessed) fall back to active-first, then alphabetical.
+  //
+  // Note: depends on `unsortedMemberships` directly, not just the IDs.
+  // Earlier the dep array keyed by `ids.join(",")` so refetches that
+  // returned identical IDs but updated business settings (e.g. after
+  // saving `business_info`) didn't invalidate this memo — `currentBusiness`
+  // kept serving the pre-save snapshot until the page reloaded.
   const memberships = useMemo(() => {
     return [...unsortedMemberships].sort((a, b) => {
       const aT = recentAccess[a.business.id] ?? 0;
@@ -127,9 +140,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       if (aActive !== bActive) return bActive - aActive;
       return (a.business.name || "").localeCompare(b.business.name || "");
     });
-  // We intentionally key off the raw membership ids + the recentAccess map.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unsortedMemberships.map((m) => m.business.id).join(","), recentAccess]);
+  }, [unsortedMemberships, recentAccess]);
 
   const activeMemberships = memberships.filter(
     (m) => m.business.status === "active"

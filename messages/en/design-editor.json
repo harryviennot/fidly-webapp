@@ -47,8 +47,33 @@
     "imageUploader": {
       "clickToUpload": "Click to upload",
       "change": "Change",
+      "recrop": "Adjust crop",
       "remove": "Remove",
       "uploading": "Uploading..."
+    },
+    "preview": {
+      "preview": "Preview",
+      "close": "Close"
+    },
+    "autoGenerate": {
+      "idle": {
+        "label": "Auto-generate from logo",
+        "loading": "Reading your logo…",
+        "noLogo": "Upload a logo to auto-generate"
+      },
+      "active": {
+        "counter": "Style {current} of {total} — {name}",
+        "next": "Try another",
+        "cancel": "Cancel"
+      },
+      "variants": {
+        "light": "Light",
+        "dark": "Dark",
+        "bold": "Bold",
+        "mono": "Mono",
+        "soft": "Soft"
+      },
+      "fromLogo": "From your logo"
     },
     "cardBack": {
       "noBackFields": "No back fields configured",
@@ -79,6 +104,7 @@
       "cardDescription": "Card Description *",
       "cardDescriptionTooltip": "On Apple Wallet, shown as the title on the info page. On Google Wallet, shown as the card header.",
       "cardDescriptionPlaceholder": "e.g., Loyalty Card",
+      "defaultLoyaltyCardName": "Loyalty Card",
       "logo": "Logo",
       "logoHint": "Appears in top-left of pass. PNG, 160x50pt max",
       "backgroundColor": "Background Color",
@@ -107,6 +133,7 @@
       "emptyStampTooltip": "Color for empty stamp circles (unfilled stamps)",
       "stampBorderColor": "Stamp Border Color",
       "stampBorderTooltip": "Border color for empty stamp circles",
+      "stampBorderEnabled": "Show stamp border",
       "stripBackground": "Strip Background",
       "stripBackgroundTooltip": "Optional pattern or texture displayed behind the stamps",
       "stripHint": "Pattern behind stamps. 1125x432px recommended",

@@ -96,7 +96,8 @@
       "errors": {
         "duplicate": "A milestone at this stamp count already exists.",
         "quotaExceeded": "You've reached your milestone limit. Upgrade to Pro for unlimited milestones.",
-        "invalidStampCount": "Stamp count must be a positive number."
+        "invalidStampCount": "Stamp count must be a positive number.",
+        "outOfRange": "Stamp count must be less than {total} (total stamps in your program)."
       },
       "toasts": {
         "created": "Milestone added",

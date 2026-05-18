@@ -21,7 +21,7 @@ import { useBusiness } from "@/contexts/business-context";
 import { useCustomers } from "@/hooks/use-customers";
 import { useActivityStats } from "@/hooks/use-activity-stats";
 import { useTransactions } from "@/hooks/use-transactions";
-import { useActiveDesign } from "@/hooks/use-designs";
+import { useDesigns } from "@/hooks/use-designs";
 import { getMyProfile } from "@/api";
 import type { User } from "@/types";
 import {
@@ -57,7 +57,8 @@ export default function DashboardPage() {
   const { data: customerData } = useCustomers(businessId, 0);
   const { data: stats } = useActivityStats(businessId);
   const { data: txns, isLoading: txnsLoading } = useTransactions(businessId, 10);
-  const { data: activeDesign } = useActiveDesign(businessId);
+  const { data: designs = [] } = useDesigns(businessId);
+  const activeDesign = designs.find((d) => d.is_active);
 
   // User profile for welcome message
   const [profile, setProfile] = useState<User | null>(null);
@@ -93,7 +94,7 @@ export default function DashboardPage() {
             label: t("dashboard.openScanner"),
             icon: <QrCodeIcon className="w-4 h-4" weight="bold" />,
             href: process.env.NEXT_PUBLIC_SCAN_URL,
-            variant: "secondary",
+            variant: "primary",
           },
         ] : undefined}
       />

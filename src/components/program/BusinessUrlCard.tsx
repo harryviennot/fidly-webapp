@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { CheckIcon, GlobeIcon, DownloadSimpleIcon, FilePdfIcon } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
 import { getBusinessSignupQR } from '@/api/businesses';
+import { downloadQrPng, downloadQrPdf } from '@/lib/qr-download';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -28,12 +29,17 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
 
   useEffect(() => {
     if (!currentBusiness?.id) return;
+    // Reset to skeleton while we re-fetch for a different business —
+    // legitimate setState-on-mount/-on-input-change, not a cascading render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQrLoading(true);
-    getBusinessSignupQR(currentBusiness.id)
+    // Pass the browser-side URL so the QR encodes exactly what's shown
+    // next to it. See InstallStep for the rationale (nip.io divergence).
+    getBusinessSignupQR(currentBusiness.id, fullUrl)
       .then((data) => setQrCode(data.qr_code))
       .catch(() => {/* QR will stay null, skeleton hidden */})
       .finally(() => setQrLoading(false));
-  }, [currentBusiness?.id]);
+  }, [currentBusiness?.id, fullUrl]);
 
   const handleCopy = async () => {
     try {
@@ -59,30 +65,13 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
 
   const handleDownloadPng = () => {
     if (!qrCode) return;
-    const link = document.createElement('a');
-    link.href = qrCode;
-    link.download = `${businessName}-qr-code.png`;
-    link.click();
+    downloadQrPng(qrCode, businessName);
   };
 
   const handleDownloadPdf = async () => {
     if (!qrCode) return;
     try {
-      const { default: jsPDF } = await import('jspdf');
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-      doc.setFontSize(20);
-      doc.text(businessName, 105, 40, { align: 'center' });
-
-      // Convert data URL to raw base64 for jsPDF compatibility
-      const base64Data = qrCode.includes(',') ? qrCode.split(',')[1] : qrCode;
-      doc.addImage(base64Data, 'PNG', 52.5, 60, 100, 100);
-
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text(fullUrl, 105, 175, { align: 'center' });
-
-      doc.save(`${businessName}-qr-code.pdf`);
+      await downloadQrPdf(qrCode, businessName, fullUrl);
     } catch (err) {
       console.error('PDF generation failed:', err);
       toast.error('Failed to generate PDF');
@@ -134,17 +123,17 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
 
       {/* Link view */}
       {!showQR ? (
-        <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-[var(--border-medium)] bg-[var(--paper)]">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-[var(--border-medium)] bg-[var(--paper)]">
             <GlobeIcon className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />
-            <span className="text-[13px] font-medium text-[#1A1A1A] flex-1 truncate">
+            <span className="text-[13px] font-medium text-[#1A1A1A] flex-1 min-w-0 truncate">
               {fullUrl}
             </span>
           </div>
           <button
             onClick={handleCopy}
             className={cn(
-              'px-4 py-2.5 rounded-lg border text-[12px] font-semibold cursor-pointer flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap',
+              'flex-shrink-0 px-4 py-2.5 rounded-lg border text-[12px] font-semibold cursor-pointer flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap',
               copied
                 ? 'bg-[var(--accent-light)] border-[var(--accent-light)] text-[var(--accent)]'
                 : 'bg-white border-[var(--border-medium)] text-[#555] hover:bg-[var(--paper)]'
