@@ -101,7 +101,13 @@ export function InstallStep() {
 
   const ownerName = (user?.user_metadata?.name as string | undefined) ?? '';
   const ownerEmail = user?.email ?? '';
-  const ownerPhone = (user?.user_metadata?.phone as string | undefined) ?? '';
+  // Owner's quick-install is a self-test, not a real customer signup, so we
+  // fall back to a placeholder E.164 mobile when the owner hasn't filled in
+  // a phone. Without it, businesses that set `collect_phone: required` get
+  // a 400 from the public-customer route and the install button silently
+  // fails. Mirrors the backend's existing "anonymous-…@placeholder.local"
+  // fallback for missing email.
+  const ownerPhone = (user?.user_metadata?.phone as string | undefined) || '+33605040302';
 
   const stepCompleted = isStepCompleted({ chapter: 'first-stamp', step: 'install' });
 

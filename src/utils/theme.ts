@@ -313,13 +313,26 @@ export function hasGoodContrastWithWhite(hex: string): boolean {
 }
 
 /**
- * Get the best theme color based on contrast requirements.
- * Prefers the accent color if it has good contrast with white,
- * otherwise falls back to the background color.
+ * Pick the webapp's primary accent for a given card design at save time.
+ * Order:
+ *   1. The stamp-filled color, if it already passes the readability gate.
+ *   2. The card background, if it passes (covers light-stamp / dark-bg cards).
+ *   3. Walk down the accent's own generated palette until a shade does. The
+ *      hue is preserved (the palette is keyed by the user's accent), only
+ *      the lightness is reduced — this keeps the dashboard accent visibly
+ *      related to the card instead of swapping in an unrelated bg color.
+ *
+ * Called from BrandingStep + StampsStep before persisting `accentColor` to
+ * `business.settings`, so the cost is paid once per design save, never on
+ * load.
  */
 export function getThemeColor(accentColor: string, backgroundColor: string): string {
-  if (hasGoodContrastWithWhite(accentColor)) {
-    return accentColor;
+  if (hasGoodContrastWithWhite(accentColor)) return accentColor;
+  if (hasGoodContrastWithWhite(backgroundColor)) return backgroundColor;
+  const palette = generatePalette(accentColor);
+  const walk: Array<keyof ColorPalette> = [500, 600, 700, 800, 900, 950];
+  for (const shade of walk) {
+    if (hasGoodContrastWithWhite(palette[shade])) return palette[shade];
   }
-  return backgroundColor;
+  return palette[700];
 }
