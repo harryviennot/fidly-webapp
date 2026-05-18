@@ -259,7 +259,10 @@ export function IdentityStep() {
           business = await createBusiness({
             name: name.trim(),
             url_slug: slug,
-            subscription_tier: 'pro',
+            // Default new wizards to Growth so abandoned signups don't end
+            // up sitting on Pro and skewing tier-mix stats. The plan step
+            // still lets the owner upgrade or downgrade before finishing.
+            subscription_tier: 'growth',
             settings: {},
             primary_locale: detectBusinessLocale(uiLocale),
             // Opt every new signup into founding-partner pricing. The

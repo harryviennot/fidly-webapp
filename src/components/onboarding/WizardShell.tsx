@@ -39,7 +39,7 @@ interface WizardShellProps {
 export function WizardShell({ slug }: WizardShellProps) {
   const router = useRouter();
   const t = useTranslations('onboardingBusiness');
-  const { markCompleted, markSkipped, finalize } = useWizardProgress();
+  const { markCompleted, markSkipped, completeAndFinalize, finalize } = useWizardProgress();
   const { currentBusiness } = useBusiness();
 
   const submitHandlerRef = useRef<SubmitHandler | null>(null);
@@ -288,8 +288,12 @@ export function WizardShell({ slug }: WizardShellProps) {
             return;
           }
         }
-        await markCompleted(step);
-        await finalize();
+        // Atomic mark-complete + set completed_at. Sequential
+        // `markCompleted` then `finalize` used to race: finalize closed
+        // over a stale `progress` snapshot and overwrote the last step
+        // out of `completed[]` (silently dropping the plan step from
+        // the funnel).
+        await completeAndFinalize(step);
         clearDraft();
         router.push('/');
         return;
@@ -316,7 +320,7 @@ export function WizardShell({ slug }: WizardShellProps) {
     } finally {
       setIsBusy(false);
     }
-  }, [resolved, markCompleted, finalize, router, clearDraft, t, visibleChapters]);
+  }, [resolved, markCompleted, completeAndFinalize, router, clearDraft, t, visibleChapters]);
 
   const handleBack = useCallback(() => {
     if (!resolved) return;

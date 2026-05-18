@@ -93,6 +93,38 @@ export function useWizardProgress() {
     await writeProgress({ ...progress, completed_at: new Date().toISOString() });
   }, [progress, writeProgress]);
 
+  /**
+   * Atomic "mark step completed AND set completed_at" — used by WizardShell
+   * for the last step (where the flow used to be `await markCompleted(step);
+   * await finalize();` and finalize would overwrite markCompleted's write
+   * with a stale `progress` snapshot, silently dropping the last step from
+   * `completed[]`). Reads `currentBusiness.settings.setup_progress` directly
+   * to avoid the closure-staleness problem, then writes once.
+   */
+  const completeAndFinalize = useCallback(
+    async (step: SetupStepRef) => {
+      if (!currentBusiness) return;
+      const current: SetupProgress =
+        currentBusiness.settings?.setup_progress ?? defaultProgress();
+      const key = stepKey(step);
+      const completed = current.completed.some((s) => stepKey(s) === key)
+        ? current.completed
+        : [...current.completed, step];
+      const skipped = current.skipped.filter((s) => stepKey(s) !== key);
+      const next: SetupProgress = {
+        ...current,
+        completed,
+        skipped,
+        last_step: step,
+        completed_at: current.completed_at ?? new Date().toISOString(),
+      };
+      await updateBusiness({
+        settings: { setup_progress: next },
+      });
+    },
+    [currentBusiness, updateBusiness]
+  );
+
   const updatePayload = useCallback(
     async (patch: Partial<SetupProgress['payload']>) => {
       await writeProgress({
@@ -147,6 +179,7 @@ export function useWizardProgress() {
     uncompleteStep,
     markSkipped,
     finalize,
+    completeAndFinalize,
     updatePayload,
     completeWithPayload,
     isStepCompleted,
