@@ -215,6 +215,33 @@ export async function uploadBusinessIcon(
   return response.json();
 }
 
+/**
+ * Server-side derivation of the notification icon from the business's
+ * logo. The backend reads the stored logo bytes, center-crops to 1:1, and
+ * re-encodes as PNG before routing through the same pipeline as a manual
+ * upload. Used by the wizard's notification step so the dropzone fills
+ * automatically when a logo is present — no client-side canvas, no CORS
+ * surface, supports any input format Pillow can open (PNG, JPEG, WEBP).
+ */
+export async function createBusinessIconFromLogo(
+  businessId: string
+): Promise<BusinessIconUploadResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/businesses/${businessId}/icon/from-logo`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to derive icon from logo');
+  }
+
+  return response.json();
+}
+
 export async function deleteBusinessIcon(businessId: string): Promise<void> {
   const response = await fetch(
     `${API_BASE_URL}/businesses/${businessId}/icon`,

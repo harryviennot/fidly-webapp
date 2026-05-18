@@ -20,10 +20,20 @@ interface SetupChecklistProps {
   activeDesign: CardDesign | undefined;
   designs: CardDesign[];
   totalCustomers: number;
+  membershipsCount?: number;
+  variant?: 'expanded' | 'banner';
   delay?: number;
 }
 
-export function SetupChecklist({ program, activeDesign, designs, totalCustomers, delay = 0 }: SetupChecklistProps) {
+export function SetupChecklist({
+  program,
+  activeDesign,
+  designs,
+  totalCustomers,
+  membershipsCount = 1,
+  variant = 'expanded',
+  delay = 0,
+}: SetupChecklistProps) {
   const t = useTranslations('loyaltyProgram.overview');
   const tProgram = useTranslations('loyaltyProgram');
   const { currentBusiness } = useBusiness();
@@ -129,10 +139,42 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
       href: undefined as string | undefined,
       action: handleCopy,
     },
+    {
+      id: 6,
+      optional: true,
+      done: currentBusiness?.settings?.first_broadcast_sent === true,
+      title: t('steps.firstBroadcast'),
+      description: t('steps.firstBroadcastDescription'),
+      cta: t('steps.firstBroadcastCta'),
+      href: '/program/broadcasts',
+      action: undefined as (() => void) | undefined,
+    },
+    {
+      id: 7,
+      optional: true,
+      done: membershipsCount > 1,
+      title: t('steps.teamInvited'),
+      description: t('steps.teamInvitedDescription'),
+      cta: t('steps.teamInvitedCta'),
+      href: '/team',
+      action: undefined as (() => void) | undefined,
+    },
+    {
+      id: 8,
+      optional: true,
+      done:
+        (currentBusiness?.subscription_tier ?? 'pro') !== 'pro' ||
+        (currentBusiness?.billing_status ?? 'trial') !== 'trial',
+      title: t('steps.planChosen'),
+      description: t('steps.planChosenDescription'),
+      cta: t('steps.planChosenCta'),
+      href: '/billing',
+      action: undefined as (() => void) | undefined,
+    },
   ];
 
   const completedCount = steps.filter((s) => s.done).length;
-  const allDone = steps.filter((s) => !s.optional).every((s) => s.done);
+  const allDone = steps.every((s) => s.done);
   const progressPercent = (completedCount / steps.length) * 100;
   // Include optional steps in "next" flow unless explicitly skipped
   const nextStepIndex = steps.findIndex((s) => !s.done && !skippedSteps.includes(s.id));
@@ -142,6 +184,57 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
   const isSelectedSkipped = skippedSteps.includes(selectedStep);
 
   if (!currentBusiness || dismissed || allDone) return null;
+
+  if (variant === 'banner') {
+    const next = nextStepIndex >= 0 ? steps[nextStepIndex] : null;
+    return (
+      <div
+        className="bg-[var(--card)] rounded-[12px] border border-[var(--border)] overflow-hidden relative animate-slide-up"
+        style={{ animationDelay: `${delay}ms` }}
+      >
+        <div
+          className="absolute top-0 left-0 right-0 h-[3px]"
+          style={{
+            background: `linear-gradient(90deg, var(--accent) ${progressPercent}%, var(--border) ${progressPercent}%)`,
+          }}
+        />
+        <div className="flex items-center justify-between gap-3 px-4 py-3 min-[640px]:px-5">
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-semibold text-[var(--foreground)] leading-tight">
+              {next ? next.title : t('steps.setupComplete')}
+            </p>
+            <p className="text-[11.5px] text-[#7A7A7A] mt-0.5">
+              {completedCount}/{steps.length} · {Math.round(progressPercent)}%
+            </p>
+          </div>
+          <div className="flex items-center gap-1">
+            {next?.href ? (
+              <Link
+                href={next.href}
+                className="inline-flex items-center gap-1 px-3.5 py-2 rounded-[8px] text-[12.5px] font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors no-underline"
+              >
+                {t('steps.continueSetup')} →
+              </Link>
+            ) : next?.action ? (
+              <button
+                onClick={next.action}
+                className="inline-flex items-center gap-1 px-3.5 py-2 rounded-[8px] text-[12.5px] font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors border-none cursor-pointer"
+              >
+                {copied ? <><CheckIcon className="w-3 h-3" /> Copied</> : <><CopyIcon className="w-3 h-3" /> {next.cta}</>}
+              </button>
+            ) : null}
+            <button
+              onClick={handleDismiss}
+              className="text-[#BBB] hover:text-[#888] p-1.5 rounded-md transition-colors flex-shrink-0"
+              aria-label="Dismiss"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Shared button styles for the detail panel CTA
   const ctaClass = (isCurrent: boolean) => cn(
@@ -298,8 +391,17 @@ export function SetupChecklist({ program, activeDesign, designs, totalCustomers,
             <div
               key={step.id}
               onClick={() => setActiveStep(step.id)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveStep(step.id);
+                }
+              }}
+              aria-expanded={isActive}
               className={cn(
-                'flex items-center gap-3 rounded-[10px] cursor-pointer transition-all duration-200 px-3',
+                'flex items-center gap-3 rounded-[10px] cursor-pointer transition-all duration-200 px-3 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2',
                 isActive ? 'py-2.5' : 'py-2',
                 isActive
                   ? step.done

@@ -50,21 +50,24 @@ export interface ColorPreset {
   value: string;
 }
 
+// 15-color "Stampeo palette". The ColorPicker bounds total swatches to 15
+// — when a logo yields 5 presets, only the first 10 of these fill the right
+// zone; when there are no logo presets, all 15 surface so the row stays
+// visually consistent at every state.
 export const designColors: readonly ColorPreset[] = [
-  { name: "Sage", value: "#4A7C59" },
-  { name: "Forest", value: "#3D6B4A" },
-  { name: "Ocean", value: "#2D5F8A" },
-  { name: "Sky", value: "#3D7CAF" },
+  { name: "Stampeo Orange", value: "#F97316" },
   { name: "Amber", value: "#C4883D" },
-  { name: "Caramel", value: "#A06B2D" },
-  { name: "Plum", value: "#8B5A8B" },
-  { name: "Berry", value: "#6B3A6B" },
   { name: "Coral", value: "#C75050" },
   { name: "Crimson", value: "#A03D3D" },
+  { name: "Plum", value: "#8B5A8B" },
+  { name: "Berry", value: "#6B3A6B" },
+  { name: "Ocean", value: "#2D5F8A" },
+  { name: "Sky", value: "#3D7CAF" },
+  { name: "Sage", value: "#4A7C59" },
+  { name: "Forest", value: "#3D6B4A" },
   { name: "Charcoal", value: "#2D2D2D" },
   { name: "Black", value: "#1A1A1A" },
-  { name: "Gray", value: "#555555" },
-  { name: "Silver", value: "#888888" },
+  { name: "Gray", value: "#888888" },
   { name: "Linen", value: "#E8E5DE" },
   { name: "White", value: "#FFFFFF" },
 ];

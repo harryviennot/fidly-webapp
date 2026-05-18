@@ -44,6 +44,48 @@ export async function fetchBusinessesList(
   return response.json();
 }
 
+export interface BusinessCreatePayload {
+  name: string;
+  url_slug: string;
+  subscription_tier: 'starter' | 'growth' | 'pro';
+  settings?: Record<string, unknown>;
+  logo_url?: string | null;
+  primary_locale?: 'fr' | 'en';
+  /**
+   * Opt into founding-partner pricing at signup. Backend revalidates against
+   * `is_founding_program_open()` and the user's reseller flag — passing
+   * `true` after the cutoff is silently coerced to `false`, so it's always
+   * safe to send `true`.
+   */
+  is_founding_partner?: boolean;
+}
+
+export async function createBusiness(payload: BusinessCreatePayload): Promise<Business> {
+  const response = await fetch(`${API_BASE_URL}/businesses`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to create business'));
+  }
+
+  return response.json();
+}
+
+export async function checkSlugAvailability(slug: string): Promise<{ available: boolean; reason?: string }> {
+  if (!slug || slug.length < 3) {
+    return { available: false, reason: 'Slug must be at least 3 characters' };
+  }
+  const response = await fetch(`${API_BASE_URL}/businesses/slug/${encodeURIComponent(slug)}/available`);
+  if (!response.ok) {
+    return { available: false, reason: 'Failed to check availability' };
+  }
+  return response.json();
+}
+
 export async function updateBusiness(
   businessId: string,
   data: BusinessUpdate
@@ -89,10 +131,26 @@ export interface SignupQRResponse {
   business_name: string;
 }
 
-export async function getBusinessSignupQR(businessId: string): Promise<SignupQRResponse> {
-  const response = await fetch(`${API_BASE_URL}/businesses/${businessId}/signup-qr`, {
-    headers: await getAuthHeaders(),
-  });
+export async function getBusinessSignupQR(
+  businessId: string,
+  /**
+   * Optional URL to encode into the QR. Use when the caller has built a
+   * specific public URL (e.g. NEXT_PUBLIC_SHOWCASE_URL + slug) and wants
+   * the QR to match the link it displays alongside. Backend validates that
+   * the URL ends with the business's url_slug; otherwise it falls back to
+   * the server-side default.
+   */
+  signupUrl?: string
+): Promise<SignupQRResponse> {
+  const params = new URLSearchParams();
+  if (signupUrl) params.set('signup_url', signupUrl);
+  const query = params.toString();
+  const response = await fetch(
+    `${API_BASE_URL}/businesses/${businessId}/signup-qr${query ? `?${query}` : ''}`,
+    {
+      headers: await getAuthHeaders(),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));

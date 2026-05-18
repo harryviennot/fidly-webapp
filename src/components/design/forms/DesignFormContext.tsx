@@ -1,0 +1,116 @@
+'use client';
+
+import { createContext, useContext } from 'react';
+import type { CardDesignCreate } from '@/types';
+import type { BusinessInfoEntry } from '@/types/business';
+import type { ColorPreset } from '@/lib/color-utils';
+import type { LogoPalette } from '@/lib/logo-palette';
+import type { ThemeVariant } from '@/lib/theme-variants';
+
+/**
+ * Shared context for the four design sub-forms (Branding, Stamps, Content, Back).
+ * The dashboard editor (`DesignEditorV2`) provides this from its own state;
+ * the wizard's design chapter provider plugs into the same shape so the forms
+ * are reused unchanged.
+ */
+export interface DesignFormContextValue {
+  // ── State ────────────────────────────────────────────────────────────
+  formData: CardDesignCreate;
+  customColors: string[];
+  businessInfo: BusinessInfoEntry[];
+  showAdvancedStamps: boolean;
+
+  // ── Computed (hex strings + contrast ratios) ─────────────────────────
+  bgHex: string;
+  labelHex: string;
+  textHex: string;
+  accentHex: string;
+  iconHex: string;
+  emptyStampHex: string;
+  borderColorHex: string;
+  labelContrast: number;
+  textContrast: number;
+
+  // ── Field updates ────────────────────────────────────────────────────
+  updateField: <K extends keyof CardDesignCreate>(key: K, value: CardDesignCreate[K]) => void;
+  updateColorField: (
+    key:
+      | 'background_color'
+      | 'stamp_filled_color'
+      | 'label_color'
+      | 'foreground_color'
+      | 'stamp_empty_color'
+      | 'stamp_border_color'
+      | 'icon_color',
+    hex: string
+  ) => void;
+  addCustomColor: (hex: string) => void;
+  setShowAdvancedStamps: (v: boolean) => void;
+  /** Stamp icon color is auto-derived from the stamp fill until the user picks one. */
+  setIconColorOverridden: (v: boolean) => void;
+
+  // ── Image handlers ───────────────────────────────────────────────────
+  handleLogoUpload: (file: File) => Promise<void>;
+  handleLogoClear: () => void;
+  handleStripBackgroundUpload: (file: File) => Promise<void>;
+  handleStripBackgroundClear: () => void;
+
+  // ── Business info (BackForm) ─────────────────────────────────────────
+  toggleBusinessInfoKey: (key: string) => void;
+
+  // ── Auto-generate from logo (Branding) ───────────────────────────────
+  /**
+   * Colors extracted from the current logo, used to power the "From your
+   * logo" preset row in ColorPicker and the auto-generate variants. `null`
+   * while extraction is in flight, or if it failed / there's no logo yet.
+   */
+  extractedPalette: LogoPalette | null;
+  /** True while a logo palette is being extracted. */
+  isPaletteLoading: boolean;
+  /** Apply a generated theme to all color fields in a single state commit. */
+  applyThemeVariant: (variant: ThemeVariant) => void;
+  /**
+   * Shared auto-generate cycle state. Lifted to context so both the
+   * form-column bar and the mobile preview-sheet bar stay in sync — when
+   * one cycles or cancels, the other reflects it immediately. `null` =
+   * idle; non-null = active mid-cycle.
+   */
+  autoGenerateState: AutoGenerateState | null;
+  setAutoGenerateState: (next: AutoGenerateState | null) => void;
+
+  // ── Optional palette override ────────────────────────────────────────
+  /**
+   * Optional custom palette for the ColorPickers in BrandingForm / StampsForm.
+   * The wizard plugs in a per-business-type palette here so the swatch row
+   * reflects step-2's chip selection (e.g. café shows warm browns first).
+   * When `undefined` (dashboard editor), the forms fall back to the universal
+   * `designColors` palette from `color-utils.ts`.
+   */
+  palette?: readonly ColorPreset[];
+}
+
+export interface AutoGenerateState {
+  palette: LogoPalette;
+  index: number;
+  snapshot: ThemeVariant;
+}
+
+const DesignFormContext = createContext<DesignFormContextValue | null>(null);
+
+export function DesignFormProvider({
+  value,
+  children,
+}: {
+  value: DesignFormContextValue;
+  children: React.ReactNode;
+}) {
+  return <DesignFormContext.Provider value={value}>{children}</DesignFormContext.Provider>;
+}
+
+export function useDesignForm(): DesignFormContextValue {
+  const ctx = useContext(DesignFormContext);
+  if (!ctx) {
+    throw new Error('useDesignForm must be used inside <DesignFormProvider>');
+  }
+  return ctx;
+}

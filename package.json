@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "bun run scripts/dev.ts",
+    "publicdev": "PUBLIC_DEV=1 bun run scripts/dev.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -38,7 +39,9 @@
     "next": "^16.2.6",
     "next-intl": "^4.9.2",
     "next-themes": "^0.4.6",
+    "node-vibrant": "^4.0.4",
     "react": "19.2.3",
+    "react-colorful": "^5.7.0",
     "react-day-picker": "^9",
     "react-dom": "19.2.3",
     "react-image-crop": "^11.0.10",

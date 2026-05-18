@@ -316,10 +316,12 @@ export function GoogleWalletCard({
             {backFields.map((field, i) => (
               <div key={field.key || i}>
                 <p
-                  className="text-xs uppercase tracking-wider font-medium mb-0.5"
+                  className="text-xs tracking-wider font-medium mb-0.5"
                   style={{ color: colors.mutedTextColor }}
                 >
-                  {field.label}
+                  {field.label
+                    ? field.label.charAt(0).toUpperCase() + field.label.slice(1)
+                    : field.label}
                 </p>
                 <p
                   className="text-sm whitespace-pre-wrap"
@@ -377,7 +379,9 @@ export function GoogleWalletCard({
                     className="text-xs font-medium mb-0.5"
                     style={{ color: colors.mutedTextColor }}
                   >
-                    {field.label}
+                    {field.label
+                      ? field.label.charAt(0).toUpperCase() + field.label.slice(1)
+                      : field.label}
                   </p>
                   <p
                     className="text-sm font-medium"

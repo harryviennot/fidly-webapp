@@ -10,10 +10,9 @@ export function NoActiveBusinessState() {
   const t = useTranslations();
   const tAuth = useTranslations("auth");
 
-  const handleCreateBusiness = async () => {
-    const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
-    await signOut();
-    window.location.href = `${showcaseUrl}/onboarding`;
+  const handleCreateBusiness = () => {
+    // User is already authenticated — open the launch wizard directly.
+    window.location.href = "/onboarding/business/welcome";
   };
 
   return (

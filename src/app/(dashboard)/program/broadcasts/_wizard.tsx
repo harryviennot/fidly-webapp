@@ -21,6 +21,7 @@ import {
   FloppyDiskIcon,
 } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -541,14 +542,17 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
     >
       {/* Header with back + step indicator + header actions */}
       <div className="flex items-center justify-between gap-4">
-        <button
-          type="button"
-          onClick={() => router.push('/program/broadcasts')}
-          className="inline-flex items-center gap-1.5 text-[13px] text-[#8A8A8A] hover:text-[#1A1A1A] transition-colors"
-        >
-          <CaretLeftIcon className="h-3.5 w-3.5" />
-          {t('page.title')}
-        </button>
+        <div className="flex items-center gap-2 min-w-0">
+          <SidebarTrigger className="md:hidden -ml-1 shrink-0" />
+          <button
+            type="button"
+            onClick={() => router.push('/program/broadcasts')}
+            className="inline-flex items-center gap-1.5 text-[13px] text-[#8A8A8A] hover:text-[#1A1A1A] transition-colors"
+          >
+            <CaretLeftIcon className="h-3.5 w-3.5" />
+            {t('page.title')}
+          </button>
+        </div>
         <div className="flex items-center gap-2">
           <div className="text-[11px] text-[#A0A0A0] font-medium mr-1">
             {tWizard('stepIndicator', {

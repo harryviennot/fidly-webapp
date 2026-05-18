@@ -1,0 +1,54 @@
+{
+  "pricing": {
+    "foundingPartner": "FONDATEUR",
+    "popular": "LE PLUS POPULAIRE",
+    "comingSoon": "BIENTÔT",
+    "perMonth": "/mois",
+    "forLife": "/mois, à vie",
+    "cta": "Commencer",
+    "selected": "Sélectionné",
+    "ctaComingSoon": "Me prévenir au lancement",
+    "ctaSubtext": "Sans carte bancaire. Sans engagement. Annulez en un clic.",
+    "legalNotice": "En confirmant votre abonnement, vous acceptez nos <terms>Conditions d'utilisation</terms> et reconnaissez notre <privacy>Politique de confidentialité</privacy>.",
+    "countdown": {
+      "daysHours": "Tarif fondateur. Expire dans {days}j {hours}h.",
+      "hoursMinutes": "Tarif fondateur. Expire dans {hours}h {minutes}m."
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Tout ce qu'il faut pour lancer votre programme.",
+      "featuresLabel": "Inclus :",
+      "features": [
+        "1 modèle de carte",
+        "Clients et tampons illimités",
+        "2 membres d'équipe (vous + 1)",
+        "Notifications automatiques",
+        "Tableau de bord et statistiques de base"
+      ]
+    },
+    "growth": {
+      "name": "Growth",
+      "tagline": "Pour les commerces qui veulent vraiment animer leur relation client.",
+      "featuresLabel": "Tout le plan Starter, plus :",
+      "features": [
+        "Tampons ou points (au choix)",
+        "Membres d'équipe illimités",
+        "Messages de notification personnalisés",
+        "3 campagnes par mois",
+        "Statistiques avancées et tendances"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "Pour les commerces à plusieurs établissements, ou qui veulent des outils marketing avancés.",
+      "featuresLabel": "Tout le plan Growth, plus :",
+      "features": [
+        "Plusieurs modèles de carte",
+        "Gestion multi-établissements",
+        "Notifications géolocalisées",
+        "Campagnes illimitées et segmentation",
+        "Analyse de rétention"
+      ]
+    }
+  }
+}

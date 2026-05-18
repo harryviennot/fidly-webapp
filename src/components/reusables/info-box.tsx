@@ -79,11 +79,11 @@ export function InfoBox({
         {resolvedIcon && <div className="shrink-0 mt-0.5">{resolvedIcon}</div>}
         <div>
           {title && (
-            <div className={cn("text-[13px] font-semibold mb-0.5", styles.title)}>
+            <div className={cn("text-[14px] font-semibold mb-0.5", styles.title)}>
               {title}
             </div>
           )}
-          <div className={cn("text-[12px] leading-[1.4]", styles.text)}>
+          <div className={cn("text-[13px] leading-[1.45]", styles.text)}>
             {message}
           </div>
         </div>
@@ -100,7 +100,7 @@ export function InfoBox({
       )}
     >
       <div className="shrink-0 mt-0.5">{DEFAULT_ICONS[variant]}</div>
-      <div className={cn("text-[12px] leading-[1.4]", styles.text)}>
+      <div className={cn("text-[13px] leading-[1.45]", styles.text)}>
         {message}
       </div>
     </div>

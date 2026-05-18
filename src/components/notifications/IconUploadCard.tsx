@@ -58,10 +58,10 @@ export function IconUploadCard({ readOnly = false }: Readonly<IconUploadCardProp
 
   return (
     <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6">
-      <div className="text-[16px] font-semibold text-[#1A1A1A] mb-1">
+      <div className="wiz-h2 font-semibold text-[#1A1A1A] mb-1">
         {t('title')}
       </div>
-      <div className="text-[12px] text-[#A0A0A0] mb-4">{t('description')}</div>
+      <div className="wiz-helper text-[#A0A0A0] mb-4">{t('description')}</div>
 
       {readOnly ? (
         <div className="flex items-center gap-4 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]">
@@ -73,21 +73,21 @@ export function IconUploadCard({ readOnly = false }: Readonly<IconUploadCardProp
               className="h-14 w-14 rounded-xl border border-[var(--border)] object-cover flex-shrink-0"
             />
           ) : (
-            <div className="h-14 w-14 rounded-xl border border-dashed border-[var(--border)] flex items-center justify-center text-[10px] text-[#A0A0A0] flex-shrink-0">
+            <div className="h-14 w-14 rounded-xl border border-dashed border-[var(--border)] flex items-center justify-center wiz-micro text-[#A0A0A0] flex-shrink-0">
               {t('default')}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-semibold text-[#1A1A1A]">
+            <div className="wiz-body-sm font-semibold text-[#1A1A1A]">
               {iconUrl ? t('custom') : t('default')}
             </div>
-            <div className="text-[11px] text-[#8A8A8A] mt-0.5">
+            <div className="wiz-micro text-[#8A8A8A] mt-0.5">
               {iconUrl ? t('customHint') : t('defaultHint')}
             </div>
           </div>
           <Link
             href="/settings"
-            className="flex-shrink-0 inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--accent)] hover:underline"
+            className="flex-shrink-0 inline-flex items-center gap-1 wiz-helper font-semibold text-[var(--accent)] hover:underline"
           >
             {t('changeInSettings')}
             <CaretRight className="h-3 w-3" weight="bold" />
@@ -118,7 +118,7 @@ export function IconUploadCard({ readOnly = false }: Readonly<IconUploadCardProp
               />
             </div>
             <div className="flex flex-col items-center gap-2 shrink-0">
-              <span className="text-[10px] uppercase tracking-wider text-[#8A8A8A] font-semibold">
+              <span className="wiz-micro uppercase tracking-wider text-[#8A8A8A] font-semibold">
                 {t('preview')}
               </span>
               <MessagePreview
@@ -138,10 +138,10 @@ export function IconUploadCard({ readOnly = false }: Readonly<IconUploadCardProp
                   weight="fill"
                 />
                 <div className="min-w-0">
-                  <div className="text-[11px] font-semibold text-amber-900 mb-0.5">
+                  <div className="wiz-micro font-semibold text-amber-900 mb-0.5">
                     {t('cacheWarning.title')}
                   </div>
-                  <p className="text-[11px] text-amber-900/80 leading-[1.45]">
+                  <p className="wiz-micro text-amber-900/80 leading-[1.45]">
                     {t('cacheWarning.body')}
                   </p>
                 </div>

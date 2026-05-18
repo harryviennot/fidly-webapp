@@ -164,7 +164,13 @@ body {
 }
 
 /* Titles use Geist font (matching showcase) */
-h1, h2, h3, h4, h5, h6, .title-font {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.title-font {
   font-family: var(--font-geist-sans), "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
 }
 
@@ -192,6 +198,7 @@ html {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -203,13 +210,33 @@ html {
 }
 
 /* Stagger delay utilities */
-.delay-0 { animation-delay: 0ms; }
-.delay-80 { animation-delay: 80ms; }
-.delay-160 { animation-delay: 160ms; }
-.delay-240 { animation-delay: 240ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
+.delay-0 {
+  animation-delay: 0ms;
+}
+
+.delay-80 {
+  animation-delay: 80ms;
+}
+
+.delay-160 {
+  animation-delay: 160ms;
+}
+
+.delay-240 {
+  animation-delay: 240ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
 
 /* Redesign easing curve */
 .ease-spring {
@@ -350,6 +377,7 @@ html {
     height: 0;
     opacity: 0;
   }
+
   to {
     height: var(--radix-collapsible-content-height);
     opacity: 1;
@@ -361,10 +389,25 @@ html {
     height: var(--radix-collapsible-content-height);
     opacity: 1;
   }
+
   to {
     height: 0;
     opacity: 0;
   }
+}
+
+/* QR loading skeleton — diagonal wave on each cell, matching the
+   scanner-app QR skeleton timing (900ms cycle, ease-in-out). */
+.qr-skeleton-cell {
+  background-color: #e8e6e1;
+  border-radius: 3px;
+  animation: qr-skeleton-wave 900ms ease-in-out infinite;
+}
+
+@keyframes qr-skeleton-wave {
+  0%   { opacity: 0.2; }
+  50%  { opacity: 0.8; }
+  100% { opacity: 0.2; }
 }
 
 /* ===== Styled Range Slider ===== */
@@ -449,8 +492,8 @@ html {
 .wallet-card {
   grid-area: card;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-              scale 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    scale 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .wallet-card-active {
@@ -498,13 +541,16 @@ html {
   scrollbar-width: thin;
   scrollbar-color: #D8D5CE transparent;
 }
+
 .styled-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
+
 .styled-scrollbar::-webkit-scrollbar-thumb {
   background: #D8D5CE;
   border-radius: 4px;
 }
+
 .styled-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -514,11 +560,13 @@ html {
   line-height: 1.55;
   cursor: text;
 }
+
 .var-editor:empty::before {
   content: attr(data-placeholder);
   color: var(--muted-foreground, #A0A0A0);
   pointer-events: none;
 }
+
 .var-pill {
   display: inline-flex;
   align-items: center;
@@ -537,9 +585,11 @@ html {
   line-height: 1.4;
   user-select: none;
 }
+
 .var-pill-label {
   pointer-events: none;
 }
+
 .var-pill-remove {
   display: inline-flex;
   align-items: center;
@@ -554,6 +604,7 @@ html {
   cursor: pointer;
   padding: 0;
 }
+
 .var-pill-remove:hover {
   opacity: 1;
   background: rgba(0, 0, 0, 0.06);
@@ -563,7 +614,106 @@ html {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Launch-wizard text scale
+ *
+ * One utility per typographic role, each responsive. Change a single
+ * number here to retune all matching usages across the wizard at once,
+ * instead of editing dozens of `text-[Npx]` literals.
+ *
+ * Scope: `web/src/components/onboarding/**`. Other surfaces keep their
+ * own scale.
+ * ──────────────────────────────────────────────────────────────────── */
+/* Used by: the page heading at the top of every step (the <h2> with
+ * t('title')) and oversized inline glyphs like the chip emoji in
+ * `OptionCard`. */
+@utility wiz-h {
+  font-size: 26px;
+  line-height: 1.2;
+
+  @media (min-width: 800px) {
+    font-size: 28px;
+  }
+}
+
+/* Used by: the chapter title in `WizardProgress` and the section title
+ * inside `IconUploadCard`. Any sub-section header that should read as a
+ * heading but not compete with `wiz-h`. */
+@utility wiz-h2 {
+  font-size: 16px;
+  line-height: 1.3;
+
+  @media (min-width: 800px) {
+    font-size: 16px;
+  }
+}
+
+/* Used by: step subtitle paragraph under each <h2>, broadcast composer
+ * inputs + textarea, the WizardFooter primary CTA, the big "Send the
+ * test stamp" button, and any explanatory paragraph the user is meant
+ * to read at normal size. */
+@utility wiz-body {
+  font-size: 16px;
+  line-height: 1.5;
+
+  @media (min-width: 800px) {
+    font-size: 16px;
+  }
+}
+
+/* Used by: form input labels (<Label>), ProfileStep group labels above
+ * each chip section, WizardFooter Back / Skip ghost buttons, broadcast
+ * lock-screen preview title, signup-page URL display, Copy URL button. */
+@utility wiz-body-sm {
+  font-size: 15px;
+  line-height: 1.5;
+
+  @media (min-width: 800px) {
+    font-size: 16px;
+  }
+}
+
+/* Used by: the helper line beneath form inputs ("Your card link will
+ * be…"), the uppercase "CHAPTER N OF M" tag in WizardProgress, recap
+ * tweak-link buttons, OptionCard descriptions, and small inline card
+ * bodies (QR description, broadcast send-progress note). */
+@utility wiz-helper {
+  font-size: 13px;
+  line-height: 1.45;
+
+  @media (min-width: 800px) {
+    font-size: 13.5px;
+  }
+}
+
+/* Used by: smallest tier — "Recommended" badge on plan cards, plan-tier
+ * feature lines, the "Stamp anyway" / dismiss links, coalesce hint under
+ * the stamp button, IconUploadCard fallback labels, cache-warning copy. */
+@utility wiz-micro {
+  font-size: 12px;
+  line-height: 1.4;
+
+  @media (min-width: 800px) {
+    font-size: 12.5px;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Bigger drag-handles for `react-image-crop` on coarse pointers (touch).
+ * The library's default handles are ~5px squares which are unusable on
+ * phones. We bump them to ~18px hit areas only on touch devices so the
+ * desktop look stays unchanged.
+ * ──────────────────────────────────────────────────────────────────── */
+@media (pointer: coarse) {
+  .ReactCrop__drag-handle::after {
+    width: 18px !important;
+    height: 18px !important;
+    border-width: 2px !important;
   }
 }
