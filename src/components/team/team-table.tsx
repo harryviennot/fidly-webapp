@@ -32,8 +32,9 @@ import { LocationAssignmentChips } from "@/components/locations/location-assignm
 import { toast } from "sonner";
 
 export interface TeamLocationContext {
-  businessId: string;
-  allLocations: Location[];
+  /** Inverse map from `useLocationAssignmentsByMember` — only the assigned
+   *  list per scanner is consumed; the rest of the locations live in the
+   *  /program/locations sheet where assignments are managed. */
   assignmentsByMember: Map<string, Location[]> | undefined;
 }
 
@@ -364,15 +365,11 @@ export function TeamTable({
                     <TableCell className="py-3 px-4 hidden xl:table-cell">
                       {row.type === "member" && row.role === "scanner" ? (
                         <LocationAssignmentChips
-                          businessId={locationContext.businessId}
-                          membershipId={row.member.id}
                           assigned={
                             locationContext.assignmentsByMember?.get(
                               row.member.id
                             ) ?? []
                           }
-                          allLocations={locationContext.allLocations}
-                          canManage={canManageTeam}
                         />
                       ) : (
                         <span className="text-[11px] text-[var(--muted-foreground)]">

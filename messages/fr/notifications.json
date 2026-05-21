@@ -142,7 +142,7 @@
       "disabledHint": "Une fois désactivée, la carte de fidélité se met toujours à jour en silence — les clients ne voient simplement pas de notification pour cet événement.",
       "rewardNameMissing": "Définissez une récompense dans les paramètres du programme pour utiliser cette variable.",
       "nameCollectionOff": "Activez la collecte des prénoms dans les paramètres du programme pour utiliser cette variable.",
-      "storeLocationPro": "La variable de lieu de magasin est une fonctionnalité Pro — passez à Pro pour l'utiliser dans vos messages.",
+      "storeLocationPro": "La variable de lieu de magasin est une fonctionnalité Pro. Passez à Pro pour l'utiliser dans vos messages.",
       "nameWarning": "Certains clients n'ont pas de prénom enregistré. Ils verront le message sans le prénom.",
       "previewWithoutName": "Aperçu pour les clients sans prénom",
       "emptyBody": "Le message ne peut pas être vide",
@@ -343,12 +343,25 @@
           "estimate": "≈ {count} clients",
           "estimating": "Calcul en cours...",
           "group": {
-            "enrollment": "Ancienneté",
-            "enrollmentHelp": "Filtrez selon la date d'inscription du client dans votre programme.",
+            "enrollment": "Inscription",
+            "enrollmentHelp": "Filtrez selon le moment et le lieu d'inscription du client.",
             "stamps": "Tampons collectés",
             "stampsHelp": "Ne cible que les clients qui ont entre N et M tampons sur leur carte actuelle.",
             "activity": "Activité",
-            "activityHelp": "Filtrez selon le comportement d'achat et la dernière visite."
+            "activityHelp": "Filtrez selon le comportement d'achat, la dernière visite et les magasins fréquentés."
+          },
+          "sub": {
+            "enrollmentAge": "Ancienneté",
+            "enrollmentAgeHelp": "Filtrez selon la date d'inscription du client.",
+            "enrollmentLocation": "Lieu d'inscription",
+            "enrollmentLocationHelp": "N'envoie qu'aux clients inscrits via les magasins sélectionnés. Activez l'interrupteur pour inclure aussi les inscriptions directes sans magasin.",
+            "enrollmentLocationUpsellTitle": "Le ciblage par lieu est Pro",
+            "enrollmentLocationUpsellDescription": "Pro vous permet de cibler les clients inscrits dans un magasin précis.",
+            "includeDirect": "Inclure aussi les inscriptions directes",
+            "activeLocation": "Actif dans un magasin",
+            "activeLocationHelp": "N'envoie qu'aux clients ayant scanné dans les magasins sélectionnés ces N derniers jours.",
+            "activeLocationUpsellTitle": "Le ciblage actif par lieu est Pro",
+            "activeLocationUpsellDescription": "Pro vous permet de reconquérir les clients qui ont récemment visité un magasin précis."
           },
           "enrollment": {
             "any": "Tous",

@@ -334,12 +334,8 @@ export default function TeamPage() {
         onCancelInvitation={handleCancelInvitation}
         onResendInvitation={handleResendInvitation}
         locationContext={
-          showLocationUi && currentBusiness?.id
-            ? {
-                businessId: currentBusiness.id,
-                allLocations: activeLocations,
-                assignmentsByMember: assignmentsQuery.data,
-              }
+          showLocationUi
+            ? { assignmentsByMember: assignmentsQuery.data }
             : undefined
         }
       />
@@ -355,12 +351,8 @@ export default function TeamPage() {
                 onRemove={() => setMobileRemoveRow(row)}
                 onResend={row.type === "invitation" ? () => handleMobileResend(row) : undefined}
                 locationContext={
-                  showLocationUi && currentBusiness?.id
-                    ? {
-                        businessId: currentBusiness.id,
-                        allLocations: activeLocations,
-                        assignmentsByMember: assignmentsQuery.data,
-                      }
+                  showLocationUi
+                    ? { assignmentsByMember: assignmentsQuery.data }
                     : undefined
                 }
               />

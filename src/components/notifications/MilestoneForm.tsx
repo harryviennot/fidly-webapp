@@ -7,8 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useBusiness } from '@/contexts/business-context';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { useCreateMilestone, useUpdateMilestone } from '@/hooks/use-notifications';
-import { renderSamplePreview, type VariableKey } from '@/lib/template-variables';
+import {
+  renderSamplePreview,
+  PRO_ONLY_VARIABLES,
+  type VariableKey,
+} from '@/lib/template-variables';
 import { ApiError } from '@/api/client';
 import { LocaleTabs } from './LocaleTabs';
 import { VariableChips } from './VariableChips';
@@ -27,6 +32,7 @@ const MILESTONE_VARIABLES: VariableKey[] = [
   'reward_name',
   'business_name',
   'customer_first_name',
+  'store_location',
 ];
 
 export interface MilestoneFormState {
@@ -66,6 +72,7 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
     const t = useTranslations('notifications');
     const tMilestones = useTranslations('notifications.milestones');
     const { currentBusiness } = useBusiness();
+    const { hasFeature } = useEntitlements();
     const createMutation = useCreateMilestone(currentBusiness?.id);
     const updateMutation = useUpdateMilestone(currentBusiness?.id);
 
@@ -97,9 +104,13 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
 
     const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
     const isNameCollectionOff = collectName === 'off' || collectName === false;
+    const canMultiLocation = hasFeature('locations.multiple');
     const disabledVars = new Set<VariableKey>();
     if (!rewardNameSet) disabledVars.add('reward_name');
     if (isNameCollectionOff) disabledVars.add('customer_first_name');
+    if (!canMultiLocation) {
+      for (const v of PRO_ONLY_VARIABLES) disabledVars.add(v);
+    }
     const usesCustomerName = bodyUsesCustomerName(bodyByLocale);
 
     const insertVariable = (variable: VariableKey) => {
@@ -224,10 +235,12 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
           disabledTooltips={{
             reward_name: t('editor.rewardNameMissing'),
             customer_first_name: t('editor.nameCollectionOff'),
+            store_location: t('editor.storeLocationPro'),
           }}
           disabledHrefs={{
             reward_name: '/program/settings',
             customer_first_name: '/program/settings',
+            store_location: '/billing?from=template_var_store_location',
           }}
         />
 

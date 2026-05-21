@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import {
   BellIcon,
@@ -14,7 +13,6 @@ import {
   EmptyState,
   InfoBox,
   InfoCard,
-  KeyValueList,
   NumberedSteps,
   DividerNote,
   UpsellInline,
@@ -25,6 +23,7 @@ import {
   TriggerEditSheet,
   TriggerListSkeleton,
   MilestoneSection,
+  VariablesList,
 } from '@/components/notifications';
 import { toast } from 'sonner';
 import {
@@ -32,11 +31,11 @@ import {
   useUpdateNotificationTemplate,
 } from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
-import { cn } from '@/lib/utils';
 import { useProgram } from '../layout';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import {
-  getVariableDisplayName,
   VARIABLE_KEYS,
+  PRO_ONLY_VARIABLES,
   type Locale,
   type VariableKey,
 } from '@/lib/template-variables';
@@ -77,6 +76,7 @@ export default function ProgramNotificationsPage() {
   const toggleMutation = useUpdateNotificationTemplate(currentBusiness?.id);
   const tToast = useTranslations('notifications.toasts');
 
+  const { hasFeature } = useEntitlements();
   const templates = useMemo(() => data?.items ?? [], [data]);
   const tier = data?.tier;
   const isEditable = templates.some((tpl) => tpl.is_editable);
@@ -85,6 +85,7 @@ export default function ProgramNotificationsPage() {
   const rewardNameSet = Boolean(program?.reward_name?.trim());
   const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
   const nameCollectionOff = collectName === 'off' || collectName === false;
+  const canMultiLocation = hasFeature('locations.multiple');
 
   // Real-value examples for the variables sidebar — pulls from the active
   // business + program when possible so French accounts see French copy and
@@ -152,6 +153,39 @@ export default function ProgramNotificationsPage() {
     </>
   );
 
+  // Per-variable lock state for the sidebar list. Adding a new lockable
+  // variable in the future is just another entry here + matching tooltip
+  // i18n key. See components/notifications/VariablesList.tsx.
+  const { disabledVars, disabledTooltips, disabledHrefs } = useMemo(() => {
+    const disabled = new Set<VariableKey>();
+    const tips: Partial<Record<VariableKey, string>> = {};
+    const hrefs: Partial<Record<VariableKey, string>> = {};
+
+    if (!rewardNameSet) {
+      disabled.add('reward_name');
+      tips.reward_name = t('editor.rewardNameMissing');
+      hrefs.reward_name = '/program/settings';
+    }
+    if (nameCollectionOff) {
+      disabled.add('customer_first_name');
+      tips.customer_first_name = t('editor.nameCollectionOff');
+      hrefs.customer_first_name = '/program/settings';
+    }
+    if (!canMultiLocation) {
+      for (const key of PRO_ONLY_VARIABLES) {
+        disabled.add(key);
+        // Per-key tooltip + billing destination. Extend the switch when
+        // we add more Pro-only variables in the future.
+        if (key === 'store_location') {
+          tips[key] = t('editor.storeLocationPro');
+          hrefs[key] = '/billing?from=template_var_store_location';
+        }
+      }
+    }
+
+    return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
+  }, [rewardNameSet, nameCollectionOff, canMultiLocation, t]);
+
   const variablesIcon = (
     <BracketsCurlyIcon className="h-3.5 w-3.5" weight="bold" />
   );
@@ -162,10 +196,12 @@ export default function ProgramNotificationsPage() {
         {t('variablesReference.description')}
       </p>
       <VariablesList
-        uiLocale={uiLocale}
-        rewardNameSet={rewardNameSet}
-        nameCollectionOff={nameCollectionOff}
+        variables={VARIABLE_KEYS}
         examples={variableExamples}
+        locale={uiLocale}
+        disabledVariables={disabledVars}
+        disabledTooltips={disabledTooltips}
+        disabledHrefs={disabledHrefs}
       />
     </>
   );
@@ -332,53 +368,3 @@ export default function ProgramNotificationsPage() {
   );
 }
 
-// ─── Variables list — wraps KeyValueList with the locale-aware row data ──
-
-interface VariablesListProps {
-  uiLocale: Locale;
-  rewardNameSet: boolean;
-  nameCollectionOff: boolean;
-  examples: Record<VariableKey, string>;
-}
-
-function VariablesList({
-  uiLocale,
-  rewardNameSet,
-  nameCollectionOff,
-  examples,
-}: Readonly<VariablesListProps>) {
-  const t = useTranslations('notifications');
-  const router = useRouter();
-  const items = VARIABLE_KEYS.map((key) => {
-    const isDisabled =
-      (key === 'reward_name' && !rewardNameSet) ||
-      (key === 'customer_first_name' && nameCollectionOff);
-    const tooltip =
-      key === 'reward_name' && !rewardNameSet
-        ? t('editor.rewardNameMissing')
-        : key === 'customer_first_name' && nameCollectionOff
-          ? t('editor.nameCollectionOff')
-          : undefined;
-    const label = (
-      <code
-        className={cn(
-          'text-[11px] font-mono font-bold',
-          isDisabled
-            ? 'text-[#A0A0A0] font-semibold'
-            : 'text-[var(--accent)]'
-        )}
-      >
-        {`{{${getVariableDisplayName(key, uiLocale)}}}`}
-      </code>
-    );
-    return {
-      key,
-      label,
-      value: <>→ {examples[key]}</>,
-      disabled: isDisabled,
-      onClick: isDisabled ? () => router.push('/program/settings') : undefined,
-      tooltip,
-    };
-  });
-  return <KeyValueList items={items} />;
-}

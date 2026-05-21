@@ -111,14 +111,9 @@ export function TeamMemberCard({
         row.role === "scanner" && (
           <div className="mb-2">
             <LocationAssignmentChips
-              businessId={locationContext.businessId}
-              membershipId={row.member.id}
               assigned={
                 locationContext.assignmentsByMember?.get(row.member.id) ?? []
               }
-              allLocations={locationContext.allLocations}
-              canManage={row.canModify}
-              compact
             />
           </div>
         )}
