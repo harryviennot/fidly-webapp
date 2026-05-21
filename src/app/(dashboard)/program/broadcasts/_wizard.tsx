@@ -69,6 +69,8 @@ import { describeFilter } from '@/lib/broadcast-filters';
 import { MessagePreview } from '@/components/notifications';
 import { AnimatedNumber } from '@/components/redesign/animated-number';
 import { GatedFeature } from '@/components/reusables/gated-feature';
+import { LocationsBroadcastFilter } from '@/components/locations/location-broadcast-filter';
+import { useLocations } from '@/hooks/use-locations';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1077,6 +1079,15 @@ function AudienceStep({
   estimating,
 }: Readonly<AudienceStepProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.audience');
+  const { currentBusiness } = useBusiness();
+  // Only fetch locations on Pro tiers to avoid noise. The GatedFeature
+  // wrapping the LocationsGroup already gates the UI; this gates the data.
+  const locationsQuery = useLocations(canSegment ? currentBusiness?.id : undefined);
+  const activeLocations = useMemo(
+    () => (locationsQuery.data ?? []).filter((l) => !l.deleted_at),
+    [locationsQuery.data]
+  );
+  const showLocationsGroup = canSegment && activeLocations.length > 1;
 
   const isAll = !!state.targetFilter.all;
 
@@ -1189,6 +1200,14 @@ function AudienceStep({
                 updateFilter={updateFilter}
                 disabled={!canSegment}
               />
+              {showLocationsGroup && (
+                <LocationsBroadcastFilter
+                  locations={activeLocations}
+                  targetFilter={state.targetFilter}
+                  updateFilter={updateFilter}
+                  disabled={!canSegment}
+                />
+              )}
             </div>
           </GatedFeature>
         </div>

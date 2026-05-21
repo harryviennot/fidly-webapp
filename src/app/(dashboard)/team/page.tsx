@@ -7,6 +7,11 @@ import { SearchInput } from "@/components/reusables/search-input";
 import { FilterPill } from "@/components/reusables/filter-pill";
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import {
+  useLocations,
+  useLocationAssignmentsByMember,
+} from "@/hooks/use-locations";
 import {
   getBusinessMembers,
   getPendingInvitations,
@@ -50,7 +55,21 @@ function getInitials(name: string) {
 export default function TeamPage() {
   const { currentBusiness, currentRole } = useBusiness();
   const { user } = useAuth();
+  const { hasFeature } = useEntitlements();
   const t = useTranslations('team');
+  const canMultiLocation = hasFeature("locations.multiple");
+  const locationsQuery = useLocations(
+    canMultiLocation ? currentBusiness?.id : undefined
+  );
+  const activeLocations = useMemo(
+    () => (locationsQuery.data ?? []).filter((l) => !l.deleted_at),
+    [locationsQuery.data]
+  );
+  const showLocationUi = canMultiLocation && activeLocations.length > 1;
+  // Only fan out the assignment map when we'll actually render it.
+  const assignmentsQuery = useLocationAssignmentsByMember(
+    showLocationUi ? currentBusiness?.id : undefined
+  );
   const [members, setMembers] = useState<MembershipWithUser[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -314,6 +333,15 @@ export default function TeamPage() {
         onMemberUpdated={loadData}
         onCancelInvitation={handleCancelInvitation}
         onResendInvitation={handleResendInvitation}
+        locationContext={
+          showLocationUi && currentBusiness?.id
+            ? {
+                businessId: currentBusiness.id,
+                allLocations: activeLocations,
+                assignmentsByMember: assignmentsQuery.data,
+              }
+            : undefined
+        }
       />
 
       {/* Mobile cards */}
@@ -326,6 +354,15 @@ export default function TeamPage() {
                 loading={cardLoading === row.id}
                 onRemove={() => setMobileRemoveRow(row)}
                 onResend={row.type === "invitation" ? () => handleMobileResend(row) : undefined}
+                locationContext={
+                  showLocationUi && currentBusiness?.id
+                    ? {
+                        businessId: currentBusiness.id,
+                        allLocations: activeLocations,
+                        assignmentsByMember: assignmentsQuery.data,
+                      }
+                    : undefined
+                }
               />
             </div>
           ))}

@@ -46,6 +46,8 @@
       "email": "Email",
       "role": "Role",
       "status": "Status",
+      "locations": "Locations",
+      "locationsAllAccess": "All locations",
       "stampsGiven": "Stamps Given",
       "joined": "Joined",
       "added": "Added {date}",
@@ -54,6 +56,17 @@
       "roleScanner": "Scanner",
       "roleAdminDesc": "Limited access to the web dashboard",
       "roleScannerDesc": "Access to the scanner app only"
+    },
+    "locations": {
+      "notAssigned": "No locations",
+      "notAssignedNoManage": "—",
+      "assign": "Assign",
+      "popoverTitle": "Assigned locations",
+      "primary": "primary",
+      "noLocations": "No locations yet",
+      "assignedToast": "Assigned to {location}",
+      "unassignedToast": "Removed from {location}",
+      "assignmentFailed": "Could not update assignment"
     },
     "invite": {
       "title": "Add Team Member",

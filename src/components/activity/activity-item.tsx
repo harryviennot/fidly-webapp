@@ -3,9 +3,11 @@
 import { useTranslations } from "next-intl";
 import type { TransactionResponse } from "@/types";
 import { useAuth } from "@/contexts/auth-provider";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
 import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
+import { LocationBadge } from "@/components/locations/location-badge";
 
 interface ActivityItemProps {
   transaction: TransactionResponse;
@@ -32,7 +34,10 @@ export function ActivityItem({
 }: ActivityItemProps) {
   const t = useTranslations("activity");
   const { user } = useAuth();
+  const { hasFeature } = useEntitlements();
   const config = TYPE_CONFIG[transaction.type];
+  const showLocation =
+    hasFeature("locations.multiple") && !!transaction.location_name;
 
   const formatRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -157,6 +162,15 @@ export function ActivityItem({
                 <span>
                   {t("by")} {transaction.employee_id === user?.id ? t("you") : transaction.employee_name}
                 </span>
+              </>
+            )}
+            {showLocation && (
+              <>
+                <span className="text-[#D8D5CE]">·</span>
+                <LocationBadge
+                  name={transaction.location_name!}
+                  variant="subtle"
+                />
               </>
             )}
           </div>

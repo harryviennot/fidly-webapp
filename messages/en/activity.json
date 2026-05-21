@@ -23,6 +23,13 @@
       "cardReAdded": "Card Re-added",
       "cardDeleted": "Card Deleted"
     },
+    "locationFilter": {
+      "allLocations": "All locations",
+      "noLocation": "No location",
+      "primary": "primary",
+      "unknown": "Unknown location",
+      "clear": "Clear location filter"
+    },
     "itemVerbs": {
       "stamp_added": "received a stamp",
       "reward_redeemed": "redeemed a reward",

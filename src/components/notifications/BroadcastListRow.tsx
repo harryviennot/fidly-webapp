@@ -14,10 +14,12 @@ import {
   PencilSimpleIcon,
   XCircleIcon,
   TrashIcon,
+  MapPinIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { BroadcastStatusBadge } from './BroadcastStatusBadge';
 import { SendAgainDialog } from './SendAgainDialog';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,7 +67,24 @@ export function BroadcastListRow({
   const uiLocale = useLocale();
   const router = useRouter();
   const { currentBusiness } = useBusiness();
+  const { hasFeature } = useEntitlements();
   const cancelMutation = useCancelBroadcast(currentBusiness?.id);
+
+  // Render a small "N locations" chip when the broadcast is location-
+  // targeted AND the viewer is on a Pro plan. Non-Pro businesses don't have
+  // locations, so the chip would be confusing for them.
+  const canSeeLocationChip = hasFeature('locations.multiple');
+  const locationTargetCount = (() => {
+    const filter = broadcast.target_filter;
+    if (!filter) return 0;
+    const enrolledIds = filter.enrolled_at_location_ids?.ids ?? [];
+    const activeIds = filter.active_at_location_ids?.ids ?? [];
+    // Union of unique IDs; "include_no_location" is reflected by the chip
+    // only when an ID is also picked, so it doesn't change the count.
+    const union = new Set<string>([...enrolledIds, ...activeIds]);
+    return union.size;
+  })();
+  const showLocationChip = canSeeLocationChip && locationTargetCount > 0;
 
   const [sendAgainOpen, setSendAgainOpen] = useState(false);
   const [confirming, setConfirming] = useState<null | 'cancel' | 'delete'>(
@@ -186,6 +205,17 @@ export function BroadcastListRow({
               {title}
             </span>
             <BroadcastStatusBadge status={broadcast.status} />
+            {showLocationChip && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-[#F5F3EF] border border-[#EEEDEA] px-1.5 py-0 text-[10px] font-medium text-[#555]"
+                title={t('row.locationTargetedTitle', {
+                  count: locationTargetCount,
+                })}
+              >
+                <MapPinIcon className="h-2.5 w-2.5" weight="fill" />
+                {t('row.locationTargeted', { count: locationTargetCount })}
+              </span>
+            )}
           </div>
           <p className="text-[12px] text-[#8A8A8A] leading-[1.4] truncate mb-1">
             {broadcast.body}

@@ -90,6 +90,8 @@
       "lastVisit": "Last Visit",
       "totalVisits": "Total Visits",
       "redemptions": "Redemptions",
+      "enrolledAt": "Enrolled at",
+      "directSignup": "Direct signup",
       "recentActivity": "Recent Activity",
       "segments": {
         "new": "New",

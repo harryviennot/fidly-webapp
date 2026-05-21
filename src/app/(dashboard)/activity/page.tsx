@@ -5,9 +5,11 @@ import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { SearchInput } from "@/components/reusables/search-input";
 import { useBusiness } from "@/contexts/business-context";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { useActiveDesign } from "@/hooks/use-designs";
 import { useActivityStats, activityKeys } from "@/hooks/use-activity-stats";
 import { useActivityFeed } from "@/hooks/use-activity-feed";
+import { useLocations } from "@/hooks/use-locations";
 import { getCustomer } from "@/api";
 import type { TransactionResponse, CustomerResponse } from "@/types";
 import { ActivityStatsBar } from "@/components/activity/activity-stats-bar";
@@ -15,6 +17,7 @@ import { ActivityFilters, ActivityFiltersSkeleton } from "@/components/activity/
 import type { FilterKey } from "@/components/activity/activity-filters";
 import { ActivityFeed, ActivityFeedSkeleton } from "@/components/activity/activity-feed";
 import { ActivityLiveIndicator } from "@/components/activity/activity-live-indicator";
+import { LocationFilter } from "@/components/locations/location-filter";
 import { CustomerDetailSheet } from "@/components/customers/customer-detail-sheet";
 import { PageHeader } from "@/components/redesign";
 import { computeCardColors } from "@/lib/card-utils";
@@ -22,11 +25,15 @@ import type { StampIconType } from "@/components/design/StampIconPicker";
 
 export default function ActivityPage() {
   const { currentBusiness } = useBusiness();
+  const { hasFeature } = useEntitlements();
   const t = useTranslations("activity");
   const queryClient = useQueryClient();
   const businessId = currentBusiness?.id;
 
   const [typeFilter, setTypeFilter] = useState<FilterKey>("all");
+  const [locationFilter, setLocationFilter] = useState<
+    string | "__none__" | undefined
+  >(undefined);
   const [search, setSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerResponse | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -39,11 +46,22 @@ export default function ActivityPage() {
 
   const stats = useActivityStats(businessId);
 
+  const canMultiLocation = hasFeature("locations.multiple");
+  // Only fetch locations when Pro — non-Pro businesses have no use for the
+  // filter and we don't want to clutter their network panel.
+  const locationsQuery = useLocations(canMultiLocation ? businessId : undefined);
+  const activeLocations = useMemo(
+    () => (locationsQuery.data ?? []).filter((l) => !l.deleted_at),
+    [locationsQuery.data]
+  );
+  const showLocationUi = canMultiLocation && activeLocations.length > 1;
+
   const feedFilters = useMemo(
     () => ({
       type: typeFilter === "all" ? undefined : typeFilter,
+      location_id: showLocationUi ? locationFilter : undefined,
     }),
-    [typeFilter]
+    [typeFilter, locationFilter, showLocationUi]
   );
 
   const feed = useActivityFeed(businessId, feedFilters);
@@ -74,7 +92,8 @@ export default function ActivityPage() {
     latestRef.current = serverLatest;
   }, [stats.data?.latest_transaction_at, businessId, feedFilters, queryClient]);
 
-  const hasActiveFilters = typeFilter !== "all";
+  const hasActiveFilters =
+    typeFilter !== "all" || (showLocationUi && locationFilter !== undefined);
 
   const handleItemClick = async (txn: TransactionResponse) => {
     if (!businessId) return;
@@ -122,6 +141,15 @@ export default function ActivityPage() {
             <ActivityFiltersSkeleton />
           ) : (
             <ActivityFilters selected={typeFilter} onSelect={setTypeFilter} />
+          )}
+
+          {/* Location filter — Pro multi-location only */}
+          {showLocationUi && (
+            <LocationFilter
+              locations={activeLocations}
+              value={locationFilter}
+              onChange={setLocationFilter}
+            />
           )}
         </div>
       </div>

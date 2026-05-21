@@ -27,7 +27,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { deleteMembership, updateMembershipRole, pauseMember, unpauseMember } from "@/api";
 import type { MembershipWithUser, MembershipRole } from "@/types";
 import type { Invitation } from "@/types";
+import type { Location } from "@/types/location";
+import { LocationAssignmentChips } from "@/components/locations/location-assignment-chips";
 import { toast } from "sonner";
+
+export interface TeamLocationContext {
+  businessId: string;
+  allLocations: Location[];
+  assignmentsByMember: Map<string, Location[]> | undefined;
+}
 
 // Unified row type for members + invitations
 export type TeamRow = {
@@ -95,6 +103,7 @@ interface TeamTableProps {
   onMemberUpdated: () => void;
   onCancelInvitation?: (id: string) => Promise<void>;
   onResendInvitation?: (id: string) => Promise<void>;
+  locationContext?: TeamLocationContext;
 }
 
 export function TeamTable({
@@ -104,6 +113,7 @@ export function TeamTable({
   onMemberUpdated,
   onCancelInvitation,
   onResendInvitation,
+  locationContext,
 }: TeamTableProps) {
   const t = useTranslations('team');
   const tRoles = useTranslations('roles');
@@ -216,6 +226,9 @@ export function TeamTable({
               <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 hidden lg:table-cell">{t('table.email')}</TableHead>
               <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4">{t('table.role')}</TableHead>
               <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4">{t('table.status')}</TableHead>
+              {locationContext && (
+                <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 hidden xl:table-cell">{t('table.locations')}</TableHead>
+              )}
               <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 text-center hidden lg:table-cell">{t('table.stampsGiven')}</TableHead>
               {canManageTeam && <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 text-right"></TableHead>}
             </TableRow>
@@ -345,6 +358,31 @@ export function TeamTable({
                       {row.statusLabel}
                     </span>
                   </TableCell>
+
+                  {/* Locations (Pro multi-location only) */}
+                  {locationContext && (
+                    <TableCell className="py-3 px-4 hidden xl:table-cell">
+                      {row.type === "member" && row.role === "scanner" ? (
+                        <LocationAssignmentChips
+                          businessId={locationContext.businessId}
+                          membershipId={row.member.id}
+                          assigned={
+                            locationContext.assignmentsByMember?.get(
+                              row.member.id
+                            ) ?? []
+                          }
+                          allLocations={locationContext.allLocations}
+                          canManage={canManageTeam}
+                        />
+                      ) : (
+                        <span className="text-[11px] text-[var(--muted-foreground)]">
+                          {row.type === "member" && !row.isOwner
+                            ? t('table.locationsAllAccess')
+                            : ""}
+                        </span>
+                      )}
+                    </TableCell>
+                  )}
 
                   {/* Stamps */}
                   <TableCell className="py-3 px-4 text-center hidden lg:table-cell">

@@ -23,6 +23,13 @@
       "cardReAdded": "Carte ré-ajoutée",
       "cardDeleted": "Carte supprimée"
     },
+    "locationFilter": {
+      "allLocations": "Tous les emplacements",
+      "noLocation": "Sans emplacement",
+      "primary": "principal",
+      "unknown": "Emplacement inconnu",
+      "clear": "Effacer le filtre d'emplacement"
+    },
     "itemVerbs": {
       "stamp_added": "a reçu un tampon",
       "reward_redeemed": "a échangé une récompense",

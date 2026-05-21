@@ -4,13 +4,15 @@ import { useTranslations } from "next-intl";
 import { TrashIcon } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import type { TeamRow } from "./team-table";
+import { LocationAssignmentChips } from "@/components/locations/location-assignment-chips";
+import type { TeamRow, TeamLocationContext } from "./team-table";
 
 interface TeamMemberCardProps {
   row: TeamRow;
   loading: boolean;
   onRemove: () => void;
   onResend?: () => void;
+  locationContext?: TeamLocationContext;
 }
 
 const ROLE_CONFIG: Record<string, { bg: string; color: string }> = {
@@ -40,6 +42,7 @@ export function TeamMemberCard({
   loading,
   onRemove,
   onResend,
+  locationContext,
 }: TeamMemberCardProps) {
   const t = useTranslations('team.memberCard');
   const tRoles = useTranslations('roles');
@@ -101,6 +104,24 @@ export function TeamMemberCard({
           )}
         </div>
       </div>
+
+      {/* Locations chips (scanners only, Pro multi-location) */}
+      {locationContext &&
+        row.type === "member" &&
+        row.role === "scanner" && (
+          <div className="mb-2">
+            <LocationAssignmentChips
+              businessId={locationContext.businessId}
+              membershipId={row.member.id}
+              assigned={
+                locationContext.assignmentsByMember?.get(row.member.id) ?? []
+              }
+              allLocations={locationContext.allLocations}
+              canManage={row.canModify}
+              compact
+            />
+          </div>
+        )}
 
       {/* Bottom row: stamps + status */}
       <div className="flex justify-between items-center text-[11px] text-[var(--muted-foreground)]">

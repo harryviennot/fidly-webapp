@@ -9,6 +9,7 @@ import {
   Footprints,
   Trophy,
   Envelope,
+  MapPin,
 } from "@phosphor-icons/react";
 import {
   Sheet,
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { getCustomer, getCustomerTransactions } from "@/api";
 import {
   classifyCustomer,
@@ -66,6 +68,7 @@ export function CustomerDetailSheet({
 }: CustomerDetailSheetProps) {
   const { currentBusiness } = useBusiness();
   const { user } = useAuth();
+  const { hasFeature } = useEntitlements();
   const t = useTranslations("customers.detail");
   const locale = useLocale();
   const queryClient = useQueryClient();
@@ -250,6 +253,15 @@ export function CustomerDetailSheet({
               value={String(liveCustomer.total_redemptions ?? 0)}
               accent="#C4883D"
             />
+            {hasFeature("locations.multiple") && (
+              <StatRow
+                icon={<MapPin className="w-4 h-4" />}
+                label={t("enrolledAt")}
+                value={
+                  liveCustomer.enrolled_at_location_name ?? t("directSignup")
+                }
+              />
+            )}
           </div>
         </div>
 

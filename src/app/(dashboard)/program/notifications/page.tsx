@@ -53,6 +53,7 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     reward_name: 'Free coffee',
     business_name: 'Your business',
     customer_first_name: 'Sarah',
+    store_location: 'Westside',
   },
   fr: {
     stamp_count: '3',
@@ -61,6 +62,7 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     reward_name: 'Café offert',
     business_name: 'Votre entreprise',
     customer_first_name: 'Sarah',
+    store_location: 'Westside',
   },
 };
 
@@ -105,6 +107,7 @@ export default function ProgramNotificationsPage() {
       reward_name: program?.reward_name?.trim() || fallbacks.reward_name,
       business_name: currentBusiness?.name?.trim() || fallbacks.business_name,
       customer_first_name: fallbacks.customer_first_name,
+      store_location: fallbacks.store_location,
     };
   }, [uiLocale, totalStamps, program?.reward_name, currentBusiness?.name]);
 
