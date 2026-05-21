@@ -12,6 +12,9 @@ import {
   TrashIcon,
   WarningIcon,
   XIcon,
+  CreditCardIcon,
+  SealCheckIcon,
+  GiftIcon,
 } from "@phosphor-icons/react";
 import {
   Sheet,
@@ -21,6 +24,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,24 +36,21 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StatCard } from "@/components/redesign";
 import { GatedFeature } from "@/components/reusables/gated-feature";
-import { LocationForm } from "./location-form";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import { LocationMemberPicker } from "./location-member-picker";
+import { getInitials } from "./_initials";
 import { ApiError } from "@/api/client";
 import {
   useLocationMembers,
   useLocationQR,
   useLocationStats,
-  useUpdateLocation,
   useDeleteLocation,
   useUnassignLocationMember,
 } from "@/hooks/use-locations";
-import type {
-  Location,
-  LocationCreate,
-  LocationPatch,
-  LocationStatsRange,
-} from "@/types/location";
+import type { Location, LocationStatsRange } from "@/types/location";
 
 interface LocationDetailSheetProps {
   open: boolean;
@@ -60,17 +61,7 @@ interface LocationDetailSheetProps {
   canManageNonPrimary: boolean;
   canUseProFeatures: boolean;
   onDeleted?: () => void;
-}
-
-function getInitials(name?: string | null, email?: string) {
-  const source = name?.trim() || email || "?";
-  return source
-    .split(/\s+/)
-    .map((s) => s[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  onEdit?: () => void;
 }
 
 export function LocationDetailSheet({
@@ -82,14 +73,17 @@ export function LocationDetailSheet({
   canManageNonPrimary,
   canUseProFeatures,
   onDeleted,
+  onEdit,
 }: LocationDetailSheetProps) {
   const t = useTranslations("loyaltyProgram.locations.detail");
-  const [editing, setEditing] = useState(false);
-  const [qrOpen, setQrOpen] = useState(false);
-  const [statsRange, setStatsRange] = useState<LocationStatsRange>("30d");
+  const isMobile = useIsMobile();
+  // null = follow viewport default (open on desktop, collapsed on mobile);
+  //  true/false = user has explicitly toggled.
+  const [qrToggled, setQrToggled] = useState<boolean | null>(null);
+  const qrOpen = qrToggled ?? !isMobile;
+  const [statsRange, setStatsRange] = useState<LocationStatsRange>("7d");
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const update = useUpdateLocation(businessId);
   const remove = useDeleteLocation(businessId);
   const unassign = useUnassignLocationMember(businessId);
 
@@ -119,12 +113,6 @@ export function LocationDetailSheet({
     (businessSlug
       ? `https://app.stampeo.app/${businessSlug}/l/${location.slug}`
       : "");
-
-  const handleSave = async (body: LocationCreate | LocationPatch) => {
-    await update.mutateAsync({ locationId: location.id, body });
-    toast.success(t("savedToast"));
-    setEditing(false);
-  };
 
   const handleCopyUrl = async () => {
     try {
@@ -174,102 +162,193 @@ export function LocationDetailSheet({
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
-          side="right"
-          className="sm:max-w-[460px] overflow-y-auto p-0 gap-0"
+          side={isMobile ? "bottom" : "right"}
+          className={cn(
+            "flex flex-col gap-0 p-0",
+            isMobile
+              ? "max-h-[85vh] rounded-t-2xl border-t-0"
+              : "sm:max-w-[520px]"
+          )}
         >
           <SheetTitle className="sr-only">{location.name}</SheetTitle>
           <SheetDescription className="sr-only">
             {location.slug}
           </SheetDescription>
 
-          {/* ── Header ── */}
-          <div className="px-5 pt-6 pb-5 border-b border-[var(--border)]">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-[var(--muted)] flex items-center justify-center mb-2.5">
-                <MapPinIcon className="h-5 w-5 text-[var(--muted-foreground)]" weight="fill" />
-              </div>
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-[18px] font-bold text-[#1A1A1A]">
-                  {location.name}
-                </h2>
-                {isPrimary && (
-                  <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
-                    {t("primary")}
-                  </Badge>
+          {isMobile && (
+            <div className="flex justify-center pt-2.5 pb-1 shrink-0">
+              <div className="h-1 w-10 rounded-full bg-[var(--border-dark)] opacity-60" />
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto">
+            {/* ── Sticky compact header ── */}
+            <div className="sticky top-0 z-10 bg-[var(--background)] border-b border-[var(--border)]">
+              <div className="flex items-center gap-3 px-5 py-4 pr-14">
+                <div className="w-10 h-10 rounded-lg bg-[var(--muted)] flex items-center justify-center shrink-0">
+                  <MapPinIcon
+                    className="h-5 w-5 text-[var(--muted-foreground)]"
+                    weight="fill"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <h2 className="text-[16px] font-bold text-[#1A1A1A] truncate">
+                      {location.name}
+                    </h2>
+                    {isPrimary && (
+                      <Badge
+                        variant="secondary"
+                        className="text-[9px] px-1.5 py-0 shrink-0"
+                      >
+                        {t("primary")}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-[11px] font-mono text-[var(--muted-foreground)] truncate">
+                    {location.slug}
+                  </p>
+                </div>
+                {canEditInfo && onEdit && (
+                  <Button
+                    variant="gradient"
+                    size="sm"
+                    onClick={onEdit}
+                    className="shrink-0"
+                  >
+                    <PencilSimpleIcon className="h-3.5 w-3.5" weight="bold" />
+                    {t("edit")}
+                  </Button>
                 )}
               </div>
-              <p className="text-[11px] font-mono text-[var(--muted-foreground)]">
-                {location.slug}
-              </p>
             </div>
-          </div>
 
-          {/* ── Info section ── */}
-          <Section
-            title={t("info")}
-            action={
-              canEditInfo && !editing ? (
-                <button
-                  type="button"
-                  onClick={() => setEditing(true)}
-                  className="text-[var(--muted-foreground)] hover:text-[#1A1A1A]"
-                  aria-label={t("editInfo")}
-                >
-                  <PencilSimpleIcon className="h-4 w-4" />
-                </button>
-              ) : null
-            }
-          >
-            {editing ? (
-              <LocationForm
-                businessId={businessId}
-                businessSlug={businessSlug}
-                mode="edit"
-                initial={location}
-                canEditNonPrimary={canManageNonPrimary}
-                onSubmit={handleSave}
-                onCancel={() => setEditing(false)}
-              />
-            ) : (
-              <div className="divide-y divide-[var(--border)]">
-                <InfoRow
-                  label={t("address")}
-                  value={location.address?.trim() || t("noAddress")}
-                  muted={!location.address?.trim()}
-                />
-                <InfoRow
-                  label={t("coordinates")}
-                  value={
-                    location.latitude != null && location.longitude != null
-                      ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`
-                      : t("noCoordinates")
-                  }
-                  muted={location.latitude == null}
-                />
-                <InfoRow
-                  label={t("enrollmentUrl")}
-                  value={
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[11px] truncate max-w-[220px]">
-                        {enrollmentUrl}
-                      </span>
+            {/* ── Identity card ── */}
+            <Section title={t("info")}>
+              <Card hover={false} className="p-4">
+                <div className="divide-y divide-[var(--border)]">
+                  <IdentityRow
+                    label={t("address")}
+                    value={location.address?.trim() || t("noAddress")}
+                    muted={!location.address?.trim()}
+                  />
+                  <IdentityRow
+                    label={t("coordinates")}
+                    value={
+                      location.latitude != null && location.longitude != null
+                        ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`
+                        : t("noCoordinates")
+                    }
+                    muted={location.latitude == null}
+                  />
+                </div>
+                <div className="mt-3 pt-3 border-t border-[var(--border)]">
+                  <p className="text-[11px] text-[var(--muted-foreground)] mb-1.5">
+                    {t("enrollmentUrl")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleCopyUrl}
+                    className="group flex items-center justify-between gap-2 w-full px-3 py-2 rounded-lg bg-[var(--muted)] hover:bg-[var(--border)] transition-colors"
+                  >
+                    <span className="font-mono text-[12px] text-[#1A1A1A] truncate text-left">
+                      {enrollmentUrl}
+                    </span>
+                    <CopyIcon
+                      className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)] group-hover:text-[#1A1A1A]"
+                      weight="bold"
+                    />
+                  </button>
+                </div>
+              </Card>
+            </Section>
+
+            {/* ── Stats section ── */}
+            <Section title={t("stats")}>
+              <GatedFeature
+                requiredTier="pro"
+                upgradeFrom="locations.stats"
+                gatedTitle={t("statsUpsellTitle")}
+                gatedDescription={t("statsUpsellDescription")}
+              >
+                {/* Segmented range picker */}
+                <div className="inline-flex items-center gap-0.5 p-0.5 rounded-full bg-[var(--muted)] mb-4">
+                  {(["7d", "30d", "90d", "all"] as LocationStatsRange[]).map(
+                    (r) => (
                       <button
+                        key={r}
                         type="button"
-                        onClick={handleCopyUrl}
-                        className="text-[var(--muted-foreground)] hover:text-[#1A1A1A]"
-                        aria-label={t("copyUrl")}
+                        onClick={() => setStatsRange(r)}
+                        className={
+                          statsRange === r
+                            ? "text-[11px] font-semibold px-3 py-1 rounded-full bg-[var(--card)] text-[#1A1A1A] shadow-sm transition-all"
+                            : "text-[11px] font-semibold px-3 py-1 rounded-full text-[var(--muted-foreground)] hover:text-[#1A1A1A] transition-colors"
+                        }
                       >
-                        <CopyIcon className="h-3.5 w-3.5" />
+                        {t(`range.${r}`)}
                       </button>
-                    </div>
-                  }
-                />
-              </div>
-            )}
-          </Section>
+                    )
+                  )}
+                </div>
 
-          {/* ── Members section ── */}
-          {!editing && (
+                {statsQuery.isLoading ? (
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {[1, 2, 3].map((i) => (
+                      <Card
+                        key={i}
+                        hover={false}
+                        className="p-4 h-[110px] animate-pulse"
+                      />
+                    ))}
+                  </div>
+                ) : statsQuery.data ? (
+                  <>
+                    {/* Hero row: 3 prominent StatCards */}
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <StatCard
+                        title={t("totalTransactions")}
+                        value={statsQuery.data.total_transactions}
+                        icon={<CreditCardIcon className="h-4 w-4" weight="bold" />}
+                        tone="accent"
+                        delay={0}
+                      />
+                      <StatCard
+                        title={t("stampsAdded")}
+                        value={statsQuery.data.stamps_added}
+                        icon={<SealCheckIcon className="h-4 w-4" weight="bold" />}
+                        tone="info"
+                        delay={60}
+                      />
+                      <StatCard
+                        title={t("rewardsRedeemed")}
+                        value={statsQuery.data.rewards_redeemed}
+                        icon={<GiftIcon className="h-4 w-4" weight="bold" />}
+                        tone="warning"
+                        delay={120}
+                      />
+                    </div>
+                    {/* Secondary row: 3 compact tiles */}
+                    <div className="grid grid-cols-3 gap-2.5 mt-2.5">
+                      <SecondaryTile
+                        label={t("stampsVoided")}
+                        value={statsQuery.data.stamps_voided}
+                      />
+                      <SecondaryTile
+                        label={t("uniqueCustomers")}
+                        value={statsQuery.data.unique_customers}
+                      />
+                      <SecondaryTile
+                        label={t("enrolledHere")}
+                        value={statsQuery.data.enrolled_here_total}
+                        hint={t("allTime")}
+                      />
+                    </div>
+                  </>
+                ) : null}
+              </GatedFeature>
+            </Section>
+
+            {/* ── Members section ── */}
             <Section
               title={t("members")}
               action={
@@ -288,59 +367,61 @@ export function LocationDetailSheet({
                 gatedDescription={t("membersUpsellDescription")}
               >
                 {!members || members.length === 0 ? (
-                  <p className="text-[12px] text-[var(--muted-foreground)] py-2">
-                    {t("noMembers")}
-                  </p>
+                  <Card hover={false} className="p-5 text-center">
+                    <p className="text-[12.5px] text-[var(--muted-foreground)]">
+                      {t("noMembers")}
+                    </p>
+                  </Card>
                 ) : (
-                  <ul className="divide-y divide-[var(--border)]">
-                    {members.map((m) => {
-                      const label = m.name || m.email;
-                      return (
-                        <li
-                          key={m.membership_id}
-                          className="flex items-center gap-2.5 py-2"
-                        >
-                          <Avatar className="h-7 w-7">
-                            <AvatarImage src={m.avatar_url ?? undefined} />
-                            <AvatarFallback className="text-[10px]">
-                              {getInitials(m.name, m.email)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[12.5px] font-medium text-[#1A1A1A] truncate">
-                              {label}
-                            </p>
-                            <p className="text-[10.5px] text-[var(--muted-foreground)] truncate">
-                              {m.email}
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleUnassign(m.membership_id, label)
-                            }
-                            className="text-[var(--muted-foreground)] opacity-40 hover:opacity-100 hover:text-red-500 transition-colors p-1"
-                            aria-label={t("unassign")}
+                  <Card hover={false} className="p-1.5">
+                    <ul className="divide-y divide-[var(--border)]">
+                      {members.map((m) => {
+                        const label = m.name || m.email;
+                        return (
+                          <li
+                            key={m.membership_id}
+                            className="flex items-center gap-3 px-2.5 py-2.5"
                           >
-                            <XIcon className="h-3.5 w-3.5" />
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={m.avatar_url ?? undefined} />
+                              <AvatarFallback className="text-[10px]">
+                                {getInitials(m.name, m.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-medium text-[#1A1A1A] truncate">
+                                {label}
+                              </p>
+                              <p className="text-[11px] text-[var(--muted-foreground)] truncate">
+                                {m.email}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleUnassign(m.membership_id, label)
+                              }
+                              className="text-[var(--muted-foreground)] opacity-40 hover:opacity-100 hover:text-red-500 transition-colors p-1.5 rounded-md"
+                              aria-label={t("unassign")}
+                            >
+                              <XIcon className="h-3.5 w-3.5" weight="bold" />
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </Card>
                 )}
               </GatedFeature>
             </Section>
-          )}
 
-          {/* ── QR section ── */}
-          {!editing && (
+            {/* ── QR section ── */}
             <Section
               title={t("qr")}
               action={
                 <button
                   type="button"
-                  onClick={() => setQrOpen((v) => !v)}
+                  onClick={() => setQrToggled(!qrOpen)}
                   className="text-[var(--muted-foreground)] hover:text-[#1A1A1A] text-[11px] font-semibold"
                 >
                   {qrOpen ? t("hide") : t("show")}
@@ -354,14 +435,14 @@ export function LocationDetailSheet({
                 gatedDescription={t("qrUpsellDescription")}
               >
                 {qrOpen && (
-                  <div className="space-y-2">
+                  <Card hover={false} className="p-4">
                     {qrQuery.isLoading && (
-                      <p className="text-xs text-[var(--muted-foreground)]">
+                      <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
                         {t("qrLoading")}
                       </p>
                     )}
                     {qrQuery.data?.qr_png_base64 && (
-                      <div className="flex flex-col items-center gap-2 py-2">
+                      <div className="flex flex-col items-center gap-3">
                         <Image
                           src={`data:image/png;base64,${qrQuery.data.qr_png_base64}`}
                           alt={`QR for ${location.name}`}
@@ -370,131 +451,70 @@ export function LocationDetailSheet({
                           className="rounded-md bg-white p-2 border border-[var(--border)]"
                           unoptimized
                         />
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={handleCopyUrl}
-                            className="rounded-full"
+                            className="rounded-full flex-1"
                           >
-                            <CopyIcon className="h-3.5 w-3.5" />
+                            <CopyIcon className="h-3.5 w-3.5" weight="bold" />
                             {t("copyUrl")}
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={handleDownloadQr}
-                            className="rounded-full"
+                            className="rounded-full flex-1"
                           >
-                            <DownloadSimpleIcon className="h-3.5 w-3.5" />
+                            <DownloadSimpleIcon
+                              className="h-3.5 w-3.5"
+                              weight="bold"
+                            />
                             {t("downloadQr")}
                           </Button>
                         </div>
                       </div>
                     )}
                     {qrQuery.data && !qrQuery.data.qr_png_base64 && (
-                      <p className="text-xs text-[var(--muted-foreground)]">
+                      <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
                         {t("qrUnavailable")}
                       </p>
                     )}
-                    <div className="flex items-start gap-1.5 mt-2 p-2 bg-amber-50 border border-amber-100 rounded-md">
+                    <div className="flex items-start gap-2 mt-3 p-2.5 bg-amber-50 border border-amber-100 rounded-md">
                       <WarningIcon
                         className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0"
                         weight="fill"
                       />
-                      <p className="text-[11px] text-amber-700">
+                      <p className="text-[11px] text-amber-700 leading-snug">
                         {t("slugWarning")}
                       </p>
                     </div>
-                  </div>
+                  </Card>
                 )}
               </GatedFeature>
             </Section>
-          )}
 
-          {/* ── Stats section ── */}
-          {!editing && (
-            <Section title={t("stats")}>
-              <GatedFeature
-                requiredTier="pro"
-                upgradeFrom="locations.stats"
-                gatedTitle={t("statsUpsellTitle")}
-                gatedDescription={t("statsUpsellDescription")}
-              >
-                <div className="flex gap-1.5 mb-3">
-                  {(["7d", "30d", "90d", "all"] as LocationStatsRange[]).map(
-                    (r) => (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => setStatsRange(r)}
-                        className={
-                          statsRange === r
-                            ? "text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#1A1A1A] text-white"
-                            : "text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[#1A1A1A]"
-                        }
-                      >
-                        {t(`range.${r}`)}
-                      </button>
-                    )
-                  )}
-                </div>
-                {statsQuery.isLoading ? (
-                  <p className="text-xs text-[var(--muted-foreground)]">
-                    {t("statsLoading")}
+            {/* ── Danger zone ── */}
+            {!isPrimary && (
+              <Section title={t("dangerZone")} variant="danger">
+                <Button
+                  variant="destructive"
+                  onClick={() => setDeleteOpen(true)}
+                  disabled={!canManageNonPrimary}
+                  className="w-full rounded-full"
+                >
+                  <TrashIcon className="h-4 w-4" weight="bold" />
+                  {t("delete")}
+                </Button>
+                {!canManageNonPrimary && (
+                  <p className="text-[11px] text-[var(--muted-foreground)] mt-2 text-center">
+                    {t("deleteUpgrade")}
                   </p>
-                ) : statsQuery.data ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    <StatTile
-                      label={t("totalTransactions")}
-                      value={statsQuery.data.total_transactions}
-                    />
-                    <StatTile
-                      label={t("stampsAdded")}
-                      value={statsQuery.data.stamps_added}
-                    />
-                    <StatTile
-                      label={t("rewardsRedeemed")}
-                      value={statsQuery.data.rewards_redeemed}
-                    />
-                    <StatTile
-                      label={t("stampsVoided")}
-                      value={statsQuery.data.stamps_voided}
-                    />
-                    <StatTile
-                      label={t("uniqueCustomers")}
-                      value={statsQuery.data.unique_customers}
-                    />
-                    <StatTile
-                      label={t("enrolledHere")}
-                      value={statsQuery.data.enrolled_here_total}
-                      hint={t("allTime")}
-                    />
-                  </div>
-                ) : null}
-              </GatedFeature>
-            </Section>
-          )}
-
-          {/* ── Danger zone ── */}
-          {!editing && !isPrimary && (
-            <Section title={t("dangerZone")} variant="danger">
-              <Button
-                variant="outline"
-                onClick={() => setDeleteOpen(true)}
-                disabled={!canManageNonPrimary}
-                className="w-full rounded-full text-red-600 border-red-200 hover:bg-red-50"
-              >
-                <TrashIcon className="h-4 w-4" />
-                {t("delete")}
-              </Button>
-              {!canManageNonPrimary && (
-                <p className="text-[11px] text-[var(--muted-foreground)] mt-2 text-center">
-                  {t("deleteUpgrade")}
-                </p>
-              )}
-            </Section>
-          )}
+                )}
+              </Section>
+            )}
+          </div>
         </SheetContent>
       </Sheet>
 
@@ -503,7 +523,7 @@ export function LocationDetailSheet({
           <AlertDialogHeader>
             <div className="flex flex-col items-center text-center mb-2">
               <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-3.5">
-                <TrashIcon className="h-5 w-5" />
+                <TrashIcon className="h-5 w-5" weight="bold" />
               </div>
               <AlertDialogTitle>
                 {t("deleteTitle", { name: location.name })}
@@ -545,11 +565,11 @@ function Section({
     <div
       className={
         variant === "danger"
-          ? "px-5 py-4 border-t border-red-100 bg-red-50/30"
-          : "px-5 py-4 border-t border-[var(--border)]"
+          ? "px-5 py-5 border-t border-red-100 bg-red-50/30"
+          : "px-5 py-5"
       }
     >
-      <div className="flex items-center justify-between mb-2.5">
+      <div className="flex items-center justify-between mb-3">
         <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider">
           {title}
         </p>
@@ -560,7 +580,7 @@ function Section({
   );
 }
 
-function InfoRow({
+function IdentityRow({
   label,
   value,
   muted,
@@ -570,15 +590,15 @@ function InfoRow({
   muted?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 py-2.5">
+    <div className="flex items-start justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
       <span className="text-[12px] text-[var(--muted-foreground)] shrink-0">
         {label}
       </span>
       <span
         className={
           muted
-            ? "text-[12.5px] text-[var(--muted-foreground)] italic text-right"
-            : "text-[12.5px] font-medium text-[#1A1A1A] text-right"
+            ? "text-[13px] text-[var(--muted-foreground)] italic text-right"
+            : "text-[13px] font-medium text-[#1A1A1A] text-right"
         }
       >
         {value}
@@ -587,7 +607,7 @@ function InfoRow({
   );
 }
 
-function StatTile({
+function SecondaryTile({
   label,
   value,
   hint,
@@ -597,15 +617,15 @@ function StatTile({
   hint?: string;
 }) {
   return (
-    <div className="bg-[var(--muted)] rounded-lg p-2.5">
+    <div className="bg-[var(--muted)] rounded-lg p-3">
       <p className="text-[10px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-1">
         {label}
       </p>
-      <p className="text-[18px] font-bold text-[#1A1A1A] tabular-nums">
+      <p className="text-[18px] font-bold text-[#1A1A1A] tabular-nums leading-none">
         {value}
       </p>
       {hint && (
-        <p className="text-[9.5px] text-[var(--muted-foreground)] mt-0.5">
+        <p className="text-[9.5px] text-[var(--muted-foreground)] mt-1">
           {hint}
         </p>
       )}

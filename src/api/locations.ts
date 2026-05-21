@@ -7,6 +7,7 @@ import type {
   LocationMember,
   LocationQRResponse,
   LocationStats,
+  LocationStatsBatch,
   LocationStatsRange,
   LocationAssignment,
   SlugAvailabilityResponse,
@@ -194,6 +195,22 @@ export async function getLocationStats(
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throwApiError(error, 'Failed to fetch location stats');
+  }
+  return response.json();
+}
+
+export async function getLocationStatsBatch(
+  businessId: string,
+  range: LocationStatsRange = '7d'
+): Promise<LocationStatsBatch> {
+  const qs = new URLSearchParams({ range });
+  const response = await fetch(
+    `${API_BASE_URL}/locations/${businessId}/stats?${qs}`,
+    { headers: await getAuthHeaders() }
+  );
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to fetch location stats batch');
   }
   return response.json();
 }

@@ -108,3 +108,13 @@ export interface LocationStats {
   unique_customers: number;
   enrolled_here_total: number;
 }
+
+/** Batch stats returned by `GET /locations/{businessId}/stats?range=…` — one
+ *  row per active location. Same shape as `LocationStats` plus `last_activity_at`,
+ *  the most recent transaction timestamp within the range (null if none). The
+ *  activity chip on `LocationCard` derives Active-today / Quiet-7d+ from this. */
+export interface LocationStatsBatchRow extends LocationStats {
+  last_activity_at: string | null;
+}
+
+export type LocationStatsBatch = LocationStatsBatchRow[];

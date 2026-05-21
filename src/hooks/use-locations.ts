@@ -26,6 +26,7 @@ import {
   getLocations,
   getLocationMembers,
   getLocationStats,
+  getLocationStatsBatch,
   getLocationQR,
   createLocation,
   updateLocation,
@@ -42,6 +43,7 @@ import type {
   LocationMember,
   LocationStatsRange,
   LocationStats,
+  LocationStatsBatch,
   LocationQRResponse,
   SlugAvailabilityResponse,
 } from "@/types/location";
@@ -55,6 +57,10 @@ export const locationKeys = {
     ["locations", businessId, "members", locationId] as const,
   stats: (businessId: string, locationId: string, range: LocationStatsRange) =>
     ["locations", businessId, "stats", locationId, range] as const,
+  // NB: keep the "stats" segment so `usePatchTransactionLocation`'s prefix
+  // invalidation (`["locations", businessId, "stats"]`) reaches the batch too.
+  statsAll: (businessId: string, range: LocationStatsRange) =>
+    ["locations", businessId, "stats", "__all__", range] as const,
   qr: (businessId: string, locationId: string) =>
     ["locations", businessId, "qr", locationId] as const,
   slugCheck: (businessId: string, slug: string, excludeId?: string) =>
@@ -119,6 +125,38 @@ export function useLocationStats(
     queryKey: locationKeys.stats(businessId ?? "", locationId ?? "", range),
     queryFn: () => getLocationStats(businessId!, locationId!, range),
     enabled: enabled && !!businessId && !!locationId,
+  });
+}
+
+/**
+ * Batch stats for every active location in the business — powers the
+ * activity-rich locations grid with a single round-trip. On success we seed
+ * the per-location cache so that opening the side panel on the same range
+ * (typically "7d") shows numbers instantly.
+ */
+export function useLocationStatsBatch(
+  businessId: string | undefined,
+  range: LocationStatsRange = "7d",
+  enabled = true
+) {
+  const qc = useQueryClient();
+  return useQuery<LocationStatsBatch>({
+    queryKey: locationKeys.statsAll(businessId ?? "", range),
+    queryFn: async () => {
+      const rows = await getLocationStatsBatch(businessId!, range);
+      // Seed the per-location stats cache for the same range. The shape is a
+      // superset (LocationStatsBatchRow extends LocationStats) so the consumer
+      // can read it as LocationStats without changes.
+      for (const row of rows) {
+        qc.setQueryData(
+          locationKeys.stats(businessId!, row.location_id, range),
+          row
+        );
+      }
+      return rows;
+    },
+    enabled: enabled && !!businessId,
+    staleTime: 60_000,
   });
 }
 

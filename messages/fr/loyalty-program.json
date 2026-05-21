@@ -212,7 +212,15 @@
         "membersCount": "{count, plural, =0 {Aucun employé assigné} one {# employé} other {# employés}}",
         "edit": "Modifier",
         "viewQr": "Voir le QR",
-        "delete": "Supprimer"
+        "delete": "Supprimer",
+        "actions": "Plus d'actions",
+        "actionsHint": "Gérer cet emplacement",
+        "scans7d": "Scans 7j",
+        "stamps7d": "Tampons 7j",
+        "redemptions7d": "Récompenses 7j",
+        "activityActive": "Actif aujourd'hui",
+        "activityQuiet": "Calme 7j+",
+        "addAnother": "Ajouter un autre emplacement"
       },
       "form": {
         "name": "Nom de l'emplacement",
@@ -240,10 +248,14 @@
         "description": "Les clients arrivant via l'URL de cet emplacement seront inscrits ici. Vous pourrez assigner des employés après création.",
         "successToast": "Emplacement créé"
       },
+      "edit": {
+        "title": "Modifier l'emplacement",
+        "description": "Mettez à jour les informations de cet emplacement. Les changements s'appliquent immédiatement au QR imprimé et à l'URL d'inscription."
+      },
       "detail": {
         "primary": "Principal",
         "info": "Informations",
-        "editInfo": "Modifier",
+        "edit": "Modifier",
         "address": "Adresse",
         "noAddress": "Pas d'adresse",
         "coordinates": "Coordonnées",

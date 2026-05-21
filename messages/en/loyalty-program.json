@@ -212,7 +212,15 @@
         "membersCount": "{count, plural, =0 {No scanners assigned} one {# scanner} other {# scanners}}",
         "edit": "Edit",
         "viewQr": "View QR",
-        "delete": "Delete"
+        "delete": "Delete",
+        "actions": "More actions",
+        "actionsHint": "Manage this location",
+        "scans7d": "Scans 7d",
+        "stamps7d": "Stamps 7d",
+        "redemptions7d": "Redeemed 7d",
+        "activityActive": "Active today",
+        "activityQuiet": "Quiet 7d+",
+        "addAnother": "Add another location"
       },
       "form": {
         "name": "Location name",
@@ -240,10 +248,14 @@
         "description": "Customers visiting this location's URL will be enrolled here. You can assign scanners after creating it.",
         "successToast": "Location created"
       },
+      "edit": {
+        "title": "Edit location",
+        "description": "Update this location's details. Changes apply to the printed QR and the enrollment URL immediately."
+      },
       "detail": {
         "primary": "Primary",
         "info": "Info",
-        "editInfo": "Edit info",
+        "edit": "Edit",
         "address": "Address",
         "noAddress": "No address",
         "coordinates": "Coordinates",

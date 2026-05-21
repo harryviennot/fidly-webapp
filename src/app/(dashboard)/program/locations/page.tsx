@@ -8,12 +8,19 @@ import { SearchInput } from "@/components/reusables/search-input";
 import { UpsellHero } from "@/components/reusables/upsell";
 import { useBusiness } from "@/contexts/business-context";
 import { useEntitlements } from "@/hooks/useEntitlements";
-import { useLocations } from "@/hooks/use-locations";
+import { useLocations, useLocationStatsBatch } from "@/hooks/use-locations";
 import { LocationCard } from "@/components/locations/location-card";
+import { LocationAddTile } from "@/components/locations/location-add-tile";
 import { LocationEmptyState } from "@/components/locations/location-empty-state";
-import { LocationCreateDialog } from "@/components/locations/location-create-dialog";
+import { LocationDialog } from "@/components/locations/location-dialog";
 import { LocationDetailSheet } from "@/components/locations/location-detail-sheet";
 import { Card } from "@/components/ui/card";
+import type { Location, LocationStatsBatchRow } from "@/types/location";
+
+type DialogState =
+  | { mode: "create" }
+  | { mode: "edit"; location: Location }
+  | null;
 
 export default function ProgramLocationsPage() {
   const t = useTranslations("loyaltyProgram.locations");
@@ -29,9 +36,19 @@ export default function ProgramLocationsPage() {
   const { data: locations, isLoading } = useLocations(
     canMultiLocation ? businessId : undefined
   );
+  // One batch call for the whole grid — see useLocationStatsBatch.
+  const { data: statsBatch, isLoading: statsLoading } = useLocationStatsBatch(
+    canMultiLocation ? businessId : undefined,
+    "7d"
+  );
+  const statsByLocation = useMemo(() => {
+    const map = new Map<string, LocationStatsBatchRow>();
+    for (const row of statsBatch ?? []) map.set(row.location_id, row);
+    return map;
+  }, [statsBatch]);
 
   const [search, setSearch] = useState("");
-  const [createOpen, setCreateOpen] = useState(false);
+  const [dialogState, setDialogState] = useState<DialogState>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const sheetOpen = !!selectedId;
 
@@ -92,19 +109,22 @@ export default function ProgramLocationsPage() {
           {
             label: t("addLocation"),
             icon: <PlusIcon className="h-4 w-4" />,
-            onClick: () => setCreateOpen(true),
+            onClick: () => setDialogState({ mode: "create" }),
           },
         ]}
       />
 
-      {/* Search bar */}
+      {/* Search bar — sticky on mobile so it stays in reach when scanning
+          a long list of stores. */}
       {activeLocations.length > 1 && (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder={t("searchPlaceholder")}
-          />
+        <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-[var(--background)] md:static md:mx-0 md:px-0 md:py-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder={t("searchPlaceholder")}
+            />
+          </div>
         </div>
       )}
 
@@ -112,27 +132,39 @@ export default function ProgramLocationsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[1, 2].map((i) => (
-            <Card key={i} hover={false} className="p-4 h-[100px] animate-pulse" />
+            <Card
+              key={i}
+              hover={false}
+              className="h-[180px] animate-pulse"
+            />
           ))}
         </div>
-      ) : activeLocations.length <= 1 && !search ? (
-        <>
-          {activeLocations.length === 1 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <LocationCard
-                businessId={businessId}
-                location={activeLocations[0]}
-                onOpen={() => setSelectedId(activeLocations[0].id)}
-                onEdit={() => setSelectedId(activeLocations[0].id)}
-                onViewQr={() => setSelectedId(activeLocations[0].id)}
-                onDelete={() => undefined}
-                canManageNonPrimary
-                canViewQr
-              />
-            </div>
-          )}
-          <LocationEmptyState canAddMore onAdd={() => setCreateOpen(true)} />
-        </>
+      ) : activeLocations.length === 0 && !search ? (
+        <LocationEmptyState
+          canAddMore
+          onAdd={() => setDialogState({ mode: "create" })}
+        />
+      ) : activeLocations.length === 1 && !search ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <LocationCard
+            businessId={businessId}
+            location={activeLocations[0]}
+            stats={statsByLocation.get(activeLocations[0].id)}
+            statsLoading={statsLoading}
+            onOpen={() => setSelectedId(activeLocations[0].id)}
+            onEdit={() =>
+              setDialogState({
+                mode: "edit",
+                location: activeLocations[0],
+              })
+            }
+            onViewQr={() => setSelectedId(activeLocations[0].id)}
+            onDelete={() => setSelectedId(activeLocations[0].id)}
+            canManageNonPrimary
+            canViewQr
+          />
+          <LocationAddTile onClick={() => setDialogState({ mode: "create" })} />
+        </div>
       ) : filtered.length === 0 ? (
         <Card hover={false} className="p-8 text-center">
           <p className="text-sm text-[var(--muted-foreground)]">
@@ -146,8 +178,12 @@ export default function ProgramLocationsPage() {
               key={loc.id}
               businessId={businessId}
               location={loc}
+              stats={statsByLocation.get(loc.id)}
+              statsLoading={statsLoading}
               onOpen={() => setSelectedId(loc.id)}
-              onEdit={() => setSelectedId(loc.id)}
+              onEdit={() =>
+                setDialogState({ mode: "edit", location: loc })
+              }
               onViewQr={() => setSelectedId(loc.id)}
               onDelete={() => setSelectedId(loc.id)}
               canManageNonPrimary
@@ -157,12 +193,26 @@ export default function ProgramLocationsPage() {
         </div>
       )}
 
-      <LocationCreateDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        businessId={businessId}
-        businessSlug={businessSlug}
-      />
+      {dialogState?.mode === "create" && (
+        <LocationDialog
+          open
+          onOpenChange={(open) => !open && setDialogState(null)}
+          businessId={businessId}
+          businessSlug={businessSlug}
+          mode="create"
+        />
+      )}
+      {dialogState?.mode === "edit" && (
+        <LocationDialog
+          open
+          onOpenChange={(open) => !open && setDialogState(null)}
+          businessId={businessId}
+          businessSlug={businessSlug}
+          mode="edit"
+          location={dialogState.location}
+          canManageNonPrimary
+        />
+      )}
 
       <LocationDetailSheet
         open={sheetOpen}
@@ -173,6 +223,12 @@ export default function ProgramLocationsPage() {
         canManageNonPrimary
         canUseProFeatures
         onDeleted={() => setSelectedId(null)}
+        onEdit={
+          selectedLocation
+            ? () =>
+                setDialogState({ mode: "edit", location: selectedLocation })
+            : undefined
+        }
       />
     </div>
   );
