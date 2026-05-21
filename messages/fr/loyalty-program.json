@@ -189,21 +189,27 @@
       "addLocation": "Ajouter un emplacement",
       "searchPlaceholder": "Rechercher par nom, identifiant ou adresse",
       "noMatches": "Aucun emplacement ne correspond à votre recherche.",
-      "upsellBanner": {
-        "title": "Le multi-emplacement est une fonctionnalité Pro",
-        "description": "Vous pouvez continuer à utiliser votre emplacement principal, mais ajouter d'autres boutiques — avec suivi par emplacement, scanners assignés, segmentation et statistiques — nécessite Pro.",
+      "starter": {
+        "headline": "Gérez chaque boutique depuis un seul endroit",
+        "description": "Enregistrez tous vos points de vente et adaptez votre communication par magasin.",
+        "features": {
+          "multiple": "Boutiques illimitées avec leur propre QR",
+          "scanners": "Employés assignés à des magasins précis",
+          "segmentation": "Diffusions ciblées par magasin",
+          "analytics": "Statistiques et profils clients par emplacement"
+        },
         "cta": "Passer à Pro"
       },
       "empty": {
         "title": "Vous n'avez que votre emplacement principal",
-        "description": "Ajoutez d'autres boutiques pour identifier l'origine de chaque tampon, segmenter vos clients et assigner des scanners à des emplacements précis.",
+        "description": "Ajoutez d'autres boutiques pour identifier l'origine de chaque tampon, segmenter vos clients et assigner des employés à des emplacements précis.",
         "cta": "Ajouter un deuxième emplacement",
         "upgradeCta": "Passer à Pro"
       },
       "card": {
         "primary": "Principal",
         "noAddress": "Pas d'adresse — touchez pour ajouter",
-        "membersCount": "{count, plural, =0 {Aucun scanner assigné} one {# scanner} other {# scanners}}",
+        "membersCount": "{count, plural, =0 {Aucun employé assigné} one {# employé} other {# employés}}",
         "edit": "Modifier",
         "viewQr": "Voir le QR",
         "delete": "Supprimer"
@@ -231,7 +237,7 @@
       },
       "create": {
         "title": "Ajouter un emplacement",
-        "description": "Les clients arrivant via l'URL de cet emplacement seront inscrits ici. Vous pourrez assigner des scanners après création.",
+        "description": "Les clients arrivant via l'URL de cet emplacement seront inscrits ici. Vous pourrez assigner des employés après création.",
         "successToast": "Emplacement créé"
       },
       "detail": {
@@ -246,10 +252,10 @@
         "copyUrl": "Copier l'URL",
         "urlCopied": "URL copiée dans le presse-papier",
         "urlCopyFailed": "Impossible de copier l'URL",
-        "members": "Scanners assignés",
-        "noMembers": "Aucun scanner assigné. Les propriétaires et admins peuvent toujours scanner ici.",
-        "membersUpsellTitle": "L'assignation de scanners par emplacement est Pro",
-        "membersUpsellDescription": "Sur Pro, chaque scanner ne voit et ne tamponne que les emplacements qui lui sont assignés.",
+        "members": "Employés assignés",
+        "noMembers": "Aucun employé assigné. Les propriétaires et admins peuvent toujours scanner ici.",
+        "membersUpsellTitle": "L'assignation d'employés par emplacement est Pro",
+        "membersUpsellDescription": "Sur Pro, chaque employé ne voit et ne tamponne que les emplacements qui lui sont assignés.",
         "unassign": "Désassigner",
         "unassignedToast": "{name} désassigné",
         "unassignFailed": "Impossible de désassigner ce membre",
@@ -283,7 +289,7 @@
         "delete": "Supprimer l'emplacement",
         "deleteUpgrade": "Passez à Pro pour supprimer des emplacements.",
         "deleteTitle": "Supprimer {name} ?",
-        "deleteDescription": "Les assignations de scanners seront effacées et cet emplacement n'apparaîtra plus dans les filtres. Les transactions existantes conservent leur étiquette d'emplacement pour l'historique.",
+        "deleteDescription": "Les assignations d'employés seront effacées et cet emplacement n'apparaîtra plus dans les filtres. Les transactions existantes conservent leur étiquette d'emplacement pour l'historique.",
         "cancel": "Conserver",
         "confirmDelete": "Supprimer",
         "deletedToast": "{name} supprimé",
@@ -296,7 +302,7 @@
         "searchPlaceholder": "Rechercher par nom ou email",
         "loading": "Chargement…",
         "noMatches": "Aucun résultat",
-        "noCandidates": "Tous les scanners sont déjà assignés ici.",
+        "noCandidates": "Tous les employés sont déjà assignés ici.",
         "assignedToast": "{name} assigné",
         "assignFailed": "Impossible d'assigner ce membre"
       }

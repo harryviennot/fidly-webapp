@@ -25,7 +25,7 @@ export function UpsellFeatureList({
     <ul
       className={cn(
         'flex flex-col text-left',
-        isSm ? 'gap-1.5' : 'gap-2.5 max-w-sm w-full',
+        isSm ? 'gap-1.5' : 'gap-2.5 max-w-xl w-full',
         className
       )}
     >

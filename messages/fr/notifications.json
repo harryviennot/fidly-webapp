@@ -405,15 +405,14 @@
             "enrolled_at_location_ids": "Inscrits à {n} {n, plural, one {emplacement} other {emplacements}}",
             "active_at_location_ids": "Actifs à {n} {n, plural, one {emplacement} other {emplacements}} ({days}j)"
           },
-          "locations": {
-            "groupLabel": "Emplacements",
-            "groupHelp": "Ciblez les clients selon le magasin où ils se sont inscrits ou ont récemment scanné.",
-            "enrolledTitle": "Inscrits à un emplacement",
-            "enrolledHelp": "N'envoie qu'aux clients inscrits dans l'un des magasins sélectionnés.",
-            "includeDirect": "Inclure aussi les inscriptions directes (sans emplacement précis)",
-            "activeTitle": "Actifs à un emplacement",
-            "activeHelp": "N'envoie qu'aux clients ayant scanné dans l'un des magasins sélectionnés ces N derniers jours.",
-            "daysSuffix": "jours"
+          "proUpsell": {
+            "title": "Débloquez la segmentation d'audience",
+            "description": "Touchez les bons clients avec des filtres plus fins sur Pro.",
+            "features": {
+              "stamps": "Filtrez par nombre de tampons collectés",
+              "activity": "Reconquérez les inactifs et récompensez les fidèles",
+              "location": "Ciblez par lieu d'inscription ou d'activité"
+            }
           }
         },
         "schedule": {

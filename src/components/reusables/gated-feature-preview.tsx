@@ -70,10 +70,12 @@ export function GatedFeaturePreview({
         className
       )}
     >
-      {/* Gated content — visible but blurred and non-interactive. */}
+      {/* Gated content — kept readable so non-Pro users can see the options
+          they're missing. Just enough desaturation + dimming to feel locked
+          without obscuring the labels. */}
       <div
         aria-hidden
-        className="pointer-events-none select-none blur-[1.5px] opacity-50 saturate-50"
+        className="pointer-events-none select-none opacity-70 saturate-[0.5]"
       >
         {children}
       </div>

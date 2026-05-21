@@ -405,15 +405,14 @@
             "enrolled_at_location_ids": "Enrolled at {n} {n, plural, one {location} other {locations}}",
             "active_at_location_ids": "Active at {n} {n, plural, one {location} other {locations}} ({days}d)"
           },
-          "locations": {
-            "groupLabel": "Locations",
-            "groupHelp": "Target customers based on which store they signed up at or recently visited.",
-            "enrolledTitle": "Enrolled at location",
-            "enrolledHelp": "Only sends to customers who signed up at one of the selected stores.",
-            "includeDirect": "Also include direct signups (no specific location)",
-            "activeTitle": "Active at location",
-            "activeHelp": "Only sends to customers who scanned at one of the selected stores in the last N days.",
-            "daysSuffix": "days"
+          "proUpsell": {
+            "title": "Unlock audience segmentation",
+            "description": "Reach the right customers with finer-grained filters on Pro.",
+            "features": {
+              "stamps": "Filter by stamp count thresholds",
+              "activity": "Win back inactive customers and reward redeemers",
+              "location": "Target by enrollment or activity at specific stores"
+            }
           }
         },
         "schedule": {

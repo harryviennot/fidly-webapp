@@ -189,9 +189,15 @@
       "addLocation": "Add location",
       "searchPlaceholder": "Search by name, slug, or address",
       "noMatches": "No locations match your search.",
-      "upsellBanner": {
-        "title": "Multi-location is a Pro feature",
-        "description": "You can keep using your main location, but adding more — and per-location tracking, members, broadcasts, and stats — requires Pro.",
+      "starter": {
+        "headline": "Manage every store from one place",
+        "description": "Register all your locations and tailor messaging by store.",
+        "features": {
+          "multiple": "Unlimited stores with their own QR codes",
+          "scanners": "Assign scanners to specific locations",
+          "segmentation": "Broadcasts targeted by store",
+          "analytics": "Per-location stats and customer breakdowns"
+        },
         "cta": "Upgrade to Pro"
       },
       "empty": {

@@ -1199,8 +1199,13 @@ function AudienceStep({
           <GatedFeaturePreview
             requiredTier="pro"
             upgradeFrom="broadcasts.segmentation"
-            gatedTitle={t('group.stamps') + ' & ' + t('group.activity')}
-            gatedDescription={t('filteredDescription')}
+            gatedTitle={t('proUpsell.title')}
+            gatedDescription={t('proUpsell.description')}
+            gatedFeatures={[
+              t('proUpsell.features.stamps'),
+              t('proUpsell.features.activity'),
+              t('proUpsell.features.location'),
+            ]}
           >
             <div className="space-y-4">
               <StampsGroup
@@ -1296,7 +1301,7 @@ interface EnrollmentGroupProps extends FilterGroupProps {
 }
 
 /** Demo chips shown to non-Pro users so they see what location targeting
- *  looks like before upgrading. Names are intentionally generic. */
+ *  would look like once unlocked. Names are intentionally generic. */
 const DEMO_LOCATIONS: Location[] = [
   { id: '__demo-1', name: 'Westside', slug: 'westside' } as Location,
   { id: '__demo-2', name: 'Eastside', slug: 'eastside' } as Location,
@@ -1371,9 +1376,10 @@ function EnrollmentGroup({
     else if (mode === 'old') updateFilter('enrolled_before_days', v);
   };
 
-  // Hide the location sub-section entirely for Pro businesses with ≤1
-  // location — segmenting by location makes no sense there.
-  const showLocationSub = !canMultiLocation || hasMultipleRealLocations;
+  // Pro with >1 locations: real interactive chips. Anything else: hide
+  // — non-Pro doesn't get a preview here (the consolidated upsell below
+  // covers location targeting), and segmenting one store is meaningless.
+  const showLocationSub = canMultiLocation && hasMultipleRealLocations;
 
   return (
     <div className="rounded-[10px] border border-[var(--border-light)] bg-[var(--paper)] p-3">
@@ -1423,30 +1429,15 @@ function EnrollmentGroup({
         </div>
       )}
 
-      {/* ── Sub-section: Enrollment location (Pro only) ── */}
+      {/* ── Sub-section: Enrollment location (Pro + >1 location only) ── */}
       {showLocationSub && (
         <>
           <div className="my-3 h-px bg-[var(--border-light)]" />
-          {canMultiLocation ? (
-            <EnrolledLocationSub
-              locations={locations}
-              targetFilter={targetFilter}
-              updateFilter={updateFilter}
-            />
-          ) : (
-            <GatedFeaturePreview
-              requiredTier="pro"
-              upgradeFrom="broadcasts.enrollment_location"
-              gatedTitle={t('sub.enrollmentLocationUpsellTitle')}
-              gatedDescription={t('sub.enrollmentLocationUpsellDescription')}
-            >
-              <EnrolledLocationSub
-                locations={DEMO_LOCATIONS}
-                targetFilter={{}}
-                updateFilter={() => undefined}
-              />
-            </GatedFeaturePreview>
-          )}
+          <EnrolledLocationSub
+            locations={locations}
+            targetFilter={targetFilter}
+            updateFilter={updateFilter}
+          />
         </>
       )}
     </div>
@@ -1696,6 +1687,10 @@ function ActivityGroup({
 }: Readonly<ActivityGroupProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.audience');
 
+  // Pro with >1 location: interactive sub. Pro with ≤1 location: skip
+  // (segmenting one store is meaningless). Non-Pro: render demo chips so
+  // the option is visible — the outer GatedFeaturePreview around Stamps +
+  // Activity already provides the locked treatment, so no extra wrapping.
   const showLocationSub = !canMultiLocation || hasMultipleRealLocations;
 
   return (
@@ -1773,7 +1768,7 @@ function ActivityGroup({
         </div>
       </div>
 
-      {/* ── Sub-section: Active at location (Pro only) ── */}
+      {/* ── Sub-section: Active at location ── */}
       {showLocationSub && (
         <>
           <div className="my-3 h-px bg-[var(--border-light)]" />
@@ -1784,18 +1779,11 @@ function ActivityGroup({
               updateFilter={updateFilter}
             />
           ) : (
-            <GatedFeaturePreview
-              requiredTier="pro"
-              upgradeFrom="broadcasts.active_location"
-              gatedTitle={t('sub.activeLocationUpsellTitle')}
-              gatedDescription={t('sub.activeLocationUpsellDescription')}
-            >
-              <ActiveLocationSub
-                locations={DEMO_LOCATIONS}
-                targetFilter={{}}
-                updateFilter={() => undefined}
-              />
-            </GatedFeaturePreview>
+            <ActiveLocationSub
+              locations={DEMO_LOCATIONS}
+              targetFilter={{}}
+              updateFilter={() => undefined}
+            />
           )}
         </>
       )}
