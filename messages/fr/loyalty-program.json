@@ -206,9 +206,9 @@
         "cta": "Passer à Pro"
       },
       "empty": {
-        "title": "Vous n'avez que votre emplacement principal",
-        "description": "Ajoutez d'autres boutiques pour identifier l'origine de chaque tampon, segmenter vos clients et assigner des employés à des emplacements précis.",
-        "cta": "Ajouter un deuxième emplacement",
+        "title": "Créez votre premier emplacement",
+        "description": "Rattachez chaque tampon et inscription à la boutique où ils ont eu lieu. Filtrez, analysez et assignez vos employés par emplacement.",
+        "cta": "Créer mon premier emplacement",
         "upgradeCta": "Passer à Pro"
       },
       "card": {
@@ -251,7 +251,8 @@
       "create": {
         "title": "Ajouter un emplacement",
         "description": "Les clients arrivant via l'URL de cet emplacement seront inscrits ici. Vous pourrez assigner des employés après création.",
-        "successToast": "Emplacement créé"
+        "successToast": "Emplacement créé",
+        "backfillToast": "{name} créé — {transactions} tampons passés et {customers} clients rattachés ici."
       },
       "edit": {
         "title": "Modifier l'emplacement",
@@ -276,8 +277,12 @@
           "subtitle": "Message optionnel affiché au dos de la carte wallet pour les clients inscrits ici."
         },
         "primaryLabel": "Définir comme emplacement principal",
-        "primaryHelp": "L'emplacement principal gère les clients sans correspondance et reste l'expérience par défaut du scanner.",
-        "alreadyPrimary": "C'est déjà votre emplacement principal."
+        "primaryHelp": "L'emplacement principal récupère les clients et l'activité qui ne sont pas rattachés à une boutique précise.",
+        "alreadyPrimary": "C'est déjà votre emplacement principal.",
+        "backfill": {
+          "label": "Rattacher mon activité passée à cet emplacement",
+          "help": "Tous les tampons, inscriptions et récompenses antérieurs seront associés à cet emplacement. Cette action est irréversible."
+        }
       },
       "detail": {
         "primary": "Principal",

@@ -10,6 +10,7 @@ import { useActiveDesign } from "@/hooks/use-designs";
 import { useActivityStats, activityKeys } from "@/hooks/use-activity-stats";
 import { useActivityFeed } from "@/hooks/use-activity-feed";
 import { useLocations } from "@/hooks/use-locations";
+import { useHasLegacyTransactions } from "@/hooks/use-transactions";
 import { getCustomer } from "@/api";
 import type { TransactionResponse, CustomerResponse } from "@/types";
 import { ActivityStatsBar } from "@/components/activity/activity-stats-bar";
@@ -54,7 +55,18 @@ export default function ActivityPage() {
     () => (locationsQuery.data ?? []).filter((l) => !l.deleted_at),
     [locationsQuery.data]
   );
-  const showLocationUi = canMultiLocation && activeLocations.length > 1;
+  // Whether the business has any NULL-location ("legacy") transactions. Drives
+  // the visibility of the "Unassigned" filter option below.
+  const legacyProbe = useHasLegacyTransactions(
+    canMultiLocation && activeLocations.length >= 1 ? businessId : undefined
+  );
+  const hasLegacyTransactions = legacyProbe.data === true;
+  // Show the filter once there's at least one location OR legacy rows. With a
+  // single location and no legacy rows there's only one bucket — keep hidden.
+  const showLocationUi =
+    canMultiLocation &&
+    (activeLocations.length > 1 ||
+      (activeLocations.length === 1 && hasLegacyTransactions));
 
   const feedFilters = useMemo(
     () => ({
@@ -149,6 +161,7 @@ export default function ActivityPage() {
               locations={activeLocations}
               value={locationFilter}
               onChange={setLocationFilter}
+              hasLegacyTransactions={hasLegacyTransactions}
             />
           )}
         </div>

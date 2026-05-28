@@ -43,6 +43,11 @@ type LocationDialogProps =
       businessId: string;
       businessSlug?: string;
       mode: "create";
+      /** True when the business has zero active locations. Hides the
+       *  "Set as primary" toggle (auto-primary) and exposes a backfill
+       *  checkbox on step 3 — the backend only honours `backfill_legacy`
+       *  on the first location. */
+      isFirstLocation?: boolean;
     }
   | {
       open: boolean;
@@ -81,6 +86,7 @@ export function LocationDialog(props: LocationDialogProps) {
   const update = useUpdateLocation(businessId);
 
   const initial = mode === "edit" ? props.location : undefined;
+  const isFirstLocation = mode === "create" && !!props.isFirstLocation;
 
   // ─── Wizard state ────────────────────────────────────────────────────
   const [step, setStep] = useState(1);
@@ -111,6 +117,9 @@ export function LocationDialog(props: LocationDialogProps) {
   const [walletFr, setWalletFr] = useState<string>(
     initial?.wallet_message?.fr ?? ""
   );
+  // First-location only: tag all legacy NULL-location activity to this new
+  // location. Defaults to false because the operation is irreversible.
+  const [backfillLegacy, setBackfillLegacy] = useState(false);
 
   const hasCoords = lat.trim() !== "" || lng.trim() !== "";
   const willBePrimary = mode === "edit" && isPrimary && !initial?.is_primary;
@@ -173,12 +182,28 @@ export function LocationDialog(props: LocationDialogProps) {
     if (mode === "edit" && isPrimary !== !!initial?.is_primary) {
       body.is_primary = isPrimary;
     }
+    // First-create: the only-location IS the primary; we don't show the
+    // toggle so we set it explicitly. Also forward the backfill choice.
+    if (mode === "create" && isFirstLocation) {
+      (body as LocationCreate).is_primary = true;
+      (body as LocationCreate).backfill_legacy = backfillLegacy;
+    }
 
     setSubmitting(true);
     try {
       if (mode === "create") {
-        await create.mutateAsync(body as LocationCreate);
-        toast.success(tCreate("successToast"));
+        const created = await create.mutateAsync(body as LocationCreate);
+        if (created.backfill?.backfilled) {
+          toast.success(
+            tCreate("backfillToast", {
+              transactions: created.backfill.transactions,
+              customers: created.backfill.customers,
+              name: created.name,
+            })
+          );
+        } else {
+          toast.success(tCreate("successToast"));
+        }
       } else {
         await update.mutateAsync({ locationId: props.location.id, body });
         toast.success(tDetail("savedToast"));
@@ -339,6 +364,25 @@ export function LocationDialog(props: LocationDialogProps) {
 
       {step === 3 && (
         <div className="flex flex-col gap-5">
+          {isFirstLocation && (
+            <label className="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-[var(--border)] bg-[var(--muted)]/40">
+              <input
+                type="checkbox"
+                checked={backfillLegacy}
+                onChange={(e) => setBackfillLegacy(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0"
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="wiz-body-sm font-medium text-[var(--foreground)]">
+                  {tWiz("backfill.label")}
+                </span>
+                <span className="wiz-helper text-[#7A7A7A]">
+                  {tWiz("backfill.help")}
+                </span>
+              </span>
+            </label>
+          )}
+
           <p className="wiz-helper text-[#999] -mt-1">
             {tForm("walletMessageHelp")}
           </p>

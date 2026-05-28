@@ -2,6 +2,7 @@ import { API_BASE_URL, getAuthHeaders, throwApiError } from './client';
 import type {
   Location,
   LocationCreate,
+  LocationCreateResponse,
   LocationPatch,
   LocationMatch,
   LocationMember,
@@ -27,7 +28,7 @@ export async function getLocations(businessId: string): Promise<Location[]> {
 export async function createLocation(
   businessId: string,
   body: LocationCreate
-): Promise<Location> {
+): Promise<LocationCreateResponse> {
   const response = await fetch(`${API_BASE_URL}/locations/${businessId}`, {
     method: 'POST',
     headers: await getAuthHeaders(),

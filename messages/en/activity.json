@@ -25,7 +25,7 @@
     },
     "locationFilter": {
       "allLocations": "All locations",
-      "noLocation": "No location",
+      "noLocation": "Unassigned",
       "primary": "primary",
       "unknown": "Unknown location",
       "clear": "Clear location filter"

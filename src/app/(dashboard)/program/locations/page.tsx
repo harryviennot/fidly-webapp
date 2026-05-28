@@ -21,6 +21,7 @@ import { LocationEmptyState } from "@/components/locations/location-empty-state"
 import { LocationDialog } from "@/components/locations/location-dialog";
 import { LocationDetailSheet } from "@/components/locations/location-detail-sheet";
 import { Card } from "@/components/ui/card";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ViewportDebugger } from "@/components/dev/viewport-debugger";
 import type { Location, LocationStatsBatchRow } from "@/types/location";
 
@@ -112,7 +113,7 @@ export default function ProgramLocationsPage() {
 
   return (
     <div className="space-y-6 @container">
-      <ViewportDebugger label="locations grid" />
+      {/* <ViewportDebugger label="locations grid" /> */}
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
@@ -239,6 +240,7 @@ export default function ProgramLocationsPage() {
           businessId={businessId}
           businessSlug={businessSlug}
           mode="create"
+          isFirstLocation={activeLocations.length === 0}
         />
       )}
       {dialogState?.mode === "edit" && (

@@ -44,6 +44,23 @@ export interface LocationCreate {
   radius_meters?: number;
   is_primary?: boolean;
   wallet_message?: LocalizedWalletMessage | null;
+  /** When true AND this is the business's first active location, the backend
+   *  retroactively tags all NULL-location transactions and customers to this
+   *  new location. Silently ignored on 2nd+ creates. */
+  backfill_legacy?: boolean;
+}
+
+/** Summary of a backfill pass returned by POST /locations/{businessId}.
+ *  `backfilled` is true only when `backfill_legacy=true` was honoured (i.e.
+ *  this was the first active location). Otherwise the field may be absent. */
+export interface LocationBackfillSummary {
+  backfilled: boolean;
+  transactions: number;
+  customers: number;
+}
+
+export interface LocationCreateResponse extends Location {
+  backfill?: LocationBackfillSummary;
 }
 
 export interface LocationPatch {

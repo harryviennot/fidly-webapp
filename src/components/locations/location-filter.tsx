@@ -19,12 +19,17 @@ interface LocationFilterProps {
    *  or undefined for "all locations". */
   value: string | "__none__" | undefined;
   onChange: (value: string | "__none__" | undefined) => void;
+  /** When false (default), the "Unassigned" radio item is hidden. Surfaced
+   *  only when the business actually has NULL-location rows — otherwise the
+   *  option would always return zero results. */
+  hasLegacyTransactions?: boolean;
 }
 
 export function LocationFilter({
   locations,
   value,
   onChange,
+  hasLegacyTransactions = false,
 }: LocationFilterProps) {
   const t = useTranslations("activity.locationFilter");
 
@@ -67,10 +72,14 @@ export function LocationFilter({
               </span>
             </DropdownMenuRadioItem>
           ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuRadioItem value="__none__">
-            {t("noLocation")}
-          </DropdownMenuRadioItem>
+          {hasLegacyTransactions && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioItem value="__none__">
+                {t("noLocation")}
+              </DropdownMenuRadioItem>
+            </>
+          )}
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem

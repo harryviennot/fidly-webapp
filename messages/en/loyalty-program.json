@@ -206,9 +206,9 @@
         "cta": "Upgrade to Pro"
       },
       "empty": {
-        "title": "Only your main location so far",
-        "description": "Add more stores to tag each stamp with where it was issued, segment customers, and assign scanners to specific locations.",
-        "cta": "Add your second location",
+        "title": "Add your first location",
+        "description": "Tag every stamp and signup with the store where it happened. Filter, analyze, and assign scanners per location.",
+        "cta": "Create your first location",
         "upgradeCta": "Upgrade to Pro"
       },
       "card": {
@@ -251,7 +251,8 @@
       "create": {
         "title": "Add a location",
         "description": "Customers visiting this location's URL will be enrolled here. You can assign scanners after creating it.",
-        "successToast": "Location created"
+        "successToast": "Location created",
+        "backfillToast": "{name} created — {transactions} past stamps and {customers} customers linked here."
       },
       "edit": {
         "title": "Edit location",
@@ -276,8 +277,12 @@
           "subtitle": "Optional message shown on the back of the wallet pass for customers enrolled here."
         },
         "primaryLabel": "Set as primary location",
-        "primaryHelp": "The primary location handles unmatched customers and shows the default scanner experience.",
-        "alreadyPrimary": "This is already your primary location."
+        "primaryHelp": "The primary location catches customers and activity that aren't linked to a specific store.",
+        "alreadyPrimary": "This is already your primary location.",
+        "backfill": {
+          "label": "Link my past activity to this location",
+          "help": "Every stamp, signup, and redemption from before now will be tagged to this location. This can't be undone."
+        }
       },
       "detail": {
         "primary": "Primary",
