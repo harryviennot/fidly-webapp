@@ -252,6 +252,28 @@
         "title": "Edit location",
         "description": "Update this location's details. Changes apply to the printed QR and the enrollment URL immediately."
       },
+      "wizard": {
+        "stepOf": "Step {current} of {total}",
+        "back": "Back",
+        "next": "Continue",
+        "create": "Create location",
+        "save": "Save changes",
+        "step1": {
+          "title": "Identity",
+          "subtitle": "What is this location called and where will customers enroll?"
+        },
+        "step2": {
+          "title": "Where is it?",
+          "subtitle": "Address and optional geofencing for the scanner app. All fields are optional."
+        },
+        "step3": {
+          "title": "Wallet message",
+          "subtitle": "Optional message shown on the back of the wallet pass for customers enrolled here."
+        },
+        "primaryLabel": "Set as primary location",
+        "primaryHelp": "The primary location handles unmatched customers and shows the default scanner experience.",
+        "alreadyPrimary": "This is already your primary location."
+      },
       "detail": {
         "primary": "Primary",
         "info": "Info",

@@ -4,15 +4,20 @@ import { cn } from "@/lib/utils"
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   hover?: boolean;
+  /** Drops the elevation entirely — no resting shadow, no hover translate.
+   *  Use for surfaces that should read as quiet content blocks rather than
+   *  floating cards (info rows inside a detail panel, dense list cards). */
+  flat?: boolean;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, hover = true, ...props }, ref) => (
+  ({ className, hover = true, flat = false, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        "rounded-xl border border-[var(--card-border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] transition-all duration-300",
-        hover && "hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5",
+        "rounded-xl border border-[var(--card-border)] bg-[var(--card)] text-[var(--foreground)] transition-all duration-300",
+        flat ? "shadow-none" : "shadow-[var(--card-shadow)]",
+        hover && !flat && "hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5",
         className
       )}
       {...props}

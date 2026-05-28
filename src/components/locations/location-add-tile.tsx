@@ -17,7 +17,8 @@ export function LocationAddTile({ onClick }: LocationAddTileProps) {
   const t = useTranslations("loyaltyProgram.locations.card");
   return (
     <Card
-      hover
+      flat
+      hover={false}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -27,7 +28,7 @@ export function LocationAddTile({ onClick }: LocationAddTileProps) {
           onClick();
         }
       }}
-      className="!border-dashed !border-2 !shadow-none bg-transparent hover:bg-[color-mix(in_srgb,var(--accent)_4%,transparent)] cursor-pointer min-h-[180px] flex items-center justify-center"
+      className="!border-dashed !border-2 bg-transparent hover:bg-[color-mix(in_srgb,var(--accent)_4%,transparent)] cursor-pointer min-h-[180px] flex items-center justify-center"
     >
       <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
         <div className="w-10 h-10 rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] flex items-center justify-center">

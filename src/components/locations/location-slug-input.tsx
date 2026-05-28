@@ -7,6 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useSlugCheck } from "@/hooks/use-locations";
 
+export type LocationSlugStatus =
+  | "idle"
+  | "checking"
+  | "available"
+  | "taken";
+
 interface LocationSlugInputProps {
   businessId: string;
   businessSlug?: string;
@@ -18,6 +24,11 @@ interface LocationSlugInputProps {
   /** Initial value used to detect if the user has touched the field — auto-
    *  derivation from name stops once they do. */
   initialValue?: string;
+  /** Fires on every status change so the wizard can gate its Continue button
+   *  on availability. */
+  onStatusChange?: (status: LocationSlugStatus) => void;
+  /** Hide the label — the wizard renders its own via WizardField. */
+  hideLabel?: boolean;
 }
 
 export function LocationSlugInput({
@@ -28,6 +39,8 @@ export function LocationSlugInput({
   excludeLocationId,
   disabled,
   initialValue,
+  onStatusChange,
+  hideLabel,
 }: LocationSlugInputProps) {
   const t = useTranslations("loyaltyProgram.locations.form");
   const [debounced, setDebounced] = useState(value);
@@ -48,12 +61,16 @@ export function LocationSlugInput({
   );
 
   const showStatus = enabled && debounced.length > 0;
-  const status = useMemo(() => {
-    if (!showStatus) return null;
-    if (isFetching) return "checking" as const;
-    if (!data) return null;
-    return data.available ? ("available" as const) : ("taken" as const);
+  const status: LocationSlugStatus = useMemo(() => {
+    if (!showStatus) return "idle";
+    if (isFetching) return "checking";
+    if (!data) return "checking";
+    return data.available ? "available" : "taken";
   }, [showStatus, isFetching, data]);
+
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [status, onStatusChange]);
 
   const normalized = data?.normalized ?? debounced;
   const urlPreview = businessSlug
@@ -62,7 +79,7 @@ export function LocationSlugInput({
 
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor="location-slug">{t("slug")}</Label>
+      {!hideLabel && <Label htmlFor="location-slug">{t("slug")}</Label>}
       <div className="relative">
         <Input
           id="location-slug"
@@ -71,10 +88,10 @@ export function LocationSlugInput({
           disabled={disabled}
           placeholder="westside"
           aria-invalid={status === "taken"}
-          className="pr-8"
+          className="h-11 pr-9"
         />
-        {status && (
-          <span className="absolute right-2 top-1/2 -translate-y-1/2">
+        {status !== "idle" && (
+          <span className="absolute right-3 top-1/2 -translate-y-1/2">
             {status === "checking" && (
               <SpinnerIcon className="h-4 w-4 text-[#A0A0A0] animate-spin" />
             )}
@@ -93,9 +110,9 @@ export function LocationSlugInput({
           </span>
         )}
       </div>
-      <p className="text-xs text-[var(--muted-foreground)]">{urlPreview}</p>
+      <p className="wiz-helper text-[#999]">{urlPreview}</p>
       {status === "taken" && (
-        <p className="text-xs text-red-500">{t("slugTaken")}</p>
+        <p className="wiz-helper text-red-600 font-medium">{t("slugTaken")}</p>
       )}
     </div>
   );

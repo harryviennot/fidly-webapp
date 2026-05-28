@@ -109,9 +109,10 @@ export function LocationCard({
   return (
     <>
       <Card
-        hover
+        flat
+        hover={false}
         onClick={onOpen}
-        className="p-0 cursor-pointer overflow-hidden"
+        className="p-0 cursor-pointer overflow-hidden hover:border-[var(--border-dark)] transition-colors"
       >
         {/* Header */}
         <div className="flex items-start gap-3 p-4 pb-3">

@@ -252,6 +252,28 @@
         "title": "Modifier l'emplacement",
         "description": "Mettez à jour les informations de cet emplacement. Les changements s'appliquent immédiatement au QR imprimé et à l'URL d'inscription."
       },
+      "wizard": {
+        "stepOf": "Étape {current} sur {total}",
+        "back": "Retour",
+        "next": "Continuer",
+        "create": "Créer l'emplacement",
+        "save": "Enregistrer",
+        "step1": {
+          "title": "Identité",
+          "subtitle": "Quel est le nom de cet emplacement et où les clients s'inscriront-ils ?"
+        },
+        "step2": {
+          "title": "Où se trouve-t-il ?",
+          "subtitle": "Adresse et géofencing optionnel pour l'application scanner. Tous les champs sont facultatifs."
+        },
+        "step3": {
+          "title": "Message du wallet",
+          "subtitle": "Message optionnel affiché au dos de la carte wallet pour les clients inscrits ici."
+        },
+        "primaryLabel": "Définir comme emplacement principal",
+        "primaryHelp": "L'emplacement principal gère les clients sans correspondance et reste l'expérience par défaut du scanner.",
+        "alreadyPrimary": "C'est déjà votre emplacement principal."
+      },
       "detail": {
         "primary": "Principal",
         "info": "Informations",

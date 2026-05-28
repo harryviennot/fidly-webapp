@@ -134,6 +134,7 @@ export default function ProgramLocationsPage() {
           {[1, 2].map((i) => (
             <Card
               key={i}
+              flat
               hover={false}
               className="h-[180px] animate-pulse"
             />
@@ -166,7 +167,7 @@ export default function ProgramLocationsPage() {
           <LocationAddTile onClick={() => setDialogState({ mode: "create" })} />
         </div>
       ) : filtered.length === 0 ? (
-        <Card hover={false} className="p-8 text-center">
+        <Card flat hover={false} className="p-8 text-center">
           <p className="text-sm text-[var(--muted-foreground)]">
             {t("noMatches")}
           </p>

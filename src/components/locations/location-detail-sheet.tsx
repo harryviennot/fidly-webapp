@@ -225,7 +225,7 @@ export function LocationDetailSheet({
 
             {/* ── Identity card ── */}
             <Section title={t("info")}>
-              <Card hover={false} className="p-4">
+              <Card flat hover={false} className="p-4">
                 <div className="divide-y divide-[var(--border)]">
                   <IdentityRow
                     label={t("address")}
@@ -296,6 +296,7 @@ export function LocationDetailSheet({
                     {[1, 2, 3].map((i) => (
                       <Card
                         key={i}
+                        flat
                         hover={false}
                         className="p-4 h-[110px] animate-pulse"
                       />
@@ -367,13 +368,13 @@ export function LocationDetailSheet({
                 gatedDescription={t("membersUpsellDescription")}
               >
                 {!members || members.length === 0 ? (
-                  <Card hover={false} className="p-5 text-center">
+                  <Card flat hover={false} className="p-5 text-center">
                     <p className="text-[12.5px] text-[var(--muted-foreground)]">
                       {t("noMembers")}
                     </p>
                   </Card>
                 ) : (
-                  <Card hover={false} className="p-1.5">
+                  <Card flat hover={false} className="p-1.5">
                     <ul className="divide-y divide-[var(--border)]">
                       {members.map((m) => {
                         const label = m.name || m.email;
@@ -435,7 +436,7 @@ export function LocationDetailSheet({
                 gatedDescription={t("qrUpsellDescription")}
               >
                 {qrOpen && (
-                  <Card hover={false} className="p-4">
+                  <Card flat hover={false} className="p-4">
                     {qrQuery.isLoading && (
                       <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
                         {t("qrLoading")}
