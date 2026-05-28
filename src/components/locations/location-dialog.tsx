@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { WizardField } from "@/components/onboarding/form/WizardField";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -80,27 +79,34 @@ function slugify(name: string): string {
 interface ParsedFieldProps {
   label: string;
   value: string;
-  editable: boolean;
   onChange: (v: string) => void;
+  className?: string;
 }
 
-function ParsedField({ label, value, editable, onChange }: ParsedFieldProps) {
+function ParsedField({ label, value, onChange, className }: ParsedFieldProps) {
+  return (
+    <div className={cn("flex flex-col gap-1 min-w-0", className)}>
+      <span className="wiz-helper text-[#7A7A7A] uppercase tracking-wider">
+        {label}
+      </span>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-9"
+      />
+    </div>
+  );
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1 min-w-0">
       <span className="wiz-helper text-[#7A7A7A] uppercase tracking-wider">
         {label}
       </span>
-      {editable ? (
-        <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-9"
-        />
-      ) : (
-        <span className="wiz-body-sm text-[var(--foreground)] truncate">
-          {value || "—"}
-        </span>
-      )}
+      <span className="wiz-body-sm text-[var(--foreground)] whitespace-normal break-words">
+        {value || "—"}
+      </span>
     </div>
   );
 }
@@ -129,16 +135,22 @@ export function LocationDialog(props: LocationDialogProps) {
   const [slugTouched, setSlugTouched] = useState(!!initial?.slug);
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [slugStatus, setSlugStatus] = useState<LocationSlugStatus>("idle");
-  const [address, setAddress] = useState(initial?.address ?? "");
   const [lat, setLat] = useState<string>(
     initial?.latitude != null ? String(initial.latitude) : ""
   );
   const [lng, setLng] = useState<string>(
     initial?.longitude != null ? String(initial.longitude) : ""
   );
-  // Parsed address from Google Places (or null in manual mode / legacy edit)
-  const [addressComponents, setAddressComponents] =
-    useState<AddressComponents | null>(initial?.address_components ?? null);
+  // Parsed address from Google Places (or null in manual mode / legacy edit).
+  // For legacy edits with only the free-form `address` text, seed the street
+  // field with it so the data isn't lost — the user can re-split it manually.
+  const [addressComponents, setAddressComponents] = useState<AddressComponents | null>(
+    () => {
+      if (initial?.address_components) return initial.address_components;
+      if (initial?.address) return { street: initial.address };
+      return null;
+    }
+  );
   // Wizard starts in autocomplete mode unless this is an edit with no parsed
   // components but legacy text — then fall back to manual so the user sees
   // their existing data without having to re-search.
@@ -208,10 +220,16 @@ export function LocationDialog(props: LocationDialogProps) {
 
   const handlePlaceSelected = (parsed: ParsedPlace) => {
     setAddressComponents(parsed.addressComponents);
-    setAddress(parsed.addressComponents.formatted ?? "");
     setLat(String(parsed.latitude));
     setLng(String(parsed.longitude));
     setEditingDetails(false);
+  };
+
+  const synthesizeFormatted = (c: AddressComponents | null): string => {
+    if (!c) return "";
+    if (c.formatted && c.formatted.trim()) return c.formatted.trim();
+    const cityLine = [c.postal_code, c.city].filter(Boolean).join(" ").trim();
+    return [c.street, cityLine, c.country].filter(Boolean).join(", ").trim();
   };
 
   const handleSubmit = async () => {
@@ -222,14 +240,27 @@ export function LocationDialog(props: LocationDialogProps) {
       if (!ok) return;
     }
 
+    // Components are the source of truth in both modes; in manual mode we
+    // also synthesize `address_components.formatted` from the parts so the
+    // backend has a single canonical display string. `address` mirrors it
+    // for back-compat with rows that pre-date the structured column.
+    const componentsForSave: AddressComponents | null =
+      addressComponents && Object.values(addressComponents).some((v) => v)
+        ? {
+            ...addressComponents,
+            formatted:
+              addressComponents.formatted?.trim() ||
+              synthesizeFormatted(addressComponents) ||
+              undefined,
+          }
+        : null;
+    const formattedText = componentsForSave?.formatted ?? "";
+
     const body: LocationCreate | LocationPatch = {
       name: name.trim(),
       slug: slug.trim() || undefined,
-      address: address.trim() || undefined,
-      address_components:
-        addressMode === "autocomplete" && addressComponents
-          ? addressComponents
-          : undefined,
+      address: formattedText || undefined,
+      address_components: componentsForSave ?? undefined,
       latitude: parseFloatOrNull(lat),
       longitude: parseFloatOrNull(lng),
       radius_meters: hasCoords ? parseInt(radius || "100", 10) : undefined,
@@ -366,7 +397,6 @@ export function LocationDialog(props: LocationDialogProps) {
               <WizardField
                 label={tForm("searchAddress")}
                 htmlFor="location-place-search"
-                helper={tForm("searchAddressHelp")}
               >
                 <PlaceAutocomplete
                   inputId="location-place-search"
@@ -375,21 +405,16 @@ export function LocationDialog(props: LocationDialogProps) {
                 />
               </WizardField>
 
-              {addressComponents?.formatted && (
+              {addressComponents && addressComponents.formatted && (
                 <div className="flex flex-col gap-3 p-3 rounded-lg border border-[var(--border)] bg-[var(--muted)]/40">
-                  <div className="flex items-start gap-2">
+                  <div className="flex items-center gap-2">
                     <CheckCircleIcon
-                      className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0"
+                      className="h-4 w-4 text-emerald-600 shrink-0"
                       weight="fill"
                     />
-                    <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                      <span className="wiz-body-sm font-medium text-[var(--foreground)]">
-                        {tForm("positionConfirmed")}
-                      </span>
-                      <span className="wiz-helper text-[#7A7A7A]">
-                        {lat && lng ? `${lat}, ${lng}` : ""}
-                      </span>
-                    </div>
+                    <span className="wiz-body-sm font-medium text-[var(--foreground)] flex-1 min-w-0">
+                      {tForm("positionConfirmed")}
+                    </span>
                     <button
                       type="button"
                       onClick={() => setEditingDetails((v) => !v)}
@@ -400,57 +425,65 @@ export function LocationDialog(props: LocationDialogProps) {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <ParsedField
-                      label={tForm("addressLine")}
-                      value={addressComponents.street ?? ""}
-                      editable={editingDetails}
-                      onChange={(v) =>
-                        setAddressComponents((c) => ({ ...(c ?? {}), street: v }))
-                      }
-                    />
-                    <ParsedField
-                      label={tForm("city")}
-                      value={addressComponents.city ?? ""}
-                      editable={editingDetails}
-                      onChange={(v) =>
-                        setAddressComponents((c) => ({ ...(c ?? {}), city: v }))
-                      }
-                    />
-                    <ParsedField
-                      label={tForm("postalCode")}
-                      value={addressComponents.postal_code ?? ""}
-                      editable={editingDetails}
-                      onChange={(v) =>
-                        setAddressComponents((c) => ({
-                          ...(c ?? {}),
-                          postal_code: v,
-                        }))
-                      }
-                    />
-                    <ParsedField
-                      label={tForm("country")}
-                      value={addressComponents.country ?? ""}
-                      editable={editingDetails}
-                      onChange={(v) =>
-                        setAddressComponents((c) => ({ ...(c ?? {}), country: v }))
-                      }
-                    />
-                  </div>
+                  {editingDetails ? (
+                    <div className="grid grid-cols-3 gap-x-3 gap-y-3">
+                      <ParsedField
+                        label={tForm("addressLine")}
+                        value={addressComponents.street ?? ""}
+                        onChange={(v) =>
+                          setAddressComponents((c) => ({ ...(c ?? {}), street: v }))
+                        }
+                        className="col-span-3"
+                      />
+                      <ParsedField
+                        label={tForm("postalCode")}
+                        value={addressComponents.postal_code ?? ""}
+                        onChange={(v) =>
+                          setAddressComponents((c) => ({
+                            ...(c ?? {}),
+                            postal_code: v,
+                          }))
+                        }
+                      />
+                      <ParsedField
+                        label={tForm("city")}
+                        value={addressComponents.city ?? ""}
+                        onChange={(v) =>
+                          setAddressComponents((c) => ({ ...(c ?? {}), city: v }))
+                        }
+                        className="col-span-2"
+                      />
+                      <ParsedField
+                        label={tForm("country")}
+                        value={addressComponents.country ?? ""}
+                        onChange={(v) =>
+                          setAddressComponents((c) => ({ ...(c ?? {}), country: v }))
+                        }
+                        className="col-span-3"
+                      />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-[3fr_2fr] gap-x-3 gap-y-3">
+                      <ReadOnlyField
+                        label={tForm("addressLine")}
+                        value={addressComponents.street ?? ""}
+                      />
+                      <ReadOnlyField
+                        label={tForm("city")}
+                        value={addressComponents.city ?? ""}
+                      />
+                      <ReadOnlyField
+                        label={tForm("postalCode")}
+                        value={addressComponents.postal_code ?? ""}
+                      />
+                      <ReadOnlyField
+                        label={tForm("country")}
+                        value={addressComponents.country ?? ""}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
-
-              <WizardField label={tForm("radius")} htmlFor="location-radius">
-                <Input
-                  id="location-radius"
-                  type="number"
-                  min={10}
-                  value={radius}
-                  onChange={(e) => setRadius(e.target.value)}
-                  placeholder="100"
-                  className="h-11"
-                />
-              </WizardField>
 
               <button
                 type="button"
@@ -462,19 +495,52 @@ export function LocationDialog(props: LocationDialogProps) {
             </>
           ) : (
             <>
-              <WizardField
-                label={tForm("address")}
-                htmlFor="location-address"
-                helper={tForm("addressHelp")}
-              >
-                <Textarea
-                  id="location-address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="5 West Ave, Paris"
-                  rows={2}
-                />
-              </WizardField>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <WizardField label={tForm("addressLine")} htmlFor="manual-street">
+                  <Input
+                    id="manual-street"
+                    value={addressComponents?.street ?? ""}
+                    onChange={(e) =>
+                      setAddressComponents((c) => ({ ...(c ?? {}), street: e.target.value }))
+                    }
+                    placeholder="5 West Ave"
+                    className="h-11"
+                  />
+                </WizardField>
+                <WizardField label={tForm("city")} htmlFor="manual-city">
+                  <Input
+                    id="manual-city"
+                    value={addressComponents?.city ?? ""}
+                    onChange={(e) =>
+                      setAddressComponents((c) => ({ ...(c ?? {}), city: e.target.value }))
+                    }
+                    placeholder="Paris"
+                    className="h-11"
+                  />
+                </WizardField>
+                <WizardField label={tForm("postalCode")} htmlFor="manual-postal">
+                  <Input
+                    id="manual-postal"
+                    value={addressComponents?.postal_code ?? ""}
+                    onChange={(e) =>
+                      setAddressComponents((c) => ({ ...(c ?? {}), postal_code: e.target.value }))
+                    }
+                    placeholder="75001"
+                    className="h-11"
+                  />
+                </WizardField>
+                <WizardField label={tForm("country")} htmlFor="manual-country">
+                  <Input
+                    id="manual-country"
+                    value={addressComponents?.country ?? ""}
+                    onChange={(e) =>
+                      setAddressComponents((c) => ({ ...(c ?? {}), country: e.target.value }))
+                    }
+                    placeholder="France"
+                    className="h-11"
+                  />
+                </WizardField>
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <WizardField label={tForm("lat")} htmlFor="location-lat">
@@ -503,20 +569,6 @@ export function LocationDialog(props: LocationDialogProps) {
               <p className="wiz-helper text-[#999] -mt-2">
                 {tForm("manualWarning")}
               </p>
-
-              {hasCoords && (
-                <WizardField label={tForm("radius")} htmlFor="location-radius">
-                  <Input
-                    id="location-radius"
-                    type="number"
-                    min={10}
-                    value={radius}
-                    onChange={(e) => setRadius(e.target.value)}
-                    placeholder="100"
-                    className="h-11"
-                  />
-                </WizardField>
-              )}
 
               <button
                 type="button"
@@ -549,6 +601,24 @@ export function LocationDialog(props: LocationDialogProps) {
                 </span>
               </span>
             </label>
+          )}
+
+          {hasCoords && (
+            <WizardField
+              label={tForm("radius")}
+              htmlFor="location-radius"
+              helper={tForm("radiusHelp")}
+            >
+              <Input
+                id="location-radius"
+                type="number"
+                min={10}
+                value={radius}
+                onChange={(e) => setRadius(e.target.value)}
+                placeholder="100"
+                className="h-11"
+              />
+            </WizardField>
           )}
 
           <p className="wiz-helper text-[#999] -mt-1">

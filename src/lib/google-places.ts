@@ -45,7 +45,20 @@ export function parseGooglePlace(place: GooglePlace): ParsedPlace | null {
 
   const streetNumber = pick(components, "street_number");
   const route = pick(components, "route");
-  const street = [streetNumber, route].filter(Boolean).join(" ").trim() || undefined;
+  const joined = [streetNumber, route].filter(Boolean).join(" ").trim();
+
+  // Some establishments (mall units, plazas, rural sites) don't return
+  // street_number/route. Fall back to other component types, then to the
+  // first segment of the formatted address as a last resort.
+  const fallbackFromFormatted = place.formattedAddress?.split(",")[0]?.trim();
+  const street =
+    joined ||
+    pick(components, "premise") ||
+    pick(components, "subpremise") ||
+    pick(components, "establishment") ||
+    pick(components, "point_of_interest") ||
+    fallbackFromFormatted ||
+    undefined;
 
   const city =
     pick(components, "locality") ??
