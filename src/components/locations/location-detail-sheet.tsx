@@ -10,18 +10,17 @@ import {
   CopyIcon,
   DownloadSimpleIcon,
   TrashIcon,
-  WarningIcon,
   XIcon,
-  CreditCardIcon,
+  UsersIcon,
   SealCheckIcon,
   GiftIcon,
+  ProhibitIcon,
 } from "@phosphor-icons/react";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  ResponsiveSidePanel,
+  ResponsiveSidePanelHeader,
+  ResponsiveSidePanelBody,
+} from "@/components/ui/responsive-side-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -38,8 +37,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatCard } from "@/components/redesign";
 import { GatedFeature } from "@/components/reusables/gated-feature";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
 import { LocationMemberPicker } from "./location-member-picker";
 import { getInitials } from "./_initials";
 import { ApiError } from "@/api/client";
@@ -69,20 +66,26 @@ export function LocationDetailSheet({
   onOpenChange,
   businessId,
   businessSlug,
-  location,
+  location: locationProp,
   canManageNonPrimary,
   canUseProFeatures,
   onDeleted,
   onEdit,
 }: LocationDetailSheetProps) {
   const t = useTranslations("loyaltyProgram.locations.detail");
-  const isMobile = useIsMobile();
-  // null = follow viewport default (open on desktop, collapsed on mobile);
-  //  true/false = user has explicitly toggled.
-  const [qrToggled, setQrToggled] = useState<boolean | null>(null);
-  const qrOpen = qrToggled ?? !isMobile;
   const [statsRange, setStatsRange] = useState<LocationStatsRange>("7d");
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  // Cache the selected location locally so the panel keeps rendering through
+  // its close animation. The parent (`page.tsx`) clears `selectedId` on
+  // dismiss, which flips the prop to null synchronously — without this
+  // cache, the panel unmounts before Radix/vaul can play the exit transition.
+  const [location, setLocation] = useState<Location | null>(locationProp);
+  const [prevProp, setPrevProp] = useState(locationProp);
+  if (locationProp !== prevProp) {
+    setPrevProp(locationProp);
+    if (locationProp) setLocation(locationProp);
+  }
 
   const remove = useDeleteLocation(businessId);
   const unassign = useUnassignLocationMember(businessId);
@@ -95,13 +98,13 @@ export function LocationDetailSheet({
   const qrQuery = useLocationQR(
     businessId,
     location?.id,
-    qrOpen && canUseProFeatures
+    open && canUseProFeatures
   );
   const statsQuery = useLocationStats(
     businessId,
     location?.id,
     statsRange,
-    canUseProFeatures
+    open && canUseProFeatures
   );
 
   if (!location) return null;
@@ -160,364 +163,327 @@ export function LocationDetailSheet({
 
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side={isMobile ? "bottom" : "right"}
-          className={cn(
-            "flex flex-col gap-0 p-0",
-            isMobile
-              ? "max-h-[85vh] rounded-t-2xl border-t-0"
-              : "sm:max-w-[520px]"
-          )}
+      <ResponsiveSidePanel
+        open={open}
+        onOpenChange={onOpenChange}
+        ariaTitle={location.name}
+        ariaDescription={location.slug}
+      >
+        <ResponsiveSidePanelHeader
+          rightActions={
+            canEditInfo && onEdit ? (
+              <Button
+                variant="gradient"
+                size="sm"
+                onClick={onEdit}
+                className="rounded-full shrink-0"
+              >
+                <PencilSimpleIcon className="h-3.5 w-3.5" weight="bold" />
+                {t("edit")}
+              </Button>
+            ) : null
+          }
         >
-          <SheetTitle className="sr-only">{location.name}</SheetTitle>
-          <SheetDescription className="sr-only">
-            {location.slug}
-          </SheetDescription>
-
-          {isMobile && (
-            <div className="flex justify-center pt-2.5 pb-1 shrink-0">
-              <div className="h-1 w-10 rounded-full bg-[var(--border-dark)] opacity-60" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-lg bg-[var(--muted)] flex items-center justify-center shrink-0">
+              <MapPinIcon
+                className="h-5 w-5 text-[var(--muted-foreground)]"
+                weight="fill"
+              />
             </div>
-          )}
-
-          <div className="flex-1 overflow-y-auto">
-            {/* ── Sticky compact header ── */}
-            <div className="sticky top-0 z-10 bg-[var(--background)] border-b border-[var(--border)]">
-              <div className="flex items-center gap-3 px-5 py-4 pr-14">
-                <div className="w-10 h-10 rounded-lg bg-[var(--muted)] flex items-center justify-center shrink-0">
-                  <MapPinIcon
-                    className="h-5 w-5 text-[var(--muted-foreground)]"
-                    weight="fill"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <h2 className="text-[16px] font-bold text-[#1A1A1A] truncate">
-                      {location.name}
-                    </h2>
-                    {isPrimary && (
-                      <Badge
-                        variant="secondary"
-                        className="text-[9px] px-1.5 py-0 shrink-0"
-                      >
-                        {t("primary")}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-[11px] font-mono text-[var(--muted-foreground)] truncate">
-                    {location.slug}
-                  </p>
-                </div>
-                {canEditInfo && onEdit && (
-                  <Button
-                    variant="gradient"
-                    size="sm"
-                    onClick={onEdit}
-                    className="shrink-0"
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <h2 className="text-[16px] font-bold text-[#1A1A1A] truncate">
+                  {location.name}
+                </h2>
+                {isPrimary && (
+                  <Badge
+                    variant="secondary"
+                    className="text-[9px] px-1.5 py-0 shrink-0"
                   >
-                    <PencilSimpleIcon className="h-3.5 w-3.5" weight="bold" />
-                    {t("edit")}
-                  </Button>
+                    {t("primary")}
+                  </Badge>
                 )}
               </div>
+              <p className="text-[11px] font-mono text-[var(--muted-foreground)] truncate">
+                {location.slug}
+              </p>
             </div>
+          </div>
+        </ResponsiveSidePanelHeader>
 
-            {/* ── Identity card ── */}
-            <Section title={t("info")}>
-              <Card flat hover={false} className="p-4">
-                <div className="divide-y divide-[var(--border)]">
-                  <IdentityRow
-                    label={t("address")}
-                    value={location.address?.trim() || t("noAddress")}
-                    muted={!location.address?.trim()}
-                  />
-                  <IdentityRow
-                    label={t("coordinates")}
-                    value={
-                      location.latitude != null && location.longitude != null
-                        ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`
-                        : t("noCoordinates")
-                    }
-                    muted={location.latitude == null}
-                  />
-                </div>
-                <div className="mt-3 pt-3 border-t border-[var(--border)]">
-                  <p className="text-[11px] text-[var(--muted-foreground)] mb-1.5">
-                    {t("enrollmentUrl")}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleCopyUrl}
-                    className="group flex items-center justify-between gap-2 w-full px-3 py-2 rounded-lg bg-[var(--muted)] hover:bg-[var(--border)] transition-colors"
-                  >
-                    <span className="font-mono text-[12px] text-[#1A1A1A] truncate text-left">
-                      {enrollmentUrl}
-                    </span>
-                    <CopyIcon
-                      className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)] group-hover:text-[#1A1A1A]"
-                      weight="bold"
-                    />
-                  </button>
-                </div>
-              </Card>
-            </Section>
-
-            {/* ── Stats section ── */}
-            <Section title={t("stats")}>
-              <GatedFeature
-                requiredTier="pro"
-                upgradeFrom="locations.stats"
-                gatedTitle={t("statsUpsellTitle")}
-                gatedDescription={t("statsUpsellDescription")}
-              >
-                {/* Segmented range picker */}
-                <div className="inline-flex items-center gap-0.5 p-0.5 rounded-full bg-[var(--muted)] mb-4">
-                  {(["7d", "30d", "90d", "all"] as LocationStatsRange[]).map(
-                    (r) => (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => setStatsRange(r)}
-                        className={
-                          statsRange === r
-                            ? "text-[11px] font-semibold px-3 py-1 rounded-full bg-[var(--card)] text-[#1A1A1A] shadow-sm transition-all"
-                            : "text-[11px] font-semibold px-3 py-1 rounded-full text-[var(--muted-foreground)] hover:text-[#1A1A1A] transition-colors"
-                        }
-                      >
-                        {t(`range.${r}`)}
-                      </button>
-                    )
-                  )}
-                </div>
-
-                {statsQuery.isLoading ? (
-                  <div className="grid grid-cols-3 gap-2.5">
-                    {[1, 2, 3].map((i) => (
-                      <Card
-                        key={i}
-                        flat
-                        hover={false}
-                        className="p-4 h-[110px] animate-pulse"
-                      />
-                    ))}
-                  </div>
-                ) : statsQuery.data ? (
-                  <>
-                    {/* Hero row: 3 prominent StatCards */}
-                    <div className="grid grid-cols-3 gap-2.5">
-                      <StatCard
-                        title={t("totalTransactions")}
-                        value={statsQuery.data.total_transactions}
-                        icon={<CreditCardIcon className="h-4 w-4" weight="bold" />}
-                        tone="accent"
-                        delay={0}
-                      />
-                      <StatCard
-                        title={t("stampsAdded")}
-                        value={statsQuery.data.stamps_added}
-                        icon={<SealCheckIcon className="h-4 w-4" weight="bold" />}
-                        tone="info"
-                        delay={60}
-                      />
-                      <StatCard
-                        title={t("rewardsRedeemed")}
-                        value={statsQuery.data.rewards_redeemed}
-                        icon={<GiftIcon className="h-4 w-4" weight="bold" />}
-                        tone="warning"
-                        delay={120}
-                      />
-                    </div>
-                    {/* Secondary row: 3 compact tiles */}
-                    <div className="grid grid-cols-3 gap-2.5 mt-2.5">
-                      <SecondaryTile
-                        label={t("stampsVoided")}
-                        value={statsQuery.data.stamps_voided}
-                      />
-                      <SecondaryTile
-                        label={t("uniqueCustomers")}
-                        value={statsQuery.data.unique_customers}
-                      />
-                      <SecondaryTile
-                        label={t("enrolledHere")}
-                        value={statsQuery.data.enrolled_here_total}
-                        hint={t("allTime")}
-                      />
-                    </div>
-                  </>
-                ) : null}
-              </GatedFeature>
-            </Section>
-
-            {/* ── Members section ── */}
-            <Section
-              title={t("members")}
-              action={
-                canManageNonPrimary || isPrimary ? (
-                  <LocationMemberPicker
-                    businessId={businessId}
-                    locationId={location.id}
-                  />
-                ) : null
-              }
-            >
-              <GatedFeature
-                requiredTier="pro"
-                upgradeFrom="locations.members"
-                gatedTitle={t("membersUpsellTitle")}
-                gatedDescription={t("membersUpsellDescription")}
-              >
-                {!members || members.length === 0 ? (
-                  <Card flat hover={false} className="p-5 text-center">
-                    <p className="text-[12.5px] text-[var(--muted-foreground)]">
-                      {t("noMembers")}
-                    </p>
-                  </Card>
-                ) : (
-                  <Card flat hover={false} className="p-1.5">
-                    <ul className="divide-y divide-[var(--border)]">
-                      {members.map((m) => {
-                        const label = m.name || m.email;
-                        return (
-                          <li
-                            key={m.membership_id}
-                            className="flex items-center gap-3 px-2.5 py-2.5"
-                          >
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={m.avatar_url ?? undefined} />
-                              <AvatarFallback className="text-[10px]">
-                                {getInitials(m.name, m.email)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[13px] font-medium text-[#1A1A1A] truncate">
-                                {label}
-                              </p>
-                              <p className="text-[11px] text-[var(--muted-foreground)] truncate">
-                                {m.email}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleUnassign(m.membership_id, label)
-                              }
-                              className="text-[var(--muted-foreground)] opacity-40 hover:opacity-100 hover:text-red-500 transition-colors p-1.5 rounded-md"
-                              aria-label={t("unassign")}
-                            >
-                              <XIcon className="h-3.5 w-3.5" weight="bold" />
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </Card>
-                )}
-              </GatedFeature>
-            </Section>
-
-            {/* ── QR section ── */}
-            <Section
-              title={t("qr")}
-              action={
+        <ResponsiveSidePanelBody className="pb-[max(4rem,env(safe-area-inset-bottom)+2rem)] md:pb-10">
+          {/* ── Identity card ── */}
+          <Section title={t("info")}>
+            <Card flat hover={false} className="p-4">
+              <div className="divide-y divide-[var(--border)]">
+                <IdentityRow
+                  label={t("address")}
+                  value={location.address?.trim() || t("noAddress")}
+                  muted={!location.address?.trim()}
+                />
+                <IdentityRow
+                  label={t("coordinates")}
+                  value={
+                    location.latitude != null && location.longitude != null
+                      ? `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`
+                      : t("noCoordinates")
+                  }
+                  muted={location.latitude == null}
+                />
+              </div>
+              <div className="mt-3 pt-3 border-t border-[var(--border)]">
+                <p className="text-[11px] text-[var(--muted-foreground)] mb-1.5">
+                  {t("enrollmentUrl")}
+                </p>
                 <button
                   type="button"
-                  onClick={() => setQrToggled(!qrOpen)}
-                  className="text-[var(--muted-foreground)] hover:text-[#1A1A1A] text-[11px] font-semibold"
+                  onClick={handleCopyUrl}
+                  className="group flex items-center justify-between gap-2 w-full px-3 py-2 rounded-lg bg-[var(--muted)] hover:bg-[var(--border)] transition-colors"
                 >
-                  {qrOpen ? t("hide") : t("show")}
+                  <span className="font-mono text-[12px] text-[#1A1A1A] truncate text-left">
+                    {enrollmentUrl}
+                  </span>
+                  <CopyIcon
+                    className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)] group-hover:text-[#1A1A1A]"
+                    weight="bold"
+                  />
                 </button>
-              }
-            >
-              <GatedFeature
-                requiredTier="pro"
-                upgradeFrom="locations.qr"
-                gatedTitle={t("qrUpsellTitle")}
-                gatedDescription={t("qrUpsellDescription")}
-              >
-                {qrOpen && (
-                  <Card flat hover={false} className="p-4">
-                    {qrQuery.isLoading && (
-                      <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
-                        {t("qrLoading")}
-                      </p>
-                    )}
-                    {qrQuery.data?.qr_png_base64 && (
-                      <div className="flex flex-col items-center gap-3">
-                        <Image
-                          src={`data:image/png;base64,${qrQuery.data.qr_png_base64}`}
-                          alt={`QR for ${location.name}`}
-                          width={180}
-                          height={180}
-                          className="rounded-md bg-white p-2 border border-[var(--border)]"
-                          unoptimized
-                        />
-                        <div className="flex gap-2 w-full">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleCopyUrl}
-                            className="rounded-full flex-1"
-                          >
-                            <CopyIcon className="h-3.5 w-3.5" weight="bold" />
-                            {t("copyUrl")}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleDownloadQr}
-                            className="rounded-full flex-1"
-                          >
-                            <DownloadSimpleIcon
-                              className="h-3.5 w-3.5"
-                              weight="bold"
-                            />
-                            {t("downloadQr")}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {qrQuery.data && !qrQuery.data.qr_png_base64 && (
-                      <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
-                        {t("qrUnavailable")}
-                      </p>
-                    )}
-                    <div className="flex items-start gap-2 mt-3 p-2.5 bg-amber-50 border border-amber-100 rounded-md">
-                      <WarningIcon
-                        className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0"
-                        weight="fill"
-                      />
-                      <p className="text-[11px] text-amber-700 leading-snug">
-                        {t("slugWarning")}
-                      </p>
-                    </div>
-                  </Card>
-                )}
-              </GatedFeature>
-            </Section>
+              </div>
+            </Card>
+          </Section>
 
-            {/* ── Danger zone ── */}
-            {!isPrimary && (
-              <Section title={t("dangerZone")} variant="danger">
-                <Button
-                  variant="destructive"
-                  onClick={() => setDeleteOpen(true)}
-                  disabled={!canManageNonPrimary}
-                  className="w-full rounded-full"
-                >
-                  <TrashIcon className="h-4 w-4" weight="bold" />
-                  {t("delete")}
-                </Button>
-                {!canManageNonPrimary && (
-                  <p className="text-[11px] text-[var(--muted-foreground)] mt-2 text-center">
-                    {t("deleteUpgrade")}
+          {/* ── Stats section ── */}
+          <Section title={t("stats")}>
+            <GatedFeature
+              requiredTier="pro"
+              upgradeFrom="locations.stats"
+              gatedTitle={t("statsUpsellTitle")}
+              gatedDescription={t("statsUpsellDescription")}
+            >
+              {/* Segmented range picker (full width) */}
+              <div className="flex w-full items-center gap-0.5 p-0.5 rounded-full bg-[var(--muted)] mb-4">
+                {(["7d", "30d", "90d", "all"] as LocationStatsRange[]).map(
+                  (r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setStatsRange(r)}
+                      className={
+                        statsRange === r
+                          ? "flex-1 text-[11px] font-semibold px-3 py-1 rounded-full bg-[var(--card)] text-[#1A1A1A] shadow-sm transition-all"
+                          : "flex-1 text-[11px] font-semibold px-3 py-1 rounded-full text-[var(--muted-foreground)] hover:text-[#1A1A1A] transition-colors"
+                      }
+                    >
+                      {t(`range.${r}`)}
+                    </button>
+                  )
+                )}
+              </div>
+
+              {statsQuery.isLoading ? (
+                <div className="grid grid-cols-2 gap-2.5">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Card
+                      key={i}
+                      flat
+                      hover={false}
+                      className="p-4 h-[110px] animate-pulse"
+                    />
+                  ))}
+                </div>
+              ) : statsQuery.data ? (
+                <>
+                  {/* 4 hero StatCards — 2×2 grid on both mobile and desktop */}
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <StatCard
+                      title={t("uniqueCustomers")}
+                      value={statsQuery.data.unique_customers}
+                      icon={<UsersIcon className="h-4 w-4" weight="bold" />}
+                      tone="accent"
+                      delay={0}
+                    />
+                    <StatCard
+                      title={t("stampsAdded")}
+                      value={statsQuery.data.stamps_added}
+                      icon={<SealCheckIcon className="h-4 w-4" weight="bold" />}
+                      tone="info"
+                      delay={60}
+                    />
+                    <StatCard
+                      title={t("rewardsRedeemed")}
+                      value={statsQuery.data.rewards_redeemed}
+                      icon={<GiftIcon className="h-4 w-4" weight="bold" />}
+                      tone="warning"
+                      delay={120}
+                    />
+                    <StatCard
+                      title={t("stampsVoided")}
+                      value={statsQuery.data.stamps_voided}
+                      icon={<ProhibitIcon className="h-4 w-4" weight="bold" />}
+                      tone="neutral"
+                      delay={180}
+                    />
+                  </div>
+                  {/* Footer tile — all-time enrolment count */}
+                  <div className="mt-2.5">
+                    <SecondaryTile
+                      label={t("enrolledHere")}
+                      value={statsQuery.data.enrolled_here_total}
+                      hint={t("allTime")}
+                    />
+                  </div>
+                </>
+              ) : null}
+            </GatedFeature>
+          </Section>
+
+          {/* ── Members section ── */}
+          <Section
+            title={t("members")}
+            action={
+              canManageNonPrimary || isPrimary ? (
+                <LocationMemberPicker
+                  businessId={businessId}
+                  locationId={location.id}
+                />
+              ) : null
+            }
+          >
+            <GatedFeature
+              requiredTier="pro"
+              upgradeFrom="locations.members"
+              gatedTitle={t("membersUpsellTitle")}
+              gatedDescription={t("membersUpsellDescription")}
+            >
+              {!members || members.length === 0 ? (
+                <Card flat hover={false} className="p-5 text-center">
+                  <p className="text-[12.5px] text-[var(--muted-foreground)]">
+                    {t("noMembers")}
+                  </p>
+                </Card>
+              ) : (
+                <Card flat hover={false} className="p-1.5">
+                  <ul className="divide-y divide-[var(--border)]">
+                    {members.map((m) => {
+                      const label = m.name || m.email;
+                      return (
+                        <li
+                          key={m.membership_id}
+                          className="flex items-center gap-3 px-2.5 py-2.5"
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={m.avatar_url ?? undefined} />
+                            <AvatarFallback className="text-[10px]">
+                              {getInitials(m.name, m.email)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-medium text-[#1A1A1A] truncate">
+                              {label}
+                            </p>
+                            <p className="text-[11px] text-[var(--muted-foreground)] truncate">
+                              {m.email}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUnassign(m.membership_id, label)
+                            }
+                            className="text-[var(--muted-foreground)] opacity-40 hover:opacity-100 hover:text-red-500 transition-colors p-1.5 rounded-md"
+                            aria-label={t("unassign")}
+                          >
+                            <XIcon className="h-3.5 w-3.5" weight="bold" />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </Card>
+              )}
+            </GatedFeature>
+          </Section>
+
+          {/* ── QR section ── */}
+          <Section title={t("qr")}>
+            <GatedFeature
+              requiredTier="pro"
+              upgradeFrom="locations.qr"
+              gatedTitle={t("qrUpsellTitle")}
+              gatedDescription={t("qrUpsellDescription")}
+            >
+              <Card flat hover={false} className="p-4">
+                {qrQuery.isLoading && (
+                  <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
+                    {t("qrLoading")}
                   </p>
                 )}
-              </Section>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+                {qrQuery.data?.qr_png_base64 && (
+                  <div className="flex flex-col items-center gap-3">
+                    <Image
+                      src={`data:image/png;base64,${qrQuery.data.qr_png_base64}`}
+                      alt={`QR for ${location.name}`}
+                      width={180}
+                      height={180}
+                      className="rounded-md bg-white p-2 border border-[var(--border)]"
+                      unoptimized
+                    />
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopyUrl}
+                        className="rounded-full flex-1"
+                      >
+                        <CopyIcon className="h-3.5 w-3.5" weight="bold" />
+                        {t("copyUrl")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownloadQr}
+                        className="rounded-full flex-1"
+                      >
+                        <DownloadSimpleIcon
+                          className="h-3.5 w-3.5"
+                          weight="bold"
+                        />
+                        {t("downloadQr")}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {qrQuery.data && !qrQuery.data.qr_png_base64 && (
+                  <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
+                    {t("qrUnavailable")}
+                  </p>
+                )}
+              </Card>
+            </GatedFeature>
+          </Section>
+
+          {/* ── Danger zone ── */}
+          {!isPrimary && (
+            <Section title={t("dangerZone")} variant="danger">
+              <Button
+                variant="destructive"
+                onClick={() => setDeleteOpen(true)}
+                disabled={!canManageNonPrimary}
+                className="w-full rounded-full"
+              >
+                <TrashIcon className="h-4 w-4" weight="bold" />
+                {t("delete")}
+              </Button>
+              {!canManageNonPrimary && (
+                <p className="text-[11px] text-[var(--muted-foreground)] mt-2 text-center">
+                  {t("deleteUpgrade")}
+                </p>
+              )}
+            </Section>
+          )}
+        </ResponsiveSidePanelBody>
+      </ResponsiveSidePanel>
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
@@ -566,12 +532,12 @@ function Section({
     <div
       className={
         variant === "danger"
-          ? "px-5 py-5 border-t border-red-100 bg-red-50/30"
-          : "px-5 py-5"
+          ? "px-4 py-4 md:px-5 md:py-5 border-t border-red-100 bg-red-50/30"
+          : "px-4 py-4 md:px-5 md:py-5"
       }
     >
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider">
+        <p className="text-[13px] md:text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider">
           {title}
         </p>
         {action}
