@@ -189,6 +189,11 @@
       "addLocation": "Add location",
       "searchPlaceholder": "Search by name, slug, or address",
       "noMatches": "No locations match your search.",
+      "error": {
+        "title": "Couldn't load your locations",
+        "description": "Something went wrong fetching this list. Check your connection and try again.",
+        "retry": "Try again"
+      },
       "starter": {
         "headline": "Manage every store from one place",
         "description": "Register all your locations and tailor messaging by store.",

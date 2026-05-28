@@ -112,7 +112,7 @@ export function LocationCard({
         flat
         hover={false}
         onClick={onOpen}
-        className="p-0 cursor-pointer overflow-hidden hover:border-[var(--border-dark)] transition-colors"
+        className="p-0 cursor-pointer overflow-hidden hover:border-[var(--border-dark)] transition-colors flex flex-col"
       >
         {/* Header */}
         <div className="flex items-start gap-3 p-4 pb-3">
@@ -193,8 +193,9 @@ export function LocationCard({
           </div>
         </div>
 
-        {/* Scanners row */}
-        <div className="flex items-center gap-2 px-4 pb-3">
+        {/* Scanners row — min-h matches the avatar-row height so empty
+            state doesn't shrink the card relative to populated siblings. */}
+        <div className="flex items-center gap-2 px-4 pb-3 min-h-[36px]">
           {memberCount > 0 ? (
             <>
               <div className="flex -space-x-1.5">
@@ -227,8 +228,9 @@ export function LocationCard({
           )}
         </div>
 
-        {/* Stats footer */}
-        <div className="border-t border-[var(--border)] bg-[var(--muted)]/30 px-2 py-2">
+        {/* Stats footer — mt-auto pins it to the bottom when the grid
+            stretches the card to match siblings of different heights. */}
+        <div className="border-t border-[var(--border)] bg-[var(--muted)]/30 px-2 py-2 mt-auto">
           <LocationStatsRow stats={stats} loading={statsLoading} />
         </div>
       </Card>

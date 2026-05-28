@@ -189,6 +189,11 @@
       "addLocation": "Ajouter un emplacement",
       "searchPlaceholder": "Rechercher par nom, identifiant ou adresse",
       "noMatches": "Aucun emplacement ne correspond à votre recherche.",
+      "error": {
+        "title": "Impossible de charger vos emplacements",
+        "description": "Une erreur est survenue lors du chargement. Vérifiez votre connexion et réessayez.",
+        "retry": "Réessayer"
+      },
       "starter": {
         "headline": "Gérez chaque boutique depuis un seul endroit",
         "description": "Enregistrez tous vos points de vente et adaptez votre communication par magasin.",

@@ -2,7 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { PlusIcon, MapPinIcon } from "@phosphor-icons/react";
+import {
+  PlusIcon,
+  MapPinIcon,
+  WarningCircleIcon,
+  ArrowClockwiseIcon,
+} from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/redesign";
 import { SearchInput } from "@/components/reusables/search-input";
 import { UpsellHero } from "@/components/reusables/upsell";
@@ -15,6 +21,7 @@ import { LocationEmptyState } from "@/components/locations/location-empty-state"
 import { LocationDialog } from "@/components/locations/location-dialog";
 import { LocationDetailSheet } from "@/components/locations/location-detail-sheet";
 import { Card } from "@/components/ui/card";
+import { ViewportDebugger } from "@/components/dev/viewport-debugger";
 import type { Location, LocationStatsBatchRow } from "@/types/location";
 
 type DialogState =
@@ -33,9 +40,12 @@ export default function ProgramLocationsPage() {
 
   // Hooks must be called unconditionally — fetch only for Pro businesses
   // by passing undefined for non-Pro so the query stays disabled.
-  const { data: locations, isLoading } = useLocations(
-    canMultiLocation ? businessId : undefined
-  );
+  const {
+    data: locations,
+    isLoading,
+    isError,
+    refetch,
+  } = useLocations(canMultiLocation ? businessId : undefined);
   // One batch call for the whole grid — see useLocationStatsBatch.
   const { data: statsBatch, isLoading: statsLoading } = useLocationStatsBatch(
     canMultiLocation ? businessId : undefined,
@@ -101,7 +111,8 @@ export default function ProgramLocationsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 @container">
+      <ViewportDebugger label="locations grid" />
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
@@ -128,10 +139,37 @@ export default function ProgramLocationsPage() {
         </div>
       )}
 
-      {/* Content */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {[1, 2].map((i) => (
+      {/* Content — grid columns scale with available content width via
+          container queries so the layout adapts when the sidebar opens or
+          collapses, not only when the viewport changes. */}
+      {isError ? (
+        <Card flat hover={false} className="p-8 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+              <WarningCircleIcon className="h-6 w-6" weight="fill" />
+            </div>
+            <div className="flex flex-col gap-1 max-w-sm">
+              <p className="text-sm font-semibold text-[#1A1A1A]">
+                {t("error.title")}
+              </p>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                {t("error.description")}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="rounded-full"
+            >
+              <ArrowClockwiseIcon className="h-3.5 w-3.5" weight="bold" />
+              {t("error.retry")}
+            </Button>
+          </div>
+        </Card>
+      ) : isLoading ? (
+        <div className="grid grid-cols-1 @3xl:grid-cols-2 @6xl:grid-cols-3 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card
               key={i}
               flat
@@ -146,7 +184,7 @@ export default function ProgramLocationsPage() {
           onAdd={() => setDialogState({ mode: "create" })}
         />
       ) : activeLocations.length === 1 && !search ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 @3xl:grid-cols-2 @6xl:grid-cols-3 gap-3">
           <LocationCard
             businessId={businessId}
             location={activeLocations[0]}
@@ -173,7 +211,7 @@ export default function ProgramLocationsPage() {
           </p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 @3xl:grid-cols-2 @6xl:grid-cols-3 gap-3">
           {filtered.map((loc) => (
             <LocationCard
               key={loc.id}
