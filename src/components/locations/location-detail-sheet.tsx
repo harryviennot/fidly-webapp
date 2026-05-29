@@ -9,6 +9,7 @@ import {
   PencilSimpleIcon,
   CopyIcon,
   DownloadSimpleIcon,
+  FilePdfIcon,
   TrashIcon,
   XIcon,
   UsersIcon,
@@ -40,6 +41,7 @@ import { GatedFeature } from "@/components/reusables/gated-feature";
 import { LocationMemberPicker } from "./location-member-picker";
 import { getInitials } from "./_initials";
 import { ApiError } from "@/api/client";
+import { downloadQrPng, downloadQrPdf, toQrDataUrl } from "@/lib/qr-download";
 import {
   useLocationMembers,
   useLocationQR,
@@ -111,10 +113,13 @@ export function LocationDetailSheet({
 
   const isPrimary = location.is_primary;
   const canEditInfo = isPrimary || canManageNonPrimary;
+  // Public enrollment lives on the showcase site (stampeo.app), NOT the dashboard
+  // (app.stampeo.app). Match the backend enrollment_url and the plain signup link.
+  const showcaseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
   const enrollmentUrl =
     qrQuery.data?.enrollment_url ??
     (businessSlug
-      ? `https://app.stampeo.app/${businessSlug}/l/${location.slug}`
+      ? `${showcaseUrl.replace(/\/$/, "")}/${businessSlug}/l/${location.slug}`
       : "");
 
   const handleCopyUrl = async () => {
@@ -126,12 +131,23 @@ export function LocationDetailSheet({
     }
   };
 
-  const handleDownloadQr = () => {
-    if (!qrQuery.data?.qr_png_base64) return;
-    const link = document.createElement("a");
-    link.href = `data:image/png;base64,${qrQuery.data.qr_png_base64}`;
-    link.download = `qr-${location.slug}.png`;
-    link.click();
+  const qrDataUrl = qrQuery.data?.qr_png_base64
+    ? toQrDataUrl(qrQuery.data.qr_png_base64)
+    : null;
+
+  const handleDownloadPng = () => {
+    if (!qrDataUrl) return;
+    downloadQrPng(qrDataUrl, location.slug);
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!qrDataUrl) return;
+    try {
+      await downloadQrPdf(qrDataUrl, location.name, enrollmentUrl);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      toast.error(t("downloadPdfError"));
+    }
   };
 
   const handleDelete = async () => {
@@ -433,23 +449,23 @@ export function LocationDetailSheet({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleCopyUrl}
-                        className="rounded-full flex-1"
-                      >
-                        <CopyIcon className="h-3.5 w-3.5" weight="bold" />
-                        {t("copyUrl")}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleDownloadQr}
+                        onClick={handleDownloadPng}
                         className="rounded-full flex-1"
                       >
                         <DownloadSimpleIcon
                           className="h-3.5 w-3.5"
                           weight="bold"
                         />
-                        {t("downloadQr")}
+                        {t("downloadPng")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownloadPdf}
+                        className="rounded-full flex-1"
+                      >
+                        <FilePdfIcon className="h-3.5 w-3.5" weight="bold" />
+                        {t("downloadPdf")}
                       </Button>
                     </div>
                   </div>

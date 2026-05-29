@@ -73,9 +73,14 @@ export function LocationSlugInput({
   }, [status, onStatusChange]);
 
   const normalized = data?.normalized ?? debounced;
+  // Show the showcase host (stampeo.app), where public enrollment lives — not the
+  // dashboard (app.stampeo.app). Strip the scheme for a compact preview.
+  const showcaseHost = (
+    process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app"
+  ).replace(/^https?:\/\//, "").replace(/\/$/, "");
   const urlPreview = businessSlug
-    ? `app.stampeo.app/${businessSlug}/l/${normalized}`
-    : `app.stampeo.app/<business>/l/${normalized}`;
+    ? `${showcaseHost}/${businessSlug}/l/${normalized}`
+    : `${showcaseHost}/<business>/l/${normalized}`;
 
   return (
     <div className="flex flex-col gap-2">

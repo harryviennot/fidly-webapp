@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { SearchInput } from "@/components/reusables/search-input";
@@ -36,8 +37,25 @@ export default function ActivityPage() {
     string | "__none__" | undefined
   >(undefined);
   const [search, setSearch] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerResponse | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  // Keyed by id so stale data from a previous selection can't flash through
+  // while the new customer is loading.
+  const [fetchedCustomer, setFetchedCustomer] = useState<{ id: string; customer: CustomerResponse } | null>(null);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const selectedCustomerId = searchParams.get("customer");
+
+  const setSelectedCustomerId = useCallback(
+    (id: string | null) => {
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      if (id) params.set("customer", id);
+      else params.delete("customer");
+      const qs = params.toString();
+      router.push(`${pathname}${qs ? `?${qs}` : ""}`);
+    },
+    [searchParams, router, pathname]
+  );
 
   const { data: design } = useActiveDesign(businessId);
   const totalStamps = design?.total_stamps ?? 0;
@@ -107,20 +125,35 @@ export default function ActivityPage() {
   const hasActiveFilters =
     typeFilter !== "all" || (showLocationUi && locationFilter !== undefined);
 
-  const handleItemClick = async (txn: TransactionResponse) => {
-    if (!businessId) return;
-    try {
-      const customer = await queryClient.fetchQuery({
-        queryKey: ["customers", businessId, txn.customer_id],
-        queryFn: () => getCustomer(businessId, txn.customer_id),
-        staleTime: 60_000,
-      });
-      setSelectedCustomer(customer);
-      setSheetOpen(true);
-    } catch {
-      // Customer may have been deleted
-    }
+  const handleItemClick = (txn: TransactionResponse) => {
+    setSelectedCustomerId(txn.customer_id);
   };
+
+  // Fetch the customer whenever the URL param changes (including on deep-link mount).
+  useEffect(() => {
+    if (!selectedCustomerId || !businessId) return;
+    let cancelled = false;
+    queryClient
+      .fetchQuery({
+        queryKey: ["customers", businessId, selectedCustomerId],
+        queryFn: () => getCustomer(businessId, selectedCustomerId),
+        staleTime: 60_000,
+      })
+      .then((customer) => {
+        if (!cancelled) setFetchedCustomer({ id: selectedCustomerId, customer });
+      })
+      .catch(() => {
+        if (!cancelled) setSelectedCustomerId(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCustomerId, businessId, queryClient, setSelectedCustomerId]);
+
+  const selectedCustomer =
+    fetchedCustomer && fetchedCustomer.id === selectedCustomerId
+      ? fetchedCustomer.customer
+      : null;
 
   return (
     <div className="flex flex-col gap-[14px] flex-1 min-h-0 animate-slide-up" style={{ animationDelay: "150ms" }}>
@@ -193,8 +226,10 @@ export default function ActivityPage() {
 
       <CustomerDetailSheet
         customer={selectedCustomer}
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
+        open={!!selectedCustomerId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedCustomerId(null);
+        }}
         maxStamps={totalStamps}
         design={design ?? undefined}
       />

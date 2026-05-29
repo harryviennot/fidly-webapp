@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   PlusIcon,
@@ -60,13 +61,38 @@ export default function ProgramLocationsPage() {
 
   const [search, setSearch] = useState("");
   const [dialogState, setDialogState] = useState<DialogState>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const selectedId = searchParams.get("location");
+
+  const setSelectedId = useCallback(
+    (id: string | null) => {
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      if (id) params.set("location", id);
+      else params.delete("location");
+      const qs = params.toString();
+      router.push(`${pathname}${qs ? `?${qs}` : ""}`);
+    },
+    [searchParams, router, pathname]
+  );
+
   const sheetOpen = !!selectedId;
 
   const activeLocations = useMemo(
     () => (locations ?? []).filter((l) => !l.deleted_at),
     [locations]
   );
+
+  // Stale-param cleanup: if the URL references a location that doesn't exist
+  // (deleted, wrong business, typo), clear the param once the list has loaded.
+  useEffect(() => {
+    if (!selectedId || isLoading) return;
+    if (!activeLocations.some((l) => l.id === selectedId)) {
+      setSelectedId(null);
+    }
+  }, [selectedId, activeLocations, isLoading, setSelectedId]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();

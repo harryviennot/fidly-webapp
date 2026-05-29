@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import { useBusiness } from "@/contexts/business-context";
-import { useCustomers, useRedeemReward, useVoidStamp, PAGE_SIZE } from "@/hooks/use-customers";
+import { useCustomers, useRedeemReward, useVoidStamp, customerKeys, PAGE_SIZE } from "@/hooks/use-customers";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useActiveDesign } from "@/hooks/use-designs";
+import { getCustomer } from "@/api";
 import type { CustomerResponse } from "@/types";
 import type { CustomerSegment } from "@/lib/customer-segments";
 import { classifyCustomer, countBySegment } from "@/lib/customer-segments";
@@ -70,7 +73,6 @@ export default function CustomersPage() {
   const [selectedSegment, setSelectedSegment] = useState<CustomerSegment | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
   const [voidReason, setVoidReason] = useState("");
   const [voidTarget, setVoidTarget] = useState<{ customerId: string; enrollmentId: string; transactionId: string } | null>(null);
@@ -80,8 +82,54 @@ export default function CustomersPage() {
     enrollmentId: string;
   } | null>(null);
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
+
+  const selectedCustomerId = searchParams.get("customer");
+
+  const setSelectedCustomerId = useCallback(
+    (id: string | null) => {
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      if (id) params.set("customer", id);
+      else params.delete("customer");
+      const qs = params.toString();
+      router.push(`${pathname}${qs ? `?${qs}` : ""}`);
+    },
+    [searchParams, router, pathname]
+  );
+
+  // Pagination fallback: the customer referenced in the URL may not be on the
+  // currently loaded page. Fetch it directly so deep links work for any customer.
+  // Keyed by id so stale data from a previous selection can't flash through.
+  const [fallback, setFallback] = useState<{ id: string; customer: CustomerResponse } | null>(null);
+
+  useEffect(() => {
+    if (!selectedCustomerId || !businessId) return;
+    if (customers.some((c) => c.id === selectedCustomerId)) return;
+    let cancelled = false;
+    queryClient
+      .fetchQuery({
+        queryKey: customerKeys.detail(businessId, selectedCustomerId),
+        queryFn: () => getCustomer(businessId, selectedCustomerId),
+        staleTime: 60_000,
+      })
+      .then((customer) => {
+        if (!cancelled) setFallback({ id: selectedCustomerId, customer });
+      })
+      .catch(() => {
+        if (!cancelled) setSelectedCustomerId(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCustomerId, businessId, customers, queryClient, setSelectedCustomerId]);
+
+  const fallbackCustomer =
+    fallback && fallback.id === selectedCustomerId ? fallback.customer : null;
   const selectedCustomer = selectedCustomerId
-    ? customers.find((c) => c.id === selectedCustomerId) ?? null
+    ? customers.find((c) => c.id === selectedCustomerId) ?? fallbackCustomer
     : null;
 
   const handleAddStamp = (e: React.MouseEvent, customer: CustomerResponse) => {

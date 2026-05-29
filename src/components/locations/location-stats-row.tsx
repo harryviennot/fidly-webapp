@@ -33,7 +33,7 @@ export function LocationStatsRow({ stats, loading }: LocationStatsRowProps) {
   return (
     <div className="grid grid-cols-3 divide-x divide-[var(--border)]">
       <Tile value={stats?.total_transactions ?? 0} label={t("scans30d")} />
-      <Tile value={stats?.stamps_added ?? 0} label={t("stamps30d")} />
+      <Tile value={stats?.enrolled_here_total ?? 0} label={t("signups")} />
       <Tile value={stats?.rewards_redeemed ?? 0} label={t("redemptions30d")} />
     </div>
   );
