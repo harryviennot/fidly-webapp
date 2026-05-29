@@ -220,11 +220,9 @@
         "delete": "Supprimer",
         "actions": "Plus d'actions",
         "actionsHint": "Gérer cet emplacement",
-        "scans7d": "Scans 7j",
-        "stamps7d": "Tampons 7j",
-        "redemptions7d": "Récompenses 7j",
-        "activityActive": "Actif aujourd'hui",
-        "activityQuiet": "Calme 7j+",
+        "scans30d": "Scans 30j",
+        "stamps30d": "Tampons 30j",
+        "redemptions30d": "Récompenses 30j",
         "addAnother": "Ajouter un autre emplacement"
       },
       "form": {

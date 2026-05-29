@@ -50,7 +50,7 @@ export default function ProgramLocationsPage() {
   // One batch call for the whole grid — see useLocationStatsBatch.
   const { data: statsBatch, isLoading: statsLoading } = useLocationStatsBatch(
     canMultiLocation ? businessId : undefined,
-    "7d"
+    "30d"
   );
   const statsByLocation = useMemo(() => {
     const map = new Map<string, LocationStatsBatchRow>();

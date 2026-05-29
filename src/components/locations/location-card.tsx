@@ -29,7 +29,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useLocationMembers } from "@/hooks/use-locations";
 import { LocationStatsRow } from "./location-stats-row";
-import { LocationActivityChip } from "./location-activity-chip";
 import { getInitials } from "./_initials";
 import type { Location, LocationStatsBatchRow } from "@/types/location";
 
@@ -147,10 +146,6 @@ export function LocationCard({
                   {t("primary")}
                 </Badge>
               )}
-              <LocationActivityChip
-                lastActivityAt={stats?.last_activity_at}
-                className="shrink-0"
-              />
             </div>
             <div className="flex items-center gap-1 text-[11px] text-[var(--muted-foreground)]">
               <MapPinIcon className="h-3 w-3 shrink-0" weight="bold" />

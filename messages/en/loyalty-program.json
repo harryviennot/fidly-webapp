@@ -220,11 +220,9 @@
         "delete": "Delete",
         "actions": "More actions",
         "actionsHint": "Manage this location",
-        "scans7d": "Scans 7d",
-        "stamps7d": "Stamps 7d",
-        "redemptions7d": "Redeemed 7d",
-        "activityActive": "Active today",
-        "activityQuiet": "Quiet 7d+",
+        "scans30d": "Scans 30d",
+        "stamps30d": "Stamps 30d",
+        "redemptions30d": "Redeemed 30d",
         "addAnother": "Add another location"
       },
       "form": {

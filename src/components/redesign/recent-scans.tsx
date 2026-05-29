@@ -4,9 +4,12 @@ import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { TransactionResponse } from "@/types";
+import { useAuth } from "@/contexts/auth-provider";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
 import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
+import { LocationBadge } from "@/components/locations/location-badge";
 
 // Dashboard widget uses accent CSS vars for stamp_added/reward_redeemed delta badges
 const WIDGET_TYPE_CONFIG = {
@@ -104,6 +107,9 @@ export function RecentScans({
   iconColor,
 }: RecentScansProps) {
   const t = useTranslations();
+  const { user } = useAuth();
+  const { hasFeature } = useEntitlements();
+  const showLocations = hasFeature("locations.multiple");
 
   return (
     <div
@@ -185,8 +191,8 @@ export function RecentScans({
                       </span>
                     </div>
 
-                    {/* Bottom row: stamp transition · employee */}
-                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8A8A8A]">
+                    {/* Bottom row: stamp transition · employee · location */}
+                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8A8A8A] flex-wrap">
                       {isCardLifecycleType(tx.type) ? (
                         <span className="capitalize">
                           {metadata?.wallet_type === "google" ? "Google Wallet" : "Apple Wallet"}
@@ -205,7 +211,21 @@ export function RecentScans({
                       {tx.employee_name && (
                         <>
                           <span className="text-[#D8D5CE]">·</span>
-                          <span>by {tx.employee_name}</span>
+                          <span>
+                            {t("dashboard.by")}{" "}
+                            {tx.employee_id === user?.id
+                              ? t("dashboard.you")
+                              : tx.employee_name}
+                          </span>
+                        </>
+                      )}
+                      {showLocations && tx.location_name && (
+                        <>
+                          <span className="text-[#D8D5CE]">·</span>
+                          <LocationBadge
+                            name={tx.location_name}
+                            variant="subtle"
+                          />
                         </>
                       )}
                     </div>
