@@ -104,6 +104,7 @@
       "description": "Customers will appear here once they register through your loyalty program link."
     },
     "detail": {
+      "customerProfile": "Customer Profile",
       "stampProgress": "Stamp Progress",
       "firstVisit": "First Visit",
       "lastVisit": "Last Visit",

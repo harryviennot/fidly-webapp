@@ -104,6 +104,7 @@
       "description": "Les clients appara\u00eetront ici une fois qu'ils se seront inscrits via votre lien de fid\u00e9lit\u00e9."
     },
     "detail": {
+      "customerProfile": "Profil client",
       "stampProgress": "Progression des tampons",
       "firstVisit": "Premi\u00e8re visite",
       "lastVisit": "Derni\u00e8re visite",
