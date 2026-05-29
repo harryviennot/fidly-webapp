@@ -216,7 +216,7 @@ export function LocationCard({
               </span>
             </>
           ) : (
-            <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--warning)]">
               <UsersIcon className="h-3.5 w-3.5" weight="bold" />
               {t("membersCount", { count: 0 })}
             </div>
