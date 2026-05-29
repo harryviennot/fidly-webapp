@@ -69,6 +69,20 @@ export function ActivityItem({
       ? `+${transaction.stamp_delta}`
       : String(transaction.stamp_delta);
 
+  const isAdjustment =
+    transaction.source === "dashboard" &&
+    (transaction.type === "stamp_added" || transaction.type === "bonus_stamp");
+  const adjustmentReason = isAdjustment
+    ? metadata?.adjustment_reason
+    : undefined;
+
+  const sourceLabel =
+    transaction.source === "scanner"
+      ? t("sources.scanner")
+      : transaction.source === "dashboard"
+        ? t("sources.dashboard")
+        : transaction.source;
+
   return (
     <div
       onClick={onClick}
@@ -153,7 +167,7 @@ export function ActivityItem({
                   </>
                 )}
                 <span className="text-[#D8D5CE]">·</span>
-                <span>{transaction.source}</span>
+                <span>{sourceLabel}</span>
               </>
             )}
             {transaction.employee_name && (
@@ -179,6 +193,13 @@ export function ActivityItem({
           {metadata?.void_reason && (
             <p className="text-[11px] text-[#8A8A8A] mt-1.5 italic">
               {metadata.void_reason}
+            </p>
+          )}
+
+          {/* Adjustment reason (dashboard-source stamps) */}
+          {adjustmentReason && (
+            <p className="text-[11px] text-[#8A8A8A] mt-1.5 italic">
+              {adjustmentReason}
             </p>
           )}
         </div>

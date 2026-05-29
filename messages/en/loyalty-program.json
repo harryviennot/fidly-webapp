@@ -231,8 +231,8 @@
         "name": "Location name",
         "slug": "URL slug",
         "slugTaken": "This slug is already used by another location.",
+        "slugLockedHelper": "Locked. URL slugs can't change once a location is live.",
         "address": "Address",
-        "addressHelp": "Optional — useful for customer-facing context and future geofencing. Mobile businesses (food trucks, pop-ups) can skip it.",
         "searchAddress": "Search your business",
         "searchAddressPlaceholder": "Start typing a business name or address",
         "autocompleteEmpty": "Keep typing to see suggestions…",
@@ -246,14 +246,6 @@
         "country": "Country",
         "cannotFindBusiness": "Can't find your business? Enter manually",
         "useAutocomplete": "Search with Google instead",
-        "manualWarning": "Coordinates are needed for scanner location detection — enter them precisely if you can.",
-        "lat": "Latitude",
-        "lng": "Longitude",
-        "coordinatesHelp": "Only needed if you want auto-location detection on the scanner app.",
-        "radius": "Radius (meters)",
-        "radiusHelp": "Distance from this location within which customers will see your wallet message and scanners are assumed to be on-site.",
-        "walletMessage": "Wallet message",
-        "walletMessageHelp": "Future geofence message shown when a customer is near this store. Optional.",
         "setPrimary": "Set as primary location",
         "alreadyPrimary": "This is already your primary location.",
         "setPrimaryConfirm": "This will demote your current primary location and make this one your customer-facing default. Continue?",
@@ -280,16 +272,16 @@
         "create": "Create location",
         "save": "Save changes",
         "step1": {
-          "title": "Identity",
-          "subtitle": "What is this location called and where will customers enroll?"
+          "title": "Name this store",
+          "subtitle": "Pick a name you'll recognize. The URL slug below is part of your QR code, so it can't be changed later."
         },
         "step2": {
-          "title": "Where is it?",
-          "subtitle": "Address and optional geofencing for the scanner app. All fields are optional."
+          "title": "Where is this store?",
+          "subtitle": "Adding an address lets your team see which store they're stamping from, so stamps don't land at the wrong location."
         },
-        "step3": {
-          "title": "Wallet message",
-          "subtitle": "Optional message shown on the back of the wallet pass for customers enrolled here."
+        "slugLockedWarning": {
+          "title": "This URL is permanent",
+          "message": "Your QR code is built from this slug. Once you save, it's locked, otherwise every QR already shared would stop working."
         },
         "primaryLabel": "Set as primary location",
         "primaryHelp": "The primary location catches customers and activity that aren't linked to a specific store.",

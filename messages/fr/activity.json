@@ -12,6 +12,10 @@
     "you": "Vous",
     "live": "En direct",
     "stampProgress": "{current}/{total} tampons",
+    "sources": {
+      "scanner": "Scan",
+      "dashboard": "Manuel"
+    },
     "filters": {
       "all": "Tout",
       "stampAdded": "Tampons ajout\u00e9s",

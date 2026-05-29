@@ -231,8 +231,8 @@
         "name": "Nom de l'emplacement",
         "slug": "Identifiant URL",
         "slugTaken": "Cet identifiant est déjà utilisé par un autre emplacement.",
+        "slugLockedHelper": "Verrouillé. L'identifiant URL ne peut plus être modifié après création.",
         "address": "Adresse",
-        "addressHelp": "Optionnel — utile pour le contexte client et le géorepérage à venir. Les commerces mobiles (food trucks, pop-ups) peuvent ignorer ce champ.",
         "searchAddress": "Rechercher votre établissement",
         "searchAddressPlaceholder": "Commencez à saisir un nom ou une adresse",
         "autocompleteEmpty": "Continuez à saisir pour voir des suggestions…",
@@ -246,14 +246,6 @@
         "country": "Pays",
         "cannotFindBusiness": "Vous ne trouvez pas votre établissement ? Saisir manuellement",
         "useAutocomplete": "Rechercher avec Google",
-        "manualWarning": "Les coordonnées sont nécessaires pour la détection d'emplacement par le scanner — saisissez-les précisément si possible.",
-        "lat": "Latitude",
-        "lng": "Longitude",
-        "coordinatesHelp": "Utile uniquement si vous souhaitez la détection automatique de l'emplacement dans l'app scanner.",
-        "radius": "Rayon (mètres)",
-        "radiusHelp": "Distance autour de cet emplacement à partir de laquelle les clients voient votre message Wallet et les employés sont considérés sur place.",
-        "walletMessage": "Message Wallet",
-        "walletMessageHelp": "Message géorepéré affiché lorsqu'un client est à proximité de cette boutique. Optionnel.",
         "setPrimary": "Définir comme emplacement principal",
         "alreadyPrimary": "Il s'agit déjà de votre emplacement principal.",
         "setPrimaryConfirm": "Cela rétrogradera l'emplacement principal actuel et fera de celui-ci votre emplacement par défaut. Continuer ?",
@@ -280,16 +272,16 @@
         "create": "Créer l'emplacement",
         "save": "Enregistrer",
         "step1": {
-          "title": "Identité",
-          "subtitle": "Quel est le nom de cet emplacement et où les clients s'inscriront-ils ?"
+          "title": "Nommez cette boutique",
+          "subtitle": "Choisissez un nom que vous reconnaîtrez. L'identifiant URL en dessous fait partie de votre QR code, il ne pourra plus être modifié ensuite."
         },
         "step2": {
-          "title": "Où se trouve-t-il ?",
-          "subtitle": "Adresse et géofencing optionnel pour l'application scanner. Tous les champs sont facultatifs."
+          "title": "Où se trouve cette boutique ?",
+          "subtitle": "Renseigner l'adresse permet à vos employés de voir précisément depuis quelle boutique ils tamponnent. Cela évite les tampons enregistrés au mauvais endroit."
         },
-        "step3": {
-          "title": "Message du wallet",
-          "subtitle": "Message optionnel affiché au dos de la carte wallet pour les clients inscrits ici."
+        "slugLockedWarning": {
+          "title": "Cette URL est définitive",
+          "message": "Votre QR code est construit à partir de cet identifiant. Une fois enregistré, il est verrouillé, sinon tous les QR codes déjà partagés cesseraient de fonctionner."
         },
         "primaryLabel": "Définir comme emplacement principal",
         "primaryHelp": "L'emplacement principal récupère les clients et l'activité qui ne sont pas rattachés à une boutique précise.",

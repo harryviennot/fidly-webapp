@@ -13,8 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useAddStamp, useRedeemReward, useVoidStamp } from "@/hooks/use-customers";
+import { useRedeemReward, useVoidStamp } from "@/hooks/use-customers";
 import { toast } from "sonner";
+import { StampAdjustmentDialog } from "./stamp-adjustment-dialog";
 import type { CustomerResponse, TransactionResponse } from "@/types";
 
 interface CustomerQuickActionsProps {
@@ -33,11 +34,11 @@ export function CustomerQuickActions({
   onActionComplete,
 }: CustomerQuickActionsProps) {
   const t = useTranslations("customers.actions");
-  const addStampMutation = useAddStamp(businessId);
   const redeemMutation = useRedeemReward(businessId);
   const voidMutation = useVoidStamp(businessId);
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
   const [voidReason, setVoidReason] = useState("");
+  const [adjustOpen, setAdjustOpen] = useState(false);
 
   const canRedeem = customer.stamps >= maxStamps;
 
@@ -53,17 +54,6 @@ export function CustomerQuickActions({
   // every customer has exactly one enrollment per business, so [0] is "the"
   // enrollment. Multi-program pro businesses will pick by program later.
   const enrollmentId = customer.enrollments[0]?.id;
-
-  const handleAddStamp = async () => {
-    if (!enrollmentId) return;
-    try {
-      await addStampMutation.mutateAsync({ customerId: customer.id, enrollmentId });
-      toast.success(t("stampAddedToast"));
-      onActionComplete();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("stampFailedToast"));
-    }
-  };
 
   const handleRedeem = async () => {
     if (!enrollmentId) return;
@@ -104,8 +94,8 @@ export function CustomerQuickActions({
           color="#4A7C59"
           bg="#E8F5E4"
           border="#C8E6C4"
-          onClick={handleAddStamp}
-          disabled={addStampMutation.isPending}
+          onClick={() => setAdjustOpen(true)}
+          disabled={!enrollmentId}
         />
       ) : (
         <ActionButton
@@ -129,6 +119,19 @@ export function CustomerQuickActions({
         onClick={() => setVoidDialogOpen(true)}
         disabled={!lastVoidable}
       />
+
+      {/* Stamp adjustment dialog (manual stamp from dashboard) */}
+      {enrollmentId && (
+        <StampAdjustmentDialog
+          open={adjustOpen}
+          onOpenChange={setAdjustOpen}
+          businessId={businessId}
+          customerId={customer.id}
+          customerName={customer.name}
+          enrollmentId={enrollmentId}
+          onSuccess={onActionComplete}
+        />
+      )}
 
       {/* Void dialog */}
       <Dialog

@@ -62,7 +62,26 @@
       "redeemFailedToast": "Failed to redeem reward",
       "voidSuccessToast": "Stamp voided",
       "voidFailedToast": "Failed to void stamp",
-      "noVoidableStamp": "No stamp to void"
+      "noVoidableStamp": "No stamp to void",
+      "adjustment": {
+        "title": "Add a stamp",
+        "description": "Manually add a stamp to {name}'s card. The reason is saved with the activity.",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "e.g. Customer forgot to scan",
+        "reasonHelp": "Visible to your team in the activity feed. The customer doesn't see it.",
+        "locationLabel": "Linked location",
+        "locationHelp": "Optional. Tag this stamp to one of your stores.",
+        "noLocation": "No location",
+        "primary": "primary",
+        "submit": "Add stamp",
+        "submitting": "Adding...",
+        "errors": {
+          "notAllowed": "Only owners and admins can add stamps manually.",
+          "reasonRequired": "A reason is required.",
+          "locationNotFound": "That location is no longer available.",
+          "locationNotPermitted": "You aren't assigned to that location."
+        }
+      }
     },
     "toasts": {
       "stampAdded": "Stamp added for {name}",
@@ -119,6 +138,11 @@
       "by": "by",
       "you": "You",
       "voidReason": "Reason",
+      "adjustmentReason": "Reason",
+      "sources": {
+        "scanner": "Scan",
+        "dashboard": "Manual"
+      },
       "time": {
         "justNow": "Just now",
         "minutesAgo": "{count}m ago",

@@ -1,5 +1,22 @@
-import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
+import { API_BASE_URL, getAuthHeaders, extractErrorMessage, throwApiError } from './client';
 import type { CustomerResponse, PaginatedCustomerResponse, StampResponse } from '@/types';
+
+export interface AddStampOptions {
+  /**
+   * Discriminator picked up by the backend.
+   *   - "scanner" (default, sent as no body) — physical-scan flow, used by
+   *     the onboarding self-test. Reason MUST be absent.
+   *   - "dashboard" — owner/admin manual adjustment, reason REQUIRED.
+   */
+  source?: 'dashboard';
+  /** Required when source === "dashboard". 1–280 chars, surfaced in activity. */
+  reason?: string;
+  /**
+   * Optional. Honored only for Pro businesses that have at least one active
+   * location. Null/undefined → transaction lands with location_id = NULL.
+   */
+  locationId?: string | null;
+}
 
 export async function getCustomer(businessId: string, customerId: string): Promise<CustomerResponse> {
   const response = await fetch(`${API_BASE_URL}/customers/${businessId}/${customerId}`, {
@@ -30,23 +47,31 @@ export async function getCustomers(
   return response.json();
 }
 
-export async function addStamp(businessId: string, enrollmentId: string): Promise<StampResponse> {
+export async function addStamp(
+  businessId: string,
+  enrollmentId: string,
+  options?: AddStampOptions
+): Promise<StampResponse> {
+  // Omit the body entirely on a default (scanner) call so the backend's
+  // `body: StampRequest | None = None` short-circuit applies cleanly.
+  const hasBody = !!options;
+  const body = hasBody
+    ? JSON.stringify({
+        source: options!.source ?? 'dashboard',
+        ...(options!.reason !== undefined && { reason: options!.reason }),
+        ...(options!.locationId !== undefined && { location_id: options!.locationId }),
+      })
+    : undefined;
+
   const response = await fetch(`${API_BASE_URL}/stamps/${businessId}/${enrollmentId}`, {
     method: 'POST',
     headers: await getAuthHeaders(),
+    ...(body && { body }),
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('Not authorized to add stamps');
-    }
-    if (response.status === 403) {
-      throw new Error('You don\'t have access to this business');
-    }
-    if (response.status === 404) {
-      throw new Error('Enrollment not found');
-    }
-    throw new Error('Failed to add stamp');
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to add stamp');
   }
 
   return response.json();

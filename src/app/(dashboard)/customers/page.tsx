@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useBusiness } from "@/contexts/business-context";
-import { useCustomers, useAddStamp, useRedeemReward, useVoidStamp, PAGE_SIZE } from "@/hooks/use-customers";
+import { useCustomers, useRedeemReward, useVoidStamp, PAGE_SIZE } from "@/hooks/use-customers";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useActiveDesign } from "@/hooks/use-designs";
 import type { CustomerResponse } from "@/types";
@@ -20,6 +20,7 @@ import {
 } from "@/components/customers/customer-segment-filters";
 import { EmptyCustomersState } from "@/components/customers/empty-customers-state";
 import { CustomerDetailSheet } from "@/components/customers/customer-detail-sheet";
+import { StampAdjustmentDialog } from "@/components/customers/stamp-adjustment-dialog";
 import {
   CustomerDataTable,
   CustomerTableSkeleton,
@@ -49,7 +50,6 @@ export default function CustomersPage() {
   const { data: paginatedData, isLoading: customersLoading } = useCustomers(businessId, page);
   const { data: txnData } = useTransactions(businessId);
   const { data: design } = useActiveDesign(businessId);
-  const addStampMutation = useAddStamp(businessId);
   const redeemMutation = useRedeemReward(businessId);
   const voidMutation = useVoidStamp(businessId);
 
@@ -74,22 +74,26 @@ export default function CustomersPage() {
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
   const [voidReason, setVoidReason] = useState("");
   const [voidTarget, setVoidTarget] = useState<{ customerId: string; enrollmentId: string; transactionId: string } | null>(null);
+  const [adjustTarget, setAdjustTarget] = useState<{
+    customerId: string;
+    customerName: string;
+    enrollmentId: string;
+  } | null>(null);
 
   const selectedCustomer = selectedCustomerId
     ? customers.find((c) => c.id === selectedCustomerId) ?? null
     : null;
 
-  const handleAddStamp = async (e: React.MouseEvent, customer: CustomerResponse) => {
+  const handleAddStamp = (e: React.MouseEvent, customer: CustomerResponse) => {
     e.stopPropagation();
     if (!businessId) return;
     const enrollmentId = customer.enrollments[0]?.id;
     if (!enrollmentId) return;
-    try {
-      await addStampMutation.mutateAsync({ customerId: customer.id, enrollmentId });
-      toast.success(t("toasts.stampAdded", { name: customer.name }));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("toasts.stampFailed"));
-    }
+    setAdjustTarget({
+      customerId: customer.id,
+      customerName: customer.name,
+      enrollmentId,
+    });
   };
 
   const handleRedeem = async (e: React.MouseEvent, customer: CustomerResponse) => {
@@ -258,7 +262,6 @@ export default function CustomersPage() {
         searchTerm={searchTerm}
         selectedCustomerId={selectedCustomerId}
         onSelectCustomer={setSelectedCustomerId}
-        isPendingAddStamp={addStampMutation.isPending}
         isPendingRedeem={redeemMutation.isPending}
         isPendingVoid={voidMutation.isPending}
       />
@@ -270,6 +273,17 @@ export default function CustomersPage() {
         maxStamps={totalStamps}
         design={design ?? undefined}
       />
+
+      {businessId && adjustTarget && (
+        <StampAdjustmentDialog
+          open={!!adjustTarget}
+          onOpenChange={(open) => { if (!open) setAdjustTarget(null); }}
+          businessId={businessId}
+          customerId={adjustTarget.customerId}
+          customerName={adjustTarget.customerName}
+          enrollmentId={adjustTarget.enrollmentId}
+        />
+      )}
 
       <Dialog
         open={voidDialogOpen}

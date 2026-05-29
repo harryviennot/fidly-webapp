@@ -3,20 +3,16 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ArrowLeftIcon, CheckCircleIcon, PencilSimpleIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, CheckCircleIcon, PencilSimpleIcon, XIcon } from "@phosphor-icons/react";
+import { Drawer as VaulDrawer } from "vaul";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InfoBox } from "@/components/reusables/info-box";
 import { WizardField } from "@/components/onboarding/form/WizardField";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -47,7 +43,7 @@ type LocationDialogProps =
       mode: "create";
       /** True when the business has zero active locations. Hides the
        *  "Set as primary" toggle (auto-primary) and exposes a backfill
-       *  checkbox on step 3 — the backend only honours `backfill_legacy`
+       *  checkbox on step 1. The backend only honours `backfill_legacy`
        *  on the first location. */
       isFirstLocation?: boolean;
     }
@@ -61,7 +57,7 @@ type LocationDialogProps =
       canManageNonPrimary: boolean;
     };
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 2;
 
 /** Convert a name into a default slug. Server normalizes too (the
  *  authoritative output is `useSlugCheck().normalized`); this is a cosmetic
@@ -162,24 +158,15 @@ export function LocationDialog(props: LocationDialogProps) {
     }
   );
   const [editingDetails, setEditingDetails] = useState(false);
-  const [radius, setRadius] = useState<string>(
-    String(initial?.radius_meters ?? 100)
-  );
   const [isPrimary, setIsPrimary] = useState<boolean>(
     initial?.is_primary ?? false
-  );
-  const [walletEn, setWalletEn] = useState<string>(
-    initial?.wallet_message?.en ?? ""
-  );
-  const [walletFr, setWalletFr] = useState<string>(
-    initial?.wallet_message?.fr ?? ""
   );
   // First-location only: tag all legacy NULL-location activity to this new
   // location. Defaults to false because the operation is irreversible.
   const [backfillLegacy, setBackfillLegacy] = useState(false);
 
-  const hasCoords = lat.trim() !== "" || lng.trim() !== "";
   const willBePrimary = mode === "edit" && isPrimary && !initial?.is_primary;
+  const slugLocked = mode === "edit";
 
   const handleNameChange = (next: string) => {
     setName(next);
@@ -263,9 +250,6 @@ export function LocationDialog(props: LocationDialogProps) {
       address_components: componentsForSave ?? undefined,
       latitude: parseFloatOrNull(lat),
       longitude: parseFloatOrNull(lng),
-      radius_meters: hasCoords ? parseInt(radius || "100", 10) : undefined,
-      wallet_message:
-        walletEn || walletFr ? { en: walletEn, fr: walletFr } : null,
     };
     if (mode === "edit" && isPrimary !== !!initial?.is_primary) {
       body.is_primary = isPrimary;
@@ -353,7 +337,11 @@ export function LocationDialog(props: LocationDialogProps) {
             />
           </WizardField>
 
-          <WizardField label={tForm("slug")} required>
+          <WizardField
+            label={tForm("slug")}
+            required
+            helper={slugLocked ? tForm("slugLockedHelper") : undefined}
+          >
             <LocationSlugInput
               businessId={businessId}
               businessSlug={businessSlug}
@@ -362,9 +350,18 @@ export function LocationDialog(props: LocationDialogProps) {
               excludeLocationId={initial?.id}
               initialValue={initial?.slug}
               onStatusChange={setSlugStatus}
+              disabled={slugLocked}
               hideLabel
             />
           </WizardField>
+
+          {mode === "create" && (
+            <InfoBox
+              variant="warning"
+              title={tWiz("slugLockedWarning.title")}
+              message={tWiz("slugLockedWarning.message")}
+            />
+          )}
 
           {mode === "edit" && (
             <label className="flex items-start gap-3 cursor-pointer pt-3 border-t border-[var(--border)]">
@@ -383,6 +380,25 @@ export function LocationDialog(props: LocationDialogProps) {
                   {initial?.is_primary
                     ? tWiz("alreadyPrimary")
                     : tWiz("primaryHelp")}
+                </span>
+              </span>
+            </label>
+          )}
+
+          {mode === "create" && isFirstLocation && (
+            <label className="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-[var(--border)] bg-[var(--muted)]/40">
+              <input
+                type="checkbox"
+                checked={backfillLegacy}
+                onChange={(e) => setBackfillLegacy(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0"
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="wiz-body-sm font-medium text-[var(--foreground)]">
+                  {tWiz("backfill.label")}
+                </span>
+                <span className="wiz-helper text-[#7A7A7A]">
+                  {tWiz("backfill.help")}
                 </span>
               </span>
             </label>
@@ -542,34 +558,6 @@ export function LocationDialog(props: LocationDialogProps) {
                 </WizardField>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <WizardField label={tForm("lat")} htmlFor="location-lat">
-                  <Input
-                    id="location-lat"
-                    type="number"
-                    step="any"
-                    value={lat}
-                    onChange={(e) => setLat(e.target.value)}
-                    placeholder="48.86"
-                    className="h-11"
-                  />
-                </WizardField>
-                <WizardField label={tForm("lng")} htmlFor="location-lng">
-                  <Input
-                    id="location-lng"
-                    type="number"
-                    step="any"
-                    value={lng}
-                    onChange={(e) => setLng(e.target.value)}
-                    placeholder="2.30"
-                    className="h-11"
-                  />
-                </WizardField>
-              </div>
-              <p className="wiz-helper text-[#999] -mt-2">
-                {tForm("manualWarning")}
-              </p>
-
               <button
                 type="button"
                 onClick={() => setAddressMode("autocomplete")}
@@ -582,69 +570,6 @@ export function LocationDialog(props: LocationDialogProps) {
         </div>
       )}
 
-      {step === 3 && (
-        <div className="flex flex-col gap-5">
-          {isFirstLocation && (
-            <label className="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-[var(--border)] bg-[var(--muted)]/40">
-              <input
-                type="checkbox"
-                checked={backfillLegacy}
-                onChange={(e) => setBackfillLegacy(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0"
-              />
-              <span className="flex flex-col gap-0.5">
-                <span className="wiz-body-sm font-medium text-[var(--foreground)]">
-                  {tWiz("backfill.label")}
-                </span>
-                <span className="wiz-helper text-[#7A7A7A]">
-                  {tWiz("backfill.help")}
-                </span>
-              </span>
-            </label>
-          )}
-
-          {hasCoords && (
-            <WizardField
-              label={tForm("radius")}
-              htmlFor="location-radius"
-              helper={tForm("radiusHelp")}
-            >
-              <Input
-                id="location-radius"
-                type="number"
-                min={10}
-                value={radius}
-                onChange={(e) => setRadius(e.target.value)}
-                placeholder="100"
-                className="h-11"
-              />
-            </WizardField>
-          )}
-
-          <p className="wiz-helper text-[#999] -mt-1">
-            {tForm("walletMessageHelp")}
-          </p>
-          <WizardField label="EN" htmlFor="wm-en">
-            <Input
-              id="wm-en"
-              value={walletEn}
-              onChange={(e) => setWalletEn(e.target.value)}
-              placeholder="Welcome to our Westside store!"
-              className="h-11"
-            />
-          </WizardField>
-          <WizardField label="FR" htmlFor="wm-fr">
-            <Input
-              id="wm-fr"
-              value={walletFr}
-              onChange={(e) => setWalletFr(e.target.value)}
-              placeholder="Bienvenue dans notre boutique Westside !"
-              className="h-11"
-            />
-          </WizardField>
-        </div>
-      )}
-
       {formError && (
         <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 text-red-600 wiz-helper border border-red-100">
           {formError}
@@ -653,29 +578,29 @@ export function LocationDialog(props: LocationDialogProps) {
     </div>
   );
 
-  const header = (
-    <div className="flex flex-col">
-      {/* Progress bar */}
-      <div className="h-[3px] bg-[var(--muted)]">
-        <div
-          className="h-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
-          style={{ width: `${progressPct}%` }}
-        />
-      </div>
-      <div className="px-6 pt-5 pb-5 pr-12">
-        <p className="wiz-helper font-medium uppercase tracking-wider text-[#999]">
-          {tWiz("stepOf", { current: step, total: TOTAL_STEPS })}
-        </p>
-        <h2 className="wiz-h2 font-semibold text-[var(--foreground)] mt-1">
-          {stepTitle}
-        </h2>
-        <p className="wiz-helper text-[#7A7A7A] mt-1">{stepSubtitle}</p>
-      </div>
+  const progressBar = (
+    <div className="h-[3px] bg-[var(--muted)] shrink-0">
+      <div
+        className="h-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
+        style={{ width: `${progressPct}%` }}
+      />
+    </div>
+  );
+
+  const titleBlock = (
+    <div className="px-6 pt-5 pb-5 pr-12">
+      <p className="wiz-helper font-medium uppercase tracking-wider text-[#999]">
+        {tWiz("stepOf", { current: step, total: TOTAL_STEPS })}
+      </p>
+      <h2 className="wiz-h font-semibold text-[var(--foreground)] mt-2">
+        {stepTitle}
+      </h2>
+      <p className="wiz-body-sm text-[#7A7A7A] mt-2">{stepSubtitle}</p>
     </div>
   );
 
   const footer = (
-    <div className="flex items-center gap-3 px-6 py-4 border-t border-[var(--border)] bg-[var(--background)]">
+    <div className="flex items-center gap-3 px-6 py-4 border-t border-[var(--border)] bg-[var(--background)] shrink-0">
       <Button
         type="button"
         variant="ghost"
@@ -706,23 +631,41 @@ export function LocationDialog(props: LocationDialogProps) {
 
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent
-          side="bottom"
-          className={cn(
-            "flex flex-col gap-0 p-0 max-h-[90vh] rounded-t-2xl overflow-hidden border-t-0"
-          )}
-        >
-          <div className="flex justify-center pt-2.5 pb-1 shrink-0">
-            <div className="h-1 w-10 rounded-full bg-[var(--border-dark)] opacity-60" />
-          </div>
-          <SheetTitle className="sr-only">{stepTitle}</SheetTitle>
-          <SheetDescription className="sr-only">{stepSubtitle}</SheetDescription>
-          {header}
-          <div className="flex-1 overflow-y-auto px-6 py-5">{body}</div>
-          {footer}
-        </SheetContent>
-      </Sheet>
+      <VaulDrawer.Root
+        open={open}
+        onOpenChange={handleClose}
+        dismissible
+        handleOnly
+        repositionInputs={false}
+      >
+        <VaulDrawer.Portal>
+          <VaulDrawer.Overlay className="fixed inset-0 z-50 bg-black/60" />
+          <VaulDrawer.Content className="fixed inset-0 z-50 flex flex-col bg-[var(--background)] outline-hidden">
+            <VaulDrawer.Title className="sr-only">{stepTitle}</VaulDrawer.Title>
+            <VaulDrawer.Description className="sr-only">
+              {stepSubtitle}
+            </VaulDrawer.Description>
+
+            {progressBar}
+
+            <button
+              type="button"
+              onClick={() => handleClose(false)}
+              aria-label={tForm("cancel")}
+              className="absolute right-3 top-5 z-20 flex h-9 w-9 items-center justify-center rounded-full text-[var(--foreground)] hover:bg-[var(--muted)]"
+            >
+              <XIcon className="h-5 w-5" weight="bold" />
+            </button>
+
+            <div className="flex-1 overflow-y-auto">
+              {titleBlock}
+              <div className="px-6 pb-6">{body}</div>
+            </div>
+
+            {footer}
+          </VaulDrawer.Content>
+        </VaulDrawer.Portal>
+      </VaulDrawer.Root>
     );
   }
 
@@ -730,7 +673,10 @@ export function LocationDialog(props: LocationDialogProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-xl flex flex-col gap-0 p-0 overflow-hidden">
         <DialogTitle className="sr-only">{stepTitle}</DialogTitle>
-        {header}
+        <div className="flex flex-col shrink-0">
+          {progressBar}
+          {titleBlock}
+        </div>
         <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">{body}</div>
         {footer}
       </DialogContent>

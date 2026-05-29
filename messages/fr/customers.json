@@ -62,7 +62,26 @@
       "redeemFailedToast": "\u00c9chec de l'\u00e9change",
       "voidSuccessToast": "Tampon annul\u00e9",
       "voidFailedToast": "\u00c9chec de l'annulation",
-      "noVoidableStamp": "Aucun tampon à annuler"
+      "noVoidableStamp": "Aucun tampon à annuler",
+      "adjustment": {
+        "title": "Ajouter un tampon",
+        "description": "Ajoutez manuellement un tampon à la carte de {name}. La raison sera enregistrée dans l'historique.",
+        "reasonLabel": "Raison",
+        "reasonPlaceholder": "ex. Le client a oublié de scanner",
+        "reasonHelp": "Visible par votre équipe dans l'historique. Le client ne la voit pas.",
+        "locationLabel": "Emplacement associé",
+        "locationHelp": "Optionnel. Rattachez ce tampon à l'un de vos emplacements.",
+        "noLocation": "Aucun emplacement",
+        "primary": "principal",
+        "submit": "Ajouter le tampon",
+        "submitting": "Ajout en cours...",
+        "errors": {
+          "notAllowed": "Seuls les propriétaires et administrateurs peuvent ajouter un tampon manuellement.",
+          "reasonRequired": "Indiquez une raison.",
+          "locationNotFound": "Cet emplacement n'est plus disponible.",
+          "locationNotPermitted": "Vous n'êtes pas assigné à cet emplacement."
+        }
+      }
     },
     "toasts": {
       "stampAdded": "Tampon ajout\u00e9 pour {name}",
@@ -119,6 +138,11 @@
       "by": "par",
       "you": "Vous",
       "voidReason": "Raison",
+      "adjustmentReason": "Raison",
+      "sources": {
+        "scanner": "Scan",
+        "dashboard": "Manuel"
+      },
       "time": {
         "justNow": "\u00c0 l'instant",
         "minutesAgo": "il y a {count} min",

@@ -59,6 +59,19 @@ export function TransactionItem({
       : String(transaction.stamp_delta);
 
   const metadata = transaction.metadata as Record<string, string> | null;
+  const isAdjustment =
+    transaction.source === "dashboard" &&
+    (transaction.type === "stamp_added" || transaction.type === "bonus_stamp");
+  const adjustmentReason = isAdjustment ? metadata?.adjustment_reason : undefined;
+
+  // Map known source values to translated labels; fall back to the raw value
+  // so unexpected backend sources still show something.
+  const sourceLabel =
+    transaction.source === "scanner"
+      ? t("sources.scanner")
+      : transaction.source === "dashboard"
+        ? t("sources.dashboard")
+        : transaction.source;
 
   return (
     <div className="flex gap-3 relative">
@@ -124,7 +137,7 @@ export function TransactionItem({
                   {transaction.stamps_after}
                 </span>
                 <span className="text-[#D8D5CE]">·</span>
-                <span>{transaction.source}</span>
+                <span>{sourceLabel}</span>
               </>
             )}
             {transaction.employee_name && (
@@ -157,6 +170,20 @@ export function TransactionItem({
               )}
             >
               {t("voidReason")}: {metadata.void_reason}
+            </button>
+          )}
+
+          {/* Expandable adjustment reason (dashboard-source stamps) */}
+          {adjustmentReason && (
+            <button
+              type="button"
+              onClick={() => setReasonExpanded(!reasonExpanded)}
+              className={cn(
+                "text-[11px] text-[#8A8A8A] mt-1.5 italic text-left w-full transition-colors hover:text-[#1A1A1A]",
+                !reasonExpanded && "line-clamp-1"
+              )}
+            >
+              {t("adjustmentReason")}: {adjustmentReason}
             </button>
           )}
         </div>

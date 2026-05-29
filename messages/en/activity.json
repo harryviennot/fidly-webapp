@@ -12,6 +12,10 @@
     "you": "You",
     "live": "Live",
     "stampProgress": "{current}/{total} stamps",
+    "sources": {
+      "scanner": "Scan",
+      "dashboard": "Manual"
+    },
     "filters": {
       "all": "All",
       "stampAdded": "Stamps Added",
