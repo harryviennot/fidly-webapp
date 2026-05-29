@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useBusiness } from '@/contexts/business-context';
+import { useEntitlements } from '@/hooks/useEntitlements';
+import { useLocations } from '@/hooks/use-locations';
 import { getBusinessSignupQR } from '@/api/businesses';
 import { QrLinkView } from '@/components/program/QrLinkView';
 import { LocationQrPanel } from '@/components/program/LocationQrPanel';
@@ -14,8 +16,20 @@ interface BusinessUrlCardProps {
 export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
   const t = useTranslations('loyaltyProgram.overview');
   const { currentBusiness } = useBusiness();
+  const { hasFeature } = useEntitlements();
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(true);
+
+  // The "Global QR" label only earns its place when the per-location block is
+  // also shown (Pro + more than one location) — otherwise there's nothing to
+  // contrast it with, so non-Pro (and single-location) accounts never see it.
+  const canMultiLocation = hasFeature('locations.multiple');
+  const { data: locations } = useLocations(
+    canMultiLocation ? currentBusiness?.id : undefined
+  );
+  const hasMultipleLocations =
+    canMultiLocation &&
+    (locations ?? []).filter((l) => !l.deleted_at).length > 1;
 
   const baseUrl = process.env.NEXT_PUBLIC_SHOWCASE_URL || 'https://stampeo.app';
   const slug = currentBusiness?.url_slug || '';
@@ -51,7 +65,13 @@ export function BusinessUrlCard({ delay = 0 }: BusinessUrlCardProps) {
         </div>
       </div>
 
-      {/* Global program QR + link */}
+      {/* Global program QR + link — labelled only when the per-location block
+          is present, so the global/per-location parallel reads clearly */}
+      {hasMultipleLocations && (
+        <div className="text-[13px] font-semibold text-[#1A1A1A] mb-2.5">
+          {t('globalQrLabel')}
+        </div>
+      )}
       <QrLinkView
         qrDataUrl={qrCode}
         loading={qrLoading}

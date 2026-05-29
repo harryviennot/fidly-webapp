@@ -5,8 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   CaretDownIcon,
-  FilePdfIcon,
-  FileZipIcon,
+  DownloadSimpleIcon,
   MapPinIcon,
 } from '@phosphor-icons/react';
 import { useBusiness } from '@/contexts/business-context';
@@ -30,8 +29,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Location } from '@/types/location';
 
-const ACTION_BUTTON =
-  'flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border-medium)] bg-white text-[12px] font-medium text-[#555] cursor-pointer hover:bg-[var(--paper)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+const DOWNLOAD_ALL_BUTTON =
+  'flex-1 flex items-center justify-between gap-2 px-4 py-2.5 rounded-lg border border-[var(--border-medium)] bg-white text-[12px] font-medium text-[#555] cursor-pointer hover:bg-[var(--paper)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
 
 /**
  * Per-location QR codes, living *inside* the program-link card below the
@@ -141,16 +140,11 @@ export function LocationQrPanel() {
             type="button"
             className="w-full flex items-center gap-2.5 cursor-pointer border-none bg-transparent text-left group"
           >
-            <div className="flex-1 min-w-0">
-              <div className="text-[13px] font-semibold text-[#1A1A1A] mb-0.5">
-                {t('locationsQrTitle')}
-              </div>
-              <div className="text-[12px] text-[#A0A0A0]">
-                {t('locationsQrSubtitle')}
-              </div>
+            <div className="flex-1 min-w-0 text-[13px] font-semibold text-[#1A1A1A]">
+              {t('locationsQrTitle')}
             </div>
-            <span className="text-[10px] font-semibold text-[var(--muted-foreground)] bg-[var(--muted)] px-2 py-0.5 rounded-full flex-shrink-0 tabular-nums">
-              {activeLocations.length}
+            <span className="text-[12px] text-[var(--muted-foreground)] flex-shrink-0">
+              {t('locationsCount', { count: activeLocations.length })}
             </span>
             <CaretDownIcon
               className={cn(
@@ -164,6 +158,26 @@ export function LocationQrPanel() {
 
         <CollapsibleContent className="collapsible-content">
           <div className="pt-3.5">
+            {/* Download everything at once — full-width, 50/50, above the list */}
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={() => downloadAll('pdf')}
+                disabled={bulkBusy}
+                className={DOWNLOAD_ALL_BUTTON}
+              >
+                {t('downloadAllPdf')}
+                <DownloadSimpleIcon className="w-3.5 h-3.5 flex-shrink-0" />
+              </button>
+              <button
+                onClick={() => downloadAll('zip')}
+                disabled={bulkBusy}
+                className={DOWNLOAD_ALL_BUTTON}
+              >
+                {t('downloadAllPng')}
+                <DownloadSimpleIcon className="w-3.5 h-3.5 flex-shrink-0" />
+              </button>
+            </div>
+
             {/* One collapsible row per location */}
             <div className="flex flex-col gap-2">
               {activeLocations.map((location) => (
@@ -180,24 +194,6 @@ export function LocationQrPanel() {
                   primaryLabel={t('locationsQrPrimary')}
                 />
               ))}
-            </div>
-
-            {/* Download everything at once */}
-            <div className="flex gap-2 mt-3.5 justify-end">
-              <button
-                onClick={() => downloadAll('pdf')}
-                disabled={bulkBusy}
-                className={ACTION_BUTTON}
-              >
-                <FilePdfIcon className="w-3.5 h-3.5" /> {t('downloadAllPdf')}
-              </button>
-              <button
-                onClick={() => downloadAll('zip')}
-                disabled={bulkBusy}
-                className={ACTION_BUTTON}
-              >
-                <FileZipIcon className="w-3.5 h-3.5" /> {t('downloadAllPng')}
-              </button>
             </div>
           </div>
         </CollapsibleContent>
