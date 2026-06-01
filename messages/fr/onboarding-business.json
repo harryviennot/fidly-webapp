@@ -396,6 +396,8 @@
         "subtitleFounding": "Tarif fondateur : 50% de réduction à vie. Choisissez maintenant pour bloquer la remise, ou explorez Stampeo pendant les 30 jours d'essai gratuit sans engagement.",
         "keepTrialCta": "Plus tard",
         "recommendedBadge": "Recommandé",
+        "ctaCheckout": "Démarrer mon essai gratuit",
+        "checkoutReassurance": "Essai gratuit de 30 jours. Aucun débit aujourd'hui, annulez quand vous voulez.",
         "perMonth": "/mois",
         "youdLose": "Vous perdriez :",
         "andMore": "+ {count} autre(s)…",

@@ -17,7 +17,18 @@ export type BackgroundSave = () => Promise<
 >;
 
 export type SubmitResult =
-  | { ok: true; save?: BackgroundSave }
+  | {
+      ok: true;
+      save?: BackgroundSave;
+      /**
+       * Last step only: after finalising the wizard, hard-navigate here
+       * instead of routing to the dashboard. Used by the plan step's
+       * card-upfront flow to hand off to Stripe Checkout — finalisation
+       * (setup_progress.completed_at) is awaited first so the user isn't
+       * bounced back into the wizard if they return without paying.
+       */
+      redirectTo?: string;
+    }
   | { ok: false; reason?: string };
 
 export type SubmitHandler = () => Promise<SubmitResult>;

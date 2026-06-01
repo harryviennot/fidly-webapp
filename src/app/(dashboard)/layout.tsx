@@ -10,6 +10,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { PendingActivationPage } from "@/components/pending-activation-page";
 import { SuspendedPage } from "@/components/suspended-page";
+import { CheckoutRequiredPage } from "@/components/checkout-required-page";
 import { NoActiveBusinessState } from "@/components/no-active-business-state";
 import { TrialMobileBanner } from "@/components/billing/TrialBanner";
 import { SuspendedBanner } from "@/components/billing/SuspendedOverlay";
@@ -51,6 +52,18 @@ export default function AdminLayout({
   // A signed-in user with zero memberships has just come from /signup —
   // ship them into the wizard to create their first business.
   const needsWizardNoBusiness = !loading && !hasAnyMembership && !isImpersonating;
+
+  // Card-upfront gate (STA-173): a new-flow business that finished onboarding
+  // but never attached a payment method (abandoned Stripe Checkout). Mirrors
+  // the server-side 402 gate exactly — keyed on completed_at so it never fires
+  // mid-wizard, and bypassed under impersonation (superadmin). Rendered inline
+  // (not a redirect): the wizard 302s away once setup is complete, so sending
+  // them back there would loop.
+  const needsCheckout =
+    !!currentBusiness?.requires_card_upfront &&
+    !currentBusiness?.stripe_subscription_id &&
+    !!setupProgress?.completed_at &&
+    !isImpersonating;
 
   useEffect(() => {
     if (needsWizard) {
@@ -132,6 +145,12 @@ export default function AdminLayout({
         </div>
       </div>
     );
+  }
+
+  // Card-upfront business that completed onboarding but hasn't paid — block
+  // the dashboard behind the checkout gate until a subscription exists.
+  if (needsCheckout) {
+    return <CheckoutRequiredPage />;
   }
 
   return (

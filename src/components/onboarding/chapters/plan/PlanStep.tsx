@@ -6,7 +6,7 @@ import { Check } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useBusiness } from '@/contexts/business-context';
-import { changeTier } from '@/api/billing';
+import { changeTier, createCheckoutSession } from '@/api/billing';
 import {
   effectivePrice,
   isFoundingProgramOpen,
@@ -47,6 +47,7 @@ export function PlanStep() {
 
   const businessId = currentBusiness?.id;
   const currentTier = currentBusiness?.subscription_tier;
+  const requiresCardUpfront = !!currentBusiness?.requires_card_upfront;
   const isFoundingPartner = !!currentBusiness?.is_founding_partner;
   const foundingOpen = isFoundingProgramOpen();
   const showFoundingPricing = isFoundingPartner && foundingOpen;
@@ -65,10 +66,45 @@ export function PlanStep() {
     ctx.setCanProceed(!!selectedTier);
   }, [ctx, selectedTier]);
 
+  // Card-upfront new signups go to Stripe Checkout, so the footer CTA reflects
+  // that ("Démarrer mon essai" rather than "Lancer mon programme"). Legacy
+  // no-card businesses keep the registry default. Set from the step so it wins
+  // over the shell's per-navigation label reset (same ordering that lets the
+  // submit handler below survive).
+  useEffect(() => {
+    if (requiresCardUpfront) ctx.setNextLabel(t('ctaCheckout'));
+  }, [ctx, requiresCardUpfront, t]);
+
   useEffect(() => {
     ctx.setSubmitHandler(async () => {
       if (!selectedTier || !businessId) return { ok: false };
 
+      // New-signup card-upfront flow: hand off to Stripe Checkout. The chosen
+      // tier rides along in the checkout session; the 30-day trial starts (and
+      // the tier is persisted) when Stripe's subscription webhook fires. The
+      // shell finalises setup_progress BEFORE following `redirectTo`, so a
+      // user who returns without paying lands on the dashboard checkout gate,
+      // not back in the wizard.
+      if (requiresCardUpfront) {
+        try {
+          const origin = window.location.origin;
+          const { checkout_url } = await createCheckoutSession(
+            businessId,
+            selectedTier,
+            `${origin}/?checkout=success`,
+            `${origin}/?checkout=cancelled`
+          );
+          return { ok: true, redirectTo: checkout_url };
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : tErr('saveFailed'));
+          return {
+            ok: false,
+            reason: err instanceof Error ? err.message : tErr('saveFailed'),
+          };
+        }
+      }
+
+      // Legacy no-card flow: persist the chosen tier and finish (no payment).
       // No tier change → just finalise, skip the API call.
       if (currentTier === selectedTier) return { ok: true };
 
@@ -84,7 +120,7 @@ export function PlanStep() {
       }
     });
     return () => ctx.setSubmitHandler(null);
-  }, [ctx, selectedTier, businessId, currentTier, tErr]);
+  }, [ctx, selectedTier, businessId, currentTier, requiresCardUpfront, tErr]);
 
   const hasSelection = selectedTier !== null;
 
@@ -119,6 +155,11 @@ export function PlanStep() {
       </div>
 
       <div className="flex flex-col items-center gap-2 max-w-2xl mx-auto text-center animate-slide-up delay-160">
+        {requiresCardUpfront && (
+          <p className="wiz-helper font-medium text-[var(--foreground)]">
+            {t('checkoutReassurance')}
+          </p>
+        )}
         <p className="wiz-helper text-[#7A7A7A]">
           {tp('ctaSubtext')}
         </p>
