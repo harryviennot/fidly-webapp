@@ -69,6 +69,9 @@ import { describeFilter } from '@/lib/broadcast-filters';
 import { MessagePreview } from '@/components/notifications';
 import { AnimatedNumber } from '@/components/redesign/animated-number';
 import { GatedFeature } from '@/components/reusables/gated-feature';
+import { GatedFeaturePreview } from '@/components/reusables/gated-feature-preview';
+import { useLocations } from '@/hooks/use-locations';
+import type { Location } from '@/types/location';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1077,6 +1080,24 @@ function AudienceStep({
   estimating,
 }: Readonly<AudienceStepProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.audience');
+  const { currentBusiness } = useBusiness();
+  const { hasFeature } = useEntitlements();
+  const canMultiLocation = hasFeature('locations.multiple');
+
+  // Fetch real locations only for Pro businesses with multi-location enabled.
+  // Non-Pro renders demo chips inside the GatedFeaturePreview so they can
+  // see what the segmentation would look like.
+  const locationsQuery = useLocations(
+    canMultiLocation ? currentBusiness?.id : undefined
+  );
+  const activeLocations = useMemo(
+    () => (locationsQuery.data ?? []).filter((l) => !l.deleted_at),
+    [locationsQuery.data]
+  );
+  // Pro with >1 location → real chips. Pro with ≤1 → hide the location
+  // sub-section (no value). Non-Pro → demo chips inside the preview gate.
+  const hasMultipleRealLocations =
+    canMultiLocation && activeLocations.length > 1;
 
   const isAll = !!state.targetFilter.all;
 
@@ -1167,16 +1188,24 @@ function AudienceStep({
       {/* Filter groups */}
       {!isAll && (
         <div className="space-y-4">
-          <EnrollmentAgeGroup
+          <EnrollmentGroup
             targetFilter={state.targetFilter}
             updateFilter={updateFilter}
+            locations={activeLocations}
+            canMultiLocation={canMultiLocation}
+            hasMultipleRealLocations={hasMultipleRealLocations}
           />
 
-          <GatedFeature
+          <GatedFeaturePreview
             requiredTier="pro"
             upgradeFrom="broadcasts.segmentation"
-            gatedTitle={t('group.stamps') + ' & ' + t('group.activity')}
-            gatedDescription={t('filteredDescription')}
+            gatedTitle={t('proUpsell.title')}
+            gatedDescription={t('proUpsell.description')}
+            gatedFeatures={[
+              t('proUpsell.features.stamps'),
+              t('proUpsell.features.activity'),
+              t('proUpsell.features.location'),
+            ]}
           >
             <div className="space-y-4">
               <StampsGroup
@@ -1188,9 +1217,12 @@ function AudienceStep({
                 targetFilter={state.targetFilter}
                 updateFilter={updateFilter}
                 disabled={!canSegment}
+                locations={activeLocations}
+                canMultiLocation={canMultiLocation}
+                hasMultipleRealLocations={hasMultipleRealLocations}
               />
             </div>
-          </GatedFeature>
+          </GatedFeaturePreview>
         </div>
       )}
 
@@ -1260,10 +1292,59 @@ function GroupHeader({
 
 type EnrollmentMode = 'any' | 'recent' | 'old';
 
-function EnrollmentAgeGroup({
+interface EnrollmentGroupProps extends FilterGroupProps {
+  locations: Location[];
+  /** True when the business is on Pro with multi-location enabled. */
+  canMultiLocation: boolean;
+  /** Pro AND >1 active location. False → render demo chips under the soft gate. */
+  hasMultipleRealLocations: boolean;
+}
+
+/** Demo chips shown to non-Pro users so they see what location targeting
+ *  would look like once unlocked. Names are intentionally generic. */
+const DEMO_LOCATIONS: Location[] = [
+  { id: '__demo-1', name: 'Westside', slug: 'westside' } as Location,
+  { id: '__demo-2', name: 'Eastside', slug: 'eastside' } as Location,
+  { id: '__demo-3', name: 'Downtown', slug: 'downtown' } as Location,
+];
+
+/** Sub-section header used inside multi-section group cards. Lighter than
+ *  GroupHeader so it doesn't compete with the box-level label. */
+function SubGroupHeader({
+  label,
+  help,
+}: Readonly<{ label: string; help: string }>) {
+  return (
+    <div className="flex items-center gap-1.5 mb-2 text-[11px] font-semibold text-[#1A1A1A]">
+      {label}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label={label}
+            className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[#A0A0A0] hover:text-[#555]"
+          >
+            <InfoIcon className="h-3.5 w-3.5" weight="regular" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="max-w-[260px] text-[11px] leading-[1.45]"
+        >
+          {help}
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  );
+}
+
+function EnrollmentGroup({
   targetFilter,
   updateFilter,
-}: Readonly<FilterGroupProps>) {
+  locations,
+  canMultiLocation,
+  hasMultipleRealLocations,
+}: Readonly<EnrollmentGroupProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.audience');
 
   const getMode = (): EnrollmentMode => {
@@ -1295,11 +1376,22 @@ function EnrollmentAgeGroup({
     else if (mode === 'old') updateFilter('enrolled_before_days', v);
   };
 
+  // Pro with >1 locations: real interactive chips. Anything else: hide
+  // — non-Pro doesn't get a preview here (the consolidated upsell below
+  // covers location targeting), and segmenting one store is meaningless.
+  const showLocationSub = canMultiLocation && hasMultipleRealLocations;
+
   return (
     <div className="rounded-[10px] border border-[var(--border-light)] bg-[var(--paper)] p-3">
       <GroupHeader
         label={t('group.enrollment')}
         help={t('group.enrollmentHelp')}
+      />
+
+      {/* ── Sub-section: Enrollment age ── */}
+      <SubGroupHeader
+        label={t('sub.enrollmentAge')}
+        help={t('sub.enrollmentAgeHelp')}
       />
       <div className="grid grid-cols-3 gap-1.5 mb-3">
         {(['any', 'recent', 'old'] as EnrollmentMode[]).map((m) => (
@@ -1319,29 +1411,199 @@ function EnrollmentAgeGroup({
         ))}
       </div>
       {mode !== 'any' && (
+        <div className="flex items-center gap-2 mb-1">
+          <Input
+            type="number"
+            min={1}
+            value={currentValue ?? ''}
+            placeholder={t('enrollment.daysPlaceholder')}
+            onChange={(e) => {
+              const raw = e.target.value;
+              setDays(raw === '' ? undefined : parseInt(raw, 10));
+            }}
+            className="w-[120px] h-8 text-sm"
+          />
+          <span className="text-[11.5px] text-[#8A8A8A]">
+            {t('enrollment.daysSuffix')}
+          </span>
+        </div>
+      )}
+
+      {/* ── Sub-section: Enrollment location (Pro + >1 location only) ── */}
+      {showLocationSub && (
         <>
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              min={1}
-              value={currentValue ?? ''}
-              placeholder={t('enrollment.daysPlaceholder')}
-              onChange={(e) => {
-                const raw = e.target.value;
-                setDays(raw === '' ? undefined : parseInt(raw, 10));
-              }}
-              className="w-[120px] h-8 text-sm"
-            />
-            <span className="text-[11.5px] text-[#8A8A8A]">
-              {t('enrollment.daysSuffix')}
-            </span>
-          </div>
-          <p className="mt-1.5 text-[11px] text-[#8A8A8A] leading-[1.45]">
-            {t(`enrollment.${mode}Desc`)}
-          </p>
+          <div className="my-3 h-px bg-[var(--border-light)]" />
+          <EnrolledLocationSub
+            locations={locations}
+            targetFilter={targetFilter}
+            updateFilter={updateFilter}
+          />
         </>
       )}
     </div>
+  );
+}
+
+interface LocationSubProps {
+  locations: Location[];
+  targetFilter: BroadcastTargetFilter;
+  updateFilter: UpdateFilterFn;
+}
+
+function EnrolledLocationSub({
+  locations,
+  targetFilter,
+  updateFilter,
+}: Readonly<LocationSubProps>) {
+  const t = useTranslations('notifications.broadcasts.wizard.audience');
+  const enrolled = targetFilter.enrolled_at_location_ids;
+  const selectedIds = new Set(enrolled?.ids ?? []);
+
+  const toggleLocation = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    const ids = Array.from(next);
+    if (ids.length === 0 && !enrolled?.include_no_location) {
+      updateFilter('enrolled_at_location_ids', undefined);
+      return;
+    }
+    updateFilter('enrolled_at_location_ids', {
+      ids,
+      ...(enrolled?.include_no_location && { include_no_location: true }),
+    });
+  };
+
+  const toggleIncludeNoLocation = (on: boolean) => {
+    const ids = enrolled?.ids ?? [];
+    if (!on && ids.length === 0) {
+      updateFilter('enrolled_at_location_ids', undefined);
+      return;
+    }
+    updateFilter('enrolled_at_location_ids', {
+      ids,
+      ...(on && { include_no_location: true }),
+    });
+  };
+
+  return (
+    <>
+      <SubGroupHeader
+        label={t('sub.enrollmentLocation')}
+        help={t('sub.enrollmentLocationHelp')}
+      />
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {locations.map((loc) => {
+          const isOn = selectedIds.has(loc.id);
+          return (
+            <button
+              key={loc.id}
+              type="button"
+              onClick={() => toggleLocation(loc.id)}
+              className={cn(
+                'rounded-full border px-2.5 py-1 text-[11.5px] font-semibold transition-colors',
+                isOn
+                  ? 'bg-[var(--accent-light)] border-[var(--accent)] text-[var(--accent)]'
+                  : 'bg-white border-[var(--border-light)] text-[#555] hover:border-[var(--border)]'
+              )}
+            >
+              {loc.name}
+            </button>
+          );
+        })}
+      </div>
+      <label className="flex items-center gap-2 cursor-pointer">
+        <Switch
+          checked={!!enrolled?.include_no_location}
+          onCheckedChange={toggleIncludeNoLocation}
+        />
+        <span className="text-[11.5px] text-[#555]">
+          {t('sub.includeDirect')}
+        </span>
+      </label>
+    </>
+  );
+}
+
+function ActiveLocationSub({
+  locations,
+  targetFilter,
+  updateFilter,
+}: Readonly<LocationSubProps>) {
+  const t = useTranslations('notifications.broadcasts.wizard.audience');
+  const active = targetFilter.active_at_location_ids;
+  const selectedIds = new Set(active?.ids ?? []);
+  const DEFAULT_DAYS = 14;
+
+  const toggleLocation = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    const ids = Array.from(next);
+    if (ids.length === 0) {
+      updateFilter('active_at_location_ids', undefined);
+      return;
+    }
+    updateFilter('active_at_location_ids', {
+      ids,
+      days: active?.days ?? DEFAULT_DAYS,
+    });
+  };
+
+  const setDays = (days: number | undefined) => {
+    if (!active?.ids?.length) return;
+    if (days == null || days < 1) return;
+    updateFilter('active_at_location_ids', {
+      ids: active.ids,
+      days: Math.min(30, Math.max(1, days)),
+    });
+  };
+
+  return (
+    <>
+      <SubGroupHeader
+        label={t('sub.activeLocation')}
+        help={t('sub.activeLocationHelp')}
+      />
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {locations.map((loc) => {
+          const isOn = selectedIds.has(loc.id);
+          return (
+            <button
+              key={loc.id}
+              type="button"
+              onClick={() => toggleLocation(loc.id)}
+              className={cn(
+                'rounded-full border px-2.5 py-1 text-[11.5px] font-semibold transition-colors',
+                isOn
+                  ? 'bg-[var(--accent-light)] border-[var(--accent)] text-[var(--accent)]'
+                  : 'bg-white border-[var(--border-light)] text-[#555] hover:border-[var(--border)]'
+              )}
+            >
+              {loc.name}
+            </button>
+          );
+        })}
+      </div>
+      {active && active.ids.length > 0 && (
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            min={1}
+            max={30}
+            value={active.days}
+            onChange={(e) => {
+              const raw = e.target.value;
+              setDays(raw === '' ? undefined : parseInt(raw, 10));
+            }}
+            className="w-[80px] h-8 text-sm"
+          />
+          <span className="text-[11.5px] text-[#8A8A8A]">
+            {t('enrollment.daysSuffix')}
+          </span>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1409,12 +1671,27 @@ function StampsGroup({
   );
 }
 
+interface ActivityGroupProps extends FilterGroupProps {
+  locations: Location[];
+  canMultiLocation: boolean;
+  hasMultipleRealLocations: boolean;
+}
+
 function ActivityGroup({
   targetFilter,
   updateFilter,
   disabled,
-}: Readonly<FilterGroupProps>) {
+  locations,
+  canMultiLocation,
+  hasMultipleRealLocations,
+}: Readonly<ActivityGroupProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.audience');
+
+  // Pro with >1 location: interactive sub. Pro with ≤1 location: skip
+  // (segmenting one store is meaningless). Non-Pro: render demo chips so
+  // the option is visible — the outer GatedFeaturePreview around Stamps +
+  // Activity already provides the locked treatment, so no extra wrapping.
+  const showLocationSub = !canMultiLocation || hasMultipleRealLocations;
 
   return (
     <div className="rounded-[10px] border border-[var(--border-light)] bg-[var(--paper)] p-3">
@@ -1490,6 +1767,26 @@ function ActivityGroup({
           </span>
         </div>
       </div>
+
+      {/* ── Sub-section: Active at location ── */}
+      {showLocationSub && (
+        <>
+          <div className="my-3 h-px bg-[var(--border-light)]" />
+          {canMultiLocation ? (
+            <ActiveLocationSub
+              locations={locations}
+              targetFilter={targetFilter}
+              updateFilter={updateFilter}
+            />
+          ) : (
+            <ActiveLocationSub
+              locations={DEMO_LOCATIONS}
+              targetFilter={{}}
+              updateFilter={() => undefined}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }

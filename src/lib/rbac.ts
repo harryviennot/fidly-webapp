@@ -16,6 +16,7 @@ export const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/program": ["owner", "admin"],
   "/program/settings": ["owner"],
   "/program/templates": ["owner"],
+  "/program/locations": ["owner", "admin"],
   "/customers": ["owner", "admin"],
   "/activity": ["owner", "admin"],
   "/team": ["owner", "admin"],

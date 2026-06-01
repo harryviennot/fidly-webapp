@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { InfoBox } from '@/components/reusables/info-box';
 import { cn } from '@/lib/utils';
 import { useBusiness } from '@/contexts/business-context';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import {
   useUpdateNotificationTemplate,
   useResetNotificationTemplate,
@@ -16,6 +17,7 @@ import {
 import {
   renderSamplePreview,
   VARIABLE_KEYS,
+  PRO_ONLY_VARIABLES,
   type VariableKey,
 } from '@/lib/template-variables';
 import { ApiError } from '@/api/client';
@@ -83,6 +85,7 @@ export const TriggerEditForm = forwardRef<TriggerEditFormHandle, TriggerEditForm
     const t = useTranslations('notifications');
     const tToast = useTranslations('notifications.toasts');
     const { currentBusiness } = useBusiness();
+    const { hasFeature } = useEntitlements();
     const updateMutation = useUpdateNotificationTemplate(currentBusiness?.id);
     const resetMutation = useResetNotificationTemplate(currentBusiness?.id);
 
@@ -101,9 +104,13 @@ export const TriggerEditForm = forwardRef<TriggerEditFormHandle, TriggerEditForm
 
     const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
     const isNameCollectionOff = collectName === 'off' || collectName === false;
+    const canMultiLocation = hasFeature('locations.multiple');
     const disabledVars = new Set<VariableKey>();
     if (!rewardNameSet) disabledVars.add('reward_name');
     if (isNameCollectionOff) disabledVars.add('customer_first_name');
+    if (!canMultiLocation) {
+      for (const v of PRO_ONLY_VARIABLES) disabledVars.add(v);
+    }
     const usesCustomerName = bodyUsesCustomerName(bodyByLocale);
 
     const currentBody = bodyByLocale[locale];
@@ -236,10 +243,12 @@ export const TriggerEditForm = forwardRef<TriggerEditFormHandle, TriggerEditForm
             disabledTooltips={{
               reward_name: t('editor.rewardNameMissing'),
               customer_first_name: t('editor.nameCollectionOff'),
+              store_location: t('editor.storeLocationPro'),
             }}
             disabledHrefs={{
               reward_name: '/program/settings',
               customer_first_name: '/program/settings',
+              store_location: '/billing?from=template_var_store_location',
             }}
           />
         </div>

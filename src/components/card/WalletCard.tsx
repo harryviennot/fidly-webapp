@@ -293,13 +293,20 @@ function FakeQRCode({ size = 80 }: { size?: number }) {
 
 const STRIP_ASPECT_RATIO = 1125 / 432;
 
+interface StampGridContainerProps
+  extends Omit<StampGridProps, "containerWidth" | "containerHeight"> {
+  /** Cap the rendered strip width. Defaults to undefined (fills parent). */
+  maxWidth?: number | string;
+}
+
 export function StampGridContainer({
   totalStamps,
   filledCount,
   colors,
   stampIcon,
   rewardIcon,
-}: Omit<StampGridProps, "containerWidth" | "containerHeight">) {
+  maxWidth,
+}: StampGridContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -327,10 +334,11 @@ export function StampGridContainer({
   return (
     <div
       ref={containerRef}
-      className="relative w-full"
+      className="relative w-full mx-auto"
       style={{
         // Use aspect-ratio to maintain proportions
         aspectRatio: `${STRIP_ASPECT_RATIO}`,
+        maxWidth,
       }}
     >
       {dimensions.width > 0 && dimensions.height > 0 && (

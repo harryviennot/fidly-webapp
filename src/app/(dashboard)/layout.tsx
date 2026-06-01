@@ -44,6 +44,7 @@ export default function AdminLayout({
   const setupProgress = currentBusiness?.settings?.setup_progress;
   const needsWizard =
     !!currentBusiness &&
+    currentBusiness.status === "active" &&
     currentRole === "owner" &&
     !isImpersonating &&
     !setupProgress?.completed_at;

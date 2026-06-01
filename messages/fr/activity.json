@@ -12,6 +12,10 @@
     "you": "Vous",
     "live": "En direct",
     "stampProgress": "{current}/{total} tampons",
+    "sources": {
+      "scanner": "Scan",
+      "dashboard": "Manuel"
+    },
     "filters": {
       "all": "Tout",
       "stampAdded": "Tampons ajout\u00e9s",
@@ -22,6 +26,13 @@
       "cardAdded": "Carte ajoutée",
       "cardReAdded": "Carte ré-ajoutée",
       "cardDeleted": "Carte supprimée"
+    },
+    "locationFilter": {
+      "allLocations": "Tous les emplacements",
+      "noLocation": "Sans emplacement",
+      "primary": "principal",
+      "unknown": "Emplacement inconnu",
+      "clear": "Effacer le filtre d'emplacement"
     },
     "itemVerbs": {
       "stamp_added": "a reçu un tampon",

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { TransactionResponse } from "@/types";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
 import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
+import { LocationBadge } from "@/components/locations/location-badge";
 
 interface TransactionItemProps {
   transaction: TransactionResponse;
@@ -29,8 +31,11 @@ export function TransactionItem({
   iconColor,
 }: TransactionItemProps) {
   const t = useTranslations("customers.transaction");
+  const { hasFeature } = useEntitlements();
   const config = TYPE_CONFIG[transaction.type];
   const [reasonExpanded, setReasonExpanded] = useState(false);
+  const showLocation =
+    hasFeature("locations.multiple") && !!transaction.location_name;
 
   const formatRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -54,6 +59,19 @@ export function TransactionItem({
       : String(transaction.stamp_delta);
 
   const metadata = transaction.metadata as Record<string, string> | null;
+  const isAdjustment =
+    transaction.source === "dashboard" &&
+    (transaction.type === "stamp_added" || transaction.type === "bonus_stamp");
+  const adjustmentReason = isAdjustment ? metadata?.adjustment_reason : undefined;
+
+  // Map known source values to translated labels; fall back to the raw value
+  // so unexpected backend sources still show something.
+  const sourceLabel =
+    transaction.source === "scanner"
+      ? t("sources.scanner")
+      : transaction.source === "dashboard"
+        ? t("sources.dashboard")
+        : transaction.source;
 
   return (
     <div className="flex gap-3 relative">
@@ -119,7 +137,7 @@ export function TransactionItem({
                   {transaction.stamps_after}
                 </span>
                 <span className="text-[#D8D5CE]">·</span>
-                <span>{transaction.source}</span>
+                <span>{sourceLabel}</span>
               </>
             )}
             {transaction.employee_name && (
@@ -128,6 +146,15 @@ export function TransactionItem({
                 <span>
                   {t("by")} {transaction.employee_id === currentUserId ? t("you") : transaction.employee_name}
                 </span>
+              </>
+            )}
+            {showLocation && (
+              <>
+                <span className="text-[#D8D5CE]">·</span>
+                <LocationBadge
+                  name={transaction.location_name!}
+                  variant="subtle"
+                />
               </>
             )}
           </div>
@@ -143,6 +170,20 @@ export function TransactionItem({
               )}
             >
               {t("voidReason")}: {metadata.void_reason}
+            </button>
+          )}
+
+          {/* Expandable adjustment reason (dashboard-source stamps) */}
+          {adjustmentReason && (
+            <button
+              type="button"
+              onClick={() => setReasonExpanded(!reasonExpanded)}
+              className={cn(
+                "text-[11px] text-[#8A8A8A] mt-1.5 italic text-left w-full transition-colors hover:text-[#1A1A1A]",
+                !reasonExpanded && "line-clamp-1"
+              )}
+            >
+              {t("adjustmentReason")}: {adjustmentReason}
             </button>
           )}
         </div>

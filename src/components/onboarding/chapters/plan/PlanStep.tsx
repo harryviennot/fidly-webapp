@@ -112,10 +112,7 @@ export function PlanStep() {
             isFoundingPartner={isFoundingPartner}
             isSelected={selectedTier === tier}
             hasSelection={hasSelection}
-            onSelect={() => {
-              if (tier === 'pro') return; // disabled — coming soon
-              setSelectedTier(tier);
-            }}
+            onSelect={() => setSelectedTier(tier)}
             tp={tp}
           />
         ))}
@@ -174,7 +171,6 @@ function TierCard({
   onSelect,
   tp,
 }: TierCardProps) {
-  const isPro = tier === 'pro';
   const isGrowth = tier === 'growth';
 
   // Growth always carries the "most popular" framing — accent-colored when
@@ -189,15 +185,13 @@ function TierCard({
   // bump dimensions on its neighbours (no ring-vs-border layout swap).
   // Growth-dimmed gets a muted neutral instead of pure foreground so it
   // still reads as "recommended" without competing with the chosen card.
-  const borderColorClass = isPro
-    ? 'border-[var(--border)]'
-    : isSelected
+  const borderColorClass = isSelected
+    ? 'border-[var(--accent)]'
+    : isGrowthAccented
       ? 'border-[var(--accent)]'
-      : isGrowthAccented
-        ? 'border-[var(--accent)]'
-        : isGrowthDimmed
-          ? 'border-[#9A9A9A]'
-          : 'border-[var(--border)]';
+      : isGrowthDimmed
+        ? 'border-[#9A9A9A]'
+        : 'border-[var(--border)]';
 
   const { displayPrice, regularPrice, isFoundingDiscount } = effectivePrice(
     tier,
@@ -211,26 +205,19 @@ function TierCard({
       className={cn(
         'relative flex flex-col rounded-2xl border-2 p-5 bg-white transition-colors',
         borderColorClass,
-        isPro && 'opacity-50',
         isSelected && 'shadow-lg',
         isGrowthAccented && !isSelected && 'shadow-md'
       )}
     >
-      {/* Top badge: SELECTED beats COMING SOON beats POPULAR (Growth keeps
-          its popular badge whether it's the chosen tier or someone else
-          was picked — only Growth itself becoming the selected card
-          replaces the badge with "SELECTED"). */}
-      {isSelected && !isPro ? (
+      {/* Top badge: SELECTED beats POPULAR (Growth keeps its popular badge
+          whether it's the chosen tier or someone else was picked — only
+          Growth itself becoming the selected card replaces the badge with
+          "SELECTED"). */}
+      {isSelected ? (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-white whitespace-nowrap">
             <Check className="w-3 h-3" weight="bold" />
             {tp('selected')}
-          </span>
-        </div>
-      ) : isPro ? (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--paper)] text-[#7A7A7A] whitespace-nowrap">
-            {tp('comingSoon')}
           </span>
         </div>
       ) : isGrowth ? (
@@ -249,12 +236,7 @@ function TierCard({
       ) : null}
 
       <div className="mb-4 mt-1">
-        <h3
-          className={cn(
-            'text-lg font-bold leading-tight',
-            isPro ? 'text-[#7A7A7A]' : 'text-[var(--foreground)]'
-          )}
-        >
+        <h3 className="text-lg font-bold leading-tight text-[var(--foreground)]">
           {tp(`${tier}.name`)}
         </h3>
         <p className="wiz-helper text-[#7A7A7A] mt-0.5 leading-snug">
@@ -280,12 +262,7 @@ function TierCard({
             </>
           ) : (
             <div className="flex items-baseline gap-1">
-              <span
-                className={cn(
-                  'text-3xl font-extrabold tabular-nums',
-                  isPro ? 'text-[#7A7A7A]' : 'text-[var(--foreground)]'
-                )}
-              >
+              <span className="text-3xl font-extrabold tabular-nums text-[var(--foreground)]">
                 €{regularPrice}
               </span>
               <span className="wiz-helper text-[#7A7A7A]">
@@ -303,55 +280,34 @@ function TierCard({
         <ul className="space-y-1.5">
           {features.map((feature, i) => (
             <li key={i} className="flex items-start gap-2 wiz-helper">
-              <span
-                className={cn(
-                  'w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5',
-                  isPro ? 'bg-[var(--paper)]' : 'bg-[var(--accent)]'
-                )}
-              >
-                <Check
-                  className={cn(
-                    'w-2.5 h-2.5',
-                    isPro ? 'text-[#9A9A9A]' : 'text-white'
-                  )}
-                  weight="bold"
-                />
+              <span className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-[var(--accent)]">
+                <Check className="w-2.5 h-2.5 text-white" weight="bold" />
               </span>
-              <span
-                className={isPro ? 'text-[#7A7A7A]' : 'text-[var(--foreground)]'}
-              >
-                {feature}
-              </span>
+              <span className="text-[var(--foreground)]">{feature}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      {isPro ? (
-        <div className="w-full h-11 px-4 flex items-center justify-center wiz-body-sm font-semibold rounded-full border-2 border-[var(--border)] text-[#9A9A9A] cursor-not-allowed">
-          {tp('ctaComingSoon')}
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={onSelect}
-          className={cn(
-            // Fixed height + flex layout — keeps the button identical in
-            // size whether it renders "Commencer" or the "✓ Sélectionné"
-            // icon+label combo. Without `h-11` the inline-flex wrapper for
-            // the selected state shifts the button height by a hair.
-            'w-full h-11 px-4 flex items-center justify-center gap-1.5 wiz-body-sm font-semibold rounded-full transition-colors duration-200 border-2',
-            isSelected
-              ? 'bg-[var(--accent)] border-[var(--accent)] text-white cursor-default shadow-md shadow-[var(--accent)]/25'
-              : isGrowthAccented
-                ? 'bg-[var(--accent)] border-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:border-[var(--accent-hover)] hover:shadow-lg hover:shadow-[var(--accent)]/25'
-                : 'bg-white border-[var(--foreground)] text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-white'
-          )}
-        >
-          {isSelected && <Check className="w-3.5 h-3.5" weight="bold" />}
-          {isSelected ? tp('selected') : tp('cta')}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={onSelect}
+        className={cn(
+          // Fixed height + flex layout — keeps the button identical in
+          // size whether it renders "Commencer" or the "✓ Sélectionné"
+          // icon+label combo. Without `h-11` the inline-flex wrapper for
+          // the selected state shifts the button height by a hair.
+          'w-full h-11 px-4 flex items-center justify-center gap-1.5 wiz-body-sm font-semibold rounded-full transition-colors duration-200 border-2',
+          isSelected
+            ? 'bg-[var(--accent)] border-[var(--accent)] text-white cursor-default shadow-md shadow-[var(--accent)]/25'
+            : isGrowthAccented
+              ? 'bg-[var(--accent)] border-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:border-[var(--accent-hover)] hover:shadow-lg hover:shadow-[var(--accent)]/25'
+              : 'bg-white border-[var(--foreground)] text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-white'
+        )}
+      >
+        {isSelected && <Check className="w-3.5 h-3.5" weight="bold" />}
+        {isSelected ? tp('selected') : tp('cta')}
+      </button>
     </div>
   );
 }

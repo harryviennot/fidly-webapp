@@ -12,6 +12,10 @@
     "you": "You",
     "live": "Live",
     "stampProgress": "{current}/{total} stamps",
+    "sources": {
+      "scanner": "Scan",
+      "dashboard": "Manual"
+    },
     "filters": {
       "all": "All",
       "stampAdded": "Stamps Added",
@@ -22,6 +26,13 @@
       "cardAdded": "Card Added",
       "cardReAdded": "Card Re-added",
       "cardDeleted": "Card Deleted"
+    },
+    "locationFilter": {
+      "allLocations": "All locations",
+      "noLocation": "Unassigned",
+      "primary": "primary",
+      "unknown": "Unknown location",
+      "clear": "Clear location filter"
     },
     "itemVerbs": {
       "stamp_added": "received a stamp",

@@ -21,6 +21,11 @@ export interface CustomerResponse {
   // Source-of-truth list of this customer's enrollments at this business.
   // Always length 1 today; multi-program future will produce length N.
   enrollments: Enrollment[];
+  // Multi-location: the location the customer signed up through. NULL is a
+  // first-class state — parent-org enrollment via /{biz_slug} with no
+  // location suffix. Display as "Direct signup", not as missing data.
+  enrolled_at_location_id?: string | null;
+  enrolled_at_location_name?: string | null;
 }
 
 export interface PaginatedCustomerResponse {

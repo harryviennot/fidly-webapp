@@ -75,6 +75,23 @@ export function describeFilter(
       label: tf('audience.chip.inactive_days', { n: filter.inactive_days }),
     });
   }
+  if (filter.enrolled_at_location_ids?.ids?.length) {
+    chips.push({
+      key: 'enrolled_at_location_ids',
+      label: tf('audience.chip.enrolled_at_location_ids', {
+        n: filter.enrolled_at_location_ids.ids.length,
+      }),
+    });
+  }
+  if (filter.active_at_location_ids?.ids?.length) {
+    chips.push({
+      key: 'active_at_location_ids',
+      label: tf('audience.chip.active_at_location_ids', {
+        n: filter.active_at_location_ids.ids.length,
+        days: filter.active_at_location_ids.days,
+      }),
+    });
+  }
 
   // Fallback — should not happen because `all: true` was caught above, but
   // keeps the list non-empty if the backend returned an unexpected shape.

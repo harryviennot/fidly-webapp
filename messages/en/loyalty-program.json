@@ -96,6 +96,18 @@
       "scanToAdd": "Scan to add loyalty card to wallet",
       "downloadPng": "Download PNG",
       "downloadPdf": "Download PDF",
+      "locationsQrTitle": "Per-location QR codes",
+      "globalQrLabel": "Global QR",
+      "locationsCount": "{count} locations",
+      "locationsQrInfoTitle": "The QR above is global",
+      "locationsQrInfoBody": "It signs customers up without linking them to a location, so it's best for online posts and brand communications. Most merchants display a per-location code at the till instead, so they can see where customers join.",
+      "locationsQrPrimary": "Primary",
+      "downloadAllPdf": "Download all as PDF",
+      "downloadAllPng": "Download all as PNG",
+      "downloadAllError": "Could not prepare the download. Please try again.",
+      "qrUnavailable": "QR code unavailable",
+      "copyFailed": "Could not copy the link",
+      "downloadPdfError": "Could not generate the PDF",
       "programConfiguration": "Program Configuration",
       "edit": "Edit",
       "loyaltyType": "Loyalty Type",
@@ -182,6 +194,176 @@
       "settingsFailed": "Failed to update settings",
       "programUpdated": "Program updated",
       "programUpdateFailed": "Failed to update program"
+    },
+    "locations": {
+      "title": "Locations",
+      "subtitle": "Manage your physical stores and where each stamp is issued.",
+      "addLocation": "Add location",
+      "searchPlaceholder": "Search by name, slug, or address",
+      "noMatches": "No locations match your search.",
+      "error": {
+        "title": "Couldn't load your locations",
+        "description": "Something went wrong fetching this list. Check your connection and try again.",
+        "retry": "Try again"
+      },
+      "starter": {
+        "headline": "Manage every store from one place",
+        "description": "Register all your locations and tailor messaging by store.",
+        "features": {
+          "multiple": "Unlimited stores with their own QR codes",
+          "scanners": "Assign scanners to specific locations",
+          "segmentation": "Broadcasts targeted by store",
+          "analytics": "Per-location stats and customer breakdowns"
+        },
+        "cta": "Upgrade to Pro"
+      },
+      "empty": {
+        "title": "Add your first location",
+        "description": "Tag every stamp and signup with the store where it happened. Filter, analyze, and assign scanners per location.",
+        "cta": "Create your first location",
+        "upgradeCta": "Upgrade to Pro"
+      },
+      "card": {
+        "primary": "Primary",
+        "noAddress": "No address — tap to add one",
+        "membersCount": "{count, plural, =0 {No scanners assigned} one {# scanner} other {# scanners}}",
+        "edit": "Edit",
+        "viewQr": "View QR",
+        "delete": "Delete",
+        "actions": "More actions",
+        "actionsHint": "Manage this location",
+        "signups": "Signups",
+        "stamps30d": "Stamps 30d",
+        "redemptions30d": "Redeemed 30d",
+        "addAnother": "Add another location"
+      },
+      "form": {
+        "name": "Location name",
+        "slug": "URL slug",
+        "slugTaken": "This slug is already used by another location.",
+        "slugLockedHelper": "Locked. URL slugs can't change once a location is live.",
+        "address": "Address",
+        "searchAddress": "Search your business",
+        "searchAddressPlaceholder": "Start typing a business name or address",
+        "autocompleteEmpty": "Keep typing to see suggestions…",
+        "autocompleteError": "Couldn't load suggestions. Try again or enter manually.",
+        "positionConfirmed": "Position confirmed",
+        "editDetails": "Edit details",
+        "done": "Done",
+        "addressLine": "Street",
+        "city": "City",
+        "postalCode": "Postal code",
+        "country": "Country",
+        "cannotFindBusiness": "Can't find your business? Enter manually",
+        "useAutocomplete": "Search with Google instead",
+        "setPrimary": "Set as primary location",
+        "alreadyPrimary": "This is already your primary location.",
+        "setPrimaryConfirm": "This will demote your current primary location and make this one your customer-facing default. Continue?",
+        "cancel": "Cancel",
+        "create": "Create location",
+        "save": "Save",
+        "saving": "Saving…",
+        "genericError": "Could not save the location."
+      },
+      "create": {
+        "title": "Add a location",
+        "description": "Customers visiting this location's URL will be enrolled here. You can assign scanners after creating it.",
+        "successToast": "Location created",
+        "backfillToast": "{name} created — {transactions} past stamps and {customers} customers linked here."
+      },
+      "edit": {
+        "title": "Edit location",
+        "description": "Update this location's details. Changes apply to the printed QR and the enrollment URL immediately."
+      },
+      "wizard": {
+        "stepOf": "Step {current} of {total}",
+        "back": "Back",
+        "next": "Continue",
+        "create": "Create location",
+        "save": "Save changes",
+        "step1": {
+          "title": "Name this store",
+          "subtitle": "Pick a name you'll recognize. The URL slug below is part of your QR code, so it can't be changed later."
+        },
+        "step2": {
+          "title": "Where is this store?",
+          "subtitle": "Adding an address lets your team see which store they're stamping from, so stamps don't land at the wrong location."
+        },
+        "slugLockedWarning": {
+          "title": "This URL is permanent",
+          "message": "Your QR code is built from this slug. Once you save, it's locked, otherwise every QR already shared would stop working."
+        },
+        "primaryLabel": "Set as primary location",
+        "primaryHelp": "The primary location catches customers and activity that aren't linked to a specific store.",
+        "alreadyPrimary": "This is already your primary location.",
+        "backfill": {
+          "label": "Link my past activity to this location",
+          "help": "Every stamp, signup, and redemption from before now will be tagged to this location. This can't be undone."
+        }
+      },
+      "detail": {
+        "primary": "Primary",
+        "info": "Info",
+        "edit": "Edit",
+        "address": "Address",
+        "noAddress": "No address",
+        "coordinates": "Coordinates",
+        "noCoordinates": "Not set",
+        "enrollmentUrl": "Enrollment URL",
+        "urlCopied": "URL copied to clipboard",
+        "urlCopyFailed": "Could not copy URL",
+        "members": "Assigned scanners",
+        "noMembers": "No scanners assigned yet. Owners and admins can always stamp here.",
+        "membersUpsellTitle": "Per-location scanner assignment is Pro",
+        "membersUpsellDescription": "On Pro, scanners only see and stamp the locations they're assigned to.",
+        "unassign": "Unassign",
+        "unassignedToast": "{name} unassigned",
+        "unassignFailed": "Could not unassign member",
+        "qr": "QR code",
+        "qrLoading": "Generating QR…",
+        "qrUnavailable": "QR code generator is not available.",
+        "qrUpsellTitle": "QR generation is Pro",
+        "qrUpsellDescription": "Print a per-location QR so customers enrolled at the right store from the start.",
+        "downloadPng": "Download PNG",
+        "downloadPdf": "Download PDF",
+        "downloadPdfError": "Could not generate the PDF",
+        "stats": "Stats",
+        "statsLoading": "Loading…",
+        "statsUpsellTitle": "Per-location stats are Pro",
+        "statsUpsellDescription": "See how each store is performing in isolation, not just the global view.",
+        "stampsAdded": "Stamps added",
+        "rewardsRedeemed": "Rewards redeemed",
+        "stampsVoided": "Stamps voided",
+        "uniqueCustomers": "Unique customers",
+        "enrolledHere": "Enrolled here",
+        "allTime": "All-time",
+        "range": {
+          "7d": "7d",
+          "30d": "30d",
+          "90d": "90d",
+          "all": "All"
+        },
+        "dangerZone": "Danger zone",
+        "delete": "Delete location",
+        "deleteUpgrade": "Upgrade to Pro to delete locations.",
+        "deleteTitle": "Delete {name}?",
+        "deleteDescription": "Scanner assignments will be cleared and this location will no longer appear in filters. Existing transactions keep their location tag for history.",
+        "cancel": "Keep",
+        "confirmDelete": "Delete",
+        "deletedToast": "{name} deleted",
+        "deleteFailed": "Could not delete location",
+        "cannotDeletePrimary": "Promote another location to primary before deleting this one.",
+        "savedToast": "Location updated"
+      },
+      "members": {
+        "addMember": "Add",
+        "searchPlaceholder": "Search by name or email",
+        "loading": "Loading…",
+        "noMatches": "No matches",
+        "noCandidates": "Every scanner is already assigned here.",
+        "assignedToast": "{name} assigned",
+        "assignFailed": "Could not assign member"
+      }
     }
   }
 }

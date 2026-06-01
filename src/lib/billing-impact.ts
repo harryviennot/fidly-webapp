@@ -8,7 +8,6 @@ import type { PreviewDowngradeResponse } from '@/api/billing';
  */
 const HIDDEN_FEATURES = new Set([
   'programs.events',
-  'programs.multiple',
   'designs.scheduled',
   'locations.multiple',
   'locations.geofencing',

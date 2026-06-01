@@ -49,12 +49,15 @@
       "maxed": "Max!",
       "redeem": "Redeem",
       "voidLast": "Void Last",
-      "voidReasonPlaceholder": "Reason for voiding...",
+      "voidReasonPlaceholder": "e.g. Stamp added by mistake",
       "voiding": "Voiding...",
-      "confirmVoid": "Confirm",
-      "voidDialogTitle": "Void Last Stamp",
-      "voidDialogDescription": "This will remove the last stamp. Please provide a reason.",
-      "voidReasonLabel": "Reason",
+      "confirmVoid": "Void stamp",
+      "voidDialogTitle": "Void last stamp",
+      "voidChip1": "Added by mistake",
+      "voidChip2": "Duplicate scan",
+      "voidChip3": "Customer cancelled",
+      "voidReasonLabel": "Reason for voiding",
+      "voidReasonHelp": "Customers don't see this. Visible to your team only.",
       "cancel": "Cancel",
       "stampAddedToast": "Stamp added!",
       "stampFailedToast": "Failed to add stamp",
@@ -62,7 +65,28 @@
       "redeemFailedToast": "Failed to redeem reward",
       "voidSuccessToast": "Stamp voided",
       "voidFailedToast": "Failed to void stamp",
-      "noVoidableStamp": "No stamp to void"
+      "noVoidableStamp": "No stamp to void",
+      "adjustment": {
+        "title": "Add a stamp",
+        "chip1": "Forgot to scan",
+        "chip2": "Manager comp",
+        "chip3": "Loyalty bonus",
+        "reasonLabel": "Reason for adjustment",
+        "reasonPlaceholder": "e.g. Customer forgot to scan",
+        "reasonHelp": "Customers don't see this. Visible to your team only.",
+        "locationLabel": "Linked location",
+        "locationHelp": "Optional. Tag this stamp to one of your stores.",
+        "noLocation": "No location",
+        "primary": "primary",
+        "submit": "Add stamp",
+        "submitting": "Adding...",
+        "errors": {
+          "notAllowed": "Only owners and admins can add stamps manually.",
+          "reasonRequired": "A reason is required.",
+          "locationNotFound": "That location is no longer available.",
+          "locationNotPermitted": "You aren't assigned to that location."
+        }
+      }
     },
     "toasts": {
       "stampAdded": "Stamp added for {name}",
@@ -85,11 +109,14 @@
       "description": "Customers will appear here once they register through your loyalty program link."
     },
     "detail": {
+      "customerProfile": "Customer Profile",
       "stampProgress": "Stamp Progress",
       "firstVisit": "First Visit",
       "lastVisit": "Last Visit",
       "totalVisits": "Total Visits",
       "redemptions": "Redemptions",
+      "enrolledAt": "Enrolled at",
+      "directSignup": "Direct signup",
       "recentActivity": "Recent Activity",
       "segments": {
         "new": "New",
@@ -117,6 +144,11 @@
       "by": "by",
       "you": "You",
       "voidReason": "Reason",
+      "adjustmentReason": "Reason",
+      "sources": {
+        "scanner": "Scan",
+        "dashboard": "Manual"
+      },
       "time": {
         "justNow": "Just now",
         "minutesAgo": "{count}m ago",

@@ -70,7 +70,13 @@ const programItems: NavItem[] = [
     lockedFeature: "notifications.broadcast",
     lockedBadgeLabel: "GROWTH",
   },
-  { href: "/program/locations", labelKey: "loyaltyProgram.nav.locations", icon: MapPin, pro: true },
+  {
+    href: "/program/locations",
+    labelKey: "loyaltyProgram.nav.locations",
+    icon: MapPin,
+    lockedFeature: "locations.multiple",
+    lockedBadgeLabel: "PRO",
+  },
 ];
 
 // "MANAGE" section

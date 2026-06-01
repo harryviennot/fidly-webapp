@@ -49,12 +49,20 @@ export function UpsellHero({
         className
       )}
     >
+      {/* Primary bloom — top-right, slightly bigger than the original but
+          same gentle intensity. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 h-60 w-60 rounded-full bg-amber-200/40 blur-3xl"
+        className="pointer-events-none absolute -top-28 -right-28 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl"
+      />
+      {/* Secondary wash — bottom-left, adds depth so the warmth wraps the
+          full card instead of pulling everything to one corner. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl"
       />
 
-      <div className="relative flex flex-col items-center text-center px-6 py-12 sm:py-14">
+      <div className="relative flex flex-col items-start text-left px-6 py-12 sm:py-14 sm:px-10">
         <div className="relative mb-5">
           <div className="w-16 h-16 rounded-2xl bg-[#1A1A1A] text-white flex items-center justify-center shadow-lg shadow-black/20">
             {icon ?? <CrownIcon className="w-7 h-7 text-amber-400" weight="fill" />}
@@ -67,10 +75,10 @@ export function UpsellHero({
           </div>
         </div>
 
-        <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1A1A1A] mb-2 leading-tight max-w-md">
+        <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1A1A1A] mb-2 leading-tight max-w-xl">
           {title}
         </h2>
-        <p className="text-[13.5px] text-[#555] max-w-md leading-[1.55] mb-6">
+        <p className="text-[13.5px] text-[#555] max-w-xl leading-[1.55] mb-6">
           {description}
         </p>
 

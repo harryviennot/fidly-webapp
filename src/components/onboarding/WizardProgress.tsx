@@ -1,5 +1,6 @@
 'use client';
 
+import { WizardBusinessSwitcher } from './WizardBusinessSwitcher';
 import { WizardLanguageSwitcher } from './WizardLanguageSwitcher';
 
 interface WizardProgressProps {
@@ -51,7 +52,8 @@ export function WizardProgress({
             </p>
           ) : null}
         </div>
-        <div className="flex-shrink-0 pt-0.5">
+        <div className="flex flex-shrink-0 items-center gap-2 pt-0.5">
+          <WizardBusinessSwitcher />
           <WizardLanguageSwitcher />
         </div>
       </div>

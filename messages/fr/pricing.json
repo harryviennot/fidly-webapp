@@ -2,12 +2,10 @@
   "pricing": {
     "foundingPartner": "FONDATEUR",
     "popular": "LE PLUS POPULAIRE",
-    "comingSoon": "BIENTÔT",
     "perMonth": "/mois",
     "forLife": "/mois, à vie",
     "cta": "Commencer",
     "selected": "Sélectionné",
-    "ctaComingSoon": "Me prévenir au lancement",
     "ctaSubtext": "Sans carte bancaire. Sans engagement. Annulez en un clic.",
     "legalNotice": "En confirmant votre abonnement, vous acceptez nos <terms>Conditions d'utilisation</terms> et reconnaissez notre <privacy>Politique de confidentialité</privacy>.",
     "countdown": {

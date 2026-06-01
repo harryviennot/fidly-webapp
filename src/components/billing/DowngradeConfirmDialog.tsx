@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   WarningCircle,
   UserCircle,
@@ -11,6 +11,8 @@ import {
   Steps,
   CalendarCheck,
   UsersThree,
+  Storefront,
+  PaperPlaneTilt,
 } from "@phosphor-icons/react";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import {
@@ -23,14 +25,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { usePreviewDowngrade } from "@/hooks/useBilling";
+import { useBroadcasts, useSendBroadcast } from "@/hooks/use-notifications";
+import { useBusiness } from "@/contexts/business-context";
 import type { PreviewDowngradeResponse } from "@/api/billing";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // ── Features not yet developed — hide from downgrade preview ────
 const HIDDEN_FEATURES = new Set([
   "programs.events",
-  "programs.multiple",
   "designs.scheduled",
   "locations.multiple",
   "locations.geofencing",
@@ -65,6 +69,8 @@ export function DowngradeConfirmDialog({
   isConfirming = false,
 }: DowngradeConfirmDialogProps) {
   const t = useTranslations("billing");
+  const locale = useLocale();
+  const { currentBusiness } = useBusiness();
   const preview = usePreviewDowngrade();
 
   useEffect(() => {
@@ -76,6 +82,26 @@ export function DowngradeConfirmDialog({
 
   const data: PreviewDowngradeResponse | undefined = preview.data ?? undefined;
   const ni = data?.notification_impact;
+
+  // Scheduled broadcasts that would be cancelled — let the owner fire them
+  // now (while still on the current plan) instead of losing them.
+  const willCancelBroadcasts = (ni?.scheduled_broadcasts_cancelled ?? 0) > 0;
+  const broadcastsQuery = useBroadcasts(
+    open && willCancelBroadcasts ? currentBusiness?.id : undefined,
+    { status: "scheduled" }
+  );
+  const scheduledBroadcasts = broadcastsQuery.data?.items ?? [];
+  const sendBroadcast = useSendBroadcast(currentBusiness?.id);
+
+  const formatBroadcastDate = (iso: string | null) => {
+    if (!iso) return "";
+    return new Date(iso).toLocaleString(locale, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   // Filter features_lost to only show real, non-redundant features
   const visibleFeatures = (data?.features_lost ?? []).filter((key) => {
@@ -133,6 +159,15 @@ export function DowngradeConfirmDialog({
       icon: Megaphone,
       message: t("downgradeImpactScheduledBroadcasts", {
         count: ni.scheduled_broadcasts_cancelled,
+      }),
+    });
+  }
+
+  if (ni && ni.store_location_templates_affected > 0) {
+    dataItems.push({
+      icon: Storefront,
+      message: t("downgradeImpactStoreLocation", {
+        count: ni.store_location_templates_affected,
       }),
     });
   }
@@ -213,6 +248,54 @@ export function DowngradeConfirmDialog({
             <p className="text-xs text-[var(--muted-foreground)] pt-1 border-t border-[var(--warning)]/20">
               {t("downgradeReassurance")}
             </p>
+          </div>
+        )}
+
+        {willCancelBroadcasts && scheduledBroadcasts.length > 0 && (
+          <div className="rounded-lg border border-[var(--border)] p-4 space-y-3 text-sm">
+            <div>
+              <p className="font-semibold text-[var(--foreground)]">
+                {t("sendBeforeDowngradeTitle")}
+              </p>
+              <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                {t("sendBeforeDowngradeHint")}
+              </p>
+            </div>
+            <ul className="space-y-2">
+              {scheduledBroadcasts.map((b) => {
+                const isSending =
+                  sendBroadcast.isPending && sendBroadcast.variables === b.id;
+                return (
+                  <li
+                    key={b.id}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-[var(--foreground)]">
+                        {b.title}
+                      </p>
+                      {b.scheduled_at && (
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          {t("broadcastScheduledFor", {
+                            date: formatBroadcastDate(b.scheduled_at),
+                          })}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0"
+                      disabled={sendBroadcast.isPending}
+                      onClick={() => sendBroadcast.mutate(b.id)}
+                    >
+                      <PaperPlaneTilt size={16} weight="bold" />
+                      {isSending ? t("sendingNow") : t("sendNowAction")}
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
 
