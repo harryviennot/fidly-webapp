@@ -166,6 +166,7 @@ export interface NotificationDowngradeImpact {
   milestones_disabled: number;
   milestones_new_cap_per_program: number | null;
   scheduled_broadcasts_cancelled: number;
+  store_location_templates_affected: number;
 }
 
 export interface PreviewDowngradeResponse {

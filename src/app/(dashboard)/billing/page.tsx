@@ -44,10 +44,11 @@ const TIER_PRICES: Record<string, number> = {
   pro: 60,
 };
 
+// Pro has no founding tier — founding partners pay full price for Pro, so it is
+// intentionally omitted here and getDisplayPrice falls back to the base price.
 const FOUNDING_PRICES: Record<string, number> = {
   starter: 10,
   growth: 20,
-  pro: 30,
 };
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -97,6 +98,8 @@ function TierCard({
 }) {
   const t = useTranslations("billing");
   const isCurrent = tier === currentTier;
+  // Pro has no founding tier — never surface the founding price/label on it,
+  // even for founding-partner accounts (they pay full price for Pro).
   const isPro = tier === "pro";
   const needsSubscription = (isTrialing || isSuspended) && !hasSubscription;
   const basePrice = TIER_PRICES[tier];
@@ -106,14 +109,6 @@ function TierCard({
   const featuresLabel = t(`features.${FEATURE_LABELS[tier]}`);
 
   const renderButton = () => {
-    if (isPro) {
-      return (
-        <Button variant="outline" className="w-full rounded-full" disabled>
-          {t("comingSoon")}
-        </Button>
-      );
-    }
-
     // No payment linked
     if (needsSubscription) {
       if (isCurrent) {
@@ -171,12 +166,10 @@ function TierCard({
       features={features}
       cta={renderButton()}
       isCurrent={isCurrent}
-      isDisabled={isPro}
-      isFoundingPartner={isFoundingPartner}
+      isFoundingPartner={isFoundingPartner && !isPro}
       foundingLabel={t("foundingPrice")}
       isReseller={isReseller}
       resellerLabel={t("resellerDiscount", { percent: resellerDiscountPercent ?? 0 })}
-      badgeText={isPro ? t("comingSoon") : undefined}
       delay={delay}
     />
   );

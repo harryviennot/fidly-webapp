@@ -19,7 +19,7 @@ export const PRICING = {
   },
   pro: {
     price: 60,
-    // Pro is "coming soon" / no founding tier — see plan step copy.
+    // No founding tier — Pro is full-price only.
   },
   /** Founding partner discount percentage (Starter + Growth only). */
   foundingDiscount: 50,
