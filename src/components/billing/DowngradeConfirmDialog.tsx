@@ -35,7 +35,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 // ── Features not yet developed — hide from downgrade preview ────
 const HIDDEN_FEATURES = new Set([
   "programs.events",
-  "programs.multiple",
   "designs.scheduled",
   "locations.multiple",
   "locations.geofencing",

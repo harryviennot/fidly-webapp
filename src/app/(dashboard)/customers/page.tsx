@@ -24,6 +24,7 @@ import {
 import { EmptyCustomersState } from "@/components/customers/empty-customers-state";
 import { CustomerDetailSheet } from "@/components/customers/customer-detail-sheet";
 import { StampAdjustmentDialog } from "@/components/customers/stamp-adjustment-dialog";
+import { StampVoidDialog } from "@/components/customers/stamp-void-dialog";
 import {
   CustomerDataTable,
   CustomerTableSkeleton,
@@ -32,16 +33,6 @@ import {
 } from "@/components/customers/customer-data-table";
 import { PageHeader } from "@/components/redesign";
 import { SearchInput } from "@/components/reusables/search-input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export default function CustomersPage() {
@@ -73,9 +64,12 @@ export default function CustomersPage() {
   const [selectedSegment, setSelectedSegment] = useState<CustomerSegment | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [voidDialogOpen, setVoidDialogOpen] = useState(false);
-  const [voidReason, setVoidReason] = useState("");
-  const [voidTarget, setVoidTarget] = useState<{ customerId: string; enrollmentId: string; transactionId: string } | null>(null);
+  const [voidTarget, setVoidTarget] = useState<{
+    customerId: string;
+    customerName: string;
+    enrollmentId: string;
+    transactionId: string;
+  } | null>(null);
   const [adjustTarget, setAdjustTarget] = useState<{
     customerId: string;
     customerName: string;
@@ -174,27 +168,13 @@ export default function CustomersPage() {
       toast.error(t("actions.noVoidableStamp"));
       return;
     }
-    setVoidTarget({ customerId: customer.id, enrollmentId, transactionId: lastVoidable.id });
-    setVoidDialogOpen(true);
+    setVoidTarget({
+      customerId: customer.id,
+      customerName: customer.name,
+      enrollmentId,
+      transactionId: lastVoidable.id,
+    });
   };
-
-  const handleVoidConfirm = useCallback(async () => {
-    if (!voidTarget || !voidReason.trim()) return;
-    try {
-      await voidMutation.mutateAsync({
-        customerId: voidTarget.customerId,
-        enrollmentId: voidTarget.enrollmentId,
-        transactionId: voidTarget.transactionId,
-        reason: voidReason.trim(),
-      });
-      toast.success(t("actions.voidSuccessToast"));
-      setVoidDialogOpen(false);
-      setVoidReason("");
-      setVoidTarget(null);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("actions.voidFailedToast"));
-    }
-  }, [voidTarget, voidReason, voidMutation, t]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -333,56 +313,17 @@ export default function CustomersPage() {
         />
       )}
 
-      <Dialog
-        open={voidDialogOpen}
-        onOpenChange={(open) => {
-          setVoidDialogOpen(open);
-          if (!open) {
-            setVoidReason("");
-            setVoidTarget(null);
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("actions.voidDialogTitle")}</DialogTitle>
-            <DialogDescription>{t("actions.voidDialogDescription")}</DialogDescription>
-          </DialogHeader>
-          <div className="py-2">
-            <label className="text-sm font-medium text-[var(--foreground)] mb-1.5 block">
-              {t("actions.voidReasonLabel")}
-            </label>
-            <Textarea
-              value={voidReason}
-              onChange={(e) => setVoidReason(e.target.value)}
-              placeholder={t("actions.voidReasonPlaceholder")}
-              maxLength={500}
-              rows={3}
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              className="rounded-full"
-              onClick={() => {
-                setVoidDialogOpen(false);
-                setVoidReason("");
-                setVoidTarget(null);
-              }}
-            >
-              {t("actions.cancel")}
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-lg text-[#C75050] border-[#FDE8E4] hover:bg-[#FDE8E4]"
-              onClick={handleVoidConfirm}
-              disabled={voidMutation.isPending || !voidReason.trim()}
-            >
-              {voidMutation.isPending ? t("actions.voiding") : t("actions.confirmVoid")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {businessId && voidTarget && (
+        <StampVoidDialog
+          open={!!voidTarget}
+          onOpenChange={(open) => { if (!open) setVoidTarget(null); }}
+          businessId={businessId}
+          customerId={voidTarget.customerId}
+          customerName={voidTarget.customerName}
+          enrollmentId={voidTarget.enrollmentId}
+          transactionId={voidTarget.transactionId}
+        />
+      )}
     </div>
   );
 }
