@@ -82,6 +82,16 @@ export type BroadcastStatus =
   | 'cancelled'
   | 'failed';
 
+export interface EnrolledLocationFilter {
+  ids: string[];
+  include_no_location?: boolean;
+}
+
+export interface ActiveLocationFilter {
+  ids: string[];
+  days: number;
+}
+
 export interface BroadcastTargetFilter {
   all?: boolean;
   enrolled_before_days?: number;
@@ -90,6 +100,8 @@ export interface BroadcastTargetFilter {
   stamp_count_max?: number;
   has_redeemed?: boolean;
   inactive_days?: number;
+  enrolled_at_location_ids?: EnrolledLocationFilter;
+  active_at_location_ids?: ActiveLocationFilter;
 }
 
 export interface BroadcastTranslations {

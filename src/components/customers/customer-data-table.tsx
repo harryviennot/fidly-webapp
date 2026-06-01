@@ -81,7 +81,6 @@ export interface CustomerDataTableProps {
   searchTerm: string;
   selectedCustomerId: string | null;
   onSelectCustomer: (id: string) => void;
-  isPendingAddStamp: boolean;
   isPendingRedeem: boolean;
   isPendingVoid: boolean;
 }
@@ -103,7 +102,6 @@ export function CustomerDataTable({
   searchTerm,
   selectedCustomerId,
   onSelectCustomer,
-  isPendingAddStamp,
   isPendingRedeem,
   isPendingVoid,
 }: CustomerDataTableProps) {
@@ -267,7 +265,6 @@ export function CustomerDataTable({
                       ) : (
                         <button
                           onClick={(e) => onAddStamp(e, customer)}
-                          disabled={isPendingAddStamp}
                           className="flex items-center justify-center gap-1 w-7 h-7 xl:w-auto xl:h-auto xl:px-2 xl:py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                           style={{ background: "#E8F5E4", color: "#4A7C59", border: "1px solid #C8E6C4" }}
                           title={t("actions.addStamp")}

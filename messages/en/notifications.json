@@ -142,6 +142,7 @@
       "disabledHint": "When disabled, the loyalty card still updates silently — customers just don't see a notification for this event.",
       "rewardNameMissing": "Define a reward in your program settings to use this variable.",
       "nameCollectionOff": "Enable name collection in program settings to use this variable.",
+      "storeLocationPro": "The store location variable is a Pro feature. Upgrade to use it in your messages.",
       "nameWarning": "Some customers don't have a name on file. They'll see the message without the name.",
       "previewWithoutName": "Preview for customers without a name",
       "emptyBody": "Message cannot be empty",
@@ -151,7 +152,8 @@
         "stamps_left": "Stamps remaining",
         "reward_name": "Reward name",
         "business_name": "Business name",
-        "customer_first_name": "Customer first name"
+        "customer_first_name": "Customer first name",
+        "store_location": "Store location"
       }
     },
     "growthUpsell": {
@@ -270,7 +272,9 @@
         "delivered": "{count} delivered",
         "failed": "{count} failed",
         "throttled": "{count} throttled",
-        "lastEdited": "Last edited {date}"
+        "lastEdited": "Last edited {date}",
+        "locationTargeted": "{count, plural, one {1 location} other {# locations}}",
+        "locationTargetedTitle": "Targeted to {count, plural, one {1 location} other {# locations}}"
       },
       "detail": {
         "title": "Title",
@@ -339,12 +343,25 @@
           "estimate": "≈ {count} customers",
           "estimating": "Calculating...",
           "group": {
-            "enrollment": "Enrollment age",
-            "enrollmentHelp": "Filter by when the customer joined your program.",
+            "enrollment": "Enrollment",
+            "enrollmentHelp": "Filter by when and where the customer joined your program.",
             "stamps": "Collected stamps",
             "stampsHelp": "Only targets customers with between N and M stamps on their current card.",
             "activity": "Activity",
-            "activityHelp": "Filter by purchase behavior and last visit."
+            "activityHelp": "Filter by purchase behavior, last visit, and where they were active."
+          },
+          "sub": {
+            "enrollmentAge": "Enrollment age",
+            "enrollmentAgeHelp": "Filter by how recently the customer joined your program.",
+            "enrollmentLocation": "Enrollment location",
+            "enrollmentLocationHelp": "Only sends to customers who signed up through the selected stores. Toggle the switch to also include customers who joined without picking a location.",
+            "enrollmentLocationUpsellTitle": "Per-location targeting is Pro",
+            "enrollmentLocationUpsellDescription": "Pro lets you target customers who enrolled at a specific store.",
+            "includeDirect": "Also include direct signups",
+            "activeLocation": "Active at location",
+            "activeLocationHelp": "Only sends to customers who scanned at the selected stores in the last N days.",
+            "activeLocationUpsellTitle": "Active-at-location targeting is Pro",
+            "activeLocationUpsellDescription": "Pro lets you win back customers who visited a specific store recently."
           },
           "enrollment": {
             "any": "Any",
@@ -384,7 +401,18 @@
             "stamp_count_min": "≥ {n} stamps",
             "stamp_count_max": "≤ {n} stamps",
             "has_redeemed": "Has redeemed",
-            "inactive_days": "Inactive {n}d+"
+            "inactive_days": "Inactive {n}d+",
+            "enrolled_at_location_ids": "Enrolled at {n} {n, plural, one {location} other {locations}}",
+            "active_at_location_ids": "Active at {n} {n, plural, one {location} other {locations}} ({days}d)"
+          },
+          "proUpsell": {
+            "title": "Unlock audience segmentation",
+            "description": "Reach the right customers with finer-grained filters on Pro.",
+            "features": {
+              "stamps": "Filter by stamp count thresholds",
+              "activity": "Win back inactive customers and reward redeemers",
+              "location": "Target by enrollment or activity at specific stores"
+            }
           }
         },
         "schedule": {

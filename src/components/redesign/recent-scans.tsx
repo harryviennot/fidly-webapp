@@ -4,9 +4,12 @@ import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { TransactionResponse } from "@/types";
+import { useAuth } from "@/contexts/auth-provider";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
 import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
+import { LocationBadge } from "@/components/locations/location-badge";
 
 // Dashboard widget uses accent CSS vars for stamp_added/reward_redeemed delta badges
 const WIDGET_TYPE_CONFIG = {
@@ -104,6 +107,9 @@ export function RecentScans({
   iconColor,
 }: RecentScansProps) {
   const t = useTranslations();
+  const { user } = useAuth();
+  const { hasFeature } = useEntitlements();
+  const showLocations = hasFeature("locations.multiple");
 
   return (
     <div
@@ -140,9 +146,10 @@ export function RecentScans({
               tx.stamp_delta > 0 ? `+${tx.stamp_delta}` : String(tx.stamp_delta);
 
             return (
-              <div
+              <Link
                 key={tx.id}
-                className="flex gap-2.5 relative animate-slide-up"
+                href={`/activity?customer=${tx.customer_id}`}
+                className="flex gap-2.5 relative animate-slide-up group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
                 style={{ animationDelay: `${delay + 100 + i * 70}ms` }}
               >
                 {/* Timeline icon + connecting line */}
@@ -161,7 +168,7 @@ export function RecentScans({
 
                 {/* Content card */}
                 <div className="pb-1.5 flex-1 min-w-0 -mt-0.5">
-                  <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-3.5 py-2.5">
+                  <div className="rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] px-3.5 py-2.5 transition-colors group-hover:bg-[#F4F2EC]">
                     {/* Top row: customer + delta + time */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
@@ -185,8 +192,8 @@ export function RecentScans({
                       </span>
                     </div>
 
-                    {/* Bottom row: stamp transition · employee */}
-                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8A8A8A]">
+                    {/* Bottom row: stamp transition · employee · location */}
+                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8A8A8A] flex-wrap">
                       {isCardLifecycleType(tx.type) ? (
                         <span className="capitalize">
                           {metadata?.wallet_type === "google" ? "Google Wallet" : "Apple Wallet"}
@@ -205,7 +212,21 @@ export function RecentScans({
                       {tx.employee_name && (
                         <>
                           <span className="text-[#D8D5CE]">·</span>
-                          <span>by {tx.employee_name}</span>
+                          <span>
+                            {t("dashboard.by")}{" "}
+                            {tx.employee_id === user?.id
+                              ? t("dashboard.you")
+                              : tx.employee_name}
+                          </span>
+                        </>
+                      )}
+                      {showLocations && tx.location_name && (
+                        <>
+                          <span className="text-[#D8D5CE]">·</span>
+                          <LocationBadge
+                            name={tx.location_name}
+                            variant="subtle"
+                          />
                         </>
                       )}
                     </div>
@@ -218,7 +239,7 @@ export function RecentScans({
                     )}
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
           </div>

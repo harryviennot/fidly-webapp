@@ -3,6 +3,7 @@ export * from './impersonation';
 export * from './customers';
 export * from './designs';
 export * from './invitations';
+export * from './locations';
 export * from './memberships';
 export * from './notifications';
 export * from './profile';

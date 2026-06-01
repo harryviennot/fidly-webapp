@@ -9,15 +9,16 @@ import {
   Footprints,
   Trophy,
   Envelope,
+  MapPin,
 } from "@phosphor-icons/react";
 import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+  ResponsiveSidePanel,
+  ResponsiveSidePanelHeader,
+  ResponsiveSidePanelBody,
+} from "@/components/ui/responsive-side-panel";
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { getCustomer, getCustomerTransactions } from "@/api";
 import {
   classifyCustomer,
@@ -66,9 +67,21 @@ export function CustomerDetailSheet({
 }: CustomerDetailSheetProps) {
   const { currentBusiness } = useBusiness();
   const { user } = useAuth();
+  const { hasFeature } = useEntitlements();
   const t = useTranslations("customers.detail");
   const locale = useLocale();
   const queryClient = useQueryClient();
+
+  // Cache the selected customer locally so the panel keeps rendering through
+  // its close animation. Parent pages clear `selectedCustomerId` synchronously
+  // on dismiss, flipping `customer` to null — without this cache, the panel
+  // unmounts before Radix/vaul can play the exit transition.
+  const [cachedCustomer, setCachedCustomer] = useState(customer);
+  const [prevProp, setPrevProp] = useState(customer);
+  if (customer !== prevProp) {
+    setPrevProp(customer);
+    if (customer) setCachedCustomer(customer);
+  }
 
   const query = useCustomerTransactions(
     currentBusiness?.id,
@@ -82,7 +95,7 @@ export function CustomerDetailSheet({
     enabled: open && !!customer && !!currentBusiness?.id,
     initialData: customer ?? undefined,
   });
-  const liveCustomer = customerQuery.data ?? customer;
+  const liveCustomer = customerQuery.data ?? cachedCustomer;
 
   const [extraTransactions, setExtraTransactions] = useState<
     TransactionResponse[]
@@ -127,7 +140,7 @@ export function CustomerDetailSheet({
     }
   };
 
-  if (!customer || !liveCustomer) return null;
+  if (!liveCustomer) return null;
 
   const segment = classifyCustomer(liveCustomer, maxStamps);
   const segConfig = getSegmentConfig(segment);
@@ -153,21 +166,21 @@ export function CustomerDetailSheet({
   const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="sm:max-w-[440px] overflow-y-auto p-0 gap-0"
-      >
-        <SheetTitle className="sr-only">{liveCustomer.name}</SheetTitle>
-        <SheetDescription className="sr-only">{liveCustomer.email}</SheetDescription>
+    <ResponsiveSidePanel
+      open={open}
+      onOpenChange={onOpenChange}
+      ariaTitle={liveCustomer.name}
+      ariaDescription={liveCustomer.email}
+    >
+      <ResponsiveSidePanelHeader>
+        <p className="text-[14px] font-semibold text-[#1A1A1A]">
+          {t("customerProfile")}
+        </p>
+      </ResponsiveSidePanelHeader>
 
-        {/* ── Header ── */}
+      <ResponsiveSidePanelBody className="pb-[max(4rem,env(safe-area-inset-bottom)+2rem)] md:pb-10">
+        {/* ── Centered identity hero ── */}
         <div className="px-5 pt-6 pb-5">
-          <p className="text-[14px] font-semibold text-[#1A1A1A] mb-5">
-            {t("stampProgress").replace("Stamp Progress", "Customer Profile")}
-          </p>
-
-          {/* Centered avatar + info */}
           <div className="flex flex-col items-center text-center">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center text-white text-[22px] font-bold mb-2.5"
@@ -204,6 +217,7 @@ export function CustomerDetailSheet({
                 colors={colors}
                 stampIcon={stampIcon ?? "checkmark"}
                 rewardIcon={rewardIcon ?? "gift"}
+                maxWidth={360}
               />
             )}
           </div>
@@ -250,6 +264,15 @@ export function CustomerDetailSheet({
               value={String(liveCustomer.total_redemptions ?? 0)}
               accent="#C4883D"
             />
+            {hasFeature("locations.multiple") && (
+              <StatRow
+                icon={<MapPin className="w-4 h-4" />}
+                label={t("enrolledAt")}
+                value={
+                  liveCustomer.enrolled_at_location_name ?? t("directSignup")
+                }
+              />
+            )}
           </div>
         </div>
 
@@ -271,8 +294,8 @@ export function CustomerDetailSheet({
             iconColor={colors?.iconColorHex}
           />
         </div>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveSidePanelBody>
+    </ResponsiveSidePanel>
   );
 }
 

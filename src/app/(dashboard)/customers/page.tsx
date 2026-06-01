@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import { useBusiness } from "@/contexts/business-context";
-import { useCustomers, useAddStamp, useRedeemReward, useVoidStamp, PAGE_SIZE } from "@/hooks/use-customers";
+import { useCustomers, useRedeemReward, useVoidStamp, customerKeys, PAGE_SIZE } from "@/hooks/use-customers";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useActiveDesign } from "@/hooks/use-designs";
+import { getCustomer } from "@/api";
 import type { CustomerResponse } from "@/types";
 import type { CustomerSegment } from "@/lib/customer-segments";
 import { classifyCustomer, countBySegment } from "@/lib/customer-segments";
@@ -20,6 +23,8 @@ import {
 } from "@/components/customers/customer-segment-filters";
 import { EmptyCustomersState } from "@/components/customers/empty-customers-state";
 import { CustomerDetailSheet } from "@/components/customers/customer-detail-sheet";
+import { StampAdjustmentDialog } from "@/components/customers/stamp-adjustment-dialog";
+import { StampVoidDialog } from "@/components/customers/stamp-void-dialog";
 import {
   CustomerDataTable,
   CustomerTableSkeleton,
@@ -28,16 +33,6 @@ import {
 } from "@/components/customers/customer-data-table";
 import { PageHeader } from "@/components/redesign";
 import { SearchInput } from "@/components/reusables/search-input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export default function CustomersPage() {
@@ -49,7 +44,6 @@ export default function CustomersPage() {
   const { data: paginatedData, isLoading: customersLoading } = useCustomers(businessId, page);
   const { data: txnData } = useTransactions(businessId);
   const { data: design } = useActiveDesign(businessId);
-  const addStampMutation = useAddStamp(businessId);
   const redeemMutation = useRedeemReward(businessId);
   const voidMutation = useVoidStamp(businessId);
 
@@ -70,26 +64,78 @@ export default function CustomersPage() {
   const [selectedSegment, setSelectedSegment] = useState<CustomerSegment | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
-  const [voidDialogOpen, setVoidDialogOpen] = useState(false);
-  const [voidReason, setVoidReason] = useState("");
-  const [voidTarget, setVoidTarget] = useState<{ customerId: string; enrollmentId: string; transactionId: string } | null>(null);
+  const [voidTarget, setVoidTarget] = useState<{
+    customerId: string;
+    customerName: string;
+    enrollmentId: string;
+    transactionId: string;
+  } | null>(null);
+  const [adjustTarget, setAdjustTarget] = useState<{
+    customerId: string;
+    customerName: string;
+    enrollmentId: string;
+  } | null>(null);
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
+
+  const selectedCustomerId = searchParams.get("customer");
+
+  const setSelectedCustomerId = useCallback(
+    (id: string | null) => {
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      if (id) params.set("customer", id);
+      else params.delete("customer");
+      const qs = params.toString();
+      router.push(`${pathname}${qs ? `?${qs}` : ""}`);
+    },
+    [searchParams, router, pathname]
+  );
+
+  // Pagination fallback: the customer referenced in the URL may not be on the
+  // currently loaded page. Fetch it directly so deep links work for any customer.
+  // Keyed by id so stale data from a previous selection can't flash through.
+  const [fallback, setFallback] = useState<{ id: string; customer: CustomerResponse } | null>(null);
+
+  useEffect(() => {
+    if (!selectedCustomerId || !businessId) return;
+    if (customers.some((c) => c.id === selectedCustomerId)) return;
+    let cancelled = false;
+    queryClient
+      .fetchQuery({
+        queryKey: customerKeys.detail(businessId, selectedCustomerId),
+        queryFn: () => getCustomer(businessId, selectedCustomerId),
+        staleTime: 60_000,
+      })
+      .then((customer) => {
+        if (!cancelled) setFallback({ id: selectedCustomerId, customer });
+      })
+      .catch(() => {
+        if (!cancelled) setSelectedCustomerId(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCustomerId, businessId, customers, queryClient, setSelectedCustomerId]);
+
+  const fallbackCustomer =
+    fallback && fallback.id === selectedCustomerId ? fallback.customer : null;
   const selectedCustomer = selectedCustomerId
-    ? customers.find((c) => c.id === selectedCustomerId) ?? null
+    ? customers.find((c) => c.id === selectedCustomerId) ?? fallbackCustomer
     : null;
 
-  const handleAddStamp = async (e: React.MouseEvent, customer: CustomerResponse) => {
+  const handleAddStamp = (e: React.MouseEvent, customer: CustomerResponse) => {
     e.stopPropagation();
     if (!businessId) return;
     const enrollmentId = customer.enrollments[0]?.id;
     if (!enrollmentId) return;
-    try {
-      await addStampMutation.mutateAsync({ customerId: customer.id, enrollmentId });
-      toast.success(t("toasts.stampAdded", { name: customer.name }));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("toasts.stampFailed"));
-    }
+    setAdjustTarget({
+      customerId: customer.id,
+      customerName: customer.name,
+      enrollmentId,
+    });
   };
 
   const handleRedeem = async (e: React.MouseEvent, customer: CustomerResponse) => {
@@ -122,27 +168,13 @@ export default function CustomersPage() {
       toast.error(t("actions.noVoidableStamp"));
       return;
     }
-    setVoidTarget({ customerId: customer.id, enrollmentId, transactionId: lastVoidable.id });
-    setVoidDialogOpen(true);
+    setVoidTarget({
+      customerId: customer.id,
+      customerName: customer.name,
+      enrollmentId,
+      transactionId: lastVoidable.id,
+    });
   };
-
-  const handleVoidConfirm = useCallback(async () => {
-    if (!voidTarget || !voidReason.trim()) return;
-    try {
-      await voidMutation.mutateAsync({
-        customerId: voidTarget.customerId,
-        enrollmentId: voidTarget.enrollmentId,
-        transactionId: voidTarget.transactionId,
-        reason: voidReason.trim(),
-      });
-      toast.success(t("actions.voidSuccessToast"));
-      setVoidDialogOpen(false);
-      setVoidReason("");
-      setVoidTarget(null);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("actions.voidFailedToast"));
-    }
-  }, [voidTarget, voidReason, voidMutation, t]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -258,7 +290,6 @@ export default function CustomersPage() {
         searchTerm={searchTerm}
         selectedCustomerId={selectedCustomerId}
         onSelectCustomer={setSelectedCustomerId}
-        isPendingAddStamp={addStampMutation.isPending}
         isPendingRedeem={redeemMutation.isPending}
         isPendingVoid={voidMutation.isPending}
       />
@@ -271,56 +302,28 @@ export default function CustomersPage() {
         design={design ?? undefined}
       />
 
-      <Dialog
-        open={voidDialogOpen}
-        onOpenChange={(open) => {
-          setVoidDialogOpen(open);
-          if (!open) {
-            setVoidReason("");
-            setVoidTarget(null);
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("actions.voidDialogTitle")}</DialogTitle>
-            <DialogDescription>{t("actions.voidDialogDescription")}</DialogDescription>
-          </DialogHeader>
-          <div className="py-2">
-            <label className="text-sm font-medium text-[var(--foreground)] mb-1.5 block">
-              {t("actions.voidReasonLabel")}
-            </label>
-            <Textarea
-              value={voidReason}
-              onChange={(e) => setVoidReason(e.target.value)}
-              placeholder={t("actions.voidReasonPlaceholder")}
-              maxLength={500}
-              rows={3}
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              className="rounded-full"
-              onClick={() => {
-                setVoidDialogOpen(false);
-                setVoidReason("");
-                setVoidTarget(null);
-              }}
-            >
-              {t("actions.cancel")}
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-lg text-[#C75050] border-[#FDE8E4] hover:bg-[#FDE8E4]"
-              onClick={handleVoidConfirm}
-              disabled={voidMutation.isPending || !voidReason.trim()}
-            >
-              {voidMutation.isPending ? t("actions.voiding") : t("actions.confirmVoid")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {businessId && adjustTarget && (
+        <StampAdjustmentDialog
+          open={!!adjustTarget}
+          onOpenChange={(open) => { if (!open) setAdjustTarget(null); }}
+          businessId={businessId}
+          customerId={adjustTarget.customerId}
+          customerName={adjustTarget.customerName}
+          enrollmentId={adjustTarget.enrollmentId}
+        />
+      )}
+
+      {businessId && voidTarget && (
+        <StampVoidDialog
+          open={!!voidTarget}
+          onOpenChange={(open) => { if (!open) setVoidTarget(null); }}
+          businessId={businessId}
+          customerId={voidTarget.customerId}
+          customerName={voidTarget.customerName}
+          enrollmentId={voidTarget.enrollmentId}
+          transactionId={voidTarget.transactionId}
+        />
+      )}
     </div>
   );
 }

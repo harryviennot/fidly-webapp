@@ -30,11 +30,24 @@ export { PAGE_SIZE };
 // enrollments per customer and the caller picks which one to address.
 type StampVars = { customerId: string; enrollmentId: string };
 
+// Dashboard adjustment vars — owner/admin manual stamp with required reason
+// + optional location. The mutation hook accepts both shapes so an
+// adjustment-flow caller can supply `reason` while legacy callers stay terse.
+type AddStampVars = StampVars & {
+  reason?: string;
+  locationId?: string | null;
+};
+
 export function useAddStamp(businessId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ enrollmentId }: StampVars) => addStamp(businessId!, enrollmentId),
+    mutationFn: ({ enrollmentId, reason, locationId }: AddStampVars) =>
+      addStamp(
+        businessId!,
+        enrollmentId,
+        reason !== undefined ? { source: 'dashboard', reason, locationId } : undefined
+      ),
     onMutate: async ({ customerId }) => {
       await queryClient.cancelQueries({
         queryKey: customerKeys.all(businessId!),

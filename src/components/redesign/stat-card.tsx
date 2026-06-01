@@ -51,7 +51,7 @@ export function StatCard({
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-[#8A8A8A]">{title}</span>
         <div
-          className="w-8 h-8 rounded-md flex items-center justify-center"
+          className="w-8 h-8 shrink-0 aspect-square rounded-md flex items-center justify-center"
           style={{ background, color }}
         >
           {icon}

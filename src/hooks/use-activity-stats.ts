@@ -1,9 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { getActivityStats } from "@/api";
 
+export interface ActivityFeedFilters {
+  type?: string;
+  location_id?: string | "__none__";
+  include_legacy?: boolean;
+}
+
 export const activityKeys = {
   stats: (businessId: string) => ["activity", businessId, "stats"] as const,
-  feed: (businessId: string, filters: { type?: string }) =>
+  feed: (businessId: string, filters: ActivityFeedFilters) =>
     ["activity", businessId, "feed", filters] as const,
 };
 

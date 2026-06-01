@@ -82,7 +82,7 @@ export default function ProgramOverviewPage() {
             />
           </div>
 
-          {/* Business URL / QR Code */}
+          {/* Business URL / QR Code (now also hosts per-location QR codes) */}
           <BusinessUrlCard delay={240} />
 
           {/* Program Configuration Summary */}

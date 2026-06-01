@@ -24,6 +24,8 @@ export interface TransactionResponse {
   source: TransactionSource;
   voided_transaction_id: string | null;
   created_at: string;
+  location_id: string | null;
+  location_name: string | null;
 }
 
 export interface TransactionListResponse {

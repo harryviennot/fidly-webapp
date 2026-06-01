@@ -1,18 +1,20 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getTransactions } from "@/api";
-import { activityKeys } from "./use-activity-stats";
+import { activityKeys, type ActivityFeedFilters } from "./use-activity-stats";
 
 const PAGE_SIZE = 50;
 
 export function useActivityFeed(
   businessId: string | undefined,
-  filters: { type?: string }
+  filters: ActivityFeedFilters
 ) {
   return useInfiniteQuery({
     queryKey: activityKeys.feed(businessId!, filters),
     queryFn: ({ pageParam = 0 }) =>
       getTransactions(businessId!, {
         type: filters.type,
+        location_id: filters.location_id,
+        include_legacy: filters.include_legacy,
         limit: PAGE_SIZE,
         offset: pageParam,
       }),

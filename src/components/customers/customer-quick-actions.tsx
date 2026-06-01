@@ -3,18 +3,10 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Stamp, Gift, Prohibit } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useAddStamp, useRedeemReward, useVoidStamp } from "@/hooks/use-customers";
+import { useRedeemReward } from "@/hooks/use-customers";
 import { toast } from "sonner";
+import { StampAdjustmentDialog } from "./stamp-adjustment-dialog";
+import { StampVoidDialog } from "./stamp-void-dialog";
 import type { CustomerResponse, TransactionResponse } from "@/types";
 
 interface CustomerQuickActionsProps {
@@ -33,11 +25,9 @@ export function CustomerQuickActions({
   onActionComplete,
 }: CustomerQuickActionsProps) {
   const t = useTranslations("customers.actions");
-  const addStampMutation = useAddStamp(businessId);
   const redeemMutation = useRedeemReward(businessId);
-  const voidMutation = useVoidStamp(businessId);
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
-  const [voidReason, setVoidReason] = useState("");
+  const [adjustOpen, setAdjustOpen] = useState(false);
 
   const canRedeem = customer.stamps >= maxStamps;
 
@@ -54,17 +44,6 @@ export function CustomerQuickActions({
   // enrollment. Multi-program pro businesses will pick by program later.
   const enrollmentId = customer.enrollments[0]?.id;
 
-  const handleAddStamp = async () => {
-    if (!enrollmentId) return;
-    try {
-      await addStampMutation.mutateAsync({ customerId: customer.id, enrollmentId });
-      toast.success(t("stampAddedToast"));
-      onActionComplete();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("stampFailedToast"));
-    }
-  };
-
   const handleRedeem = async () => {
     if (!enrollmentId) return;
     try {
@@ -73,24 +52,6 @@ export function CustomerQuickActions({
       onActionComplete();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("redeemFailedToast"));
-    }
-  };
-
-  const handleVoid = async () => {
-    if (!lastVoidable || !voidReason.trim() || !enrollmentId) return;
-    try {
-      await voidMutation.mutateAsync({
-        customerId: customer.id,
-        enrollmentId,
-        transactionId: lastVoidable.id,
-        reason: voidReason.trim(),
-      });
-      toast.success(t("voidSuccessToast"));
-      setVoidDialogOpen(false);
-      setVoidReason("");
-      onActionComplete();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("voidFailedToast"));
     }
   };
 
@@ -104,8 +65,8 @@ export function CustomerQuickActions({
           color="#4A7C59"
           bg="#E8F5E4"
           border="#C8E6C4"
-          onClick={handleAddStamp}
-          disabled={addStampMutation.isPending}
+          onClick={() => setAdjustOpen(true)}
+          disabled={!enrollmentId}
         />
       ) : (
         <ActionButton
@@ -130,53 +91,32 @@ export function CustomerQuickActions({
         disabled={!lastVoidable}
       />
 
+      {/* Stamp adjustment dialog (manual stamp from dashboard) */}
+      {enrollmentId && (
+        <StampAdjustmentDialog
+          open={adjustOpen}
+          onOpenChange={setAdjustOpen}
+          businessId={businessId}
+          customerId={customer.id}
+          customerName={customer.name}
+          enrollmentId={enrollmentId}
+          onSuccess={onActionComplete}
+        />
+      )}
+
       {/* Void dialog */}
-      <Dialog
-        open={voidDialogOpen}
-        onOpenChange={(open) => {
-          setVoidDialogOpen(open);
-          if (!open) setVoidReason("");
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("voidDialogTitle")}</DialogTitle>
-            <DialogDescription>{t("voidDialogDescription")}</DialogDescription>
-          </DialogHeader>
-          <div className="py-2">
-            <label className="text-sm font-medium text-[var(--foreground)] mb-1.5 block">
-              {t("voidReasonLabel")}
-            </label>
-            <Textarea
-              value={voidReason}
-              onChange={(e) => setVoidReason(e.target.value)}
-              placeholder={t("voidReasonPlaceholder")}
-              maxLength={500}
-              rows={3}
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              className="rounded-full"
-              onClick={() => {
-                setVoidDialogOpen(false);
-                setVoidReason("");
-              }}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-lg text-[#C75050] border-[#FDE8E4] hover:bg-[#FDE8E4]"
-              onClick={handleVoid}
-              disabled={voidMutation.isPending || !voidReason.trim()}
-            >
-              {voidMutation.isPending ? t("voiding") : t("confirmVoid")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {enrollmentId && lastVoidable && (
+        <StampVoidDialog
+          open={voidDialogOpen}
+          onOpenChange={setVoidDialogOpen}
+          businessId={businessId}
+          customerId={customer.id}
+          customerName={customer.name}
+          enrollmentId={enrollmentId}
+          transactionId={lastVoidable.id}
+          onSuccess={onActionComplete}
+        />
+      )}
     </div>
   );
 }

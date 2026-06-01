@@ -15,9 +15,18 @@ export const VARIABLE_KEYS = [
   'reward_name',
   'business_name',
   'customer_first_name',
+  'store_location',
 ] as const;
 
 export type VariableKey = (typeof VARIABLE_KEYS)[number];
+
+/** Variables only available on the Pro tier. The backend strips these at
+ *  render time on non-Pro tiers (`_strip_pro_only_vars`) so customers
+ *  don't see raw `{{...}}` syntax in their wallet pass. The UI surfaces
+ *  the chip as disabled with an upsell tooltip. */
+export const PRO_ONLY_VARIABLES: ReadonlySet<VariableKey> = new Set([
+  'store_location',
+]);
 
 export type Locale = 'en' | 'fr';
 
@@ -34,6 +43,7 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     reward_name: 'reward_name',
     business_name: 'business_name',
     customer_first_name: 'customer_first_name',
+    store_location: 'store_location',
   },
   fr: {
     stamp_count: 'tampons_actuels',
@@ -42,6 +52,7 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     reward_name: 'nom_recompense',
     business_name: 'nom_entreprise',
     customer_first_name: 'prenom_client',
+    store_location: 'lieu_magasin',
   },
 };
 
@@ -83,6 +94,7 @@ export function renderSamplePreview(
     reward_name: 'Free Coffee',
     business_name: 'Your business',
     customer_first_name: 'Sarah',
+    store_location: 'Westside',
   };
   const values = { ...defaults, ...overrides };
   return template.replace(VARIABLE_PATTERN, (_match, key: string) => {

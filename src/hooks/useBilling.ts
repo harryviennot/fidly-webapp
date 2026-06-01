@@ -127,6 +127,10 @@ export function useChangeTier() {
         // Refresh designs (is_over_limit annotations change with tier)
         queryClient.invalidateQueries({ queryKey: ["designs", currentBusiness.id] });
         queryClient.invalidateQueries({ queryKey: ["business"] });
+        // A downgrade reshapes notification state server-side: custom templates
+        // reset to defaults, milestones capped, scheduled broadcasts cancelled.
+        // Prefix-invalidate so templates, milestones, and broadcasts all refetch.
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
       }
     },
   });
