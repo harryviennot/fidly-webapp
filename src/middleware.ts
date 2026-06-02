@@ -47,16 +47,40 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // getSession() will attempt to refresh an expired access token. If the
+  // refresh token is missing/stale/already-rotated, supabase throws
+  // (AuthApiError: refresh_token_not_found). Treat any failure as "no session"
+  // rather than letting it crash the request with a 500.
+  let session = null;
+  try {
+    const result = await supabase.auth.getSession();
+    if (result.error) throw result.error;
+    session = result.data.session;
+  } catch {
+    session = null;
+  }
 
-  // If no session, redirect to showcase login
+  // If no session, clear any stale auth cookies and redirect to showcase login.
   if (!session) {
     const showcaseUrl =
       process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
     const loginUrl = `${showcaseUrl}/login?redirect=${encodeURIComponent(request.url)}`;
-    return NextResponse.redirect(loginUrl);
+    const redirect = NextResponse.redirect(loginUrl);
+
+    // Drop dead Supabase auth cookies so the bad refresh token can't keep
+    // re-triggering the error on subsequent requests.
+    for (const cookie of request.cookies.getAll()) {
+      if (cookie.name.startsWith("sb-")) {
+        redirect.cookies.set({
+          name: cookie.name,
+          value: "",
+          maxAge: 0,
+          domain: cookieDomain,
+        });
+      }
+    }
+
+    return redirect;
   }
 
   return response;
