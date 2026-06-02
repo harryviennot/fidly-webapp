@@ -185,21 +185,26 @@ export function TrialSidebarWidget() {
             <XIcon className={cn("w-3 h-3", styles.text)} />
           </button>
         )}
-        <div className="flex items-start gap-2 pr-4">
-          <Icon className={cn("w-4 h-4 shrink-0 mt-0.5", styles.text)} weight="fill" />
+        <div className="flex items-center gap-2 pr-4">
+          <Icon className={cn("w-4 h-4 shrink-0", styles.text)} weight="fill" />
           <div className="min-w-0">
             <p className={cn("text-xs font-medium leading-tight", styles.text)}>
               {message}
             </p>
-            <Link
-              href="/billing"
-              className={cn(
-                "text-[11px] font-semibold underline underline-offset-2 mt-1 inline-block",
-                styles.text
-              )}
-            >
-              {variant === "error" ? t("updatePayment") : t("viewPlans")}
-            </Link>
+            {/* Trial/grace badges are informational only — no "view plans"
+                link (the plan is already chosen at signup). Past-due keeps a
+                link so the owner can fix a failed payment. */}
+            {variant === "error" && (
+              <Link
+                href="/billing"
+                className={cn(
+                  "text-[11px] font-semibold underline underline-offset-2 mt-1 inline-block",
+                  styles.text
+                )}
+              >
+                {t("updatePayment")}
+              </Link>
+            )}
           </div>
         </div>
       </div>
