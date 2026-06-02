@@ -53,6 +53,12 @@ function useSidebar() {
   return context
 }
 
+// Non-throwing variant for components that may render both inside and outside
+// a SidebarProvider (e.g. a shared PageHeader used on standalone routes).
+function useOptionalSidebar() {
+  return React.useContext(SidebarContext)
+}
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -721,4 +727,5 @@ export {
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
+  useOptionalSidebar,
 }

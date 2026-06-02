@@ -53,7 +53,7 @@ function getInitials(name: string) {
 }
 
 export default function TeamPage() {
-  const { currentBusiness, currentRole } = useBusiness();
+  const { currentBusiness, currentRole, isImpersonating } = useBusiness();
   const { user } = useAuth();
   const { hasFeature } = useEntitlements();
   const t = useTranslations('team');
@@ -84,15 +84,28 @@ export default function TeamPage() {
 
     if (showLoading) setLoading(true);
     try {
-      const [membersData, invitationsData] = await Promise.all([
+      // Settle independently: a failure fetching one (e.g. invitations are
+      // hidden from some roles) shouldn't blank out the other.
+      const [membersResult, invitationsResult] = await Promise.allSettled([
         getBusinessMembers(currentBusiness.id),
         getPendingInvitations(currentBusiness.id),
       ]);
-      setMembers(membersData);
-      setInvitations(invitationsData);
-    } catch (error) {
-      console.error("Failed to load team data:", error);
-      toast.error(t('loadFailed'));
+
+      if (membersResult.status === "fulfilled") {
+        setMembers(membersResult.value);
+      } else {
+        console.error("Failed to load team members:", membersResult.reason);
+      }
+      if (invitationsResult.status === "fulfilled") {
+        setInvitations(invitationsResult.value);
+      } else {
+        console.error("Failed to load invitations:", invitationsResult.reason);
+      }
+
+      // Only surface the error toast if we got nothing useful at all.
+      if (membersResult.status === "rejected" && invitationsResult.status === "rejected") {
+        toast.error(t('loadFailed'));
+      }
     } finally {
       if (showLoading) setLoading(false);
     }
@@ -117,7 +130,11 @@ export default function TeamPage() {
 
   // Build unified rows from members + invitations
   const ownerCount = members.filter((m) => m.role === "owner").length;
-  const canManageTeam = currentRole === "owner" || currentRole === "admin";
+  // Superadmins impersonating a business get a read-only view of its team:
+  // the backend blocks team mutations under impersonation, so hide the
+  // controls that would only 403.
+  const canManageTeam =
+    !isImpersonating && (currentRole === "owner" || currentRole === "admin");
 
   const allRows: TeamRow[] = useMemo(() => {
     const memberRows: TeamRow[] = members.map((member) => {
@@ -246,7 +263,7 @@ export default function TeamPage() {
         <PageHeader
           title={t('title')}
           subtitle={t('subtitle')}
-          actions={[{ label: t('addMember'), icon: <UserPlusIcon className="h-4 w-4" />, disabled: true }]}
+          actions={isImpersonating ? [] : [{ label: t('addMember'), icon: <UserPlusIcon className="h-4 w-4" />, disabled: true }]}
         />
 
         <TeamStatsSkeleton />
@@ -262,8 +279,9 @@ export default function TeamPage() {
     );
   }
 
-  // Empty state - only the owner exists
-  if (members.length <= 1 && invitations.length === 0) {
+  // Empty state - only the owner exists. Skipped while impersonating so the
+  // operator sees the (read-only) member list rather than an invite CTA.
+  if (!isImpersonating && members.length <= 1 && invitations.length === 0) {
     return (
       <div className="flex flex-col gap-[14px]">
         <PageHeader
@@ -291,7 +309,7 @@ export default function TeamPage() {
       <PageHeader
         title={t('title')}
         subtitle={t('subtitle')}
-        actions={[{ label: t('addMember'), icon: <UserPlusIcon className="h-4 w-4" />, onClick: () => setInviteOpen(true) }]}
+        actions={isImpersonating ? [] : [{ label: t('addMember'), icon: <UserPlusIcon className="h-4 w-4" />, onClick: () => setInviteOpen(true) }]}
       />
 
       {/* Stats */}
@@ -329,7 +347,7 @@ export default function TeamPage() {
       <TeamTable
         rows={filteredRows}
         totalCount={allRows.length}
-        currentRole={currentRole ?? "scanner"}
+        currentRole={isImpersonating ? "scanner" : (currentRole ?? "scanner")}
         onMemberUpdated={loadData}
         onCancelInvitation={handleCancelInvitation}
         onResendInvitation={handleResendInvitation}
@@ -349,7 +367,7 @@ export default function TeamPage() {
                 row={row}
                 loading={cardLoading === row.id}
                 onRemove={() => setMobileRemoveRow(row)}
-                onResend={row.type === "invitation" ? () => handleMobileResend(row) : undefined}
+                onResend={row.type === "invitation" && canManageTeam ? () => handleMobileResend(row) : undefined}
                 locationContext={
                   showLocationUi
                     ? { assignmentsByMember: assignmentsQuery.data }

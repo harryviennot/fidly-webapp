@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger, useOptionalSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 export interface PageHeaderAction {
@@ -25,6 +25,10 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, actions, action, className }: PageHeaderProps) {
   const hasActions = !!(actions?.length || action);
+  // The mobile sidebar trigger only makes sense inside a SidebarProvider
+  // (dashboard routes). On standalone routes like /businesses there is no
+  // sidebar, so skip it instead of throwing.
+  const hasSidebar = useOptionalSidebar() !== null;
 
   const titleBlock = (
     <div className="min-w-0 md:flex-1 md:order-1">
@@ -41,7 +45,9 @@ export function PageHeader({ title, subtitle, actions, action, className }: Page
     <div className={cn("flex flex-col md:flex-row md:items-start md:justify-between md:gap-4", hasActions ? "gap-3" : "gap-1", className)}>
       {/* md:contents collapses this wrapper on desktop so trigger/actions flow into the parent flex with the title */}
       <div className="flex items-center justify-between gap-2 md:contents">
-        <SidebarTrigger className="md:hidden -ml-2! shrink-0 size-9! hover:bg-transparent hover:text-current dark:hover:bg-transparent [&_svg]:size-5! [&_svg]:stroke-[2]" />
+        {hasSidebar && (
+          <SidebarTrigger className="md:hidden -ml-2! shrink-0 size-9! hover:bg-transparent hover:text-current dark:hover:bg-transparent [&_svg]:size-5! [&_svg]:stroke-[2]" />
+        )}
         {hasActions && (
           <div className="shrink-0 flex items-center gap-2 md:order-2">
             {actions?.map((a, i) => {
