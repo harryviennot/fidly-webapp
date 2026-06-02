@@ -66,15 +66,6 @@ export function PlanStep() {
     ctx.setCanProceed(!!selectedTier);
   }, [ctx, selectedTier]);
 
-  // Card-upfront new signups go to Stripe Checkout, so the footer CTA reflects
-  // that ("Démarrer mon essai" rather than "Lancer mon programme"). Legacy
-  // no-card businesses keep the registry default. Set from the step so it wins
-  // over the shell's per-navigation label reset (same ordering that lets the
-  // submit handler below survive).
-  useEffect(() => {
-    if (requiresCardUpfront) ctx.setNextLabel(t('ctaCheckout'));
-  }, [ctx, requiresCardUpfront, t]);
-
   useEffect(() => {
     ctx.setSubmitHandler(async () => {
       if (!selectedTier || !businessId) return { ok: false };
@@ -155,13 +146,10 @@ export function PlanStep() {
       </div>
 
       <div className="flex flex-col items-center gap-2 max-w-2xl mx-auto text-center animate-slide-up delay-160">
-        {requiresCardUpfront ? (
-          // Card-upfront: the "no credit card required" ctaSubtext would be a
-          // lie, so replace it with the trial reassurance.
-          <p className="wiz-helper font-medium text-[var(--foreground)]">
-            {t('checkoutReassurance')}
-          </p>
-        ) : (
+        {/* Card-upfront: the "no credit card required" ctaSubtext would be a
+            lie, and the billing terms now live in the step subtitle, so we
+            drop the line entirely. Legacy no-card businesses keep it. */}
+        {!requiresCardUpfront && (
           <p className="wiz-helper text-[#7A7A7A]">
             {tp('ctaSubtext')}
           </p>

@@ -74,7 +74,7 @@
           "recap": "Je suis prêt"
         },
         "plan": {
-          "plan": "Lancer mon programme"
+          "plan": "Démarrer mon essai gratuit de 30 jours"
         }
       }
     },
@@ -392,12 +392,10 @@
       },
       "plan": {
         "title": "Choisissez votre offre",
-        "subtitle": "Choisissez votre offre maintenant, ou explorez Stampeo pendant les 30 jours d'essai gratuit sans engagement.",
-        "subtitleFounding": "Tarif fondateur : 50% de réduction à vie. Choisissez maintenant pour bloquer la remise, ou explorez Stampeo pendant les 30 jours d'essai gratuit sans engagement.",
+        "subtitle": "Commencez avec 30 jours gratuits. Aucun débit aujourd'hui : ensuite, l'offre choisie est facturée chaque mois. Sans engagement.",
+        "subtitleFounding": "Commencez avec 30 jours gratuits. Aucun débit aujourd'hui : ensuite, votre tarif de fondateur est facturé chaque mois et reste bloqué à vie, il n'augmentera jamais. Sans engagement.",
         "keepTrialCta": "Plus tard",
         "recommendedBadge": "Recommandé",
-        "ctaCheckout": "Démarrer mon essai gratuit de 30 jours",
-        "checkoutReassurance": "Commencez avec 30 jours gratuits. Aucun débit aujourd'hui : à la fin de l'essai, l'offre choisie est facturée chaque mois, et vous pouvez annuler à tout moment avant ce premier prélèvement.",
         "perMonth": "/mois",
         "youdLose": "Vous perdriez :",
         "andMore": "+ {count} autre(s)…",
