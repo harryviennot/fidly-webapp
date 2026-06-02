@@ -74,7 +74,7 @@
           "recap": "Choose my plan"
         },
         "plan": {
-          "plan": "Launch my program"
+          "plan": "Start my 30-day free trial"
         }
       }
     },
@@ -392,8 +392,8 @@
       },
       "plan": {
         "title": "Choose your plan",
-        "subtitle": "Pick a plan now, or keep exploring on your 30-day Pro trial. You can change anytime.",
-        "subtitleFounding": "Founding partners get 50% off, locked in for as long as your subscription stays active. Pick a plan now to claim the rate, or keep exploring on your 30-day Pro trial.",
+        "subtitle": "Start with 30 days free. No charge today, after that you'll be billed monthly for the plan you choose, and you can cancel anytime before then.",
+        "subtitleFounding": "Start with 30 days free. No charge today, after that you'll be billed monthly at your founding partner rate, locked in for life so it never goes up. Cancel anytime before then.",
         "keepTrialCta": "Decide later",
         "recommendedBadge": "Most popular",
         "perMonth": "/mo",

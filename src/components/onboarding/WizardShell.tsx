@@ -267,11 +267,13 @@ export function WizardShell({ slug }: WizardShellProps) {
     if (!resolved) return;
     setIsBusy(true);
     let backgroundSave: BackgroundSave | undefined;
+    let redirectTo: string | undefined;
     try {
       if (submitHandlerRef.current) {
         const result = await submitHandlerRef.current();
         if (!result.ok) return; // validation failed — toast came from the step
         backgroundSave = result.save;
+        redirectTo = result.redirectTo;
       }
 
       const step = { chapter: resolved.chapter.id, step: resolved.subStep.id };
@@ -295,6 +297,14 @@ export function WizardShell({ slug }: WizardShellProps) {
         // the funnel).
         await completeAndFinalize(step);
         clearDraft();
+        // Card-upfront plan step: finalisation is now persisted, so hand off
+        // to Stripe Checkout. The hard navigation supersedes the dashboard
+        // route; if the user returns without paying, the dashboard's checkout
+        // gate (not the wizard) catches them.
+        if (redirectTo) {
+          window.location.href = redirectTo;
+          return;
+        }
         router.push('/');
         return;
       }

@@ -1,4 +1,11 @@
-export type BillingStatus = "trial" | "active" | "past_due" | "cancelled" | "grace" | "suspended";
+export type BillingStatus =
+  | "pending_checkout"
+  | "trial"
+  | "active"
+  | "past_due"
+  | "cancelled"
+  | "grace"
+  | "suspended";
 
 export interface Business {
   id: string;
@@ -8,8 +15,12 @@ export interface Business {
   status: "pending" | "active" | "suspended";
   activated_at?: string | null;
   is_founding_partner?: boolean;
+  // New-signup card-upfront gate (STA-173). Existing businesses are
+  // grandfathered with this false/undefined and keep the no-card trial flow.
+  requires_card_upfront?: boolean;
   billing_status?: BillingStatus;
   trial_ends_at?: string | null;
+  stripe_subscription_id?: string | null;
   billing_period_end?: string | null;
   settings: BusinessSettings;
   logo_url?: string | null;
