@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AppSidebar } from "@/components/dashboard";
@@ -10,8 +10,8 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { PendingActivationPage } from "@/components/pending-activation-page";
 import { SuspendedPage } from "@/components/suspended-page";
-import { CheckoutRequiredPage } from "@/components/checkout-required-page";
 import { NoActiveBusinessState } from "@/components/no-active-business-state";
+import { isBusinessSetupComplete } from "@/lib/onboarding-status";
 import { TrialMobileBanner } from "@/components/billing/TrialBanner";
 import { SuspendedBanner } from "@/components/billing/SuspendedOverlay";
 import { OverLimitBanner } from "@/components/billing/OverLimitBanner";
@@ -38,43 +38,70 @@ export default function AdminLayout({
     hasAnyMembership,
     currentRole,
     isImpersonating,
+    refetch,
   } = useBusiness();
   const t = useTranslations();
   useImpersonationBeacon();
 
   const setupProgress = currentBusiness?.settings?.setup_progress;
+  // "Set up" means the wizard is done AND — for card-upfront new signups — a
+  // subscription exists. A card-upfront business that finished every wizard
+  // step but abandoned Stripe Checkout is still "not set up", so needsWizard
+  // stays true and the resume path drops them back on the plan step to pay
+  // (no separate paywall screen). See isBusinessSetupComplete.
   const needsWizard =
     !!currentBusiness &&
     currentBusiness.status === "active" &&
     currentRole === "owner" &&
     !isImpersonating &&
-    !setupProgress?.completed_at;
+    !isBusinessSetupComplete(currentBusiness);
   // A signed-in user with zero memberships has just come from /signup —
   // ship them into the wizard to create their first business.
   const needsWizardNoBusiness = !loading && !hasAnyMembership && !isImpersonating;
 
-  // Card-upfront gate (STA-173): a new-flow business that finished onboarding
-  // but never attached a payment method (abandoned Stripe Checkout). Mirrors
-  // the server-side 402 gate exactly — keyed on completed_at so it never fires
-  // mid-wizard, and bypassed under impersonation (superadmin). Rendered inline
-  // (not a redirect): the wizard 302s away once setup is complete, so sending
-  // them back there would loop.
-  const needsCheckout =
+  // Just back from Stripe Checkout (card-upfront flow). The subscription
+  // webhook may land a beat after the redirect, so rather than bounce the user
+  // back to the plan step the instant they return, poll memberships for a few
+  // seconds and hold a spinner until stripe_subscription_id appears.
+  const [justCheckedOut, setJustCheckedOut] = useState<boolean>(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("checkout") === "success"
+  );
+  const awaitingSubscription =
+    justCheckedOut &&
     !!currentBusiness?.requires_card_upfront &&
     !currentBusiness?.stripe_subscription_id &&
-    !!setupProgress?.completed_at &&
     !isImpersonating;
+  const pollAttempts = useRef(0);
+  useEffect(() => {
+    if (!awaitingSubscription) return;
+    const id = setInterval(() => {
+      pollAttempts.current += 1;
+      if (pollAttempts.current > 12) {
+        // ~24s elapsed without the webhook — give up waiting and let the
+        // normal gate take over (resumes the plan step so they can retry).
+        setJustCheckedOut(false);
+        clearInterval(id);
+        return;
+      }
+      void refetch();
+    }, 2000);
+    return () => clearInterval(id);
+  }, [awaitingSubscription, refetch]);
 
   useEffect(() => {
+    if (awaitingSubscription) return; // hold while the webhook lands
     if (needsWizard) {
       router.replace(wizardResumePath(setupProgress));
     } else if (needsWizardNoBusiness) {
       router.replace("/onboarding/business/welcome");
     }
-  }, [needsWizard, needsWizardNoBusiness, router, setupProgress]);
+  }, [awaitingSubscription, needsWizard, needsWizardNoBusiness, router, setupProgress]);
 
-  // Show loading state
-  if (loading) {
+  // Show loading state — also while we wait for the post-checkout webhook so
+  // the user isn't bounced back to the plan step the instant they return.
+  if (loading || awaitingSubscription) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">
@@ -145,12 +172,6 @@ export default function AdminLayout({
         </div>
       </div>
     );
-  }
-
-  // Card-upfront business that completed onboarding but hasn't paid — block
-  // the dashboard behind the checkout gate until a subscription exists.
-  if (needsCheckout) {
-    return <CheckoutRequiredPage />;
   }
 
   return (

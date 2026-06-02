@@ -155,14 +155,17 @@ export function PlanStep() {
       </div>
 
       <div className="flex flex-col items-center gap-2 max-w-2xl mx-auto text-center animate-slide-up delay-160">
-        {requiresCardUpfront && (
+        {requiresCardUpfront ? (
+          // Card-upfront: the "no credit card required" ctaSubtext would be a
+          // lie, so replace it with the trial reassurance.
           <p className="wiz-helper font-medium text-[var(--foreground)]">
             {t('checkoutReassurance')}
           </p>
+        ) : (
+          <p className="wiz-helper text-[#7A7A7A]">
+            {tp('ctaSubtext')}
+          </p>
         )}
-        <p className="wiz-helper text-[#7A7A7A]">
-          {tp('ctaSubtext')}
-        </p>
         <p className="text-[11px] text-[#9A9A9A] leading-relaxed">
           {tp.rich('legalNotice', {
             terms: (chunks) => (
