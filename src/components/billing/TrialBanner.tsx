@@ -17,6 +17,8 @@ interface BannerVisibility {
   isDismissable: boolean;
   variant: BannerVariant;
   message: string;
+  /** Show an "update payment method" button (grace / past_due states). */
+  needsPayment: boolean;
   onDismiss: () => void;
 }
 
@@ -71,6 +73,7 @@ function useTrialBannerVisibility(): BannerVisibility {
     isDismissable: false,
     variant: "info",
     message: "",
+    needsPayment: false,
     onDismiss,
   };
 
@@ -83,6 +86,7 @@ function useTrialBannerVisibility(): BannerVisibility {
       isDismissable: false,
       variant: "info",
       message: t("trialSidebarBillingSoon", { days: daysUntilFirstCharge }),
+      needsPayment: false,
       onDismiss,
     };
   }
@@ -95,6 +99,7 @@ function useTrialBannerVisibility(): BannerVisibility {
       isDismissable: false,
       variant: "warning",
       message: t("trialSidebarGrace"),
+      needsPayment: true,
       onDismiss,
     };
   }
@@ -106,6 +111,7 @@ function useTrialBannerVisibility(): BannerVisibility {
       isDismissable: false,
       variant: "error",
       message: t("trialSidebarPastDue"),
+      needsPayment: true,
       onDismiss,
     };
   }
@@ -126,25 +132,29 @@ function useTrialBannerVisibility(): BannerVisibility {
     message: isUrgent
       ? t("trialSidebarUrgent", { days: daysRemaining })
       : t("trialSidebarInfo", { days: daysRemaining }),
+    needsPayment: false,
     onDismiss,
   };
 }
 
-const VARIANT_STYLES: Record<BannerVariant, { bg: string; text: string; border: string }> = {
+const VARIANT_STYLES: Record<BannerVariant, { bg: string; text: string; border: string; solid: string }> = {
   info: {
     bg: "bg-[var(--info-light)]",
     text: "text-[var(--info)]",
     border: "border-[var(--info)]/20",
+    solid: "bg-[var(--info)] hover:bg-[var(--info)]/90",
   },
   warning: {
     bg: "bg-[var(--warning-light)]",
     text: "text-[var(--warning)]",
     border: "border-[var(--warning)]/20",
+    solid: "bg-[var(--warning)] hover:bg-[var(--warning)]/90",
   },
   error: {
     bg: "bg-[var(--error-light)]",
     text: "text-[var(--error)]",
     border: "border-[var(--error)]/20",
+    solid: "bg-[var(--error)] hover:bg-[var(--error)]/90",
   },
 };
 
@@ -159,7 +169,7 @@ const VARIANT_ICONS: Record<BannerVariant, typeof ClockIcon> = {
  */
 export function TrialSidebarWidget() {
   const t = useTranslations("billing");
-  const { shouldShow, variant, message, isDismissable, onDismiss } =
+  const { shouldShow, variant, message, isDismissable, needsPayment, onDismiss } =
     useTrialBannerVisibility();
 
   if (!shouldShow) return null;
@@ -179,33 +189,32 @@ export function TrialSidebarWidget() {
         {isDismissable && (
           <button
             onClick={onDismiss}
-            className="absolute top-2 right-2 p-0.5 rounded-sm opacity-60 hover:opacity-100 transition-opacity"
+            className="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 rounded-sm opacity-60 hover:opacity-100 transition-opacity"
             aria-label="Dismiss"
           >
             <XIcon className={cn("w-3 h-3", styles.text)} />
           </button>
         )}
-        <div className="flex items-center gap-2 pr-4">
-          <Icon className={cn("w-4 h-4 shrink-0", styles.text)} weight="fill" />
-          <div className="min-w-0">
-            <p className={cn("text-xs font-medium leading-tight", styles.text)}>
+        <div>
+          <div className="flex items-center gap-2 pr-4">
+            <Icon className={cn("w-4 h-4 shrink-0", styles.text)} weight="fill" />
+            <p className={cn("min-w-0 text-xs font-medium leading-tight", styles.text)}>
               {message}
             </p>
-            {/* Trial/grace badges are informational only — no "view plans"
-                link (the plan is already chosen at signup). Past-due keeps a
-                link so the owner can fix a failed payment. */}
-            {variant === "error" && (
-              <Link
-                href="/billing"
-                className={cn(
-                  "text-[11px] font-semibold underline underline-offset-2 mt-1 inline-block",
-                  styles.text
-                )}
-              >
-                {t("updatePayment")}
-              </Link>
-            )}
           </div>
+          {/* Trial badges are informational only (the plan is chosen at
+              signup). Grace / past_due get an action button to fix payment. */}
+          {needsPayment && (
+            <Link
+              href="/billing"
+              className={cn(
+                "mt-2 inline-flex w-full items-center justify-center rounded-md px-2.5 py-1 text-[11px] font-semibold text-white transition-colors",
+                styles.solid
+              )}
+            >
+              {t("updatePaymentMethod")}
+            </Link>
+          )}
         </div>
       </div>
     </div>
