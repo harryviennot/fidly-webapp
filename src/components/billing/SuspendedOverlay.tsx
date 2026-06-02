@@ -26,9 +26,9 @@ export function SuspendedBanner() {
         </div>
         <Link
           href="/billing"
-          className="shrink-0 inline-flex items-center gap-1 text-sm font-semibold text-[var(--error)] underline underline-offset-2 hover:opacity-80 transition-opacity"
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-[var(--error)] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[var(--error)]/90 transition-colors"
         >
-          {t("suspendedBannerCta")}
+          {t("updatePaymentMethod")}
           <ArrowRightIcon className="w-3.5 h-3.5" weight="bold" />
         </Link>
       </div>

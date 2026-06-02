@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-provider';
 import { useBusiness } from '@/contexts/business-context';
+import { isBusinessSetupComplete } from '@/lib/onboarding-status';
 import { applyTheme, getAccentFromSettings, getBackgroundFromSettings, resetTheme } from '@/utils/theme';
 
 const STAMPEO_BRAND_ACCENT = '#f97316';
@@ -12,8 +13,11 @@ const STAMPEO_BRAND_ACCENT = '#f97316';
  * Minimal layout for the launch wizard. No sidebar, no business switcher —
  * the wizard is a focused, single-task surface.
  *
- * Inverse gate: if the current business already has setup_progress.completed_at
- * set, the wizard is unreachable. Direct URL navigation 302s to /.
+ * Inverse gate: if the current business is fully set up, the wizard is
+ * unreachable and direct URL navigation 302s to /. "Fully set up" means the
+ * wizard finished AND — for card-upfront new signups — a subscription exists,
+ * so a business that completed every step but hasn't paid stays here on the
+ * plan step to finish Stripe Checkout. See isBusinessSetupComplete.
  *
  * Theming: the dashboard keeps its native green accent, but the onboarding
  * runs in Stampeo's brand orange so it matches the marketing site the user
@@ -32,7 +36,7 @@ export default function OnboardingBusinessLayout({ children }: { children: React
       router.replace('/login');
       return;
     }
-    if (currentBusiness?.settings?.setup_progress?.completed_at) {
+    if (isBusinessSetupComplete(currentBusiness)) {
       router.replace('/');
     }
   }, [authLoading, businessLoading, user, currentBusiness, router]);

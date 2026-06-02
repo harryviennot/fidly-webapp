@@ -25,6 +25,7 @@
     "pastDueTitle": "Payment failed",
     "pastDueDescription": "Please update your payment method to avoid service interruption.",
     "updatePayment": "Update payment",
+    "updatePaymentMethod": "Update payment method",
     "graceTitle": "Trial ended",
     "graceDescription": "Your trial has ended. Subscribe within the next few days to keep full access to your account.",
     "manageBilling": "Manage billing",
@@ -116,7 +117,6 @@
         "Trends & analytics"
       ],
       "pro": [
-        "Multiple active card templates",
         "Multi-location support",
         "Geofencing notifications",
         "Unlimited campaigns + segmentation",

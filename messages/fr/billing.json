@@ -25,6 +25,7 @@
     "pastDueTitle": "Échec du paiement",
     "pastDueDescription": "Veuillez mettre à jour votre moyen de paiement pour éviter une interruption de service.",
     "updatePayment": "Mettre à jour",
+    "updatePaymentMethod": "Mettre à jour le moyen de paiement",
     "graceTitle": "Essai terminé",
     "graceDescription": "Votre essai est terminé. Abonnez-vous dans les prochains jours pour conserver l'accès complet à votre compte.",
     "manageBilling": "Gérer la facturation",
@@ -116,7 +117,6 @@
         "Tendances & analyses"
       ],
       "pro": [
-        "Plusieurs modèles de carte actifs",
         "Support multi-établissements",
         "Notifications par géolocalisation",
         "Campagnes illimitées + segmentation",
