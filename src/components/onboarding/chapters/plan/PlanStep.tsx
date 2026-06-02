@@ -12,7 +12,6 @@ import {
   isFoundingProgramOpen,
   type TierId,
 } from '@/lib/pricing';
-import { FoundingCountdown } from '@/components/ui/founding-countdown';
 import { useWizardStep } from '../../wizard-context';
 
 const TIERS: readonly TierId[] = ['starter', 'growth', 'pro'] as const;
@@ -124,11 +123,6 @@ export function PlanStep() {
         <p className="wiz-body text-[#7A7A7A] max-w-xl">
           {showFoundingPricing ? t('subtitleFounding') : t('subtitle')}
         </p>
-        {showFoundingPricing && (
-          <div className="mt-2">
-            <FoundingCountdown variant="badge" />
-          </div>
-        )}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 max-w-4xl mx-auto w-full animate-slide-up delay-80">
@@ -146,6 +140,11 @@ export function PlanStep() {
       </div>
 
       <div className="flex flex-col items-center gap-2 max-w-2xl mx-auto text-center animate-slide-up delay-160">
+        {showFoundingPricing && (
+          <p className="wiz-helper text-[#7A7A7A]">
+            {tp('foundingReassurance')}
+          </p>
+        )}
         {/* Card-upfront: the "no credit card required" ctaSubtext would be a
             lie, and the billing terms now live in the step subtitle, so we
             drop the line entirely. Legacy no-card businesses keep it. */}

@@ -8,6 +8,7 @@
     "selected": "Sélectionné",
     "ctaSubtext": "Sans carte bancaire. Sans engagement. Annulez en un clic.",
     "legalNotice": "En confirmant votre abonnement, vous acceptez nos <terms>Conditions d'utilisation</terms> et reconnaissez notre <privacy>Politique de confidentialité</privacy>.",
+    "foundingReassurance": "Votre tarif fondateur est garanti à vie. Même si nos prix augmentent, ou si vous résiliez puis revenez plus tard, vous gardez ce tarif.",
     "countdown": {
       "daysHours": "Tarif fondateur. Expire dans {days}j {hours}h.",
       "hoursMinutes": "Tarif fondateur. Expire dans {hours}h {minutes}m."
