@@ -8,6 +8,7 @@
     "selected": "Selected",
     "ctaSubtext": "No credit card required · Cancel anytime",
     "legalNotice": "By confirming your subscription, you accept our <terms>Terms of Service</terms> and acknowledge our <privacy>Privacy Policy</privacy>.",
+    "foundingReassurance": "Your founding rate is locked for good. Even if prices rise, or you cancel and come back later, you keep this price.",
     "countdown": {
       "daysHours": "Founding pricing closes in {days}d {hours}h",
       "hoursMinutes": "Founding pricing closes in {hours}h {minutes}m"
