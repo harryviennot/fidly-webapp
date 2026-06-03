@@ -1,9 +1,11 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useTranslations } from "next-intl";
-import { CheckCircle, Lock } from "@phosphor-icons/react";
+import { CheckCircle } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/redesign";
-import { AchievementIcon } from "@/components/redesign/achievement-icon";
+import { AchievementBadge, BADGE_CATEGORY_COLOR } from "@/components/redesign/achievement-badge";
+import { Card } from "@/components/ui/card";
 import { InfoPopover } from "@/components/reusables/info-popover";
 import { useBusiness } from "@/contexts/business-context";
 import { useBusinessAchievements } from "@/hooks/use-business-achievements";
@@ -27,66 +29,72 @@ function AchievementTile({
   a: DisplayAchievement;
   t: ReturnType<typeof useTranslations>;
 }) {
-  // Blurred teaser — a glimpse of the next challenge to create a bit of suspense.
-  if (a.display === "teaser") {
-    return (
-      <div className="flex select-none flex-col rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)]">
-          <Lock className="h-[18px] w-[18px]" weight="bold" />
-        </div>
-        <p
-          aria-hidden
-          className="text-[13px] font-semibold leading-snug text-[var(--foreground)] blur-[5px]"
-        >
-          {achievementTitle(t, a)}
-        </p>
-        <p className="mt-1.5 text-[11px] text-[var(--muted-foreground)]">{t("stateLocked")}</p>
-      </div>
-    );
-  }
-
+  const color = BADGE_CATEGORY_COLOR[a.category];
+  const state =
+    a.display === "earned" ? "earned" : a.display === "current" ? "progress" : "locked";
   const earned = a.display === "earned";
+  const teaser = a.display === "teaser";
+
   return (
-    <div
+    <Card
+      hover={false}
+      style={
+        { "--fam": color, "--fam-tint": `${color}22`, "--fam-border": `${color}55` } as CSSProperties
+      }
       className={cn(
-        "flex flex-col rounded-xl border p-4 transition-colors",
+        "group relative flex flex-col items-center p-5 text-center [perspective:600px]",
         earned
-          ? "border-[var(--accent)]/30 bg-[var(--accent-light)]/30"
-          : "border-[var(--border)] bg-[var(--card)]"
+          ? "border-[color:var(--fam-border)] bg-[linear-gradient(180deg,var(--fam-tint),var(--card)_62%)] shadow-[0_10px_24px_-14px_var(--fam)]"
+          : "border-[var(--border)]"
       )}
     >
-      <div className="mb-3 flex items-start justify-between">
-        <div
-          className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-lg",
-            earned
-              ? "bg-[var(--accent)] text-white"
-              : "bg-[var(--muted)] text-[var(--muted-foreground)]"
-          )}
-        >
-          <AchievementIcon
-            name={a.icon}
-            className="h-[18px] w-[18px]"
-            weight={earned ? "fill" : "bold"}
-          />
-        </div>
-        {earned && <CheckCircle className="h-5 w-5 text-[var(--accent)]" weight="fill" />}
+      {earned && (
+        <CheckCircle
+          className="absolute right-3 top-3 h-[22px] w-[22px]"
+          style={{ color }}
+          weight="fill"
+        />
+      )}
+
+      {/* Hover an earned trophy → it flips a full 360° on the X axis. */}
+      <div
+        className={cn(
+          "mb-3 transition-transform duration-700 ease-out [transform-style:preserve-3d]",
+          earned && "group-hover:[transform:rotateX(360deg)]"
+        )}
+      >
+        <AchievementBadge
+          category={a.category}
+          value={a.oneTime ? undefined : a.threshold}
+          state={state}
+          isFinalTier={a.isFinalTier}
+          oneTime={a.oneTime}
+          size={84}
+        />
       </div>
 
-      <p className="text-[13px] font-semibold leading-snug text-[var(--foreground)]">
+      <p
+        className={cn(
+          "text-[13.5px] font-semibold leading-snug text-[var(--foreground)]",
+          teaser && "select-none blur-[5px]"
+        )}
+        aria-hidden={teaser || undefined}
+      >
         {achievementTitle(t, a)}
       </p>
 
-      {earned || a.oneTime ? (
-        <p className="mt-1.5 text-[11px] text-[var(--muted-foreground)]">
-          {earned ? t("stateEarned") : t("stateLocked")}
+      {earned ? (
+        <p className="mt-1.5 text-[11px] font-semibold" style={{ color }}>
+          {t("stateEarned")}
         </p>
+      ) : a.oneTime || teaser ? (
+        <p className="mt-1.5 text-[11px] text-[var(--muted-foreground)]">{t("stateLocked")}</p>
       ) : (
-        <div className="mt-auto pt-3">
+        <div className="mt-3 w-full max-w-[220px]">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
             <div
-              className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-500 ease-out"
-              style={{ width: `${Math.round(a.progress * 100)}%` }}
+              className="h-full rounded-full transition-[width] duration-500 ease-out"
+              style={{ width: `${Math.round(a.progress * 100)}%`, backgroundColor: color }}
             />
           </div>
           <p className="mt-1.5 text-[11px] tabular-nums text-[var(--muted-foreground)]">
@@ -94,7 +102,7 @@ function AchievementTile({
           </p>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 

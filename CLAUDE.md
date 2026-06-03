@@ -28,8 +28,9 @@ cutting that doesn't exist, build it generic and drop it under `ui/` or
 
 Notable reusables:
 
-- **`InfoPopover`** (`reusables/info-popover.tsx`) — a click-to-open "i" info
-  bubble for explaining a metric, field, or term. Built on `Popover` (not
-  `Tooltip`) so it works on touch devices, where hover tooltips never fire.
-  Pass `content` (string or node), optional `label`/`side`/`align`. Reach for
-  this for any "what is this / tell me more" secondary context.
+- **`InfoPopover`** (`reusables/info-popover.tsx`) — a small "i" info bubble for
+  explaining a metric, field, or term. Device-adaptive: **hover to view** on
+  mouse / fine-pointer devices (a real `Tooltip`), **tap to view** on touch (a
+  `Popover`, since hover tooltips never fire on touch). Both wear the base
+  Tooltip style. Pass `content` (string or node), optional `label`/`side`/`align`.
+  Reach for this for any "what is this / tell me more" secondary context.

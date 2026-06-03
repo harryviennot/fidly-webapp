@@ -117,6 +117,8 @@ export interface ResolvedAchievement {
   unlocked: boolean;
   /** The lowest unmet rung of its ladder — the "current goal". */
   isNext: boolean;
+  /** The top rung of its ladder — the badge gets a gold rim. False for one-time. */
+  isFinalTier: boolean;
   /** 0..1 fill toward this rung (1 once earned). */
   progress: number;
   /** Non-ladder (one-time) achievement. */
@@ -162,7 +164,7 @@ export function computeAchievements(
   for (const ladder of ACHIEVEMENT_LADDERS) {
     const current = values[ladder.metric];
     let nextMarked = false;
-    for (const threshold of ladder.thresholds) {
+    ladder.thresholds.forEach((threshold, i) => {
       const key = rungKey(ladder.metric, threshold);
       const unlocked = current >= threshold || seen.has(key);
       const isNext = !unlocked && !nextMarked;
@@ -176,10 +178,11 @@ export function computeAchievements(
         current,
         unlocked,
         isNext,
+        isFinalTier: i === ladder.thresholds.length - 1,
         progress: unlocked ? 1 : clamp01(threshold > 0 ? current / threshold : 0),
         oneTime: false,
       });
-    }
+    });
   }
 
   for (const ot of ACHIEVEMENT_ONE_TIMES) {
@@ -193,6 +196,7 @@ export function computeAchievements(
       current: unlocked ? 1 : 0,
       unlocked,
       isNext: false,
+      isFinalTier: false,
       progress: unlocked ? 1 : 0,
       oneTime: true,
     });
