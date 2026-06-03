@@ -54,11 +54,13 @@ function ProgressBar({ value, tone = "accent" }: { value: number; tone?: "accent
 function RungRow({ a, t }: { a: ResolvedAchievement; t: ReturnType<typeof useTranslations> }) {
   return (
     <div className="flex items-center gap-3">
+      {/* Colored (not matte) so the in-progress goals feel inviting; the bar
+          below carries the "not yet earned" signal. No gold final-tier rim —
+          these aren't completed. */}
       <AchievementBadge
         category={a.category}
         value={a.threshold}
-        state="progress"
-        isFinalTier={a.isFinalTier}
+        state="earned"
         size={40}
         className="shrink-0"
       />
@@ -144,8 +146,8 @@ function WeeklyGoalBlock({
       <ProgressBar value={goal.progress} />
       <p className="mt-2 text-[12px] text-[var(--muted-foreground)]">
         {goal.reached
-          ? t("weeklyGoal.reached", { current: goal.current, target: goal.target })
-          : t("weeklyGoal.toGo", { remaining: goal.remaining })}
+          && t("weeklyGoal.reached", { current: goal.current, target: goal.target })
+        }
       </p>
 
       <Dialog open={open} onOpenChange={setOpen}>
