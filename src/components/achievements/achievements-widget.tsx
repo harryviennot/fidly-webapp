@@ -226,8 +226,6 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
   );
 
   const topInProgress = computed?.inProgress.slice(0, 3) ?? [];
-  const earned = computed?.earnedCount ?? 0;
-  const total = computed?.totalCount ?? 0;
 
   return (
     <Card flat className="animate-slide-up p-4" style={{ animationDelay: `${delay}ms` }}>

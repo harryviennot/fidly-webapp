@@ -23,12 +23,26 @@ export function AchievementHero({ computed }: { computed: ComputedAchievements }
   const total = computed.totalCount;
   const pct = total > 0 ? earned / total : 0;
 
+  // Adaptive recency line. As an owner gets deep into the ladders, months can
+  // pass between unlocks — a bare "0 this month" would read as failure. So we
+  // fall back month -> year, and when even the year is empty we drop the line
+  // entirely (the always-reachable "next up" goal carries the forward motion).
   const now = new Date();
   const earnedThisMonth = computed.all.filter((a) => {
     if (!a.unlocked || !a.unlockedAt) return false;
     const d = new Date(a.unlockedAt);
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   }).length;
+  const earnedThisYear = computed.all.filter((a) => {
+    if (!a.unlocked || !a.unlockedAt) return false;
+    return new Date(a.unlockedAt).getFullYear() === now.getFullYear();
+  }).length;
+  const recencyLine =
+    earnedThisMonth > 0
+      ? t("hero.earnedThisMonth", { count: earnedThisMonth })
+      : earnedThisYear > 0
+        ? t("hero.earnedThisYear", { count: earnedThisYear })
+        : null;
 
   const next = computed.inProgress[0];
 
@@ -45,10 +59,8 @@ export function AchievementHero({ computed }: { computed: ComputedAchievements }
           <p className="text-[15px] font-semibold text-[var(--foreground)]">
             {t("hero.earnedTitle", { earned, total })}
           </p>
-          {earnedThisMonth > 0 && (
-            <p className="mt-0.5 text-[12.5px] text-[var(--muted-foreground)]">
-              {t("hero.earnedThisMonth", { count: earnedThisMonth })}
-            </p>
+          {recencyLine && (
+            <p className="mt-0.5 text-[12.5px] text-[var(--muted-foreground)]">{recencyLine}</p>
           )}
         </div>
       </div>

@@ -40,6 +40,7 @@
     "hero": {
       "earnedTitle": "{earned} sur {total} décrochés",
       "earnedThisMonth": "{count, plural, =1 {1 décroché ce mois-ci} other {# décrochés ce mois-ci}}",
+      "earnedThisYear": "{count, plural, =1 {1 décroché cette année} other {# décrochés cette année}}",
       "nextUp": "Objectif suivant"
     },
     "cta": {

@@ -20,6 +20,7 @@ import {
   achievementsForDisplay,
   achievementTitle,
   achievementValueLabel,
+  ACHIEVEMENT_CTA,
   CATEGORY_ORDER,
   type DisplayAchievement,
 } from "@/lib/achievements";
@@ -46,9 +47,13 @@ function buildRows(items: DisplayAchievement[]): DisplayAchievement[][] {
 function AchievementTile({
   a,
   t,
+  showCta = false,
 }: {
   a: DisplayAchievement;
   t: ReturnType<typeof useTranslations>;
+  /** The CTA is shown once per section (on the first uncompleted, actionable
+   *  tile) — after that the owner knows the lever, so repeating it just clutters. */
+  showCta?: boolean;
 }) {
   const format = useFormatter();
   const color = BADGE_CATEGORY_COLOR[a.category];
@@ -151,7 +156,7 @@ function AchievementTile({
       ) : isOneTimeLocked ? (
         <div className="mt-1.5 flex flex-col items-center gap-2">
           <p className="text-[11px] text-[var(--muted-foreground)]">{t("stateLocked")}</p>
-          <AchievementCtaLink metric={a.metric} />
+          {showCta && <AchievementCtaLink metric={a.metric} />}
         </div>
       ) : isCurrent ? (
         <div className="mt-3 w-full max-w-[220px]">
@@ -164,7 +169,7 @@ function AchievementTile({
           <p className="mt-1.5 text-[11px] tabular-nums text-[var(--muted-foreground)]">
             {achievementValueLabel(a, fmt)}
           </p>
-          <AchievementCtaLink metric={a.metric} className="mt-2.5 mx-auto" />
+          {showCta && <AchievementCtaLink metric={a.metric} className="mt-2.5 mx-auto" />}
         </div>
       ) : (
         <p className="mt-1.5 text-[11px] text-[var(--muted-foreground)]">{t("stateLocked")}</p>
@@ -198,6 +203,14 @@ export default function AchievementsPage() {
         // standalone trophies, so they stay together on a single row.
         const rows = buildRows(items);
 
+        // Show the action button once per section: on the first uncompleted tile
+        // that actually has a lever (current ladder rung or a locked "first").
+        const ctaKey = items.find(
+          (a) =>
+            (a.display === "current" || (a.oneTime && a.display !== "earned")) &&
+            ACHIEVEMENT_CTA[a.metric]
+        )?.key;
+
         return (
           <section key={cat} className="flex flex-col gap-3">
             <div className="flex flex-col gap-0.5">
@@ -218,7 +231,7 @@ export default function AchievementsPage() {
                   className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
                 >
                   {row.map((a) => (
-                    <AchievementTile key={a.key} a={a} t={t} />
+                    <AchievementTile key={a.key} a={a} t={t} showCta={a.key === ctaKey} />
                   ))}
                 </div>
               ))}
