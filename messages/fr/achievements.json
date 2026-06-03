@@ -5,8 +5,8 @@
     "earnedCount": "{earned} sur {total} décrochés",
     "allEarned": "Tous les trophées sont décrochés. Bravo.",
     "viewAll": "Tout voir",
-    "unlockedOne": "Trophée débloqué : {name}",
-    "unlockedMany": "{count} trophées débloqués !",
+    "unlockedTitle": "Trophée débloqué !",
+    "recentlyEarned": "Décrochés récemment",
     "pageTitle": "Trophées",
     "pageSubtitle": "Les étapes que vous franchissez à mesure que votre programme grandit.",
     "stateEarned": "Décroché",
@@ -36,6 +36,23 @@
       "loyalty": "Les clients qui reviennent, comptés dès qu'ils passent sur deux jours différents.",
       "firsts": "Des étapes uniques, franchies la première fois que vous faites quelque chose.",
       "weeklyGoal": "Les tampons que votre équipe donne cette semaine. On vous suggère un objectif d'après vos dernières semaines, et vous pouvez le changer quand vous voulez."
+    },
+    "hero": {
+      "earnedTitle": "{earned} sur {total} décrochés",
+      "earnedThisMonth": "{count, plural, =1 {1 décroché ce mois-ci} other {# décrochés ce mois-ci}}",
+      "nextUp": "Objectif suivant"
+    },
+    "cta": {
+      "shareQr": "Partager mon QR code",
+      "openScanner": "Ouvrir le scanner",
+      "sendBroadcast": "Envoyer une diffusion"
+    },
+    "why": {
+      "growth": "Chaque client qui ajoute votre carte. Votre portée qui grandit.",
+      "engagement": "Chaque tampon, c'est une visite. Plus de tampons, plus d'habitude.",
+      "momentum": "Vos 30 derniers jours, une fenêtre glissante. Elle récompense un bon mois récent.",
+      "loyalty": "Les clients revenus sur deux jours différents, vos habitués.",
+      "firsts": "Des étapes uniques, franchies la première fois que vous faites quelque chose."
     },
     "weeklyGoal": {
       "label": "Objectif de la semaine",

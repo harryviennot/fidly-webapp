@@ -584,6 +584,127 @@ html {
   }
 }
 
+/* ===== Achievement Unlock Celebration (the big moment) =====
+   A distinct, game-like reward — NOT the hover flip. The badge lands with an
+   overshoot bounce while a ray fan turns behind it, particles fling outward,
+   and a highlight sweeps the enamel face. Per-category color via --ach-glow. */
+
+@keyframes ach-celebrate-in {
+  0% {
+    transform: scale(0) rotate(-18deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.18) rotate(6deg);
+    opacity: 1;
+  }
+  72% {
+    transform: scale(0.94) rotate(-3deg);
+  }
+  86% {
+    transform: scale(1.04) rotate(1deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+.ach-celebrate-in {
+  animation: ach-celebrate-in 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes ach-rays {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ach-rays {
+  position: absolute;
+  inset: -55%;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 9deg,
+    color-mix(in srgb, var(--ach-glow, #f2a93b) 55%, transparent) 9deg 18deg,
+    transparent 18deg 30deg
+  );
+  -webkit-mask-image: radial-gradient(circle, #000 36%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 36%, transparent 70%);
+  animation: ach-rays 9s linear infinite;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@keyframes ach-sparkle {
+  0% {
+    transform: translate(0, 0) scale(0.2);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 0), var(--ty, 0)) scale(1);
+    opacity: 0;
+  }
+}
+.ach-sparkle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 9999px;
+  background: var(--ach-glow, #f2a93b);
+  animation: ach-sparkle 1.1s ease-out var(--d, 0s) forwards;
+  pointer-events: none;
+}
+
+@keyframes ach-shine-sweep {
+  0% {
+    transform: translateX(-130%) rotate(20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateX(130%) rotate(20deg);
+    opacity: 0;
+  }
+}
+.ach-shine-sweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.85) 50%,
+    transparent 65%
+  );
+  -webkit-mask-image: radial-gradient(circle at center, #000 45%, transparent 62%);
+  mask-image: radial-gradient(circle at center, #000 45%, transparent 62%);
+  animation: ach-shine-sweep 1s ease-in-out 0.35s both;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ach-rays,
+  .ach-sparkle,
+  .ach-shine-sweep {
+    animation: none;
+    opacity: 0;
+  }
+  .ach-celebrate-in {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
 /* ===== Wallet Switch Animation ===== */
 
 .wallet-card-container {

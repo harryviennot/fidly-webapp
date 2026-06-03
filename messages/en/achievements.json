@@ -5,8 +5,8 @@
     "earnedCount": "{earned} of {total} earned",
     "allEarned": "Every achievement earned. Incredible.",
     "viewAll": "View all",
-    "unlockedOne": "Achievement unlocked: {name}",
-    "unlockedMany": "{count} achievements unlocked!",
+    "unlockedTitle": "Achievement unlocked!",
+    "recentlyEarned": "Recently earned",
     "pageTitle": "Achievements",
     "pageSubtitle": "Milestones you reach as your loyalty program grows.",
     "stateEarned": "Earned",
@@ -36,6 +36,23 @@
       "loyalty": "Customers who keep coming back, counted once they have visited on two different days.",
       "firsts": "One-time milestones you reach the first time you do something.",
       "weeklyGoal": "Stamps your team gives this week. We suggest a target from your recent weeks, and you can change it anytime."
+    },
+    "hero": {
+      "earnedTitle": "{earned} of {total} earned",
+      "earnedThisMonth": "{count, plural, =1 {1 earned this month} other {# earned this month}}",
+      "nextUp": "Next up"
+    },
+    "cta": {
+      "shareQr": "Share my QR code",
+      "openScanner": "Open scanner",
+      "sendBroadcast": "Send a broadcast"
+    },
+    "why": {
+      "growth": "Every customer who adds your card. Your reach, growing.",
+      "engagement": "Every stamp is a visit. More stamps, more habit.",
+      "momentum": "Your last 30 days, a rolling window. It rewards a strong recent month.",
+      "loyalty": "Customers who came back on two different days, your regulars.",
+      "firsts": "Milestones you hit the first time you do something."
     },
     "weeklyGoal": {
       "label": "This week's goal",

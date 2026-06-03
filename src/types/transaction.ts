@@ -57,6 +57,14 @@ export interface WeeklyStampPoint {
   stamps: number;
 }
 
+/** One recorded trophy in the business_achievements ledger (migration 96).
+ *  `acknowledged_at` is null until the unlock has been celebrated once. */
+export interface UnlockedAchievement {
+  key: string;
+  unlocked_at: string;
+  acknowledged_at: string | null;
+}
+
 /**
  * Lifetime "trophy" counters + a trailing weekly stamp series powering the
  * dashboard Achievements + weekly-goal widget and the /achievements page.
@@ -79,6 +87,17 @@ export interface BusinessAchievementsResponse {
   new_customers_last_30d: number;
   /** Last 5 complete weeks, oldest -> newest. Excludes the current partial week. */
   weekly_stamp_series: WeeklyStampPoint[];
+  /** Per-trophy unlock ledger: when each was earned + whether it's been celebrated. */
+  unlocked: UnlockedAchievement[];
+  /** Whether the business has been seeded (the '__init__' sentinel exists). Gates
+   *  first-contact silent seeding so established shops don't replay their history. */
+  initialized: boolean;
+}
+
+/** Ledger returned by the sync / acknowledge writes. */
+export interface AchievementLedgerResponse {
+  unlocked: UnlockedAchievement[];
+  initialized: boolean;
 }
 
 export interface StampResponse {

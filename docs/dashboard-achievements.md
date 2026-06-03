@@ -88,9 +88,10 @@ as "100%" for a single twice-stamped customer, and 100% is not a realistic targe
 
 **The "This month" category is rolling and sticky.** It rewards sustained recent effort rather
 than lifetime stacking. Because a rolling window naturally falls, these trophies are made
-**sticky**: `computeAchievements(values, seenKeys)` treats any key already in
-`settings.achievements_seen` as permanently unlocked, so a quiet month never un-earns a trophy.
-Stickiness applies to all ladders (a harmless no-op for monotonic lifetime ones).
+**sticky**: `computeAchievements(values, ledger)` treats any key already recorded in the
+`business_achievements` ledger (see §4.3) as permanently unlocked, so a quiet month never
+un-earns a trophy. Stickiness applies to all ladders (a harmless no-op for monotonic lifetime
+ones).
 
 The widget shows the **current goal per ladder** (lowest unmet rung), the three closest to
 completion, so there is always an "almost there" target. Setup/adoption badges are deliberately
@@ -119,19 +120,43 @@ Logic in `web/src/lib/weekly-goal.ts`.
 - Resets on the same week boundary the RPC uses, `date_trunc('week', CURRENT_DATE)` (Monday
   00:00, **server TZ / UTC**, same as `stamps_this_week`).
 
-### 4.3 Celebration (in-app now)
+### 4.3 The unlock ledger (`business_achievements`, migration 96)
 
-When a computed-earned key is absent from `settings.achievements_seen`, the widget pops a
-Sonner toast and a "New" badge, then writes the key into `achievements_seen` so it fires
-once. On the **very first load** (`achievements_seen` never set), the baseline is seeded
-silently so already-earned trophies never pop retroactively; only future unlocks celebrate.
+The old `settings.achievements_seen: text[]` array is replaced by a real per-business
+ledger: `business_achievements (business_id, achievement_key, unlocked_at, acknowledged_at)`.
+It carries WHEN each trophy was earned (for "Earned · 2 days ago" + the "Recently earned"
+strip) and whether its unlock has been celebrated yet (`acknowledged_at`). Its recorded
+keys also feed `computeAchievements(values, ledger)` for stickiness, the role the old array
+played. Detection stays client-computed; the server only records what the client reports.
+
+**The `__init__` sentinel** is the persistent "this business has been seeded" marker. Table
+emptiness alone can't tell an established shop's first visit (suppress every already-earned
+trophy) from a brand-new shop earning its genuine first one (celebrate it) — both can have
+an empty ledger. The sentinel lives in the table (not owner-only settings), so it works no
+matter which member opens the dashboard first. Migration 96 backfills existing
+`achievements_seen` arrays as already-acknowledged rows + a sentinel, so nothing re-pops.
+
+**Flow (unlock → animate → acknowledge):**
+1. The client computes `unlockedKeys` from the counters and `POST .../achievements/sync`s
+   them. First contact (no sentinel) seeds the sentinel + every key as already-acknowledged
+   (silent). Later calls insert genuinely new keys with `acknowledged_at = NULL`.
+2. `AchievementCelebration` (mounted once in `web/src/app/(dashboard)/layout.tsx`) shows the
+   centered "unlocked" moment for any `acknowledged_at == null` rows — a distinct, game-like
+   animation (scale-in bounce + ray fan + particle burst + shine sweep), **not** the hover
+   coin flip. It queues multiple unlocks and points at the next action via the CTA.
+3. On dismiss it `POST .../achievements/acknowledge`s the batch, so a trophy celebrates
+   exactly once and never re-fires. The endpoints are `require_any_access` + idempotent.
+
+`useAchievementSync` (the writer, used only by the overlay) and `useComputedAchievements`
+(read-only, used by the widget + page) are the single source — nothing reads
+`achievements_seen` anymore.
 
 ### 4.4 Fast-follow: unlock emails (not built)
 
-A server-side unlock email/push to pull an absent owner back. The `achievements_seen` ledger
-is forward-compatible: the email job tracks its own emailed-set and reuses the same
-achievement definitions. Adding it requires no rework here. A stored `unlocked_at` (needed
-for exact per-achievement unlock dates on the page) would land with that work.
+A server-side unlock email/push to pull an absent owner back. The `business_achievements`
+table is forward-compatible: server-side detection (firing on stamp/customer/reward/broadcast
+writes) would insert rows directly, and the email job can track its own emailed flag beside
+`acknowledged_at`. `unlocked_at` already gives exact per-achievement dates.
 
 ---
 

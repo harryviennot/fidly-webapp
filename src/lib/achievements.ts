@@ -104,6 +104,40 @@ export const CATEGORY_ORDER: AchievementCategory[] = [
   "firsts",
 ];
 
+/**
+ * The single action that moves each metric — so a trophy can tell the owner not
+ * just "you need 3 more" but HOW to get them. `labelKey` is under
+ * `achievements.cta.*`; `external` resolves to NEXT_PUBLIC_SCAN_URL in the UI;
+ * `featureGate` hides the CTA when the plan lacks that capability. first_reward is
+ * omitted on purpose — it's customer-driven, nothing the owner can do directly.
+ */
+export interface AchievementCta {
+  labelKey: string;
+  href?: string;
+  external?: boolean;
+  featureGate?: string;
+}
+
+export const ACHIEVEMENT_CTA: Partial<Record<AchievementMetric, AchievementCta>> = {
+  total_customers: { labelKey: "shareQr", href: "/program" },
+  new_customers_last_30d: { labelKey: "shareQr", href: "/program" },
+  total_stamps_given: { labelKey: "openScanner", external: true },
+  stamps_last_30d: { labelKey: "openScanner", external: true },
+  repeat_customers: { labelKey: "openScanner", external: true },
+  first_broadcast: {
+    labelKey: "sendBroadcast",
+    href: "/program/broadcasts",
+    featureGate: "notifications.broadcast",
+  },
+};
+
+/** One recorded trophy from the server ledger (business_achievements, migration 96). */
+export interface AchievementLedgerEntry {
+  key: string;
+  unlocked_at: string;
+  acknowledged_at: string | null;
+}
+
 export interface ResolvedAchievement {
   /** Stable key — also the celebration ledger key in settings.achievements_seen. */
   key: string;
@@ -123,6 +157,10 @@ export interface ResolvedAchievement {
   progress: number;
   /** Non-ladder (one-time) achievement. */
   oneTime: boolean;
+  /** When this rung was earned (from the ledger), or null if not recorded yet. */
+  unlockedAt: string | null;
+  /** When its unlock was celebrated; null = earned but celebration still pending. */
+  acknowledgedAt: string | null;
 }
 
 export interface ComputedAchievements {
@@ -148,17 +186,19 @@ function clamp01(n: number): number {
 /**
  * Resolve the catalog against current values.
  *
- * `seenKeys` (the celebration ledger) makes every trophy **sticky**: once a key
- * has been earned and recorded, it stays unlocked even if the live value later
- * drops below the threshold. This is essential for the rolling 30-day ladders,
- * whose value naturally falls as the window moves — without it a trophy would
- * re-lock. For monotonic lifetime ladders it is a harmless no-op.
+ * The `ledger` (recorded unlocks from the server) makes every trophy **sticky**:
+ * once a key has been earned and recorded, it stays unlocked even if the live
+ * value later drops below the threshold. This is essential for the rolling 30-day
+ * ladders, whose value naturally falls as the window moves — without it a trophy
+ * would re-lock. For monotonic lifetime ladders it is a harmless no-op. The ledger
+ * also carries each unlock's timestamp + acknowledged state, attached per rung.
  */
 export function computeAchievements(
   values: AchievementMetricValues,
-  seenKeys: string[] = []
+  ledger: AchievementLedgerEntry[] = []
 ): ComputedAchievements {
-  const seen = new Set(seenKeys);
+  const byKey = new Map(ledger.map((e) => [e.key, e]));
+  const seen = new Set(byKey.keys());
   const all: ResolvedAchievement[] = [];
 
   for (const ladder of ACHIEVEMENT_LADDERS) {
@@ -169,6 +209,7 @@ export function computeAchievements(
       const unlocked = current >= threshold || seen.has(key);
       const isNext = !unlocked && !nextMarked;
       if (isNext) nextMarked = true;
+      const entry = byKey.get(key);
       all.push({
         key,
         category: ladder.category,
@@ -181,12 +222,15 @@ export function computeAchievements(
         isFinalTier: i === ladder.thresholds.length - 1,
         progress: unlocked ? 1 : clamp01(threshold > 0 ? current / threshold : 0),
         oneTime: false,
+        unlockedAt: entry?.unlocked_at ?? null,
+        acknowledgedAt: entry?.acknowledged_at ?? null,
       });
     });
   }
 
   for (const ot of ACHIEVEMENT_ONE_TIMES) {
     const unlocked = Boolean(values[ot.metric]) || seen.has(ot.key);
+    const entry = byKey.get(ot.key);
     all.push({
       key: ot.key,
       category: ot.category,
@@ -199,6 +243,8 @@ export function computeAchievements(
       isFinalTier: false,
       progress: unlocked ? 1 : 0,
       oneTime: true,
+      unlockedAt: entry?.unlocked_at ?? null,
+      acknowledgedAt: entry?.acknowledged_at ?? null,
     });
   }
 

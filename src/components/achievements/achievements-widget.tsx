@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { toast } from "sonner";
 import { Trophy, PencilSimple, ArrowRight } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,10 +21,8 @@ import { InfoPopover } from "@/components/reusables/info-popover";
 import { AchievementBadge } from "./achievement-badge";
 import { useBusiness } from "@/contexts/business-context";
 import { useUpdateBusiness } from "@/hooks/use-business-query";
-import { useBusinessAchievements } from "@/hooks/use-business-achievements";
+import { useComputedAchievements } from "@/hooks/use-business-achievements";
 import {
-  computeAchievements,
-  metricValuesFromData,
   achievementTitle,
   achievementValueLabel,
   type ResolvedAchievement,
@@ -209,59 +206,24 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
   const { currentBusiness, currentRole } = useBusiness();
   const businessId = currentBusiness?.id;
   const isOwner = currentRole === "owner";
-  const { data } = useBusinessAchievements(businessId);
   const updateBiz = useUpdateBusiness(businessId);
 
   const settings = currentBusiness?.settings;
   const firstBroadcast = Boolean(settings?.first_broadcast_sent);
-  const seen = settings?.achievements_seen;
   const goalOverride = settings?.weekly_goal ?? null;
 
-  const seenList = Array.isArray(seen) ? seen : [];
-  const computed = data
-    ? computeAchievements(metricValuesFromData(data, firstBroadcast), seenList)
-    : null;
+  // Read-only: recording + the unlock celebration are owned by the single
+  // AchievementCelebration overlay mounted in the dashboard layout.
+  const { data, computed } = useComputedAchievements(businessId, firstBroadcast);
 
   const series = data?.weekly_stamp_series ?? [];
   const target = resolveWeeklyGoal(goalOverride, series);
   const goal = weeklyGoalStatus(data?.current_week_stamps ?? 0, target);
 
-  // One-time celebration. On the very first load (achievements_seen never set)
-  // we silently seed the baseline so already-earned trophies never pop
-  // retroactively; only future unlocks celebrate.
-  const seededRef = useRef(false);
-  const [hasFreshUnlock, setHasFreshUnlock] = useState(false);
-
-  const unlockedKeys = computed?.unlockedKeys ?? [];
-  const seenSignature = Array.isArray(seen) ? seen.join(",") : "__init__";
-
-  useEffect(() => {
-    // Settings writes (seeding + celebration ledger) are owner-only on the API.
-    // Admins still see the widget; they just don't seed/celebrate.
-    if (!isOwner) return;
-    if (!computed || !businessId || updateBiz.isPending) return;
-    if (!Array.isArray(seen)) {
-      if (seededRef.current) return;
-      seededRef.current = true;
-      updateBiz.mutate({ settings: { achievements_seen: unlockedKeys } });
-      return;
-    }
-    const fresh = unlockedKeys.filter((k) => !seen.includes(k));
-    if (fresh.length === 0) return;
-    const first = computed.all.find((a) => a.key === fresh[0]);
-    const name = first ? achievementTitle(t, first) : "";
-    toast.success(
-      fresh.length === 1
-        ? t("unlockedOne", { name })
-        : t("unlockedMany", { count: fresh.length }),
-      { icon: "🎉", duration: 5000 }
-    );
-    setHasFreshUnlock(true);
-    updateBiz.mutate({
-      settings: { achievements_seen: Array.from(new Set([...seen, ...unlockedKeys])) },
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unlockedKeys.join(","), seenSignature, updateBiz.isPending, businessId, isOwner]);
+  // A quiet "New" flag while a freshly-earned trophy still awaits its celebration.
+  const hasFreshUnlock = Boolean(
+    computed?.all.some((a) => a.unlocked && a.acknowledgedAt === null)
+  );
 
   const topInProgress = computed?.inProgress.slice(0, 3) ?? [];
   const earned = computed?.earnedCount ?? 0;

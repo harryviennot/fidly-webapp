@@ -1,17 +1,22 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { CheckCircle } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/redesign";
-import { AchievementBadge, AchievementCoin, BADGE_CATEGORY_COLOR } from "@/components/achievements";
+import {
+  AchievementBadge,
+  AchievementCoin,
+  AchievementCtaLink,
+  AchievementHero,
+  BADGE_CATEGORY_COLOR,
+  RecentlyEarned,
+} from "@/components/achievements";
 import { Card } from "@/components/ui/card";
 import { InfoPopover } from "@/components/reusables/info-popover";
 import { useBusiness } from "@/contexts/business-context";
-import { useBusinessAchievements } from "@/hooks/use-business-achievements";
+import { useComputedAchievements } from "@/hooks/use-business-achievements";
 import {
-  computeAchievements,
-  metricValuesFromData,
   achievementsForDisplay,
   achievementTitle,
   achievementValueLabel,
@@ -45,9 +50,15 @@ function AchievementTile({
   a: DisplayAchievement;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const format = useFormatter();
   const color = BADGE_CATEGORY_COLOR[a.category];
+
   const earned = a.display === "earned";
-  const teaser = a.display === "teaser";
+  // Keep the SUSPENSE blur only for the next locked LADDER rung. One-time
+  // "firsts" stay readable + actionable so owners know the milestone exists.
+  const isLadderTeaser = a.display === "teaser" && !a.oneTime;
+  const isOneTimeLocked = a.oneTime && !earned;
+  const isCurrent = a.display === "current";
 
   // Replay the flip/shake on each trigger. Driven from mouseenter (desktop) and
   // tap (touch) rather than CSS `:hover`, which on touch sticks on first tap and
@@ -84,8 +95,8 @@ function AchievementTile({
         />
       )}
 
-      {/* Earned → full coin flip; in-progress → half flip; locked → error shake. */}
-      <div className={cn("mb-3", teaser && "ach-shake")}>
+      {/* Earned → full coin flip; in-progress → half flip; locked → static badge. */}
+      <div className={cn("mb-3", isLadderTeaser && "ach-shake")}>
         {earned ? (
           <AchievementCoin
             category={a.category}
@@ -96,7 +107,7 @@ function AchievementTile({
             flip="full"
             size={84}
           />
-        ) : a.display === "current" ? (
+        ) : isCurrent ? (
           <AchievementCoin
             category={a.category}
             value={a.threshold}
@@ -120,9 +131,9 @@ function AchievementTile({
       <p
         className={cn(
           "text-[13.5px] font-semibold leading-snug text-[var(--foreground)]",
-          teaser && "select-none blur-[5px]"
+          isLadderTeaser && "select-none blur-[5px]"
         )}
-        aria-hidden={teaser || undefined}
+        aria-hidden={isLadderTeaser || undefined}
       >
         {achievementTitle(t, a)}
       </p>
@@ -130,10 +141,19 @@ function AchievementTile({
       {earned ? (
         <p className="mt-1.5 text-[11px] font-semibold" style={{ color }}>
           {t("stateEarned")}
+          {a.unlockedAt && (
+            <span className="font-normal text-[var(--muted-foreground)]">
+              {" · "}
+              {format.relativeTime(new Date(a.unlockedAt))}
+            </span>
+          )}
         </p>
-      ) : a.oneTime || teaser ? (
-        <p className="mt-1.5 text-[11px] text-[var(--muted-foreground)]">{t("stateLocked")}</p>
-      ) : (
+      ) : isOneTimeLocked ? (
+        <div className="mt-1.5 flex flex-col items-center gap-2">
+          <p className="text-[11px] text-[var(--muted-foreground)]">{t("stateLocked")}</p>
+          <AchievementCtaLink metric={a.metric} />
+        </div>
+      ) : isCurrent ? (
         <div className="mt-3 w-full max-w-[220px]">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
             <div
@@ -144,7 +164,10 @@ function AchievementTile({
           <p className="mt-1.5 text-[11px] tabular-nums text-[var(--muted-foreground)]">
             {achievementValueLabel(a, fmt)}
           </p>
+          <AchievementCtaLink metric={a.metric} className="mt-2.5 mx-auto" />
         </div>
+      ) : (
+        <p className="mt-1.5 text-[11px] text-[var(--muted-foreground)]">{t("stateLocked")}</p>
       )}
     </Card>
   );
@@ -154,28 +177,17 @@ export default function AchievementsPage() {
   const t = useTranslations("achievements");
   const { currentBusiness } = useBusiness();
   const businessId = currentBusiness?.id;
-  const { data } = useBusinessAchievements(businessId);
-
   const firstBroadcast = Boolean(currentBusiness?.settings?.first_broadcast_sent);
-  const seen = currentBusiness?.settings?.achievements_seen;
-  const computed = data
-    ? computeAchievements(
-        metricValuesFromData(data, firstBroadcast),
-        Array.isArray(seen) ? seen : []
-      )
-    : null;
+  const { computed } = useComputedAchievements(businessId, firstBroadcast);
 
   const displayList = computed ? achievementsForDisplay(computed.all) : [];
-  const earned = computed?.earnedCount ?? 0;
-  const total = computed?.totalCount ?? 0;
 
   return (
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
       <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
 
-      <span className="text-[13px] font-medium text-[var(--muted-foreground)]">
-        {t("earnedCount", { earned, total })}
-      </span>
+      {computed && <AchievementHero computed={computed} />}
+      {computed && <RecentlyEarned all={computed.all} />}
 
       {CATEGORY_ORDER.map((cat) => {
         const items = displayList.filter((a) => a.category === cat);
@@ -188,11 +200,16 @@ export default function AchievementsPage() {
 
         return (
           <section key={cat} className="flex flex-col gap-3">
-            <div className="flex items-center gap-1.5">
-              <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-                {t(`categories.${cat}`)}
-              </h2>
-              <InfoPopover content={t(`info.${cat}`)} label={t(`categories.${cat}`)} />
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+                  {t(`categories.${cat}`)}
+                </h2>
+                <InfoPopover content={t(`info.${cat}`)} label={t(`categories.${cat}`)} />
+              </div>
+              {/* One line that both DEFINES the metric and frames why it matters,
+                  so comprehension no longer depends on opening the popover. */}
+              <p className="text-[12.5px] text-[var(--muted-foreground)]">{t(`why.${cat}`)}</p>
             </div>
             <div className="flex flex-col gap-5">
               {rows.map((row) => (

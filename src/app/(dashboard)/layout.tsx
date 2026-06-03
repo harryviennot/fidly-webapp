@@ -17,6 +17,7 @@ import { SuspendedBanner } from "@/components/billing/SuspendedOverlay";
 import { OverLimitBanner } from "@/components/billing/OverLimitBanner";
 import { ImpersonationBanner } from "@/components/impersonation/impersonation-banner";
 import { useImpersonationBeacon } from "@/hooks/use-impersonation-beacon";
+import { AchievementCelebration } from "@/components/achievements";
 
 function wizardResumePath(setupProgress: { last_step?: { chapter: string; step?: string } } | undefined): string {
   const last = setupProgress?.last_step;
@@ -187,6 +188,7 @@ export default function AdminLayout({
         </SidebarInset>
       </SidebarProvider>
       <Toaster position="bottom-right" />
+      <AchievementCelebration />
     </RoleGuard>
   );
 }
