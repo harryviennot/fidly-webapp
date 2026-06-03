@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/redesign";
-import { AchievementBadge, BADGE_CATEGORY_COLOR } from "@/components/redesign/achievement-badge";
+import { AchievementBadge, AchievementCoin, BADGE_CATEGORY_COLOR } from "@/components/achievements";
 import { Card } from "@/components/ui/card";
 import { InfoPopover } from "@/components/reusables/info-popover";
 import { useBusiness } from "@/contexts/business-context";
@@ -21,6 +21,22 @@ import {
 import { cn } from "@/lib/utils";
 
 const fmt = (n: number) => n.toLocaleString();
+
+/** Group a category's tiles into rows: one row per ladder metric, but all
+ *  one-time "firsts" trophies share a single row. */
+function buildRows(items: DisplayAchievement[]): DisplayAchievement[][] {
+  if (items.every((a) => a.oneTime)) return [items];
+  const order: string[] = [];
+  const byMetric = new Map<string, DisplayAchievement[]>();
+  for (const a of items) {
+    if (!byMetric.has(a.metric)) {
+      byMetric.set(a.metric, []);
+      order.push(a.metric);
+    }
+    byMetric.get(a.metric)!.push(a);
+  }
+  return order.map((m) => byMetric.get(m)!);
+}
 
 function AchievementTile({
   a,
@@ -42,7 +58,7 @@ function AchievementTile({
         { "--fam": color, "--fam-tint": `${color}22`, "--fam-border": `${color}55` } as CSSProperties
       }
       className={cn(
-        "group relative flex flex-col items-center p-5 text-center [perspective:600px]",
+        "group relative flex flex-col items-center p-5 text-center",
         earned
           ? "border-[color:var(--fam-border)] bg-[linear-gradient(180deg,var(--fam-tint),var(--card)_62%)] shadow-[0_10px_24px_-14px_var(--fam)]"
           : "border-[var(--border)]"
@@ -56,21 +72,26 @@ function AchievementTile({
         />
       )}
 
-      {/* Hover an earned trophy → it flips a full 360° on the X axis. */}
-      <div
-        className={cn(
-          "mb-3 transition-transform duration-700 ease-out [transform-style:preserve-3d]",
-          earned && "group-hover:[transform:rotateX(360deg)]"
+      {/* Earned trophies are 3D coins that flip on hover; the rest stay flat. */}
+      <div className="mb-3">
+        {earned ? (
+          <AchievementCoin
+            category={a.category}
+            value={a.oneTime ? undefined : a.threshold}
+            isFinalTier={a.isFinalTier}
+            oneTime={a.oneTime}
+            size={84}
+          />
+        ) : (
+          <AchievementBadge
+            category={a.category}
+            value={a.oneTime ? undefined : a.threshold}
+            state={state}
+            isFinalTier={a.isFinalTier}
+            oneTime={a.oneTime}
+            size={84}
+          />
         )}
-      >
-        <AchievementBadge
-          category={a.category}
-          value={a.oneTime ? undefined : a.threshold}
-          state={state}
-          isFinalTier={a.isFinalTier}
-          oneTime={a.oneTime}
-          size={84}
-        />
       </div>
 
       <p
@@ -136,6 +157,12 @@ export default function AchievementsPage() {
       {CATEGORY_ORDER.map((cat) => {
         const items = displayList.filter((a) => a.category === cat);
         if (items.length === 0) return null;
+
+        // One row per achievement type: a category like "momentum" runs two
+        // separate ladders, which shouldn't share a row. One-time "firsts" are
+        // standalone trophies, so they stay together on a single row.
+        const rows = buildRows(items);
+
         return (
           <section key={cat} className="flex flex-col gap-3">
             <div className="flex items-center gap-1.5">
@@ -144,9 +171,16 @@ export default function AchievementsPage() {
               </h2>
               <InfoPopover content={t(`info.${cat}`)} label={t(`categories.${cat}`)} />
             </div>
-            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-              {items.map((a) => (
-                <AchievementTile key={a.key} a={a} t={t} />
+            <div className="flex flex-col gap-5">
+              {rows.map((row) => (
+                <div
+                  key={row[0].metric}
+                  className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+                >
+                  {row.map((a) => (
+                    <AchievementTile key={a.key} a={a} t={t} />
+                  ))}
+                </div>
               ))}
             </div>
           </section>

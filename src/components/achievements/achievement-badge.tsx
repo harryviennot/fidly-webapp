@@ -10,7 +10,9 @@ import type { AchievementCategory } from "@/lib/achievements";
  * and locked (matte grey; locked swaps the number for a padlock).
  *
  * Geometry, gradients, shine, lift shadow and gold-rim markup are reused from
- * the design reference (acheivements-page-example.html).
+ * the design reference (acheivements-page-example.html). The silhouette +
+ * edge-color helpers below let <AchievementCoin> extrude the same shape into a
+ * 3D coin for the hover flip.
  */
 
 export type BadgeState = "earned" | "progress" | "locked";
@@ -36,23 +38,43 @@ interface CategoryStyle {
   to: string;
   /** Darker shell behind the face when earned. */
   back: string;
+  /** Widest the number may render (viewBox units) before it's squeezed to fit. */
+  maxText: number;
 }
 
 const STYLES: Record<AchievementCategory, CategoryStyle> = {
-  growth: { base: "#16A2B8", from: "#16A2B8", to: "#0C7A8C", back: "#0A5A68" },
-  engagement: { path: HEXAGON, base: "#F97316", from: "#F9852A", to: "#D9650F", back: "#A44C09" },
-  momentum: { path: SHIELD, base: "#6C54D6", from: "#7C63E4", to: "#5B43C9", back: "#4631A0" },
-  loyalty: { path: OCTAGON, base: "#E0568A", from: "#E0568A", to: "#BB3A6B", back: "#8C2A50" },
-  firsts: { path: STAR, base: "#F2A93B", from: "#F7C75A", to: "#E0991F", back: "#9C5C08" },
+  growth: { base: "#16A2B8", from: "#16A2B8", to: "#0C7A8C", back: "#0A5A68", maxText: 84 },
+  engagement: { path: HEXAGON, base: "#F97316", from: "#F9852A", to: "#D9650F", back: "#A44C09", maxText: 82 },
+  momentum: { path: SHIELD, base: "#6C54D6", from: "#7C63E4", to: "#5B43C9", back: "#4631A0", maxText: 66 },
+  loyalty: { path: OCTAGON, base: "#E0568A", from: "#E0568A", to: "#BB3A6B", back: "#8C2A50", maxText: 80 },
+  firsts: { path: STAR, base: "#F2A93B", from: "#F7C75A", to: "#E0991F", back: "#9C5C08", maxText: 60 },
 };
 
 /** Matte palette shared by progress + locked badges. */
 const MATTE = { back: "#8E897C", from: "#C7C2B6", to: "#ABA597", num: "#F3F1EB" } as const;
 
+/** Gold treatment for a ladder's final rung. */
+const GOLD = { light: "#F4D38A", dark: "#8A5207" } as const;
+
 /** Per-category base accent, for callers tinting cards/bars. */
 export const BADGE_CATEGORY_COLOR = Object.fromEntries(
   (Object.entries(STYLES) as [AchievementCategory, CategoryStyle][]).map(([k, v]) => [k, v.base])
 ) as Record<AchievementCategory, string>;
+
+/** Outer silhouette path for a category (undefined → circle). */
+export function badgeShapePath(category: AchievementCategory): string | undefined {
+  return STYLES[category].path;
+}
+
+/** Top→bottom edge gradient for the 3D coin rim. */
+export function badgeEdgeColors(
+  category: AchievementCategory,
+  isFinalTier: boolean
+): { light: string; dark: string } {
+  if (isFinalTier) return GOLD;
+  const s = STYLES[category];
+  return { light: s.to, dark: s.back };
+}
 
 /** "1K" / "1.5K" / "2.5K" above 999, plain below. Badge-internal display only. */
 export function formatBadgeNumber(n: number): string {
@@ -70,6 +92,49 @@ function numberFontSize(label: string): number {
   return 30;
 }
 
+/**
+ * A single opaque silhouette layer in the category's edge gradient. Stacked
+ * along Z by <AchievementCoin> to extrude a believable coin thickness — so the
+ * flip never reveals a paper-thin nothing at 90°.
+ */
+export function BadgeSilhouette({
+  category,
+  isFinalTier = false,
+  size = 84,
+  className,
+}: {
+  category: AchievementCategory;
+  isFinalTier?: boolean;
+  size?: number;
+  className?: string;
+}) {
+  const uid = useId().replace(/:/g, "");
+  const path = STYLES[category].path;
+  const { light, dark } = badgeEdgeColors(category, isFinalTier);
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 120 120"
+      width={size}
+      height={size}
+      className={className}
+      aria-hidden
+    >
+      <defs>
+        <linearGradient id={`edge_${uid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={light} />
+          <stop offset="1" stopColor={dark} />
+        </linearGradient>
+      </defs>
+      {path ? (
+        <path d={path} fill={`url(#edge_${uid})`} />
+      ) : (
+        <circle cx="60" cy="60" r="52" fill={`url(#edge_${uid})`} />
+      )}
+    </svg>
+  );
+}
+
 export function AchievementBadge({
   category,
   value,
@@ -77,6 +142,8 @@ export function AchievementBadge({
   isFinalTier = false,
   oneTime = false,
   size = 96,
+  /** Render the soft lift drop-shadow (suppressed when stacked into a coin). */
+  lift = true,
   className,
 }: {
   category: AchievementCategory;
@@ -88,6 +155,7 @@ export function AchievementBadge({
   /** One-time "firsts" badge → no number even when earned. */
   oneTime?: boolean;
   size?: number;
+  lift?: boolean;
   className?: string;
 }) {
   // useId() can contain ":" which is awkward inside url(#…) refs — strip it.
@@ -106,6 +174,11 @@ export function AchievementBadge({
   const showNumber = state !== "locked" && label !== null;
   const showPadlock = state === "locked";
   const fontSize = label ? numberFontSize(label) : 50;
+
+  // Squeeze the glyphs only when they'd otherwise overflow the silhouette.
+  const approxWidth = label ? label.length * fontSize * 0.6 : 0;
+  const textLength = label && approxWidth > s.maxText ? s.maxText : undefined;
+  const lengthAdjust = textLength ? "spacingAndGlyphs" : undefined;
 
   return (
     <svg
@@ -147,7 +220,7 @@ export function AchievementBadge({
         </filter>
       </defs>
 
-      <g filter={earned ? `url(#lift_${uid})` : undefined}>
+      <g filter={earned && lift ? `url(#lift_${uid})` : undefined}>
         {isCircle ? (
           <>
             <circle cx="60" cy="60" r="52" fill={shellFill} />
@@ -188,6 +261,8 @@ export function AchievementBadge({
               y="61.5"
               textAnchor="middle"
               dominantBaseline="central"
+              textLength={textLength}
+              lengthAdjust={lengthAdjust}
               fontFamily="var(--font-geist-sans), system-ui, sans-serif"
               fontWeight="800"
               fontSize={fontSize}
@@ -201,6 +276,8 @@ export function AchievementBadge({
               y="60"
               textAnchor="middle"
               dominantBaseline="central"
+              textLength={textLength}
+              lengthAdjust={lengthAdjust}
               fontFamily="var(--font-geist-sans), system-ui, sans-serif"
               fontWeight="800"
               fontSize={fontSize}

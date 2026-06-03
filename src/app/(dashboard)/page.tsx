@@ -17,8 +17,8 @@ import {
   RecentScans,
   ActiveCardWidget,
   QuickActions,
-  AchievementsWidget,
 } from "@/components/redesign";
+import { AchievementsWidget } from "@/components/achievements";
 import { computeCardColors } from "@/lib/card-utils";
 import { wowTrend } from "@/lib/dashboard-trends";
 import type { StampIconType } from "@/components/design/StampIconPicker";

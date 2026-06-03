@@ -482,6 +482,54 @@ html {
   transform: rotateY(180deg);
 }
 
+/* ===== Achievement Coin (3D badge flip) ===== */
+
+.ach-coin-scene {
+  perspective: 700px;
+  /* Grounded shadow that stays put while the coin spins inside. */
+  filter: drop-shadow(0 7px 7px rgba(19, 33, 43, 0.18));
+}
+
+.ach-coin {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  /* Full vertical turn, top tipping toward the viewer. */
+  transition: transform 0.9s cubic-bezier(0.45, 0.05, 0.35, 1);
+}
+
+/* Card hover (the tile is the `group`) flips the coin. */
+.group:hover .ach-coin {
+  transform: rotateX(-360deg);
+}
+
+.ach-coin-face,
+.ach-coin-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Faces show only when pointing at the viewer; the rim slabs always show. */
+.ach-coin-face {
+  backface-visibility: hidden;
+}
+
+.ach-coin-layer {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ach-coin {
+    transition: none;
+  }
+  .group:hover .ach-coin {
+    transform: none;
+  }
+}
+
 /* ===== Wallet Switch Animation ===== */
 
 .wallet-card-container {
