@@ -268,7 +268,7 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
   const total = computed?.totalCount ?? 0;
 
   return (
-    <Card hover={false} className="animate-slide-up p-4" style={{ animationDelay: `${delay}ms` }}>
+    <Card flat className="animate-slide-up p-4" style={{ animationDelay: `${delay}ms` }}>
       <WeeklyGoalBlock
         goal={goal}
         isAuto={goalOverride === null}

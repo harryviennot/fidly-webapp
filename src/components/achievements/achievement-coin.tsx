@@ -61,10 +61,7 @@ export function AchievementCoin({
 
   return (
     <div className={cn("ach-coin-scene", className)} style={{ width: size, height: size }}>
-      <div
-        className="ach-coin"
-        style={{ "--coin-flip": flip === "half" ? "180deg" : "360deg" } as CSSProperties}
-      >
+      <div className={cn("ach-coin", flip === "half" ? "ach-coin-half" : "ach-coin-full")}>
         {/* Rim — opaque silhouette slabs stacked through the depth. */}
         {layers.map((z, i) => (
           <div

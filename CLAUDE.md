@@ -12,6 +12,11 @@ divs — they drift over time and produce mixed rounding/borders.
   rebuilding it.
 - Pass `hover={false}` for static / non-clickable surfaces. The default
   `hover` adds a translate-up animation that feels wrong on info cards.
+- Pass `flat` for static content cards that must carry **no shadow at all** —
+  e.g. the achievement tiles on `/achievements`. `flat` drops the resting
+  shadow *and* the hover translate. **Never re-introduce a shadow on a `flat`
+  card** via a `shadow-[…]` className override; if a surface is meant to be
+  flat, keep it flat.
 - Tint variants happen via className overrides on `<Card>` (e.g.
   `bg-[var(--accent-light)]/40`), not via new wrappers.
 

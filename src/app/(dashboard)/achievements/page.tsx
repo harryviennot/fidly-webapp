@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/redesign";
@@ -49,16 +49,30 @@ function AchievementTile({
   const earned = a.display === "earned";
   const teaser = a.display === "teaser";
 
+  // Replay the flip/shake on each trigger. Driven from mouseenter (desktop) and
+  // tap (touch) rather than CSS `:hover`, which on touch sticks on first tap and
+  // can't repeat — owners can now tap a tile again and again to replay it.
+  const [playing, setPlaying] = useState(false);
+  const play = () => {
+    setPlaying(false);
+    requestAnimationFrame(() => setPlaying(true));
+  };
+
   return (
     <Card
-      hover={false}
+      flat
+      onMouseEnter={play}
+      onClick={play}
+      onAnimationEnd={() => setPlaying(false)}
       style={
         { "--fam": color, "--fam-tint": `${color}22`, "--fam-border": `${color}55` } as CSSProperties
       }
       className={cn(
+        // `flat` per web/CLAUDE.md — achievement tiles carry no shadow.
         "group relative flex flex-col items-center p-5 text-center",
+        playing && "ach-play",
         earned
-          ? "border-[color:var(--fam-border)] bg-[linear-gradient(180deg,var(--fam-tint),var(--card)_62%)] shadow-[0_10px_24px_-14px_var(--fam)]"
+          ? "border-[color:var(--fam-border)] bg-[linear-gradient(180deg,var(--fam-tint),var(--card)_62%)]"
           : "border-[var(--border)]"
       )}
     >
