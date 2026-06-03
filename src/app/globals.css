@@ -495,13 +495,14 @@ html {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  /* Full vertical turn, top tipping toward the viewer. */
+  /* Horizontal (left↔right) turn; amount set per coin via --coin-flip
+     (360° earned, 180° in-progress). */
   transition: transform 0.9s cubic-bezier(0.45, 0.05, 0.35, 1);
 }
 
 /* Card hover (the tile is the `group`) flips the coin. */
 .group:hover .ach-coin {
-  transform: rotateX(-360deg);
+  transform: rotateY(var(--coin-flip, 360deg));
 }
 
 .ach-coin-face,
@@ -521,12 +522,42 @@ html {
   pointer-events: none;
 }
 
+/* Locked trophies wobble like an error when hovered — "not yet". */
+@keyframes ach-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-5px) rotate(-2deg);
+  }
+  30% {
+    transform: translateX(5px) rotate(2deg);
+  }
+  45% {
+    transform: translateX(-4px) rotate(-1.5deg);
+  }
+  60% {
+    transform: translateX(4px) rotate(1.5deg);
+  }
+  75% {
+    transform: translateX(-2px) rotate(-1deg);
+  }
+}
+
+.group:hover .ach-shake {
+  animation: ach-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ach-coin {
     transition: none;
   }
   .group:hover .ach-coin {
     transform: none;
+  }
+  .group:hover .ach-shake {
+    animation: none;
   }
 }
 

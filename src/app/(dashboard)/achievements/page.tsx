@@ -46,8 +46,6 @@ function AchievementTile({
   t: ReturnType<typeof useTranslations>;
 }) {
   const color = BADGE_CATEGORY_COLOR[a.category];
-  const state =
-    a.display === "earned" ? "earned" : a.display === "current" ? "progress" : "locked";
   const earned = a.display === "earned";
   const teaser = a.display === "teaser";
 
@@ -72,21 +70,32 @@ function AchievementTile({
         />
       )}
 
-      {/* Earned trophies are 3D coins that flip on hover; the rest stay flat. */}
-      <div className="mb-3">
+      {/* Earned → full coin flip; in-progress → half flip; locked → error shake. */}
+      <div className={cn("mb-3", teaser && "ach-shake")}>
         {earned ? (
           <AchievementCoin
             category={a.category}
             value={a.oneTime ? undefined : a.threshold}
+            state="earned"
             isFinalTier={a.isFinalTier}
             oneTime={a.oneTime}
+            flip="full"
+            size={84}
+          />
+        ) : a.display === "current" ? (
+          <AchievementCoin
+            category={a.category}
+            value={a.threshold}
+            state="progress"
+            isFinalTier={a.isFinalTier}
+            flip="half"
             size={84}
           />
         ) : (
           <AchievementBadge
             category={a.category}
             value={a.oneTime ? undefined : a.threshold}
-            state={state}
+            state="locked"
             isFinalTier={a.isFinalTier}
             oneTime={a.oneTime}
             size={84}

@@ -69,8 +69,10 @@ export function badgeShapePath(category: AchievementCategory): string | undefine
 /** Top→bottom edge gradient for the 3D coin rim. */
 export function badgeEdgeColors(
   category: AchievementCategory,
-  isFinalTier: boolean
+  isFinalTier: boolean,
+  matte = false
 ): { light: string; dark: string } {
+  if (matte) return { light: MATTE.from, dark: MATTE.back };
   if (isFinalTier) return GOLD;
   const s = STYLES[category];
   return { light: s.to, dark: s.back };
@@ -100,17 +102,20 @@ function numberFontSize(label: string): number {
 export function BadgeSilhouette({
   category,
   isFinalTier = false,
+  matte = false,
   size = 84,
   className,
 }: {
   category: AchievementCategory;
   isFinalTier?: boolean;
+  /** Grey rim for an in-progress coin. */
+  matte?: boolean;
   size?: number;
   className?: string;
 }) {
   const uid = useId().replace(/:/g, "");
   const path = STYLES[category].path;
-  const { light, dark } = badgeEdgeColors(category, isFinalTier);
+  const { light, dark } = badgeEdgeColors(category, isFinalTier, matte);
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
