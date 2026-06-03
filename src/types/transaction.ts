@@ -74,6 +74,9 @@ export interface BusinessAchievementsResponse {
   active_cards: number;
   first_reward_redeemed_at: string | null;
   current_week_stamps: number;
+  /** Rolling 30-day windows (now - 30d). Reward sustained effort. */
+  stamps_last_30d: number;
+  new_customers_last_30d: number;
   /** Last 5 complete weeks, oldest -> newest. Excludes the current partial week. */
   weekly_stamp_series: WeeklyStampPoint[];
 }

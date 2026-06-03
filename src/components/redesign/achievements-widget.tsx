@@ -18,6 +18,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { InfoPopover } from "@/components/reusables/info-popover";
 import { AchievementIcon } from "./achievement-icon";
 import { useBusiness } from "@/contexts/business-context";
 import { useUpdateBusiness } from "@/hooks/use-business-query";
@@ -109,9 +110,12 @@ function WeeklyGoalBlock({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-semibold text-[var(--foreground)]">
-          {t("weeklyGoal.label")}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-semibold text-[var(--foreground)]">
+            {t("weeklyGoal.label")}
+          </span>
+          <InfoPopover content={t("info.weeklyGoal")} label={t("weeklyGoal.label")} />
+        </div>
         {canEdit && (
           <button
             type="button"
@@ -123,10 +127,13 @@ function WeeklyGoalBlock({
           </button>
         )}
       </div>
-      <div className="mb-1.5 flex items-baseline justify-between">
+      <div className="mb-1.5 flex items-baseline gap-1.5">
         <span className="text-[22px] font-bold tabular-nums leading-none text-[var(--foreground)]">
           {goal.current}
           <span className="text-[15px] font-semibold text-[var(--muted-foreground)]"> / {goal.target}</span>
+        </span>
+        <span className="text-[12px] font-medium text-[var(--muted-foreground)]">
+          {t("weeklyGoal.unit")}
         </span>
       </div>
       <ProgressBar value={goal.progress} />
@@ -203,7 +210,10 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
   const seen = settings?.achievements_seen;
   const goalOverride = settings?.weekly_goal ?? null;
 
-  const computed = data ? computeAchievements(metricValuesFromData(data, firstBroadcast)) : null;
+  const seenList = Array.isArray(seen) ? seen : [];
+  const computed = data
+    ? computeAchievements(metricValuesFromData(data, firstBroadcast), seenList)
+    : null;
 
   const series = data?.weekly_stamp_series ?? [];
   const target = resolveWeeklyGoal(goalOverride, series);

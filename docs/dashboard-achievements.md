@@ -68,26 +68,43 @@ Right rail: the **achievements widget** (top), the active-card widget, quick act
 
 ## 4. Gamification
 
-### 4.1 Achievements (lifetime trophies)
+### 4.1 Achievements (ladders + one-time badges)
 
 Config and resolver live in `web/src/lib/achievements.ts` (pure, no React). Every threshold
 is defined there once; the UI only formats labels via i18n (`messages/{en,fr}/achievements.json`).
+Early rungs are deliberately tiny so a new shop unlocks something fast.
 
-- **Growth, Customers ladder** (`total_customers`): 1, 10, 25, 50, 100, 250, 500, 1000, 2500
-- **Engagement, Stamps ladder** (`total_stamps_given`): 50, 250, 1000, 5000, 25000, 100000
-- **Loyalty, Repeat customers** (`repeat_customers`): 1, 25, 100
-- **Loyalty, Repeat rate** (`repeat_rate`, fractions): 0.25, 0.40, 0.60
+- **Growth, Customers** (`total_customers`): 1, 5, 10, 25, 50, 100, 200, 500, 1000, 2500, 5000
+- **Engagement, Stamps** (`total_stamps_given`): 1, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000, 100000
+- **This month, Stamps in 30 days** (`stamps_last_30d`): 10, 25, 50, 100, 250, 500, 1000, 2500, 5000
+- **This month, New customers in 30 days** (`new_customers_last_30d`): 5, 10, 25, 50, 100, 250, 500
+- **Loyalty, Returning customers** (`repeat_customers`, a **count**, not a percentage): 1, 5, 10, 25, 50, 100, 250, 500, 1000
 - **Firsts (one-time)**: `first_reward` (`total_rewards_redeemed >= 1`), `first_broadcast`
   (`businesses.settings.first_broadcast_sent`)
 
-The widget shows the **lowest unmet rung per ladder**, the three closest to completion, so
-there is always an "almost there" goal. The `/achievements` page shows the full catalog by
-category. Setup/adoption badges are deliberately excluded: that belongs to the onboarding
-checklist, not here. A rewards ladder is an easy future add (the RPC already returns
-`total_rewards_redeemed`).
+**Why repeat rate is a count, not a percentage.** A repeat-*rate* percentage re-locks and reads
+as "100%" for a single twice-stamped customer, and 100% is not a realistic target. Returning
+**customers** (visited on >=2 distinct days) is an honest, always-achievable count.
+
+**The "This month" category is rolling and sticky.** It rewards sustained recent effort rather
+than lifetime stacking. Because a rolling window naturally falls, these trophies are made
+**sticky**: `computeAchievements(values, seenKeys)` treats any key already in
+`settings.achievements_seen` as permanently unlocked, so a quiet month never un-earns a trophy.
+Stickiness applies to all ladders (a harmless no-op for monotonic lifetime ones).
+
+The widget shows the **current goal per ladder** (lowest unmet rung), the three closest to
+completion, so there is always an "almost there" target. Setup/adoption badges are deliberately
+excluded: that belongs to the onboarding checklist. A rewards ladder is an easy future add (the
+RPC already returns `total_rewards_redeemed`).
 
 All counters come from `get_business_achievements` (migration 95). "Stamps given" counts
 `type = 'stamp_added'` only, so a trophy total always agrees with the dashboard StatCards.
+
+**Page display (suspense without overwhelm).** `achievementsForDisplay` shows, per ladder, every
+earned rung + the current goal clearly, the rung right after it **blurred** (a teaser so the
+owner knows another challenge exists), and **hides** everything beyond. Each category has a
+clickable `InfoPopover` (`web/src/components/reusables/info-popover.tsx`, touch-friendly)
+explaining its metric; the weekly goal carries one too (it answers "of what?": stamps).
 
 ### 4.2 Weekly goal (smart auto, editable)
 

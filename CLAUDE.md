@@ -25,3 +25,11 @@ buttons, alerts/info-boxes, dialogs, dropdowns, inputs, etc. Check the
 existing kit before adding a new component. If you need something cross-
 cutting that doesn't exist, build it generic and drop it under `ui/` or
 `reusables/`.
+
+Notable reusables:
+
+- **`InfoPopover`** (`reusables/info-popover.tsx`) — a click-to-open "i" info
+  bubble for explaining a metric, field, or term. Built on `Popover` (not
+  `Tooltip`) so it works on touch devices, where hover tooltips never fire.
+  Pass `content` (string or node), optional `label`/`side`/`align`. Reach for
+  this for any "what is this / tell me more" secondary context.

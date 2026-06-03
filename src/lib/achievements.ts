@@ -11,24 +11,26 @@
  * See web/docs/dashboard-achievements.md.
  */
 
-export type AchievementCategory = "growth" | "engagement" | "loyalty" | "firsts";
+export type AchievementCategory = "growth" | "engagement" | "momentum" | "loyalty" | "firsts";
 
 export type LadderMetric =
   | "total_customers"
   | "total_stamps_given"
-  | "repeat_customers"
-  | "repeat_rate";
+  | "stamps_last_30d"
+  | "new_customers_last_30d"
+  | "repeat_customers";
 
 export type OneTimeMetric = "first_reward" | "first_broadcast";
 
 export type AchievementMetric = LadderMetric | OneTimeMetric;
 
-/** Resolved metric values the resolver scores against. repeat_rate is a 0..1 fraction. */
+/** Resolved metric values the resolver scores against. */
 export interface AchievementMetricValues {
   total_customers: number;
   total_stamps_given: number;
+  stamps_last_30d: number;
+  new_customers_last_30d: number;
   repeat_customers: number;
-  repeat_rate: number;
   first_reward: boolean;
   first_broadcast: boolean;
 }
@@ -48,31 +50,42 @@ export interface OneTimeDef {
   icon: string;
 }
 
-/** Two continuous climbing ladders (Customers, Stamps) + a lighter Loyalty track. */
+/**
+ * Ladders. Early rungs are deliberately tiny so a new shop unlocks something fast.
+ * Lifetime ladders stack forever; the 30-day "momentum" ladders reward a strong
+ * RECENT window and are treated as sticky (once earned, stay earned — see
+ * computeAchievements) so a rolling window dropping never re-locks a trophy.
+ */
 export const ACHIEVEMENT_LADDERS: LadderDef[] = [
   {
     category: "growth",
     metric: "total_customers",
-    thresholds: [1, 10, 25, 50, 100, 250, 500, 1000, 2500],
+    thresholds: [1, 5, 10, 25, 50, 100, 200, 500, 1000, 2500, 5000],
     icon: "Users",
   },
   {
     category: "engagement",
     metric: "total_stamps_given",
-    thresholds: [50, 250, 1000, 5000, 25000, 100000],
+    thresholds: [1, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000, 100000],
     icon: "Stamp",
+  },
+  {
+    category: "momentum",
+    metric: "stamps_last_30d",
+    thresholds: [10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
+    icon: "TrendUp",
+  },
+  {
+    category: "momentum",
+    metric: "new_customers_last_30d",
+    thresholds: [5, 10, 25, 50, 100, 250, 500],
+    icon: "UserPlus",
   },
   {
     category: "loyalty",
     metric: "repeat_customers",
-    thresholds: [1, 25, 100],
+    thresholds: [1, 5, 10, 25, 50, 100, 250, 500, 1000],
     icon: "Repeat",
-  },
-  {
-    category: "loyalty",
-    metric: "repeat_rate",
-    thresholds: [0.25, 0.4, 0.6],
-    icon: "ArrowsClockwise",
   },
 ];
 
@@ -80,6 +93,15 @@ export const ACHIEVEMENT_LADDERS: LadderDef[] = [
 export const ACHIEVEMENT_ONE_TIMES: OneTimeDef[] = [
   { key: "first_reward", category: "firsts", metric: "first_reward", icon: "Gift" },
   { key: "first_broadcast", category: "firsts", metric: "first_broadcast", icon: "Megaphone" },
+];
+
+/** Section order on the /achievements page. */
+export const CATEGORY_ORDER: AchievementCategory[] = [
+  "growth",
+  "engagement",
+  "momentum",
+  "loyalty",
+  "firsts",
 ];
 
 export interface ResolvedAchievement {
@@ -90,13 +112,13 @@ export interface ResolvedAchievement {
   icon: string;
   /** Target for this rung. For one-time achievements, 1. */
   threshold: number;
-  /** Current metric value (absolute; repeat_rate is a 0..1 fraction). */
+  /** Current metric value (absolute). */
   current: number;
   unlocked: boolean;
-  /** 0..1 fill toward this rung. */
+  /** The lowest unmet rung of its ladder — the "current goal". */
+  isNext: boolean;
+  /** 0..1 fill toward this rung (1 once earned). */
   progress: number;
-  /** repeat_rate rungs — UI formats as a percentage. */
-  isRate: boolean;
   /** Non-ladder (one-time) achievement. */
   oneTime: boolean;
 }
@@ -106,15 +128,13 @@ export interface ComputedAchievements {
   all: ResolvedAchievement[];
   earnedCount: number;
   totalCount: number;
-  /** Lowest unmet rung per ladder metric, sorted most-progressed first (widget). */
+  /** The current goal per ladder, sorted most-progressed first (widget). */
   inProgress: ResolvedAchievement[];
   /** Keys currently unlocked — diff against settings.achievements_seen to celebrate. */
   unlockedKeys: string[];
 }
 
-/** repeat_rate keys use whole-percent to stay integer + stable (0.25 -> repeat_rate_25). */
 function rungKey(metric: AchievementMetric, threshold: number): string {
-  if (metric === "repeat_rate") return `repeat_rate_${Math.round(threshold * 100)}`;
   return `${metric}_${threshold}`;
 }
 
@@ -123,29 +143,47 @@ function clamp01(n: number): number {
   return Math.min(1, Math.max(0, n));
 }
 
-export function computeAchievements(values: AchievementMetricValues): ComputedAchievements {
+/**
+ * Resolve the catalog against current values.
+ *
+ * `seenKeys` (the celebration ledger) makes every trophy **sticky**: once a key
+ * has been earned and recorded, it stays unlocked even if the live value later
+ * drops below the threshold. This is essential for the rolling 30-day ladders,
+ * whose value naturally falls as the window moves — without it a trophy would
+ * re-lock. For monotonic lifetime ladders it is a harmless no-op.
+ */
+export function computeAchievements(
+  values: AchievementMetricValues,
+  seenKeys: string[] = []
+): ComputedAchievements {
+  const seen = new Set(seenKeys);
   const all: ResolvedAchievement[] = [];
 
   for (const ladder of ACHIEVEMENT_LADDERS) {
     const current = values[ladder.metric];
+    let nextMarked = false;
     for (const threshold of ladder.thresholds) {
+      const key = rungKey(ladder.metric, threshold);
+      const unlocked = current >= threshold || seen.has(key);
+      const isNext = !unlocked && !nextMarked;
+      if (isNext) nextMarked = true;
       all.push({
-        key: rungKey(ladder.metric, threshold),
+        key,
         category: ladder.category,
         metric: ladder.metric,
         icon: ladder.icon,
         threshold,
         current,
-        unlocked: current >= threshold,
-        progress: clamp01(threshold > 0 ? current / threshold : 0),
-        isRate: ladder.metric === "repeat_rate",
+        unlocked,
+        isNext,
+        progress: unlocked ? 1 : clamp01(threshold > 0 ? current / threshold : 0),
         oneTime: false,
       });
     }
   }
 
   for (const ot of ACHIEVEMENT_ONE_TIMES) {
-    const unlocked = Boolean(values[ot.metric]);
+    const unlocked = Boolean(values[ot.metric]) || seen.has(ot.key);
     all.push({
       key: ot.key,
       category: ot.category,
@@ -154,21 +192,15 @@ export function computeAchievements(values: AchievementMetricValues): ComputedAc
       threshold: 1,
       current: unlocked ? 1 : 0,
       unlocked,
+      isNext: false,
       progress: unlocked ? 1 : 0,
-      isRate: false,
       oneTime: true,
     });
   }
 
-  // Widget "in progress": the lowest unmet rung per ladder metric (thresholds are
-  // pushed ascending, so the first unmet is the next goal), most-progressed first
-  // so the owner always sees an "almost there" target.
-  const inProgress: ResolvedAchievement[] = [];
-  for (const ladder of ACHIEVEMENT_LADDERS) {
-    const next = all.find((a) => a.metric === ladder.metric && !a.unlocked);
-    if (next) inProgress.push(next);
-  }
-  inProgress.sort((a, b) => b.progress - a.progress);
+  const inProgress = all
+    .filter((a) => a.isNext)
+    .sort((a, b) => b.progress - a.progress);
 
   const unlockedKeys = all.filter((a) => a.unlocked).map((a) => a.key);
 
@@ -186,8 +218,9 @@ export function metricValuesFromData(
   data: {
     total_customers: number;
     total_stamps_given: number;
+    stamps_last_30d: number;
+    new_customers_last_30d: number;
     repeat_customers: number;
-    repeat_rate: number;
     total_rewards_redeemed: number;
   },
   firstBroadcastSent: boolean
@@ -195,18 +228,57 @@ export function metricValuesFromData(
   return {
     total_customers: data.total_customers,
     total_stamps_given: data.total_stamps_given,
+    stamps_last_30d: data.stamps_last_30d,
+    new_customers_last_30d: data.new_customers_last_30d,
     repeat_customers: data.repeat_customers,
-    repeat_rate: data.repeat_rate,
     first_reward: data.total_rewards_redeemed >= 1,
     first_broadcast: firstBroadcastSent,
   };
 }
 
+export type DisplayState = "earned" | "current" | "teaser";
+
+export interface DisplayAchievement extends ResolvedAchievement {
+  display: DisplayState;
+}
+
+/**
+ * Page display rules (suspense without overwhelm): per ladder show every earned
+ * rung + the current goal clearly, the rung right after it BLURRED (a teaser so
+ * the owner knows another challenge exists), and hide everything beyond. One-time
+ * badges show earned, or blurred when not yet earned.
+ */
+export function achievementsForDisplay(all: ResolvedAchievement[]): DisplayAchievement[] {
+  const byMetric = new Map<string, ResolvedAchievement[]>();
+  for (const a of all) {
+    const arr = byMetric.get(a.metric) ?? [];
+    arr.push(a);
+    byMetric.set(a.metric, arr);
+  }
+
+  const out: DisplayAchievement[] = [];
+  for (const rungs of byMetric.values()) {
+    if (rungs[0]?.oneTime) {
+      for (const r of rungs) out.push({ ...r, display: r.unlocked ? "earned" : "teaser" });
+      continue;
+    }
+    const nextIdx = rungs.findIndex((r) => r.isNext);
+    rungs.forEach((r, i) => {
+      if (r.unlocked) out.push({ ...r, display: "earned" });
+      else if (nextIdx === -1) {
+        /* all unlocked — handled above */
+      } else if (i === nextIdx) out.push({ ...r, display: "current" });
+      else if (i === nextIdx + 1) out.push({ ...r, display: "teaser" });
+      // rungs beyond the teaser are hidden
+    });
+  }
+  return out;
+}
+
 type TFunc = (key: string, values?: Record<string, string | number>) => string;
 
 /** Display title for an achievement, via i18n. Keys are relative to the
- *  "achievements" namespace, so callers pass `useTranslations("achievements")`.
- *  Keeps label logic DRY across the widget and the page. */
+ *  "achievements" namespace, so callers pass `useTranslations("achievements")`. */
 export function achievementTitle(t: TFunc, a: ResolvedAchievement): string {
   if (a.oneTime) return t(`firsts.${a.key}`);
   switch (a.metric) {
@@ -214,20 +286,21 @@ export function achievementTitle(t: TFunc, a: ResolvedAchievement): string {
       return t("ladders.customers", { count: a.threshold });
     case "total_stamps_given":
       return t("ladders.stamps", { count: a.threshold });
+    case "stamps_last_30d":
+      return t("ladders.stamps30d", { count: a.threshold });
+    case "new_customers_last_30d":
+      return t("ladders.customers30d", { count: a.threshold });
     case "repeat_customers":
       return t("ladders.repeatCustomers", { count: a.threshold });
-    case "repeat_rate":
-      return t("ladders.repeatRate", { pct: Math.round(a.threshold * 100) });
     default:
       return "";
   }
 }
 
-/** "740 / 1,000" or "36% / 40%" — the numeric progress under a rung. `fmt` localizes. */
+/** "740 / 1,000" — the numeric progress under a rung. `fmt` localizes. */
 export function achievementValueLabel(
   a: ResolvedAchievement,
   fmt: (n: number) => string
 ): string {
-  if (a.isRate) return `${Math.round(a.current * 100)}% / ${Math.round(a.threshold * 100)}%`;
   return `${fmt(Math.min(a.current, a.threshold))} / ${fmt(a.threshold)}`;
 }

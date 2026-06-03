@@ -14,23 +14,34 @@
     "categories": {
       "growth": "Growth",
       "engagement": "Engagement",
+      "momentum": "This month",
       "loyalty": "Loyalty",
       "firsts": "Firsts"
     },
     "ladders": {
       "customers": "{count, plural, =1 {First customer} other {# customers}}",
-      "stamps": "{count} stamps given",
-      "repeatCustomers": "{count, plural, =1 {First returning customer} other {# returning customers}}",
-      "repeatRate": "{pct}% return rate"
+      "stamps": "{count, plural, =1 {First stamp given} other {# stamps given}}",
+      "stamps30d": "{count} stamps in 30 days",
+      "customers30d": "{count} new customers in 30 days",
+      "repeatCustomers": "{count, plural, =1 {First returning customer} other {# returning customers}}"
     },
     "firsts": {
       "first_reward": "First reward redeemed",
       "first_broadcast": "First broadcast sent"
     },
+    "info": {
+      "growth": "Total customers who have added your card, all time.",
+      "engagement": "Total stamps your team has given, all time.",
+      "momentum": "Your last 30 days, a rolling window. It rewards a strong recent month and keeps moving as the days roll by.",
+      "loyalty": "Customers who keep coming back, counted once they have visited on two different days.",
+      "firsts": "One-time milestones you reach the first time you do something.",
+      "weeklyGoal": "Stamps your team gives this week. We suggest a target from your recent weeks, and you can change it anytime."
+    },
     "weeklyGoal": {
       "label": "This week's goal",
-      "toGo": "{remaining} to go, you've got this.",
-      "reached": "Goal reached. {current} of {target}.",
+      "unit": "stamps",
+      "toGo": "{remaining} stamps to go, you've got this.",
+      "reached": "Goal reached. {current} of {target} stamps.",
       "editTitle": "Set your weekly goal",
       "editDescription": "The number of stamps you want to reach this week. We suggest {auto}, based on your recent weeks.",
       "fieldLabel": "Stamps this week",

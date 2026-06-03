@@ -2,9 +2,10 @@
 
 import {
   Users,
+  UserPlus,
   Stamp,
   Repeat,
-  ArrowsClockwise,
+  TrendUp,
   Gift,
   Megaphone,
   Trophy,
@@ -17,9 +18,10 @@ const ICON_MAP: Record<
   React.ComponentType<{ className?: string; weight?: IconWeight }>
 > = {
   Users,
+  UserPlus,
   Stamp,
   Repeat,
-  ArrowsClockwise,
+  TrendUp,
   Gift,
   Megaphone,
   Trophy,
