@@ -244,7 +244,7 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
 
       <div className="my-4 h-px bg-[var(--border)]" />
 
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Trophy className="h-4 w-4 text-[var(--accent)]" weight="fill" />
           <span className="text-sm font-semibold text-[var(--foreground)]">{t("title")}</span>
@@ -254,9 +254,13 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
             </Badge>
           )}
         </div>
-        <span className="text-[11px] tabular-nums text-[var(--muted-foreground)]">
-          {t("earnedCount", { earned, total })}
-        </span>
+          <Link
+          href="/achievements"
+          className="flex items-center justify-center gap-1 text-[12px] font-semibold text-[var(--accent)] hover:underline"
+        >
+          {t("viewAll")}
+          <ArrowRight className="h-3.5 w-3.5" weight="bold" />
+        </Link>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -267,14 +271,6 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
           <p className="py-1 text-[12px] text-[var(--muted-foreground)]">{t("allEarned")}</p>
         )}
       </div>
-
-      <Link
-        href="/achievements"
-        className="mt-4 flex items-center justify-center gap-1 text-[12px] font-semibold text-[var(--accent)] hover:underline"
-      >
-        {t("viewAll")}
-        <ArrowRight className="h-3.5 w-3.5" weight="bold" />
-      </Link>
     </Card>
   );
 }
