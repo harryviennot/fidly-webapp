@@ -1,0 +1,42 @@
+{
+  "achievements": {
+    "title": "Trophées",
+    "new": "Nouveau",
+    "earnedCount": "{earned} sur {total} décrochés",
+    "allEarned": "Tous les trophées sont décrochés. Bravo.",
+    "viewAll": "Tout voir",
+    "unlockedOne": "Trophée débloqué : {name}",
+    "unlockedMany": "{count} trophées débloqués !",
+    "pageTitle": "Trophées",
+    "pageSubtitle": "Les étapes que vous franchissez à mesure que votre programme grandit.",
+    "stateEarned": "Décroché",
+    "stateLocked": "À venir",
+    "categories": {
+      "growth": "Croissance",
+      "engagement": "Engagement",
+      "loyalty": "Fidélité",
+      "firsts": "Premières fois"
+    },
+    "ladders": {
+      "customers": "{count, plural, =1 {Premier client} other {# clients}}",
+      "stamps": "{count} tampons donnés",
+      "repeatCustomers": "{count, plural, =1 {Premier client fidèle} other {# clients fidèles}}",
+      "repeatRate": "{pct} % de clients fidèles"
+    },
+    "firsts": {
+      "first_reward": "Première récompense réclamée",
+      "first_broadcast": "Première diffusion envoyée"
+    },
+    "weeklyGoal": {
+      "label": "Objectif de la semaine",
+      "toGo": "Plus que {remaining}, vous y êtes presque.",
+      "reached": "Objectif atteint ! {current} sur {target}.",
+      "editTitle": "Définir votre objectif de la semaine",
+      "editDescription": "Le nombre de tampons que vous visez cette semaine. On vous suggère {auto}, d'après vos dernières semaines.",
+      "fieldLabel": "Tampons cette semaine",
+      "save": "Enregistrer mon objectif",
+      "reset": "Revenir au mode automatique",
+      "cancel": "Annuler"
+    }
+  }
+}

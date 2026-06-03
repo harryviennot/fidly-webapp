@@ -1,0 +1,42 @@
+{
+  "achievements": {
+    "title": "Achievements",
+    "new": "New",
+    "earnedCount": "{earned} of {total} earned",
+    "allEarned": "Every achievement earned. Incredible.",
+    "viewAll": "View all",
+    "unlockedOne": "Achievement unlocked: {name}",
+    "unlockedMany": "{count} achievements unlocked!",
+    "pageTitle": "Achievements",
+    "pageSubtitle": "Milestones you reach as your loyalty program grows.",
+    "stateEarned": "Earned",
+    "stateLocked": "Locked",
+    "categories": {
+      "growth": "Growth",
+      "engagement": "Engagement",
+      "loyalty": "Loyalty",
+      "firsts": "Firsts"
+    },
+    "ladders": {
+      "customers": "{count, plural, =1 {First customer} other {# customers}}",
+      "stamps": "{count} stamps given",
+      "repeatCustomers": "{count, plural, =1 {First returning customer} other {# returning customers}}",
+      "repeatRate": "{pct}% return rate"
+    },
+    "firsts": {
+      "first_reward": "First reward redeemed",
+      "first_broadcast": "First broadcast sent"
+    },
+    "weeklyGoal": {
+      "label": "This week's goal",
+      "toGo": "{remaining} to go, you've got this.",
+      "reached": "Goal reached. {current} of {target}.",
+      "editTitle": "Set your weekly goal",
+      "editDescription": "The number of stamps you want to reach this week. We suggest {auto}, based on your recent weeks.",
+      "fieldLabel": "Stamps this week",
+      "save": "Save my goal",
+      "reset": "Back to automatic",
+      "cancel": "Cancel"
+    }
+  }
+}

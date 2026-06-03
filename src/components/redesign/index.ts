@@ -7,3 +7,4 @@ export { RecentScans } from "./recent-scans";
 export { ActiveCardWidget } from "./active-card-widget";
 export { PeakHoursChart } from "./peak-hours-chart";
 export { QuickActions } from "./quick-actions";
+export { AchievementsWidget } from "./achievements-widget";

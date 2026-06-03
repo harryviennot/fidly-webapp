@@ -72,7 +72,7 @@ export default function ProgramOverviewPage() {
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
               title={t('activeCards')}
-              value={totalCustomers}
+              value={stats?.active_cards ?? 0}
               icon={<CreditCardIcon className="w-4 h-4" weight="bold" />}
               tone="info"
               // subtitle={`87% ${t('installRate')}`}
@@ -98,7 +98,7 @@ export default function ProgramOverviewPage() {
           <ActiveCardWidget
             design={activeDesign ?? null}
             totalCustomers={totalCustomers}
-            activeCards={totalCustomers}
+            activeCards={stats?.active_cards ?? 0}
             isOwner={isOwner}
             delay={0}
           />

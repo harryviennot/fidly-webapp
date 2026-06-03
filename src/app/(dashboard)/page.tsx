@@ -2,26 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import {
-  Users,
-  QrCodeIcon,
-  CreditCard,
-  Gift,
-} from "@phosphor-icons/react";
-// import {
-//   BarChart,
-//   Bar,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   ResponsiveContainer,
-// } from "recharts";
+import { Users, QrCodeIcon, CreditCard, Stamp, Repeat } from "@phosphor-icons/react";
 import { useBusiness } from "@/contexts/business-context";
 import { useCustomers } from "@/hooks/use-customers";
 import { useActivityStats } from "@/hooks/use-activity-stats";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useDesigns } from "@/hooks/use-designs";
+import { useBusinessAchievements } from "@/hooks/use-business-achievements";
 import { getMyProfile } from "@/api";
 import type { User } from "@/types";
 import {
@@ -29,24 +16,12 @@ import {
   StatCard,
   RecentScans,
   ActiveCardWidget,
-  // PeakHoursChart,
   QuickActions,
-  // ChartCard,
-  // LegendItem,
+  AchievementsWidget,
 } from "@/components/redesign";
 import { computeCardColors } from "@/lib/card-utils";
+import { wowTrend } from "@/lib/dashboard-trends";
 import type { StampIconType } from "@/components/design/StampIconPicker";
-
-// Placeholder chart data (will be wired to real analytics later)
-// const SCAN_CHART_DATA = [
-//   { day: "Mon", scans: 34, stamps: 28, redemptions: 3 },
-//   { day: "Tue", scans: 45, stamps: 38, redemptions: 5 },
-//   { day: "Wed", scans: 52, stamps: 44, redemptions: 6 },
-//   { day: "Thu", scans: 38, stamps: 30, redemptions: 4 },
-//   { day: "Fri", scans: 67, stamps: 58, redemptions: 8 },
-//   { day: "Sat", scans: 89, stamps: 76, redemptions: 11 },
-//   { day: "Sun", scans: 72, stamps: 61, redemptions: 9 },
-// ];
 
 export default function DashboardPage() {
   const t = useTranslations();
@@ -58,6 +33,7 @@ export default function DashboardPage() {
   const { data: stats } = useActivityStats(businessId);
   const { data: txns, isLoading: txnsLoading } = useTransactions(businessId, 10);
   const { data: designs = [] } = useDesigns(businessId);
+  const { data: achievements } = useBusinessAchievements(businessId);
   const activeDesign = designs.find((d) => d.is_active);
 
   // User profile for welcome message
@@ -67,25 +43,30 @@ export default function DashboardPage() {
   }, []);
 
   const totalCustomers = customerData?.total ?? 0;
-  const rewardsToday = stats?.rewards_today ?? 0;
-  const activeCustomersToday = stats?.active_customers_today ?? 0;
-  const recentTransactions = txns?.transactions?.slice(0, 6) ?? [];
+  const activeCards = stats?.active_cards ?? 0;
+  const stampsThisWeek = stats?.stamps_this_week ?? 0;
+  const stampsToday = stats?.stamps_today ?? 0;
+  const newThisWeek = stats?.new_customers_this_week ?? 0;
+  const recentTransactions = txns?.transactions?.slice(0, 5) ?? [];
+  const installRate =
+    totalCustomers > 0 ? Math.round((activeCards / totalCustomers) * 100) : 0;
+  // Repeat rate is the loyalty north-star. Sourced from get_business_achievements;
+  // shown as a level (no WoW arrow — there is no prior-week baseline to compare).
+  const repeatRatePct = Math.round((achievements?.repeat_rate ?? 0) * 100);
+
+  // Week-over-week trends (see web/docs/dashboard-achievements.md).
+  // Total customers reconstructs its prior baseline from this week's new count.
+  const customersTrend = wowTrend(totalCustomers, totalCustomers - newThisWeek);
+  const stampsTrend = wowTrend(stampsThisWeek, stats?.stamps_prev_week ?? 0);
+
   const colors = activeDesign ? computeCardColors(activeDesign) : null;
   const stampIcon = (activeDesign?.stamp_icon as StampIconType) ?? undefined;
   const rewardIcon = (activeDesign?.reward_icon as StampIconType) ?? undefined;
 
   const displayName = profile?.name || "there";
 
-  // Read accent palette from CSS vars for Recharts (SVG attrs don't support CSS vars directly)
-  // const cssStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
-  // const accentColor = cssStyle?.getPropertyValue("--accent").trim() || "#f97316";
-  // const accent300 = cssStyle?.getPropertyValue("--accent-300").trim() || "#fdba74";
-  // const secondaryColor = cssStyle?.getPropertyValue("--business-secondary").trim() || "#C4A67D";
-
-  console.log("NEXT_PUBLIC_SCAN_URL", process.env.NEXT_PUBLIC_SCAN_URL);
   return (
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
-      {/* Header */}
       <PageHeader
         title={t("dashboard.title")}
         subtitle={t("dashboard.welcome", { name: displayName })}
@@ -99,11 +80,12 @@ export default function DashboardPage() {
         ] : undefined}
       />
 
-      {/* Two-column layout — right column starts at top alongside stat cards */}
+      {/* Two-column layout — right rail starts at top alongside the KPI grid */}
       <div className="flex gap-[14px] flex-col min-[1080px]:flex-row min-[1080px]:items-start">
-        {/* Left column */}
+        {/* Left column — health at a glance + a peek at recent activity */}
         <div className="flex-1 flex flex-col gap-[14px] min-w-0">
-          {/* Stat cards — inside left column so right panel aligns from top */}
+          {/* Balanced KPI grid. Daily counts ride along as subtitles so a quiet
+              day never reads as an empty dashboard. */}
           <div className="flex flex-wrap gap-[14px]">
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
@@ -111,112 +93,50 @@ export default function DashboardPage() {
               value={totalCustomers}
               icon={<Users className="w-4 h-4" weight="bold" />}
               tone="accent"
-              // subtitle={t("dashboard.vsLastMonth")}
-              // change="+18%"
-              // positive
+              change={customersTrend.change}
+              positive={customersTrend.positive}
               delay={0}
             />
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
-              title={t("dashboard.scansToday")}
-              value={activeCustomersToday}
-              icon={<QrCodeIcon className="w-4 h-4" weight="bold" />}
-              tone="accent"
-              // subtitle={t("dashboard.vsYesterday")}
-              // change="+12%"
-              // positive
+              title={t("dashboard.activeCards")}
+              value={activeCards}
+              icon={<CreditCard className="w-4 h-4" weight="bold" />}
+              tone="info"
+              subtitle={
+                totalCustomers > 0
+                  ? t("dashboard.installedSubtitle", { rate: installRate })
+                  : undefined
+              }
               delay={80}
             />
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
-              title={t("dashboard.activeCards")}
-              value={totalCustomers}
-              icon={<CreditCard className="w-4 h-4" weight="bold" />}
-              tone="neutral"
-              // subtitle={t("dashboard.installRate87")}
-              // change="+8%"
-              // positive
+              title={t("dashboard.stampsThisWeek")}
+              value={stampsThisWeek}
+              icon={<Stamp className="w-4 h-4" weight="bold" />}
+              tone="accent"
+              subtitle={t("dashboard.todayCount", { count: stampsToday })}
+              change={stampsTrend.change}
+              positive={stampsTrend.positive}
               delay={160}
             />
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
-              title={t("dashboard.redemptions")}
-              value={rewardsToday}
-              icon={<Gift className="w-4 h-4" weight="bold" />}
-              tone="warning"
-              // subtitle={t("dashboard.thisWeek")}
-              // change="+23%"
-              // positive
+              title={t("dashboard.repeatRate")}
+              value={repeatRatePct}
+              suffix="%"
+              icon={<Repeat className="w-4 h-4" weight="bold" />}
+              tone="info"
               delay={240}
             />
           </div>
 
-          {/* Scan Activity Chart */}
-
-          {/* 
-          <ChartCard
-            title={t("dashboard.scanActivity")}
-            delay={300}
-            legend={
-              <div className="flex items-center gap-3">
-                <LegendItem color={accent300} label={t("dashboard.scans")} />
-                <LegendItem color={accentColor} label={t("dashboard.stamps")} />
-                <LegendItem color={secondaryColor} label={t("dashboard.redemptions")} />
-              </div>
-            }
-          >
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={SCAN_CHART_DATA} barGap={2} barCategoryGap="20%">
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0EE" vertical={false} />
-                <XAxis
-                  dataKey="day"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 11, fill: "#AAA" }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 11, fill: "#AAA" }}
-                  width={30}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: 8,
-                    border: "1px solid #eee",
-                    fontSize: 11,
-                  }}
-                  cursor={{ fill: "rgba(0,0,0,0.02)" }}
-                />
-                <Bar
-                  dataKey="scans"
-                  fill={accent300}
-                  radius={[3, 3, 0, 0]}
-                  animationDuration={800}
-                />
-                <Bar
-                  dataKey="stamps"
-                  fill={accentColor}
-                  radius={[3, 3, 0, 0]}
-                  animationDuration={800}
-                  animationBegin={150}
-                />
-                <Bar
-                  dataKey="redemptions"
-                  fill={secondaryColor}
-                  radius={[3, 3, 0, 0]}
-                  animationDuration={800}
-                  animationBegin={300}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard> */}
-
-          {/* Recent Scans */}
+          {/* A peek at recent activity — the full log lives on Activity */}
           <RecentScans
             transactions={recentTransactions}
             loading={txnsLoading}
-            delay={400}
+            delay={320}
             stampIcon={stampIcon}
             rewardIcon={rewardIcon}
             stampFilledColor={colors?.accentHex}
@@ -224,19 +144,19 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Right column — starts at top */}
+        {/* Right rail — achievements centerpiece up top */}
         <div
           className="w-full min-[1080px]:w-[290px] min-[1080px]:min-w-[290px] flex flex-col gap-[14px] animate-slide-up"
           style={{ animationDelay: "350ms" }}
         >
+          <AchievementsWidget delay={0} />
           <ActiveCardWidget
             design={activeDesign}
             totalCustomers={totalCustomers}
-            activeCards={totalCustomers}
+            activeCards={activeCards}
             isOwner={currentRole === "owner"}
-            delay={0}
+            delay={100}
           />
-          {/* <PeakHoursChart delay={100} /> */}
           <QuickActions delay={200} />
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { API_BASE_URL, getAuthHeaders, throwApiError } from './client';
 import type {
   ActivityStatsResponse,
+  BusinessAchievementsResponse,
   TransactionListResponse,
   TransactionResponse,
 } from '@/types/transaction';
@@ -74,6 +75,21 @@ export async function getActivityStats(
 
   if (!response.ok) {
     throw new Error('Failed to fetch activity stats');
+  }
+
+  return response.json();
+}
+
+export async function getBusinessAchievements(
+  businessId: string
+): Promise<BusinessAchievementsResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/transactions/${businessId}/achievements`,
+    { headers: await getAuthHeaders() }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch business achievements');
   }
 
   return response.json();

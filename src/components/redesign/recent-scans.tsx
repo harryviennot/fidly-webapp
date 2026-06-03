@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { QrCodeIcon } from "@phosphor-icons/react";
 import type { TransactionResponse } from "@/types";
 import { useAuth } from "@/contexts/auth-provider";
 import { useEntitlements } from "@/hooks/useEntitlements";
@@ -134,6 +135,18 @@ export function RecentScans({
       <SmoothHeight>
         {loading ? (
           <RecentScansSkeleton />
+        ) : transactions.length === 0 ? (
+          <div className="flex flex-col items-center text-center py-8 px-4">
+            <div className="w-10 h-10 rounded-full bg-[var(--muted)] flex items-center justify-center mb-3">
+              <QrCodeIcon className="w-5 h-5 text-[var(--muted-foreground)]" weight="bold" />
+            </div>
+            <p className="text-[13px] font-medium text-[var(--foreground)]">
+              {t("dashboard.recentScansEmptyTitle")}
+            </p>
+            <p className="text-[12px] text-[var(--muted-foreground)] mt-0.5 max-w-[240px]">
+              {t("dashboard.recentScansEmptyBody")}
+            </p>
+          </div>
         ) : (
           <div>
             {transactions.map((tx, i) => {
