@@ -211,11 +211,13 @@ function WeeklyGoalBlock({
               autoFocus
             />
           </div>
-          <DialogFooter className="gap-2 sm:gap-2">
-            {!isAuto && (
+          {!isAuto && (
+            <div className="-mt-3 flex">
               <Button
                 type="button"
                 variant="ghost"
+                size="sm"
+                className="h-auto px-0 text-sm font-medium text-[var(--muted-foreground)] hover:bg-transparent hover:text-[var(--foreground)]"
                 onClick={() => {
                   onReset();
                   setOpen(false);
@@ -224,7 +226,9 @@ function WeeklyGoalBlock({
               >
                 {t("weeklyGoal.reset")}
               </Button>
-            )}
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
             <DialogClose asChild>
               <Button type="button" variant="outline">
                 {t("weeklyGoal.cancel")}

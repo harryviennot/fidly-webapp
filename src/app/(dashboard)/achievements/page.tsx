@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { CheckCircle } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/redesign";
 import {
@@ -58,6 +58,7 @@ function AchievementTile({
   showCta?: boolean;
 }) {
   const format = useFormatter();
+  const now = useNow();
   const color = BADGE_CATEGORY_COLOR[a.category];
 
   const earned = a.display === "earned";
@@ -151,7 +152,7 @@ function AchievementTile({
           {a.unlockedAt && (
             <span className="font-normal text-[var(--muted-foreground)]">
               {" · "}
-              {format.relativeTime(new Date(a.unlockedAt))}
+              {format.relativeTime(new Date(a.unlockedAt), now)}
             </span>
           )}
         </p>

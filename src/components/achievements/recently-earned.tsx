@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { AchievementBadge } from "./achievement-badge";
 import { achievementTitle, type ResolvedAchievement } from "@/lib/achievements";
@@ -13,6 +13,7 @@ import { achievementTitle, type ResolvedAchievement } from "@/lib/achievements";
 export function RecentlyEarned({ all }: { all: ResolvedAchievement[] }) {
   const t = useTranslations("achievements");
   const format = useFormatter();
+  const now = useNow();
 
   const recent = all
     .filter((a) => a.unlocked && a.unlockedAt)
@@ -54,7 +55,7 @@ export function RecentlyEarned({ all }: { all: ResolvedAchievement[] }) {
               {achievementTitle(t, a)}
             </p>
             <p className="text-[10px] text-[var(--muted-foreground)]">
-              {format.relativeTime(new Date(a.unlockedAt!))}
+              {format.relativeTime(new Date(a.unlockedAt!), now)}
             </p>
           </div>
         ))}

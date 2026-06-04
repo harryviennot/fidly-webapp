@@ -101,7 +101,7 @@ export default function DashboardPage() {
               title={t("dashboard.totalStamps")}
               value={totalStamps}
               icon={<Stamp className="w-4 h-4" weight="bold" />}
-              tone="info"
+              tone="accent"
               subtitle={
                 stampsThisWeek > 0
                   ? t("dashboard.plusThisWeek", { count: stampsThisWeek })
@@ -122,7 +122,7 @@ export default function DashboardPage() {
               title={t("dashboard.loyalCustomers")}
               value={loyalCustomers}
               icon={<Heart className="w-4 h-4" weight="bold" />}
-              tone="info"
+              tone="accent"
               subtitle={t("dashboard.loyalSubtitle")}
               delay={240}
             />
