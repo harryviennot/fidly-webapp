@@ -189,18 +189,33 @@ export default function AchievementsPage() {
   // trophies they know the levers, so hide them to cut clutter.
   const showCtas = (computed?.earnedCount ?? 0) <= 2;
 
+  // Sections fade/slide in on a stagger — the same entrance the dashboard and
+  // broadcasts pages use — so the page assembles itself instead of popping in as
+  // one block. Header → hero → recently-earned occupy the first slots; the
+  // category sections continue the cascade from there.
+  const STEP = 70;
+  const delay = (slot: number) => `${Math.min(slot, 10) * STEP}ms`;
+
   return (
-    <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
-      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+    <div className="flex flex-col gap-[14px]">
+      <div className="animate-slide-up" style={{ animationDelay: delay(0) }}>
+        <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+      </div>
 
       {/* The unlock animation plays here (and only here) so the dashboard is never
           interrupted by a takeover. */}
       <AchievementCelebration />
 
-      {computed && <AchievementHero computed={computed} />}
-      {computed && <RecentlyEarned all={computed.all} />}
+      {computed && (
+        <div className="animate-slide-up" style={{ animationDelay: delay(1) }}>
+          <AchievementHero computed={computed} />
+        </div>
+      )}
+      {/* RecentlyEarned animates on its own root (it returns null when empty, so a
+          wrapper div here would leave a dangling flex gap). */}
+      {computed && <RecentlyEarned all={computed.all} delay={2 * STEP} />}
 
-      {CATEGORY_ORDER.map((cat) => {
+      {CATEGORY_ORDER.map((cat, i) => {
         const items = displayList.filter((a) => a.category === cat);
         if (items.length === 0) return null;
 
@@ -221,7 +236,11 @@ export default function AchievementsPage() {
           : undefined;
 
         return (
-          <section key={cat} className="flex flex-col gap-3">
+          <section
+            key={cat}
+            className="flex flex-col gap-3 animate-slide-up"
+            style={{ animationDelay: delay(3 + i) }}
+          >
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-1.5">
                 <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">

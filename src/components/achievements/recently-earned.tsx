@@ -10,7 +10,7 @@ import { achievementTitle, type ResolvedAchievement } from "@/lib/achievements";
  * page itself feels like a record of wins rather than a static catalog. A trophy
  * still awaiting its celebration carries a "New" badge.
  */
-export function RecentlyEarned({ all }: { all: ResolvedAchievement[] }) {
+export function RecentlyEarned({ all, delay = 0 }: { all: ResolvedAchievement[]; delay?: number }) {
   const t = useTranslations("achievements");
   const format = useFormatter();
   const now = useNow();
@@ -23,7 +23,7 @@ export function RecentlyEarned({ all }: { all: ResolvedAchievement[] }) {
   if (recent.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-3 animate-slide-up" style={{ animationDelay: `${delay}ms` }}>
       <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
         {t("recentlyEarned")}
       </h2>

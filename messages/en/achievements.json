@@ -35,12 +35,12 @@
       "first_broadcast": "First broadcast sent"
     },
     "info": {
-      "growth": "Total customers who have added your card, all time.",
-      "engagement": "Total stamps your team has given, all time.",
-      "momentum": "Your last 30 days, a rolling window. It rewards a strong recent month and keeps moving as the days roll by.",
-      "loyalty": "Customers who keep coming back, counted once they have visited on two different days.",
-      "firsts": "One-time milestones you reach the first time you do something.",
-      "weeklyGoal": "Stamps your team gives this week. We suggest a target from your recent weeks, and you can change it anytime."
+      "growth": "The total number of customers who have ever added your card.",
+      "engagement": "The total number of stamps your team has ever given.",
+      "momentum": "Your last 30 days, always moving forward. Today counts, and anything older than 30 days drops off.",
+      "loyalty": "Customers who come back, counted as loyal once they visit again on another day.",
+      "firsts": "Milestones you earn just once, the first time you reach each one, like your first stamp or first broadcast.",
+      "weeklyGoal": "Stamps your team gives this week. We suggest a target based on your recent weeks, and you can change it anytime."
     },
     "hero": {
       "earnedTitle": "{earned} of {total} earned",
