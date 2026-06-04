@@ -86,6 +86,17 @@ export default function DashboardPage() {
           {/* Balanced KPI grid. Daily counts ride along as subtitles so a quiet
               day never reads as an empty dashboard. */}
           <div className="flex flex-wrap gap-[14px]">
+            
+            <StatCard
+              className="flex-1 basis-0 min-w-[140px]"
+              title={t("dashboard.totalStamps")}
+              value={totalStamps}
+              icon={<Stamp className="w-4 h-4" weight="bold" />}
+              tone="accent"
+              change={stampsThisWeek > 0 ? t("dashboard.plusThisWeek", { count: stampsThisWeek }) : undefined}
+              positive={stampsThisWeek > 0}
+              delay={0}
+            />
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
               title={t("dashboard.totalCustomers")}
@@ -94,19 +105,6 @@ export default function DashboardPage() {
               tone="accent"
               change={customersTrend.change}
               positive={customersTrend.positive}
-              delay={0}
-            />
-            <StatCard
-              className="flex-1 basis-0 min-w-[140px]"
-              title={t("dashboard.totalStamps")}
-              value={totalStamps}
-              icon={<Stamp className="w-4 h-4" weight="bold" />}
-              tone="accent"
-              subtitle={
-                stampsThisWeek > 0
-                  ? t("dashboard.plusThisWeek", { count: stampsThisWeek })
-                  : undefined
-              }
               delay={80}
             />
             <StatCard

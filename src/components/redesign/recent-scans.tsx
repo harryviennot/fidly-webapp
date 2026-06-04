@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
 import { LocationBadge } from "@/components/locations/location-badge";
+import { SectionHeader } from "@/components/redesign/section-header";
 
 // Dashboard widget uses accent CSS vars for stamp_added/reward_redeemed delta badges
 const WIDGET_TYPE_CONFIG = {
@@ -120,17 +121,10 @@ export function RecentScans({
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[15px] font-semibold text-[var(--foreground)]">
-          {t("dashboard.recentScans")}
-        </h3>
-        <Link
-          href="/activity"
-          className="text-xs text-[var(--accent)] font-medium hover:underline"
-        >
-          {t("dashboard.viewAll")}
-        </Link>
-      </div>
+      <SectionHeader
+        title={t("dashboard.recentScans")}
+        action={{ label: t("dashboard.viewAll"), href: "/activity" }}
+      />
 
       <SmoothHeight>
         {loading ? (

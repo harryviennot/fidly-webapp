@@ -17,6 +17,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { SectionHeader } from "@/components/redesign/section-header";
 import { InfoPopover } from "@/components/reusables/info-popover";
 import { ProgressBar } from "@/components/reusables/progress-bar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -295,24 +296,18 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
 
       <div className="my-5 h-px bg-[var(--border)]" />
 
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <Trophy className="h-4 w-4 text-[var(--accent)]" weight="fill" />
-          <span className="text-sm font-semibold text-[var(--foreground)]">{t("title")}</span>
-          {hasFreshUnlock && (
+      <SectionHeader
+        title={t("title")}
+        icon={<Trophy className="h-4 w-4 shrink-0 text-[var(--accent)]" weight="fill" />}
+        badge={
+          hasFreshUnlock ? (
             <Badge variant="success" className="ml-1 px-1.5 py-0 text-[9px]">
               {t("new")}
             </Badge>
-          )}
-        </div>
-        <Link
-          href="/achievements"
-          className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-[var(--accent)] hover:underline"
-        >
-          {t("viewAll")}
-          <ArrowRight className="h-3.5 w-3.5" weight="bold" />
-        </Link>
-      </div>
+          ) : undefined
+        }
+        action={{ label: t("viewAll"), href: "/achievements" }}
+      />
 
       <div className="flex flex-col gap-4">
         {completed.map((a) => (
