@@ -46,8 +46,8 @@
       "email": "Email",
       "role": "Rôle",
       "status": "Statut",
-      "locations": "Emplacements",
-      "locationsAllAccess": "Tous les emplacements",
+      "locations": "Établissements",
+      "locationsAllAccess": "Tous les établissements",
       "stampsGiven": "Tampons donnés",
       "joined": "Rejoint le",
       "added": "Ajouté {date}",
@@ -58,12 +58,12 @@
       "roleScannerDesc": "Accès à l'application scanner uniquement"
     },
     "locations": {
-      "notAssigned": "Aucun emplacement",
-      "notAssignedNoManage": "—",
+      "notAssigned": "Aucun établissement",
+      "notAssignedNoManage": "–",
       "assign": "Assigner",
-      "popoverTitle": "Emplacements assignés",
+      "popoverTitle": "Établissements assignés",
       "primary": "principal",
-      "noLocations": "Aucun emplacement pour l'instant",
+      "noLocations": "Aucun établissement pour l'instant",
       "assignedToast": "Assigné à {location}",
       "unassignedToast": "Retiré de {location}",
       "assignmentFailed": "Impossible de mettre à jour l'assignation"

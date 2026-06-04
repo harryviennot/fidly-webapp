@@ -26,6 +26,7 @@ import {
   SquaresFour,
   Users,
   ChartBar,
+  Trophy,
   QrCode,
   GearSix,
   CreditCard,
@@ -55,6 +56,7 @@ const mainItems: NavItem[] = [
   { href: "/", labelKey: "nav.dashboard", icon: SquaresFour },
   { href: "/customers", labelKey: "nav.customers", icon: Users },
   { href: "/activity", labelKey: "nav.activity", icon: ChartBar },
+  { href: "/achievements", labelKey: "nav.achievements", icon: Trophy },
 ];
 
 // "LOYALTY PROGRAM" section

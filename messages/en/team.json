@@ -59,7 +59,7 @@
     },
     "locations": {
       "notAssigned": "No locations",
-      "notAssignedNoManage": "—",
+      "notAssignedNoManage": "-",
       "assign": "Assign",
       "popoverTitle": "Assigned locations",
       "primary": "primary",

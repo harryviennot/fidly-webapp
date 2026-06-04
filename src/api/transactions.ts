@@ -1,6 +1,8 @@
 import { API_BASE_URL, getAuthHeaders, throwApiError } from './client';
 import type {
+  AchievementLedgerResponse,
   ActivityStatsResponse,
+  BusinessAchievementsResponse,
   TransactionListResponse,
   TransactionResponse,
 } from '@/types/transaction';
@@ -74,6 +76,66 @@ export async function getActivityStats(
 
   if (!response.ok) {
     throw new Error('Failed to fetch activity stats');
+  }
+
+  return response.json();
+}
+
+export async function getBusinessAchievements(
+  businessId: string
+): Promise<BusinessAchievementsResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/transactions/${businessId}/achievements`,
+    { headers: await getAuthHeaders() }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch business achievements');
+  }
+
+  return response.json();
+}
+
+/** Record the keys the client currently computes as unlocked. First contact
+ *  seeds silently; later calls return the ledger with freshly-unlocked keys
+ *  carrying `acknowledged_at: null` so the client celebrates them once. */
+export async function syncAchievements(
+  businessId: string,
+  unlockedKeys: string[]
+): Promise<AchievementLedgerResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/transactions/${businessId}/achievements/sync`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ unlocked_keys: unlockedKeys }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to sync achievements');
+  }
+
+  return response.json();
+}
+
+/** Flip the given trophy keys to acknowledged once their unlock animation has
+ *  played, so they never re-celebrate. */
+export async function acknowledgeAchievements(
+  businessId: string,
+  keys: string[]
+): Promise<AchievementLedgerResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/transactions/${businessId}/achievements/acknowledge`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ keys }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to acknowledge achievements');
   }
 
   return response.json();

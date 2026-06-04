@@ -1,7 +1,7 @@
 {
   "activity": {
     "title": "Activité",
-    "subtitle": "Historique des transactions en temps réel de votre programme de fidélité",
+    "subtitle": "Tout ce qui se passe dans votre programme, en direct",
     "export": "Exporter",
     "searchPlaceholder": "Rechercher un client...",
     "loadFailed": "Impossible de charger le fil d'activit\u00e9.",
@@ -28,11 +28,11 @@
       "cardDeleted": "Carte supprimée"
     },
     "locationFilter": {
-      "allLocations": "Tous les emplacements",
-      "noLocation": "Sans emplacement",
+      "allLocations": "Tous les établissements",
+      "noLocation": "Sans établissement",
       "primary": "principal",
-      "unknown": "Emplacement inconnu",
-      "clear": "Effacer le filtre d'emplacement"
+      "unknown": "Établissement inconnu",
+      "clear": "Effacer le filtre d'établissement"
     },
     "itemVerbs": {
       "stamp_added": "a reçu un tampon",
@@ -61,7 +61,7 @@
       "stampsToday": "Tampons aujourd'hui",
       "rewardsToday": "R\u00e9compenses aujourd'hui",
       "totalThisWeek": "Total cette semaine",
-      "activeCustomersToday": "Clients actifs"
+      "activeCustomersToday": "Actifs aujourd'hui"
     },
     "emptyState": {
       "title": "Aucune activit\u00e9",

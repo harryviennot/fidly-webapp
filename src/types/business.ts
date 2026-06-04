@@ -85,6 +85,10 @@ export interface BusinessSettings {
   setup_progress?: SetupProgress;
   first_broadcast_sent?: boolean;
   design_reviewed?: boolean;
+  /** Owner override for the dashboard weekly stamp goal. null/absent = auto. */
+  weekly_goal?: number | null;
+  /** Achievement keys already celebrated in-app (so confetti fires once). */
+  achievements_seen?: string[];
   business_type?: string;
   business_type_other?: string;
   team_size?: string;
