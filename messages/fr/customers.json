@@ -42,7 +42,7 @@
       "vip": "Clients ayant utilis\u00e9 3 r\u00e9compenses ou plus.",
       "closeToReward": "\u00c0 moins de 2 tampons de leur r\u00e9compense.",
       "atRisk": "Ont des tampons mais ne sont pas venus depuis plus de 30 jours.",
-      "ghost": "Ont pris leur carte mais ne sont jamais revenus \u2014 aucun tampon."
+      "ghost": "Ont pris leur carte mais ne sont jamais revenus : aucun tampon."
     },
     "actions": {
       "addStamp": "Ajouter tampon",
@@ -74,17 +74,17 @@
         "reasonLabel": "Raison de l'ajustement",
         "reasonPlaceholder": "ex. Le client a oublié de scanner",
         "reasonHelp": "Le client ne le voit pas. Visible par votre équipe uniquement.",
-        "locationLabel": "Emplacement associé",
-        "locationHelp": "Optionnel. Rattachez ce tampon à l'un de vos emplacements.",
-        "noLocation": "Aucun emplacement",
+        "locationLabel": "Établissement associé",
+        "locationHelp": "Optionnel. Rattachez ce tampon à l'un de vos établissements.",
+        "noLocation": "Aucun établissement",
         "primary": "principal",
         "submit": "Ajouter le tampon",
         "submitting": "Ajout en cours...",
         "errors": {
           "notAllowed": "Seuls les propriétaires et administrateurs peuvent ajouter un tampon manuellement.",
           "reasonRequired": "Indiquez une raison.",
-          "locationNotFound": "Cet emplacement n'est plus disponible.",
-          "locationNotPermitted": "Vous n'êtes pas assigné à cet emplacement."
+          "locationNotFound": "Cet établissement n'est plus disponible.",
+          "locationNotPermitted": "Vous n'êtes pas assigné à cet établissement."
         }
       }
     },

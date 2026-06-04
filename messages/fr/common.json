@@ -1,6 +1,7 @@
 {
   "nav": {
     "dashboard": "Tableau de bord",
+    "achievements": "Trophées",
     "program": "Programme",
     "loyaltyProgram": "Programme de fidélité",
     "customers": "Clients",
@@ -17,11 +18,11 @@
     "loyaltyProgram": "Programme de fidélité",
     "customers": "Clients",
     "activity": "Activité",
-    "design": "Design de carte",
+    "design": "Modèle de carte",
     "team": "Équipe",
     "settings": "Paramètres",
     "account": "Compte",
-    "new": "Nouveau design",
+    "new": "Nouveau modèle",
     "edit": "Modifier"
   },
   "userMenu": {

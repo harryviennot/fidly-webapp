@@ -401,7 +401,7 @@ export function WalletCard({
           <div className="relative h-full px-0 py-0 flex flex-col z-10">
             {/* Header: Logo + Business Name */}
             <div className="flex justify-between items-center px-2.5 py-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
                 {design.logo_url ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -429,7 +429,7 @@ export function WalletCard({
 
                 </div>
               </div>
-              <div className="text-right items-center">
+              <div className="text-right items-center flex-shrink-0 pl-2">
                 <div
                   className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300"
                   style={{ color: colors.mutedTextColor }}

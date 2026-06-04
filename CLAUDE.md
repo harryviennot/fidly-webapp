@@ -12,6 +12,11 @@ divs — they drift over time and produce mixed rounding/borders.
   rebuilding it.
 - Pass `hover={false}` for static / non-clickable surfaces. The default
   `hover` adds a translate-up animation that feels wrong on info cards.
+- Pass `flat` for static content cards that must carry **no shadow at all** —
+  e.g. the achievement tiles on `/achievements`. `flat` drops the resting
+  shadow *and* the hover translate. **Never re-introduce a shadow on a `flat`
+  card** via a `shadow-[…]` className override; if a surface is meant to be
+  flat, keep it flat.
 - Tint variants happen via className overrides on `<Card>` (e.g.
   `bg-[var(--accent-light)]/40`), not via new wrappers.
 
@@ -25,3 +30,12 @@ buttons, alerts/info-boxes, dialogs, dropdowns, inputs, etc. Check the
 existing kit before adding a new component. If you need something cross-
 cutting that doesn't exist, build it generic and drop it under `ui/` or
 `reusables/`.
+
+Notable reusables:
+
+- **`InfoPopover`** (`reusables/info-popover.tsx`) — a small "i" info bubble for
+  explaining a metric, field, or term. Device-adaptive: **hover to view** on
+  mouse / fine-pointer devices (a real `Tooltip`), **tap to view** on touch (a
+  `Popover`, since hover tooltips never fire on touch). Both wear the base
+  Tooltip style. Pass `content` (string or node), optional `label`/`side`/`align`.
+  Reach for this for any "what is this / tell me more" secondary context.

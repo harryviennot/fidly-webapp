@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { QrCodeIcon } from "@phosphor-icons/react";
 import type { TransactionResponse } from "@/types";
 import { useAuth } from "@/contexts/auth-provider";
 import { useEntitlements } from "@/hooks/useEntitlements";
@@ -10,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
 import { LocationBadge } from "@/components/locations/location-badge";
+import { SectionHeader } from "@/components/redesign/section-header";
 
 // Dashboard widget uses accent CSS vars for stamp_added/reward_redeemed delta badges
 const WIDGET_TYPE_CONFIG = {
@@ -119,21 +121,26 @@ export function RecentScans({
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[15px] font-semibold text-[var(--foreground)]">
-          {t("dashboard.recentScans")}
-        </h3>
-        <Link
-          href="/activity"
-          className="text-xs text-[var(--accent)] font-medium hover:underline"
-        >
-          {t("dashboard.viewAll")}
-        </Link>
-      </div>
+      <SectionHeader
+        title={t("dashboard.recentScans")}
+        action={{ label: t("dashboard.viewAll"), href: "/activity" }}
+      />
 
       <SmoothHeight>
         {loading ? (
           <RecentScansSkeleton />
+        ) : transactions.length === 0 ? (
+          <div className="flex flex-col items-center text-center py-8 px-4">
+            <div className="w-10 h-10 rounded-full bg-[var(--muted)] flex items-center justify-center mb-3">
+              <QrCodeIcon className="w-5 h-5 text-[var(--muted-foreground)]" weight="bold" />
+            </div>
+            <p className="text-[13px] font-medium text-[var(--foreground)]">
+              {t("dashboard.recentScansEmptyTitle")}
+            </p>
+            <p className="text-[12px] text-[var(--muted-foreground)] mt-0.5 max-w-[240px]">
+              {t("dashboard.recentScansEmptyBody")}
+            </p>
+          </div>
         ) : (
           <div>
             {transactions.map((tx, i) => {

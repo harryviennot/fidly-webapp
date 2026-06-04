@@ -6,7 +6,7 @@
       "language": "Langue",
       "theme": "Thème"
     },
-    "subtitle": "Détails de l'entreprise, configuration des cartes et branding",
+    "subtitle": "Détails de l'entreprise, configuration des cartes et identité visuelle",
     "businessInfo": {
       "title": "Informations de l'entreprise",
       "description": "Modifier le nom et le logo de votre entreprise",
@@ -75,7 +75,7 @@
       "title": "Langue de votre entreprise",
       "description": "C'est la langue principale de votre entreprise, utilisée pour votre programme de fidélité",
       "passLocale": "Langue",
-      "passLocaleHint": "Vous pouvez toujours ajouter des traductions pour d'autres langues dans l'éditeur de design.",
+      "passLocaleHint": "Vous pouvez toujours ajouter des traductions pour d'autres langues dans l'éditeur de carte.",
       "saved": "La langue de votre entreprise a été mise à jour."
     },
     "theme": {
@@ -88,11 +88,11 @@
       "saveTheme": "Enregistrer le thème",
       "accentColorHint": "Utilisé pour les couleurs de votre entreprise sur le mini site, les communications.",
       "backgroundColorHint": "Utilisé pour les couleurs de votre entreprise sur le mini site, les communications.",
-      "saved": "Paramètres de branding enregistrés."
+      "saved": "Identité visuelle enregistrée."
     },
     "cardBackPreview": {
       "title": "Aperçu du dos de la carte",
-      "subtitle": "Aperçu du dos de votre carte wallet",
+      "subtitle": "Aperçu du dos de votre carte",
       "loyaltyCard": "Carte de fidélité",
       "notSet": "Non défini",
       "closed": "Fermé",

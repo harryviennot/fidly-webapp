@@ -24,13 +24,13 @@
       },
       "cacheWarning": {
         "title": "À propos des mises à jour",
-        "body": "Les nouveaux clients verront la nouvelle icône immédiatement. Pour les clients existants, cela peut prendre plusieurs jours — Apple Wallet met les ressources en cache de manière agressive et nous ne pouvons pas forcer la mise à jour."
+        "body": "Les nouveaux clients verront la nouvelle icône immédiatement. Pour les clients existants, cela peut prendre plusieurs jours. Apple Wallet met les ressources en cache de manière agressive et nous ne pouvons pas forcer la mise à jour."
       }
     },
     "howItWorks": {
       "title": "Comment ça marche",
       "step1": "Un membre de votre équipe scanne la carte de fidélité du client.",
-      "step2": "Sa carte wallet se met à jour en silence en arrière-plan.",
+      "step2": "Sa carte se met à jour en silence en arrière-plan.",
       "step3": "Le client voit la notification sur son écran verrouillé.",
       "note": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité."
     },
@@ -113,7 +113,7 @@
       },
       "proUpsell": {
         "title": "Paliers illimités",
-        "description": "Passez à Pro pour créer autant de paliers que vous voulez — sans limite.",
+        "description": "Passez à Pro pour créer autant de paliers que vous voulez, sans limite.",
         "features": {
           "unlimited": "Paliers illimités",
           "broadcasts": "Diffusions illimitées + programmation"
@@ -139,10 +139,10 @@
       "resetLocale": "Réinitialiser cette langue",
       "enabled": "Activée",
       "disabled": "Désactivée",
-      "disabledHint": "Une fois désactivée, la carte de fidélité se met toujours à jour en silence — les clients ne voient simplement pas de notification pour cet événement.",
+      "disabledHint": "Une fois désactivée, la carte de fidélité se met toujours à jour en silence. Les clients ne voient simplement pas de notification pour cet événement.",
       "rewardNameMissing": "Définissez une récompense dans les paramètres du programme pour utiliser cette variable.",
       "nameCollectionOff": "Activez la collecte des prénoms dans les paramètres du programme pour utiliser cette variable.",
-      "storeLocationPro": "La variable de lieu de magasin est une fonctionnalité Pro. Passez à Pro pour l'utiliser dans vos messages.",
+      "storeLocationPro": "La variable de lieu d'établissement est une fonctionnalité Pro. Passez à Pro pour l'utiliser dans vos messages.",
       "nameWarning": "Certains clients n'ont pas de prénom enregistré. Ils verront le message sans le prénom.",
       "previewWithoutName": "Aperçu pour les clients sans prénom",
       "emptyBody": "Le message ne peut pas être vide",
@@ -153,7 +153,7 @@
         "reward_name": "Nom de la récompense",
         "business_name": "Nom de l'entreprise",
         "customer_first_name": "Prénom du client",
-        "store_location": "Lieu du magasin"
+        "store_location": "Lieu de l'établissement"
       }
     },
     "growthUpsell": {
@@ -167,7 +167,7 @@
       "cta": "Passer à Growth"
     },
     "plan": {
-      "starterReadOnly": "Voici les messages par défaut. Passez à un forfait supérieur pour personnaliser le texte.",
+      "starterReadOnly": "Voici les messages par défaut. Passez à un plan supérieur pour personnaliser le texte.",
       "starterUsingDefault": "Le contenu personnalisé est suspendu sur votre plan actuel. Les messages par défaut sont envoyés à la place.",
       "upgradeToCustomize": "Passez à Growth pour personnaliser",
       "upgradeToGrowth": "Passer à Growth",
@@ -273,8 +273,8 @@
         "failed": "{count} échoués",
         "throttled": "{count} limités",
         "lastEdited": "Modifiée {date}",
-        "locationTargeted": "{count, plural, one {1 emplacement} other {# emplacements}}",
-        "locationTargetedTitle": "Ciblée sur {count, plural, one {1 emplacement} other {# emplacements}}"
+        "locationTargeted": "{count, plural, one {1 établissement} other {# établissements}}",
+        "locationTargetedTitle": "Ciblée sur {count, plural, one {1 établissement} other {# établissements}}"
       },
       "detail": {
         "title": "Titre",
@@ -302,13 +302,13 @@
         "totalSendsShort": "total",
         "reachableHint": "Clients ayant une carte Apple ou Google Wallet active au moment de l'envoi. Ceux qui n'ont jamais installé la carte sont comptés à part.",
         "deliveryRate": "{rate}% livrés",
-        "deliveredHint": "« Livré » signifie que la mise à jour de la carte a été acceptée par Apple ou Google Wallet. Les clients peuvent avoir masqué les notifications sur leur téléphone — nous ne pouvons pas le détecter, mais la carte elle-même est bien mise à jour.",
+        "deliveredHint": "« Livré » signifie que la mise à jour de la carte a été acceptée par Apple ou Google Wallet. Les clients peuvent avoir masqué les notifications sur leur téléphone, nous ne pouvons pas le détecter, mais la carte elle-même est bien mise à jour.",
         "apple": "Apple Wallet",
         "google": "Google Wallet",
         "failed": "Échecs",
-        "failedHint": "Clients pour lesquels ni Apple ni Google Wallet n'a accepté la notification. Généralement des erreurs réseau temporaires — ces clients seront reciblés lors de votre prochaine diffusion.",
+        "failedHint": "Clients pour lesquels ni Apple ni Google Wallet n'a accepté la notification. Généralement des erreurs réseau temporaires. Ces clients seront reciblés lors de votre prochaine diffusion.",
         "notReachable": "Non joignables",
-        "notReachableBody": "{count} {count, plural, one {client n'a} other {clients n'ont}} pas de carte wallet installée",
+        "notReachableBody": "{count} {count, plural, one {client n'a} other {clients n'ont}} pas de carte installée",
         "passRemoved": "Carte supprimée",
         "passRemovedHint": "Utilisateurs Google Wallet ayant supprimé la carte avant l'envoi. Ils ne recevront pas cette diffusion.",
         "throttledHint": "Google limite chaque carte à 3 notifications par 24h. Les clients limités recevront votre prochaine diffusion."
@@ -327,7 +327,7 @@
         },
         "compose": {
           "title": "Rédigez votre diffusion",
-          "subtitle": "Écrivez le message court que vos clients verront dans leur wallet. Ajoutez une traduction anglaise si vous voulez — les clients voient la langue qui correspond à leur téléphone.",
+          "subtitle": "Écrivez le message court que vos clients verront dans leur carte. Ajoutez une traduction anglaise si vous voulez. Les clients voient la langue qui correspond à leur téléphone.",
           "bodyLabel": "Message",
           "bodyPlaceholder": "Profitez de 20% de réduction ce week-end !",
           "charCount": "{count} / {max} caractères",
@@ -337,7 +337,7 @@
           "title": "Qui recevra cette diffusion ?",
           "subtitle": "Choisissez tout le monde ou filtrez par activité.",
           "all": "Tous les clients inscrits",
-          "allDescription": "Chaque client avec une carte wallet",
+          "allDescription": "Chaque client avec une carte installée",
           "filtered": "Audience filtrée",
           "filteredDescription": "Sélectionnez les destinataires par activité",
           "estimate": "≈ {count} clients",
@@ -348,20 +348,20 @@
             "stamps": "Tampons collectés",
             "stampsHelp": "Ne cible que les clients qui ont entre N et M tampons sur leur carte actuelle.",
             "activity": "Activité",
-            "activityHelp": "Filtrez selon le comportement d'achat, la dernière visite et les magasins fréquentés."
+            "activityHelp": "Filtrez selon le comportement d'achat, la dernière visite et les établissements fréquentés."
           },
           "sub": {
             "enrollmentAge": "Ancienneté",
             "enrollmentAgeHelp": "Filtrez selon la date d'inscription du client.",
             "enrollmentLocation": "Lieu d'inscription",
-            "enrollmentLocationHelp": "N'envoie qu'aux clients inscrits via les magasins sélectionnés. Activez l'interrupteur pour inclure aussi les inscriptions directes sans magasin.",
+            "enrollmentLocationHelp": "N'envoie qu'aux clients inscrits via les établissements sélectionnés. Activez l'interrupteur pour inclure aussi les inscriptions directes sans établissement.",
             "enrollmentLocationUpsellTitle": "Le ciblage par lieu est Pro",
-            "enrollmentLocationUpsellDescription": "Pro vous permet de cibler les clients inscrits dans un magasin précis.",
+            "enrollmentLocationUpsellDescription": "Pro vous permet de cibler les clients inscrits dans un établissement précis.",
             "includeDirect": "Inclure aussi les inscriptions directes",
-            "activeLocation": "Actif dans un magasin",
-            "activeLocationHelp": "N'envoie qu'aux clients ayant scanné dans les magasins sélectionnés ces N derniers jours.",
+            "activeLocation": "Actif dans un établissement",
+            "activeLocationHelp": "N'envoie qu'aux clients ayant scanné dans les établissements sélectionnés ces N derniers jours.",
             "activeLocationUpsellTitle": "Le ciblage actif par lieu est Pro",
-            "activeLocationUpsellDescription": "Pro vous permet de reconquérir les clients qui ont récemment visité un magasin précis."
+            "activeLocationUpsellDescription": "Pro vous permet de reconquérir les clients qui ont récemment visité un établissement précis."
           },
           "enrollment": {
             "any": "Tous",
@@ -383,7 +383,7 @@
             "hasRedeemedLabel": "A déjà utilisé une récompense",
             "hasRedeemedHelp": "N'envoie qu'aux clients qui ont déjà réclamé au moins une récompense.",
             "inactiveLabel": "Inactifs depuis",
-            "inactiveHelp": "Cible les clients qui ne sont pas revenus depuis N jours — utile pour les relancer.",
+            "inactiveHelp": "Cible les clients qui ne sont pas revenus depuis N jours, utile pour les relancer.",
             "inactivePlaceholder": "ex. 60"
           },
           "filters": {
@@ -402,8 +402,8 @@
             "stamp_count_max": "≤ {n} tampons",
             "has_redeemed": "A utilisé",
             "inactive_days": "Inactifs {n}j+",
-            "enrolled_at_location_ids": "Inscrits à {n} {n, plural, one {emplacement} other {emplacements}}",
-            "active_at_location_ids": "Actifs à {n} {n, plural, one {emplacement} other {emplacements}} ({days}j)"
+            "enrolled_at_location_ids": "Inscrits à {n} {n, plural, one {établissement} other {établissements}}",
+            "active_at_location_ids": "Actifs à {n} {n, plural, one {établissement} other {établissements}} ({days}j)"
           },
           "proUpsell": {
             "title": "Débloquez la segmentation d'audience",
@@ -448,7 +448,7 @@
           "contentLabel": "Message",
           "nameLabel": "Nommer cette diffusion",
           "namePlaceholder": "ex. Teasing Black Friday",
-          "nameHelp": "Pour vos archives uniquement — les clients ne verront pas ce nom. Sert à retrouver la diffusion dans votre historique."
+          "nameHelp": "Pour vos archives uniquement. Les clients ne verront pas ce nom. Sert à retrouver la diffusion dans votre historique."
         },
         "next": "Suivant",
         "back": "Retour",
@@ -461,7 +461,7 @@
       },
       "proUpsell": {
         "title": "Planifiez et diffusez sans limite",
-        "description": "Préparez vos campagnes à l'avance et touchez vos clients aussi souvent que nécessaire.",
+        "description": "Préparez vos diffusions à l'avance et touchez vos clients aussi souvent que nécessaire.",
         "features": {
           "schedule": "Programmez vos diffusions des jours ou semaines à l'avance",
           "unlimited": "Diffusions mensuelles illimitées"
@@ -474,7 +474,7 @@
         "features": {
           "segment": "Ciblez par tampons, activité ou date d'inscription",
           "schedule": "Programmez vos diffusions à l'avance (Pro)",
-          "tracking": "Suivi de livraison en direct — voyez qui l'a reçue"
+          "tracking": "Suivi de livraison en direct : voyez qui l'a reçue"
         },
         "cta": "Passer à Growth"
       },
@@ -491,7 +491,7 @@
         "sentAgainFailed": "Échec du renvoi",
         "deleted": "Brouillon supprimé",
         "deleteFailed": "Échec de la suppression",
-        "scheduledCancelled": "Diffusion annulée — déplacée vers vos brouillons"
+        "scheduledCancelled": "Diffusion annulée, déplacée vers vos brouillons"
       },
       "errors": {
         "upgradeRequired": "Les diffusions nécessitent Growth ou Pro.",
@@ -500,9 +500,9 @@
       }
     },
     "downgradeBanner": {
-      "title": "Votre forfait Growth a expiré",
+      "title": "Votre plan Growth a expiré",
       "description": "{count, plural, =0 {Les messages personnalisés sont désactivés.} one {# message programmé a été annulé et les messages personnalisés sont désactivés.} other {# messages programmés ont été annulés et les messages personnalisés sont désactivés.}}",
-      "cta": "Réactivez votre forfait",
+      "cta": "Réactivez votre plan",
       "dismiss": "Ignorer"
     }
   }

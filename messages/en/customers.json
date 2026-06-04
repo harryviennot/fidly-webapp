@@ -42,7 +42,7 @@
       "vip": "Customers who have redeemed 3 or more rewards.",
       "closeToReward": "Within 2 stamps of completing their card.",
       "atRisk": "Have stamps but haven't visited in over 30 days.",
-      "ghost": "Got their card but never came back — no stamps yet."
+      "ghost": "Got their card but never came back. No stamps yet."
     },
     "actions": {
       "addStamp": "Add Stamp",
@@ -75,7 +75,7 @@
         "reasonPlaceholder": "e.g. Customer forgot to scan",
         "reasonHelp": "Customers don't see this. Visible to your team only.",
         "locationLabel": "Linked location",
-        "locationHelp": "Optional. Tag this stamp to one of your stores.",
+        "locationHelp": "Optional. Tag this stamp to one of your locations.",
         "noLocation": "No location",
         "primary": "primary",
         "submit": "Add stamp",

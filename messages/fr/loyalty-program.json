@@ -12,20 +12,20 @@
     "linkCopied": "Lien copié dans le presse-papiers",
     "qrCodeHint": "Les QR codes sont disponibles dans l'application scanner",
     "dataCollectionDescription": "Collectez ces informations lorsque les clients s'inscrivent à leur carte de fidélité.",
-    "anonymousModeNote": "Ne collecter aucune donnée active le mode anonyme — les clients peuvent s'inscrire sans fournir aucune information.",
+    "anonymousModeNote": "Ne collecter aucune donnée active le mode anonyme : les clients peuvent s'inscrire sans fournir aucune information.",
     "anonymousModeWarning": "Vos clients s'inscrivent sans rien remplir. En revanche, ils ne pourront pas récupérer leur carte en cas de perte ou de changement de téléphone, et vous ne pourrez pas les recontacter. Utile pour les commerces de passage ou les programmes éphémères.",
     "anonymousModeTitle": "Mode anonyme activé",
     "rewardFallback": "une récompense",
     "recommended": "Recommandé",
     "nav": {
       "details": "Détails",
-      "design": "Design de carte",
+      "design": "Modèle de carte",
       "overview": "Vue d'ensemble",
       "configuration": "Configuration",
       "templates": "Modèles",
       "notifications": "Notifications",
       "broadcasts": "Diffusions",
-      "locations": "Emplacements"
+      "locations": "Établissements"
     },
     "overview": {
       "title": "Programme de fidélité",
@@ -41,7 +41,7 @@
       "thisWeek": "cette semaine",
       "stampDistribution": "Répartition des tampons",
       "quickActions": "Actions rapides",
-      "editDesign": "Modifier le design",
+      "editDesign": "Modifier le modèle",
       "programSettings": "Paramètres du programme",
       "setupChecklist": "Préparez votre programme",
       "setupSubtitle": "{completed} sur {total} étapes terminées",
@@ -54,7 +54,7 @@
         "createDescription": "Personnalisez les couleurs, ajoutez votre logo et créez une carte à l'image de votre marque.",
         "createCta": "Créer une carte",
         "reviewDesign": "Vérifiez votre carte",
-        "reviewDescription": "Votre carte a été créée lors de l'inscription. Ouvrez l'éditeur pour ajuster les couleurs, le contenu et le branding.",
+        "reviewDescription": "Votre carte a été créée lors de l'inscription. Ouvrez l'éditeur pour ajuster les couleurs, le contenu et l'identité visuelle.",
         "reviewCta": "Ouvrir l'éditeur",
         "activateCard": "Passez en ligne",
         "activateDescription": "Activez votre carte pour que vos clients puissent commencer à collecter des tampons.",
@@ -63,7 +63,7 @@
         "customizeDescription": "Personnalisez les messages que vos clients reçoivent quand ils gagnent des tampons ou débloquent des récompenses.",
         "customizeCta": "Personnaliser",
         "backFields": "Informations de la carte",
-        "backFieldsDescription": "Ajoutez une adresse, un site web, un numéro de téléphone ou un email qui apparaîtra au dos de chaque carte — pour plus de cohérence et gagner du temps. Vous pouvez toujours le désactiver lors de la création d'une nouvelle carte.",
+        "backFieldsDescription": "Ajoutez une adresse, un site web, un numéro de téléphone ou un email qui apparaîtra au dos de chaque carte, pour plus de cohérence et gagner du temps. Vous pouvez toujours le désactiver lors de la création d'une nouvelle carte.",
         "backFieldsCta": "Ouvrir les paramètres",
         "backFieldsSkip": "Ignorer pour l'instant",
         "completed": "Terminé",
@@ -72,10 +72,10 @@
         "optional": "Optionnel",
         "stepN": "Étape {n}",
         "firstCustomer": "Obtenez votre premier client",
-        "firstCustomerDescription": "Partagez votre lien d'inscription ou QR code — un seul scan suffit pour démarrer.",
+        "firstCustomerDescription": "Partagez votre lien d'inscription ou QR code. Un seul scan suffit pour démarrer.",
         "firstCustomerCta": "Copier le lien",
         "firstBroadcast": "Envoyez votre première diffusion",
-        "firstBroadcastDescription": "Touchez vos clients là où ils regardent déjà — directement sur leur carte de fidélité.",
+        "firstBroadcastDescription": "Touchez vos clients là où ils regardent déjà, directement sur leur carte de fidélité.",
         "firstBroadcastCta": "Ouvrir les diffusions",
         "teamInvited": "Invitez votre équipe",
         "teamInvitedDescription": "Ajoutez les personnes qui valideront les passages clients à la caisse.",
@@ -96,11 +96,11 @@
       "scanToAdd": "Scannez pour ajouter la carte de fidélité",
       "downloadPng": "Télécharger PNG",
       "downloadPdf": "Télécharger PDF",
-      "locationsQrTitle": "QR codes par emplacement",
+      "locationsQrTitle": "QR codes par établissement",
       "globalQrLabel": "QR global",
-      "locationsCount": "{count} emplacements",
+      "locationsCount": "{count} établissements",
       "locationsQrInfoTitle": "Le QR ci-dessus est global",
-      "locationsQrInfoBody": "Il inscrit vos clients sans les rattacher à un emplacement : parfait pour vos publications en ligne et vos communications de marque. La plupart des commerçants affichent plutôt un code par emplacement à leur caisse, pour voir où leurs clients s'inscrivent.",
+      "locationsQrInfoBody": "Il inscrit vos clients sans les rattacher à un établissement : parfait pour vos publications en ligne et vos communications de marque. La plupart des commerçants affichent plutôt un code par établissement à leur caisse, pour voir où leurs clients s'inscrivent.",
       "locationsQrPrimary": "Principal",
       "downloadAllPdf": "Tout télécharger en PDF",
       "downloadAllPng": "Tout télécharger en PNG",
@@ -116,7 +116,7 @@
       "dataCollected": "Données collectées",
       "cardStatus": "Statut de la carte",
       "active": "Active",
-      "passType": "Type de passe",
+      "passType": "Type de carte",
       "appleAndGoogle": "Apple & Google Wallet",
       "emailOnly": "Email uniquement",
       "programHealth": "Santé du programme",
@@ -132,7 +132,7 @@
       "shareLinkDesc": "Envoyez à vos clients",
       "totalStampsGiven": "Total tampons donnés",
       "rewardsRedeemed": "Récompenses échangées",
-      "activeCards": "Cartes actives",
+      "activeCards": "Cartes installées",
       "allTime": "depuis le début",
       "installRate": "taux d'installation",
       "comingSoon": "Bientôt disponible",
@@ -140,8 +140,8 @@
       "notificationsDescription": "Messages automatiques envoyés à vos clients lors des événements de fidélité",
       "broadcasts": "Diffusions",
       "broadcastsDescription": "Envoyez un message promotionnel à tous vos clients en une fois",
-      "locations": "Emplacements",
-      "locationsDescription": "Emplacements de l'entreprise et géorepérage"
+      "locations": "Établissements",
+      "locationsDescription": "Établissements de l'entreprise et géorepérage"
     },
     "programInfo": "Infos du programme",
     "programName": "Nom du programme",
@@ -196,51 +196,51 @@
       "programUpdateFailed": "Échec de la mise à jour du programme"
     },
     "locations": {
-      "title": "Emplacements",
-      "subtitle": "Gérez vos points de vente physiques et l'origine de chaque tampon.",
-      "addLocation": "Ajouter un emplacement",
+      "title": "Établissements",
+      "subtitle": "Gérez vos établissements physiques et l'origine de chaque tampon.",
+      "addLocation": "Ajouter un établissement",
       "searchPlaceholder": "Rechercher par nom, identifiant ou adresse",
-      "noMatches": "Aucun emplacement ne correspond à votre recherche.",
+      "noMatches": "Aucun établissement ne correspond à votre recherche.",
       "error": {
-        "title": "Impossible de charger vos emplacements",
+        "title": "Impossible de charger vos établissements",
         "description": "Une erreur est survenue lors du chargement. Vérifiez votre connexion et réessayez.",
         "retry": "Réessayer"
       },
       "starter": {
-        "headline": "Gérez chaque boutique depuis un seul endroit",
-        "description": "Enregistrez tous vos points de vente et adaptez votre communication par magasin.",
+        "headline": "Gérez chaque établissement depuis un seul endroit",
+        "description": "Enregistrez tous vos établissements et adaptez votre communication par établissement.",
         "features": {
-          "multiple": "Boutiques illimitées avec leur propre QR",
-          "scanners": "Employés assignés à des magasins précis",
-          "segmentation": "Diffusions ciblées par magasin",
-          "analytics": "Statistiques et profils clients par emplacement"
+          "multiple": "Établissements illimités avec leur propre QR",
+          "scanners": "Employés assignés à des établissements précis",
+          "segmentation": "Diffusions ciblées par établissement",
+          "analytics": "Statistiques et profils clients par établissement"
         },
         "cta": "Passer à Pro"
       },
       "empty": {
-        "title": "Créez votre premier emplacement",
-        "description": "Rattachez chaque tampon et inscription à la boutique où ils ont eu lieu. Filtrez, analysez et assignez vos employés par emplacement.",
-        "cta": "Créer mon premier emplacement",
+        "title": "Créez votre premier établissement",
+        "description": "Rattachez chaque tampon et inscription à l'établissement où ils ont eu lieu. Filtrez, analysez et assignez vos employés par établissement.",
+        "cta": "Créer mon premier établissement",
         "upgradeCta": "Passer à Pro"
       },
       "card": {
         "primary": "Principal",
-        "noAddress": "Pas d'adresse — touchez pour ajouter",
+        "noAddress": "Pas d'adresse, touchez pour ajouter",
         "membersCount": "{count, plural, =0 {Aucun employé assigné} one {# employé} other {# employés}}",
         "edit": "Modifier",
         "viewQr": "Voir le QR",
         "delete": "Supprimer",
         "actions": "Plus d'actions",
-        "actionsHint": "Gérer cet emplacement",
+        "actionsHint": "Gérer cet établissement",
         "signups": "Inscriptions",
         "stamps30d": "Tampons 30j",
         "redemptions30d": "Récompenses 30j",
-        "addAnother": "Ajouter un autre emplacement"
+        "addAnother": "Ajouter un autre établissement"
       },
       "form": {
-        "name": "Nom de l'emplacement",
+        "name": "Nom de l'établissement",
         "slug": "Identifiant URL",
-        "slugTaken": "Cet identifiant est déjà utilisé par un autre emplacement.",
+        "slugTaken": "Cet identifiant est déjà utilisé par un autre établissement.",
         "slugLockedHelper": "Verrouillé. L'identifiant URL ne peut plus être modifié après création.",
         "address": "Adresse",
         "searchAddress": "Rechercher votre établissement",
@@ -256,49 +256,49 @@
         "country": "Pays",
         "cannotFindBusiness": "Vous ne trouvez pas votre établissement ? Saisir manuellement",
         "useAutocomplete": "Rechercher avec Google",
-        "setPrimary": "Définir comme emplacement principal",
-        "alreadyPrimary": "Il s'agit déjà de votre emplacement principal.",
-        "setPrimaryConfirm": "Cela rétrogradera l'emplacement principal actuel et fera de celui-ci votre emplacement par défaut. Continuer ?",
+        "setPrimary": "Définir comme établissement principal",
+        "alreadyPrimary": "Il s'agit déjà de votre établissement principal.",
+        "setPrimaryConfirm": "Cela rétrogradera l'établissement principal actuel et fera de celui-ci votre établissement par défaut. Continuer ?",
         "cancel": "Annuler",
-        "create": "Créer l'emplacement",
+        "create": "Créer l'établissement",
         "save": "Enregistrer",
         "saving": "Enregistrement…",
-        "genericError": "Impossible d'enregistrer l'emplacement."
+        "genericError": "Impossible d'enregistrer l'établissement."
       },
       "create": {
-        "title": "Ajouter un emplacement",
-        "description": "Les clients arrivant via l'URL de cet emplacement seront inscrits ici. Vous pourrez assigner des employés après création.",
-        "successToast": "Emplacement créé",
-        "backfillToast": "{name} créé — {transactions} tampons passés et {customers} clients rattachés ici."
+        "title": "Ajouter un établissement",
+        "description": "Les clients arrivant via l'URL de cet établissement seront inscrits ici. Vous pourrez assigner des employés après création.",
+        "successToast": "Établissement créé",
+        "backfillToast": "{name} créé. {transactions} tampons passés et {customers} clients rattachés ici."
       },
       "edit": {
-        "title": "Modifier l'emplacement",
-        "description": "Mettez à jour les informations de cet emplacement. Les changements s'appliquent immédiatement au QR imprimé et à l'URL d'inscription."
+        "title": "Modifier l'établissement",
+        "description": "Mettez à jour les informations de cet établissement. Les changements s'appliquent immédiatement au QR imprimé et à l'URL d'inscription."
       },
       "wizard": {
         "stepOf": "Étape {current} sur {total}",
         "back": "Retour",
         "next": "Continuer",
-        "create": "Créer l'emplacement",
+        "create": "Créer l'établissement",
         "save": "Enregistrer",
         "step1": {
-          "title": "Nommez cette boutique",
+          "title": "Nommez cet établissement",
           "subtitle": "Choisissez un nom que vous reconnaîtrez. L'identifiant URL en dessous fait partie de votre QR code, il ne pourra plus être modifié ensuite."
         },
         "step2": {
-          "title": "Où se trouve cette boutique ?",
-          "subtitle": "Renseigner l'adresse permet à vos employés de voir précisément depuis quelle boutique ils tamponnent. Cela évite les tampons enregistrés au mauvais endroit."
+          "title": "Où se trouve cet établissement ?",
+          "subtitle": "Renseigner l'adresse permet à vos employés de voir précisément depuis quel établissement ils tamponnent. Cela évite les tampons enregistrés au mauvais endroit."
         },
         "slugLockedWarning": {
           "title": "Cette URL est définitive",
           "message": "Votre QR code est construit à partir de cet identifiant. Une fois enregistré, il est verrouillé, sinon tous les QR codes déjà partagés cesseraient de fonctionner."
         },
-        "primaryLabel": "Définir comme emplacement principal",
-        "primaryHelp": "L'emplacement principal récupère les clients et l'activité qui ne sont pas rattachés à une boutique précise.",
-        "alreadyPrimary": "C'est déjà votre emplacement principal.",
+        "primaryLabel": "Définir comme établissement principal",
+        "primaryHelp": "L'établissement principal récupère les clients et l'activité qui ne sont pas rattachés à un établissement précis.",
+        "alreadyPrimary": "C'est déjà votre établissement principal.",
         "backfill": {
-          "label": "Rattacher mon activité passée à cet emplacement",
-          "help": "Tous les tampons, inscriptions et récompenses antérieurs seront associés à cet emplacement. Cette action est irréversible."
+          "label": "Rattacher mon activité passée à cet établissement",
+          "help": "Tous les tampons, inscriptions et récompenses antérieurs seront associés à cet établissement. Cette action est irréversible."
         }
       },
       "detail": {
@@ -314,8 +314,8 @@
         "urlCopyFailed": "Impossible de copier l'URL",
         "members": "Employés assignés",
         "noMembers": "Aucun employé assigné. Les propriétaires et admins peuvent toujours scanner ici.",
-        "membersUpsellTitle": "L'assignation d'employés par emplacement est Pro",
-        "membersUpsellDescription": "Sur Pro, chaque employé ne voit et ne tamponne que les emplacements qui lui sont assignés.",
+        "membersUpsellTitle": "L'assignation d'employés par établissement est Pro",
+        "membersUpsellDescription": "Sur Pro, chaque employé ne voit et ne tamponne que les établissements qui lui sont assignés.",
         "unassign": "Désassigner",
         "unassignedToast": "{name} désassigné",
         "unassignFailed": "Impossible de désassigner ce membre",
@@ -323,14 +323,14 @@
         "qrLoading": "Génération du QR…",
         "qrUnavailable": "Le générateur de QR n'est pas disponible.",
         "qrUpsellTitle": "La génération de QR est Pro",
-        "qrUpsellDescription": "Imprimez un QR par emplacement pour que vos clients soient inscrits au bon magasin dès le départ.",
+        "qrUpsellDescription": "Imprimez un QR par établissement pour que vos clients soient inscrits au bon établissement dès le départ.",
         "downloadPng": "Télécharger PNG",
         "downloadPdf": "Télécharger PDF",
         "downloadPdfError": "Impossible de générer le PDF",
         "stats": "Statistiques",
         "statsLoading": "Chargement…",
-        "statsUpsellTitle": "Les statistiques par emplacement sont Pro",
-        "statsUpsellDescription": "Voyez les performances de chaque boutique en isolation, pas uniquement la vue globale.",
+        "statsUpsellTitle": "Les statistiques par établissement sont Pro",
+        "statsUpsellDescription": "Voyez les performances de chaque établissement en isolation, pas uniquement la vue globale.",
         "stampsAdded": "Tampons ajoutés",
         "rewardsRedeemed": "Récompenses échangées",
         "stampsVoided": "Tampons annulés",
@@ -344,16 +344,16 @@
           "all": "Tout"
         },
         "dangerZone": "Zone sensible",
-        "delete": "Supprimer l'emplacement",
-        "deleteUpgrade": "Passez à Pro pour supprimer des emplacements.",
+        "delete": "Supprimer l'établissement",
+        "deleteUpgrade": "Passez à Pro pour supprimer des établissements.",
         "deleteTitle": "Supprimer {name} ?",
-        "deleteDescription": "Les assignations d'employés seront effacées et cet emplacement n'apparaîtra plus dans les filtres. Les transactions existantes conservent leur étiquette d'emplacement pour l'historique.",
+        "deleteDescription": "Les assignations d'employés seront effacées et cet établissement n'apparaîtra plus dans les filtres. Les transactions existantes conservent leur étiquette d'établissement pour l'historique.",
         "cancel": "Conserver",
         "confirmDelete": "Supprimer",
         "deletedToast": "{name} supprimé",
-        "deleteFailed": "Impossible de supprimer l'emplacement",
-        "cannotDeletePrimary": "Désignez un autre emplacement comme principal avant de supprimer celui-ci.",
-        "savedToast": "Emplacement mis à jour"
+        "deleteFailed": "Impossible de supprimer l'établissement",
+        "cannotDeletePrimary": "Désignez un autre établissement comme principal avant de supprimer celui-ci.",
+        "savedToast": "Établissement mis à jour"
       },
       "members": {
         "addMember": "Ajouter",

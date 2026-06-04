@@ -61,7 +61,7 @@
       "stampsToday": "Stamps Today",
       "rewardsToday": "Rewards Today",
       "totalThisWeek": "Total This Week",
-      "activeCustomersToday": "Active Customers"
+      "activeCustomersToday": "Active today"
     },
     "emptyState": {
       "title": "No activity yet",

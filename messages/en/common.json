@@ -1,6 +1,7 @@
 {
   "nav": {
     "dashboard": "Dashboard",
+    "achievements": "Achievements",
     "program": "Program",
     "loyaltyProgram": "Loyalty Program",
     "customers": "Customers",
@@ -17,11 +18,11 @@
     "loyaltyProgram": "Loyalty Program",
     "customers": "Customers",
     "activity": "Activity",
-    "design": "Card Design",
+    "design": "Card Style",
     "team": "Team",
     "settings": "Settings",
     "account": "Account",
-    "new": "New Design",
+    "new": "New Card Style",
     "edit": "Edit"
   },
   "userMenu": {
