@@ -85,6 +85,9 @@ export interface BusinessAchievementsResponse {
   /** Rolling 30-day windows (now - 30d). Reward sustained effort. */
   stamps_last_30d: number;
   new_customers_last_30d: number;
+  /** Customers with >=2 distinct stamp-days in the last 6 months ("currently loyal"
+   *  dashboard KPI), distinct from the lifetime `repeat_customers` trophy metric. */
+  loyal_customers_6m: number;
   /** Last 5 complete weeks, oldest -> newest. Excludes the current partial week. */
   weekly_stamp_series: WeeklyStampPoint[];
   /** Per-trophy unlock ledger: when each was earned + whether it's been celebrated. */

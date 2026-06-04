@@ -7,6 +7,11 @@
     "viewAll": "View all",
     "unlockedTitle": "Achievement unlocked!",
     "recentlyEarned": "Recently earned",
+    "celebration": {
+      "done": "Awesome!",
+      "see": "Celebrate",
+      "summaryTitle": "{count} achievements unlocked!"
+    },
     "pageTitle": "Achievements",
     "pageSubtitle": "Milestones you reach as your loyalty program grows.",
     "stateEarned": "Earned",

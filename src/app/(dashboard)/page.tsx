@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Users, QrCodeIcon, CreditCard, Stamp, Repeat } from "@phosphor-icons/react";
+import { Users, QrCodeIcon, Stamp, Gift, Heart } from "@phosphor-icons/react";
 import { useBusiness } from "@/contexts/business-context";
 import { useCustomers } from "@/hooks/use-customers";
 import { useActivityStats } from "@/hooks/use-activity-stats";
@@ -45,19 +45,18 @@ export default function DashboardPage() {
   const totalCustomers = customerData?.total ?? 0;
   const activeCards = stats?.active_cards ?? 0;
   const stampsThisWeek = stats?.stamps_this_week ?? 0;
-  const stampsToday = stats?.stamps_today ?? 0;
   const newThisWeek = stats?.new_customers_this_week ?? 0;
   const recentTransactions = txns?.transactions?.slice(0, 5) ?? [];
-  const installRate =
-    totalCustomers > 0 ? Math.round((activeCards / totalCustomers) * 100) : 0;
-  // Repeat rate is the loyalty north-star. Sourced from get_business_achievements;
-  // shown as a level (no WoW arrow — there is no prior-week baseline to compare).
-  const repeatRatePct = Math.round((achievements?.repeat_rate ?? 0) * 100);
 
-  // Week-over-week trends (see web/docs/dashboard-achievements.md).
-  // Total customers reconstructs its prior baseline from this week's new count.
+  // Lifetime totals + "currently loyal" (>=2 visits in the last 6 months), all
+  // from get_business_achievements. Loyalty here is recency-windowed on purpose,
+  // unlike the lifetime repeat-count behind the loyalty trophy.
+  const totalStamps = achievements?.total_stamps_given ?? 0;
+  const totalRewards = achievements?.total_rewards_redeemed ?? 0;
+  const loyalCustomers = achievements?.loyal_customers_6m ?? 0;
+
+  // Total customers reconstructs its prior-week baseline from this week's new count.
   const customersTrend = wowTrend(totalCustomers, totalCustomers - newThisWeek);
-  const stampsTrend = wowTrend(stampsThisWeek, stats?.stamps_prev_week ?? 0);
 
   const colors = activeDesign ? computeCardColors(activeDesign) : null;
   const stampIcon = (activeDesign?.stamp_icon as StampIconType) ?? undefined;
@@ -99,35 +98,32 @@ export default function DashboardPage() {
             />
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
-              title={t("dashboard.activeCards")}
-              value={activeCards}
-              icon={<CreditCard className="w-4 h-4" weight="bold" />}
+              title={t("dashboard.totalStamps")}
+              value={totalStamps}
+              icon={<Stamp className="w-4 h-4" weight="bold" />}
               tone="info"
               subtitle={
-                totalCustomers > 0
-                  ? t("dashboard.installedSubtitle", { rate: installRate })
+                stampsThisWeek > 0
+                  ? t("dashboard.plusThisWeek", { count: stampsThisWeek })
                   : undefined
               }
               delay={80}
             />
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
-              title={t("dashboard.stampsThisWeek")}
-              value={stampsThisWeek}
-              icon={<Stamp className="w-4 h-4" weight="bold" />}
+              title={t("dashboard.totalRewards")}
+              value={totalRewards}
+              icon={<Gift className="w-4 h-4" weight="bold" />}
               tone="accent"
-              subtitle={t("dashboard.todayCount", { count: stampsToday })}
-              change={stampsTrend.change}
-              positive={stampsTrend.positive}
               delay={160}
             />
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
-              title={t("dashboard.repeatRate")}
-              value={repeatRatePct}
-              suffix="%"
-              icon={<Repeat className="w-4 h-4" weight="bold" />}
+              title={t("dashboard.loyalCustomers")}
+              value={loyalCustomers}
+              icon={<Heart className="w-4 h-4" weight="bold" />}
               tone="info"
+              subtitle={t("dashboard.loyalSubtitle")}
               delay={240}
             />
           </div>

@@ -97,8 +97,8 @@ export const ACHIEVEMENT_ONE_TIMES: OneTimeDef[] = [
 
 /** Section order on the /achievements page. */
 export const CATEGORY_ORDER: AchievementCategory[] = [
-  "growth",
   "engagement",
+  "growth",
   "momentum",
   "loyalty",
   "firsts",

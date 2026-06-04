@@ -57,9 +57,15 @@ The 4 KPIs (balanced grid, no single hero). Definitions are owned by
 | KPI | Value | Trend | Source |
 |---|---|---|---|
 | Total customers | cumulative count | WoW (prior baseline reconstructed from `new_customers_this_week`) | `useCustomers` + `get_activity_stats` |
-| Installed cards | `active_cards` | install-rate subtitle (`active / total`), no arrow | `get_activity_stats` |
-| Stamps this week | `stamps_this_week` | WoW vs `stamps_prev_week`, today's count as subtitle | `get_activity_stats` |
-| Repeat rate | `repeat_rate` x 100 | **level only** (no prior-week baseline exists, do not fabricate one) | `get_business_achievements` |
+| Total stamps | `total_stamps_given` (lifetime) | `+{stamps_this_week} this week` subtitle, no arrow | `get_business_achievements` |
+| Total rewards | `total_rewards_redeemed` (lifetime) | level only | `get_business_achievements` |
+| Loyal customers | `loyal_customers_6m` | level only, `active last 6 months` subtitle | `get_business_achievements` (migration 97) |
+
+**Loyalty is defined two ways on purpose.** The dashboard KPI uses `loyal_customers_6m`
+(>=2 distinct stamp-days in the **last 6 months**) — "currently loyal", because someone who
+came twice years ago and never returned is not loyal today. The loyalty **trophy** uses the
+lifetime `repeat_customers` (>=2 distinct stamp-days **ever**), which must stay monotonic so a
+trophy never re-locks. Keep them separate.
 
 Below the grid: a 5-row **recent-activity peek** (`RecentScans`) that links to `/activity`.
 Right rail: the **achievements widget** (top), the active-card widget, quick actions.

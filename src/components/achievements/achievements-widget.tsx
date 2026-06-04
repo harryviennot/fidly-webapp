@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { InfoPopover } from "@/components/reusables/info-popover";
 import { ProgressBar } from "@/components/reusables/progress-bar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AchievementBadge } from "./achievement-badge";
 import { useBusiness } from "@/contexts/business-context";
 import { useUpdateBusiness } from "@/hooks/use-business-query";
@@ -62,6 +63,60 @@ function RungRow({ a, t }: { a: ResolvedAchievement; t: ReturnType<typeof useTra
         <ProgressBar value={a.progress} trackClassName="h-2" />
       </div>
     </div>
+  );
+}
+
+/** A freshly-earned trophy shown at 100% in the widget. The animation lives on
+ *  /achievements (so the dashboard isn't interrupted), so this links there to play
+ *  it. */
+function CompletedRow({ a, t }: { a: ResolvedAchievement; t: ReturnType<typeof useTranslations> }) {
+  return (
+    <Link href="/achievements" className="group flex items-center gap-3.5">
+      <AchievementBadge
+        category={a.category}
+        value={a.oneTime ? undefined : a.threshold}
+        state="earned"
+        isFinalTier={a.isFinalTier}
+        oneTime={a.oneTime}
+        size={40}
+        className="shrink-0"
+      />
+      <div className="min-w-0 flex-1">
+        <div className="mb-1.5 flex items-center justify-between gap-2">
+          <span className="truncate text-[13px] font-medium text-[var(--foreground)]">
+            {achievementTitle(t, a)}
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-[var(--accent)] group-hover:underline">
+            {t("celebration.see")}
+            <ArrowRight className="h-3.5 w-3.5" weight="bold" />
+          </span>
+        </div>
+        <ProgressBar value={1} trackClassName="h-2" />
+      </div>
+    </Link>
+  );
+}
+
+function WidgetSkeleton({ delay }: { delay: number }) {
+  return (
+    <Card flat className="animate-slide-up p-5" style={{ animationDelay: `${delay}ms` }}>
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="mt-3 h-6 w-24" />
+      <Skeleton className="mt-3 h-2 w-full rounded-full" />
+      <div className="my-5 h-px bg-[var(--border)]" />
+      <Skeleton className="h-4 w-28" />
+      <div className="mt-4 flex flex-col gap-4">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="flex items-center gap-3.5">
+            <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+            <div className="flex-1">
+              <Skeleton className="h-3 w-2/3" />
+              <Skeleton className="mt-2 h-2 w-full rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 
@@ -201,20 +256,25 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
   const firstBroadcast = Boolean(settings?.first_broadcast_sent);
   const goalOverride = settings?.weekly_goal ?? null;
 
-  // Read-only: recording + the unlock celebration are owned by the single
-  // AchievementCelebration overlay mounted in the dashboard layout.
-  const { data, computed } = useComputedAchievements(businessId, firstBroadcast);
+  // Read-only: recording is the headless AchievementRecorder's job (dashboard
+  // layout); the unlock animation lives only on /achievements.
+  const { data, computed, isLoading, isError } = useComputedAchievements(businessId, firstBroadcast);
 
-  const series = data?.weekly_stamp_series ?? [];
+  // Don't show a broken widget on a data error; show a skeleton while loading.
+  if (isError) return null;
+  if (isLoading || !data || !computed) return <WidgetSkeleton delay={delay} />;
+
+  const series = data.weekly_stamp_series ?? [];
   const target = resolveWeeklyGoal(goalOverride, series);
-  const goal = weeklyGoalStatus(data?.current_week_stamps ?? 0, target);
+  const goal = weeklyGoalStatus(data.current_week_stamps ?? 0, target);
 
-  // A quiet "New" flag while a freshly-earned trophy still awaits its celebration.
-  const hasFreshUnlock = Boolean(
-    computed?.all.some((a) => a.unlocked && a.acknowledgedAt === null)
-  );
-
-  const topInProgress = computed?.inProgress.slice(0, 3) ?? [];
+  // Freshly-earned but not-yet-celebrated trophies — shown as "completed" rows
+  // that link to /achievements (where the animation plays).
+  const completed = computed.all
+    .filter((a) => a.unlocked && a.acknowledgedAt === null)
+    .slice(0, 3);
+  const hasFreshUnlock = completed.length > 0;
+  const topInProgress = computed.inProgress.slice(0, Math.max(0, 3 - completed.length));
 
   return (
     <Card flat className="animate-slide-up p-5" style={{ animationDelay: `${delay}ms` }}>
@@ -231,7 +291,7 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
 
       <div className="my-5 h-px bg-[var(--border)]" />
 
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <Trophy className="h-4 w-4 text-[var(--accent)]" weight="fill" />
           <span className="text-sm font-semibold text-[var(--foreground)]">{t("title")}</span>
@@ -241,9 +301,9 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
             </Badge>
           )}
         </div>
-          <Link
+        <Link
           href="/achievements"
-          className="flex items-center justify-center gap-1 text-[12px] font-semibold text-[var(--accent)] hover:underline"
+          className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-[var(--accent)] hover:underline"
         >
           {t("viewAll")}
           <ArrowRight className="h-3.5 w-3.5" weight="bold" />
@@ -251,10 +311,13 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
       </div>
 
       <div className="flex flex-col gap-4">
+        {completed.map((a) => (
+          <CompletedRow key={a.key} a={a} t={t} />
+        ))}
         {topInProgress.map((a) => (
           <RungRow key={a.key} a={a} t={t} />
         ))}
-        {computed && topInProgress.length === 0 && (
+        {completed.length === 0 && topInProgress.length === 0 && (
           <p className="py-1 text-[12px] text-[var(--muted-foreground)]">{t("allEarned")}</p>
         )}
       </div>

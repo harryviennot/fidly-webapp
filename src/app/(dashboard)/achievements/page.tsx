@@ -6,6 +6,7 @@ import { CheckCircle } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/redesign";
 import {
   AchievementBadge,
+  AchievementCelebration,
   AchievementCoin,
   AchievementCtaLink,
   AchievementHero,
@@ -183,9 +184,17 @@ export default function AchievementsPage() {
 
   const displayList = computed ? achievementsForDisplay(computed.all) : [];
 
+  // CTAs are onboarding scaffolding: once the owner has earned more than a couple
+  // trophies they know the levers, so hide them to cut clutter.
+  const showCtas = (computed?.earnedCount ?? 0) <= 2;
+
   return (
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
       <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+
+      {/* The unlock animation plays here (and only here) so the dashboard is never
+          interrupted by a takeover. */}
+      <AchievementCelebration />
 
       {computed && <AchievementHero computed={computed} />}
       {computed && <RecentlyEarned all={computed.all} />}
@@ -200,12 +209,15 @@ export default function AchievementsPage() {
         const rows = buildRows(items);
 
         // Show the action button once per section: on the first uncompleted tile
-        // that actually has a lever (current ladder rung or a locked "first").
-        const ctaKey = items.find(
-          (a) =>
-            (a.display === "current" || (a.oneTime && a.display !== "earned")) &&
-            ACHIEVEMENT_CTA[a.metric]
-        )?.key;
+        // that actually has a lever (current ladder rung or a locked "first") —
+        // and only while the owner is still new (see showCtas).
+        const ctaKey = showCtas
+          ? items.find(
+              (a) =>
+                (a.display === "current" || (a.oneTime && a.display !== "earned")) &&
+                ACHIEVEMENT_CTA[a.metric]
+            )?.key
+          : undefined;
 
         return (
           <section key={cat} className="flex flex-col gap-3">

@@ -67,7 +67,7 @@ export function AchievementHero({ computed }: { computed: ComputedAchievements }
       </div>
 
       {next && (
-        <div className="sm:ml-auto sm:border-l sm:border-[var(--border)] sm:pl-6">
+        <div className="border-t border-[var(--border)] pt-5 sm:ml-auto sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
             {t("hero.nextUp")}
           </p>
@@ -80,7 +80,9 @@ export function AchievementHero({ computed }: { computed: ComputedAchievements }
               {achievementValueLabel(next, fmt)}
             </span>
           </div>
-          <AchievementCtaLink metric={next.metric} className="mt-2.5" />
+          {/* CTA is onboarding scaffolding — drop it once the owner knows the
+              levers (more than a couple trophies earned). */}
+          {earned <= 2 && <AchievementCtaLink metric={next.metric} className="mt-2.5" />}
         </div>
       )}
     </Card>

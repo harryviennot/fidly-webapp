@@ -43,8 +43,9 @@ interface CategoryStyle {
 }
 
 const STYLES: Record<AchievementCategory, CategoryStyle> = {
-  growth: { base: "#16A2B8", from: "#16A2B8", to: "#0C7A8C", back: "#0A5A68", maxText: 84 },
-  engagement: { path: HEXAGON, base: "#F97316", from: "#F9852A", to: "#D9650F", back: "#A44C09", maxText: 82 },
+  // Customers = orange hexagon, stamps = blue/teal circle (swapped intentionally).
+  growth: { path: HEXAGON, base: "#F97316", from: "#F9852A", to: "#D9650F", back: "#A44C09", maxText: 82 },
+  engagement: { base: "#16A2B8", from: "#16A2B8", to: "#0C7A8C", back: "#0A5A68", maxText: 84 },
   momentum: { path: SHIELD, base: "#6C54D6", from: "#7C63E4", to: "#5B43C9", back: "#4631A0", maxText: 66 },
   loyalty: { path: OCTAGON, base: "#E0568A", from: "#E0568A", to: "#BB3A6B", back: "#8C2A50", maxText: 80 },
   firsts: { path: STAR, base: "#F2A93B", from: "#F7C75A", to: "#E0991F", back: "#9C5C08", maxText: 60 },

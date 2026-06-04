@@ -10,6 +10,7 @@ export {
 export { AchievementCoin } from "./achievement-coin";
 export { AchievementsWidget } from "./achievements-widget";
 export { AchievementCelebration } from "./achievement-celebration";
+export { AchievementRecorder } from "./achievement-recorder";
 export { AchievementHero } from "./achievement-hero";
 export { RecentlyEarned } from "./recently-earned";
 export { AchievementCtaLink } from "./achievement-cta";

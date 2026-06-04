@@ -7,6 +7,11 @@
     "viewAll": "Tout voir",
     "unlockedTitle": "Trophée débloqué !",
     "recentlyEarned": "Décrochés récemment",
+    "celebration": {
+      "done": "Super !",
+      "see": "Découvrir",
+      "summaryTitle": "{count} trophées débloqués !"
+    },
     "pageTitle": "Trophées",
     "pageSubtitle": "Les étapes que vous franchissez à mesure que votre programme grandit.",
     "stateEarned": "Décroché",
