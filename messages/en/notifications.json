@@ -24,13 +24,13 @@
       },
       "cacheWarning": {
         "title": "Heads up about updates",
-        "body": "New customers will see your updated icon right away. Existing customers may take several days — Apple Wallet caches pass assets aggressively and we can't force a refresh."
+        "body": "New customers will see your updated icon right away. Existing customers may take several days. Apple Wallet caches card assets aggressively and we can't force a refresh."
       }
     },
     "howItWorks": {
       "title": "How it works",
       "step1": "A staff member scans the customer's loyalty card.",
-      "step2": "Their wallet pass silently refreshes in the background.",
+      "step2": "Their card silently refreshes in the background.",
       "step3": "The customer sees the notification on their lock screen.",
       "note": "Your customers receive the notification directly on their phone and on the back of their loyalty card."
     },
@@ -113,7 +113,7 @@
       },
       "proUpsell": {
         "title": "Unlimited milestones",
-        "description": "Upgrade to Pro to create as many milestone notifications as you need — no cap.",
+        "description": "Upgrade to Pro to create as many milestone notifications as you need, no cap.",
         "features": {
           "unlimited": "Unlimited milestones",
           "broadcasts": "Unlimited broadcasts + scheduling"
@@ -139,10 +139,10 @@
       "resetLocale": "Reset this language",
       "enabled": "Enabled",
       "disabled": "Disabled",
-      "disabledHint": "When disabled, the loyalty card still updates silently — customers just don't see a notification for this event.",
+      "disabledHint": "When disabled, the loyalty card still updates silently. Customers just don't see a notification for this event.",
       "rewardNameMissing": "Define a reward in your program settings to use this variable.",
       "nameCollectionOff": "Enable name collection in program settings to use this variable.",
-      "storeLocationPro": "The store location variable is a Pro feature. Upgrade to use it in your messages.",
+      "storeLocationPro": "The location variable is a Pro feature. Upgrade to use it in your messages.",
       "nameWarning": "Some customers don't have a name on file. They'll see the message without the name.",
       "previewWithoutName": "Preview for customers without a name",
       "emptyBody": "Message cannot be empty",
@@ -153,7 +153,7 @@
         "reward_name": "Reward name",
         "business_name": "Business name",
         "customer_first_name": "Customer first name",
-        "store_location": "Store location"
+        "store_location": "Location"
       }
     },
     "growthUpsell": {
@@ -233,7 +233,7 @@
         },
         "googleNote": {
           "title": "Note about Google Wallet",
-          "body": "Google limits passes to 3 notifications per day. Customers who already received 3 notifications today (e.g. stamps) won't receive this broadcast."
+          "body": "Google limits cards to 3 notifications per day. Customers who already received 3 notifications today (e.g. stamps) won't receive this broadcast."
         }
       },
       "lastResults": {
@@ -300,18 +300,18 @@
         "confirmCancelBody": "The broadcast won't be sent and will be moved back to your drafts. You can reschedule it later.",
         "reachable": "Reachable",
         "totalSendsShort": "total",
-        "reachableHint": "Customers who have an active Apple or Google Wallet pass at send time. Those who never installed the pass are shown separately.",
+        "reachableHint": "Customers who have an active card in Apple or Google Wallet at send time. Those who never installed the card are shown separately.",
         "deliveryRate": "{rate}% delivered",
-        "deliveredHint": "Delivered means the pass update was accepted by Apple or Google Wallet. Customers may have silenced push banners on their device, which we can't detect — the pass itself still updates.",
+        "deliveredHint": "Delivered means the card update was accepted by Apple or Google Wallet. Customers may have silenced push banners on their device, which we can't detect. The card itself still updates.",
         "apple": "Apple Wallet",
         "google": "Google Wallet",
         "failed": "Failed",
-        "failedHint": "Customers where neither Apple nor Google Wallet accepted the push. Usually transient network errors — these customers will be targeted again on your next broadcast.",
+        "failedHint": "Customers where neither Apple nor Google Wallet accepted the push. Usually transient network errors, these customers will be targeted again on your next broadcast.",
         "notReachable": "Not reachable",
-        "notReachableBody": "{count} {count, plural, one {customer has} other {customers have}} no wallet pass installed",
-        "passRemoved": "Pass removed",
-        "passRemovedHint": "Google Wallet users who removed the pass before we could push. They won't receive this broadcast.",
-        "throttledHint": "Google limits each wallet pass to 3 push messages per 24h. Throttled customers will receive your next broadcast."
+        "notReachableBody": "{count} {count, plural, one {customer has} other {customers have}} no card installed",
+        "passRemoved": "Card removed",
+        "passRemovedHint": "Google Wallet users who removed the card before we could push. They won't receive this broadcast.",
+        "throttledHint": "Google limits each card to 3 push messages per 24h. Throttled customers will receive your next broadcast."
       },
       "wizard": {
         "steps": {
@@ -327,7 +327,7 @@
         },
         "compose": {
           "title": "Write your broadcast",
-          "subtitle": "Write the short message your customers will see on their wallet. Add a translation if you like — customers see the language that matches their phone.",
+          "subtitle": "Write the short message your customers will see on their card. Add a translation if you like, customers see the language that matches their phone.",
           "bodyLabel": "Message",
           "bodyPlaceholder": "Get 20% off this weekend!",
           "charCount": "{count} / {max} characters",
@@ -354,14 +354,14 @@
             "enrollmentAge": "Enrollment age",
             "enrollmentAgeHelp": "Filter by how recently the customer joined your program.",
             "enrollmentLocation": "Enrollment location",
-            "enrollmentLocationHelp": "Only sends to customers who signed up through the selected stores. Toggle the switch to also include customers who joined without picking a location.",
+            "enrollmentLocationHelp": "Only sends to customers who signed up through the selected locations. Toggle the switch to also include customers who joined without picking a location.",
             "enrollmentLocationUpsellTitle": "Per-location targeting is Pro",
-            "enrollmentLocationUpsellDescription": "Pro lets you target customers who enrolled at a specific store.",
+            "enrollmentLocationUpsellDescription": "Pro lets you target customers who enrolled at a specific location.",
             "includeDirect": "Also include direct signups",
             "activeLocation": "Active at location",
-            "activeLocationHelp": "Only sends to customers who scanned at the selected stores in the last N days.",
+            "activeLocationHelp": "Only sends to customers who scanned at the selected locations in the last N days.",
             "activeLocationUpsellTitle": "Active-at-location targeting is Pro",
-            "activeLocationUpsellDescription": "Pro lets you win back customers who visited a specific store recently."
+            "activeLocationUpsellDescription": "Pro lets you win back customers who visited a specific location recently."
           },
           "enrollment": {
             "any": "Any",
@@ -383,7 +383,7 @@
             "hasRedeemedLabel": "Has redeemed a reward",
             "hasRedeemedHelp": "Only sends to customers who have already claimed at least one reward.",
             "inactiveLabel": "Inactive for",
-            "inactiveHelp": "Target customers who haven't come back in N days — useful for win-back messages.",
+            "inactiveHelp": "Target customers who haven't come back in N days, useful for win-back messages.",
             "inactivePlaceholder": "e.g. 60"
           },
           "filters": {
@@ -411,7 +411,7 @@
             "features": {
               "stamps": "Filter by stamp count thresholds",
               "activity": "Win back inactive customers and reward redeemers",
-              "location": "Target by enrollment or activity at specific stores"
+              "location": "Target by enrollment or activity at specific locations"
             }
           }
         },
@@ -448,7 +448,7 @@
           "contentLabel": "Message",
           "nameLabel": "Name this broadcast",
           "namePlaceholder": "e.g. Black Friday teaser",
-          "nameHelp": "For your records only — customers will not see this. Used to find this broadcast in your history."
+          "nameHelp": "For your records only, customers will not see this. Used to find this broadcast in your history."
         },
         "next": "Next",
         "back": "Back",
@@ -465,7 +465,7 @@
         "features": {
           "segment": "Target customers by stamps, activity, or enrolment date",
           "schedule": "Schedule broadcasts in advance (Pro)",
-          "tracking": "Live delivery tracking — see who got it"
+          "tracking": "Live delivery tracking, see who got it"
         },
         "cta": "Upgrade to Growth"
       },
@@ -489,7 +489,7 @@
         "cancelFailed": "Failed to cancel broadcast",
         "deleted": "Draft deleted",
         "deleteFailed": "Failed to delete draft",
-        "scheduledCancelled": "Broadcast cancelled — moved to your drafts",
+        "scheduledCancelled": "Broadcast cancelled, moved to your drafts",
         "sentAgain": "Broadcast re-sent",
         "sentAgainFailed": "Failed to re-send broadcast"
       },

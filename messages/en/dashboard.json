@@ -18,7 +18,6 @@
     "plusThisWeek": "+{count} this week",
     "vsLastMonth": "vs last month",
     "vsYesterday": "vs yesterday",
-    "installRate87": "install rate 87%",
     "thisWeek": "this week",
     "recentScansEmptyTitle": "No scans yet",
     "recentScansEmptyBody": "Stamps your team adds will show up here.",
@@ -69,7 +68,7 @@
     "loyaltyCard": "Loyalty Card",
     "activeCard": "Loyalty card",
     "edit": "Edit",
-    "noCardYet": "No card designed yet",
+    "noCardYet": "No card style yet",
     "cardsIssued": "Cards issued",
     "activePasses": "Installed cards",
     "installRate": "Install rate"

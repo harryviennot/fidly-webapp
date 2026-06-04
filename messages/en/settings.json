@@ -26,7 +26,7 @@
       "moveUp": "Move up",
       "moveDown": "Move down",
       "types": {
-        "hours": "Store Hours",
+        "hours": "Opening Hours",
         "website": "Website",
         "phone": "Phone",
         "email": "Email",
@@ -34,7 +34,7 @@
         "custom": "Custom Field"
       },
       "hours": {
-        "title": "Store Hours",
+        "title": "Opening Hours",
         "days": "Days",
         "daysPlaceholder": "e.g. Mon-Fri",
         "open": "Open",
@@ -75,7 +75,7 @@
       "title": "Your Business Language",
       "description": "This is your main business language, and will be used for your loyalty program",
       "passLocale": "Language",
-      "passLocaleHint": "You can always add translations for other languages in the design editor.",
+      "passLocaleHint": "You can always add translations for other languages in the card style editor.",
       "saved": "Your business language has been successfully updated."
     },
     "theme": {
@@ -92,7 +92,7 @@
     },
     "cardBackPreview": {
       "title": "Card Back Preview",
-      "subtitle": "How the back of your wallet card looks",
+      "subtitle": "How the back of your card looks",
       "loyaltyCard": "Loyalty Card",
       "notSet": "Not set",
       "closed": "Closed",

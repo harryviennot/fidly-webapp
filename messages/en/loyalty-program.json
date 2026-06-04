@@ -12,14 +12,14 @@
     "linkCopied": "Link copied to clipboard",
     "qrCodeHint": "QR code downloads are available in the scanner app",
     "dataCollectionDescription": "Collect this information when customers sign up for their loyalty card.",
-    "anonymousModeNote": "Collecting no data enables anonymous mode — customers can sign up without providing any information.",
+    "anonymousModeNote": "Collecting no data enables anonymous mode: customers can sign up without providing any information.",
     "anonymousModeWarning": "Anonymous mode is active. Customers won't need to fill any form, but you won't be able to identify them. They won't be able to recover a lost card or sync across devices, and you won't be able to contact them.",
     "anonymousModeTitle": "Anonymous Mode active",
     "rewardFallback": "a reward",
     "recommended": "Recommended",
     "nav": {
       "details": "Details",
-      "design": "Card Design",
+      "design": "Card Style",
       "overview": "Overview",
       "configuration": "Configuration",
       "templates": "Templates",
@@ -41,7 +41,7 @@
       "thisWeek": "this week",
       "stampDistribution": "Stamp distribution",
       "quickActions": "Quick Actions",
-      "editDesign": "Edit Design",
+      "editDesign": "Edit Card Style",
       "programSettings": "Program Settings",
       "setupChecklist": "Get your program ready",
       "setupSubtitle": "{completed} of {total} steps completed",
@@ -51,7 +51,7 @@
         "configureDescription": "Name your program, choose how many stamps, and set a reward your customers will love.",
         "configureCta": "Configure",
         "createDesign": "Design your card",
-        "createDescription": "Make it yours — pick colors, add your logo, and create a card that matches your brand.",
+        "createDescription": "Make it yours. Pick colors, add your logo, and create a card that matches your brand.",
         "createCta": "Create card",
         "reviewDesign": "Review your card",
         "reviewDescription": "Your card was created during setup. Open the editor to fine-tune colors, content, and branding.",
@@ -63,7 +63,7 @@
         "customizeDescription": "Personalize the messages customers see when they earn stamps or unlock rewards.",
         "customizeCta": "Customize",
         "backFields": "Add card information",
-        "backFieldsDescription": "Add an address, website, phone number or email that will appear on the back of every card you create — keeping things consistent and saving you time. You can always opt out when designing a new card.",
+        "backFieldsDescription": "Add an address, website, phone number or email that will appear on the back of every card you create, keeping things consistent and saving you time. You can always opt out when designing a new card.",
         "backFieldsCta": "Open settings",
         "backFieldsSkip": "Skip for now",
         "completed": "Completed",
@@ -72,10 +72,10 @@
         "optional": "Optional",
         "stepN": "Step {n}",
         "firstCustomer": "Get your first customer",
-        "firstCustomerDescription": "Share your signup link or QR code — it only takes one scan to get started.",
+        "firstCustomerDescription": "Share your signup link or QR code. It only takes one scan to get started.",
         "firstCustomerCta": "Copy link",
         "firstBroadcast": "Send your first broadcast",
-        "firstBroadcastDescription": "Reach your customers where they already look — straight to their wallet card.",
+        "firstBroadcastDescription": "Reach your customers where they already look, straight to their card.",
         "firstBroadcastCta": "Open broadcasts",
         "teamInvited": "Invite your team",
         "teamInvitedDescription": "Add the people who'll stamp customers at your point of sale.",
@@ -116,7 +116,7 @@
       "dataCollected": "Data Collected",
       "cardStatus": "Card Status",
       "active": "Active",
-      "passType": "Pass Type",
+      "passType": "Card Type",
       "appleAndGoogle": "Apple & Google Wallet",
       "emailOnly": "Email only",
       "programHealth": "Program Health",
@@ -183,9 +183,9 @@
       "name": "Name",
       "nameDescription": "Identify your customers, personalize their card and notifications",
       "email": "Email",
-      "emailDescription": "Enable pass recovery, email campaigns, and customer lookup",
+      "emailDescription": "Enable card recovery, email campaigns, and customer lookup",
       "phone": "Phone",
-      "phoneDescription": "Collect it if you'd like to reach customers yourself — Stampeo doesn't send SMS."
+      "phoneDescription": "Collect it if you'd like to reach customers yourself. Stampeo doesn't send SMS."
     },
     "requiredField": "Required",
     "optionalField": "Optional",
@@ -197,7 +197,7 @@
     },
     "locations": {
       "title": "Locations",
-      "subtitle": "Manage your physical stores and where each stamp is issued.",
+      "subtitle": "Manage your physical locations and where each stamp is issued.",
       "addLocation": "Add location",
       "searchPlaceholder": "Search by name, slug, or address",
       "noMatches": "No locations match your search.",
@@ -207,25 +207,25 @@
         "retry": "Try again"
       },
       "starter": {
-        "headline": "Manage every store from one place",
-        "description": "Register all your locations and tailor messaging by store.",
+        "headline": "Manage every location from one place",
+        "description": "Register all your locations and tailor messaging by location.",
         "features": {
-          "multiple": "Unlimited stores with their own QR codes",
+          "multiple": "Unlimited locations with their own QR codes",
           "scanners": "Assign scanners to specific locations",
-          "segmentation": "Broadcasts targeted by store",
+          "segmentation": "Broadcasts targeted by location",
           "analytics": "Per-location stats and customer breakdowns"
         },
         "cta": "Upgrade to Pro"
       },
       "empty": {
         "title": "Add your first location",
-        "description": "Tag every stamp and signup with the store where it happened. Filter, analyze, and assign scanners per location.",
+        "description": "Tag every stamp and signup with the location where it happened. Filter, analyze, and assign scanners per location.",
         "cta": "Create your first location",
         "upgradeCta": "Upgrade to Pro"
       },
       "card": {
         "primary": "Primary",
-        "noAddress": "No address — tap to add one",
+        "noAddress": "No address, tap to add one",
         "membersCount": "{count, plural, =0 {No scanners assigned} one {# scanner} other {# scanners}}",
         "edit": "Edit",
         "viewQr": "View QR",
@@ -269,7 +269,7 @@
         "title": "Add a location",
         "description": "Customers visiting this location's URL will be enrolled here. You can assign scanners after creating it.",
         "successToast": "Location created",
-        "backfillToast": "{name} created — {transactions} past stamps and {customers} customers linked here."
+        "backfillToast": "{name} created. {transactions} past stamps and {customers} customers linked here."
       },
       "edit": {
         "title": "Edit location",
@@ -282,19 +282,19 @@
         "create": "Create location",
         "save": "Save changes",
         "step1": {
-          "title": "Name this store",
+          "title": "Name this location",
           "subtitle": "Pick a name you'll recognize. The URL slug below is part of your QR code, so it can't be changed later."
         },
         "step2": {
-          "title": "Where is this store?",
-          "subtitle": "Adding an address lets your team see which store they're stamping from, so stamps don't land at the wrong location."
+          "title": "Where is this location?",
+          "subtitle": "Adding an address lets your team see which location they're stamping from, so stamps don't land at the wrong location."
         },
         "slugLockedWarning": {
           "title": "This URL is permanent",
           "message": "Your QR code is built from this slug. Once you save, it's locked, otherwise every QR already shared would stop working."
         },
         "primaryLabel": "Set as primary location",
-        "primaryHelp": "The primary location catches customers and activity that aren't linked to a specific store.",
+        "primaryHelp": "The primary location catches customers and activity that aren't linked to a specific location.",
         "alreadyPrimary": "This is already your primary location.",
         "backfill": {
           "label": "Link my past activity to this location",
@@ -323,14 +323,14 @@
         "qrLoading": "Generating QR…",
         "qrUnavailable": "QR code generator is not available.",
         "qrUpsellTitle": "QR generation is Pro",
-        "qrUpsellDescription": "Print a per-location QR so customers enrolled at the right store from the start.",
+        "qrUpsellDescription": "Print a per-location QR so customers enrolled at the right location from the start.",
         "downloadPng": "Download PNG",
         "downloadPdf": "Download PDF",
         "downloadPdfError": "Could not generate the PDF",
         "stats": "Stats",
         "statsLoading": "Loading…",
         "statsUpsellTitle": "Per-location stats are Pro",
-        "statsUpsellDescription": "See how each store is performing in isolation, not just the global view.",
+        "statsUpsellDescription": "See how each location is performing in isolation, not just the global view.",
         "stampsAdded": "Stamps added",
         "rewardsRedeemed": "Rewards redeemed",
         "stampsVoided": "Stamps voided",

@@ -7,7 +7,7 @@
         "target": "1. Target",
         "reason": "2. Reason",
         "targetSubtitle": "Pick who you'll view this business as.",
-        "reasonSubtitle": "Explain why — this will be logged with the session.",
+        "reasonSubtitle": "Explain why. This will be logged with the session.",
         "summaryLabel": "Will impersonate"
       },
       "next": "Next",
@@ -30,7 +30,7 @@
       },
       "reason": {
         "label": "Reason for access",
-        "placeholder": "Ticket #1234 — customer reports stamps not applying after scan",
+        "placeholder": "Ticket #1234, customer reports stamps not applying after scan",
         "counter": "{count}/{max} characters (min {min})"
       },
       "confirmation": "I confirm this access is for legitimate support purposes. The session will be logged.",
@@ -41,7 +41,7 @@
       "genericError": "Could not start the impersonation session"
     },
     "banner": {
-      "text": "Viewing as {name} ({role}) at {business} — read-only",
+      "text": "Viewing as {name} ({role}) at {business} (read-only)",
       "byRoleAnnotation": "selected by role",
       "endSession": "End session"
     }

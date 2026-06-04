@@ -1,18 +1,18 @@
 {
   "businessesPage": {
-    "title": "Mes établissements",
-    "subtitle": "L'ensemble des établissements auxquels vous appartenez.",
-    "subtitleAdmin": "Tous les établissements de la plateforme.",
+    "title": "Mes entreprises",
+    "subtitle": "L'ensemble des entreprises auxquelles vous appartenez.",
+    "subtitleAdmin": "Toutes les entreprises de la plateforme.",
     "searchPlaceholder": "Rechercher par nom ou identifiant…",
     "ownedBy": "Propriétaire : {name}",
     "count": "{count} sur {total}",
     "openDashboard": "Ouvrir",
     "viewAs": "Voir en tant que…",
     "viewAsComingSoon": "Bientôt disponible",
-    "loadError": "Impossible de charger les établissements. Veuillez actualiser.",
+    "loadError": "Impossible de charger les entreprises. Veuillez actualiser.",
     "scope": {
-      "mine": "Mes établissements",
-      "all": "Tous les établissements"
+      "mine": "Mes entreprises",
+      "all": "Toutes les entreprises"
     },
     "view": {
       "cards": "Cartes",
@@ -30,14 +30,14 @@
       "suspended": "Suspendu"
     },
     "empty": {
-      "title": "Aucun établissement trouvé",
+      "title": "Aucune entreprise trouvée",
       "description": "Essayez de modifier votre recherche ou vos filtres."
     },
     "table": {
-      "business": "Établissement",
+      "business": "Entreprise",
       "owner": "Propriétaire",
       "status": "Statut",
-      "plan": "Formule",
+      "plan": "Plan",
       "role": "Votre rôle",
       "actions": "Actions"
     },
