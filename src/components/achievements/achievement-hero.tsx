@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { CompletionRing } from "@/components/reusables/completion-ring";
+import { ProgressBar } from "@/components/reusables/progress-bar";
 import { AchievementCtaLink } from "./achievement-cta";
 import {
   achievementTitle,
@@ -74,12 +75,7 @@ export function AchievementHero({ computed }: { computed: ComputedAchievements }
             {achievementTitle(t, next)}
           </p>
           <div className="mt-1.5 flex items-center gap-2">
-            <div className="h-1.5 w-28 overflow-hidden rounded-full bg-[var(--muted)]">
-              <div
-                className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-500 ease-out"
-                style={{ width: `${Math.round(next.progress * 100)}%` }}
-              />
-            </div>
+            <ProgressBar value={next.progress} trackClassName="w-28" />
             <span className="text-[11px] tabular-nums text-[var(--muted-foreground)]">
               {achievementValueLabel(next, fmt)}
             </span>

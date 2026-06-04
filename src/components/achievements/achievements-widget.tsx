@@ -18,6 +18,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { InfoPopover } from "@/components/reusables/info-popover";
+import { ProgressBar } from "@/components/reusables/progress-bar";
 import { AchievementBadge } from "./achievement-badge";
 import { useBusiness } from "@/contexts/business-context";
 import { useUpdateBusiness } from "@/hooks/use-business-query";
@@ -36,21 +37,9 @@ import {
 
 const fmt = (n: number) => n.toLocaleString();
 
-/** Thin progress bar, modeled on the wizard's CSS-width bar. */
-function ProgressBar({ value, tone = "accent" }: { value: number; tone?: "accent" | "muted" }) {
-  return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
-      <div
-        className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-500 ease-out"
-        style={{ width: `${Math.round(value * 100)}%`, opacity: tone === "muted" ? 0.5 : 1 }}
-      />
-    </div>
-  );
-}
-
 function RungRow({ a, t }: { a: ResolvedAchievement; t: ReturnType<typeof useTranslations> }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3.5">
       {/* Colored (not matte) so the in-progress goals feel inviting; the bar
           below carries the "not yet earned" signal. No gold final-tier rim —
           these aren't completed. */}
@@ -62,7 +51,7 @@ function RungRow({ a, t }: { a: ResolvedAchievement; t: ReturnType<typeof useTra
         className="shrink-0"
       />
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex items-center justify-between gap-2">
+        <div className="mb-1.5 flex items-center justify-between gap-2">
           <span className="truncate text-[13px] font-medium text-[var(--foreground)]">
             {achievementTitle(t, a)}
           </span>
@@ -70,7 +59,7 @@ function RungRow({ a, t }: { a: ResolvedAchievement; t: ReturnType<typeof useTra
             {achievementValueLabel(a, fmt)}
           </span>
         </div>
-        <ProgressBar value={a.progress} />
+        <ProgressBar value={a.progress} trackClassName="h-2" />
       </div>
     </div>
   );
@@ -131,7 +120,7 @@ function WeeklyGoalBlock({
           </button>
         )}
       </div>
-      <div className="mb-1.5 flex items-baseline gap-1.5">
+      <div className="mb-2 flex items-baseline gap-1.5">
         <span className="text-[22px] font-bold tabular-nums leading-none text-[var(--foreground)]">
           {goal.current}
           <span className="text-[15px] font-semibold text-[var(--muted-foreground)]"> / {goal.target}</span>
@@ -140,12 +129,12 @@ function WeeklyGoalBlock({
           {t("weeklyGoal.unit")}
         </span>
       </div>
-      <ProgressBar value={goal.progress} />
-      <p className="mt-2 text-[12px] text-[var(--muted-foreground)]">
-        {goal.reached
-          && t("weeklyGoal.reached", { current: goal.current, target: goal.target })
-        }
-      </p>
+      <ProgressBar value={goal.progress} trackClassName="h-2" />
+      {goal.reached && (
+        <p className="mt-2.5 text-[12px] text-[var(--muted-foreground)]">
+          {t("weeklyGoal.reached", { current: goal.current, target: goal.target })}
+        </p>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
@@ -228,7 +217,7 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
   const topInProgress = computed?.inProgress.slice(0, 3) ?? [];
 
   return (
-    <Card flat className="animate-slide-up p-4" style={{ animationDelay: `${delay}ms` }}>
+    <Card flat className="animate-slide-up p-5" style={{ animationDelay: `${delay}ms` }}>
       <WeeklyGoalBlock
         goal={goal}
         isAuto={goalOverride === null}
@@ -240,7 +229,7 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
         t={t}
       />
 
-      <div className="my-4 h-px bg-[var(--border)]" />
+      <div className="my-5 h-px bg-[var(--border)]" />
 
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
@@ -261,7 +250,7 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
         </Link>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         {topInProgress.map((a) => (
           <RungRow key={a.key} a={a} t={t} />
         ))}

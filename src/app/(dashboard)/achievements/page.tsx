@@ -14,6 +14,7 @@ import {
 } from "@/components/achievements";
 import { Card } from "@/components/ui/card";
 import { InfoPopover } from "@/components/reusables/info-popover";
+import { ProgressBar } from "@/components/reusables/progress-bar";
 import { useBusiness } from "@/contexts/business-context";
 import { useComputedAchievements } from "@/hooks/use-business-achievements";
 import {
@@ -160,12 +161,7 @@ function AchievementTile({
         </div>
       ) : isCurrent ? (
         <div className="mt-3 w-full max-w-[220px]">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
-            <div
-              className="h-full rounded-full transition-[width] duration-500 ease-out"
-              style={{ width: `${Math.round(a.progress * 100)}%`, backgroundColor: color }}
-            />
-          </div>
+          <ProgressBar value={a.progress} color={color} />
           <p className="mt-1.5 text-[11px] tabular-nums text-[var(--muted-foreground)]">
             {achievementValueLabel(a, fmt)}
           </p>
