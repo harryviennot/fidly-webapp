@@ -232,6 +232,24 @@ export default function CustomersPage() {
     onSelect: setSelectedSegment,
   });
 
+  // Sort control shared by the toolbar (works on mobile + desktop) and the
+  // desktop table headers — both read/write the same sortKey/sortDir state, so
+  // they stay in sync. Option values ARE the SortKey union (no mapping needed).
+  const sortConfig = {
+    options: [
+      { value: "name", label: t("sort.name") },
+      { value: "stamps", label: t("sort.stamps") },
+      { value: "total_redemptions", label: t("sort.rewards") },
+      { value: "updated_at", label: t("sort.lastActivity") },
+    ],
+    value: sortKey,
+    direction: sortDir,
+    onChange: (value: string, direction: SortDir) => {
+      setSortKey(value as SortKey);
+      setSortDir(direction);
+    },
+  };
+
   if (customersLoading) {
     return (
       <div className="flex flex-col gap-[14px]">
@@ -267,6 +285,7 @@ export default function CustomersPage() {
           placeholder: t("searchPlaceholder"),
         }}
         filters={[segmentFilterGroup]}
+        sort={sortConfig}
       />
 
       <CustomerDataTable

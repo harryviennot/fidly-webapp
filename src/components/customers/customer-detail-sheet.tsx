@@ -11,6 +11,7 @@ import {
   Envelope,
   MapPin,
   PaperPlaneTilt,
+  Wallet,
 } from "@phosphor-icons/react";
 import {
   ResponsiveSidePanel,
@@ -20,7 +21,7 @@ import {
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
 import { useEntitlements } from "@/hooks/useEntitlements";
-import { getCustomer, getCustomerTransactions } from "@/api";
+import { getCustomer, getCustomerTransactions, getCustomerWalletStatus } from "@/api";
 import {
   classifyCustomer,
   getSegmentConfig,
@@ -74,6 +75,7 @@ export function CustomerDetailSheet({
   const { hasFeature } = useEntitlements();
   const t = useTranslations("customers.detail");
   const tSendPass = useTranslations("customers.sendPass");
+  const tTime = useTranslations("customers.time");
   const locale = useLocale();
   const queryClient = useQueryClient();
 
@@ -103,6 +105,18 @@ export function CustomerDetailSheet({
     initialData: customer ?? undefined,
   });
   const liveCustomer = customerQuery.data ?? cachedCustomer;
+
+  // Which wallet(s) hold this customer's card. Gated on the live `customer`
+  // prop (not the exit-animation cache) so it doesn't fire while closed.
+  const walletQuery = useQuery({
+    queryKey: customerKeys.walletStatus(
+      currentBusiness?.id ?? "",
+      customer?.id ?? ""
+    ),
+    queryFn: () => getCustomerWalletStatus(currentBusiness!.id, customer!.id),
+    enabled: open && !!customer && !!currentBusiness?.id,
+    staleTime: 60_000,
+  });
 
   const [extraTransactions, setExtraTransactions] = useState<
     TransactionResponse[]
@@ -162,12 +176,37 @@ export function CustomerDetailSheet({
     });
   };
 
+  // Human "how long ago" headline, same scale as the customer table.
+  const formatRelative = (dateStr?: string) => {
+    if (!dateStr) return "\u2014";
+    const diffDays = Math.floor(
+      (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (diffDays <= 0) return tTime("today");
+    if (diffDays === 1) return tTime("yesterday");
+    if (diffDays < 7) return tTime("daysAgo", { count: diffDays });
+    if (diffDays < 30)
+      return tTime("weeksAgo", { count: Math.floor(diffDays / 7) });
+    return tTime("monthsAgo", { count: Math.floor(diffDays / 30) });
+  };
+
   const totalVisits = transactions.filter(
     (txn) => txn.stamp_delta > 0
   ).length;
 
   const firstVisit = liveCustomer.created_at;
   const lastVisit = liveCustomer.last_activity_at ?? liveCustomer.updated_at;
+
+  const wallet = walletQuery.data;
+  const walletValue = walletQuery.isLoading
+    ? t("wallet.loading")
+    : wallet?.apple && wallet?.google
+      ? t("wallet.both")
+      : wallet?.apple
+        ? t("wallet.appleWallet")
+        : wallet?.google
+          ? t("wallet.googleWallet")
+          : t("wallet.notInstalled");
   const colors = design ? computeCardColors(design) : null;
   const stampIcon = (design?.stamp_icon as StampIconType) ?? undefined;
   const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
@@ -188,7 +227,18 @@ export function CustomerDetailSheet({
 
       <ResponsiveSidePanelBody className="pb-[max(4rem,env(safe-area-inset-bottom)+2rem)] md:pb-10">
         {/* ── Centered identity hero ── */}
-        <div className="px-5 pt-6 pb-5">
+        <div className="relative px-5 pt-6 pb-5">
+          {/* Action about this person — anchored top-right, clear of the panel's
+              close button (which lives in the header above). */}
+          <button
+            type="button"
+            onClick={() => setSendPassOpen(true)}
+            aria-label={tSendPass("trigger")}
+            className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-2.5 py-1 text-[12px] font-medium text-[var(--accent)] hover:bg-[var(--accent-light)]/40 transition-colors cursor-pointer"
+          >
+            <PaperPlaneTilt className="w-3.5 h-3.5 shrink-0" weight="bold" />
+            <span className="hidden min-[380px]:inline">{tSendPass("short")}</span>
+          </button>
           <div className="flex flex-col items-center text-center">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center text-white text-[22px] font-bold mb-2.5"
@@ -213,14 +263,6 @@ export function CustomerDetailSheet({
             >
               {t(`segments.${segment}`)}
             </span>
-            <button
-              type="button"
-              onClick={() => setSendPassOpen(true)}
-              className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--accent)] hover:underline cursor-pointer"
-            >
-              <PaperPlaneTilt className="w-3.5 h-3.5" weight="bold" />
-              {tSendPass("trigger")}
-            </button>
           </div>
         </div>
 
@@ -262,19 +304,23 @@ export function CustomerDetailSheet({
             {t("customerStats")}
           </p>
           <div className="grid grid-cols-2 gap-2.5">
-            <StatTile
-              icon={<CalendarBlank className="w-4 h-4" weight="bold" />}
-              label={t("firstVisit")}
-              value={formatDate(firstVisit)}
-              iconBg="var(--info-light)"
-              iconColor="var(--info)"
-            />
+            {/* Date tiles carry both the headline AND its companion (relative +
+                absolute), so nothing is shown twice across two cards. */}
             <StatTile
               icon={<Clock className="w-4 h-4" weight="bold" />}
               label={t("lastVisit")}
-              value={formatDate(lastVisit)}
+              value={formatRelative(lastVisit)}
+              hint={formatDate(lastVisit)}
               iconBg="var(--muted)"
               iconColor="var(--muted-foreground)"
+            />
+            <StatTile
+              icon={<CalendarBlank className="w-4 h-4" weight="bold" />}
+              label={t("customerSince")}
+              value={formatDate(firstVisit)}
+              hint={formatRelative(firstVisit)}
+              iconBg="var(--info-light)"
+              iconColor="var(--info)"
             />
             <StatTile
               icon={<Footprints className="w-4 h-4" weight="bold" />}
@@ -291,6 +337,14 @@ export function CustomerDetailSheet({
               iconBg="var(--warning-light)"
               iconColor="var(--warning)"
               valueColor="#C4883D"
+            />
+            <StatTile
+              className="col-span-2"
+              icon={<Wallet className="w-4 h-4" weight="bold" />}
+              label={t("wallet.label")}
+              value={walletValue}
+              iconBg="var(--muted)"
+              iconColor="var(--muted-foreground)"
             />
             {hasFeature("locations.multiple") && (
               <StatTile
@@ -347,6 +401,7 @@ function StatTile({
   icon,
   label,
   value,
+  hint,
   iconBg,
   iconColor,
   valueColor,
@@ -355,6 +410,9 @@ function StatTile({
   icon: React.ReactNode;
   label: string;
   value: string;
+  /** Optional muted companion line under the value (e.g. the exact date
+   *  beneath a relative headline). Lets one tile carry two related facts. */
+  hint?: string;
   iconBg: string;
   iconColor: string;
   valueColor?: string;
@@ -369,13 +427,18 @@ function StatTile({
         {icon}
       </div>
       <div className="min-w-0">
+        <div className="text-[11px] text-[#8A8A8A] truncate">{label}</div>
         <div
-          className="text-[14px] font-semibold leading-tight truncate"
+          className="text-[15px] font-semibold leading-tight truncate"
           style={{ color: valueColor || "#1A1A1A" }}
         >
           {value}
         </div>
-        <div className="text-[11px] text-[#8A8A8A] truncate">{label}</div>
+        {hint && (
+          <div className="text-[11px] text-[#A5A5A5] leading-tight truncate">
+            {hint}
+          </div>
+        )}
       </div>
     </Card>
   );

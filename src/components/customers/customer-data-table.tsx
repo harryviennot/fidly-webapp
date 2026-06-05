@@ -1,18 +1,13 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   CaretUp,
   CaretDown,
   CaretLeft,
   CaretRight,
-  Info,
 } from "@phosphor-icons/react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { InfoPopover } from "@/components/reusables/info-popover";
 import type { CustomerResponse, CardDesign } from "@/types";
 import {
   classifyCustomer,
@@ -104,6 +99,9 @@ export function CustomerDataTable({
   isPendingVoid,
 }: CustomerDataTableProps) {
   const t = useTranslations("customers");
+  const locale = useLocale();
+  // French puts a space before the colon; English does not.
+  const sep = locale === "fr" ? " : " : ": ";
 
   const formatRelativeTime = (dateStr?: string) => {
     if (!dateStr) return "—";
@@ -152,30 +150,21 @@ export function CustomerDataTable({
               <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-3 hidden @[32rem]:table-cell">
                 <span className="inline-flex items-center gap-1">
                   {t("table.segment")}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label={t("segmentsHelp.title")}
-                        className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full text-[#A0A0A0] hover:text-[#555]"
-                      >
-                        <Info className="h-3.5 w-3.5" weight="regular" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="max-w-[320px] text-[11px] leading-[1.5] normal-case tracking-normal font-normal"
-                    >
-                      <div className="space-y-1.5">
-                        <div><span className="font-semibold">{t("segments.new")}</span>{" — "}{t("segmentsHelp.new")}</div>
-                        <div><span className="font-semibold">{t("segments.regular")}</span>{" — "}{t("segmentsHelp.regular")}</div>
-                        <div><span className="font-semibold">{t("segments.vip")}</span>{" — "}{t("segmentsHelp.vip")}</div>
-                        <div><span className="font-semibold">{t("segments.closeToReward")}</span>{" — "}{t("segmentsHelp.closeToReward")}</div>
-                        <div><span className="font-semibold">{t("segments.atRisk")}</span>{" — "}{t("segmentsHelp.atRisk")}</div>
-                        <div><span className="font-semibold">{t("segments.ghost")}</span>{" — "}{t("segmentsHelp.ghost")}</div>
+                  <InfoPopover
+                    label={t("segmentsHelp.title")}
+                    side="top"
+                    align="start"
+                    content={
+                      <div className="space-y-1.5 normal-case tracking-normal font-normal">
+                        <div><span className="font-semibold">{t("segments.new")}</span>{sep}{t("segmentsHelp.new")}</div>
+                        <div><span className="font-semibold">{t("segments.regular")}</span>{sep}{t("segmentsHelp.regular")}</div>
+                        <div><span className="font-semibold">{t("segments.vip")}</span>{sep}{t("segmentsHelp.vip")}</div>
+                        <div><span className="font-semibold">{t("segments.closeToReward")}</span>{sep}{t("segmentsHelp.closeToReward")}</div>
+                        <div><span className="font-semibold">{t("segments.atRisk")}</span>{sep}{t("segmentsHelp.atRisk")}</div>
+                        <div><span className="font-semibold">{t("segments.ghost")}</span>{sep}{t("segmentsHelp.ghost")}</div>
                       </div>
-                    </TooltipContent>
-                  </Tooltip>
+                    }
+                  />
                 </span>
               </TableHead>
               <TableHead

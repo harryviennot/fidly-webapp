@@ -10,6 +10,8 @@ export const customerKeys = {
     ["customers", businessId, page] as const,
   detail: (businessId: string, customerId: string) =>
     ["customers", businessId, customerId] as const,
+  walletStatus: (businessId: string, customerId: string) =>
+    ["customers", businessId, customerId, "wallet-status"] as const,
 };
 
 export function useCustomers(businessId: string | undefined, page: number = 0) {

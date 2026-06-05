@@ -25,10 +25,24 @@
       "newLast30d": "New (30 days)",
       "repeatRate": "Repeat Rate",
       "loyalCustomers": "Loyal Customers",
-      "loyalSubtitle": "Last 6 months"
+      "loyalSubtitle": "Last 6 months",
+      "newSubtitle": "vs. previous 30 days",
+      "info": {
+        "totalCustomers": "Everyone who has added your loyalty card.",
+        "newLast30d": "Customers who joined in the last 30 days. The arrow compares with the 30 days before.",
+        "repeatRate": "The share of your customers who came back on a second day, not just once.",
+        "loyalCustomers": "Customers who came in on at least two different days in the last 6 months."
+      }
+    },
+    "sort": {
+      "name": "Name",
+      "stamps": "Stamps",
+      "rewards": "Rewards",
+      "lastActivity": "Last activity"
     },
     "sendPass": {
       "trigger": "Send card by email",
+      "short": "Send card",
       "dialogTitle": "Send card by email",
       "dialogDescription": "We'll email {name} a link to add their card.",
       "emailLabel": "Email address",
@@ -126,15 +140,24 @@
     },
     "detail": {
       "customerProfile": "Customer Profile",
-      "customerStats": "Customer Stats",
+      "customerStats": "Customer details",
       "noEmail": "No email on file",
       "stampProgress": "Stamp Progress",
       "firstVisit": "First Visit",
-      "lastVisit": "Last Visit",
+      "customerSince": "Customer since",
+      "lastVisit": "Last visit",
       "totalVisits": "Total Visits",
       "redemptions": "Rewards",
       "enrolledAt": "Enrolled at",
       "directSignup": "Direct signup",
+      "wallet": {
+        "label": "Wallet",
+        "appleWallet": "Apple Wallet",
+        "googleWallet": "Google Wallet",
+        "both": "Both",
+        "notInstalled": "Not added",
+        "loading": "Checking..."
+      },
       "recentActivity": "Recent Activity",
       "segments": {
         "new": "New",

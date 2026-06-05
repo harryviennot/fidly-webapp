@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "./animated-number";
+import { InfoPopover } from "@/components/reusables/info-popover";
 
 export type StatCardTone = "accent" | "warning" | "info" | "neutral";
 
@@ -14,6 +15,8 @@ const TONE_STYLES: Record<StatCardTone, { background: string; color: string }> =
 
 interface StatCardProps {
   title: string;
+  /** Optional "what is this" explanation shown in an info bubble next to the title. */
+  info?: React.ReactNode;
   value: number;
   prefix?: string;
   suffix?: string;
@@ -28,6 +31,7 @@ interface StatCardProps {
 
 export function StatCard({
   title,
+  info,
   value,
   prefix,
   suffix,
@@ -49,7 +53,10 @@ export function StatCard({
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-[#8A8A8A]">{title}</span>
+        <span className="inline-flex items-center gap-1 min-w-0">
+          <span className="text-xs text-[#8A8A8A] truncate">{title}</span>
+          {info && <InfoPopover content={info} side="top" align="start" />}
+        </span>
         <div
           className="w-8 h-8 shrink-0 aspect-square rounded-md flex items-center justify-center"
           style={{ background, color }}

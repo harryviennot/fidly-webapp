@@ -34,6 +34,7 @@ export function CustomerStatsCards({
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px]">
       <StatCard
         title={t("totalCustomers")}
+        info={t("info.totalCustomers")}
         value={totalCustomers}
         icon={<Users className="w-4 h-4" weight="bold" />}
         tone="accent"
@@ -41,7 +42,9 @@ export function CustomerStatsCards({
       />
       <StatCard
         title={t("newLast30d")}
+        info={t("info.newLast30d")}
         value={newLast30d}
+        subtitle={t("newSubtitle")}
         icon={<UserPlus className="w-4 h-4" weight="bold" />}
         tone="info"
         change={growth.change}
@@ -50,6 +53,7 @@ export function CustomerStatsCards({
       />
       <StatCard
         title={t("repeatRate")}
+        info={t("info.repeatRate")}
         value={repeatPct}
         suffix="%"
         icon={<ArrowsClockwise className="w-4 h-4" weight="bold" />}
@@ -58,6 +62,7 @@ export function CustomerStatsCards({
       />
       <StatCard
         title={t("loyalCustomers")}
+        info={t("info.loyalCustomers")}
         value={loyal}
         subtitle={t("loyalSubtitle")}
         icon={<Medal className="w-4 h-4" weight="bold" />}
