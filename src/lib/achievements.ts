@@ -20,7 +20,11 @@ export type LadderMetric =
   | "new_customers_last_30d"
   | "repeat_customers";
 
-export type OneTimeMetric = "first_reward" | "first_broadcast";
+export type OneTimeMetric =
+  | "first_reward"
+  | "first_broadcast"
+  | "owner_used_native_app"
+  | "all_employees_use_native_app";
 
 export type AchievementMetric = LadderMetric | OneTimeMetric;
 
@@ -33,6 +37,8 @@ export interface AchievementMetricValues {
   repeat_customers: number;
   first_reward: boolean;
   first_broadcast: boolean;
+  owner_used_native_app: boolean;
+  all_employees_use_native_app: boolean;
 }
 
 export interface LadderDef {
@@ -93,6 +99,10 @@ export const ACHIEVEMENT_LADDERS: LadderDef[] = [
 export const ACHIEVEMENT_ONE_TIMES: OneTimeDef[] = [
   { key: "first_reward", category: "firsts", metric: "first_reward", icon: "Gift" },
   { key: "first_broadcast", category: "firsts", metric: "first_broadcast", icon: "Megaphone" },
+  // App-adoption (STA-174): the owner has scanned from the native app, and the
+  // whole team has moved off the web scanner onto the native app.
+  { key: "owner_uses_app", category: "firsts", metric: "owner_used_native_app", icon: "DeviceMobile" },
+  { key: "team_uses_app", category: "firsts", metric: "all_employees_use_native_app", icon: "DeviceMobile" },
 ];
 
 /** Section order on the /achievements page. */
@@ -272,6 +282,8 @@ export function metricValuesFromData(
     new_customers_last_30d: number;
     repeat_customers: number;
     total_rewards_redeemed: number;
+    owner_used_native_app: boolean;
+    all_employees_use_native_app: boolean;
   },
   firstBroadcastSent: boolean
 ): AchievementMetricValues {
@@ -283,6 +295,8 @@ export function metricValuesFromData(
     repeat_customers: data.repeat_customers,
     first_reward: data.total_rewards_redeemed >= 1,
     first_broadcast: firstBroadcastSent,
+    owner_used_native_app: data.owner_used_native_app,
+    all_employees_use_native_app: data.all_employees_use_native_app,
   };
 }
 

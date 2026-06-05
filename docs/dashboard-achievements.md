@@ -86,7 +86,18 @@ Early rungs are deliberately tiny so a new shop unlocks something fast.
 - **This month, New customers in 30 days** (`new_customers_last_30d`): 5, 10, 25, 50, 100, 250, 500
 - **Loyalty, Returning customers** (`repeat_customers`, a **count**, not a percentage): 1, 5, 10, 25, 50, 100, 250, 500, 1000
 - **Firsts (one-time)**: `first_reward` (`total_rewards_redeemed >= 1`), `first_broadcast`
-  (`businesses.settings.first_broadcast_sent`)
+  (`businesses.settings.first_broadcast_sent`), `owner_uses_app` (`owner_used_native_app`),
+  `team_uses_app` (`all_employees_use_native_app`)
+
+**App-adoption trophies (STA-174).** Two one-time badges reward moving the team off the web
+scanner onto the native iOS/Android app: `owner_uses_app` (the owner has at least one native
+scan) and `team_uses_app` (every active, non-paused scanner member has a native scan). Both read
+the **per-membership** `memberships.platforms_used` list (migration 98), so a business is only
+credited for native scans done *there* — no cross-business leak. "Native" means `ios`/`android`;
+a `web`-only scanner has not earned it. The signal is fed by `record_scan_platform()`, called on
+every stamp from the platform the scanner-app reports via the `X-Client-Platform` header (dashboard
+manual adjustments send no header, so they never count). A global `users.platforms_used` mirror
+exists for platform-wide "how many people use the app" analytics.
 
 **Why repeat rate is a count, not a percentage.** A repeat-*rate* percentage re-locks and reads
 as "100%" for a single twice-stamped customer, and 100% is not a realistic target. Returning
