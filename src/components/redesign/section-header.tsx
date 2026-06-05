@@ -45,7 +45,7 @@ export function SectionHeader({ title, icon, badge, action, className }: Section
     <div className={cn("mb-3 flex items-center justify-between gap-2", className)}>
       <div className="flex min-w-0 items-center gap-1.5">
         {icon}
-        <h3 className="truncate text-[15px] font-semibold text-[var(--foreground)]">{title}</h3>
+        <h3 className="font-body truncate text-[15px] font-semibold text-[var(--foreground)]">{title}</h3>
         {badge}
       </div>
       {action &&
