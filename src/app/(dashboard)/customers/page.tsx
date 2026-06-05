@@ -18,7 +18,7 @@ import {
   CustomerStatsCardsSkeleton,
 } from "@/components/customers/customer-stats-cards";
 import {
-  CustomerSegmentFilters,
+  useCustomerSegmentFilterGroup,
   CustomerSegmentFiltersSkeleton,
 } from "@/components/customers/customer-segment-filters";
 import { EmptyCustomersState } from "@/components/customers/empty-customers-state";
@@ -32,7 +32,7 @@ import {
   type SortDir,
 } from "@/components/customers/customer-data-table";
 import { PageHeader } from "@/components/redesign";
-import { SearchInput } from "@/components/reusables/search-input";
+import { SearchBar } from "@/components/reusables/search-bar";
 import { toast } from "sonner";
 
 export default function CustomersPage() {
@@ -229,6 +229,13 @@ export default function CustomersPage() {
     return result;
   }, [customers, selectedSegment, searchTerm, sortKey, sortDir, totalStamps]);
 
+  const segmentFilterGroup = useCustomerSegmentFilterGroup({
+    segments: segmentCounts,
+    totalCount: totalCustomers,
+    selected: selectedSegment,
+    onSelect: setSelectedSegment,
+  });
+
   if (customersLoading) {
     return (
       <div className="flex flex-col gap-[14px]">
@@ -257,21 +264,14 @@ export default function CustomersPage() {
       <CustomerStatsCards stats={stats} />
 
       {/* Search & Filter bar */}
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5">
-        <div className="flex gap-2.5 items-center flex-wrap">
-          <SearchInput
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder={t("searchPlaceholder")}
-          />
-          <CustomerSegmentFilters
-            segments={segmentCounts}
-            totalCount={totalCustomers}
-            selected={selectedSegment}
-            onSelect={setSelectedSegment}
-          />
-        </div>
-      </div>
+      <SearchBar
+        search={{
+          value: searchTerm,
+          onChange: setSearchTerm,
+          placeholder: t("searchPlaceholder"),
+        }}
+        filters={[segmentFilterGroup]}
+      />
 
       <CustomerDataTable
         customers={filteredAndSorted}

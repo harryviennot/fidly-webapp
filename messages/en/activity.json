@@ -17,6 +17,7 @@
       "dashboard": "Manual"
     },
     "filters": {
+      "label": "Type",
       "all": "All",
       "stampAdded": "Stamps Added",
       "rewardRedeemed": "Rewards Redeemed",
@@ -28,6 +29,7 @@
       "cardDeleted": "Card Deleted"
     },
     "locationFilter": {
+      "label": "Location",
       "allLocations": "All locations",
       "noLocation": "Unassigned",
       "primary": "primary",

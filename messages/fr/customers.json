@@ -27,6 +27,7 @@
       "redemptionsThisMonth": "\u00c9changes ce mois"
     },
     "segments": {
+      "label": "Segment",
       "all": "Tous",
       "new": "Nouveau",
       "regular": "R\u00e9gulier",

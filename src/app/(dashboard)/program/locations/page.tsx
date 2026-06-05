@@ -11,7 +11,7 @@ import {
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/redesign";
-import { SearchInput } from "@/components/reusables/search-input";
+import { SearchBar } from "@/components/reusables/search-bar";
 import { UpsellHero } from "@/components/reusables/upsell";
 import { useBusiness } from "@/contexts/business-context";
 import { useEntitlements } from "@/hooks/useEntitlements";
@@ -156,13 +156,13 @@ export default function ProgramLocationsPage() {
           a long list of stores. */}
       {activeLocations.length > 1 && (
         <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-[var(--background)] md:static md:mx-0 md:px-0 md:py-0">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5">
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder={t("searchPlaceholder")}
-            />
-          </div>
+          <SearchBar
+            search={{
+              value: search,
+              onChange: setSearch,
+              placeholder: t("searchPlaceholder"),
+            }}
+          />
         </div>
       )}
 

@@ -10,6 +10,7 @@
     "noPendingInvitations": "No pending invitations",
     "loadFailed": "Failed to load team data",
     "searchPlaceholder": "Search by name or email...",
+    "filterRole": "Role",
     "filterAll": "All",
     "filterOwner": "Owner",
     "filterAdmin": "Admin",

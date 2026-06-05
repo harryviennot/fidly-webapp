@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { FilterPill } from "@/components/reusables/filter-pill";
+import type { SingleSelectFilterGroup } from "@/components/reusables/search-bar";
 import type { TransactionType } from "@/types";
 
 type FilterKey = TransactionType | "all" | "card_added,card_re_added";
@@ -45,43 +45,29 @@ const FILTER_COLORS: Record<FilterKey, { color: string; bg: string }> = {
 
 export type { FilterKey };
 
-interface ActivityFiltersProps {
-  selected: FilterKey;
-  onSelect: (filter: FilterKey) => void;
-}
-
-export function ActivityFilters({ selected, onSelect }: ActivityFiltersProps) {
+/**
+ * Builds the activity "type" `FilterGroup` for `<SearchBar filters={[...]}>`.
+ * Renders as a color-dot dropdown (8 options > the pill threshold). The "all"
+ * option carries no color so the reset row has no dot.
+ */
+export function useActivityTypeFilterGroup(
+  selected: FilterKey,
+  onSelect: (filter: FilterKey) => void
+): SingleSelectFilterGroup {
   const t = useTranslations("activity");
 
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {FILTER_OPTIONS.map((filter) => {
-        const colors = FILTER_COLORS[filter];
-        return (
-          <FilterPill
-            key={filter}
-            label={t(FILTER_LABEL_KEYS[filter])}
-            isActive={selected === filter}
-            onClick={() => onSelect(filter)}
-            activeColor={colors.color}
-            activeBg={colors.bg}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-export function ActivityFiltersSkeleton() {
-  return (
-    <div className="flex gap-1.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div
-          key={i}
-          className="h-7 rounded-full bg-[var(--muted)] animate-pulse"
-          style={{ width: `${60 + i * 12}px` }}
-        />
-      ))}
-    </div>
-  );
+  return {
+    id: "type",
+    label: t("filters.label"),
+    value: selected === "all" ? null : selected,
+    allValue: "all",
+    onChange: (v) => onSelect((v ?? "all") as FilterKey),
+    options: FILTER_OPTIONS.map((filter) => ({
+      value: filter,
+      label: t(FILTER_LABEL_KEYS[filter]),
+      ...(filter === "all"
+        ? {}
+        : { color: FILTER_COLORS[filter].color, activeBg: FILTER_COLORS[filter].bg }),
+    })),
+  };
 }

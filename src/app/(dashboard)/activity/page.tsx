@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
-import { SearchInput } from "@/components/reusables/search-input";
+import { SearchBar } from "@/components/reusables/search-bar";
 import { useBusiness } from "@/contexts/business-context";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { useActiveDesign } from "@/hooks/use-designs";
@@ -15,11 +15,11 @@ import { useHasLegacyTransactions } from "@/hooks/use-transactions";
 import { getCustomer } from "@/api";
 import type { TransactionResponse, CustomerResponse } from "@/types";
 import { ActivityStatsBar } from "@/components/activity/activity-stats-bar";
-import { ActivityFilters, ActivityFiltersSkeleton } from "@/components/activity/activity-filters";
+import { useActivityTypeFilterGroup } from "@/components/activity/activity-filters";
 import type { FilterKey } from "@/components/activity/activity-filters";
 import { ActivityFeed, ActivityFeedSkeleton } from "@/components/activity/activity-feed";
 import { ActivityLiveIndicator } from "@/components/activity/activity-live-indicator";
-import { LocationFilter } from "@/components/locations/location-filter";
+import { useLocationFilterGroup } from "@/components/locations/location-filter";
 import { CustomerDetailSheet } from "@/components/customers/customer-detail-sheet";
 import { PageHeader } from "@/components/redesign";
 import { computeCardColors } from "@/lib/card-utils";
@@ -155,6 +155,14 @@ export default function ActivityPage() {
       ? fetchedCustomer.customer
       : null;
 
+  const typeFilterGroup = useActivityTypeFilterGroup(typeFilter, setTypeFilter);
+  const locationFilterGroup = useLocationFilterGroup({
+    locations: activeLocations,
+    value: locationFilter,
+    onChange: setLocationFilter,
+    hasLegacyTransactions,
+  });
+
   return (
     <div className="flex flex-col gap-[14px] flex-1 min-h-0 animate-slide-up" style={{ animationDelay: "150ms" }}>
       {/* Header */}
@@ -172,33 +180,18 @@ export default function ActivityPage() {
       <ActivityStatsBar stats={stats.data} isLoading={stats.isLoading} />
 
       {/* Search & Filter bar */}
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5 shrink-0">
-        <div className="flex gap-2.5 items-center flex-wrap">
-          {/* Search input */}
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder={t("searchPlaceholder")}
-          />
-
-          {/* Type filters */}
-          {feed.isLoading ? (
-            <ActivityFiltersSkeleton />
-          ) : (
-            <ActivityFilters selected={typeFilter} onSelect={setTypeFilter} />
-          )}
-
-          {/* Location filter — Pro multi-location only */}
-          {showLocationUi && (
-            <LocationFilter
-              locations={activeLocations}
-              value={locationFilter}
-              onChange={setLocationFilter}
-              hasLegacyTransactions={hasLegacyTransactions}
-            />
-          )}
-        </div>
-      </div>
+      <SearchBar
+        className="shrink-0"
+        search={{
+          value: search,
+          onChange: setSearch,
+          placeholder: t("searchPlaceholder"),
+        }}
+        filters={[
+          typeFilterGroup,
+          { ...locationFilterGroup, hidden: !showLocationUi },
+        ]}
+      />
 
       {/* Timeline Feed */}
       <div className="rounded-xl border border-[#EEEDEA] bg-white flex-1 overflow-hidden flex flex-col min-h-0">

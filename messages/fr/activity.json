@@ -17,6 +17,7 @@
       "dashboard": "Manuel"
     },
     "filters": {
+      "label": "Type",
       "all": "Tout",
       "stampAdded": "Tampons ajout\u00e9s",
       "rewardRedeemed": "R\u00e9compenses",
@@ -28,6 +29,7 @@
       "cardDeleted": "Carte supprimée"
     },
     "locationFilter": {
+      "label": "Établissement",
       "allLocations": "Tous les établissements",
       "noLocation": "Sans établissement",
       "primary": "principal",
