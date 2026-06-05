@@ -7,12 +7,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useBusiness } from "@/contexts/business-context";
 import { useCustomers, useRedeemReward, useVoidStamp, customerKeys, PAGE_SIZE } from "@/hooks/use-customers";
 import { useTransactions } from "@/hooks/use-transactions";
+import { useBusinessAchievements } from "@/hooks/use-business-achievements";
 import { useActiveDesign } from "@/hooks/use-designs";
 import { getCustomer } from "@/api";
 import type { CustomerResponse } from "@/types";
 import type { CustomerSegment } from "@/lib/customer-segments";
 import { classifyCustomer, countBySegment } from "@/lib/customer-segments";
-import { calculateCustomerStats } from "@/lib/customer-stats";
 import {
   CustomerStatsCards,
   CustomerStatsCardsSkeleton,
@@ -43,6 +43,7 @@ export default function CustomersPage() {
   const [page, setPage] = useState(0);
   const { data: paginatedData, isLoading: customersLoading } = useCustomers(businessId, page);
   const { data: txnData } = useTransactions(businessId);
+  const { data: achievements } = useBusinessAchievements(businessId);
   const { data: design } = useActiveDesign(businessId);
   const redeemMutation = useRedeemReward(businessId);
   const voidMutation = useVoidStamp(businessId);
@@ -185,11 +186,6 @@ export default function CustomersPage() {
     }
   };
 
-  const stats = useMemo(
-    () => calculateCustomerStats(customers, transactions),
-    [customers, transactions]
-  );
-
   const segmentCounts = useMemo(
     () => countBySegment(customers, totalStamps),
     [customers, totalStamps]
@@ -205,7 +201,7 @@ export default function CustomersPage() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(
-        (c) => c.name.toLowerCase().includes(term) || c.email.toLowerCase().includes(term)
+        (c) => c.name.toLowerCase().includes(term) || (c.email ?? "").toLowerCase().includes(term)
       );
     }
 
@@ -251,7 +247,7 @@ export default function CustomersPage() {
     return (
       <div className="flex flex-col gap-[14px]">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
-        <CustomerStatsCards stats={stats} />
+        <CustomerStatsCards totalCustomers={totalCustomers} achievements={achievements} />
         <EmptyCustomersState />
       </div>
     );
@@ -261,7 +257,7 @@ export default function CustomersPage() {
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
-      <CustomerStatsCards stats={stats} />
+      <CustomerStatsCards totalCustomers={totalCustomers} achievements={achievements} />
 
       {/* Search & Filter bar */}
       <SearchBar

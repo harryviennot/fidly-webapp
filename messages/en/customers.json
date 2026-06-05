@@ -16,15 +16,30 @@
       "stamps": "Stamps",
       "segment": "Segment",
       "lastVisit": "Last Visit",
-      "redemptions": "Redemptions",
+      "redemptions": "Rewards",
       "action": "Action",
       "actions": "Actions"
     },
     "stats": {
       "totalCustomers": "Total Customers",
-      "newThisWeek": "New This Week",
-      "stampsToday": "Stamps Today",
-      "redemptionsThisMonth": "Redemptions This Month"
+      "newLast30d": "New (30 days)",
+      "repeatRate": "Repeat Rate",
+      "loyalCustomers": "Loyal Customers",
+      "loyalSubtitle": "Last 6 months"
+    },
+    "sendPass": {
+      "trigger": "Send card by email",
+      "dialogTitle": "Send card by email",
+      "dialogDescription": "We'll email {name} a link to add their card.",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "name@example.com",
+      "warningTitle": "Make sure this is their email",
+      "warningBody": "Whoever receives this gets full access to the card and its stamps. Only send it to an address that belongs to this customer.",
+      "send": "Send card",
+      "sending": "Sending...",
+      "cancel": "Cancel",
+      "successToast": "Card sent",
+      "failedToast": "Couldn't send the card"
     },
     "segments": {
       "label": "Segment",
@@ -111,11 +126,13 @@
     },
     "detail": {
       "customerProfile": "Customer Profile",
+      "customerStats": "Customer Stats",
+      "noEmail": "No email on file",
       "stampProgress": "Stamp Progress",
       "firstVisit": "First Visit",
       "lastVisit": "Last Visit",
       "totalVisits": "Total Visits",
-      "redemptions": "Redemptions",
+      "redemptions": "Rewards",
       "enrolledAt": "Enrolled at",
       "directSignup": "Direct signup",
       "recentActivity": "Recent Activity",

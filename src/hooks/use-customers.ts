@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getCustomers, addStamp, redeemReward, voidStamp } from "@/api";
+import { getCustomers, addStamp, redeemReward, voidStamp, sendCustomerPass } from "@/api";
 import type { PaginatedCustomerResponse } from "@/types";
 
 const PAGE_SIZE = 50;
@@ -133,6 +133,24 @@ export function useRedeemReward(businessId: string | undefined) {
       });
       queryClient.invalidateQueries({
         queryKey: ["activity", businessId],
+      });
+    },
+  });
+}
+
+export function useSendCustomerPass(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ customerId, email }: { customerId: string; email?: string }) =>
+      sendCustomerPass(businessId!, customerId, email),
+    onSuccess: (_data, { customerId }) => {
+      // A newly-saved email should show immediately in the detail sheet + list.
+      queryClient.invalidateQueries({
+        queryKey: customerKeys.detail(businessId!, customerId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: customerKeys.all(businessId!),
       });
     },
   });

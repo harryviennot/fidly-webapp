@@ -10,6 +10,7 @@ import {
   Trophy,
   Envelope,
   MapPin,
+  PaperPlaneTilt,
 } from "@phosphor-icons/react";
 import {
   ResponsiveSidePanel,
@@ -26,9 +27,12 @@ import {
   SEGMENT_AVATAR_COLORS,
 } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
+import { SendPassDialog } from "./send-pass-dialog";
 import { TransactionTimeline } from "./transaction-timeline";
 import { StampGridContainer } from "@/components/card";
+import { Card } from "@/components/ui/card";
 import { computeCardColors } from "@/lib/card-utils";
+import { cn } from "@/lib/utils";
 import {
   useCustomerTransactions,
   transactionKeys,
@@ -69,8 +73,11 @@ export function CustomerDetailSheet({
   const { user } = useAuth();
   const { hasFeature } = useEntitlements();
   const t = useTranslations("customers.detail");
+  const tSendPass = useTranslations("customers.sendPass");
   const locale = useLocale();
   const queryClient = useQueryClient();
+
+  const [sendPassOpen, setSendPassOpen] = useState(false);
 
   // Cache the selected customer locally so the panel keeps rendering through
   // its close animation. Parent pages clear `selectedCustomerId` synchronously
@@ -166,11 +173,12 @@ export function CustomerDetailSheet({
   const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
 
   return (
+    <>
     <ResponsiveSidePanel
       open={open}
       onOpenChange={onOpenChange}
       ariaTitle={liveCustomer.name}
-      ariaDescription={liveCustomer.email}
+      ariaDescription={liveCustomer.email ?? undefined}
     >
       <ResponsiveSidePanelHeader>
         <p className="text-[14px] font-semibold text-[#1A1A1A]">
@@ -191,9 +199,13 @@ export function CustomerDetailSheet({
             <h2 className="text-[18px] font-bold text-[#1A1A1A] mb-0.5">
               {liveCustomer.name}
             </h2>
-            <div className="text-[12px] text-[#A0A0A0] mb-2 flex items-center gap-1">
+            <div className="text-[12px] mb-2 flex items-center gap-1">
               <Envelope className="w-3.5 h-3.5 text-[#BBB]" />
-              {liveCustomer.email}
+              {liveCustomer.email ? (
+                <span className="text-[#A0A0A0]">{liveCustomer.email}</span>
+              ) : (
+                <span className="text-[#BBB] italic">{t("noEmail")}</span>
+              )}
             </div>
             <span
               className="text-[11px] px-3 py-0.5 rounded-full font-semibold"
@@ -201,6 +213,14 @@ export function CustomerDetailSheet({
             >
               {t(`segments.${segment}`)}
             </span>
+            <button
+              type="button"
+              onClick={() => setSendPassOpen(true)}
+              className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--accent)] hover:underline cursor-pointer"
+            >
+              <PaperPlaneTilt className="w-3.5 h-3.5" weight="bold" />
+              {tSendPass("trigger")}
+            </button>
           </div>
         </div>
 
@@ -238,39 +258,50 @@ export function CustomerDetailSheet({
 
         {/* ── Stats ── */}
         <div className="px-5 py-4">
-          <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-1">
-            Customer Stats
+          <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2.5">
+            {t("customerStats")}
           </p>
-          <div className="divide-y divide-[#F8F7F5]">
-            <StatRow
-              icon={<CalendarBlank className="w-4 h-4" />}
+          <div className="grid grid-cols-2 gap-2.5">
+            <StatTile
+              icon={<CalendarBlank className="w-4 h-4" weight="bold" />}
               label={t("firstVisit")}
               value={formatDate(firstVisit)}
+              iconBg="var(--info-light)"
+              iconColor="var(--info)"
             />
-            <StatRow
-              icon={<Clock className="w-4 h-4" />}
+            <StatTile
+              icon={<Clock className="w-4 h-4" weight="bold" />}
               label={t("lastVisit")}
               value={formatDate(lastVisit)}
+              iconBg="var(--muted)"
+              iconColor="var(--muted-foreground)"
             />
-            <StatRow
-              icon={<Footprints className="w-4 h-4" />}
+            <StatTile
+              icon={<Footprints className="w-4 h-4" weight="bold" />}
               label={t("totalVisits")}
               value={String(totalVisits)}
-              accent="#4A7C59"
+              iconBg="var(--accent-light)"
+              iconColor="var(--accent)"
+              valueColor="#4A7C59"
             />
-            <StatRow
-              icon={<Trophy className="w-4 h-4" />}
+            <StatTile
+              icon={<Trophy className="w-4 h-4" weight="bold" />}
               label={t("redemptions")}
               value={String(liveCustomer.total_redemptions ?? 0)}
-              accent="#C4883D"
+              iconBg="var(--warning-light)"
+              iconColor="var(--warning)"
+              valueColor="#C4883D"
             />
             {hasFeature("locations.multiple") && (
-              <StatRow
-                icon={<MapPin className="w-4 h-4" />}
+              <StatTile
+                className="col-span-2"
+                icon={<MapPin className="w-4 h-4" weight="bold" />}
                 label={t("enrolledAt")}
                 value={
                   liveCustomer.enrolled_at_location_name ?? t("directSignup")
                 }
+                iconBg="var(--muted)"
+                iconColor="var(--muted-foreground)"
               />
             )}
           </div>
@@ -296,30 +327,56 @@ export function CustomerDetailSheet({
         </div>
       </ResponsiveSidePanelBody>
     </ResponsiveSidePanel>
+
+    {currentBusiness && (
+      <SendPassDialog
+        open={sendPassOpen}
+        onOpenChange={setSendPassOpen}
+        customerId={liveCustomer.id}
+        customerName={liveCustomer.name}
+        currentEmail={liveCustomer.email}
+        businessId={currentBusiness.id}
+        onSuccess={() => customerQuery.refetch()}
+      />
+    )}
+    </>
   );
 }
 
-function StatRow({
+function StatTile({
   icon,
   label,
   value,
-  accent,
+  iconBg,
+  iconColor,
+  valueColor,
+  className,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  accent?: string;
+  iconBg: string;
+  iconColor: string;
+  valueColor?: string;
+  className?: string;
 }) {
   return (
-    <div className="flex items-center gap-2.5 py-2.5">
-      <span className="text-[#B0B0B0] flex shrink-0">{icon}</span>
-      <span className="flex-1 text-[12px] text-[#8A8A8A]">{label}</span>
-      <span
-        className="text-[13px] font-semibold"
-        style={{ color: accent || "#1A1A1A" }}
+    <Card flat className={cn("flex items-center gap-2.5 px-3 py-2.5", className)}>
+      <div
+        className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
+        style={{ background: iconBg, color: iconColor }}
       >
-        {value}
-      </span>
-    </div>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <div
+          className="text-[14px] font-semibold leading-tight truncate"
+          style={{ color: valueColor || "#1A1A1A" }}
+        >
+          {value}
+        </div>
+        <div className="text-[11px] text-[#8A8A8A] truncate">{label}</div>
+      </div>
+    </Card>
   );
 }

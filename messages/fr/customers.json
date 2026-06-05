@@ -16,15 +16,30 @@
       "stamps": "Tampons",
       "segment": "Segment",
       "lastVisit": "Derni\u00e8re visite",
-      "redemptions": "\u00c9changes",
+      "redemptions": "R\u00e9compenses",
       "action": "Action",
       "actions": "Actions"
     },
     "stats": {
-      "totalCustomers": "Total Clients",
-      "newThisWeek": "Nouveaux cette semaine",
-      "stampsToday": "Tampons aujourd'hui",
-      "redemptionsThisMonth": "\u00c9changes ce mois"
+      "totalCustomers": "Clients au total",
+      "newLast30d": "Nouveaux (30 jours)",
+      "repeatRate": "Taux de fid\u00e9lit\u00e9",
+      "loyalCustomers": "Clients fid\u00e8les",
+      "loyalSubtitle": "6 derniers mois"
+    },
+    "sendPass": {
+      "trigger": "Envoyer la carte par e-mail",
+      "dialogTitle": "Envoyer la carte par e-mail",
+      "dialogDescription": "On enverra \u00e0 {name} un lien pour ajouter sa carte.",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "nom@exemple.com",
+      "warningTitle": "V\u00e9rifiez que c'est bien son adresse",
+      "warningBody": "La personne qui re\u00e7oit cet e-mail aura un acc\u00e8s complet \u00e0 la carte et \u00e0 ses tampons. Ne l'envoyez qu'\u00e0 une adresse qui appartient \u00e0 ce client.",
+      "send": "Envoyer la carte",
+      "sending": "Envoi...",
+      "cancel": "Annuler",
+      "successToast": "Carte envoy\u00e9e",
+      "failedToast": "\u00c9chec de l'envoi de la carte"
     },
     "segments": {
       "label": "Segment",
@@ -111,11 +126,13 @@
     },
     "detail": {
       "customerProfile": "Profil client",
+      "customerStats": "Statistiques du client",
+      "noEmail": "Aucun e-mail enregistré",
       "stampProgress": "Progression des tampons",
       "firstVisit": "Premi\u00e8re visite",
       "lastVisit": "Derni\u00e8re visite",
       "totalVisits": "Visites totales",
-      "redemptions": "\u00c9changes",
+      "redemptions": "R\u00e9compenses",
       "enrolledAt": "Inscrit \u00e0",
       "directSignup": "Inscription directe",
       "recentActivity": "Activit\u00e9 r\u00e9cente",

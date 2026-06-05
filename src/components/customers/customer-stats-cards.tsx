@@ -3,63 +3,78 @@
 import { useTranslations } from "next-intl";
 import {
   Users,
-  ChartBar,
   UserPlus,
-  Gift,
+  ArrowsClockwise,
+  Medal,
 } from "@phosphor-icons/react";
 import { StatCard } from "@/components/redesign";
-import type { CustomerPageStats } from "@/lib/customer-stats";
+import { wowTrend } from "@/lib/dashboard-trends";
+import type { BusinessAchievementsResponse } from "@/types/transaction";
 
 interface CustomerStatsCardsProps {
-  stats: CustomerPageStats;
+  /** Accurate business-wide count (from the paginated response's `total`). */
+  totalCustomers: number;
+  /** Pre-computed business-wide metrics. Undefined while loading. */
+  achievements?: BusinessAchievementsResponse;
 }
 
-export function CustomerStatsCards({ stats }: CustomerStatsCardsProps) {
+export function CustomerStatsCards({
+  totalCustomers,
+  achievements,
+}: CustomerStatsCardsProps) {
   const t = useTranslations("customers.stats");
 
+  const newLast30d = achievements?.new_customers_last_30d ?? 0;
+  const newPrev30d = achievements?.new_customers_prev_30d ?? 0;
+  const growth = wowTrend(newLast30d, newPrev30d);
+  const repeatPct = Math.round((achievements?.repeat_rate ?? 0) * 100);
+  const loyal = achievements?.loyal_customers_6m ?? 0;
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[14px]">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px]">
       <StatCard
         title={t("totalCustomers")}
-        value={stats.totalCustomers}
+        value={totalCustomers}
         icon={<Users className="w-4 h-4" weight="bold" />}
         tone="accent"
         delay={0}
       />
       <StatCard
-        title={t("newThisWeek")}
-        value={stats.newThisWeek}
+        title={t("newLast30d")}
+        value={newLast30d}
         icon={<UserPlus className="w-4 h-4" weight="bold" />}
         tone="info"
+        change={growth.change}
+        positive={growth.positive}
         delay={80}
       />
       <StatCard
-        title={t("stampsToday")}
-        value={stats.stampsToday}
-        icon={<ChartBar className="w-4 h-4" weight="bold" />}
-        tone="accent"
+        title={t("repeatRate")}
+        value={repeatPct}
+        suffix="%"
+        icon={<ArrowsClockwise className="w-4 h-4" weight="bold" />}
+        tone="warning"
         delay={160}
       />
-      <div className="md:col-span-3 lg:col-span-1">
-        <StatCard
-          title={t("redemptionsThisMonth")}
-          value={stats.redemptionsThisMonth}
-          icon={<Gift className="w-4 h-4" weight="bold" />}
-          tone="warning"
-          delay={240}
-        />
-      </div>
+      <StatCard
+        title={t("loyalCustomers")}
+        value={loyal}
+        subtitle={t("loyalSubtitle")}
+        icon={<Medal className="w-4 h-4" weight="bold" />}
+        tone="accent"
+        delay={240}
+      />
     </div>
   );
 }
 
 export function CustomerStatsCardsSkeleton() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[14px]">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px]">
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className={`rounded-xl border border-[var(--border)] bg-[var(--card)] p-[16px_18px] ${i === 4 ? "md:col-span-3 lg:col-span-1" : ""}`}
+          className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-[16px_18px]"
         >
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-lg bg-[var(--muted)] animate-pulse" />

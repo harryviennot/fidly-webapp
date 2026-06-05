@@ -10,7 +10,9 @@ export interface Enrollment {
 export interface CustomerResponse {
   id: string;
   name: string;
-  email: string;
+  // Nullable: businesses that don't collect email leave this empty (no
+  // placeholder). Guard every read with `?? ""` / a presence check.
+  email?: string | null;
   // Flat convenience fields — sourced from enrollments[0]. Customer list,
   // segment classifier, stats cards keep reading these.
   stamps: number;

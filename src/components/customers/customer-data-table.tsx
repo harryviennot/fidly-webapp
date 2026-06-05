@@ -6,9 +6,6 @@ import {
   CaretDown,
   CaretLeft,
   CaretRight,
-  Stamp,
-  Gift,
-  Prohibit,
   Info,
 } from "@phosphor-icons/react";
 import {
@@ -23,6 +20,7 @@ import {
   SEGMENT_AVATAR_COLORS,
 } from "@/lib/customer-segments";
 import { StampProgress } from "./stamp-progress";
+import { CustomerActionButton } from "./customer-action-button";
 import {
   Table,
   TableHeader,
@@ -133,25 +131,25 @@ export function CustomerDataTable({
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden md:block rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+      <div className="hidden md:block rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden @container">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-[#F0EFEB] bg-white hover:bg-white">
               <TableHead
-                className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4"
+                className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-3"
                 onClick={() => onSort("name")}
               >
                 {t("table.name")}
                 <SortIndicator sortKey={sortKey} sortDir={sortDir} column="name" />
               </TableHead>
               <TableHead
-                className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4"
+                className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-3 whitespace-nowrap"
                 onClick={() => onSort("stamps")}
               >
                 {t("table.stamps")}
                 <SortIndicator sortKey={sortKey} sortDir={sortDir} column="stamps" />
               </TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4">
+              <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-3 hidden @[32rem]:table-cell">
                 <span className="inline-flex items-center gap-1">
                   {t("table.segment")}
                   <Tooltip>
@@ -181,13 +179,13 @@ export function CustomerDataTable({
                 </span>
               </TableHead>
               <TableHead
-                className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 hidden lg:table-cell"
+                className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-3 hidden @[44rem]:table-cell text-center whitespace-nowrap"
                 onClick={() => onSort("total_redemptions")}
               >
                 {t("table.redemptions")}
                 <SortIndicator sortKey={sortKey} sortDir={sortDir} column="total_redemptions" />
               </TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 text-right">
+              <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-3 text-right whitespace-nowrap">
                 {t("table.actions")}
               </TableHead>
             </TableRow>
@@ -208,26 +206,26 @@ export function CustomerDataTable({
                   )}
                   onClick={() => onSelectCustomer(customer.id)}
                 >
-                  <TableCell className="py-3 px-4">
-                    <div className="flex items-center gap-2.5">
+                  <TableCell className="py-3 px-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
                         style={{ background: avatarColor }}
                       >
                         {getInitials(customer.name)}
                       </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#1A1A1A]">
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-medium text-[#1A1A1A] line-clamp-2 leading-snug">
                           {customer.name}
                         </div>
-                        <div className="text-[10.5px] text-[#A5A5A5]">
+                        <div className="text-[10.5px] text-[#A5A5A5] line-clamp-1">
                           {formatRelativeTime(customer.last_activity_at ?? customer.updated_at)}
                         </div>
                       </div>
                     </div>
                   </TableCell>
 
-                  <TableCell className="py-3 px-4">
+                  <TableCell className="py-3 px-3">
                     <StampProgress
                       count={customer.stamps}
                       total={totalStamps}
@@ -236,7 +234,7 @@ export function CustomerDataTable({
                     />
                   </TableCell>
 
-                  <TableCell className="py-3 px-4">
+                  <TableCell className="py-3 px-3 hidden @[32rem]:table-cell">
                     <span
                       className="text-[11px] px-2.5 py-0.5 rounded-full font-semibold"
                       style={{ background: segConfig.bg, color: segConfig.color }}
@@ -245,44 +243,35 @@ export function CustomerDataTable({
                     </span>
                   </TableCell>
 
-                  <TableCell className="py-3 px-4 text-center text-[14px] font-semibold text-[#1A1A1A] hidden lg:table-cell">
+                  <TableCell className="py-3 px-3 text-center text-[14px] font-semibold text-[#1A1A1A] hidden @[44rem]:table-cell">
                     {customer.total_redemptions ?? 0}
                   </TableCell>
 
-                  <TableCell className="py-3 px-4">
-                    <div className="flex items-center justify-end gap-1">
+                  <TableCell className="py-3 px-3">
+                    <div className="flex items-center justify-end gap-1.5">
                       {customer.stamps >= totalStamps ? (
-                        <button
+                        <CustomerActionButton
+                          variant="redeem"
+                          size="sm"
+                          label={t("actions.redeem")}
                           onClick={(e) => onRedeem(e, customer)}
-                          disabled={isPendingRedeem}
-                          className="flex items-center justify-center gap-1 w-7 h-7 xl:w-auto xl:h-auto xl:px-2 xl:py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                          style={{ background: "#FFF3E0", color: "#C4883D", border: "1px solid #F0DFC0" }}
-                          title={t("actions.redeem")}
-                        >
-                          <Gift className="w-3 h-3 shrink-0" weight="bold" />
-                          <span className="hidden xl:inline">{t("actions.redeem")}</span>
-                        </button>
+                          loading={isPendingRedeem}
+                        />
                       ) : (
-                        <button
+                        <CustomerActionButton
+                          variant="stamp"
+                          size="sm"
+                          label={t("actions.addStamp")}
                           onClick={(e) => onAddStamp(e, customer)}
-                          className="flex items-center justify-center gap-1 w-7 h-7 xl:w-auto xl:h-auto xl:px-2 xl:py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                          style={{ background: "#E8F5E4", color: "#4A7C59", border: "1px solid #C8E6C4" }}
-                          title={t("actions.addStamp")}
-                        >
-                          <Stamp className="w-3 h-3 shrink-0" weight="bold" />
-                          <span className="hidden xl:inline">{t("actions.addStamp")}</span>
-                        </button>
+                        />
                       )}
-                      <button
+                      <CustomerActionButton
+                        variant="void"
+                        size="sm"
+                        label={t("actions.voidLast")}
                         onClick={(e) => onVoid(e, customer)}
-                        disabled={isPendingVoid}
-                        className="flex items-center justify-center gap-1 w-7 h-7 xl:w-auto xl:h-auto xl:px-2 xl:py-1 rounded-md text-[10.5px] font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                        style={{ background: "#fff", color: "#C75050", border: "1px solid #DEDBD5" }}
-                        title={t("actions.voidLast")}
-                      >
-                        <Prohibit className="w-3 h-3 shrink-0" weight="bold" />
-                        <span className="hidden xl:inline">{t("actions.voidLast")}</span>
-                      </button>
+                        loading={isPendingVoid}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -373,14 +362,16 @@ export function CustomerDataTable({
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <StampProgress
-                    count={customer.stamps}
-                    total={totalStamps}
-                    design={design}
-                    size="sm"
-                  />
-                  <div className="text-[11px] text-[#8A8A8A]">
+                <div className="flex justify-between items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <StampProgress
+                      count={customer.stamps}
+                      total={totalStamps}
+                      design={design}
+                      size="sm"
+                    />
+                  </div>
+                  <div className="text-[11px] text-[#8A8A8A] shrink-0 whitespace-nowrap">
                     {customer.total_redemptions ?? 0} {t("table.redemptions").toLowerCase()}
                   </div>
                 </div>

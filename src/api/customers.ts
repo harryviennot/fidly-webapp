@@ -171,6 +171,40 @@ export async function getCustomerWalletStatus(
   return response.json();
 }
 
+export interface SendPassResponse {
+  status: string;
+  email: string;
+  email_saved: boolean;
+}
+
+/**
+ * Email a customer their wallet card (Apple + Google links). Owners/admins only.
+ * When `email` is provided it's persisted onto the customer record (unless it
+ * already belongs to another customer in the business). Required when the
+ * customer has no email on file.
+ */
+export async function sendCustomerPass(
+  businessId: string,
+  customerId: string,
+  email?: string
+): Promise<SendPassResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/customers/${businessId}/${customerId}/send-pass`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(email ? { email } : {}),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to send the card'));
+  }
+
+  return response.json();
+}
+
 export async function voidStamp(
   businessId: string,
   enrollmentId: string,
