@@ -32,7 +32,9 @@
     },
     "firsts": {
       "first_reward": "Première récompense réclamée",
-      "first_broadcast": "Première diffusion envoyée"
+      "first_broadcast": "Première diffusion envoyée",
+      "owner_uses_app": "Premier scan depuis l'application",
+      "team_uses_app": "Toute l'équipe sur l'application"
     },
     "info": {
       "growth": "Le nombre total de clients ayant ajouté votre carte depuis le début.",

@@ -32,7 +32,9 @@
     },
     "firsts": {
       "first_reward": "First reward redeemed",
-      "first_broadcast": "First broadcast sent"
+      "first_broadcast": "First broadcast sent",
+      "owner_uses_app": "First scan from the app",
+      "team_uses_app": "Whole team on the app"
     },
     "info": {
       "growth": "The total number of customers who have ever added your card.",

@@ -1,24 +1,30 @@
 "use client";
 
 import { useEffect } from "react";
-import { useTranslations } from "next-intl";
-import {
-  ArrowSquareOutIcon,
-  CheckCircleIcon,
-  DeviceMobileIcon,
-} from "@phosphor-icons/react";
+import Image from "next/image";
+import { useTranslations, useLocale } from "next-intl";
+import { CheckCircleIcon, DeviceMobileIcon } from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/auth-provider";
 import { useBusiness } from "@/contexts/business-context";
-import { Button } from "@/components/ui/button";
 import { InviteShell } from "@/components/invite/InviteShell";
 
 const scanUrl = process.env.NEXT_PUBLIC_SCAN_URL;
+
+// Live store listings for the Stampeo scanner app (region-free / locale-aware
+// canonical forms so each store opens in the user's local market + language).
+const APP_STORE_URL = "https://apps.apple.com/app/id6761758382";
+const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=com.hryvnt.stampeo";
 
 export default function ScannerWelcomePage() {
   const { signOut } = useAuth();
   const { currentRole, currentBusiness, loading } = useBusiness();
   const t = useTranslations("auth.scannerWelcome");
   const tAuth = useTranslations("auth");
+  const locale = useLocale();
+
+  const appleSrc = locale === "fr" ? "/AppStoreFR.svg" : "/AppStore.svg";
+  const googleSrc = locale === "fr" ? "/GooglePlayFR.svg" : "/GooglePlay.svg";
 
   useEffect(() => {
     if (!loading && currentRole && currentRole !== "scanner") {
@@ -69,37 +75,51 @@ export default function ScannerWelcomePage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            {scanUrl && (
-              <Button
-                asChild
-                variant="gradient"
-                size="xl"
-                className="w-full"
-              >
-                <a href={scanUrl} target="_blank" rel="noopener noreferrer">
-                  {t("openScanner")}
-                  <ArrowSquareOutIcon className="ml-1 h-4 w-4" />
-                </a>
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="xl"
-              className="w-full"
-              disabled
+          <div className="flex flex-col items-center gap-3">
+            <a
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("appStoreAlt")}
+              className="block hover:opacity-90 transition-opacity"
             >
-              {t("appStore")}
-            </Button>
-            <Button
-              variant="outline"
-              size="xl"
-              className="w-full"
-              disabled
+              <Image
+                src={appleSrc}
+                alt={t("appStoreAlt")}
+                width={120}
+                height={40}
+                className="h-[52px] w-auto"
+              />
+            </a>
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("googlePlayAlt")}
+              className="block hover:opacity-90 transition-opacity"
             >
-              {t("googlePlay")}
-            </Button>
+              <Image
+                src={googleSrc}
+                alt={t("googlePlayAlt")}
+                width={239}
+                height={71}
+                className="h-[52px] w-auto"
+              />
+            </a>
           </div>
+
+          {scanUrl && (
+            <div className="text-center">
+              <a
+                href={scanUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline transition-colors"
+              >
+                {t("continueInBrowser")}
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="text-center">

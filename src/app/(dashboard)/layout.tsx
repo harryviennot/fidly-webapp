@@ -44,6 +44,12 @@ export default function AdminLayout({
   const t = useTranslations();
   useImpersonationBeacon();
 
+  // Scanner members (employees) never belong in the dashboard or the owner
+  // wizard. We bounce them to /scanner-welcome from the gate below — before any
+  // dashboard chrome mounts — rather than relying solely on RoleGuard's late,
+  // post-render redirect. (RoleGuard stays as defense-in-depth.)
+  const isScanner = currentRole === "scanner";
+
   const setupProgress = currentBusiness?.settings?.setup_progress;
   // "Set up" means the wizard is done AND — for card-upfront new signups — a
   // subscription exists. A card-upfront business that finished every wizard
@@ -92,17 +98,35 @@ export default function AdminLayout({
   }, [awaitingSubscription, refetch]);
 
   useEffect(() => {
+    // Scanners go straight to their welcome page — they have no dashboard.
+    if (!loading && isScanner) {
+      router.replace("/scanner-welcome");
+      return;
+    }
     if (awaitingSubscription) return; // hold while the webhook lands
     if (needsWizard) {
       router.replace(wizardResumePath(setupProgress));
     } else if (needsWizardNoBusiness) {
       router.replace("/onboarding/business/welcome");
     }
-  }, [awaitingSubscription, needsWizard, needsWizardNoBusiness, router, setupProgress]);
+  }, [loading, isScanner, awaitingSubscription, needsWizard, needsWizardNoBusiness, router, setupProgress]);
 
   // Show loading state — also while we wait for the post-checkout webhook so
   // the user isn't bounced back to the plan step the instant they return.
   if (loading || awaitingSubscription) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
+          <p className="mt-4 text-sm text-[var(--muted-foreground)]">{t("status.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Scanner: the useEffect above redirects to /scanner-welcome. Render a loading
+  // shell in the interim so the dashboard chrome never flashes.
+  if (isScanner) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">

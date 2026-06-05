@@ -90,6 +90,10 @@ export interface BusinessAchievementsResponse {
   loyal_customers_6m: number;
   /** Last 5 complete weeks, oldest -> newest. Excludes the current partial week. */
   weekly_stamp_series: WeeklyStampPoint[];
+  /** App-adoption trophies (per-membership platforms_used): the owner has scanned
+   *  from the native app; every active scanner uses the native app, not the browser. */
+  owner_used_native_app: boolean;
+  all_employees_use_native_app: boolean;
   /** Per-trophy unlock ledger: when each was earned + whether it's been celebrated. */
   unlocked: UnlockedAchievement[];
   /** Whether the business has been seeded (the '__init__' sentinel exists). Gates
