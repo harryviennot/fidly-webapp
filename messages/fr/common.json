@@ -1,4 +1,11 @@
 {
+  "searchBar": {
+    "all": "Tout",
+    "clear": "Effacer",
+    "sort": "Trier",
+    "ascending": "Croissant",
+    "descending": "Décroissant"
+  },
   "nav": {
     "dashboard": "Tableau de bord",
     "achievements": "Trophées",

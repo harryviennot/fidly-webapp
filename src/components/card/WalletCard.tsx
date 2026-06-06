@@ -362,7 +362,7 @@ export function StampGridContainer({
 
 export function WalletCard({
   design,
-  stamps = 3,
+  stamps = Math.round((design.total_stamps ?? 10) * 0.75),
   totalStamps: totalStampsProp,
   organizationName,
   showQR = true,

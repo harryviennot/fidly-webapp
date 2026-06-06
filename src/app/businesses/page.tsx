@@ -9,8 +9,7 @@ import {
   StorefrontIcon,
 } from "@phosphor-icons/react";
 
-import { SearchInput } from "@/components/reusables/search-input";
-import { FilterPill } from "@/components/reusables/filter-pill";
+import { SearchBar, type FilterGroup } from "@/components/reusables/search-bar";
 import { EmptyState } from "@/components/reusables/empty-state";
 import { PageHeader } from "@/components/redesign";
 import { Button } from "@/components/ui/button";
@@ -96,6 +95,33 @@ export default function BusinessesPage() {
   // When the toolbar is hidden, the view toggle is hidden too — force cards.
   const effectiveView: View = showToolbar ? view : "cards";
 
+  const filters: FilterGroup[] = [];
+  if (isSuperadmin) {
+    filters.push({
+      id: "scope",
+      label: t("scope.label"),
+      value: scope,
+      onChange: (v) => {
+        setScope((v ?? "mine") as "mine" | "all");
+        setPage(0);
+      },
+      options: [
+        { value: "mine", label: t("scope.mine") },
+        { value: "all", label: t("scope.all") },
+      ],
+    });
+  }
+  filters.push({
+    id: "status",
+    label: t("statusFilter.label"),
+    value: statusFilter === "all" ? null : statusFilter,
+    allValue: "all",
+    onChange: (v) => setStatusFilter((v ?? "all") as StatusFilter),
+    options: (["all", "active", "pending", "suspended"] as StatusFilter[]).map(
+      (s) => ({ value: s, label: t(`statusFilter.${s}`) }),
+    ),
+  });
+
   return (
     <div className="flex flex-col gap-[14px]">
       <PageHeader
@@ -111,61 +137,28 @@ export default function BusinessesPage() {
       />
 
       {showToolbar && (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5 flex flex-col gap-2.5">
-          <div className="flex gap-2.5 items-center flex-wrap">
-            <div className="flex-1 min-w-[180px] max-w-md">
-              <SearchInput
-                value={search}
-                onChange={(v) => {
-                  setSearch(v);
-                  setPage(0);
-                }}
-                placeholder={t("searchPlaceholder")}
-              />
-            </div>
-            {isSuperadmin && (
-              <div className="flex gap-1">
-                <FilterPill
-                  label={t("scope.mine")}
-                  isActive={scope === "mine"}
-                  onClick={() => {
-                    setScope("mine");
-                    setPage(0);
-                  }}
-                />
-                <FilterPill
-                  label={t("scope.all")}
-                  isActive={scope === "all"}
-                  onClick={() => {
-                    setScope("all");
-                    setPage(0);
-                  }}
-                />
-              </div>
-            )}
-            <div className="ml-auto">
-              <ViewToggle
-                value={view}
-                onChange={setView}
-                options={[
-                  { value: "cards", label: t("view.cards"), icon: <SquaresFourIcon size={14} /> },
-                  { value: "table", label: t("view.table"), icon: <RowsIcon size={14} /> },
-                ]}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-1">
-            {(["all", "active", "pending", "suspended"] as StatusFilter[]).map((s) => (
-              <FilterPill
-                key={s}
-                label={t(`statusFilter.${s}`)}
-                isActive={statusFilter === s}
-                onClick={() => setStatusFilter(s)}
-              />
-            ))}
-          </div>
-        </div>
+        <SearchBar
+          search={{
+            value: search,
+            onChange: (v) => {
+              setSearch(v);
+              setPage(0);
+            },
+            placeholder: t("searchPlaceholder"),
+            className: "max-w-md",
+          }}
+          filters={filters}
+          actions={
+            <ViewToggle
+              value={view}
+              onChange={setView}
+              options={[
+                { value: "cards", label: t("view.cards"), icon: <SquaresFourIcon size={14} /> },
+                { value: "table", label: t("view.table"), icon: <RowsIcon size={14} /> },
+              ]}
+            />
+          }
+        />
       )}
 
       {isError && (

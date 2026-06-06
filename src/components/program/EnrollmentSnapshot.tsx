@@ -26,7 +26,7 @@ export function EnrollmentSnapshot({ totalStamps }: EnrollmentSnapshotProps) {
 
   const { data, isLoading } = useQuery({
     queryKey: [...customerKeys.all(businessId!), 'enrollment'] as const,
-    queryFn: () => getCustomers(businessId!, 200, 0),
+    queryFn: () => getCustomers(businessId!, { limit: 200 }),
     enabled: !!businessId,
   });
 

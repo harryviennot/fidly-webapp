@@ -51,7 +51,7 @@ export function useBusinessInstalls(businessId: string | undefined): UseBusiness
     }
     const seq = ++refetchSeq.current;
     try {
-      const page = await getCustomers(businessId, 100, 0);
+      const page = await getCustomers(businessId, { limit: 100 });
       if (seq !== refetchSeq.current) return;
       const customers = page.data ?? [];
       const statuses = await Promise.all(
@@ -69,7 +69,7 @@ export function useBusinessInstalls(businessId: string | undefined): UseBusiness
         return {
           customer_id: c.id,
           name: c.name,
-          email: c.email,
+          email: c.email ?? "",
           enrollment_id: c.enrollments?.[0]?.id ?? null,
           stamps: c.enrollments?.[0]?.progress?.stamps ?? c.stamps ?? 0,
           has_apple: status.apple,

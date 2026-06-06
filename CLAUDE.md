@@ -39,3 +39,10 @@ Notable reusables:
   `Popover`, since hover tooltips never fire on touch). Both wear the base
   Tooltip style. Pass `content` (string or node), optional `label`/`side`/`align`.
   Reach for this for any "what is this / tell me more" secondary context.
+
+  **Rule: always use `InfoPopover` for any new tooltip or info bubble.** Never
+  hand-roll a raw shadcn `<Tooltip>` as an info bubble — it is hover-only and
+  never fires on touch, so phone users never see it. When you come across an
+  existing raw-`Tooltip`-as-info-bubble, migrate it to `InfoPopover` (move its
+  content into the `content` prop). `StatCard` (`components/redesign`) takes an
+  optional `info` prop that renders one next to the title.

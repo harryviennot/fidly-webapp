@@ -17,8 +17,13 @@
     "loyalSubtitle": "actifs sur 6 mois",
     "plusThisWeek": "+{count} cette semaine",
     "vsLastMonth": "vs mois dernier",
+    "vsLastWeek": "vs semaine dernière",
     "vsYesterday": "vs hier",
     "thisWeek": "cette semaine",
+    "info": {
+      "totalCustomers": "Tous les clients qui ont ajouté votre carte de fidélité. La flèche montre l'évolution par rapport à la semaine dernière.",
+      "loyalCustomers": "Total des clients venus au moins 2 fois dans les 6 derniers mois."
+    },
     "recentScansEmptyTitle": "Aucun scan pour l'instant",
     "recentScansEmptyBody": "Les tampons ajoutés par votre équipe apparaîtront ici.",
     "firstRunTitle": "Votre premier client",

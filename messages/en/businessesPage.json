@@ -11,6 +11,7 @@
     "viewAsComingSoon": "Coming soon",
     "loadError": "Failed to load businesses. Please refresh.",
     "scope": {
+      "label": "Scope",
       "mine": "My businesses",
       "all": "All businesses"
     },
@@ -19,6 +20,7 @@
       "table": "Table"
     },
     "statusFilter": {
+      "label": "Status",
       "all": "All",
       "active": "Active",
       "pending": "Pending",

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Stamp, Gift, Prohibit } from "@phosphor-icons/react";
 import { useRedeemReward } from "@/hooks/use-customers";
 import { toast } from "sonner";
 import { StampAdjustmentDialog } from "./stamp-adjustment-dialog";
 import { StampVoidDialog } from "./stamp-void-dialog";
+import { CustomerActionButton } from "./customer-action-button";
 import type { CustomerResponse, TransactionResponse } from "@/types";
 
 interface CustomerQuickActionsProps {
@@ -56,37 +56,31 @@ export function CustomerQuickActions({
   };
 
   return (
-    <div className="flex gap-1.5">
+    <div className="flex gap-2">
       {/* Add Stamp / Redeem */}
       {!canRedeem ? (
-        <ActionButton
-          icon={<Stamp className="w-4 h-4" />}
+        <CustomerActionButton
+          variant="stamp"
+          size="lg"
           label={t("addStamp")}
-          color="#4A7C59"
-          bg="#E8F5E4"
-          border="#C8E6C4"
           onClick={() => setAdjustOpen(true)}
           disabled={!enrollmentId}
         />
       ) : (
-        <ActionButton
-          icon={<Gift className="w-4 h-4" />}
+        <CustomerActionButton
+          variant="redeem"
+          size="lg"
           label={t("redeem")}
-          color="#C4883D"
-          bg="#FFF3E0"
-          border="#F0DFC0"
           onClick={handleRedeem}
-          disabled={redeemMutation.isPending}
+          loading={redeemMutation.isPending}
         />
       )}
 
       {/* Void Stamp */}
-      <ActionButton
-        icon={<Prohibit className="w-4 h-4" />}
+      <CustomerActionButton
+        variant="void"
+        size="lg"
         label={t("voidLast")}
-        color="#C75050"
-        bg="#fff"
-        border="#DEDBD5"
         onClick={() => setVoidDialogOpen(true)}
         disabled={!lastVoidable}
       />
@@ -118,46 +112,5 @@ export function CustomerQuickActions({
         />
       )}
     </div>
-  );
-}
-
-function ActionButton({
-  icon,
-  label,
-  color,
-  bg,
-  border,
-  onClick,
-  disabled,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  color: string;
-  bg: string;
-  border: string;
-  onClick: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="flex-1 flex flex-col items-center gap-1 py-2.5 px-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:-translate-y-px hover:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
-      style={{
-        border: `1px solid ${border}`,
-        background: bg,
-        fontFamily: "inherit",
-      }}
-    >
-      <span style={{ color }} className="flex">
-        {icon}
-      </span>
-      <span
-        className="text-[10px] font-medium whitespace-nowrap"
-        style={{ color }}
-      >
-        {label}
-      </span>
-    </button>
   );
 }

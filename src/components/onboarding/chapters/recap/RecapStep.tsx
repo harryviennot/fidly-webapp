@@ -57,7 +57,7 @@ export function RecapStep() {
   useEffect(() => {
     if (!businessId) return;
     let cancelled = false;
-    getCustomers(businessId, 100, 0)
+    getCustomers(businessId, { limit: 100 })
       .then((page) => {
         if (cancelled) return;
         const total = (page.data ?? []).reduce(

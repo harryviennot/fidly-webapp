@@ -30,18 +30,60 @@ export async function getCustomer(businessId: string, customerId: string): Promi
   return response.json();
 }
 
+export interface CustomerListParams {
+  limit?: number;
+  offset?: number;
+  /** Free-text match on name OR email, applied server-side across the whole business. */
+  search?: string;
+  /** "all" or a CustomerSegment. "all" is omitted from the request. */
+  segment?: string;
+  /** API sort key: "name" | "stamps" | "last_activity" | "total_redemptions". */
+  sort?: string;
+  sortDir?: 'asc' | 'desc';
+}
+
 export async function getCustomers(
   businessId: string,
-  limit: number = 50,
-  offset: number = 0,
+  params: CustomerListParams = {},
 ): Promise<PaginatedCustomerResponse> {
+  const { limit = 50, offset = 0, search, segment, sort, sortDir } = params;
+  const qs = new URLSearchParams();
+  qs.set('limit', String(limit));
+  qs.set('offset', String(offset));
+  if (search) qs.set('search', search);
+  if (segment && segment !== 'all') qs.set('segment', segment);
+  if (sort) qs.set('sort', sort);
+  if (sortDir) qs.set('sort_dir', sortDir);
+
   const response = await fetch(
-    `${API_BASE_URL}/customers/${businessId}?limit=${limit}&offset=${offset}`,
+    `${API_BASE_URL}/customers/${businessId}?${qs.toString()}`,
     { headers: await getAuthHeaders() },
   );
 
   if (!response.ok) {
     throw new Error('Failed to fetch customers');
+  }
+
+  return response.json();
+}
+
+/** Whole-business per-segment counts for the list filter pills. Narrowed by
+ *  `search` (so pills stay coherent with results) but not by selected segment.
+ *  Returns a { segment: count } map; missing segments are absent (treat as 0). */
+export async function getCustomerSegmentCounts(
+  businessId: string,
+  search?: string,
+): Promise<Record<string, number>> {
+  const qs = new URLSearchParams();
+  if (search) qs.set('search', search);
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  const response = await fetch(
+    `${API_BASE_URL}/customers/${businessId}/segment-counts${suffix}`,
+    { headers: await getAuthHeaders() },
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch segment counts');
   }
 
   return response.json();
@@ -168,6 +210,40 @@ export async function getCustomerWalletStatus(
     const error = await response.json().catch(() => ({}));
     throw new Error(extractErrorMessage(error, 'Failed to fetch wallet status'));
   }
+  return response.json();
+}
+
+export interface SendPassResponse {
+  status: string;
+  email: string;
+  email_saved: boolean;
+}
+
+/**
+ * Email a customer their wallet card (Apple + Google links). Owners/admins only.
+ * When `email` is provided it's persisted onto the customer record (unless it
+ * already belongs to another customer in the business). Required when the
+ * customer has no email on file.
+ */
+export async function sendCustomerPass(
+  businessId: string,
+  customerId: string,
+  email?: string
+): Promise<SendPassResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/customers/${businessId}/${customerId}/send-pass`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(email ? { email } : {}),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to send the card'));
+  }
+
   return response.json();
 }
 

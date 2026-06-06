@@ -16,17 +16,45 @@
       "stamps": "Tampons",
       "segment": "Segment",
       "lastVisit": "Derni\u00e8re visite",
-      "redemptions": "\u00c9changes",
+      "redemptions": "R\u00e9compenses",
       "action": "Action",
       "actions": "Actions"
     },
     "stats": {
-      "totalCustomers": "Total Clients",
-      "newThisWeek": "Nouveaux cette semaine",
-      "stampsToday": "Tampons aujourd'hui",
-      "redemptionsThisMonth": "\u00c9changes ce mois"
+      "totalCustomers": "Clients totaux",
+      "newLast30d": "Ce mois-ci",
+      "repeatRate": "Taux de fid\u00e9lit\u00e9",
+      "loyalCustomers": "Clients fid\u00e8les",
+      "loyalSubtitle": "6 derniers mois",
+      "newSubtitle": "vs mois pr\u00e9c\u00e9dent",
+      "info": {
+        "repeatRate": "Part des clients venus au moins 2 fois dans les 6 derniers mois.",
+        "loyalCustomers": "Total des clients venus au moins 2 fois dans les 6 derniers mois."
+      }
+    },
+    "sort": {
+      "name": "Nom",
+      "stamps": "Tampons",
+      "rewards": "R\u00e9compenses",
+      "lastActivity": "Derni\u00e8re activit\u00e9"
+    },
+    "sendPass": {
+      "trigger": "Envoyer la carte par e-mail",
+      "short": "Envoyer la carte",
+      "dialogTitle": "Envoyer la carte par e-mail",
+      "dialogDescription": "On enverra \u00e0 {name} un lien pour ajouter sa carte.",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "nom@exemple.com",
+      "warningTitle": "V\u00e9rifiez que c'est bien son adresse",
+      "warningBody": "La personne qui re\u00e7oit cet e-mail aura un acc\u00e8s complet \u00e0 la carte et \u00e0 ses tampons. Ne l'envoyez qu'\u00e0 une adresse qui appartient \u00e0 ce client.",
+      "send": "Envoyer la carte",
+      "sending": "Envoi...",
+      "cancel": "Annuler",
+      "successToast": "Carte envoy\u00e9e",
+      "failedToast": "\u00c9chec de l'envoi de la carte"
     },
     "segments": {
+      "label": "Segment",
       "all": "Tous",
       "new": "Nouveau",
       "regular": "R\u00e9gulier",
@@ -110,13 +138,24 @@
     },
     "detail": {
       "customerProfile": "Profil client",
+      "customerStats": "Détails du client",
+      "noEmail": "Aucun e-mail enregistré",
       "stampProgress": "Progression des tampons",
       "firstVisit": "Premi\u00e8re visite",
+      "customerSince": "Client depuis",
       "lastVisit": "Derni\u00e8re visite",
       "totalVisits": "Visites totales",
-      "redemptions": "\u00c9changes",
+      "redemptions": "R\u00e9compenses",
       "enrolledAt": "Inscrit \u00e0",
       "directSignup": "Inscription directe",
+      "wallet": {
+        "label": "Portefeuille",
+        "appleWallet": "Apple Wallet",
+        "googleWallet": "Google Wallet",
+        "both": "Les deux",
+        "notInstalled": "Pas encore ajoutée",
+        "loading": "Vérification..."
+      },
       "recentActivity": "Activit\u00e9 r\u00e9cente",
       "segments": {
         "new": "Nouveau",

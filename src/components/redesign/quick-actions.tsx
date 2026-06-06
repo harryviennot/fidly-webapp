@@ -61,7 +61,7 @@ export function QuickActions({ className, delay = 0 }: QuickActionsProps) {
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <h3 className="text-[13px] font-semibold text-[var(--foreground)] mb-3">
+      <h3 className="font-body text-[15px] font-semibold text-[var(--foreground)] mb-3">
         {t("dashboard.quickActions")}
       </h3>
 

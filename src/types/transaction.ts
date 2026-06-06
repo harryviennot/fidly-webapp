@@ -85,6 +85,8 @@ export interface BusinessAchievementsResponse {
   /** Rolling 30-day windows (now - 30d). Reward sustained effort. */
   stamps_last_30d: number;
   new_customers_last_30d: number;
+  /** Prior 30-day window [now-60d, now-30d) — powers the customer-page growth badge. */
+  new_customers_prev_30d: number;
   /** Customers with >=2 distinct stamp-days in the last 6 months ("currently loyal"
    *  dashboard KPI), distinct from the lifetime `repeat_customers` trophy metric. */
   loyal_customers_6m: number;

@@ -25,7 +25,10 @@ export default function ProgramOverviewPage() {
 
   const t = useTranslations('loyaltyProgram.overview');
 
-  const { data: customerData } = useCustomers(currentBusiness?.id, 0);
+  // Only needs the whole-business `total`; an unfiltered first page supplies it.
+  const { data: customerData } = useCustomers(currentBusiness?.id, {
+    page: 0, search: "", segment: "all", sort: "name", sortDir: "asc",
+  });
   const totalCustomers = customerData?.total ?? 0;
   const { data: stats } = useActivityStats(currentBusiness?.id);
 

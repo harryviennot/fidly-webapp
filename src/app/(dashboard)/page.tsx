@@ -29,7 +29,10 @@ export default function DashboardPage() {
   const businessId = currentBusiness?.id;
 
   // Data hooks
-  const { data: customerData } = useCustomers(businessId, 0);
+  // Only needs the whole-business `total`; an unfiltered first page supplies it.
+  const { data: customerData } = useCustomers(businessId, {
+    page: 0, search: "", segment: "all", sort: "name", sortDir: "asc",
+  });
   const { data: stats } = useActivityStats(businessId);
   const { data: txns, isLoading: txnsLoading } = useTransactions(businessId, 10);
   const { data: designs = [] } = useDesigns(businessId);
@@ -100,9 +103,11 @@ export default function DashboardPage() {
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
               title={t("dashboard.totalCustomers")}
+              info={t("dashboard.info.totalCustomers")}
               value={totalCustomers}
               icon={<Users className="w-4 h-4" weight="bold" />}
               tone="accent"
+              subtitle={customersTrend.change ? t("dashboard.vsLastWeek") : undefined}
               change={customersTrend.change}
               positive={customersTrend.positive}
               delay={80}
@@ -118,6 +123,7 @@ export default function DashboardPage() {
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
               title={t("dashboard.loyalCustomers")}
+              info={t("dashboard.info.loyalCustomers")}
               value={loyalCustomers}
               icon={<Heart className="w-4 h-4" weight="bold" />}
               tone="accent"
