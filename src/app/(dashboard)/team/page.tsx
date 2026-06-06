@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { UserPlusIcon, TrashIcon } from "@phosphor-icons/react";
-import { SearchInput } from "@/components/reusables/search-input";
-import { FilterPill } from "@/components/reusables/filter-pill";
+import { SearchBar } from "@/components/reusables/search-bar";
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
 import { useEntitlements } from "@/hooks/useEntitlements";
@@ -319,29 +318,27 @@ export default function TeamPage() {
       />
 
       {/* Search & Filter */}
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5">
-        <div className="flex gap-2.5 items-center flex-wrap">
-          {/* Search input */}
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder={t('searchPlaceholder')}
-          />
-
-          {/* Filter pills */}
-          <div className="flex flex-wrap gap-1.5">
-            {filterButtons.map((f) => (
-              <FilterPill
-                key={f.key}
-                label={f.label}
-                count={roleCounts[f.key] || 0}
-                isActive={roleFilter === f.key}
-                onClick={() => setRoleFilter(f.key)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      <SearchBar
+        search={{
+          value: search,
+          onChange: setSearch,
+          placeholder: t('searchPlaceholder'),
+        }}
+        filters={[
+          {
+            id: "role",
+            label: t('filterRole'),
+            value: roleFilter === "all" ? null : roleFilter,
+            allValue: "all",
+            onChange: (v) => setRoleFilter((v ?? "all") as RoleFilter),
+            options: filterButtons.map((f) => ({
+              value: f.key,
+              label: f.label,
+              count: roleCounts[f.key] || 0,
+            })),
+          },
+        ]}
+      />
 
       {/* Desktop table */}
       <TeamTable

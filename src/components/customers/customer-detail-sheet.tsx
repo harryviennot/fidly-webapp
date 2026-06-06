@@ -10,6 +10,8 @@ import {
   Trophy,
   Envelope,
   MapPin,
+  PaperPlaneTilt,
+  Wallet,
 } from "@phosphor-icons/react";
 import {
   ResponsiveSidePanel,
@@ -19,16 +21,19 @@ import {
 import { useBusiness } from "@/contexts/business-context";
 import { useAuth } from "@/contexts/auth-provider";
 import { useEntitlements } from "@/hooks/useEntitlements";
-import { getCustomer, getCustomerTransactions } from "@/api";
+import { getCustomer, getCustomerTransactions, getCustomerWalletStatus } from "@/api";
 import {
   classifyCustomer,
   getSegmentConfig,
   SEGMENT_AVATAR_COLORS,
 } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
+import { SendPassDialog } from "./send-pass-dialog";
 import { TransactionTimeline } from "./transaction-timeline";
 import { StampGridContainer } from "@/components/card";
+import { Card } from "@/components/ui/card";
 import { computeCardColors } from "@/lib/card-utils";
+import { cn } from "@/lib/utils";
 import {
   useCustomerTransactions,
   transactionKeys,
@@ -69,8 +74,12 @@ export function CustomerDetailSheet({
   const { user } = useAuth();
   const { hasFeature } = useEntitlements();
   const t = useTranslations("customers.detail");
+  const tSendPass = useTranslations("customers.sendPass");
+  const tTime = useTranslations("customers.time");
   const locale = useLocale();
   const queryClient = useQueryClient();
+
+  const [sendPassOpen, setSendPassOpen] = useState(false);
 
   // Cache the selected customer locally so the panel keeps rendering through
   // its close animation. Parent pages clear `selectedCustomerId` synchronously
@@ -96,6 +105,18 @@ export function CustomerDetailSheet({
     initialData: customer ?? undefined,
   });
   const liveCustomer = customerQuery.data ?? cachedCustomer;
+
+  // Which wallet(s) hold this customer's card. Gated on the live `customer`
+  // prop (not the exit-animation cache) so it doesn't fire while closed.
+  const walletQuery = useQuery({
+    queryKey: customerKeys.walletStatus(
+      currentBusiness?.id ?? "",
+      customer?.id ?? ""
+    ),
+    queryFn: () => getCustomerWalletStatus(currentBusiness!.id, customer!.id),
+    enabled: open && !!customer && !!currentBusiness?.id,
+    staleTime: 60_000,
+  });
 
   const [extraTransactions, setExtraTransactions] = useState<
     TransactionResponse[]
@@ -155,22 +176,48 @@ export function CustomerDetailSheet({
     });
   };
 
+  // Relative ("5 days ago") while it's fresh, then the exact date once it's
+  // over a month old \u2014 one clean value per tile instead of cramming both in.
+  const formatSmartDate = (dateStr?: string) => {
+    if (!dateStr) return "\u2014";
+    const diffDays = Math.floor(
+      (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (diffDays >= 30) return formatDate(dateStr);
+    if (diffDays <= 0) return tTime("today");
+    if (diffDays === 1) return tTime("yesterday");
+    if (diffDays < 7) return tTime("daysAgo", { count: diffDays });
+    return tTime("weeksAgo", { count: Math.floor(diffDays / 7) });
+  };
+
   const totalVisits = transactions.filter(
     (txn) => txn.stamp_delta > 0
   ).length;
 
   const firstVisit = liveCustomer.created_at;
   const lastVisit = liveCustomer.last_activity_at ?? liveCustomer.updated_at;
+
+  const wallet = walletQuery.data;
+  const walletValue = walletQuery.isLoading
+    ? t("wallet.loading")
+    : wallet?.apple && wallet?.google
+      ? t("wallet.both")
+      : wallet?.apple
+        ? t("wallet.appleWallet")
+        : wallet?.google
+          ? t("wallet.googleWallet")
+          : t("wallet.notInstalled");
   const colors = design ? computeCardColors(design) : null;
   const stampIcon = (design?.stamp_icon as StampIconType) ?? undefined;
   const rewardIcon = (design?.reward_icon as StampIconType) ?? undefined;
 
   return (
+    <>
     <ResponsiveSidePanel
       open={open}
       onOpenChange={onOpenChange}
       ariaTitle={liveCustomer.name}
-      ariaDescription={liveCustomer.email}
+      ariaDescription={liveCustomer.email ?? undefined}
     >
       <ResponsiveSidePanelHeader>
         <p className="text-[14px] font-semibold text-[#1A1A1A]">
@@ -180,7 +227,18 @@ export function CustomerDetailSheet({
 
       <ResponsiveSidePanelBody className="pb-[max(4rem,env(safe-area-inset-bottom)+2rem)] md:pb-10">
         {/* ── Centered identity hero ── */}
-        <div className="px-5 pt-6 pb-5">
+        <div className="relative px-5 pt-6 pb-5">
+          {/* Action about this person — anchored top-right, clear of the panel's
+              close button (which lives in the header above). */}
+          <button
+            type="button"
+            onClick={() => setSendPassOpen(true)}
+            aria-label={tSendPass("trigger")}
+            className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-2.5 py-1 text-[12px] font-medium text-[var(--accent)] hover:bg-[var(--accent-light)]/40 transition-colors cursor-pointer"
+          >
+            <PaperPlaneTilt className="w-3.5 h-3.5 shrink-0" weight="bold" />
+            <span className="hidden min-[380px]:inline">{tSendPass("short")}</span>
+          </button>
           <div className="flex flex-col items-center text-center">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center text-white text-[22px] font-bold mb-2.5"
@@ -191,9 +249,13 @@ export function CustomerDetailSheet({
             <h2 className="text-[18px] font-bold text-[#1A1A1A] mb-0.5">
               {liveCustomer.name}
             </h2>
-            <div className="text-[12px] text-[#A0A0A0] mb-2 flex items-center gap-1">
+            <div className="text-[12px] mb-2 flex items-center gap-1">
               <Envelope className="w-3.5 h-3.5 text-[#BBB]" />
-              {liveCustomer.email}
+              {liveCustomer.email ? (
+                <span className="text-[#A0A0A0]">{liveCustomer.email}</span>
+              ) : (
+                <span className="text-[#BBB] italic">{t("noEmail")}</span>
+              )}
             </div>
             <span
               className="text-[11px] px-3 py-0.5 rounded-full font-semibold"
@@ -238,39 +300,58 @@ export function CustomerDetailSheet({
 
         {/* ── Stats ── */}
         <div className="px-5 py-4">
-          <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-1">
-            Customer Stats
+          <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2.5">
+            {t("customerStats")}
           </p>
-          <div className="divide-y divide-[#F8F7F5]">
-            <StatRow
-              icon={<CalendarBlank className="w-4 h-4" />}
-              label={t("firstVisit")}
-              value={formatDate(firstVisit)}
-            />
-            <StatRow
-              icon={<Clock className="w-4 h-4" />}
+          <div className="grid grid-cols-2 gap-2.5">
+            <StatTile
+              icon={<Clock className="w-4 h-4" weight="bold" />}
               label={t("lastVisit")}
-              value={formatDate(lastVisit)}
+              value={formatSmartDate(lastVisit)}
+              iconBg="var(--muted)"
+              iconColor="var(--muted-foreground)"
             />
-            <StatRow
-              icon={<Footprints className="w-4 h-4" />}
+            <StatTile
+              icon={<CalendarBlank className="w-4 h-4" weight="bold" />}
+              label={t("customerSince")}
+              value={formatSmartDate(firstVisit)}
+              iconBg="var(--info-light)"
+              iconColor="var(--info)"
+            />
+            <StatTile
+              icon={<Footprints className="w-4 h-4" weight="bold" />}
               label={t("totalVisits")}
               value={String(totalVisits)}
-              accent="#4A7C59"
+              iconBg="var(--accent-light)"
+              iconColor="var(--accent)"
+              valueColor="#4A7C59"
             />
-            <StatRow
-              icon={<Trophy className="w-4 h-4" />}
+            <StatTile
+              icon={<Trophy className="w-4 h-4" weight="bold" />}
               label={t("redemptions")}
               value={String(liveCustomer.total_redemptions ?? 0)}
-              accent="#C4883D"
+              iconBg="var(--warning-light)"
+              iconColor="var(--warning)"
+              valueColor="#C4883D"
+            />
+            <StatTile
+              className="col-span-2"
+              icon={<Wallet className="w-4 h-4" weight="bold" />}
+              label={t("wallet.label")}
+              value={walletValue}
+              iconBg="var(--muted)"
+              iconColor="var(--muted-foreground)"
             />
             {hasFeature("locations.multiple") && (
-              <StatRow
-                icon={<MapPin className="w-4 h-4" />}
+              <StatTile
+                className="col-span-2"
+                icon={<MapPin className="w-4 h-4" weight="bold" />}
                 label={t("enrolledAt")}
                 value={
                   liveCustomer.enrolled_at_location_name ?? t("directSignup")
                 }
+                iconBg="var(--muted)"
+                iconColor="var(--muted-foreground)"
               />
             )}
           </div>
@@ -296,30 +377,56 @@ export function CustomerDetailSheet({
         </div>
       </ResponsiveSidePanelBody>
     </ResponsiveSidePanel>
+
+    {currentBusiness && (
+      <SendPassDialog
+        open={sendPassOpen}
+        onOpenChange={setSendPassOpen}
+        customerId={liveCustomer.id}
+        customerName={liveCustomer.name}
+        currentEmail={liveCustomer.email}
+        businessId={currentBusiness.id}
+        onSuccess={() => customerQuery.refetch()}
+      />
+    )}
+    </>
   );
 }
 
-function StatRow({
+function StatTile({
   icon,
   label,
   value,
-  accent,
+  iconBg,
+  iconColor,
+  valueColor,
+  className,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  accent?: string;
+  iconBg: string;
+  iconColor: string;
+  valueColor?: string;
+  className?: string;
 }) {
   return (
-    <div className="flex items-center gap-2.5 py-2.5">
-      <span className="text-[#B0B0B0] flex shrink-0">{icon}</span>
-      <span className="flex-1 text-[12px] text-[#8A8A8A]">{label}</span>
-      <span
-        className="text-[13px] font-semibold"
-        style={{ color: accent || "#1A1A1A" }}
+    <Card flat className={cn("flex items-center gap-2.5 px-3 py-2.5", className)}>
+      <div
+        className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
+        style={{ background: iconBg, color: iconColor }}
       >
-        {value}
-      </span>
-    </div>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <div className="text-[11px] text-[#8A8A8A] truncate">{label}</div>
+        <div
+          className="text-[15px] font-semibold leading-tight truncate"
+          style={{ color: valueColor || "#1A1A1A" }}
+        >
+          {value}
+        </div>
+      </div>
+    </Card>
   );
 }

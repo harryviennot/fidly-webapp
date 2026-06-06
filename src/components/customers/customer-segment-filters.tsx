@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { FilterPill } from "@/components/reusables/filter-pill";
+import type { SingleSelectFilterGroup } from "@/components/reusables/search-bar";
 import type { CustomerSegment } from "@/lib/customer-segments";
 
 const SEGMENTS: (CustomerSegment | "all")[] = [
@@ -24,53 +24,52 @@ const SEGMENT_LABEL_KEYS: Record<CustomerSegment | "all", string> = {
   ghost: "segments.ghost",
 };
 
-interface CustomerSegmentFiltersProps {
+interface UseCustomerSegmentFilterGroupArgs {
   segments: Record<CustomerSegment, number>;
   totalCount: number;
   selected: CustomerSegment | "all";
   onSelect: (segment: CustomerSegment | "all") => void;
 }
 
-export function CustomerSegmentFilters({
+/**
+ * Builds the customer "segment" `FilterGroup` for `<SearchBar filters={[...]}>`.
+ * Zero-count segments are hidden (except "all"); counts surface as dropdown
+ * badges.
+ */
+export function useCustomerSegmentFilterGroup({
   segments,
   totalCount,
   selected,
   onSelect,
-}: CustomerSegmentFiltersProps) {
+}: UseCustomerSegmentFilterGroupArgs): SingleSelectFilterGroup {
   const t = useTranslations("customers");
 
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {SEGMENTS.map((segment) => {
-        const count = segment === "all" ? totalCount : segments[segment];
-
-        // Don't show segment if count is 0 (except "all")
-        if (segment !== "all" && count === 0) return null;
-
-        return (
-          <FilterPill
-            key={segment}
-            label={t(SEGMENT_LABEL_KEYS[segment])}
-            count={count}
-            isActive={selected === segment}
-            onClick={() => onSelect(segment)}
-          />
-        );
-      })}
-    </div>
-  );
+  return {
+    id: "segment",
+    label: t("segments.label"),
+    value: selected === "all" ? null : selected,
+    allValue: "all",
+    onChange: (v) => onSelect((v ?? "all") as CustomerSegment | "all"),
+    options: SEGMENTS.map((segment) => {
+      const count = segment === "all" ? totalCount : segments[segment];
+      return {
+        value: segment,
+        label: t(SEGMENT_LABEL_KEYS[segment]),
+        count,
+        hidden: segment !== "all" && count === 0,
+      };
+    }),
+  };
 }
 
+/** Toolbar-shaped placeholder shown while the customer list loads. */
 export function CustomerSegmentFiltersSkeleton() {
   return (
-    <div className="flex gap-1.5">
-      {[1, 2, 3, 4].map((i) => (
-        <div
-          key={i}
-          className="h-7 rounded-full bg-[var(--muted)] animate-pulse"
-          style={{ width: `${50 + i * 15}px` }}
-        />
-      ))}
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="h-9 basis-full sm:basis-auto sm:flex-1 rounded-lg bg-[var(--muted)] animate-pulse" />
+        <div className="h-8 w-28 rounded-full bg-[var(--muted)] animate-pulse" />
+      </div>
     </div>
   );
 }

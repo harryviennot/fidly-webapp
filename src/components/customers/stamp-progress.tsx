@@ -22,28 +22,41 @@ export function StampProgress({ count, total, design, size = "sm" }: StampProgre
   const rewardIcon = (design?.reward_icon as StampIconType) ?? "gift";
 
   if (size === "sm") {
+    // Filled circles use the design accent; empty circles use a fixed neutral
+    // (theme tokens) rather than the design's empty colors. A card design tuned
+    // for a dark background can have white/near-white empty stamps that vanish
+    // on the white table — the neutral guarantees legibility for every business.
+    const renderCircle = (i: number) => (
+      <div
+        key={i}
+        className="w-3 h-3 rounded-full transition-colors duration-300"
+        style={
+          i < count
+            ? { backgroundColor: colors?.accentHex ?? "var(--accent)" }
+            : { backgroundColor: "var(--muted)", border: "1px solid var(--border)" }
+        }
+      />
+    );
+
+    // At most two rows: a single row up to 12 dots, otherwise split evenly into
+    // two. Never more, so a long program stays compact instead of growing a tall
+    // stack of dots.
+    const twoRows = total > 12;
+    const topCount = twoRows ? Math.ceil(total / 2) : total;
+
     return (
-      <div className="flex items-center gap-1">
-        {Array.from({ length: total }, (_, i) => {
-          const filled = i < count;
-          return (
-            <div
-              key={i}
-              className="w-3 h-3 rounded-full transition-colors duration-300"
-              style={
-                filled
-                  ? { backgroundColor: colors?.accentHex ?? "var(--accent)" }
-                  : {
-                    backgroundColor: colors?.emptyStampBg ?? "var(--muted)",
-                    border: colors
-                      ? `1px solid ${colors.emptyStampBorder}`
-                      : undefined,
-                  }
-              }
-            />
-          );
-        })}
-        <span className="ml-2 text-sm text-[var(--muted-foreground)] tabular-nums">
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="flex flex-col gap-1 shrink-0">
+          <div className="flex items-center gap-1">
+            {Array.from({ length: topCount }, (_, i) => renderCircle(i))}
+          </div>
+          {twoRows && (
+            <div className="flex items-center gap-1">
+              {Array.from({ length: total - topCount }, (_, i) => renderCircle(topCount + i))}
+            </div>
+          )}
+        </div>
+        <span className="text-sm text-[var(--muted-foreground)] tabular-nums shrink-0">
           {count}/{total}
         </span>
       </div>

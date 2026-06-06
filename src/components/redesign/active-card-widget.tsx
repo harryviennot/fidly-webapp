@@ -104,7 +104,7 @@ export function ActiveCardWidget({
     >
       {/* Header: title + edit link */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[15px] font-semibold text-[#1A1A1A]">
+        <h3 className="font-body text-[15px] font-semibold text-[#1A1A1A]">
           {t("activeCard")}
         </h3>
         {design && isOwner && (

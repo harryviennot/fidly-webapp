@@ -1,4 +1,11 @@
 {
+  "searchBar": {
+    "all": "All",
+    "clear": "Clear",
+    "sort": "Sort",
+    "ascending": "Ascending",
+    "descending": "Descending"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "achievements": "Achievements",

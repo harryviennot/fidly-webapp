@@ -50,3 +50,25 @@ export { GatedFeature, PlanGatedField } from './gated-feature';
 // Empty state
 export { EmptyState } from './empty-state';
 export type { EmptyStateProps } from './empty-state';
+
+// Search / filter bar
+export {
+  SearchBar,
+  FilterControl,
+  FilterDropdown,
+  FilterPills,
+  SortControl,
+} from './search-bar';
+export type {
+  SearchBarProps,
+  SearchConfig,
+  SearchBarLabels,
+  FilterGroup,
+  SingleSelectFilterGroup,
+  MultiSelectFilterGroup,
+  FilterOption,
+  FilterDisplayMode,
+  SortConfig,
+  SortOption,
+  SortDirection,
+} from './search-bar';

@@ -10,6 +10,7 @@
     "noPendingInvitations": "Aucune invitation en attente",
     "loadFailed": "Impossible de charger les données de l'équipe",
     "searchPlaceholder": "Rechercher par nom ou email...",
+    "filterRole": "Rôle",
     "filterAll": "Tous",
     "filterOwner": "Propriétaire",
     "filterAdmin": "Admin",

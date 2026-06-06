@@ -11,6 +11,7 @@
     "viewAsComingSoon": "Bientôt disponible",
     "loadError": "Impossible de charger les entreprises. Veuillez actualiser.",
     "scope": {
+      "label": "Périmètre",
       "mine": "Mes entreprises",
       "all": "Toutes les entreprises"
     },
@@ -19,6 +20,7 @@
       "table": "Tableau"
     },
     "statusFilter": {
+      "label": "Statut",
       "all": "Tous",
       "active": "Actifs",
       "pending": "En attente",
