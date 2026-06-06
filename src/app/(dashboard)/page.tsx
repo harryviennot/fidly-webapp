@@ -29,7 +29,10 @@ export default function DashboardPage() {
   const businessId = currentBusiness?.id;
 
   // Data hooks
-  const { data: customerData } = useCustomers(businessId, 0);
+  // Only needs the whole-business `total`; an unfiltered first page supplies it.
+  const { data: customerData } = useCustomers(businessId, {
+    page: 0, search: "", segment: "all", sort: "name", sortDir: "asc",
+  });
   const { data: stats } = useActivityStats(businessId);
   const { data: txns, isLoading: txnsLoading } = useTransactions(businessId, 10);
   const { data: designs = [] } = useDesigns(businessId);

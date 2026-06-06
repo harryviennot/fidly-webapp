@@ -51,7 +51,7 @@ export function useBusinessInstalls(businessId: string | undefined): UseBusiness
     }
     const seq = ++refetchSeq.current;
     try {
-      const page = await getCustomers(businessId, 100, 0);
+      const page = await getCustomers(businessId, { limit: 100 });
       if (seq !== refetchSeq.current) return;
       const customers = page.data ?? [];
       const statuses = await Promise.all(

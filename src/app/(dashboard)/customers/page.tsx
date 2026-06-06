@@ -5,14 +5,14 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { useBusiness } from "@/contexts/business-context";
-import { useCustomers, useRedeemReward, useVoidStamp, customerKeys, PAGE_SIZE } from "@/hooks/use-customers";
+import { useCustomers, useCustomerSegmentCounts, useRedeemReward, useVoidStamp, customerKeys, PAGE_SIZE } from "@/hooks/use-customers";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useBusinessAchievements } from "@/hooks/use-business-achievements";
 import { useActiveDesign } from "@/hooks/use-designs";
 import { getCustomer } from "@/api";
 import type { CustomerResponse } from "@/types";
 import type { CustomerSegment } from "@/lib/customer-segments";
-import { classifyCustomer, countBySegment } from "@/lib/customer-segments";
 import {
   CustomerStatsCards,
   CustomerStatsCardsSkeleton,
@@ -35,13 +35,38 @@ import { PageHeader } from "@/components/redesign";
 import { SearchBar } from "@/components/reusables/search-bar";
 import { toast } from "sonner";
 
+const SEGMENT_KEYS: CustomerSegment[] = [
+  "new",
+  "regular",
+  "vip",
+  "close_to_reward",
+  "at_risk",
+  "ghost",
+];
+
 export default function CustomersPage() {
   const { currentBusiness } = useBusiness();
   const t = useTranslations("customers");
   const businessId = currentBusiness?.id;
 
   const [page, setPage] = useState(0);
-  const { data: paginatedData, isLoading: customersLoading } = useCustomers(businessId, page);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSegment, setSelectedSegment] = useState<CustomerSegment | "all">("all");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  // Debounce search before it reaches the query key so we fire one request per
+  // pause, not per keystroke.
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  const { data: paginatedData, isLoading: customersLoading } = useCustomers(businessId, {
+    page,
+    search: debouncedSearch,
+    segment: selectedSegment,
+    sort: sortKey,
+    sortDir,
+  });
+  const { data: segmentCountsData } = useCustomerSegmentCounts(businessId, debouncedSearch);
   const { data: txnData } = useTransactions(businessId);
   const { data: achievements } = useBusinessAchievements(businessId);
   const { data: design } = useActiveDesign(businessId);
@@ -52,19 +77,19 @@ export default function CustomersPage() {
     () => (Array.isArray(paginatedData?.data) ? paginatedData.data : []),
     [paginatedData]
   );
+  // `total` from the list response is the FILTERED total (drives pagination).
   const totalCustomers = paginatedData?.total ?? 0;
   const totalPages = Math.ceil(totalCustomers / PAGE_SIZE);
+  // Whole-business count, independent of the active filter — for the stat card,
+  // its repeat-rate denominator, and the truly-empty check. Falls back to the
+  // unfiltered list total before achievements load.
+  const businessCustomerCount = achievements?.total_customers ?? totalCustomers;
 
   const transactions = useMemo(
     () => (Array.isArray(txnData?.transactions) ? txnData.transactions : []),
     [txnData]
   );
   const totalStamps = design?.total_stamps ?? 10;
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSegment, setSelectedSegment] = useState<CustomerSegment | "all">("all");
-  const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [voidTarget, setVoidTarget] = useState<{
     customerId: string;
     customerName: string;
@@ -178,6 +203,7 @@ export default function CustomersPage() {
   };
 
   const handleSort = (key: SortKey) => {
+    setPage(0);
     if (sortKey === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -186,50 +212,33 @@ export default function CustomersPage() {
     }
   };
 
-  const segmentCounts = useMemo(
-    () => countBySegment(customers, totalStamps),
-    [customers, totalStamps]
+  // Whole-business per-segment counts come from the server now (migration 102),
+  // narrowed by the active search. Fill any segment the API omitted with 0.
+  const segmentCounts = useMemo(() => {
+    const counts = {
+      new: 0, regular: 0, vip: 0, close_to_reward: 0, at_risk: 0, ghost: 0,
+    } as Record<CustomerSegment, number>;
+    if (segmentCountsData) {
+      for (const key of SEGMENT_KEYS) counts[key] = segmentCountsData[key] ?? 0;
+    }
+    return counts;
+  }, [segmentCountsData]);
+
+  // The "all" pill count = sum of every segment (search-narrowed), so pills and
+  // their total stay coherent with the result set.
+  const segmentTotal = useMemo(
+    () => SEGMENT_KEYS.reduce((sum, k) => sum + segmentCounts[k], 0),
+    [segmentCounts]
   );
-
-  const filteredAndSorted = useMemo(() => {
-    let result = customers;
-
-    if (selectedSegment !== "all") {
-      result = result.filter((c) => classifyCustomer(c, totalStamps) === selectedSegment);
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (c) => c.name.toLowerCase().includes(term) || (c.email ?? "").toLowerCase().includes(term)
-      );
-    }
-
-    result = [...result].sort((a, b) => {
-      let cmp = 0;
-      switch (sortKey) {
-        case "name": cmp = a.name.localeCompare(b.name); break;
-        case "stamps": cmp = a.stamps - b.stamps; break;
-        case "updated_at":
-          cmp = (a.last_activity_at ?? a.updated_at ?? "").localeCompare(
-            b.last_activity_at ?? b.updated_at ?? ""
-          );
-          break;
-        case "total_redemptions":
-          cmp = (a.total_redemptions ?? 0) - (b.total_redemptions ?? 0);
-          break;
-      }
-      return sortDir === "asc" ? cmp : -cmp;
-    });
-
-    return result;
-  }, [customers, selectedSegment, searchTerm, sortKey, sortDir, totalStamps]);
 
   const segmentFilterGroup = useCustomerSegmentFilterGroup({
     segments: segmentCounts,
-    totalCount: totalCustomers,
+    totalCount: segmentTotal,
     selected: selectedSegment,
-    onSelect: setSelectedSegment,
+    onSelect: (seg) => {
+      setSelectedSegment(seg);
+      setPage(0);
+    },
   });
 
   // Sort control shared by the toolbar (works on mobile + desktop) and the
@@ -247,6 +256,7 @@ export default function CustomersPage() {
     onChange: (value: string, direction: SortDir) => {
       setSortKey(value as SortKey);
       setSortDir(direction);
+      setPage(0);
     },
   };
 
@@ -261,11 +271,14 @@ export default function CustomersPage() {
     );
   }
 
-  if (customers.length === 0 && page === 0) {
+  // Truly-empty business (no customers at all) gets the onboarding empty state.
+  // A search/segment that simply matches nothing falls through to the table,
+  // which renders its own "no results" message.
+  if (businessCustomerCount === 0) {
     return (
       <div className="flex flex-col gap-[14px]">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
-        <CustomerStatsCards totalCustomers={totalCustomers} achievements={achievements} />
+        <CustomerStatsCards totalCustomers={businessCustomerCount} achievements={achievements} />
         <EmptyCustomersState />
       </div>
     );
@@ -275,13 +288,16 @@ export default function CustomersPage() {
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: "150ms" }}>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
-      <CustomerStatsCards totalCustomers={totalCustomers} achievements={achievements} />
+      <CustomerStatsCards totalCustomers={businessCustomerCount} achievements={achievements} />
 
       {/* Search & Filter bar */}
       <SearchBar
         search={{
           value: searchTerm,
-          onChange: setSearchTerm,
+          onChange: (v) => {
+            setSearchTerm(v);
+            setPage(0);
+          },
           placeholder: t("searchPlaceholder"),
         }}
         filters={[segmentFilterGroup]}
@@ -289,7 +305,7 @@ export default function CustomersPage() {
       />
 
       <CustomerDataTable
-        customers={filteredAndSorted}
+        customers={customers}
         page={page}
         totalPages={totalPages}
         totalCustomers={totalCustomers}

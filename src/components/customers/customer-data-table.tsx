@@ -181,7 +181,7 @@ export function CustomerDataTable({
           </TableHeader>
           <TableBody>
             {customers.map((customer) => {
-              const segment = classifyCustomer(customer, totalStamps);
+              const segment = customer.segment ?? classifyCustomer(customer, totalStamps);
               const segConfig = getSegmentConfig(segment);
               const avatarColor = SEGMENT_AVATAR_COLORS[segment];
               const isSelected = selectedCustomerId === customer.id;
@@ -316,7 +316,7 @@ export function CustomerDataTable({
       <div className="md:hidden rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
         <div className="divide-y divide-[#F8F7F5]">
           {customers.map((customer) => {
-            const segment = classifyCustomer(customer, totalStamps);
+            const segment = customer.segment ?? classifyCustomer(customer, totalStamps);
             const segConfig = getSegmentConfig(segment);
             const avatarColor = SEGMENT_AVATAR_COLORS[segment];
 

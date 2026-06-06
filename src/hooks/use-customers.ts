@@ -1,25 +1,85 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getCustomers, addStamp, redeemReward, voidStamp, sendCustomerPass } from "@/api";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import {
+  getCustomers,
+  getCustomerSegmentCounts,
+  addStamp,
+  redeemReward,
+  voidStamp,
+  sendCustomerPass,
+} from "@/api";
 import type { PaginatedCustomerResponse } from "@/types";
+import type { SortKey, SortDir } from "@/components/customers/customer-data-table";
 
 const PAGE_SIZE = 50;
 
+// The table exposes "updated_at" as the last-activity sort; the API names that
+// column "last_activity". Everything else maps 1:1.
+const SORT_TO_API: Record<SortKey, string> = {
+  name: "name",
+  stamps: "stamps",
+  updated_at: "last_activity",
+  total_redemptions: "total_redemptions",
+};
+
+export interface CustomerListQuery {
+  page: number;
+  search: string;
+  segment: string;
+  sort: SortKey;
+  sortDir: SortDir;
+}
+
 export const customerKeys = {
   all: (businessId: string) => ["customers", businessId] as const,
-  page: (businessId: string, page: number) =>
-    ["customers", businessId, page] as const,
+  list: (businessId: string, query: CustomerListQuery) =>
+    ["customers", businessId, "list", query] as const,
+  segmentCounts: (businessId: string, search: string) =>
+    ["customers", businessId, "segment-counts", search] as const,
   detail: (businessId: string, customerId: string) =>
     ["customers", businessId, customerId] as const,
   walletStatus: (businessId: string, customerId: string) =>
     ["customers", businessId, customerId, "wallet-status"] as const,
 };
 
-export function useCustomers(businessId: string | undefined, page: number = 0) {
+/**
+ * Server-side customers list: search / segment filter / sort / pagination all
+ * run in the backend (migration 102), so results are correct across the whole
+ * business, not just the loaded page. `keepPreviousData` holds the prior page
+ * on screen while the next query resolves, so typing/sorting never flashes
+ * empty.
+ */
+export function useCustomers(
+  businessId: string | undefined,
+  query: CustomerListQuery,
+) {
   return useQuery({
-    queryKey: customerKeys.page(businessId!, page),
+    queryKey: customerKeys.list(businessId!, query),
     queryFn: () =>
-      getCustomers(businessId!, PAGE_SIZE, page * PAGE_SIZE),
+      getCustomers(businessId!, {
+        limit: PAGE_SIZE,
+        offset: query.page * PAGE_SIZE,
+        search: query.search || undefined,
+        segment: query.segment,
+        sort: SORT_TO_API[query.sort],
+        sortDir: query.sortDir,
+      }),
     enabled: !!businessId,
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** Whole-business per-segment counts for the filter pills, narrowed by the
+ *  (debounced) search term. Cached separately so it only refetches when the
+ *  search changes — not on every page/sort change. */
+export function useCustomerSegmentCounts(
+  businessId: string | undefined,
+  search: string,
+) {
+  return useQuery({
+    queryKey: customerKeys.segmentCounts(businessId!, search),
+    queryFn: () => getCustomerSegmentCounts(businessId!, search || undefined),
+    enabled: !!businessId,
+    placeholderData: keepPreviousData,
   });
 }
 

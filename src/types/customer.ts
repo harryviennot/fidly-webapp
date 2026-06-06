@@ -28,6 +28,11 @@ export interface CustomerResponse {
   // location suffix. Display as "Direct signup", not as missing data.
   enrolled_at_location_id?: string | null;
   enrolled_at_location_name?: string | null;
+  // Server-computed lifecycle segment (backend migration 102 search_customers).
+  // Only the list endpoint populates this; other producers leave it undefined.
+  // Mirrors CustomerSegment in @/lib/customer-segments — kept inline to avoid a
+  // type import cycle (customer-segments imports CustomerResponse from here).
+  segment?: "new" | "regular" | "vip" | "close_to_reward" | "at_risk" | "ghost" | null;
 }
 
 export interface PaginatedCustomerResponse {
