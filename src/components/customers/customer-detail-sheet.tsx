@@ -176,18 +176,18 @@ export function CustomerDetailSheet({
     });
   };
 
-  // Human "how long ago" headline, same scale as the customer table.
-  const formatRelative = (dateStr?: string) => {
+  // Relative ("5 days ago") while it's fresh, then the exact date once it's
+  // over a month old \u2014 one clean value per tile instead of cramming both in.
+  const formatSmartDate = (dateStr?: string) => {
     if (!dateStr) return "\u2014";
     const diffDays = Math.floor(
       (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24)
     );
+    if (diffDays >= 30) return formatDate(dateStr);
     if (diffDays <= 0) return tTime("today");
     if (diffDays === 1) return tTime("yesterday");
     if (diffDays < 7) return tTime("daysAgo", { count: diffDays });
-    if (diffDays < 30)
-      return tTime("weeksAgo", { count: Math.floor(diffDays / 7) });
-    return tTime("monthsAgo", { count: Math.floor(diffDays / 30) });
+    return tTime("weeksAgo", { count: Math.floor(diffDays / 7) });
   };
 
   const totalVisits = transactions.filter(
@@ -304,21 +304,17 @@ export function CustomerDetailSheet({
             {t("customerStats")}
           </p>
           <div className="grid grid-cols-2 gap-2.5">
-            {/* Date tiles carry both the headline AND its companion (relative +
-                absolute), so nothing is shown twice across two cards. */}
             <StatTile
               icon={<Clock className="w-4 h-4" weight="bold" />}
               label={t("lastVisit")}
-              value={formatRelative(lastVisit)}
-              hint={formatDate(lastVisit)}
+              value={formatSmartDate(lastVisit)}
               iconBg="var(--muted)"
               iconColor="var(--muted-foreground)"
             />
             <StatTile
               icon={<CalendarBlank className="w-4 h-4" weight="bold" />}
               label={t("customerSince")}
-              value={formatDate(firstVisit)}
-              hint={formatRelative(firstVisit)}
+              value={formatSmartDate(firstVisit)}
               iconBg="var(--info-light)"
               iconColor="var(--info)"
             />
@@ -401,7 +397,6 @@ function StatTile({
   icon,
   label,
   value,
-  hint,
   iconBg,
   iconColor,
   valueColor,
@@ -410,9 +405,6 @@ function StatTile({
   icon: React.ReactNode;
   label: string;
   value: string;
-  /** Optional muted companion line under the value (e.g. the exact date
-   *  beneath a relative headline). Lets one tile carry two related facts. */
-  hint?: string;
   iconBg: string;
   iconColor: string;
   valueColor?: string;
@@ -434,11 +426,6 @@ function StatTile({
         >
           {value}
         </div>
-        {hint && (
-          <div className="text-[11px] text-[#A5A5A5] leading-tight truncate">
-            {hint}
-          </div>
-        )}
       </div>
     </Card>
   );

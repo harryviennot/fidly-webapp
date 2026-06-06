@@ -69,7 +69,7 @@ export function InfoPopover({
       onClick={(e) => e.stopPropagation()}
       className={cn(TRIGGER_CLASSES, className)}
     >
-      <Info className="h-4 w-4" weight="bold" />
+      <Info className="h-4 w-4" weight="regular" />
     </button>
   );
 

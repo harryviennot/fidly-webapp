@@ -27,14 +27,17 @@ export function CustomerStatsCards({
   const newLast30d = achievements?.new_customers_last_30d ?? 0;
   const newPrev30d = achievements?.new_customers_prev_30d ?? 0;
   const growth = wowTrend(newLast30d, newPrev30d);
-  const repeatPct = Math.round((achievements?.repeat_rate ?? 0) * 100);
+  // "Repeat rate" and "Loyal customers" describe the SAME population — customers
+  // who came in on 2+ distinct days in the last 6 months — one as a share, one
+  // as a count. Keep them consistent by deriving the rate from the loyal count.
   const loyal = achievements?.loyal_customers_6m ?? 0;
+  const repeatPct =
+    totalCustomers > 0 ? Math.round((loyal / totalCustomers) * 100) : 0;
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px]">
       <StatCard
         title={t("totalCustomers")}
-        info={t("info.totalCustomers")}
         value={totalCustomers}
         icon={<Users className="w-4 h-4" weight="bold" />}
         tone="accent"
@@ -42,7 +45,6 @@ export function CustomerStatsCards({
       />
       <StatCard
         title={t("newLast30d")}
-        info={t("info.newLast30d")}
         value={newLast30d}
         subtitle={t("newSubtitle")}
         icon={<UserPlus className="w-4 h-4" weight="bold" />}

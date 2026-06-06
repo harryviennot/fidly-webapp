@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSendCustomerPass } from "@/hooks/use-customers";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface SendPassDialogProps {
@@ -73,7 +74,21 @@ export function SendPassDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[420px] gap-6">
+      <DialogContent
+        className={cn(
+          "max-w-[420px] gap-5",
+          // Phones: dock to the bottom edge as a sheet instead of a centered
+          // modal. It sizes to its content, rides up with the keyboard, and
+          // reads as native mobile UI — no overflow, no forced scrolling.
+          "max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:right-0",
+          "max-md:translate-x-0 max-md:translate-y-0 max-md:w-full max-md:max-w-none",
+          "max-md:rounded-b-none max-md:rounded-t-3xl max-md:p-6",
+          "max-md:pb-[max(1.5rem,env(safe-area-inset-bottom))]",
+          // Mobile safety net only (desktop matches the sibling dialogs exactly):
+          // this form is short enough that the scroll never actually triggers.
+          "max-md:max-h-[92dvh] max-md:overflow-y-auto max-md:overscroll-contain"
+        )}
+      >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[var(--accent-light)] flex items-center justify-center shrink-0">
             <PaperPlaneTilt

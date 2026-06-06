@@ -22,16 +22,14 @@
     },
     "stats": {
       "totalCustomers": "Total Customers",
-      "newLast30d": "New (30 days)",
+      "newLast30d": "This month",
       "repeatRate": "Repeat Rate",
       "loyalCustomers": "Loyal Customers",
       "loyalSubtitle": "Last 6 months",
-      "newSubtitle": "vs. previous 30 days",
+      "newSubtitle": "vs. last month",
       "info": {
-        "totalCustomers": "Everyone who has added your loyalty card.",
-        "newLast30d": "Customers who joined in the last 30 days. The arrow compares with the 30 days before.",
-        "repeatRate": "The share of your customers who came back on a second day, not just once.",
-        "loyalCustomers": "Customers who came in on at least two different days in the last 6 months."
+        "repeatRate": "The share of customers who came in at least twice in the last 6 months.",
+        "loyalCustomers": "The number of customers who came in at least twice in the last 6 months."
       }
     },
     "sort": {

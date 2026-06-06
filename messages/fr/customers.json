@@ -21,17 +21,15 @@
       "actions": "Actions"
     },
     "stats": {
-      "totalCustomers": "Clients au total",
-      "newLast30d": "Nouveaux (30 jours)",
+      "totalCustomers": "Clients totaux",
+      "newLast30d": "Ce mois-ci",
       "repeatRate": "Taux de fid\u00e9lit\u00e9",
       "loyalCustomers": "Clients fid\u00e8les",
       "loyalSubtitle": "6 derniers mois",
-      "newSubtitle": "vs 30 jours d'avant",
+      "newSubtitle": "vs mois pr\u00e9c\u00e9dent",
       "info": {
-        "totalCustomers": "Tous les clients qui ont ajout\u00e9 votre carte de fid\u00e9lit\u00e9.",
-        "newLast30d": "Clients arriv\u00e9s ces 30 derniers jours. La fl\u00e8che compare avec les 30 jours d'avant.",
-        "repeatRate": "La part de vos clients revenus un deuxi\u00e8me jour, pas seulement une fois.",
-        "loyalCustomers": "Clients venus au moins deux jours diff\u00e9rents sur les 6 derniers mois."
+        "repeatRate": "Part des clients venus au moins 2 fois dans les 6 derniers mois.",
+        "loyalCustomers": "Total des clients venus au moins 2 fois dans les 6 derniers mois."
       }
     },
     "sort": {

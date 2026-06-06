@@ -44,30 +44,56 @@ export function CustomerActionButton({
 
   const base =
     "inline-flex items-center justify-center cursor-pointer transition-all duration-150 " +
-    "hover:-translate-y-px hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 " +
+    "hover:-translate-y-px hover:shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 " +
     "focus-visible:ring-black/10 disabled:opacity-40 disabled:cursor-not-allowed " +
-    "disabled:hover:translate-y-0 disabled:hover:shadow-none";
+    "disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:active:scale-100";
 
   if (size === "lg") {
+    // Strong hierarchy: the primary action (add / redeem) is a wide, premium
+    // gradient pill with a soft glow and lift; "void" shrinks to a compact
+    // icon button that only flushes red on intent — so the rare corrective
+    // action is always within reach but never competes for attention.
+    const isVoid = variant === "void";
+    const gradient =
+      variant === "redeem"
+        ? "linear-gradient(135deg, #D89A4A, #BF7E33)"
+        : "linear-gradient(135deg, #5A9568, #467453)";
+    const glow =
+      variant === "redeem"
+        ? "hover:shadow-[0_10px_24px_-8px_rgba(196,136,61,0.55)]"
+        : "hover:shadow-[0_10px_24px_-8px_rgba(74,124,89,0.55)]";
+
     return (
       <button
         type="button"
         onClick={onClick}
         disabled={isDisabled}
         title={label}
-        className={cn(base, "flex-1 flex-col gap-1 py-2.5 px-1.5 rounded-lg", className)}
-        style={{ border: `1px solid ${border}`, background: bg, fontFamily: "inherit" }}
+        aria-label={label}
+        className={cn(
+          "inline-flex items-center justify-center gap-2 h-12 rounded-2xl font-semibold cursor-pointer select-none",
+          "transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2",
+          "focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]",
+          "disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
+          isVoid
+            ? "shrink-0 w-12 text-[#A8A29A] bg-[#F4F3F0] hover:bg-[#FBEEED] hover:text-[#C75050] focus-visible:ring-[#C75050]/30"
+            : cn(
+                "flex-1 text-white text-[13.5px] shadow-md hover:-translate-y-0.5",
+                "disabled:hover:translate-y-0 focus-visible:ring-[var(--accent)]",
+                glow
+              ),
+          className
+        )}
+        style={isVoid ? undefined : { background: gradient }}
       >
-        <span style={{ color }} className="flex">
+        <span className="flex">
           {loading ? (
-            <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />
+            <CircleNotch className="w-5 h-5 animate-spin" weight="bold" />
           ) : (
-            <Icon className="w-4 h-4" weight="bold" />
+            <Icon className="w-5 h-5" weight={isVoid ? "bold" : "fill"} />
           )}
         </span>
-        <span className="text-[10px] font-medium whitespace-nowrap" style={{ color }}>
-          {label}
-        </span>
+        {!isVoid && <span className="whitespace-nowrap">{label}</span>}
       </button>
     );
   }

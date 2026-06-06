@@ -56,7 +56,7 @@ export function CustomerQuickActions({
   };
 
   return (
-    <div className="flex gap-1.5">
+    <div className="flex gap-2">
       {/* Add Stamp / Redeem */}
       {!canRedeem ? (
         <CustomerActionButton
