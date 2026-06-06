@@ -75,7 +75,10 @@ export function StatCard({
           <span
             className={cn(
               "font-semibold flex items-center gap-0.5",
-              positive ? "text-[var(--accent)]" : "text-[#C75050]"
+              // Semantic, not brand: up reads as a clear "good" green (the brand
+              // accent is itself green, so it never signalled positive); down is
+              // the error red. Logical at a glance.
+              positive ? "text-[#2E9E5B]" : "text-[#C75050]"
             )}
           >
             <span className="text-[8px]">{positive ? "▲" : "▼"}</span>

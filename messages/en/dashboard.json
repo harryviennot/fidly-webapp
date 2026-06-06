@@ -17,8 +17,13 @@
     "loyalSubtitle": "active last 6 months",
     "plusThisWeek": "+{count} this week",
     "vsLastMonth": "vs last month",
+    "vsLastWeek": "vs last week",
     "vsYesterday": "vs yesterday",
     "thisWeek": "this week",
+    "info": {
+      "totalCustomers": "Everyone who has added your loyalty card. The arrow shows the change vs last week.",
+      "loyalCustomers": "The number of customers who came in at least twice in the last 6 months."
+    },
     "recentScansEmptyTitle": "No scans yet",
     "recentScansEmptyBody": "Stamps your team adds will show up here.",
     "firstRunTitle": "Get your first customer",
