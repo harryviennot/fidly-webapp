@@ -28,7 +28,7 @@ const STAMPEO_BRAND_ACCENT = '#f97316';
 export default function OnboardingBusinessLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { currentBusiness, loading: businessLoading } = useBusiness();
+  const { currentBusiness, loading: businessLoading, cancelNewBusiness } = useBusiness();
 
   useEffect(() => {
     if (authLoading || businessLoading) return;
@@ -40,6 +40,15 @@ export default function OnboardingBusinessLayout({ children }: { children: React
       router.replace('/');
     }
   }, [authLoading, businessLoading, user, currentBusiness, router]);
+
+  // Leaving onboarding without finishing a "create another business" run
+  // clears the flag, so the context reselects the user's previous business
+  // instead of holding `currentBusiness` at the forced-null value. On a normal
+  // finish the wizard already cleared it via setCurrentBusiness, so this is a
+  // no-op there. `cancelNewBusiness` is stable, so this fires only on unmount.
+  useEffect(() => {
+    return () => cancelNewBusiness();
+  }, [cancelNewBusiness]);
 
   // Apply the wizard's orange theme on mount. On unmount, hand the theme
   // back to the saved business colors so the dashboard renders the user's

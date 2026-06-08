@@ -3,6 +3,7 @@
     "title": "Mes entreprises",
     "subtitle": "L'ensemble des entreprises auxquelles vous appartenez.",
     "subtitleAdmin": "Toutes les entreprises de la plateforme.",
+    "createNew": "Nouvelle entreprise",
     "searchPlaceholder": "Rechercher par nom ou identifiant…",
     "ownedBy": "Propriétaire : {name}",
     "count": "{count} sur {total}",

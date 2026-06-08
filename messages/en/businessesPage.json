@@ -3,6 +3,7 @@
     "title": "Businesses",
     "subtitle": "All the businesses you belong to.",
     "subtitleAdmin": "All businesses on the platform.",
+    "createNew": "New business",
     "searchPlaceholder": "Search by name or slug…",
     "ownedBy": "Owner: {name}",
     "count": "{count} of {total}",

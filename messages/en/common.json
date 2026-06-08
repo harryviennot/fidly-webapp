@@ -39,6 +39,7 @@
   "businessSwitcher": {
     "yourBusinesses": "Your businesses",
     "switchTo": "Switch to",
+    "createNew": "Create new business",
     "viewAll": "View all ({count})"
   },
   "roles": {

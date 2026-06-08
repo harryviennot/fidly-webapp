@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CaretUpDown, ArrowRight } from "@phosphor-icons/react"
+import { CaretUpDown, ArrowRight, Plus } from "@phosphor-icons/react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import {
@@ -94,7 +94,7 @@ function BusinessAvatar({
 }
 
 export function BusinessSwitcher() {
-  const { memberships, currentBusiness, setCurrentBusiness } = useBusiness()
+  const { memberships, currentBusiness, setCurrentBusiness, startNewBusiness } = useBusiness()
   const isSuperadmin = useIsSuperadmin()
   const router = useRouter()
   const t = useTranslations()
@@ -226,22 +226,33 @@ export function BusinessSwitcher() {
             </div>
           </DropdownMenuItem>
         ))}
+        {visibleMemberships.length > 0 && <DropdownMenuSeparator />}
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault()
+            startNewBusiness()
+            router.push("/onboarding/business/welcome")
+          }}
+          className="flex items-center gap-2 p-2 text-sm cursor-pointer"
+        >
+          <Plus className="size-4 text-[var(--accent)]" weight="bold" />
+          <span className="text-[var(--accent)] font-medium">
+            {t("businessSwitcher.createNew")}
+          </span>
+        </DropdownMenuItem>
         {shouldShowViewAll && (
-          <>
-            {visibleMemberships.length > 0 && <DropdownMenuSeparator />}
-            <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault()
-                router.push("/businesses")
-              }}
-              className="flex items-center justify-between gap-2 p-2 text-sm cursor-pointer"
-            >
-              <span className="text-[var(--accent)] font-medium">
-                {t("businessSwitcher.viewAll", { count: memberships.length })}
-              </span>
-              <ArrowRight className="size-3.5 text-[var(--accent)]" weight="bold" />
-            </DropdownMenuItem>
-          </>
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault()
+              router.push("/businesses")
+            }}
+            className="flex items-center justify-between gap-2 p-2 text-sm cursor-pointer"
+          >
+            <span className="text-[var(--accent)] font-medium">
+              {t("businessSwitcher.viewAll", { count: memberships.length })}
+            </span>
+            <ArrowRight className="size-3.5 text-[var(--accent)]" weight="bold" />
+          </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
