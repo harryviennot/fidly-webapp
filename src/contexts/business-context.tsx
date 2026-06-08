@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
@@ -33,6 +33,14 @@ interface BusinessContextType {
   error: string | null;
   refetch: () => Promise<void>;
   isImpersonating: boolean;
+  /**
+   * True while the user is creating an additional business through the launch
+   * wizard. Forces `currentBusiness` to null so the wizard runs its first-time
+   * path (create, not edit). See `startNewBusiness` / `cancelNewBusiness`.
+   */
+  creatingNewBusiness: boolean;
+  startNewBusiness: () => void;
+  cancelNewBusiness: () => void;
 }
 
 const BusinessContext = createContext<BusinessContextType | undefined>(
@@ -57,6 +65,14 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const [currentBusinessId, setCurrentBusinessId] = useState<string | null>(
     () => (typeof window !== "undefined" ? localStorage.getItem("currentBusinessId") : null)
   );
+
+  // "Create another business" flow. While true, `currentBusiness` is forced to
+  // null (below) and the reconcile effect won't auto-reselect an existing
+  // membership — so the launch wizard sees a clean slate and creates a new
+  // business instead of editing the selected one. Cleared when the wizard
+  // commits the new business (`setCurrentBusiness`) or the user leaves
+  // onboarding without finishing (`cancelNewBusiness`).
+  const [creatingNewBusiness, setCreatingNewBusiness] = useState(false);
 
   // Tracks the last time the user explicitly switched to each business so
   // the switcher / list can sort by recent access. Lives in localStorage.
@@ -162,6 +178,11 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Creating a new business: leave the stored selection untouched (so the
+    // user returns to it if they abandon onboarding) but skip auto-selection
+    // so `currentBusiness` stays the forced-null value the wizard needs.
+    if (creatingNewBusiness) return;
+
     // Don't touch the stored selection until the memberships query has
     // resolved — otherwise on refresh we would clobber a valid stored ID
     // with the first active membership before knowing what's available.
@@ -189,10 +210,14 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("currentBusinessId");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, isLoading, memberships.length, activeMemberships.length, isImpersonating, impersonatedBusiness?.id]);
+  }, [user?.id, isLoading, memberships.length, activeMemberships.length, isImpersonating, impersonatedBusiness?.id, creatingNewBusiness]);
 
-  const membership =
-    memberships.find((m) => m.business.id === currentBusinessId) ?? null;
+  // During the new-business flow, force the selection to null so the wizard
+  // runs its first-time (create) path. The stored id is preserved, so clearing
+  // the flag (commit or cancel) snaps back to the previously selected business.
+  const membership = creatingNewBusiness
+    ? null
+    : (memberships.find((m) => m.business.id === currentBusinessId) ?? null);
   const currentBusiness = membership?.business ?? null;
   const currentRole = membership?.role ?? null;
 
@@ -241,6 +266,10 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   }, [currentBusiness?.id, currentBusiness?.status, isImpersonating]);
 
   const setCurrentBusiness = (business: Business) => {
+    // Selecting a concrete business ends the new-business flow — the wizard
+    // calls this the moment it creates the row, so the forced-null window
+    // closes exactly when a real business exists to point at.
+    setCreatingNewBusiness(false);
     // Switching businesses while impersonating ends the session — the
     // operator is leaving the impersonated context, and the audit log
     // should reflect that as a clean exit, not a silent drift.
@@ -254,6 +283,18 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     const secondaryColor = getBackgroundFromSettings(business.settings);
     applyTheme(accentColor, secondaryColor ?? undefined);
   };
+
+  // Enter the "create another business" flow. Stable identity so consumers
+  // (e.g. the onboarding layout's unmount cleanup) can depend on it safely.
+  const startNewBusiness = useCallback(() => {
+    setCreatingNewBusiness(true);
+  }, []);
+
+  // Exit the flow without committing — restores the previously selected
+  // business. Called when the user leaves onboarding before finishing.
+  const cancelNewBusiness = useCallback(() => {
+    setCreatingNewBusiness(false);
+  }, []);
 
   const refetch = () =>
     queryClient.invalidateQueries({
@@ -273,6 +314,9 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         error: queryError ? "Failed to load memberships" : null,
         refetch,
         isImpersonating,
+        creatingNewBusiness,
+        startNewBusiness,
+        cancelNewBusiness,
       }}
     >
       {children}

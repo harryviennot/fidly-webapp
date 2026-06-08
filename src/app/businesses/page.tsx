@@ -7,6 +7,7 @@ import {
   SquaresFourIcon,
   RowsIcon,
   StorefrontIcon,
+  PlusIcon,
 } from "@phosphor-icons/react";
 
 import { SearchBar, type FilterGroup } from "@/components/reusables/search-bar";
@@ -32,7 +33,7 @@ export default function BusinessesPage() {
   const t = useTranslations("businessesPage");
   const router = useRouter();
   const isSuperadmin = useIsSuperadmin();
-  const { memberships, setCurrentBusiness } = useBusiness();
+  const { memberships, setCurrentBusiness, startNewBusiness } = useBusiness();
 
   const [view, setView] = useListViewPreference<View>("businessListView", "cards");
   const [scope, setScope] = useListViewPreference<"mine" | "all">(
@@ -81,6 +82,14 @@ export default function BusinessesPage() {
     router.push("/");
   };
 
+  // Create another business: enter the launch wizard with a clean slate (the
+  // context forces currentBusiness to null), so it runs the same create flow
+  // as a first-time signup instead of editing one of the existing businesses.
+  const handleCreateNew = () => {
+    startNewBusiness();
+    router.push("/onboarding/business/welcome");
+  };
+
   const [impersonateTarget, setImpersonateTarget] = useState<BusinessListItem | null>(null);
 
   const handleImpersonate = (business: BusinessListItem) => {
@@ -127,6 +136,13 @@ export default function BusinessesPage() {
       <PageHeader
         title={t("title")}
         subtitle={isSuperadmin ? t("subtitleAdmin") : t("subtitle")}
+        actions={[
+          {
+            label: t("createNew"),
+            icon: <PlusIcon size={16} weight="bold" />,
+            onClick: handleCreateNew,
+          },
+        ]}
         action={
           showCount ? (
             <span className="text-xs text-[var(--muted-foreground)] tabular-nums">

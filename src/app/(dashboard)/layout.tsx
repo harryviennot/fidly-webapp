@@ -39,6 +39,7 @@ export default function AdminLayout({
     hasAnyMembership,
     currentRole,
     isImpersonating,
+    creatingNewBusiness,
     refetch,
   } = useBusiness();
   const t = useTranslations();
@@ -65,6 +66,9 @@ export default function AdminLayout({
   // A signed-in user with zero memberships has just come from /signup —
   // ship them into the wizard to create their first business.
   const needsWizardNoBusiness = !loading && !hasAnyMembership && !isImpersonating;
+  // "Create another business": the context has forced currentBusiness to null,
+  // so route to the wizard rather than fall through to NoActiveBusinessState.
+  const startingNewBusiness = creatingNewBusiness && !isImpersonating;
 
   // Just back from Stripe Checkout (card-upfront flow). The subscription
   // webhook may land a beat after the redirect, so rather than bounce the user
@@ -104,12 +108,14 @@ export default function AdminLayout({
       return;
     }
     if (awaitingSubscription) return; // hold while the webhook lands
-    if (needsWizard) {
+    if (startingNewBusiness) {
+      router.replace("/onboarding/business/welcome");
+    } else if (needsWizard) {
       router.replace(wizardResumePath(setupProgress));
     } else if (needsWizardNoBusiness) {
       router.replace("/onboarding/business/welcome");
     }
-  }, [loading, isScanner, awaitingSubscription, needsWizard, needsWizardNoBusiness, router, setupProgress]);
+  }, [loading, isScanner, awaitingSubscription, startingNewBusiness, needsWizard, needsWizardNoBusiness, router, setupProgress]);
 
   // Show loading state — also while we wait for the post-checkout webhook so
   // the user isn't bounced back to the plan step the instant they return.
@@ -155,6 +161,20 @@ export default function AdminLayout({
   // the launch wizard; render the loading shell in the interim so we don't
   // flash NoActiveBusinessState.
   if (needsWizardNoBusiness) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)] mx-auto"></div>
+          <p className="mt-4 text-sm text-[var(--muted-foreground)]">{t("status.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Creating another business: currentBusiness is forced to null, so render the
+  // loading shell while the useEffect above redirects to the wizard — never the
+  // NoActiveBusinessState branch below (which would catch the null).
+  if (startingNewBusiness) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">

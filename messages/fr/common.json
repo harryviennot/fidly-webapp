@@ -39,6 +39,7 @@
   "businessSwitcher": {
     "yourBusinesses": "Vos entreprises",
     "switchTo": "Basculer vers",
+    "createNew": "Créer une entreprise",
     "viewAll": "Voir tous ({count})"
   },
   "roles": {
