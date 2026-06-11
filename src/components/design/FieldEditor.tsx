@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { PassField } from '@/types';
-import { CaretUp, CaretDown, Trash, Plus } from '@phosphor-icons/react';
+import { CaretUp, CaretDown, InfoIcon, Trash, Plus } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { VariableChips } from '@/components/notifications/VariableChips';
 import {
@@ -148,6 +148,7 @@ export default function FieldEditor({
                       locale={locale}
                       placeholder={t('label')}
                       ariaLabel={t('label')}
+                      singleLine
                       className="min-h-9 py-1.5 text-sm font-semibold bg-white"
                     />
                   </div>
@@ -166,6 +167,7 @@ export default function FieldEditor({
                       locale={locale}
                       placeholder={t('value')}
                       ariaLabel={t('value')}
+                      singleLine
                       className="min-h-9 py-1.5 text-sm bg-white"
                     />
                   </div>
@@ -205,11 +207,17 @@ export default function FieldEditor({
       )}
 
       {enableVariables && fields.length > 0 && (
-        <VariableChips
-          variables={FIELD_VARIABLES}
-          onInsert={handleInsertVariable}
-          locale={locale}
-        />
+        <>
+          <VariableChips
+            variables={FIELD_VARIABLES}
+            onInsert={handleInsertVariable}
+            locale={locale}
+          />
+          <p className="text-[11px] text-muted-foreground leading-[1.5] flex items-start gap-1.5">
+            <InfoIcon className="w-3.5 h-3.5 shrink-0 mt-[1px]" weight="regular" />
+            <span>{t('variablesNote')}</span>
+          </p>
+        </>
       )}
 
       {fields.length < maxFields && (

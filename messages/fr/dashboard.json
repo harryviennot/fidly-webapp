@@ -76,6 +76,7 @@
     "noCardYet": "Aucune carte créée",
     "cardsIssued": "Cartes émises",
     "activePasses": "Cartes installées",
-    "installRate": "Taux d'installation"
+    "installRate": "Taux d'installation",
+    "rewardsLeft": "{count} récompense(s) restante(s)"
   }
 }

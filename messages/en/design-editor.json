@@ -168,7 +168,8 @@
       "moveUp": "Move up",
       "moveDown": "Move down",
       "remove": "Remove",
-      "addField": "Add Field"
+      "addField": "Add Field",
+      "variablesNote": "If a customer's info is missing (their name, for example), the whole field is left off their card, label included."
     },
     "translations": {
       "button": "Translations",

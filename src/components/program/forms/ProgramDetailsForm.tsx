@@ -5,6 +5,8 @@ import { CheckIcon } from '@phosphor-icons/react';
 import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
 import { Switch } from '@/components/ui/switch';
 import { InfoPopover } from '@/components/reusables/info-popover';
+import { NumberStepper } from '@/components/reusables/number-stepper';
+import { SmoothHeight } from '@/components/reusables/smooth-height';
 import { computeCardColors } from '@/lib/card-utils';
 import { cn } from '@/lib/utils';
 import type { CardDesign } from '@/types';
@@ -198,6 +200,33 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
         </div>
       </div>
 
+      {/* Prestamp (head start) — right after the stamp goal: both are about
+          the stamp count, before the reward block below. */}
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <label className="text-[12px] font-semibold text-[#555]">
+              {t('prestamp.label')}
+            </label>
+            <InfoPopover content={t('prestamp.help')} />
+          </div>
+          <NumberStepper
+            value={value.initialStamps}
+            onChange={(next) =>
+              patch({
+                initialStamps: Math.max(0, Math.min(next ?? 0, value.totalStamps - 1)),
+              })
+            }
+            min={0}
+            max={value.totalStamps - 1}
+            aria-label={t('prestamp.label')}
+          />
+        </div>
+        <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
+          {t('prestamp.description')}
+        </p>
+      </div>
+
       {/* Reward */}
       <div>
         <label className="block text-[12px] font-semibold text-[#555] mb-1.5">{t('rewardLabel')}</label>
@@ -211,10 +240,12 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
       </div>
 
       {/* Stackable rewards */}
-      <div className="rounded-[10px] border-[1.5px] border-[var(--border)] p-3.5 px-4">
+      <div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[13px] font-semibold text-[#1A1A1A]">{t('stackableRewards.label')}</span>
+            <label className="text-[12px] font-semibold text-[#555]">
+              {t('stackableRewards.label')}
+            </label>
             <InfoPopover content={t('stackableRewards.help')} />
           </div>
           <Switch
@@ -226,63 +257,27 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
         <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
           {t('stackableRewards.description')}
         </p>
-        {value.stackableRewards && (
-          <div className="mt-3 pt-3 border-t border-[var(--border-light)]">
-            <div className="flex items-center justify-between gap-3">
+        <SmoothHeight>
+          {value.stackableRewards && (
+            <div className="flex items-center justify-between gap-3 pt-3 animate-slide-up">
               <div className="flex items-center gap-1.5 min-w-0">
                 <label className="text-[12px] font-semibold text-[#555]">
                   {t('stackableRewards.maxLabel')}
                 </label>
                 <InfoPopover content={t('stackableRewards.maxHelp')} />
               </div>
-              <input
-                type="number"
+              <NumberStepper
+                value={value.maxStackedRewards}
+                onChange={(next) => patch({ maxStackedRewards: next })}
                 min={1}
                 max={99}
-                value={value.maxStackedRewards ?? ''}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  if (raw === '') {
-                    patch({ maxStackedRewards: null });
-                    return;
-                  }
-                  const parsed = parseInt(raw, 10);
-                  if (!Number.isNaN(parsed)) {
-                    patch({ maxStackedRewards: Math.max(1, Math.min(parsed, 99)) });
-                  }
-                }}
-                placeholder={t('stackableRewards.unlimited')}
-                className="w-[120px] px-3 py-2 rounded-lg border border-[var(--border-medium)] bg-white text-[13px] text-[#1A1A1A] outline-none focus:border-[var(--accent)] transition-colors text-right"
+                allowEmpty
+                emptyLabel={t('stackableRewards.unlimited')}
+                aria-label={t('stackableRewards.maxLabel')}
               />
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Prestamp (head start) */}
-      <div className="rounded-[10px] border-[1.5px] border-[var(--border)] p-3.5 px-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[13px] font-semibold text-[#1A1A1A]">{t('prestamp.label')}</span>
-            <InfoPopover content={t('prestamp.help')} />
-          </div>
-          <input
-            type="number"
-            min={0}
-            max={value.totalStamps - 1}
-            value={value.initialStamps}
-            onChange={(e) => {
-              const parsed = parseInt(e.target.value, 10);
-              const next = Number.isNaN(parsed) ? 0 : parsed;
-              patch({ initialStamps: Math.max(0, Math.min(next, value.totalStamps - 1)) });
-            }}
-            className="w-[80px] px-3 py-2 rounded-lg border border-[var(--border-medium)] bg-white text-[13px] text-[#1A1A1A] outline-none focus:border-[var(--accent)] transition-colors text-right"
-            aria-label={t('prestamp.label')}
-          />
-        </div>
-        <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
-          {t('prestamp.description')}
-        </p>
+          )}
+        </SmoothHeight>
       </div>
     </div>
   );

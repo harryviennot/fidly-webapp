@@ -167,7 +167,8 @@
         "close_to_reward": "Close to Reward",
         "at_risk": "At Risk",
         "ghost": "Ghost"
-      }
+      },
+      "rewardsAvailable": "Rewards to redeem"
     },
     "transaction": {
       "empty": "No transactions yet",
@@ -197,7 +198,8 @@
         "hoursAgo": "{count}h ago",
         "yesterday": "Yesterday",
         "daysAgo": "{count}d ago"
-      }
+      },
+      "rewardsLeft": "{count} reward(s) left"
     }
   }
 }

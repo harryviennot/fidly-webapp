@@ -167,7 +167,8 @@
         "close_to_reward": "Proche de la récompense",
         "at_risk": "À risque",
         "ghost": "Fantôme"
-      }
+      },
+      "rewardsAvailable": "Récompenses à utiliser"
     },
     "transaction": {
       "empty": "Aucune transaction",
@@ -197,7 +198,8 @@
         "hoursAgo": "il y a {count}h",
         "yesterday": "Hier",
         "daysAgo": "il y a {count}j"
-      }
+      },
+      "rewardsLeft": "{count} récompense(s) restante(s)"
     }
   }
 }

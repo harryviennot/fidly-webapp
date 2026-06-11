@@ -4,6 +4,9 @@ import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { NumberStepper } from '@/components/reusables/number-stepper';
+import { SmoothHeight } from '@/components/reusables/smooth-height';
 import { useBusiness } from '@/contexts/business-context';
 import { useDefaultProgram, useUpdateProgram } from '@/hooks/use-programs';
 import { useDesigns } from '@/hooks/use-designs';
@@ -89,6 +92,18 @@ export function ProgramStep() {
     'program.rewardName',
     () => program?.reward_name || tDef(bizDefaults.rewardNameKey)
   );
+  const [stackableRewards, setStackableRewards] = useWizardDraft<boolean>(
+    'program.stackableRewards',
+    () => program?.config?.stackable_rewards ?? false
+  );
+  const [maxStackedRewards, setMaxStackedRewards] = useWizardDraft<number | null>(
+    'program.maxStackedRewards',
+    () => program?.config?.max_stacked_rewards ?? null
+  );
+  const [initialStamps, setInitialStamps] = useWizardDraft<number>(
+    'program.initialStamps',
+    () => program?.config?.initial_stamps ?? 0
+  );
 
   // Only one type is currently active; the others render as disabled chips
   // with a "Coming soon" badge so the user sees the roadmap.
@@ -121,8 +136,15 @@ export function ProgramStep() {
   );
 
   const snapshot = useMemo(
-    () => ({ programName, totalStamps, rewardName }),
-    [programName, totalStamps, rewardName]
+    () => ({
+      programName,
+      totalStamps,
+      rewardName,
+      stackableRewards,
+      maxStackedRewards,
+      initialStamps,
+    }),
+    [programName, totalStamps, rewardName, stackableRewards, maxStackedRewards, initialStamps]
   );
   const { isDirty, markSaved } = useDirtySnapshot('program', snapshot);
 
@@ -161,7 +183,16 @@ export function ProgramStep() {
               programId,
               data: {
                 name,
-                config: { ...programConfig, total_stamps: stamps, user_configured: true },
+                config: {
+                  ...programConfig,
+                  total_stamps: stamps,
+                  stackable_rewards: snapshot.stackableRewards,
+                  max_stacked_rewards: snapshot.maxStackedRewards,
+                  // Clamp defensively: the stepper caps live, but the goal
+                  // can shrink after the prestamp was drafted.
+                  initial_stamps: Math.max(0, Math.min(snapshot.initialStamps, stamps - 1)),
+                  user_configured: true,
+                },
                 reward_name: reward,
               },
             });
@@ -236,6 +267,18 @@ export function ProgramStep() {
           />
         </WizardField>
 
+        <WizardField label={tLp('prestamp.label')} helper={tLp('prestamp.description')}>
+          <NumberStepper
+            value={initialStamps}
+            onChange={(next) =>
+              setInitialStamps(Math.max(0, Math.min(next ?? 0, totalStamps - 1)))
+            }
+            min={0}
+            max={totalStamps - 1}
+            aria-label={tLp('prestamp.label')}
+          />
+        </WizardField>
+
         <WizardField label={tLp('rewardLabel')} htmlFor="program-reward" required>
           <Input
             id="program-reward"
@@ -244,6 +287,37 @@ export function ProgramStep() {
             placeholder={tLp('rewardNamePlaceholder')}
             className="h-11"
           />
+        </WizardField>
+
+        <WizardField
+          label={tLp('stackableRewards.label')}
+          helper={tLp('stackableRewards.description')}
+        >
+          <div className="flex flex-col">
+            <Switch
+              checked={stackableRewards}
+              onCheckedChange={setStackableRewards}
+              aria-label={tLp('stackableRewards.label')}
+            />
+            <SmoothHeight>
+              {stackableRewards && (
+                <div className="flex items-center justify-between gap-3 pt-3 animate-slide-up">
+                  <span className="wiz-body text-[#7A7A7A]">
+                    {tLp('stackableRewards.maxLabel')}
+                  </span>
+                  <NumberStepper
+                    value={maxStackedRewards}
+                    onChange={setMaxStackedRewards}
+                    min={1}
+                    max={99}
+                    allowEmpty
+                    emptyLabel={tLp('stackableRewards.unlimited')}
+                    aria-label={tLp('stackableRewards.maxLabel')}
+                  />
+                </div>
+              )}
+            </SmoothHeight>
+          </div>
         </WizardField>
       </div>
     </div>

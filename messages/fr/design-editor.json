@@ -168,7 +168,8 @@
       "moveUp": "Monter",
       "moveDown": "Descendre",
       "remove": "Supprimer",
-      "addField": "Ajouter un champ"
+      "addField": "Ajouter un champ",
+      "variablesNote": "Si une information manque pour un client (son prénom, par exemple), le champ entier disparaît de sa carte, titre compris."
     },
     "translations": {
       "button": "Traductions",

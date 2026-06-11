@@ -83,6 +83,14 @@ export function ActivityItem({
         ? t("sources.dashboard")
         : transaction.source;
 
+  // Stackable rewards: redemptions record the remaining banked count so the
+  // log answers "how many do they have left?" at a glance. Older rows
+  // (pre-feature) lack the key and show nothing.
+  const rewardsLeft =
+    transaction.type === "reward_redeemed" && metadata?.rewards_after != null
+      ? Number(metadata.rewards_after)
+      : null;
+
   return (
     <div
       onClick={onClick}
@@ -168,6 +176,14 @@ export function ActivityItem({
                 )}
                 <span className="text-[#D8D5CE]">·</span>
                 <span>{sourceLabel}</span>
+                {rewardsLeft != null && (
+                  <>
+                    <span className="text-[#D8D5CE]">·</span>
+                    <span className="font-semibold text-[var(--warning)]">
+                      {t("rewardsLeft", { count: rewardsLeft })}
+                    </span>
+                  </>
+                )}
               </>
             )}
             {transaction.employee_name && (

@@ -32,6 +32,11 @@ interface VariableEditorProps {
   placeholder?: string;
   /** Optional aria-label. */
   ariaLabel?: string;
+  /** Single-line mode for pass-field inputs: Enter is swallowed and any
+   *  newline that sneaks in (paste, BR serialization) collapses to a space.
+   *  Without this, contenteditable <br>s serialize to "\n" and end up as a
+   *  literal escape on the real wallet pass. */
+  singleLine?: boolean;
   className?: string;
 }
 
@@ -112,7 +117,7 @@ function serializeDom(root: HTMLElement): string {
 
 export const VariableEditor = forwardRef<VariableEditorHandle, VariableEditorProps>(
   function VariableEditor(
-    { value, onChange, locale, placeholder, ariaLabel, className },
+    { value, onChange, locale, placeholder, ariaLabel, singleLine, className },
     ref
   ) {
     const editorRef = useRef<HTMLDivElement>(null);
@@ -141,10 +146,13 @@ export const VariableEditor = forwardRef<VariableEditorHandle, VariableEditorPro
     const emit = useCallback(() => {
       const el = editorRef.current;
       if (!el) return;
-      const text = serializeDom(el);
+      let text = serializeDom(el);
+      if (singleLine) {
+        text = text.replace(/\s*\n+\s*/g, ' ');
+      }
       lastSyncedRef.current = text;
       onChange(text);
-    }, [onChange]);
+    }, [onChange, singleLine]);
 
     const handleInput = useCallback(() => {
       emit();
@@ -217,12 +225,19 @@ export const VariableEditor = forwardRef<VariableEditorHandle, VariableEditorPro
         ref={editorRef}
         role="textbox"
         aria-label={ariaLabel}
-        aria-multiline="true"
+        aria-multiline={!singleLine}
         contentEditable
         suppressContentEditableWarning
         data-placeholder={placeholder}
         onInput={handleInput}
         onClick={handleClick}
+        onKeyDown={
+          singleLine
+            ? (e) => {
+                if (e.key === 'Enter') e.preventDefault();
+              }
+            : undefined
+        }
         className={cn(
           'var-editor min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs',
           'outline-none transition-[color,box-shadow]',
