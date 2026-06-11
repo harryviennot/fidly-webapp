@@ -39,6 +39,7 @@ const SEGMENT_KEYS: CustomerSegment[] = [
   "new",
   "regular",
   "vip",
+  "reward_ready",
   "close_to_reward",
   "at_risk",
   "ghost",
@@ -216,7 +217,7 @@ export default function CustomersPage() {
   // narrowed by the active search. Fill any segment the API omitted with 0.
   const segmentCounts = useMemo(() => {
     const counts = {
-      new: 0, regular: 0, vip: 0, close_to_reward: 0, at_risk: 0, ghost: 0,
+      new: 0, regular: 0, vip: 0, reward_ready: 0, close_to_reward: 0, at_risk: 0, ghost: 0,
     } as Record<CustomerSegment, number>;
     if (segmentCountsData) {
       for (const key of SEGMENT_KEYS) counts[key] = segmentCountsData[key] ?? 0;

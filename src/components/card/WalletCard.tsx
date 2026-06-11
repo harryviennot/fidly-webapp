@@ -4,6 +4,7 @@ import React, { useRef, useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { CardDesign } from "@/types";
+import { renderSamplePreview } from "@/lib/template-variables";
 import {
   StampIconSvg,
   StampIconType,
@@ -175,7 +176,7 @@ function SecondaryFieldsRow({ fields, colors }: SecondaryFieldsRowProps) {
                 className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300 whitespace-nowrap"
                 style={{ color: colors.mutedTextColor }}
               >
-                {field.label}
+                {renderSamplePreview(field.label)}
               </div>
               <div
                 className="font-medium transition-colors duration-300 whitespace-nowrap"
@@ -184,7 +185,7 @@ function SecondaryFieldsRow({ fields, colors }: SecondaryFieldsRowProps) {
                   fontSize: `${fontSize}px`,
                 }}
               >
-                {field.value}
+                {renderSamplePreview(field.value)}
               </div>
             </div>
           );

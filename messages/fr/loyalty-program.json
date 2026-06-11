@@ -364,6 +364,35 @@
         "assignedToast": "{name} assigné",
         "assignFailed": "Impossible d'assigner ce membre"
       }
+    },
+    "stackableRewards": {
+      "label": "Récompenses cumulables",
+      "help": "Quand la carte est pleine, la récompense est mise de côté et la carte repart de zéro. Vos clients peuvent cumuler plusieurs récompenses et les utiliser quand ils veulent.",
+      "description": "Vos clients continuent de tamponner après une carte pleine. Les récompenses gagnées attendent d'être utilisées.",
+      "maxLabel": "Récompenses cumulées au maximum",
+      "maxHelp": "Une fois cette limite atteinte, la carte reste pleine jusqu'à ce que le client utilise une récompense. Laissez vide pour ne pas mettre de limite.",
+      "unlimited": "Sans limite"
+    },
+    "prestamp": {
+      "label": "Tampons offerts au départ",
+      "help": "Chaque nouveau client reçoit ces tampons en ajoutant votre carte. Une carte déjà entamée est complétée plus souvent.",
+      "description": "Tampons offerts à chaque nouveau client à l'inscription."
+    },
+    "goalChange": {
+      "raiseTitle": "{count, plural, one {1 client a une carte pleine} other {# clients ont une carte pleine}}",
+      "raiseDescription": "Vous passez l'objectif de {oldTotal} à {newTotal} tampons. Choisissez ce qui arrive aux clients qui avaient déjà rempli leur carte à {oldTotal}.",
+      "grantLabel": "Leur donner leur récompense maintenant",
+      "grantDescription": "Ils gardent la récompense gagnée et repartent sur une carte vierge. Recommandé : ils l'ont gagnée avec les anciennes règles.",
+      "keepLabel": "Garder leurs tampons",
+      "keepDescription": "Leurs tampons sont conservés et ils continuent vers {newTotal}.",
+      "lowerTitle": "{count, plural, one {1 client dépasse le nouvel objectif} other {# clients dépassent le nouvel objectif}}",
+      "lowerDescription": "Vous baissez l'objectif à {newTotal} tampons. Les clients au-dessus peuvent utiliser leur récompense. Personne ne perd de tampon.",
+      "lowerDescriptionStackable": "Vous baissez l'objectif à {newTotal} tampons. Les clients au-dessus reçoivent leur récompense et gardent leurs tampons en trop. Personne ne perd rien.",
+      "stackOffTitle": "{count, plural, one {1 client a des récompenses en attente} other {# clients ont des récompenses en attente}}",
+      "stackOffDescription": "Ils gardent toutes leurs récompenses et peuvent les utiliser comme d'habitude. Aucune nouvelle récompense ne sera cumulée : une carte pleine attend d'être utilisée, comme avant.",
+      "cancel": "Revenir",
+      "confirm": "Enregistrer",
+      "saving": "Enregistrement..."
     }
   }
 }

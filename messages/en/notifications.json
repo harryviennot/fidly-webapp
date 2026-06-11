@@ -150,6 +150,7 @@
         "stamp_count": "Current stamp count",
         "total_stamps": "Total stamps needed",
         "stamps_left": "Stamps remaining",
+        "rewards_count": "Rewards waiting to be redeemed",
         "reward_name": "Reward name",
         "business_name": "Business name",
         "customer_first_name": "Customer first name",
@@ -377,7 +378,9 @@
             "maxLabel": "At most",
             "placeholder": "e.g. 5",
             "suffix": "stamps",
-            "help": "Tip: leave either field empty to skip that bound."
+            "help": "Tip: leave either field empty to skip that bound.",
+            "hasRewardLabel": "Has a reward to redeem",
+            "hasRewardHelp": "Only customers who currently hold a reward: a full card or stacked rewards. Perfect for a 'come redeem it' message."
           },
           "activity": {
             "hasRedeemedLabel": "Has redeemed a reward",

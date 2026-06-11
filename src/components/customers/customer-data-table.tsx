@@ -159,6 +159,7 @@ export function CustomerDataTable({
                         <div><span className="font-semibold">{t("segments.new")}</span>{sep}{t("segmentsHelp.new")}</div>
                         <div><span className="font-semibold">{t("segments.regular")}</span>{sep}{t("segmentsHelp.regular")}</div>
                         <div><span className="font-semibold">{t("segments.vip")}</span>{sep}{t("segmentsHelp.vip")}</div>
+                        <div><span className="font-semibold">{t("segments.rewardReady")}</span>{sep}{t("segmentsHelp.rewardReady")}</div>
                         <div><span className="font-semibold">{t("segments.closeToReward")}</span>{sep}{t("segmentsHelp.closeToReward")}</div>
                         <div><span className="font-semibold">{t("segments.atRisk")}</span>{sep}{t("segmentsHelp.atRisk")}</div>
                         <div><span className="font-semibold">{t("segments.ghost")}</span>{sep}{t("segmentsHelp.ghost")}</div>

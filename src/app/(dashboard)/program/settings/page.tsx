@@ -16,13 +16,20 @@ import {
   DataCollectionForm,
   type DataCollectionValue,
 } from '@/components/program/forms/DataCollectionForm';
+import {
+  StampGoalChangeDialog,
+  type GoalChangeStrategy,
+  type StampGoalDialogVariant,
+} from '@/components/program/StampGoalChangeDialog';
 import { useBusiness } from '@/contexts/business-context';
 import { updateBusiness } from '@/api';
+import { getStampGoalImpact } from '@/api/programs';
 import { useProgram } from '../layout';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 import type { FieldCollectionMode } from '@/types/business';
+import type { StampGoalImpact } from '@/types';
 
 const DEFAULT_DATA_COLLECTION: DataCollectionValue = {
   collect_name: 'off',
@@ -34,6 +41,9 @@ const DEFAULT_PROGRAM_DETAILS: ProgramDetailsValue = {
   programName: '',
   totalStamps: 10,
   rewardName: '',
+  initialStamps: 0,
+  stackableRewards: false,
+  maxStackedRewards: null,
 };
 
 /** Normalise legacy boolean values to the new tri-state. */
@@ -70,29 +80,101 @@ export default function ProgramSettingsPage() {
       programName: program.name || '',
       totalStamps: program.config?.total_stamps ?? 10,
       rewardName: program.reward_name || '',
+      initialStamps: program.config?.initial_stamps ?? 0,
+      stackableRewards: program.config?.stackable_rewards ?? false,
+      maxStackedRewards: program.config?.max_stacked_rewards ?? null,
     });
   }, [program]);
 
   const isDirty = program
     ? programDetails.programName !== (program.name || '') ||
       programDetails.totalStamps !== (program.config?.total_stamps ?? 10) ||
-      programDetails.rewardName !== (program.reward_name || '')
+      programDetails.rewardName !== (program.reward_name || '') ||
+      programDetails.initialStamps !== (program.config?.initial_stamps ?? 0) ||
+      programDetails.stackableRewards !== (program.config?.stackable_rewards ?? false) ||
+      programDetails.maxStackedRewards !== (program.config?.max_stacked_rewards ?? null)
     : false;
 
-  const handleSaveProgram = async () => {
+  // ── Pre-save impact dialog (goal change / stackable toggle-off) ──────────
+  const [goalDialogOpen, setGoalDialogOpen] = useState(false);
+  const [goalDialogVariant, setGoalDialogVariant] = useState<StampGoalDialogVariant>('raise');
+  const [goalImpact, setGoalImpact] = useState<StampGoalImpact | null>(null);
+
+  const doSaveProgram = async (strategy?: GoalChangeStrategy) => {
     setSavingProgram(true);
     try {
+      // Spread the existing config: the backend replaces the JSONB
+      // wholesale, so a partial object would wipe keys we don't manage here.
       await updateProgram({
         name: programDetails.programName,
-        config: { total_stamps: programDetails.totalStamps, user_configured: true },
+        config: {
+          ...program?.config,
+          total_stamps: programDetails.totalStamps,
+          initial_stamps: programDetails.initialStamps,
+          stackable_rewards: programDetails.stackableRewards,
+          max_stacked_rewards: programDetails.maxStackedRewards,
+          user_configured: true,
+        },
         reward_name: programDetails.rewardName || null,
+        ...(strategy ? { existing_customers_strategy: strategy } : {}),
       });
+      setGoalDialogOpen(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch {
       // toast already shown in layout
     } finally {
       setSavingProgram(false);
+    }
+  };
+
+  const handleSaveProgram = async () => {
+    if (!currentBusiness?.id || !program?.id) return;
+
+    const oldTotal = program.config?.total_stamps ?? 10;
+    const totalChanged = programDetails.totalStamps !== oldTotal;
+    const stackableTurnedOff =
+      (program.config?.stackable_rewards ?? false) && !programDetails.stackableRewards;
+
+    // No customer impact to surface: save directly.
+    if (!totalChanged && !stackableTurnedOff) {
+      await doSaveProgram();
+      return;
+    }
+
+    setSavingProgram(true);
+    try {
+      const impact = await getStampGoalImpact(
+        currentBusiness.id,
+        program.id,
+        programDetails.totalStamps
+      );
+      setSavingProgram(false);
+
+      if (totalChanged && impact.direction === 'raise' && impact.affected_count > 0) {
+        setGoalImpact(impact);
+        setGoalDialogVariant('raise');
+        setGoalDialogOpen(true);
+        return;
+      }
+      if (totalChanged && impact.direction === 'lower' && impact.affected_count > 0) {
+        setGoalImpact(impact);
+        setGoalDialogVariant('lower');
+        setGoalDialogOpen(true);
+        return;
+      }
+      if (stackableTurnedOff && impact.banked_rewards_count > 0) {
+        setGoalImpact(impact);
+        setGoalDialogVariant('stackable_off');
+        setGoalDialogOpen(true);
+        return;
+      }
+      await doSaveProgram();
+    } catch {
+      // Impact preview failed: don't block the save, just apply the
+      // backend's default (keep stamps / keep-and-drain).
+      setSavingProgram(false);
+      await doSaveProgram();
     }
   };
 
@@ -303,6 +385,16 @@ export default function ProgramSettingsPage() {
           </div>
         </div>
       </div>
+
+      <StampGoalChangeDialog
+        open={goalDialogOpen}
+        onOpenChange={setGoalDialogOpen}
+        variant={goalDialogVariant}
+        impact={goalImpact}
+        nextStackable={programDetails.stackableRewards}
+        onConfirm={(strategy) => doSaveProgram(strategy)}
+        isConfirming={savingProgram}
+      />
     </div>
   );
 }
