@@ -380,11 +380,11 @@
     },
     "goalChange": {
       "raiseTitle": "{count, plural, one {1 client a une carte pleine} other {# clients ont une carte pleine}}",
-      "raiseDescription": "Vous passez l'objectif de {oldTotal} à {newTotal} tampons. Choisissez ce qui arrive aux clients qui avaient déjà rempli leur carte à {oldTotal}.",
+      "raiseDescription": "Vous passez l'objectif de {oldTotal} à {newTotal} tampons. Ces clients avaient gagné leur récompense à {oldTotal}. Choisissez ce qui leur arrive :",
       "grantLabel": "Leur donner leur récompense maintenant",
-      "grantDescription": "Ils gardent la récompense gagnée et repartent sur une carte vierge. Recommandé : ils l'ont gagnée avec les anciennes règles.",
+      "grantDescription": "Leur récompense est mise de côté sur leur carte, prête à être utilisée à leur prochaine visite, et leurs tampons repartent à 0 vers le nouvel objectif de {newTotal}.",
       "keepLabel": "Garder leurs tampons",
-      "keepDescription": "Leurs tampons sont conservés et ils continuent vers {newTotal}.",
+      "keepDescription": "Aucune récompense n'est accordée. Leurs {oldTotal} tampons comptent simplement vers le nouvel objectif de {newTotal}.",
       "lowerTitle": "{count, plural, one {1 client dépasse le nouvel objectif} other {# clients dépassent le nouvel objectif}}",
       "lowerDescription": "Vous baissez l'objectif à {newTotal} tampons. Les clients au-dessus peuvent utiliser leur récompense. Personne ne perd de tampon.",
       "lowerDescriptionStackable": "Vous baissez l'objectif à {newTotal} tampons. Les clients au-dessus reçoivent leur récompense et gardent leurs tampons en trop. Personne ne perd rien.",
@@ -392,7 +392,8 @@
       "stackOffDescription": "Ils gardent toutes leurs récompenses et peuvent les utiliser comme d'habitude. Aucune nouvelle récompense ne sera cumulée : une carte pleine attend d'être utilisée, comme avant.",
       "cancel": "Revenir",
       "confirm": "Enregistrer",
-      "saving": "Enregistrement..."
+      "saving": "Enregistrement...",
+      "raiseNote": "Les clients qui ont déjà des récompenses mises de côté ne sont pas concernés."
     }
   }
 }

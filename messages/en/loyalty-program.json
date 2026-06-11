@@ -380,11 +380,11 @@
     },
     "goalChange": {
       "raiseTitle": "{count, plural, one {1 customer has a full card} other {# customers have a full card}}",
-      "raiseDescription": "You are raising the goal from {oldTotal} to {newTotal} stamps. Choose what happens to customers who already filled their card at {oldTotal}.",
+      "raiseDescription": "You are raising the goal from {oldTotal} to {newTotal} stamps. These customers earned their reward at {oldTotal}. Choose what happens to them:",
       "grantLabel": "Give them their reward now",
-      "grantDescription": "They keep the reward they earned and start a fresh card. Recommended: they earned it under the old rules.",
+      "grantDescription": "Their reward is set aside on their card, ready to redeem on their next visit, and their stamps reset to 0 toward the new goal of {newTotal}.",
       "keepLabel": "Keep their stamps",
-      "keepDescription": "Their stamps carry over and they keep stamping toward {newTotal}.",
+      "keepDescription": "No reward is granted. Their {oldTotal} stamps simply count toward the new goal of {newTotal}.",
       "lowerTitle": "{count, plural, one {1 customer is above the new goal} other {# customers are above the new goal}}",
       "lowerDescription": "You are lowering the goal to {newTotal} stamps. Customers above it become ready to redeem. Nobody loses stamps.",
       "lowerDescriptionStackable": "You are lowering the goal to {newTotal} stamps. Customers above it get their reward set aside and keep their extra stamps. Nobody loses anything.",
@@ -392,7 +392,8 @@
       "stackOffDescription": "They keep every reward they earned and can redeem them as usual. No new rewards will be stacked: a full card waits to be redeemed, like before.",
       "cancel": "Go back",
       "confirm": "Save changes",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "raiseNote": "Customers who already set rewards aside are not affected."
     }
   }
 }

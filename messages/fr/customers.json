@@ -116,7 +116,8 @@
           "locationNotFound": "Cet établissement n'est plus disponible.",
           "locationNotPermitted": "Vous n'êtes pas assigné à cet établissement."
         }
-      }
+      },
+      "redeemBanked": "{count, plural, =1 {Utiliser (1 en attente)} other {Utiliser (# en attente)}}"
     },
     "toasts": {
       "stampAdded": "Tampon ajouté pour {name}",

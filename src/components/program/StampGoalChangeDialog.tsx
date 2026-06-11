@@ -82,13 +82,16 @@ export function StampGoalChangeDialog({
       id: 'grant_reward',
       icon: GiftIcon,
       label: t('grantLabel'),
-      desc: t('grantDescription'),
+      desc: t('grantDescription', { newTotal: impact.new_total }),
     },
     {
       id: 'keep_stamps',
       icon: StampIcon,
       label: t('keepLabel'),
-      desc: t('keepDescription', { newTotal: impact.new_total }),
+      desc: t('keepDescription', {
+        oldTotal: impact.old_total,
+        newTotal: impact.new_total,
+      }),
     },
   ];
 
@@ -139,6 +142,9 @@ export function StampGoalChangeDialog({
                 </button>
               );
             })}
+            <p className="text-[11px] text-[var(--muted-foreground)] leading-[1.5] mt-1">
+              {t('raiseNote')}
+            </p>
           </div>
         )}
 
