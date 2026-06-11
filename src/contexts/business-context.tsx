@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/contexts/auth-provider";
@@ -295,6 +296,28 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const cancelNewBusiness = useCallback(() => {
     setCreatingNewBusiness(false);
   }, []);
+
+  // Auto-cancel the new-business flow when the user actually LEAVES the
+  // wizard route. This replaces the wizard layout's unmount cleanup, which
+  // StrictMode double-invokes on entry: the cleanup cleared the flag while
+  // still on /onboarding/business, the previous (already set-up) business
+  // snapped back, and the wizard's inverse gate bounced the user straight
+  // home — the "create new business goes nowhere" bug.
+  // The was-inside ref makes this navigation-based: the flag set on the
+  // dashboard (before router.push lands) is never cancelled prematurely.
+  const pathname = usePathname();
+  const wasOnWizardRef = useRef(false);
+  useEffect(() => {
+    const onWizard = pathname?.startsWith("/onboarding/business") ?? false;
+    if (onWizard) {
+      wasOnWizardRef.current = true;
+      return;
+    }
+    if (wasOnWizardRef.current) {
+      wasOnWizardRef.current = false;
+      setCreatingNewBusiness(false);
+    }
+  }, [pathname]);
 
   const refetch = () =>
     queryClient.invalidateQueries({

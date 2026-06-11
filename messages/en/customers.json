@@ -59,6 +59,7 @@
       "new": "New",
       "regular": "Regular",
       "vip": "VIP",
+      "rewardReady": "Reward ready",
       "closeToReward": "Close to Reward",
       "atRisk": "At Risk",
       "ghost": "Ghost"
@@ -68,6 +69,7 @@
       "new": "Joined within the last 14 days.",
       "regular": "Active customers without a special status.",
       "vip": "Customers who have redeemed 3 or more rewards.",
+      "rewardReady": "Has a reward waiting to be redeemed: a full card or stacked rewards.",
       "closeToReward": "Within 2 stamps of completing their card.",
       "atRisk": "Have stamps but haven't visited in over 30 days.",
       "ghost": "Got their card but never came back. No stamps yet."
@@ -114,7 +116,8 @@
           "locationNotFound": "That location is no longer available.",
           "locationNotPermitted": "You aren't assigned to that location."
         }
-      }
+      },
+      "redeemBanked": "{count, plural, =1 {Redeem (1 saved)} other {Redeem (# saved)}}"
     },
     "toasts": {
       "stampAdded": "Stamp added for {name}",
@@ -161,10 +164,12 @@
         "new": "New",
         "regular": "Regular",
         "vip": "VIP",
+        "reward_ready": "Reward ready",
         "close_to_reward": "Close to Reward",
         "at_risk": "At Risk",
         "ghost": "Ghost"
-      }
+      },
+      "rewardsAvailable": "Rewards to redeem"
     },
     "transaction": {
       "empty": "No transactions yet",
@@ -194,7 +199,8 @@
         "hoursAgo": "{count}h ago",
         "yesterday": "Yesterday",
         "daysAgo": "{count}d ago"
-      }
+      },
+      "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"
     }
   }
 }

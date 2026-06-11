@@ -20,12 +20,14 @@ export function ContentForm() {
         fields={formData.secondary_fields || []}
         onChange={(f) => updateField('secondary_fields', f)}
         maxFields={3}
+        enableVariables
       />
       <FieldEditor
         title={t('additionalInfo')}
         fields={formData.auxiliary_fields || []}
         onChange={(f) => updateField('auxiliary_fields', f)}
         maxFields={3}
+        enableVariables
       />
     </div>
   );

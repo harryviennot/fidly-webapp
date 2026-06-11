@@ -98,6 +98,9 @@ export interface BroadcastTargetFilter {
   enrolled_after_days?: number;
   stamp_count_min?: number;
   stamp_count_max?: number;
+  /** Customer currently holds a redeemable reward: banked rewards
+   *  (stackable rewards) or a full card. */
+  has_unredeemed_reward?: boolean;
   has_redeemed?: boolean;
   inactive_days?: number;
   enrolled_at_location_ids?: EnrolledLocationFilter;

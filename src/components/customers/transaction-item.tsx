@@ -73,6 +73,12 @@ export function TransactionItem({
         ? t("sources.dashboard")
         : transaction.source;
 
+  // Stackable rewards: remaining banked count recorded on redemptions.
+  const rewardsLeft =
+    transaction.type === "reward_redeemed" && metadata?.rewards_after != null
+      ? Number(metadata.rewards_after)
+      : null;
+
   return (
     <div className="flex gap-3 relative">
       {/* Timeline dot + connecting line */}
@@ -138,6 +144,14 @@ export function TransactionItem({
                 </span>
                 <span className="text-[#D8D5CE]">·</span>
                 <span>{sourceLabel}</span>
+                {rewardsLeft != null && (
+                  <>
+                    <span className="text-[#D8D5CE]">·</span>
+                    <span className="font-semibold text-[var(--warning)]">
+                      {t("rewardsLeft", { count: rewardsLeft })}
+                    </span>
+                  </>
+                )}
               </>
             )}
             {transaction.employee_name && (

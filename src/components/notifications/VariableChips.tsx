@@ -32,6 +32,10 @@ interface VariableChipsProps {
    *  the chip itself, not inside the tooltip. */
   disabledHrefs?: Partial<Record<VariableKey, string>>;
   className?: string;
+  /** Extra classes merged onto each chip — surfaces whose background is
+   *  close to the default muted chip fill (e.g. the onboarding wizard)
+   *  pass an explicit background so chips stay visible. */
+  chipClassName?: string;
 }
 
 export function VariableChips({
@@ -42,6 +46,7 @@ export function VariableChips({
   disabledTooltips,
   disabledHrefs,
   className,
+  chipClassName,
 }: VariableChipsProps) {
   const t = useTranslations('notifications.editor');
   const router = useRouter();
@@ -58,7 +63,8 @@ export function VariableChips({
           'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-mono transition-colors',
           isDisabled
             ? 'border-dashed border-border bg-muted/20 text-muted-foreground/60 hover:border-[var(--accent)] hover:text-foreground cursor-pointer'
-            : 'border-border bg-muted/40 text-foreground hover:bg-muted hover:border-[var(--accent)]'
+            : 'border-border bg-muted/40 text-foreground hover:bg-muted hover:border-[var(--accent)]',
+          chipClassName
         );
 
         if (isDisabled) {

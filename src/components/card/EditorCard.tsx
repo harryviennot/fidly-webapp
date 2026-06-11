@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { CardDesign, PassField } from "@/types";
 import { WalletCard } from "./WalletCard";
 import { computeCardColors, rgbToHex } from "@/lib/card-utils";
+import { renderSamplePreview } from "@/lib/template-variables";
 import { ScaledCardWrapper } from "@/components/design/ScaledCardWrapper";
 
 // ============================================================================
@@ -156,15 +157,16 @@ function CardBack({ design, organizationName }: CardBackProps) {
                         className="text-[11px] font-bold tracking-wider"
                         style={{ color: labelColor, opacity: 0.7 }}
                       >
-                        {field.label
-                          ? field.label.charAt(0).toUpperCase() + field.label.slice(1)
-                          : field.label}
+                        {(() => {
+                          const label = renderSamplePreview(field.label || "");
+                          return label ? label.charAt(0).toUpperCase() + label.slice(1) : label;
+                        })()}
                       </p>
                       <p
                         className="text-sm whitespace-pre-wrap"
                         style={{ color: foregroundColor }}
                       >
-                        {field.value}
+                        {renderSamplePreview(field.value || "")}
                       </p>
                     </div>
                   ))

@@ -4,6 +4,10 @@ import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { NumberStepper } from '@/components/reusables/number-stepper';
+import { SmoothHeight } from '@/components/reusables/smooth-height';
+import { InfoPopover } from '@/components/reusables/info-popover';
 import { useBusiness } from '@/contexts/business-context';
 import { useDefaultProgram, useUpdateProgram } from '@/hooks/use-programs';
 import { useDesigns } from '@/hooks/use-designs';
@@ -89,6 +93,18 @@ export function ProgramStep() {
     'program.rewardName',
     () => program?.reward_name || tDef(bizDefaults.rewardNameKey)
   );
+  const [stackableRewards, setStackableRewards] = useWizardDraft<boolean>(
+    'program.stackableRewards',
+    () => program?.config?.stackable_rewards ?? false
+  );
+  const [maxStackedRewards, setMaxStackedRewards] = useWizardDraft<number | null>(
+    'program.maxStackedRewards',
+    () => program?.config?.max_stacked_rewards ?? null
+  );
+  const [initialStamps, setInitialStamps] = useWizardDraft<number>(
+    'program.initialStamps',
+    () => program?.config?.initial_stamps ?? 0
+  );
 
   // Only one type is currently active; the others render as disabled chips
   // with a "Coming soon" badge so the user sees the roadmap.
@@ -121,8 +137,15 @@ export function ProgramStep() {
   );
 
   const snapshot = useMemo(
-    () => ({ programName, totalStamps, rewardName }),
-    [programName, totalStamps, rewardName]
+    () => ({
+      programName,
+      totalStamps,
+      rewardName,
+      stackableRewards,
+      maxStackedRewards,
+      initialStamps,
+    }),
+    [programName, totalStamps, rewardName, stackableRewards, maxStackedRewards, initialStamps]
   );
   const { isDirty, markSaved } = useDirtySnapshot('program', snapshot);
 
@@ -161,7 +184,16 @@ export function ProgramStep() {
               programId,
               data: {
                 name,
-                config: { ...programConfig, total_stamps: stamps, user_configured: true },
+                config: {
+                  ...programConfig,
+                  total_stamps: stamps,
+                  stackable_rewards: snapshot.stackableRewards,
+                  max_stacked_rewards: snapshot.maxStackedRewards,
+                  // Clamp defensively: the stepper caps live, but the goal
+                  // can shrink after the prestamp was drafted.
+                  initial_stamps: Math.max(0, Math.min(snapshot.initialStamps, stamps - 1)),
+                  user_configured: true,
+                },
                 reward_name: reward,
               },
             });
@@ -236,6 +268,30 @@ export function ProgramStep() {
           />
         </WizardField>
 
+        {/* Prestamp (head start) — same row layout as the settings page */}
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <label className="text-[12px] font-semibold text-[#555]">
+                {tLp('prestamp.label')}
+              </label>
+              <InfoPopover content={tLp('prestamp.help')} />
+            </div>
+            <NumberStepper
+              value={initialStamps}
+              onChange={(next) =>
+                setInitialStamps(Math.max(0, Math.min(next ?? 0, totalStamps - 1)))
+              }
+              min={0}
+              max={totalStamps - 1}
+              aria-label={tLp('prestamp.label')}
+            />
+          </div>
+          <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
+            {tLp('prestamp.description')}
+          </p>
+        </div>
+
         <WizardField label={tLp('rewardLabel')} htmlFor="program-reward" required>
           <Input
             id="program-reward"
@@ -245,6 +301,47 @@ export function ProgramStep() {
             className="h-11"
           />
         </WizardField>
+
+        {/* Stackable rewards — same row layout as the settings page */}
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <label className="text-[12px] font-semibold text-[#555]">
+                {tLp('stackableRewards.label')}
+              </label>
+              <InfoPopover content={tLp('stackableRewards.help')} />
+            </div>
+            <Switch
+              checked={stackableRewards}
+              onCheckedChange={setStackableRewards}
+              aria-label={tLp('stackableRewards.label')}
+            />
+          </div>
+          <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
+            {tLp('stackableRewards.description')}
+          </p>
+          <SmoothHeight>
+            {stackableRewards && (
+              <div className="flex items-center justify-between gap-3 pt-3 animate-slide-up">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <label className="text-[12px] font-semibold text-[#555]">
+                    {tLp('stackableRewards.maxLabel')}
+                  </label>
+                  <InfoPopover content={tLp('stackableRewards.maxHelp')} />
+                </div>
+                <NumberStepper
+                  value={maxStackedRewards}
+                  onChange={setMaxStackedRewards}
+                  min={1}
+                  max={99}
+                  allowEmpty
+                  emptyLabel={tLp('stackableRewards.unlimited')}
+                  aria-label={tLp('stackableRewards.maxLabel')}
+                />
+              </div>
+            )}
+          </SmoothHeight>
+        </div>
       </div>
     </div>
   );

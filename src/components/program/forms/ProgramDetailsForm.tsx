@@ -3,6 +3,10 @@
 import { useTranslations } from 'next-intl';
 import { CheckIcon } from '@phosphor-icons/react';
 import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
+import { Switch } from '@/components/ui/switch';
+import { InfoPopover } from '@/components/reusables/info-popover';
+import { NumberStepper } from '@/components/reusables/number-stepper';
+import { SmoothHeight } from '@/components/reusables/smooth-height';
 import { computeCardColors } from '@/lib/card-utils';
 import { cn } from '@/lib/utils';
 import type { CardDesign } from '@/types';
@@ -11,6 +15,12 @@ export interface ProgramDetailsValue {
   programName: string;
   totalStamps: number;
   rewardName: string;
+  /** Prestamp: stamps a new customer starts with (0 = none). */
+  initialStamps: number;
+  /** Stackable rewards: full card banks a reward, stamping continues. */
+  stackableRewards: boolean;
+  /** Max banked rewards; null = unlimited. */
+  maxStackedRewards: number | null;
 }
 
 interface ProgramDetailsFormProps {
@@ -190,6 +200,33 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
         </div>
       </div>
 
+      {/* Prestamp (head start) — right after the stamp goal: both are about
+          the stamp count, before the reward block below. */}
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <label className="text-[12px] font-semibold text-[#555]">
+              {t('prestamp.label')}
+            </label>
+            <InfoPopover content={t('prestamp.help')} />
+          </div>
+          <NumberStepper
+            value={value.initialStamps}
+            onChange={(next) =>
+              patch({
+                initialStamps: Math.max(0, Math.min(next ?? 0, value.totalStamps - 1)),
+              })
+            }
+            min={0}
+            max={value.totalStamps - 1}
+            aria-label={t('prestamp.label')}
+          />
+        </div>
+        <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
+          {t('prestamp.description')}
+        </p>
+      </div>
+
       {/* Reward */}
       <div>
         <label className="block text-[12px] font-semibold text-[#555] mb-1.5">{t('rewardLabel')}</label>
@@ -200,6 +237,47 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
           placeholder={t('rewardNamePlaceholder')}
           className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border-medium)] bg-white text-[13px] text-[#1A1A1A] outline-none focus:border-[var(--accent)] transition-colors min-h-[44px]"
         />
+      </div>
+
+      {/* Stackable rewards */}
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <label className="text-[12px] font-semibold text-[#555]">
+              {t('stackableRewards.label')}
+            </label>
+            <InfoPopover content={t('stackableRewards.help')} />
+          </div>
+          <Switch
+            checked={value.stackableRewards}
+            onCheckedChange={(checked) => patch({ stackableRewards: checked })}
+            aria-label={t('stackableRewards.label')}
+          />
+        </div>
+        <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
+          {t('stackableRewards.description')}
+        </p>
+        <SmoothHeight>
+          {value.stackableRewards && (
+            <div className="flex items-center justify-between gap-3 pt-3 animate-slide-up">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <label className="text-[12px] font-semibold text-[#555]">
+                  {t('stackableRewards.maxLabel')}
+                </label>
+                <InfoPopover content={t('stackableRewards.maxHelp')} />
+              </div>
+              <NumberStepper
+                value={value.maxStackedRewards}
+                onChange={(next) => patch({ maxStackedRewards: next })}
+                min={1}
+                max={99}
+                allowEmpty
+                emptyLabel={t('stackableRewards.unlimited')}
+                aria-label={t('stackableRewards.maxLabel')}
+              />
+            </div>
+          )}
+        </SmoothHeight>
       </div>
     </div>
   );

@@ -69,6 +69,7 @@
       "title": "No activity yet",
       "description": "Stamps and rewards will appear here as customers interact with your loyalty program."
     },
-    "emptyFiltered": "No activity matches your filters."
+    "emptyFiltered": "No activity matches your filters.",
+    "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"
   }
 }

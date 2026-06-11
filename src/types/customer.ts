@@ -16,6 +16,9 @@ export interface CustomerResponse {
   // Flat convenience fields — sourced from enrollments[0]. Customer list,
   // segment classifier, stats cards keep reading these.
   stamps: number;
+  // Banked (earned, unredeemed) rewards from stackable rewards. Backends
+  // predating migration 105 omit it: guard with `?? 0`.
+  rewards?: number;
   total_redemptions?: number;
   last_activity_at?: string;
   created_at?: string;
@@ -32,7 +35,7 @@ export interface CustomerResponse {
   // Only the list endpoint populates this; other producers leave it undefined.
   // Mirrors CustomerSegment in @/lib/customer-segments — kept inline to avoid a
   // type import cycle (customer-segments imports CustomerResponse from here).
-  segment?: "new" | "regular" | "vip" | "close_to_reward" | "at_risk" | "ghost" | null;
+  segment?: "new" | "regular" | "vip" | "reward_ready" | "close_to_reward" | "at_risk" | "ghost" | null;
 }
 
 export interface PaginatedCustomerResponse {
