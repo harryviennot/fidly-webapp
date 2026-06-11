@@ -3,8 +3,11 @@
 import { useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { PassField } from '@/types';
+import { useMemo } from 'react';
 import { CaretUp, CaretDown, Trash, Plus } from '@phosphor-icons/react';
 import { InfoBox } from '@/components/reusables/info-box';
+import { useBusiness } from '@/contexts/business-context';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { Input } from '@/components/ui/input';
 import { VariableChips } from '@/components/notifications/VariableChips';
 import {
@@ -45,7 +48,35 @@ export default function FieldEditor({
   enableVariables = false,
 }: FieldEditorProps) {
   const t = useTranslations('designEditor.fieldEditor');
+  const tNotif = useTranslations('notifications');
   const locale = useLocale() as Locale;
+  const { currentBusiness } = useBusiness();
+  const { data: program } = useDefaultProgram(
+    enableVariables ? currentBusiness?.id : undefined
+  );
+
+  // Mirror the notification editor's gating: variables whose source data is
+  // off/unset render as greyed-out chips with a "turn it on in program
+  // settings" tooltip (clicking navigates there).
+  const { disabledVars, disabledTooltips, disabledHrefs } = useMemo(() => {
+    const disabled = new Set<VariableKey>();
+    const tips: Partial<Record<VariableKey, string>> = {};
+    const hrefs: Partial<Record<VariableKey, string>> = {};
+    if (!enableVariables) return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
+
+    const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
+    if (collectName === 'off' || collectName === false) {
+      disabled.add('customer_first_name');
+      tips.customer_first_name = tNotif('editor.nameCollectionOff');
+      hrefs.customer_first_name = '/program/settings';
+    }
+    if (program && !program.reward_name?.trim()) {
+      disabled.add('reward_name');
+      tips.reward_name = tNotif('editor.rewardNameMissing');
+      hrefs.reward_name = '/program/settings';
+    }
+    return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
+  }, [enableVariables, currentBusiness?.settings?.customer_data_collection?.collect_name, program, tNotif]);
 
   // Last-focused pill editor — the chip row inserts into it. Keyed by
   // `${field.key}:${'label'|'value'}`.
@@ -214,6 +245,9 @@ export default function FieldEditor({
             onInsert={handleInsertVariable}
             locale={locale}
             chipClassName="bg-white border-[var(--border-medium)]"
+            disabledVariables={disabledVars.size > 0 ? disabledVars : undefined}
+            disabledTooltips={disabledTooltips}
+            disabledHrefs={disabledHrefs}
           />
           <InfoBox
             variant="info"
