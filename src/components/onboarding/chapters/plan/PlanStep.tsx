@@ -6,6 +6,7 @@ import { Check } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useBusiness } from '@/contexts/business-context';
+import { isCheckoutSetupWindowLapsed } from '@/lib/onboarding-status';
 import { changeTier, createCheckoutSession } from '@/api/billing';
 import {
   effectivePrice,
@@ -114,8 +115,17 @@ export function PlanStep() {
 
   const hasSelection = selectedTier !== null;
 
+  const setupWindowLapsed = isCheckoutSetupWindowLapsed(currentBusiness);
+
   return (
     <div className="flex flex-col gap-6">
+      {setupWindowLapsed && (
+        <div className="mx-auto w-full max-w-2xl rounded-2xl bg-[var(--accent-light)] px-5 py-4 text-center animate-slide-up">
+          <p className="wiz-body text-[var(--foreground)]">
+            {t('setupWindowLapsed')}
+          </p>
+        </div>
+      )}
       <header className="flex flex-col items-center gap-2 text-center animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}

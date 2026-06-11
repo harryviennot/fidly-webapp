@@ -11,7 +11,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { PendingActivationPage } from "@/components/pending-activation-page";
 import { SuspendedPage } from "@/components/suspended-page";
 import { NoActiveBusinessState } from "@/components/no-active-business-state";
-import { isBusinessSetupComplete } from "@/lib/onboarding-status";
+import { CheckoutRequiredPage } from "@/components/billing/CheckoutRequiredPage";
+import { isBusinessSetupComplete, isCheckoutSetupWindowLapsed } from "@/lib/onboarding-status";
 import { TrialMobileBanner } from "@/components/billing/TrialBanner";
 import { SuspendedBanner } from "@/components/billing/SuspendedOverlay";
 import { OverLimitBanner } from "@/components/billing/OverLimitBanner";
@@ -19,7 +20,16 @@ import { ImpersonationBanner } from "@/components/impersonation/impersonation-ba
 import { useImpersonationBeacon } from "@/hooks/use-impersonation-beacon";
 import { AchievementRecorder } from "@/components/achievements";
 
-function wizardResumePath(setupProgress: { last_step?: { chapter: string; step?: string } } | undefined): string {
+const PLAN_STEP_PATH = "/onboarding/business/plan";
+
+function wizardResumePath(
+  setupProgress: { last_step?: { chapter: string; step?: string } } | undefined,
+  lapsed: boolean,
+): string {
+  // Card-upfront business past its free setup window (STA-215): skip straight
+  // to the plan step to pay — the optional demo chapters it might resume into
+  // (first stamp / broadcast / team) now hit the backend checkout gate.
+  if (lapsed) return PLAN_STEP_PATH;
   const last = setupProgress?.last_step;
   if (!last?.chapter) return "/onboarding/business/welcome";
   return last.step ? `/onboarding/business/${last.chapter}/${last.step}` : `/onboarding/business/${last.chapter}`;
@@ -63,6 +73,18 @@ export default function AdminLayout({
     currentRole === "owner" &&
     !isImpersonating &&
     !isBusinessSetupComplete(currentBusiness);
+  // Non-owner member (admin/manager) of a card-upfront business whose owner
+  // hasn't completed Stripe Checkout. They can't pay and can't run the wizard,
+  // so instead of the dashboard they get an informative blocked screen. Scoped
+  // to pending_checkout so it never catches a normal active/trial business.
+  // See STA-215.
+  const gatedNonOwner =
+    !!currentBusiness &&
+    currentBusiness.status === "active" &&
+    currentRole !== "owner" &&
+    currentRole !== "scanner" &&
+    !isImpersonating &&
+    currentBusiness.billing_status === "pending_checkout";
   // A signed-in user with zero memberships has just come from /signup —
   // ship them into the wizard to create their first business.
   const needsWizardNoBusiness = !loading && !hasAnyMembership && !isImpersonating;
@@ -108,14 +130,15 @@ export default function AdminLayout({
       return;
     }
     if (awaitingSubscription) return; // hold while the webhook lands
+    if (gatedNonOwner) return; // render the blocked screen below, no redirect
     if (startingNewBusiness) {
       router.replace("/onboarding/business/welcome");
     } else if (needsWizard) {
-      router.replace(wizardResumePath(setupProgress));
+      router.replace(wizardResumePath(setupProgress, isCheckoutSetupWindowLapsed(currentBusiness)));
     } else if (needsWizardNoBusiness) {
       router.replace("/onboarding/business/welcome");
     }
-  }, [loading, isScanner, awaitingSubscription, startingNewBusiness, needsWizard, needsWizardNoBusiness, router, setupProgress]);
+  }, [loading, isScanner, awaitingSubscription, gatedNonOwner, startingNewBusiness, needsWizard, needsWizardNoBusiness, router, setupProgress, currentBusiness]);
 
   // Show loading state — also while we wait for the post-checkout webhook so
   // the user isn't bounced back to the plan step the instant they return.
@@ -203,6 +226,13 @@ export default function AdminLayout({
   // (and switcher) accessible so the user can switch back to an active one.
   if (currentBusiness.status === "suspended") {
     return <SuspendedPage />;
+  }
+
+  // Non-owner of a card-upfront business that hasn't completed checkout. They
+  // can't pay, so we show an informative blocked screen rather than the
+  // dashboard or the (owner-only) wizard. See STA-215.
+  if (gatedNonOwner) {
+    return <CheckoutRequiredPage />;
   }
 
   // Owner with an incomplete launch wizard cannot reach the dashboard. The
