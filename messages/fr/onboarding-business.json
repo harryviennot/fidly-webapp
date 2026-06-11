@@ -392,6 +392,7 @@
       },
       "plan": {
         "title": "Choisissez votre offre",
+        "setupWindowLapsed": "Votre période d'installation gratuite est terminée. Choisissez votre offre pour continuer, vous pourrez finir le reste ensuite.",
         "subtitle": "Commencez avec 30 jours gratuits. Aucun débit aujourd'hui : ensuite, l'offre choisie est facturée chaque mois. Sans engagement.",
         "subtitleFounding": "Commencez avec 30 jours gratuits. Aucun débit aujourd'hui : ensuite, votre tarif de fondateur est facturé chaque mois et reste bloqué à vie, il n'augmentera jamais. Sans engagement.",
         "keepTrialCta": "Plus tard",
