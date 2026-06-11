@@ -199,7 +199,7 @@
         "yesterday": "Hier",
         "daysAgo": "il y a {count}j"
       },
-      "rewardsLeft": "{count} récompense(s) restante(s)"
+      "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}"
     }
   }
 }

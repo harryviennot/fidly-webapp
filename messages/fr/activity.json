@@ -70,6 +70,6 @@
       "description": "Les tampons et récompenses apparaîtront ici lorsque vos clients interagiront avec votre programme de fidélité."
     },
     "emptyFiltered": "Aucune activité ne correspond à vos filtres.",
-    "rewardsLeft": "{count} récompense(s) restante(s)"
+    "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}"
   }
 }

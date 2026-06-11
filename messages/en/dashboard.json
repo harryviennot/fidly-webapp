@@ -77,6 +77,6 @@
     "cardsIssued": "Cards issued",
     "activePasses": "Installed cards",
     "installRate": "Install rate",
-    "rewardsLeft": "{count} reward(s) left"
+    "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"
   }
 }

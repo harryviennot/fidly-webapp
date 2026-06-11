@@ -199,7 +199,7 @@
         "yesterday": "Yesterday",
         "daysAgo": "{count}d ago"
       },
-      "rewardsLeft": "{count} reward(s) left"
+      "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"
     }
   }
 }
