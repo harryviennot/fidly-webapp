@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { NumberStepper } from '@/components/reusables/number-stepper';
 import { SmoothHeight } from '@/components/reusables/smooth-height';
+import { InfoPopover } from '@/components/reusables/info-popover';
 import { useBusiness } from '@/contexts/business-context';
 import { useDefaultProgram, useUpdateProgram } from '@/hooks/use-programs';
 import { useDesigns } from '@/hooks/use-designs';
@@ -267,17 +268,29 @@ export function ProgramStep() {
           />
         </WizardField>
 
-        <WizardField label={tLp('prestamp.label')} helper={tLp('prestamp.description')}>
-          <NumberStepper
-            value={initialStamps}
-            onChange={(next) =>
-              setInitialStamps(Math.max(0, Math.min(next ?? 0, totalStamps - 1)))
-            }
-            min={0}
-            max={totalStamps - 1}
-            aria-label={tLp('prestamp.label')}
-          />
-        </WizardField>
+        {/* Prestamp (head start) — same row layout as the settings page */}
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <label className="text-[12px] font-semibold text-[#555]">
+                {tLp('prestamp.label')}
+              </label>
+              <InfoPopover content={tLp('prestamp.help')} />
+            </div>
+            <NumberStepper
+              value={initialStamps}
+              onChange={(next) =>
+                setInitialStamps(Math.max(0, Math.min(next ?? 0, totalStamps - 1)))
+              }
+              min={0}
+              max={totalStamps - 1}
+              aria-label={tLp('prestamp.label')}
+            />
+          </div>
+          <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
+            {tLp('prestamp.description')}
+          </p>
+        </div>
 
         <WizardField label={tLp('rewardLabel')} htmlFor="program-reward" required>
           <Input
@@ -289,36 +302,46 @@ export function ProgramStep() {
           />
         </WizardField>
 
-        <WizardField
-          label={tLp('stackableRewards.label')}
-          helper={tLp('stackableRewards.description')}
-        >
-          <div className="flex flex-col">
+        {/* Stackable rewards — same row layout as the settings page */}
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <label className="text-[12px] font-semibold text-[#555]">
+                {tLp('stackableRewards.label')}
+              </label>
+              <InfoPopover content={tLp('stackableRewards.help')} />
+            </div>
             <Switch
               checked={stackableRewards}
               onCheckedChange={setStackableRewards}
               aria-label={tLp('stackableRewards.label')}
             />
-            <SmoothHeight>
-              {stackableRewards && (
-                <div className="flex items-center justify-between gap-3 pt-3 animate-slide-up">
-                  <span className="wiz-body text-[#7A7A7A]">
-                    {tLp('stackableRewards.maxLabel')}
-                  </span>
-                  <NumberStepper
-                    value={maxStackedRewards}
-                    onChange={setMaxStackedRewards}
-                    min={1}
-                    max={99}
-                    allowEmpty
-                    emptyLabel={tLp('stackableRewards.unlimited')}
-                    aria-label={tLp('stackableRewards.maxLabel')}
-                  />
-                </div>
-              )}
-            </SmoothHeight>
           </div>
-        </WizardField>
+          <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
+            {tLp('stackableRewards.description')}
+          </p>
+          <SmoothHeight>
+            {stackableRewards && (
+              <div className="flex items-center justify-between gap-3 pt-3 animate-slide-up">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <label className="text-[12px] font-semibold text-[#555]">
+                    {tLp('stackableRewards.maxLabel')}
+                  </label>
+                  <InfoPopover content={tLp('stackableRewards.maxHelp')} />
+                </div>
+                <NumberStepper
+                  value={maxStackedRewards}
+                  onChange={setMaxStackedRewards}
+                  min={1}
+                  max={99}
+                  allowEmpty
+                  emptyLabel={tLp('stackableRewards.unlimited')}
+                  aria-label={tLp('stackableRewards.maxLabel')}
+                />
+              </div>
+            )}
+          </SmoothHeight>
+        </div>
       </div>
     </div>
   );

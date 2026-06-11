@@ -3,7 +3,8 @@
 import { useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { PassField } from '@/types';
-import { CaretUp, CaretDown, InfoIcon, Trash, Plus } from '@phosphor-icons/react';
+import { CaretUp, CaretDown, Trash, Plus } from '@phosphor-icons/react';
+import { InfoBox } from '@/components/reusables/info-box';
 import { Input } from '@/components/ui/input';
 import { VariableChips } from '@/components/notifications/VariableChips';
 import {
@@ -212,11 +213,13 @@ export default function FieldEditor({
             variables={FIELD_VARIABLES}
             onInsert={handleInsertVariable}
             locale={locale}
+            chipClassName="bg-white border-[var(--border-medium)]"
           />
-          <p className="text-[11px] text-muted-foreground leading-[1.5] flex items-start gap-1.5">
-            <InfoIcon className="w-3.5 h-3.5 shrink-0 mt-[1px]" weight="regular" />
-            <span>{t('variablesNote')}</span>
-          </p>
+          <InfoBox
+            variant="info"
+            message={t('variablesNote')}
+            className="p-2.5 [&_div]:text-[11.5px]"
+          />
         </>
       )}
 
