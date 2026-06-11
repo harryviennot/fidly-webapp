@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { CardDesign } from "@/types";
 import { renderSamplePreview } from "@/lib/template-variables";
+import { useVariablePreviewValues } from "@/hooks/use-variable-preview-values";
 import {
   StampIconSvg,
   StampIconType,
@@ -115,9 +116,12 @@ export function StampGrid({
 interface SecondaryFieldsRowProps {
   fields: Array<{ key?: string; label: string; value: string }>;
   colors: ReturnType<typeof computeCardColors>;
+  /** Values substituted into {{variable}} templates. Falls back to the
+   *  generic samples from template-variables when a key is absent. */
+  variableValues?: Record<string, string>;
 }
 
-function SecondaryFieldsRow({ fields, colors }: SecondaryFieldsRowProps) {
+function SecondaryFieldsRow({ fields, colors, variableValues }: SecondaryFieldsRowProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [fontSize, setFontSize] = useState(14); // Start with text-sm equivalent
 
@@ -176,7 +180,7 @@ function SecondaryFieldsRow({ fields, colors }: SecondaryFieldsRowProps) {
                 className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300 whitespace-nowrap"
                 style={{ color: colors.mutedTextColor }}
               >
-                {renderSamplePreview(field.label)}
+                {renderSamplePreview(field.label, variableValues)}
               </div>
               <div
                 className="font-medium transition-colors duration-300 whitespace-nowrap"
@@ -185,7 +189,7 @@ function SecondaryFieldsRow({ fields, colors }: SecondaryFieldsRowProps) {
                   fontSize: `${fontSize}px`,
                 }}
               >
-                {renderSamplePreview(field.value)}
+                {renderSamplePreview(field.value, variableValues)}
               </div>
             </div>
           );
@@ -377,6 +381,20 @@ export function WalletCard({
   const totalStamps = totalStampsProp ?? design.total_stamps ?? 10;
   const colors = computeCardColors(design);
 
+  // {{variable}} previews use the business's REAL data (reward name,
+  // business name, the signed-in user's own first name) and the counts
+  // shown on this very card, so the preview matches what a customer sees.
+  const realValues = useVariablePreviewValues();
+  const variableValues = useMemo(
+    () => ({
+      ...realValues,
+      stamp_count: String(stamps),
+      total_stamps: String(totalStamps),
+      stamps_left: String(Math.max(0, totalStamps - stamps)),
+    }),
+    [realValues, stamps, totalStamps]
+  );
+
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
 
@@ -478,6 +496,7 @@ export function WalletCard({
               <SecondaryFieldsRow
                 fields={secondaryFields.slice(0, 4)}
                 colors={colors}
+                variableValues={variableValues}
               />
             )}
 
@@ -488,6 +507,7 @@ export function WalletCard({
               <SecondaryFieldsRow
                 fields={auxiliaryFields.slice(0, 4)}
                 colors={colors}
+                variableValues={variableValues}
               />
             )}
 

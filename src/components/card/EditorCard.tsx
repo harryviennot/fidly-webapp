@@ -6,6 +6,7 @@ import { CardDesign, PassField } from "@/types";
 import { WalletCard } from "./WalletCard";
 import { computeCardColors, rgbToHex } from "@/lib/card-utils";
 import { renderSamplePreview } from "@/lib/template-variables";
+import { useVariablePreviewValues } from "@/hooks/use-variable-preview-values";
 import { ScaledCardWrapper } from "@/components/design/ScaledCardWrapper";
 
 // ============================================================================
@@ -75,6 +76,8 @@ interface CardBackProps {
 }
 
 function CardBack({ design, organizationName }: CardBackProps) {
+  // Real business/program/user values for {{variable}} previews.
+  const variableValues = useVariablePreviewValues();
   const t = useTranslations("designEditor.cardBack");
   const { cardRef, rotate, glare, handleMouseMove, handleMouseLeave } =
     use3DEffect();
@@ -158,7 +161,7 @@ function CardBack({ design, organizationName }: CardBackProps) {
                         style={{ color: labelColor, opacity: 0.7 }}
                       >
                         {(() => {
-                          const label = renderSamplePreview(field.label || "");
+                          const label = renderSamplePreview(field.label || "", variableValues);
                           return label ? label.charAt(0).toUpperCase() + label.slice(1) : label;
                         })()}
                       </p>
@@ -166,7 +169,7 @@ function CardBack({ design, organizationName }: CardBackProps) {
                         className="text-sm whitespace-pre-wrap"
                         style={{ color: foregroundColor }}
                       >
-                        {renderSamplePreview(field.value || "")}
+                        {renderSamplePreview(field.value || "", variableValues)}
                       </p>
                     </div>
                   ))
