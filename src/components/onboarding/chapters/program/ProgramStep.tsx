@@ -272,7 +272,7 @@ export function ProgramStep() {
         <div>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 min-w-0">
-              <label className="text-[12px] font-semibold text-[#555]">
+              <label className="wiz-body-sm font-medium text-[var(--foreground)]">
                 {tLp('prestamp.label')}
               </label>
               <InfoPopover content={tLp('prestamp.help')} />
@@ -306,7 +306,7 @@ export function ProgramStep() {
         <div>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 min-w-0">
-              <label className="text-[12px] font-semibold text-[#555]">
+              <label className="wiz-body-sm font-medium text-[var(--foreground)]">
                 {tLp('stackableRewards.label')}
               </label>
               <InfoPopover content={tLp('stackableRewards.help')} />
