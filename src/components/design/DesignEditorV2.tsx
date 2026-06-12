@@ -480,6 +480,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       customColors,
       businessInfo,
       showAdvancedStamps,
+      designId: design?.id,
       bgHex,
       labelHex,
       textHex,

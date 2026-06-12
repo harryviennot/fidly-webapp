@@ -13,6 +13,42 @@ export interface DesignTranslation {
   back_fields?: PassField[];
 }
 
+/**
+ * A merchant-uploaded icon with its server-derived variants. Produced once
+ * by the backend at upload time; the preview renders these URLs verbatim,
+ * which is what guarantees preview/strip parity. Assets are immutable per
+ * id (a re-upload mints a new id).
+ */
+export interface ProcessedIconAsset {
+  id: string;
+  original_url: string;
+  processed_url: string;
+  greyscale_url: string;
+  outline_url: string;
+  bg_removed: boolean;
+}
+
+export type CustomStampEmptyMode = "greyscale" | "outline" | "custom";
+export type CustomStampArrangement = "straight" | "staggered" | "overlap";
+
+/**
+ * Custom stamp icon configuration (mirrors backend CustomStampConfig).
+ * `icons` is the ordered rotation list: stamp slot i renders icons[i % n];
+ * the last slot uses reward_icon when set.
+ */
+export interface CustomStampConfig {
+  icons: ProcessedIconAsset[];
+  reward_icon?: ProcessedIconAsset | null;
+  empty_icon?: ProcessedIconAsset | null;
+  empty_mode: CustomStampEmptyMode;
+  arrangement: CustomStampArrangement;
+  /** Opacity (percent, 10-100) applied to empty slots at render time.
+   *  100 = solid grey like the FLTR reference. */
+  empty_opacity?: number;
+}
+
+export type StampIconMode = "preset" | "custom";
+
 export interface CardDesign {
   id: string;
   name: string;
@@ -36,6 +72,11 @@ export interface CardDesign {
   stamp_icon?: string;
   reward_icon?: string;
   icon_color?: string;
+
+  // Custom stamp icons (STA-216)
+  card_type?: string;
+  stamp_icon_mode?: StampIconMode;
+  custom_stamp_config?: CustomStampConfig | null;
 
   // Asset URLs
   logo_url?: string;
@@ -83,6 +124,8 @@ export interface CardDesignCreate {
   stamp_icon?: string;
   reward_icon?: string;
   icon_color?: string;
+  stamp_icon_mode?: StampIconMode;
+  custom_stamp_config?: CustomStampConfig | null;
   strip_background_opacity?: number;
 
   logo_url?: string;
