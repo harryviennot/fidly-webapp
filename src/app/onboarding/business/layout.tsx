@@ -28,7 +28,7 @@ const STAMPEO_BRAND_ACCENT = '#f97316';
 export default function OnboardingBusinessLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { currentBusiness, loading: businessLoading, cancelNewBusiness } = useBusiness();
+  const { currentBusiness, loading: businessLoading, creatingNewBusiness } = useBusiness();
 
   useEffect(() => {
     if (authLoading || businessLoading) return;
@@ -36,19 +36,18 @@ export default function OnboardingBusinessLayout({ children }: { children: React
       router.replace('/login');
       return;
     }
-    if (isBusinessSetupComplete(currentBusiness)) {
+    // The create-another-business flow forces currentBusiness to null, but
+    // guard explicitly anyway: a transient frame where the previous (set-up)
+    // business is still selected must not bounce the user home.
+    if (!creatingNewBusiness && isBusinessSetupComplete(currentBusiness)) {
       router.replace('/');
     }
-  }, [authLoading, businessLoading, user, currentBusiness, router]);
+  }, [authLoading, businessLoading, user, currentBusiness, creatingNewBusiness, router]);
 
-  // Leaving onboarding without finishing a "create another business" run
-  // clears the flag, so the context reselects the user's previous business
-  // instead of holding `currentBusiness` at the forced-null value. On a normal
-  // finish the wizard already cleared it via setCurrentBusiness, so this is a
-  // no-op there. `cancelNewBusiness` is stable, so this fires only on unmount.
-  useEffect(() => {
-    return () => cancelNewBusiness();
-  }, [cancelNewBusiness]);
+  // NOTE: leaving the wizard mid-flow used to clear `creatingNewBusiness`
+  // via an unmount cleanup here — StrictMode double-invoked it on entry and
+  // killed the flow. The BusinessProvider now cancels on real navigation
+  // away from /onboarding/business instead (pathname-based).
 
   // Apply the wizard's orange theme on mount. On unmount, hand the theme
   // back to the saved business colors so the dashboard renders the user's

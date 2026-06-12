@@ -128,6 +128,9 @@ export async function redeemReward(
     {
       method: 'POST',
       headers: await getAuthHeaders(),
+      // Label the transaction as a dashboard action (the activity log
+      // splits real scans from manual dashboard operations).
+      body: JSON.stringify({ source: 'dashboard' }),
     }
   );
 

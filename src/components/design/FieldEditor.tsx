@@ -1,24 +1,99 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useRef } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { PassField } from '@/types';
+import { useMemo } from 'react';
 import { CaretUp, CaretDown, Trash, Plus } from '@phosphor-icons/react';
+import { InfoBox } from '@/components/reusables/info-box';
+import { useBusiness } from '@/contexts/business-context';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { Input } from '@/components/ui/input';
+import { VariableChips } from '@/components/notifications/VariableChips';
+import {
+  VariableEditor,
+  type VariableEditorHandle,
+} from '@/components/notifications/VariableEditor';
+import type { Locale, VariableKey } from '@/lib/template-variables';
 
 interface FieldEditorProps {
   title: string;
   fields: PassField[];
   onChange: (fields: PassField[]) => void;
   maxFields?: number;
+  /** Per-customer template variables ({{rewards_count}}, {{customer_first_name}}, ...).
+   *  Inputs become pill editors and a chip row appears below the list.
+   *  Off by default: BusinessInfoEditor and other static surfaces stay plain. */
+  enableVariables?: boolean;
 }
+
+/** Variables that make sense on a pass field. `store_location` is per-scan,
+ *  not per-customer, so the backend always strips it from pass fields: the
+ *  chip is hidden here entirely. */
+const FIELD_VARIABLES: VariableKey[] = [
+  'stamp_count',
+  'total_stamps',
+  'stamps_left',
+  'rewards_count',
+  'reward_name',
+  'business_name',
+  'customer_first_name',
+];
 
 export default function FieldEditor({
   title,
   fields,
   onChange,
   maxFields = 10,
+  enableVariables = false,
 }: FieldEditorProps) {
   const t = useTranslations('designEditor.fieldEditor');
+  const tNotif = useTranslations('notifications');
+  const locale = useLocale() as Locale;
+  const { currentBusiness } = useBusiness();
+  const { data: program } = useDefaultProgram(
+    enableVariables ? currentBusiness?.id : undefined
+  );
+
+  // Mirror the notification editor's gating: variables whose source data is
+  // off/unset render as greyed-out chips with a "turn it on in program
+  // settings" tooltip (clicking navigates there).
+  const { disabledVars, disabledTooltips, disabledHrefs } = useMemo(() => {
+    const disabled = new Set<VariableKey>();
+    const tips: Partial<Record<VariableKey, string>> = {};
+    const hrefs: Partial<Record<VariableKey, string>> = {};
+    if (!enableVariables) return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
+
+    const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
+    if (collectName === 'off' || collectName === false) {
+      disabled.add('customer_first_name');
+      tips.customer_first_name = tNotif('editor.nameCollectionOff');
+      hrefs.customer_first_name = '/program/settings';
+    }
+    if (program && !program.reward_name?.trim()) {
+      disabled.add('reward_name');
+      tips.reward_name = tNotif('editor.rewardNameMissing');
+      hrefs.reward_name = '/program/settings';
+    }
+    return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
+  }, [enableVariables, currentBusiness?.settings?.customer_data_collection?.collect_name, program, tNotif]);
+
+  // Last-focused pill editor — the chip row inserts into it. Keyed by
+  // `${field.key}:${'label'|'value'}`.
+  const editorRefs = useRef<Map<string, VariableEditorHandle | null>>(new Map());
+  const focusedEditorKey = useRef<string | null>(null);
+
+  const registerEditor = (key: string) => (handle: VariableEditorHandle | null) => {
+    editorRefs.current.set(key, handle);
+  };
+
+  const handleInsertVariable = (variable: VariableKey) => {
+    const key =
+      focusedEditorKey.current ??
+      (fields.length > 0 ? `${fields[fields.length - 1].key}:value` : null);
+    if (!key) return;
+    editorRefs.current.get(key)?.insertVariable(variable);
+  };
 
   const addField = () => {
     if (fields.length >= maxFields) return;
@@ -89,21 +164,65 @@ export default function FieldEditor({
                 </button>
               </div>
 
-              {/* Label input */}
-              <Input
-                placeholder={t('label')}
-                value={field.label}
-                onChange={(e) => updateField(index, { label: e.target.value })}
-                className="h-9 text-sm font-semibold w-[35%] flex-shrink-0 bg-white"
-              />
+              {enableVariables ? (
+                <>
+                  {/* Label editor (pill-aware) */}
+                  <div
+                    className="w-[35%] flex-shrink-0"
+                    onFocusCapture={() => {
+                      focusedEditorKey.current = `${field.key}:label`;
+                    }}
+                  >
+                    <VariableEditor
+                      ref={registerEditor(`${field.key}:label`)}
+                      value={field.label}
+                      onChange={(next) => updateField(index, { label: next })}
+                      locale={locale}
+                      placeholder={t('label')}
+                      ariaLabel={t('label')}
+                      singleLine
+                      className="min-h-9 py-1.5 text-sm font-semibold bg-white"
+                    />
+                  </div>
 
-              {/* Value input */}
-              <Input
-                placeholder={t('value')}
-                value={field.value}
-                onChange={(e) => updateField(index, { value: e.target.value })}
-                className="h-9 text-sm flex-1 min-w-0 bg-white"
-              />
+                  {/* Value editor (pill-aware) */}
+                  <div
+                    className="flex-1 min-w-0"
+                    onFocusCapture={() => {
+                      focusedEditorKey.current = `${field.key}:value`;
+                    }}
+                  >
+                    <VariableEditor
+                      ref={registerEditor(`${field.key}:value`)}
+                      value={field.value}
+                      onChange={(next) => updateField(index, { value: next })}
+                      locale={locale}
+                      placeholder={t('value')}
+                      ariaLabel={t('value')}
+                      singleLine
+                      className="min-h-9 py-1.5 text-sm bg-white"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Label input */}
+                  <Input
+                    placeholder={t('label')}
+                    value={field.label}
+                    onChange={(e) => updateField(index, { label: e.target.value })}
+                    className="h-9 text-sm font-semibold w-[35%] flex-shrink-0 bg-white"
+                  />
+
+                  {/* Value input */}
+                  <Input
+                    placeholder={t('value')}
+                    value={field.value}
+                    onChange={(e) => updateField(index, { value: e.target.value })}
+                    className="h-9 text-sm flex-1 min-w-0 bg-white"
+                  />
+                </>
+              )}
 
               {/* Delete button */}
               <button
@@ -117,6 +236,25 @@ export default function FieldEditor({
             </div>
           ))}
         </div>
+      )}
+
+      {enableVariables && fields.length > 0 && (
+        <>
+          <VariableChips
+            variables={FIELD_VARIABLES}
+            onInsert={handleInsertVariable}
+            locale={locale}
+            chipClassName="bg-white border-[var(--border-medium)]"
+            disabledVariables={disabledVars.size > 0 ? disabledVars : undefined}
+            disabledTooltips={disabledTooltips}
+            disabledHrefs={disabledHrefs}
+          />
+          <InfoBox
+            variant="info"
+            message={t('variablesNote')}
+            className="p-2.5 [&_div]:text-[11.5px]"
+          />
+        </>
       )}
 
       {fields.length < maxFields && (

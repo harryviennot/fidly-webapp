@@ -4,8 +4,8 @@
     "subtitle": "Tout ce qui se passe dans votre programme, en direct",
     "export": "Exporter",
     "searchPlaceholder": "Rechercher un client...",
-    "loadFailed": "Impossible de charger le fil d'activit\u00e9.",
-    "empty": "Aucune activit\u00e9 pour le moment. Les tampons et r\u00e9compenses appara\u00eetront ici.",
+    "loadFailed": "Impossible de charger le fil d'activité.",
+    "empty": "Aucune activité pour le moment. Les tampons et récompenses apparaîtront ici.",
     "loadMore": "Charger plus",
     "loadingMore": "Chargement...",
     "by": "par",
@@ -19,9 +19,9 @@
     "filters": {
       "label": "Type",
       "all": "Tout",
-      "stampAdded": "Tampons ajout\u00e9s",
-      "rewardRedeemed": "R\u00e9compenses",
-      "stampVoided": "Tampons annul\u00e9s",
+      "stampAdded": "Tampons ajoutés",
+      "rewardRedeemed": "Récompenses",
+      "stampVoided": "Tampons annulés",
       "bonusStamp": "Tampons bonus",
       "stampsAdjusted": "Ajustements",
       "cardAdded": "Carte ajoutée",
@@ -47,7 +47,7 @@
       "card_deleted": "a supprimé sa carte"
     },
     "time": {
-      "justNow": "\u00c0 l'instant",
+      "justNow": "À l'instant",
       "minutesAgo": "il y a {count} min",
       "hoursAgo": "il y a {count}h",
       "yesterday": "Hier",
@@ -61,14 +61,15 @@
     },
     "stats": {
       "stampsToday": "Tampons aujourd'hui",
-      "rewardsToday": "R\u00e9compenses aujourd'hui",
+      "rewardsToday": "Récompenses aujourd'hui",
       "totalThisWeek": "Total cette semaine",
       "activeCustomersToday": "Actifs aujourd'hui"
     },
     "emptyState": {
-      "title": "Aucune activit\u00e9",
-      "description": "Les tampons et r\u00e9compenses appara\u00eetront ici lorsque vos clients interagiront avec votre programme de fid\u00e9lit\u00e9."
+      "title": "Aucune activité",
+      "description": "Les tampons et récompenses apparaîtront ici lorsque vos clients interagiront avec votre programme de fidélité."
     },
-    "emptyFiltered": "Aucune activit\u00e9 ne correspond \u00e0 vos filtres."
+    "emptyFiltered": "Aucune activité ne correspond à vos filtres.",
+    "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}"
   }
 }

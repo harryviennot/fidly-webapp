@@ -364,6 +364,36 @@
         "assignedToast": "{name} assigned",
         "assignFailed": "Could not assign member"
       }
+    },
+    "stackableRewards": {
+      "label": "Stackable rewards",
+      "help": "When a card is full, the reward is set aside and the card starts again. Customers can hold several rewards at once and redeem them whenever they like.",
+      "description": "Customers keep stamping past a full card. Earned rewards wait until they are redeemed.",
+      "maxLabel": "Maximum stacked rewards",
+      "maxHelp": "Once a customer reaches this limit, their card stays full until they redeem a reward. Leave empty for no limit.",
+      "unlimited": "No limit"
+    },
+    "prestamp": {
+      "label": "Head start stamps",
+      "help": "New customers get these stamps the moment they add your card. A card that is already started gets completed more often.",
+      "description": "Stamps offered to every new customer on sign-up."
+    },
+    "goalChange": {
+      "raiseTitle": "{count, plural, one {1 customer has a full card} other {# customers have a full card}}",
+      "raiseDescription": "You are raising the goal from {oldTotal} to {newTotal} stamps. These customers earned their reward at {oldTotal}. Choose what happens to them:",
+      "grantLabel": "Give them their reward now",
+      "grantDescription": "Their reward is set aside on their card, ready to redeem on their next visit, and their stamps reset to 0 toward the new goal of {newTotal}.",
+      "keepLabel": "Keep their stamps",
+      "keepDescription": "No reward is granted. Their {oldTotal} stamps simply count toward the new goal of {newTotal}.",
+      "lowerTitle": "{count, plural, one {1 customer is above the new goal} other {# customers are above the new goal}}",
+      "lowerDescription": "You are lowering the goal to {newTotal} stamps. Customers above it become ready to redeem. Nobody loses stamps.",
+      "lowerDescriptionStackable": "You are lowering the goal to {newTotal} stamps. Customers above it get their reward set aside and keep their extra stamps. Nobody loses anything.",
+      "stackOffTitle": "{count, plural, one {1 customer has stacked rewards} other {# customers have stacked rewards}}",
+      "stackOffDescription": "They keep every reward they earned and can redeem them as usual. No new rewards will be stacked: a full card waits to be redeemed, like before.",
+      "cancel": "Go back",
+      "confirm": "Save changes",
+      "saving": "Saving...",
+      "raiseNote": "Customers who already set rewards aside are not affected."
     }
   }
 }

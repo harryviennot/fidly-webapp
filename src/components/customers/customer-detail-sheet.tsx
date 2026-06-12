@@ -7,6 +7,7 @@ import {
   CalendarBlank,
   Clock,
   Footprints,
+  Gift,
   Trophy,
   Envelope,
   MapPin,
@@ -334,6 +335,20 @@ export function CustomerDetailSheet({
               iconColor="var(--warning)"
               valueColor="#C4883D"
             />
+            {/* Stackable rewards: banked (earned, unredeemed) count. Only
+                shown when the customer actually holds some — businesses
+                without stacking never see the tile. */}
+            {(liveCustomer.rewards ?? 0) > 0 && (
+              <StatTile
+                className="col-span-2"
+                icon={<Gift className="w-4 h-4" weight="bold" />}
+                label={t("rewardsAvailable")}
+                value={String(liveCustomer.rewards)}
+                iconBg="var(--warning-light)"
+                iconColor="var(--warning)"
+                valueColor="#C4883D"
+              />
+            )}
             <StatTile
               className="col-span-2"
               icon={<Wallet className="w-4 h-4" weight="bold" />}

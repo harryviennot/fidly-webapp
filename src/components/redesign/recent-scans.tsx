@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { QrCodeIcon } from "@phosphor-icons/react";
@@ -10,6 +9,7 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
 import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
+import { SmoothHeight } from "@/components/reusables/smooth-height";
 import { LocationBadge } from "@/components/locations/location-badge";
 import { SectionHeader } from "@/components/redesign/section-header";
 
@@ -43,39 +43,8 @@ interface RecentScansProps {
   iconColor?: string;
 }
 
-function SmoothHeight({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | "auto">("auto");
-  const prevHeight = useRef<number | "auto">("auto");
-  const [transitioning, setTransitioning] = useState(false);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const observer = new ResizeObserver(([entry]) => {
-      const newH = entry.contentRect.height;
-      if (prevHeight.current !== "auto" && prevHeight.current !== newH) {
-        setTransitioning(true);
-      }
-      prevHeight.current = newH;
-      setHeight(newH);
-    });
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      className={cn(
-        "transition-[height] duration-300 ease-out",
-        transitioning ? "overflow-hidden" : "overflow-visible"
-      )}
-      style={{ height: height === "auto" ? "auto" : height }}
-      onTransitionEnd={() => setTransitioning(false)}
-    >
-      <div ref={ref}>{children}</div>
-    </div>
-  );
-}
+// SmoothHeight was extracted to reusables so other expand/collapse surfaces
+// (e.g. the program settings stackable-rewards row) share the same feel.
 
 function RecentScansSkeleton() {
   return (
@@ -214,6 +183,17 @@ export function RecentScans({
                           <span className="font-semibold tabular-nums text-[#555]">
                             {tx.stamps_after}
                           </span>
+                          {tx.type === "reward_redeemed" &&
+                            metadata?.rewards_after != null && (
+                              <>
+                                <span className="text-[#D8D5CE]">·</span>
+                                <span className="font-semibold text-[var(--warning)]">
+                                  {t("dashboard.rewardsLeft", {
+                                    count: Number(metadata.rewards_after),
+                                  })}
+                                </span>
+                              </>
+                            )}
                         </>
                       )}
                       {tx.employee_name && (

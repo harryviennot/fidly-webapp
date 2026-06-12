@@ -1,5 +1,5 @@
 import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
-import type { LoyaltyProgram, LoyaltyProgramUpdate } from '@/types';
+import type { LoyaltyProgram, LoyaltyProgramUpdate, StampGoalImpact } from '@/types';
 
 export async function getPrograms(businessId: string): Promise<LoyaltyProgram[]> {
   const response = await fetch(`${API_BASE_URL}/programs/${businessId}`, {
@@ -20,6 +20,23 @@ export async function getProgram(businessId: string, programId: string): Promise
 
   if (!response.ok) {
     throw new Error('Program not found');
+  }
+
+  return response.json();
+}
+
+export async function getStampGoalImpact(
+  businessId: string,
+  programId: string,
+  newTotal: number
+): Promise<StampGoalImpact> {
+  const response = await fetch(
+    `${API_BASE_URL}/programs/${businessId}/${programId}/stamp-goal-impact?new_total=${newTotal}`,
+    { headers: await getAuthHeaders() }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch stamp goal impact');
   }
 
   return response.json();

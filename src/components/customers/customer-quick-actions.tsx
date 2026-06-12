@@ -29,7 +29,16 @@ export function CustomerQuickActions({
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
   const [adjustOpen, setAdjustOpen] = useState(false);
 
-  const canRedeem = customer.stamps >= maxStamps;
+  // Redeemable = classic full card OR banked (stacked) rewards. Banked
+  // rewards stay redeemable even after stacking is toggled off
+  // (keep-and-drain), so `rewards > 0` alone is the right signal.
+  const isCardFull = customer.stamps >= maxStamps;
+  const hasBankedRewards = (customer.rewards ?? 0) > 0;
+  const canRedeem = isCardFull || hasBankedRewards;
+  // Stamping stays available below a full card — with stackable rewards a
+  // customer can hold banked rewards AND keep stamping, so both buttons
+  // show side by side. At a full card stamping is blocked: redeem replaces it.
+  const canStamp = !isCardFull;
 
   const lastVoidable = transactions.find(
     (txn) =>
@@ -57,8 +66,7 @@ export function CustomerQuickActions({
 
   return (
     <div className="flex gap-2">
-      {/* Add Stamp / Redeem */}
-      {!canRedeem ? (
+      {canStamp && (
         <CustomerActionButton
           variant="stamp"
           size="lg"
@@ -66,11 +74,17 @@ export function CustomerQuickActions({
           onClick={() => setAdjustOpen(true)}
           disabled={!enrollmentId}
         />
-      ) : (
+      )}
+
+      {canRedeem && (
         <CustomerActionButton
           variant="redeem"
           size="lg"
-          label={t("redeem")}
+          label={
+            hasBankedRewards && !isCardFull
+              ? t("redeemBanked", { count: customer.rewards ?? 0 })
+              : t("redeem")
+          }
           onClick={handleRedeem}
           loading={redeemMutation.isPending}
         />

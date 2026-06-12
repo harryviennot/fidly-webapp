@@ -76,6 +76,7 @@
     "noCardYet": "No card style yet",
     "cardsIssued": "Cards issued",
     "activePasses": "Installed cards",
-    "installRate": "Install rate"
+    "installRate": "Install rate",
+    "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"
   }
 }

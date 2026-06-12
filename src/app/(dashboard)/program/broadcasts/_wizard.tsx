@@ -1667,6 +1667,35 @@ function StampsGroup({
       <p className="mt-2 text-[11px] text-[#8A8A8A] leading-[1.45]">
         {t('stamps.help')}
       </p>
+
+      <div className="mt-3 pt-3 border-t border-[var(--border-light)] flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Label className="text-[12px] text-[#1A1A1A] font-medium">
+            {t('stamps.hasRewardLabel')}
+          </Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label="help"
+                className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[#A0A0A0] hover:text-[#555]"
+              >
+                <InfoIcon className="h-3.5 w-3.5" weight="regular" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-[260px] text-[11px] leading-[1.45]">
+              {t('stamps.hasRewardHelp')}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <Switch
+          checked={!!targetFilter.has_unredeemed_reward}
+          onCheckedChange={(v) =>
+            updateFilter('has_unredeemed_reward', v ? true : undefined)
+          }
+          disabled={disabled}
+        />
+      </div>
     </div>
   );
 }

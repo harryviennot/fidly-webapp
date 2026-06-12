@@ -392,6 +392,7 @@
       },
       "plan": {
         "title": "Choose your plan",
+        "setupWindowLapsed": "Your free setup period has ended. Choose your plan to continue, you can finish the rest afterwards.",
         "subtitle": "Start with 30 days free. No charge today, after that you'll be billed monthly for the plan you choose, and you can cancel anytime before then.",
         "subtitleFounding": "Start with 30 days free. No charge today, after that you'll be billed monthly at your founding partner rate, locked in for life so it never goes up. Cancel anytime before then.",
         "keepTrialCta": "Decide later",
