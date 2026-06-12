@@ -327,7 +327,10 @@
       "saveFirst": "Save your card style once, then add your own images here.",
       "uploadError": "We couldn't process this image. Try a PNG, JPG or WebP under 5MB.",
       "replace": "Replace",
-      "remove": "Remove"
+      "remove": "Remove",
+      "cropTitle": "Frame your icon",
+      "cropDescription": "Keep just the subject. We trim transparent edges automatically after this step.",
+      "arrangement_overlap": "Overlapping"
     }
   }
 }

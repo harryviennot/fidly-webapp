@@ -327,7 +327,10 @@
       "saveFirst": "Enregistrez d'abord votre modèle, puis importez vos images ici.",
       "uploadError": "Impossible de traiter cette image. Essayez un PNG, JPG ou WebP de moins de 5 Mo.",
       "replace": "Remplacer",
-      "remove": "Retirer"
+      "remove": "Retirer",
+      "cropTitle": "Cadrez votre icône",
+      "cropDescription": "Gardez seulement le sujet. Les bords transparents sont retirés automatiquement après cette étape.",
+      "arrangement_overlap": "Superposée"
     }
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CaretDown, CaretLeft, CaretRight, Info } from '@phosphor-icons/react';
+import { CaretDown, CaretLeft, CaretRight, Info, Spinner } from '@phosphor-icons/react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -11,6 +11,8 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { StampIconUploader } from '@/components/design/StampIconUploader';
+import { useBusiness } from '@/contexts/business-context';
+import { reprocessStampIcon } from '@/api';
 import { useDesignForm } from './DesignFormContext';
 import type {
   CustomStampArrangement,
@@ -40,8 +42,11 @@ const EMPTY_CONFIG: CustomStampConfig = {
  */
 export function CustomStampsPanel() {
   const t = useTranslations('designEditor.customStamps');
+  const { currentBusiness } = useBusiness();
   const { formData, updateField, designId } = useDesignForm();
   const [removeBg, setRemoveBg] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
+  const [reprocessError, setReprocessError] = useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [rewardOpen, setRewardOpen] = useState(false);
 
@@ -52,6 +57,36 @@ export function CustomStampsPanel() {
     const next = { ...config, ...partial };
     updateField('custom_stamp_config', next);
     updateField('stamp_icon_mode', (next.icons?.length ?? 0) > 0 ? 'custom' : 'preset');
+  };
+
+  /**
+   * The toggle is a design-level setting: flipping it re-processes every
+   * uploaded asset's stored original on the server with the new value, so
+   * the cutout (or its undo) is immediately visible on the live preview.
+   */
+  const handleRemoveBgChange = async (next: boolean) => {
+    setRemoveBg(next);
+    setReprocessError(null);
+    const hasAssets = icons.length > 0 || config.reward_icon || config.empty_icon;
+    if (!hasAssets || !currentBusiness?.id || !designId) return;
+
+    setReprocessing(true);
+    try {
+      const redo = (asset: ProcessedIconAsset) =>
+        reprocessStampIcon(currentBusiness.id, designId, asset.id, next);
+
+      const [newIcons, newReward, newEmpty] = await Promise.all([
+        Promise.all(icons.map(redo)),
+        config.reward_icon ? redo(config.reward_icon) : Promise.resolve(null),
+        config.empty_icon ? redo(config.empty_icon) : Promise.resolve(null),
+      ]);
+      setConfig({ icons: newIcons, reward_icon: newReward, empty_icon: newEmpty });
+    } catch (err) {
+      setRemoveBg(!next);
+      setReprocessError(err instanceof Error ? err.message : t('uploadError'));
+    } finally {
+      setReprocessing(false);
+    }
   };
 
   if (!designId) {
@@ -93,6 +128,7 @@ export function CustomStampsPanel() {
             asset={primary}
             designId={designId}
             removeBg={removeBg}
+            processing={reprocessing}
             onUploaded={(asset) =>
               primary ? setIconAt(0, asset) : setConfig({ icons: [asset] })
             }
@@ -101,10 +137,20 @@ export function CustomStampsPanel() {
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <Label className="text-sm font-normal">{t('removeBg')}</Label>
-              <Switch checked={removeBg} onCheckedChange={setRemoveBg} />
+              <Label className="text-sm font-normal flex items-center gap-1.5">
+                {t('removeBg')}
+                {reprocessing && <Spinner className="w-3.5 h-3.5 animate-spin" />}
+              </Label>
+              <Switch
+                checked={removeBg}
+                onCheckedChange={(v) => void handleRemoveBgChange(v)}
+                disabled={reprocessing}
+              />
             </div>
             <p className="text-xs text-muted-foreground mt-1">{t('removeBgHint')}</p>
+            {reprocessError && (
+              <p className="text-xs text-destructive mt-1">{reprocessError}</p>
+            )}
           </div>
         </div>
       </div>
@@ -151,6 +197,7 @@ export function CustomStampsPanel() {
                   asset={config.empty_icon}
                   designId={designId}
                   removeBg={removeBg}
+                  processing={reprocessing}
                   size={56}
                   onUploaded={(asset) => setConfig({ empty_icon: asset })}
                   onRemove={() => setConfig({ empty_icon: null, empty_mode: 'greyscale' })}
@@ -165,7 +212,7 @@ export function CustomStampsPanel() {
           <div className="flex flex-col gap-3">
             <Label>{t('arrangementLabel')}</Label>
             <div className="flex gap-2">
-              {(['straight', 'staggered'] satisfies CustomStampArrangement[]).map(
+              {(['straight', 'staggered', 'overlap'] satisfies CustomStampArrangement[]).map(
                 (arrangement) => (
                   <button
                     key={arrangement}
@@ -178,7 +225,7 @@ export function CustomStampsPanel() {
                         : 'border-border hover:bg-muted/40'
                     )}
                   >
-                    <ArrangementGlyph staggered={arrangement === 'staggered'} />
+                    <ArrangementGlyph arrangement={arrangement} />
                     <span className="text-xs font-medium">
                       {t(`arrangement_${arrangement}`)}
                     </span>
@@ -206,6 +253,7 @@ export function CustomStampsPanel() {
                         asset={asset}
                         designId={designId}
                         removeBg={removeBg}
+                        processing={reprocessing}
                         size={56}
                         onUploaded={(next) => setIconAt(index, next)}
                         onRemove={() => removeIconAt(index)}
@@ -263,6 +311,7 @@ export function CustomStampsPanel() {
                   asset={config.reward_icon}
                   designId={designId}
                   removeBg={removeBg}
+                  processing={reprocessing}
                   size={56}
                   onUploaded={(asset) => setConfig({ reward_icon: asset })}
                   onRemove={() => setConfig({ reward_icon: null })}
@@ -278,27 +327,40 @@ export function CustomStampsPanel() {
   );
 }
 
-/** Tiny schematic of the two arrangements, drawn with dots. */
-function ArrangementGlyph({ staggered }: { staggered: boolean }) {
-  const dots = staggered
-    ? [
-        { x: 4, y: 10 },
-        { x: 13, y: 16 },
-        { x: 22, y: 10 },
-        { x: 31, y: 16 },
-        { x: 40, y: 10 },
-      ]
-    : [
-        { x: 4, y: 13 },
-        { x: 13, y: 13 },
-        { x: 22, y: 13 },
-        { x: 31, y: 13 },
-        { x: 40, y: 13 },
-      ];
+/** Tiny schematic of the three arrangements, drawn with dots. */
+function ArrangementGlyph({ arrangement }: { arrangement: CustomStampArrangement }) {
+  const dots =
+    arrangement === 'overlap'
+      ? // Tight pitch + deep drop: neighbors visibly overlap
+        [
+          { x: 6, y: 9 },
+          { x: 13, y: 16 },
+          { x: 20, y: 9 },
+          { x: 27, y: 16 },
+          { x: 34, y: 9 },
+          { x: 41, y: 16 },
+        ]
+      : arrangement === 'staggered'
+        ? // Normal pitch + subtle drop
+          [
+            { x: 6, y: 11 },
+            { x: 15, y: 15 },
+            { x: 24, y: 11 },
+            { x: 33, y: 15 },
+            { x: 42, y: 11 },
+          ]
+        : [
+            { x: 6, y: 13 },
+            { x: 15, y: 13 },
+            { x: 24, y: 13 },
+            { x: 33, y: 13 },
+            { x: 42, y: 13 },
+          ];
+  const r = arrangement === 'overlap' ? 5 : 4;
   return (
     <svg width="48" height="26" viewBox="0 0 48 26" aria-hidden>
       {dots.map((d, i) => (
-        <circle key={i} cx={d.x + 2} cy={d.y} r="4" className="fill-current opacity-70" />
+        <circle key={i} cx={d.x} cy={d.y} r={r} className="fill-current opacity-70" />
       ))}
     </svg>
   );

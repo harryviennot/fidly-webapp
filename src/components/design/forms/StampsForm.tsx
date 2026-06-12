@@ -173,6 +173,13 @@ export function StampsForm() {
           onUpload={handleStripBackgroundUpload}
           onClear={handleStripBackgroundClear}
           hint={t('stripHint')}
+          enableCrop
+          cropProps={{
+            // Lock the crop to the strip's aspect so what the user frames is
+            // exactly what the cover-fit renders — no surprise cropping.
+            aspect: 1125 / 432,
+            filename: 'strip-background.png',
+          }}
         />
         {formData.strip_background_url && (
           <div className="flex flex-col gap-2 pt-2">

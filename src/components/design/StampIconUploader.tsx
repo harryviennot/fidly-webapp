@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, Spinner, X, ArrowsClockwise } from "@phosphor-icons/react";
 import { useBusiness } from "@/contexts/business-context";
 import { uploadStampIcon, deleteStampIcon } from "@/api";
+import { ImageCropper } from "@/components/reusables/image-cropper";
 import type { ProcessedIconAsset } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -23,16 +24,20 @@ interface StampIconUploaderProps {
   readonly size?: number;
   /** Accessible label for the empty tile. */
   readonly label?: string;
+  /** Externally-driven busy state (e.g. the remove-bg toggle re-processing
+   *  this slot's asset on the server). Shows the same spinner overlay. */
+  readonly processing?: boolean;
 }
 
 /**
  * Square upload tile for custom stamp icons.
  *
- * Unlike ImageUploader (deferred blob preview + crop), this uploads
- * IMMEDIATELY on file pick: the preview needs the server-processed output
- * (background removal, trim, derived empty variants), and the returned
- * URLs are exactly what the strip generator will composite. An uploaded
- * but never-saved asset is inert and gets swept by the backend later.
+ * File pick opens the shared crop dialog first (free-form aspect, raw
+ * pixels so transparency survives), then uploads IMMEDIATELY: the preview needs the
+ * server-processed output (background removal, trim, derived empty
+ * variants), and the returned URLs are exactly what the strip generator
+ * will composite. An uploaded but never-saved asset is inert and gets
+ * swept by the backend later.
  */
 export function StampIconUploader({
   asset,
@@ -42,14 +47,28 @@ export function StampIconUploader({
   designId,
   size = 64,
   label,
+  processing = false,
 }: StampIconUploaderProps) {
   const t = useTranslations("designEditor.customStamps");
   const { currentBusiness } = useBusiness();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Blob URL of the picked file, feeding the crop dialog. Null = closed.
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
 
-  const handleFile = async (file: File) => {
+  useEffect(() => {
+    return () => {
+      if (cropSrc) URL.revokeObjectURL(cropSrc);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const busy = uploading || processing;
+
+  const handleCropped = async (file: File) => {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
     if (!currentBusiness?.id) return;
     setUploading(true);
     setError(null);
@@ -77,7 +96,7 @@ export function StampIconUploader({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={uploading}
+          disabled={busy}
           aria-label={label ?? t("uploadLabel")}
           title={asset ? t("replace") : (label ?? t("uploadLabel"))}
           className={cn(
@@ -87,7 +106,7 @@ export function StampIconUploader({
               : "border-dashed border-border bg-muted/40 hover:bg-muted text-muted-foreground"
           )}
         >
-          {uploading ? (
+          {busy ? (
             <Spinner className="w-5 h-5 animate-spin text-muted-foreground" />
           ) : asset ? (
             <>
@@ -106,7 +125,7 @@ export function StampIconUploader({
           )}
         </button>
 
-        {asset && onRemove && !uploading && (
+        {asset && onRemove && !busy && (
           <button
             type="button"
             onClick={handleRemove}
@@ -124,13 +143,37 @@ export function StampIconUploader({
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) void handleFile(file);
+            if (file) setCropSrc(URL.createObjectURL(file));
             e.target.value = "";
           }}
         />
       </div>
       {error && (
         <p className="text-xs text-destructive max-w-[180px]">{error}</p>
+      )}
+
+      {cropSrc && (
+        <ImageCropper
+          open={!!cropSrc}
+          onOpenChange={(open) => {
+            if (!open) {
+              URL.revokeObjectURL(cropSrc);
+              setCropSrc(null);
+            }
+          }}
+          imageSrc={cropSrc}
+          onCropComplete={handleCropped}
+          title={t("cropTitle")}
+          description={t("cropDescription")}
+          filename="stamp-icon.png"
+          // Free-form crop: the server trims to the subject and centers it
+          // on a square TRANSPARENT canvas, so any aspect keeps its true
+          // proportions on the card. The clamp only blocks absurd slivers.
+          minAspect={0.3}
+          maxAspect={3}
+          defaultAspect={1}
+          hideAspectSlider
+        />
       )}
     </div>
   );

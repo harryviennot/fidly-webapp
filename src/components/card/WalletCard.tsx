@@ -17,9 +17,10 @@ import {
   calculateStaggeredStampLayout,
   customIconBoxSize,
   resolveStampIconUrl,
+  CUSTOM_GRID_VPAD_SCALE,
   STAGGERED_MAX_COUNT,
 } from "@/lib/card-utils";
-import type { CustomStampConfig } from "@/types";
+import type { CustomStampArrangement, CustomStampConfig } from "@/types";
 
 // ============================================================================
 // Types
@@ -74,23 +75,25 @@ export function StampGrid({
   customConfig,
 }: StampGridProps) {
   const useCustom = !!customConfig && customConfig.icons.length > 0;
-  // Mirror of the backend fallback: staggered only for 2..16 stamps
-  const arrangement: "straight" | "staggered" =
+  // Mirror of the backend fallback: band arrangements only for 2..16 stamps
+  const arrangement: CustomStampArrangement =
     useCustom &&
-    customConfig.arrangement === "staggered" &&
+    (customConfig.arrangement === "staggered" || customConfig.arrangement === "overlap") &&
     totalStamps >= 2 &&
     totalStamps <= STAGGERED_MAX_COUNT
-      ? "staggered"
+      ? customConfig.arrangement
       : "straight";
 
   // Calculate layout using the same algorithm as the backend
   const layout = useMemo(() => {
-    if (arrangement === "staggered") {
+    if (arrangement === "staggered" || arrangement === "overlap") {
       return calculateStaggeredStampLayout(
         totalStamps,
         containerWidth,
         containerHeight,
-        SIDE_PADDING
+        SIDE_PADDING,
+        MIN_PADDING,
+        arrangement === "overlap"
       );
     }
     return calculateStampLayout(
@@ -98,9 +101,10 @@ export function StampGrid({
       containerWidth,
       containerHeight,
       MIN_PADDING,
-      SIDE_PADDING
+      SIDE_PADDING,
+      useCustom ? CUSTOM_GRID_VPAD_SCALE : 1
     );
-  }, [arrangement, totalStamps, containerWidth, containerHeight]);
+  }, [arrangement, totalStamps, containerWidth, containerHeight, useCustom]);
 
   // Calculate icon size (60% of diameter, matching backend)
   const iconSize = Math.max(layout.radius * 1.2, 12);

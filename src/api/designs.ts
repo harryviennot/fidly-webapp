@@ -252,6 +252,38 @@ export async function uploadStampIcon(
   return response.json();
 }
 
+/**
+ * Re-process an already-uploaded icon's stored original with a different
+ * background-removal setting (the editor toggle). Mints a new asset.
+ */
+export async function reprocessStampIcon(
+  businessId: string,
+  designId: string,
+  sourceAssetId: string,
+  removeBg: boolean
+): Promise<ProcessedIconAsset> {
+  const formData = new FormData();
+  formData.append('source_asset_id', sourceAssetId);
+  formData.append('remove_bg', String(removeBg));
+
+  const response = await fetch(
+    `${API_BASE_URL}/designs/${businessId}/${designId}/upload/stamp-icon`,
+    {
+      method: 'POST',
+      headers: await getAuthHeadersForFormData(),
+      body: formData,
+      signal: AbortSignal.timeout(30_000),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to process stamp icon');
+  }
+
+  return response.json();
+}
+
 /** Best-effort eager cleanup when an icon is removed before save. */
 export async function deleteStampIcon(
   businessId: string,
