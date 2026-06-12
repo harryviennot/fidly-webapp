@@ -357,7 +357,13 @@ export function ImageCropper({
               // canvas becomes tainted and `toBlob` throws SecurityError.
               crossOrigin="anonymous"
               onLoad={onImageLoad}
-              className="max-h-[45vh] sm:max-h-[55vh] max-w-full w-auto h-auto object-contain"
+              className="max-w-full w-auto h-auto object-contain"
+              // Inline style, not a Tailwind max-h class: react-image-crop's
+              // own stylesheet (`.ReactCrop__child-wrapper > img`) outranks
+              // utility classes and un-caps the height, which made tall
+              // uploads overflow into a scrollable crop area. Inline wins,
+              // so the full image always fits the dialog.
+              style={{ maxHeight: 'min(55vh, 520px)' }}
             />
           </ReactCrop>
         </div>

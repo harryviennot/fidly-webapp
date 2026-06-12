@@ -19,6 +19,13 @@ export interface DesignFormContextValue {
   customColors: string[];
   businessInfo: BusinessInfoEntry[];
   showAdvancedStamps: boolean;
+  /**
+   * Saved design row id, when one exists. Custom stamp icon uploads are
+   * processed server-side at upload time and stored under the design's
+   * asset folder, so they need this id — the custom panel shows a
+   * "save first" hint while it's undefined (brand-new design).
+   */
+  designId?: string;
 
   // ── Computed (hex strings + contrast ratios) ─────────────────────────
   bgHex: string;
