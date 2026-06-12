@@ -264,8 +264,9 @@ export const iconMap: Record<string, PhosphorIcon> = Object.fromEntries(
   STAMP_ICONS.map(({ id, Icon }) => [id, Icon]),
 );
 
-/** Curated subset offered for the final (reward) stamp. */
-const REWARD_ICON_IDS: StampIconType[] = [
+/** Curated subset suggested for the final (reward) stamp. The full library
+ *  stays available behind it — this is guidance, not a restriction. */
+export const REWARD_ICON_IDS: StampIconType[] = [
   "gift",
   "trophy",
   "star",
@@ -319,7 +320,7 @@ function IconButton({ entry, selected, accentColor, iconColor, displayName, onCl
   );
 }
 
-interface StampIconPickerProps {
+interface IconLibraryProps {
   readonly value: StampIconType;
   readonly onChange: (icon: StampIconType) => void;
   readonly accentColor?: string;
@@ -327,14 +328,22 @@ interface StampIconPickerProps {
    *  match `design.icon_color` so the picker previews exactly what the
    *  customer will see on their pass. Defaults to white. */
   readonly iconColor?: string;
+  /** Ids pinned in a "Suggested" section above the categories (e.g. the
+   *  curated reward icons). The full library stays browsable below. */
+  readonly suggested?: StampIconType[];
 }
 
-export function StampIconPicker({
+/**
+ * The full searchable, categorized icon library. Rendered inline by
+ * StampIconPicker or inside IconPickerField's popover.
+ */
+export function IconLibrary({
   value,
   onChange,
   accentColor = "#f97316",
   iconColor = "#ffffff",
-}: StampIconPickerProps) {
+  suggested,
+}: IconLibraryProps) {
   const t = useTranslations("designEditor.iconPicker");
   const tNames = useTranslations("designEditor");
   const [query, setQuery] = useState("");
@@ -357,6 +366,30 @@ export function StampIconPicker({
     });
   }, [query, localizedNames]);
 
+  const suggestedEntries = useMemo(
+    () =>
+      (suggested ?? [])
+        .map((id) => STAMP_ICONS.find((entry) => entry.id === id))
+        .filter((entry): entry is (typeof STAMP_ICONS)[number] => !!entry),
+    [suggested]
+  );
+
+  const renderGrid = (entries: readonly (typeof STAMP_ICONS)[number][]) => (
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-y-2 gap-x-1">
+      {entries.map((entry) => (
+        <IconButton
+          key={entry.id}
+          entry={entry}
+          selected={value === entry.id}
+          accentColor={accentColor}
+          iconColor={iconColor}
+          displayName={displayName(entry)}
+          onClick={() => onChange(entry.id)}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
@@ -373,42 +406,26 @@ export function StampIconPicker({
       <div className="max-h-64 overflow-y-auto pr-1 -mr-1">
         {filtered ? (
           filtered.length > 0 ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-y-2 gap-x-1">
-              {filtered.map((entry) => (
-                <IconButton
-                  key={entry.id}
-                  entry={entry}
-                  selected={value === entry.id}
-                  accentColor={accentColor}
-                  iconColor={iconColor}
-                  displayName={displayName(entry)}
-                  onClick={() => onChange(entry.id)}
-                />
-              ))}
-            </div>
+            renderGrid(filtered)
           ) : (
             <p className="text-sm text-muted-foreground py-2">{t("noResults")}</p>
           )
         ) : (
           <div className="flex flex-col gap-4">
+            {suggestedEntries.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  {t("suggested")}
+                </p>
+                {renderGrid(suggestedEntries)}
+              </div>
+            )}
             {ICON_CATEGORIES.map((category) => (
               <div key={category} className="flex flex-col gap-2">
                 <p className="text-xs font-medium text-muted-foreground">
                   {t(`categories.${category}`)}
                 </p>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-y-2 gap-x-1">
-                  {STAMP_ICONS.filter((entry) => entry.category === category).map((entry) => (
-                    <IconButton
-                      key={entry.id}
-                      entry={entry}
-                      selected={value === entry.id}
-                      accentColor={accentColor}
-                      iconColor={iconColor}
-                      displayName={displayName(entry)}
-                      onClick={() => onChange(entry.id)}
-                    />
-                  ))}
-                </div>
+                {renderGrid(STAMP_ICONS.filter((entry) => entry.category === category))}
               </div>
             ))}
           </div>
@@ -416,6 +433,18 @@ export function StampIconPicker({
       </div>
     </div>
   );
+}
+
+export function StampIconPicker(props: IconLibraryProps) {
+  return <IconLibrary {...props} />;
+}
+
+/** Localized display name for an icon id (falls back to the English label). */
+export function useIconDisplayName(): (id: StampIconType) => string {
+  const tNames = useTranslations("designEditor");
+  const names = (tNames.raw("iconNames") as Record<string, string> | undefined) ?? {};
+  return (id) =>
+    names[id] ?? STAMP_ICONS.find((entry) => entry.id === id)?.label ?? id;
 }
 
 interface StampIconSvgProps {
@@ -428,41 +457,4 @@ export function StampIconSvg({ icon, className = "w-4 h-4", color }: StampIconSv
   const Icon = iconMap[icon] || Check;
   const weight = icon === "checkmark" ? "bold" : "fill";
   return <Icon className={className} weight={weight} style={color ? { color } : undefined} />;
-}
-
-// Reward Icon Picker - subset of icons suitable for the final reward stamp
-interface RewardIconPickerProps {
-  readonly value: StampIconType;
-  readonly onChange: (icon: StampIconType) => void;
-  readonly accentColor?: string;
-  readonly iconColor?: string;
-}
-
-export function RewardIconPicker({
-  value,
-  onChange,
-  accentColor = "#f97316",
-  iconColor = "#ffffff",
-}: RewardIconPickerProps) {
-  const tNames = useTranslations("designEditor");
-  const localizedNames = (tNames.raw("iconNames") as Record<string, string> | undefined) ?? {};
-  const rewardEntries = REWARD_ICON_IDS.map(
-    (id) => STAMP_ICONS.find((entry) => entry.id === id)!,
-  );
-
-  return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-y-2 gap-x-1">
-      {rewardEntries.map((entry) => (
-        <IconButton
-          key={entry.id}
-          entry={entry}
-          selected={value === entry.id}
-          accentColor={accentColor}
-          iconColor={iconColor}
-          displayName={localizedNames[entry.id] ?? entry.label}
-          onClick={() => onChange(entry.id)}
-        />
-      ))}
-    </div>
-  );
 }

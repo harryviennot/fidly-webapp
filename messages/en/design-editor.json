@@ -199,7 +199,9 @@
         "peopleSmileys": "People & smileys",
         "moneyRewards": "Rewards & money",
         "symbolsMisc": "Symbols & more"
-      }
+      },
+      "suggested": "Suggested",
+      "change": "Change icon"
     },
     "iconNames": {
       "coffee": "Coffee",

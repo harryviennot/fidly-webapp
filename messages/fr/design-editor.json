@@ -199,7 +199,9 @@
         "peopleSmileys": "Personnes et sourires",
         "moneyRewards": "Récompenses et argent",
         "symbolsMisc": "Symboles et divers"
-      }
+      },
+      "suggested": "Suggestions",
+      "change": "Changer d'icône"
     },
     "iconNames": {
       "coffee": "Café",

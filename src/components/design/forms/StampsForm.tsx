@@ -7,11 +7,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LabelWithTooltip } from '@/components/design/FieldTooltip';
 import { ColorPicker } from '@/components/design/ColorPicker';
-import {
-  StampIconPicker,
-  RewardIconPicker,
-  type StampIconType,
-} from '@/components/design/StampIconPicker';
+import { REWARD_ICON_IDS, type StampIconType } from '@/components/design/StampIconPicker';
+import { IconPickerField } from '@/components/design/IconPickerField';
 import ImageUploader from '@/components/design/ImageUploader';
 import { accentColors, iconColors, emptyStampColors } from '@/lib/color-utils';
 import { paletteToSwatches } from '@/lib/logo-palette';
@@ -93,7 +90,7 @@ export function StampsForm() {
         <>
           <div className="flex flex-col gap-3">
             <LabelWithTooltip tooltip={t('stampIconTooltip')}>{t('stampIcon')}</LabelWithTooltip>
-            <StampIconPicker
+            <IconPickerField
               value={(formData.stamp_icon || 'checkmark') as StampIconType}
               onChange={(icon) => updateField('stamp_icon', icon)}
               accentColor={accentHex}
@@ -103,11 +100,12 @@ export function StampsForm() {
 
           <div className="flex flex-col gap-3">
             <LabelWithTooltip tooltip={t('rewardIconTooltip')}>{t('rewardIcon')}</LabelWithTooltip>
-            <RewardIconPicker
+            <IconPickerField
               value={(formData.reward_icon || 'gift') as StampIconType}
               onChange={(icon) => updateField('reward_icon', icon)}
               accentColor={accentHex}
               iconColor={iconHex}
+              suggested={REWARD_ICON_IDS}
             />
           </div>
 
