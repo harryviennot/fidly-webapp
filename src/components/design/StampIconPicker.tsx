@@ -331,6 +331,9 @@ interface IconLibraryProps {
   /** Ids pinned in a "Suggested" section above the categories (e.g. the
    *  curated reward icons). The full library stays browsable below. */
   readonly suggested?: StampIconType[];
+  /** Height/scroll classes for the icon list. The popover keeps the
+   *  default; the mobile bottom sheet passes a taller cap. */
+  readonly listClassName?: string;
 }
 
 /**
@@ -343,6 +346,7 @@ export function IconLibrary({
   accentColor = "#f97316",
   iconColor = "#ffffff",
   suggested,
+  listClassName = "max-h-64",
 }: IconLibraryProps) {
   const t = useTranslations("designEditor.iconPicker");
   const tNames = useTranslations("designEditor");
@@ -403,7 +407,7 @@ export function IconLibrary({
         />
       </div>
 
-      <div className="max-h-64 overflow-y-auto pr-1 -mr-1">
+      <div className={`${listClassName} overflow-y-auto pr-1 -mr-1`}>
         {filtered ? (
           filtered.length > 0 ? (
             renderGrid(filtered)

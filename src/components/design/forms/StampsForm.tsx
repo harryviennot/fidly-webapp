@@ -95,6 +95,7 @@ export function StampsForm() {
               onChange={(icon) => updateField('stamp_icon', icon)}
               accentColor={accentHex}
               iconColor={iconHex}
+              label={t('stampIcon')}
             />
           </div>
 
@@ -106,6 +107,7 @@ export function StampsForm() {
               accentColor={accentHex}
               iconColor={iconHex}
               suggested={REWARD_ICON_IDS}
+              label={t('rewardIcon')}
             />
           </div>
 

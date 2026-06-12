@@ -201,7 +201,8 @@
         "symbolsMisc": "Symboles et divers"
       },
       "suggested": "Suggestions",
-      "change": "Changer d'icône"
+      "change": "Changer d'icône",
+      "title": "Choisir une icône"
     },
     "iconNames": {
       "coffee": "Café",
