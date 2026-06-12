@@ -330,7 +330,8 @@
       "remove": "Retirer",
       "cropTitle": "Cadrez votre icône",
       "cropDescription": "Gardez seulement le sujet. Les bords transparents sont retirés automatiquement après cette étape.",
-      "arrangement_overlap": "Superposée"
+      "arrangement_overlap": "Superposée",
+      "emptyOpacityLabel": "Opacité des tampons restants"
     }
   }
 }

@@ -330,7 +330,8 @@
       "remove": "Remove",
       "cropTitle": "Frame your icon",
       "cropDescription": "Keep just the subject. We trim transparent edges automatically after this step.",
-      "arrangement_overlap": "Overlapping"
+      "arrangement_overlap": "Overlapping",
+      "emptyOpacityLabel": "Opacity of remaining stamps"
     }
   }
 }

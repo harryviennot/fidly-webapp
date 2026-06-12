@@ -28,6 +28,7 @@ const EMPTY_CONFIG: CustomStampConfig = {
   empty_icon: null,
   empty_mode: 'greyscale',
   arrangement: 'straight',
+  empty_opacity: 100,
 };
 
 /**
@@ -44,7 +45,12 @@ export function CustomStampsPanel() {
   const t = useTranslations('designEditor.customStamps');
   const { currentBusiness } = useBusiness();
   const { formData, updateField, designId } = useDesignForm();
-  const [removeBg, setRemoveBg] = useState(false);
+  // Background removal defaults ON (most uploads are photos or logos on a
+  // background); for a saved design, reflect what the primary upload
+  // actually used so the switch isn't lying.
+  const [removeBg, setRemoveBg] = useState<boolean>(
+    () => formData.custom_stamp_config?.icons?.[0]?.bg_removed ?? true
+  );
   const [reprocessing, setReprocessing] = useState(false);
   const [reprocessError, setReprocessError] = useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -182,7 +188,12 @@ export function CustomStampsPanel() {
                   <span className="w-8 h-8 flex items-center justify-center">
                     {src ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={src} alt="" className="w-full h-full object-contain" />
+                      <img
+                        src={src}
+                        alt=""
+                        className="w-full h-full object-contain"
+                        style={{ opacity: (config.empty_opacity ?? 100) / 100 }}
+                      />
                     ) : (
                       <span className="w-7 h-7 rounded-full border border-dashed border-muted-foreground/50" />
                     )}
@@ -206,6 +217,28 @@ export function CustomStampsPanel() {
                 <p className="text-xs text-muted-foreground">{t('emptyCustomHint')}</p>
               </div>
             )}
+
+            {/* Empty-slot opacity: applied at render time (CSS opacity in the
+                preview, alpha multiply in the strip generator) — sliding it
+                never re-processes the uploads. */}
+            <div className="flex flex-col gap-2 pt-1">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-normal">{t('emptyOpacityLabel')}</Label>
+                <span className="text-sm text-muted-foreground">
+                  {config.empty_opacity ?? 100}%
+                </span>
+              </div>
+              <input
+                type="range"
+                className="styled-slider w-full"
+                min={10}
+                max={100}
+                value={config.empty_opacity ?? 100}
+                onChange={(e) =>
+                  setConfig({ empty_opacity: parseInt(e.target.value, 10) })
+                }
+              />
+            </div>
           </div>
 
           {/* Arrangement */}
