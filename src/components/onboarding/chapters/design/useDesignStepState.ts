@@ -291,6 +291,7 @@ export function useDesignStepState(
   const designContext: DesignFormContextValue = {
     formData,
     customColors,
+    designId: existingDesign?.id,
     businessInfo: (currentBusiness?.settings?.business_info as BusinessInfoEntry[]) || [],
     showAdvancedStamps,
     bgHex,

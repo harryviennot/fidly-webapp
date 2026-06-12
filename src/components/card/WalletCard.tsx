@@ -14,7 +14,12 @@ import {
   computeCardColors,
   getInitials,
   calculateStampLayout,
+  calculateStaggeredStampLayout,
+  customIconBoxSize,
+  resolveStampIconUrl,
+  STAGGERED_MAX_COUNT,
 } from "@/lib/card-utils";
+import type { CustomStampConfig } from "@/types";
 
 // ============================================================================
 // Types
@@ -49,7 +54,14 @@ interface StampGridProps {
   readonly rewardIcon: StampIconType;
   readonly containerWidth: number;
   readonly containerHeight: number;
+  /** Custom uploaded icons (STA-216). When set with at least one icon,
+   *  slots render the processed PNGs instead of circles — exactly what the
+   *  backend strip generator composites, so the preview cannot drift. */
+  readonly customConfig?: CustomStampConfig | null;
 }
+
+const MIN_PADDING = 8; // 24/3, scaled for the ~375px preview container
+const SIDE_PADDING = 11; // 32/3 ≈ 11
 
 export function StampGrid({
   totalStamps,
@@ -59,20 +71,40 @@ export function StampGrid({
   rewardIcon,
   containerWidth,
   containerHeight,
+  customConfig,
 }: StampGridProps) {
+  const useCustom = !!customConfig && customConfig.icons.length > 0;
+  // Mirror of the backend fallback: staggered only for 2..16 stamps
+  const arrangement: "straight" | "staggered" =
+    useCustom &&
+    customConfig.arrangement === "staggered" &&
+    totalStamps >= 2 &&
+    totalStamps <= STAGGERED_MAX_COUNT
+      ? "staggered"
+      : "straight";
+
   // Calculate layout using the same algorithm as the backend
   const layout = useMemo(() => {
+    if (arrangement === "staggered") {
+      return calculateStaggeredStampLayout(
+        totalStamps,
+        containerWidth,
+        containerHeight,
+        SIDE_PADDING
+      );
+    }
     return calculateStampLayout(
       totalStamps,
       containerWidth,
       containerHeight,
-      8,  // minPadding (scaled for ~375px width container)
-      11  // sidePadding (32/3 ≈ 11)
+      MIN_PADDING,
+      SIDE_PADDING
     );
-  }, [totalStamps, containerWidth, containerHeight]);
+  }, [arrangement, totalStamps, containerWidth, containerHeight]);
 
   // Calculate icon size (60% of diameter, matching backend)
   const iconSize = Math.max(layout.radius * 1.2, 12);
+  const customBox = customIconBoxSize(layout, MIN_PADDING, arrangement);
 
   return (
     <div
@@ -82,6 +114,34 @@ export function StampGrid({
       {layout.positions.map((pos) => {
         const isFilled = pos.globalIndex < filledCount;
         const isLast = pos.globalIndex === totalStamps - 1;
+
+        if (useCustom) {
+          const src = resolveStampIconUrl(
+            customConfig,
+            pos.globalIndex,
+            totalStamps,
+            isFilled
+          );
+          if (!src) return null;
+          return (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              key={`stamp-${pos.globalIndex}`}
+              src={src}
+              alt=""
+              className="absolute object-contain transition-all duration-300"
+              style={{
+                width: customBox,
+                height: customBox,
+                left: pos.centerX - customBox / 2,
+                top: pos.centerY - customBox / 2,
+                // Staggered: front row (row 1) overlaps the back row,
+                // matching the backend compositing order.
+                zIndex: pos.row + 1,
+              }}
+            />
+          );
+        }
 
         return (
           <div
@@ -310,6 +370,7 @@ export function StampGridContainer({
   colors,
   stampIcon,
   rewardIcon,
+  customConfig,
   maxWidth,
 }: StampGridContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -353,6 +414,7 @@ export function StampGridContainer({
           colors={colors}
           stampIcon={stampIcon}
           rewardIcon={rewardIcon}
+          customConfig={customConfig}
           containerWidth={dimensions.width}
           containerHeight={dimensions.height}
         />
@@ -397,6 +459,8 @@ export function WalletCard({
 
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
+  const customConfig =
+    design.stamp_icon_mode === "custom" ? design.custom_stamp_config : null;
 
   const secondaryFields = design.secondary_fields || [];
   const auxiliaryFields = design.auxiliary_fields || [];
@@ -488,6 +552,7 @@ export function WalletCard({
                 colors={colors}
                 stampIcon={stampIcon}
                 rewardIcon={rewardIcon}
+                customConfig={customConfig}
               />
             </div>
 

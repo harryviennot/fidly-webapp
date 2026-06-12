@@ -1,5 +1,11 @@
 import { API_BASE_URL, getAuthHeaders, getAuthHeadersForFormData, throwApiError } from './client';
-import type { CardDesign, CardDesignCreate, CardDesignUpdate, UploadResponse } from '@/types';
+import type {
+  CardDesign,
+  CardDesignCreate,
+  CardDesignUpdate,
+  ProcessedIconAsset,
+  UploadResponse,
+} from '@/types';
 
 export async function getDesigns(businessId: string): Promise<CardDesign[]> {
   const response = await fetch(`${API_BASE_URL}/designs/${businessId}`, {
@@ -206,6 +212,59 @@ export async function uploadStamp(
   }
 
   return response.json();
+}
+
+/**
+ * Upload + server-process a custom stamp icon. The backend optionally
+ * removes the background, trims, normalizes, and derives the greyscale and
+ * outline empty-state variants; the returned URLs are final and the
+ * preview displays them directly. Slot-agnostic: the caller decides where
+ * the asset goes inside custom_stamp_config and persists via updateDesign.
+ *
+ * Processing (rembg especially) takes a few seconds; the request is
+ * capped at 30s client-side.
+ */
+export async function uploadStampIcon(
+  businessId: string,
+  designId: string,
+  file: File,
+  removeBg: boolean
+): Promise<ProcessedIconAsset> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('remove_bg', String(removeBg));
+
+  const response = await fetch(
+    `${API_BASE_URL}/designs/${businessId}/${designId}/upload/stamp-icon`,
+    {
+      method: 'POST',
+      headers: await getAuthHeadersForFormData(),
+      body: formData,
+      signal: AbortSignal.timeout(30_000),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to upload stamp icon');
+  }
+
+  return response.json();
+}
+
+/** Best-effort eager cleanup when an icon is removed before save. */
+export async function deleteStampIcon(
+  businessId: string,
+  designId: string,
+  assetId: string
+): Promise<void> {
+  await fetch(
+    `${API_BASE_URL}/designs/${businessId}/${designId}/upload/stamp-icon/${assetId}`,
+    {
+      method: 'DELETE',
+      headers: await getAuthHeaders(),
+    }
+  ).catch(() => undefined);
 }
 
 export async function uploadStripBackground(

@@ -1,18 +1,12 @@
 "use client";
 
-import React, { useRef, useState, useMemo, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { CardDesign } from "@/types";
-import {
-  StampIconSvg,
-  StampIconType,
-} from "@/components/design/StampIconPicker";
-import {
-  computeCardColors,
-  getInitials,
-  calculateStampLayout,
-} from "@/lib/card-utils";
+import { StampIconType } from "@/components/design/StampIconPicker";
+import { StampGrid } from "@/components/card/WalletCard";
+import { computeCardColors, getInitials } from "@/lib/card-utils";
 
 // ============================================================================
 // Types
@@ -134,72 +128,6 @@ function FakeQRCode({ size = 80 }: { size?: number }) {
   );
 }
 
-// Stamp grid for Google Wallet hero image area
-function GoogleStampGrid({
-  totalStamps,
-  filledCount,
-  colors,
-  stampIcon,
-  rewardIcon,
-  containerWidth,
-  containerHeight,
-}: {
-  totalStamps: number;
-  filledCount: number;
-  colors: ReturnType<typeof computeCardColors>;
-  stampIcon: StampIconType;
-  rewardIcon: StampIconType;
-  containerWidth: number;
-  containerHeight: number;
-}) {
-  const layout = useMemo(() => {
-    return calculateStampLayout(
-      totalStamps,
-      containerWidth,
-      containerHeight,
-      8,
-      11
-    );
-  }, [totalStamps, containerWidth, containerHeight]);
-
-  const iconSize = Math.max(layout.radius * 1.2, 12);
-
-  return (
-    <div className="relative w-full" style={{ height: containerHeight }}>
-      {layout.positions.map((pos) => {
-        const isFilled = pos.globalIndex < filledCount;
-        const isLast = pos.globalIndex === totalStamps - 1;
-
-        return (
-          <div
-            key={`stamp-${pos.globalIndex}`}
-            className="absolute flex items-center justify-center rounded-full transition-all duration-300"
-            style={{
-              width: layout.diameter,
-              height: layout.diameter,
-              left: pos.centerX - pos.radius,
-              top: pos.centerY - pos.radius,
-              backgroundColor: isFilled ? colors.accentHex : colors.emptyStampBg,
-              border: isFilled ? "none" : `1px solid ${colors.emptyStampBorder}`,
-              boxShadow: isFilled ? `0 4px 12px ${colors.accentHex}40` : "none",
-            }}
-          >
-            {isFilled && (
-              <div style={{ width: iconSize, height: iconSize }}>
-                <StampIconSvg
-                  icon={isLast ? rewardIcon : stampIcon}
-                  className="w-full h-full"
-                  color={colors.iconColorHex}
-                />
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -236,6 +164,8 @@ export function GoogleWalletCard({
 
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
+  const customConfig =
+    design.stamp_icon_mode === "custom" ? design.custom_stamp_config : null;
 
   const secondaryFields = design.secondary_fields || [];
 
@@ -451,12 +381,13 @@ export function GoogleWalletCard({
             {/* Stamps */}
             <div className="relative">
               {heroWidth > 0 && (
-                <GoogleStampGrid
+                <StampGrid
                   totalStamps={totalStamps}
                   filledCount={stamps}
                   colors={colors}
                   stampIcon={stampIcon}
                   rewardIcon={rewardIcon}
+                  customConfig={customConfig}
                   containerWidth={heroWidth}
                   containerHeight={heroHeight}
                 />

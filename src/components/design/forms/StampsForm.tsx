@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LabelWithTooltip } from '@/components/design/FieldTooltip';
 import { ColorPicker } from '@/components/design/ColorPicker';
 import {
@@ -15,6 +16,7 @@ import ImageUploader from '@/components/design/ImageUploader';
 import { accentColors, iconColors, emptyStampColors } from '@/lib/color-utils';
 import { paletteToSwatches } from '@/lib/logo-palette';
 import { useDesignForm } from './DesignFormContext';
+import { CustomStampsPanel } from './CustomStampsPanel';
 
 /**
  * Stamps section: stamp + reward icon, all stamp-related colors, and the
@@ -25,6 +27,7 @@ import { useDesignForm } from './DesignFormContext';
  */
 export function StampsForm() {
   const t = useTranslations('designEditor.editor');
+  const tCustom = useTranslations('designEditor.customStamps');
   const tAuto = useTranslations('designEditor.autoGenerate');
   const {
     formData,
@@ -42,6 +45,21 @@ export function StampsForm() {
     extractedPalette,
     palette,
   } = useDesignForm();
+
+  // Local tab state: the saved stamp_icon_mode only flips to 'custom' once
+  // an icon is uploaded (a half-configured custom panel keeps the design
+  // rendering presets), so the tab can't be derived from formData alone.
+  const [iconTab, setIconTab] = useState<'preset' | 'custom'>(
+    formData.stamp_icon_mode === 'custom' ? 'custom' : 'preset'
+  );
+
+  const switchIconTab = (tab: 'preset' | 'custom') => {
+    setIconTab(tab);
+    const hasIcons = (formData.custom_stamp_config?.icons?.length ?? 0) > 0;
+    // Config is retained when switching back to presets — re-entering the
+    // custom tab restores the previous uploads instantly.
+    updateField('stamp_icon_mode', tab === 'custom' && hasIcons ? 'custom' : 'preset');
+  };
   // Wizard overrides with a per-business-type palette; dashboard falls back
   // to the universal `designColors` aliases below.
   const accentPalette = palette ?? accentColors;
@@ -58,75 +76,92 @@ export function StampsForm() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3">
-        <LabelWithTooltip tooltip={t('stampIconTooltip')}>{t('stampIcon')}</LabelWithTooltip>
-        <StampIconPicker
-          value={(formData.stamp_icon || 'checkmark') as StampIconType}
-          onChange={(icon) => updateField('stamp_icon', icon)}
-          accentColor={accentHex}
-          iconColor={iconHex}
-        />
-      </div>
+      <Tabs value={iconTab} onValueChange={(v) => switchIconTab(v as 'preset' | 'custom')}>
+        <TabsList className="w-full">
+          <TabsTrigger value="preset" className="flex-1">
+            {tCustom('tabPresets')}
+          </TabsTrigger>
+          <TabsTrigger value="custom" className="flex-1">
+            {tCustom('tabCustom')}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-      <div className="flex flex-col gap-3">
-        <LabelWithTooltip tooltip={t('rewardIconTooltip')}>{t('rewardIcon')}</LabelWithTooltip>
-        <RewardIconPicker
-          value={(formData.reward_icon || 'gift') as StampIconType}
-          onChange={(icon) => updateField('reward_icon', icon)}
-          accentColor={accentHex}
-          iconColor={iconHex}
-        />
-      </div>
+      {iconTab === 'custom' ? (
+        <CustomStampsPanel />
+      ) : (
+        <>
+          <div className="flex flex-col gap-3">
+            <LabelWithTooltip tooltip={t('stampIconTooltip')}>{t('stampIcon')}</LabelWithTooltip>
+            <StampIconPicker
+              value={(formData.stamp_icon || 'checkmark') as StampIconType}
+              onChange={(icon) => updateField('stamp_icon', icon)}
+              accentColor={accentHex}
+              iconColor={iconHex}
+            />
+          </div>
 
-      <ColorPicker
-        label={t('stampColor')}
-        tooltip={t('stampColorTooltip')}
-        colors={accentPalette}
-        value={accentHex}
-        onChange={(hex) => updateColorField('stamp_filled_color', hex)}
-        customColors={customColors}
-        onCustomColor={addCustomColor}
-        extraPresets={logoPresets}
-        extraPresetsLabel={logoPresetsLabel}
-      />
+          <div className="flex flex-col gap-3">
+            <LabelWithTooltip tooltip={t('rewardIconTooltip')}>{t('rewardIcon')}</LabelWithTooltip>
+            <RewardIconPicker
+              value={(formData.reward_icon || 'gift') as StampIconType}
+              onChange={(icon) => updateField('reward_icon', icon)}
+              accentColor={accentHex}
+              iconColor={iconHex}
+            />
+          </div>
 
-      <ColorPicker
-        label={t('iconColor')}
-        tooltip={t('iconColorTooltip')}
-        colors={iconPalette}
-        value={iconHex}
-        onChange={(hex) => {
-          setIconColorOverridden(true);
-          updateColorField('icon_color', hex);
-        }}
-        customColors={customColors}
-        onCustomColor={addCustomColor}
-        extraPresets={logoPresets}
-        extraPresetsLabel={logoPresetsLabel}
-      />
+          <ColorPicker
+            label={t('stampColor')}
+            tooltip={t('stampColorTooltip')}
+            colors={accentPalette}
+            value={accentHex}
+            onChange={(hex) => updateColorField('stamp_filled_color', hex)}
+            customColors={customColors}
+            onCustomColor={addCustomColor}
+            extraPresets={logoPresets}
+            extraPresetsLabel={logoPresetsLabel}
+          />
 
-      <ColorPicker
-        label={t('emptyStampColor')}
-        tooltip={t('emptyStampTooltip')}
-        colors={emptyPalette}
-        value={emptyStampHex}
-        onChange={(hex) => updateColorField('stamp_empty_color', hex)}
-        customColors={customColors}
-        onCustomColor={addCustomColor}
-        extraPresets={logoPresets}
-        extraPresetsLabel={logoPresetsLabel}
-      />
+          <ColorPicker
+            label={t('iconColor')}
+            tooltip={t('iconColorTooltip')}
+            colors={iconPalette}
+            value={iconHex}
+            onChange={(hex) => {
+              setIconColorOverridden(true);
+              updateColorField('icon_color', hex);
+            }}
+            customColors={customColors}
+            onCustomColor={addCustomColor}
+            extraPresets={logoPresets}
+            extraPresetsLabel={logoPresetsLabel}
+          />
 
-      <StampBorderField
-        borderColorHex={borderColorHex}
-        emptyStampHex={emptyStampHex}
-        customColors={customColors}
-        logoPresets={logoPresets}
-        logoPresetsLabel={logoPresetsLabel}
-        palette={emptyPalette}
-        onChange={(hex) => updateColorField('stamp_border_color', hex)}
-        onCustomColor={addCustomColor}
-      />
+          <ColorPicker
+            label={t('emptyStampColor')}
+            tooltip={t('emptyStampTooltip')}
+            colors={emptyPalette}
+            value={emptyStampHex}
+            onChange={(hex) => updateColorField('stamp_empty_color', hex)}
+            customColors={customColors}
+            onCustomColor={addCustomColor}
+            extraPresets={logoPresets}
+            extraPresetsLabel={logoPresetsLabel}
+          />
+
+          <StampBorderField
+            borderColorHex={borderColorHex}
+            emptyStampHex={emptyStampHex}
+            customColors={customColors}
+            logoPresets={logoPresets}
+            logoPresetsLabel={logoPresetsLabel}
+            palette={emptyPalette}
+            onChange={(hex) => updateColorField('stamp_border_color', hex)}
+            onCustomColor={addCustomColor}
+          />
+        </>
+      )}
 
       <div className="flex flex-col gap-3">
         <LabelWithTooltip tooltip={t('stripBackgroundTooltip')}>

@@ -300,6 +300,34 @@
       "laptop": "Ordinateur portable",
       "bus": "Bus",
       "axe": "Hache"
+    },
+    "customStamps": {
+      "tabPresets": "Bibliothèque d'icônes",
+      "tabCustom": "Votre image",
+      "primaryLabel": "Image du tampon",
+      "uploadLabel": "Importer une image",
+      "removeBg": "Supprimer l'arrière-plan",
+      "removeBgHint": "On détoure votre image pour qu'elle se pose directement sur la carte. PNG, JPG ou WebP, 5 Mo max.",
+      "emptyStyleLabel": "Tampons restants",
+      "empty_greyscale": "Grisé",
+      "empty_outline": "Contour",
+      "empty_custom": "Autre image",
+      "emptyUploadLabel": "Importer l'image des tampons restants",
+      "emptyCustomHint": "Affichée sur chaque tampon que le client n'a pas encore gagné.",
+      "arrangementLabel": "Disposition",
+      "arrangement_straight": "Alignée",
+      "arrangement_staggered": "En quinconce",
+      "advancedTitle": "Une image différente par tampon",
+      "advancedHint": "Vos images se répètent dans l'ordre sur les tampons.",
+      "addIcon": "Ajouter une image",
+      "moveLeft": "Déplacer à gauche",
+      "moveRight": "Déplacer à droite",
+      "rewardTitle": "Image du tampon récompense",
+      "rewardHint": "Optionnel. Sans image, le dernier tampon reprend vos images de tampon.",
+      "saveFirst": "Enregistrez d'abord votre modèle, puis importez vos images ici.",
+      "uploadError": "Impossible de traiter cette image. Essayez un PNG, JPG ou WebP de moins de 5 Mo.",
+      "replace": "Remplacer",
+      "remove": "Retirer"
     }
   }
 }

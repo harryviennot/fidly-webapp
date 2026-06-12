@@ -300,6 +300,34 @@
       "laptop": "Laptop",
       "bus": "Bus",
       "axe": "Axe"
+    },
+    "customStamps": {
+      "tabPresets": "Icon library",
+      "tabCustom": "Your own image",
+      "primaryLabel": "Stamp image",
+      "uploadLabel": "Add an image",
+      "removeBg": "Remove the background",
+      "removeBgHint": "We cut out the subject so it sits directly on the card. PNG, JPG or WebP, up to 5MB.",
+      "emptyStyleLabel": "Stamps left to earn",
+      "empty_greyscale": "Greyed",
+      "empty_outline": "Outline",
+      "empty_custom": "Other image",
+      "emptyUploadLabel": "Add the empty-stamp image",
+      "emptyCustomHint": "Shown on every stamp the customer hasn't earned yet.",
+      "arrangementLabel": "Arrangement",
+      "arrangement_straight": "Aligned",
+      "arrangement_staggered": "Staggered",
+      "advancedTitle": "Different image per stamp",
+      "advancedHint": "Your images repeat in order across the stamps.",
+      "addIcon": "Add an image",
+      "moveLeft": "Move left",
+      "moveRight": "Move right",
+      "rewardTitle": "Reward stamp image",
+      "rewardHint": "Optional. Without one, the last stamp uses your stamp images.",
+      "saveFirst": "Save your card style once, then add your own images here.",
+      "uploadError": "We couldn't process this image. Try a PNG, JPG or WebP under 5MB.",
+      "replace": "Replace",
+      "remove": "Remove"
     }
   }
 }
