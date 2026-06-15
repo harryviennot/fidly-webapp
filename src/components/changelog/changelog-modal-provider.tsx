@@ -7,14 +7,14 @@ import type { ChangelogRelease } from "@/api/changelog";
 import { ChangelogModal } from "./changelog-modal";
 
 interface ChangelogModalContextValue {
-  /** Open the modal (and mark the latest release seen if it was unread). */
-  open: () => void;
-  close: () => void;
-  isOpen: boolean;
-  /** Latest published release, for the "review what you dismissed" entry. */
-  latestRelease: ChangelogRelease | null;
+  /** Open the "What's new" modal on a specific release. */
+  openRelease: (release: ChangelogRelease) => void;
+  /** Recent published releases (newest first) — for the help menu's list. */
+  releases: ChangelogRelease[];
   unreadCount: number;
   isLoading: boolean;
+  /** Drop the unread count to 0 (called when the help menu is opened). */
+  markSeen: () => void;
 }
 
 const ChangelogModalContext = createContext<ChangelogModalContextValue | null>(
@@ -22,37 +22,34 @@ const ChangelogModalContext = createContext<ChangelogModalContextValue | null>(
 );
 
 /**
- * Owns the single "What's new" modal so it can be opened from two places — the
- * conditional sidebar trigger AND the Support popup (the permanent re-entry
- * point). Mounted once inside the dashboard layout. Mark-seen lives here, so
- * opening from Support after the update is already seen is a harmless no-op.
+ * Owns the single "What's new" modal so any release can be opened from the help
+ * menu's What's-new list. `open` is tracked separately from the selected
+ * release, so the release stays mounted through the modal's close animation.
  */
 export function ChangelogModalProvider({ children }: { children: ReactNode }) {
   const { releases, areas, unreadCount, markSeen, isLoading } = useChangelog();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const open = () => {
-    setIsOpen(true);
-    if (unreadCount > 0) markSeen();
-  };
+  const [selected, setSelected] = useState<ChangelogRelease | null>(null);
+  const [open, setOpen] = useState(false);
 
   return (
     <ChangelogModalContext.Provider
       value={{
-        open,
-        close: () => setIsOpen(false),
-        isOpen,
-        latestRelease: releases[0] ?? null,
+        openRelease: (r) => {
+          setSelected(r);
+          setOpen(true);
+        },
+        releases,
         unreadCount,
         isLoading,
+        markSeen,
       }}
     >
       {children}
       <ChangelogModal
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        releases={releases}
+        open={open}
+        release={selected}
         areas={areas}
+        onOpenChange={setOpen}
       />
     </ChangelogModalContext.Provider>
   );

@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
 import { NavUser } from "./nav-user";
-import { ChangelogWidget } from "@/components/changelog/changelog-widget";
-import { SupportPopover } from "@/components/changelog/support-popover";
+import { HelpMenu } from "@/components/changelog/help-menu";
 import { Badge } from "@/components/ui/badge";
 import { TrialSidebarWidget } from "@/components/billing/TrialBanner";
 import {
@@ -193,13 +192,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* Trial widget */}
         <TrialSidebarWidget />
 
-        {/* Bottom utility links */}
-        <div className="px-3">
-          <SidebarMenu className="gap-0.5">
-            <SupportPopover />
-          </SidebarMenu>
-          {/* What's new — surfaces only when there's an unseen update */}
-          <ChangelogWidget />
+        {/* Help menu — contact, scanner app, and What's new (unseen dot) */}
+        <div className="flex items-center px-3 py-0.5">
+          <HelpMenu />
         </div>
 
         <SidebarSeparator className="mx-3" />

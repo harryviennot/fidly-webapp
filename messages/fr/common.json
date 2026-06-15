@@ -23,8 +23,14 @@
   },
   "support": {
     "title": "Support",
-    "latestUpdate": "Dernière nouveauté",
-    "whatsapp": "Nous écrire sur WhatsApp"
+    "whatsNew": "Nouveautés",
+    "contactUs": "Nous contacter",
+    "downloadApps": "Télécharger l'application",
+    "whatsapp": "Nous écrire sur WhatsApp",
+    "contactTitle": "Nous contacter",
+    "contactDescription": "Comment souhaitez-vous nous joindre ?",
+    "contactEmail": "Envoyer un e-mail",
+    "contactEmailSubject": "Demande de support : {slug}"
   },
   "header": {
     "loyaltyProgram": "Programme de fidélité",

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Sparkle, ArrowUp, Bug, CaretDown } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
-import { areaDotHex } from "@/lib/changelog-areas";
+import { areaChipClass } from "@/lib/changelog-areas";
 import {
   resolveLocale,
   type ChangelogArea,
@@ -38,6 +38,14 @@ export function showcaseChangelogUrl(locale: string): string {
   return `${base}${locale === "en" ? "/en" : ""}/changelog`;
 }
 
+/** Public showcase "mobile scanner" feature page (locale-specific slug). */
+export function scannerAppUrl(locale: string): string {
+  const base = process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
+  return locale === "en"
+    ? `${base}/en/features/mobile-scanner`
+    : `${base}/features/scanner-mobile`;
+}
+
 /** Date in the viewer's locale, e.g. "June 11, 2026" / "11 juin 2026". */
 export function formatReleaseDate(iso: string | null, locale: string): string {
   if (!iso) return "";
@@ -49,6 +57,44 @@ export function formatReleaseDate(iso: string | null, locale: string): string {
   } catch {
     return "";
   }
+}
+
+/** Changelog hero image: a framed, aspect-locked box that RESERVES its space
+ *  (so the modal doesn't jump when the image arrives) with a skeleton + a soft
+ *  fade-in. Framed with the app's card tokens to feel native. */
+export function ChangelogHero({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div
+      className={cn(
+        "relative aspect-video w-full overflow-hidden rounded-xl border border-[var(--card-border)] bg-[var(--muted)]",
+        className
+      )}
+    >
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-[var(--muted)]" />
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        className={cn(
+          "h-full w-full object-cover transition-opacity duration-500",
+          loaded ? "opacity-100" : "opacity-0"
+        )}
+      />
+    </div>
+  );
 }
 
 /** A single changelog line: area pill + title (+ optional body) + team flag. */
@@ -70,13 +116,14 @@ export function ChangelogItemRow({
     !(item.affects ?? []).includes("owner");
 
   return (
-    <li className="flex flex-col gap-1.5 py-2.5 sm:flex-row sm:items-baseline sm:gap-2.5">
+    <li className="flex flex-col items-start gap-1.5 py-2.5 sm:flex-row sm:items-baseline sm:gap-2.5">
       {area && (
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-[11px] font-medium text-[var(--muted-foreground)]">
-          <span
-            className="h-1.5 w-1.5 rounded-full"
-            style={{ backgroundColor: areaDotHex(area.color) }}
-          />
+        <span
+          className={cn(
+            "inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold",
+            areaChipClass(area.color)
+          )}
+        >
           {locale === "en" ? area.label_en : area.label_fr}
         </span>
       )}

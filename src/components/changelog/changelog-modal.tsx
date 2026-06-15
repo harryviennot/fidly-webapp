@@ -16,6 +16,7 @@ import {
 import {
   CATEGORY_ICON,
   CategoryAccordion,
+  ChangelogHero,
   ChangelogItemRow,
   formatReleaseDate,
   plainExcerpt,
@@ -24,28 +25,26 @@ import {
 
 /**
  * The "What's new" modal — a centered Dialog on desktop, a bottom Sheet on
- * mobile (matching the app's responsive convention). Shows only the LATEST
- * release; Improvements/Fixes collapse into accordions. Visibility is driven by
- * the `open` prop only (never the unread count), so it stays open after the
- * sidebar trigger self-hides on mark-seen. Built on the Radix primitive so the
+ * mobile. Renders the SELECTED release (opened from the help menu). `open` is
+ * controlled separately from `release` by the provider, so `release` stays set
+ * through the zoom-out close animation. Built on the Radix primitive so the
  * shared DialogContent (used elsewhere) is untouched.
  */
 export function ChangelogModal({
   open,
-  onOpenChange,
-  releases,
+  release,
   areas,
+  onOpenChange,
 }: {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  releases: ChangelogRelease[];
+  release: ChangelogRelease | null;
   areas: ChangelogArea[];
+  onOpenChange: (open: boolean) => void;
 }) {
   const isMobile = useIsMobile();
   const t = useTranslations("changelog");
   const locale = useLocale();
 
-  const release = releases[0];
   if (!release) return null;
 
   const areaBySlug = new Map(areas.map((a) => [a.slug, a]));
@@ -58,17 +57,19 @@ export function ChangelogModal({
     list: release.changelog_items.filter((i) => i.category === cat),
   })).filter((g) => g.list.length > 0);
 
-  // Slim Linear-style header: date · "Changelog ↗" · close.
+  // Slim Linear-style header: date · "Changelog" link · close. A 3-column grid
+  // (1fr / auto / 1fr) centers the link to the modal width regardless of how
+  // wide the date or the close button are.
   const header = (
-    <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--border)] px-5 py-3">
-      <time className="text-sm font-medium text-[var(--muted-foreground)]">
+    <div className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-[var(--border)] px-4 py-3">
+      <time className="min-w-0 justify-self-start truncate text-sm font-medium text-[var(--muted-foreground)]">
         {date}
       </time>
       <a
         href={showcaseChangelogUrl(locale)}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-sm font-medium text-[var(--accent)] transition-opacity hover:opacity-80"
+        className="inline-flex items-center gap-1 justify-self-center whitespace-nowrap text-sm font-medium text-[var(--accent)] transition-opacity hover:opacity-80"
       >
         {t("changelogLink")}
         <ArrowSquareOut className="h-3.5 w-3.5" />
@@ -77,7 +78,7 @@ export function ChangelogModal({
         type="button"
         onClick={() => onOpenChange(false)}
         aria-label={t("close")}
-        className="-mr-1.5 rounded-full p-1.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+        className="-mr-1.5 justify-self-end rounded-full p-1.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
       >
         <X className="h-4 w-4" />
       </button>
@@ -91,12 +92,10 @@ export function ChangelogModal({
       </h2>
 
       {release.image_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <ChangelogHero
           src={release.image_url}
           alt={title || "Changelog"}
-          loading="lazy"
-          className="mt-3 max-h-[280px] w-full rounded-2xl border border-[var(--border)] object-cover"
+          className="mt-3"
         />
       )}
 
