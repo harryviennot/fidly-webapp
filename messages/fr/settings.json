@@ -72,11 +72,14 @@
       "saveFailed": "Échec de l'enregistrement des informations"
     },
     "language": {
-      "title": "Langue de votre entreprise",
-      "description": "C'est la langue principale de votre entreprise, utilisée pour votre programme de fidélité",
+      "title": "Langue et pays de votre entreprise",
+      "description": "La langue principale de votre entreprise et le pays où elle se trouve.",
       "passLocale": "Langue",
       "passLocaleHint": "Vous pouvez toujours ajouter des traductions pour d'autres langues dans l'éditeur de carte.",
-      "saved": "La langue de votre entreprise a été mise à jour."
+      "saved": "La langue de votre entreprise a été mise à jour.",
+      "country": "Pays",
+      "countryHint": "Le pays où se trouve votre entreprise.",
+      "countrySaved": "Le pays de votre entreprise a été mis à jour."
     },
     "theme": {
       "title": "Personnalisation du thème",

@@ -27,6 +27,8 @@ export interface Business {
   icon_url?: string | null;
   icon_original_url?: string | null;
   primary_locale: "fr" | "en";
+  /** ISO 3166-1 alpha-2 country the business operates from (e.g. "FR"). */
+  country?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -104,4 +106,6 @@ export interface BusinessUpdate {
   settings?: BusinessSettings;
   logo_url?: string | null;
   primary_locale?: "fr" | "en";
+  /** ISO 3166-1 alpha-2 country code (e.g. "FR"). */
+  country?: string;
 }
