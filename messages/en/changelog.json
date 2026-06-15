@@ -1,0 +1,14 @@
+{
+  "changelog": {
+    "trigger": "What's new",
+    "title": "What's new",
+    "viewAll": "View full changelog",
+    "empty": "You're all caught up.",
+    "forTeam": "For your team",
+    "categories": {
+      "feature": "New",
+      "improvement": "Improvements",
+      "fix": "Fixes"
+    }
+  }
+}

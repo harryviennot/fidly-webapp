@@ -6,7 +6,18 @@
       "profilePicture": "Profile Picture",
       "password": "Password",
       "accountInfo": "Account Info",
-      "language": "Language"
+      "language": "Language",
+      "productUpdates": "Product Updates"
+    },
+    "productUpdates": {
+      "title": "Product Updates",
+      "description": "Choose how you hear about new features and improvements.",
+      "emailLabel": "Email me about product updates",
+      "emailHint": "A short recap each time we ship something new.",
+      "statusUpToDate": "You're up to date.",
+      "statusVersion": "Latest version: {version}",
+      "loadFailed": "Could not load your preferences.",
+      "saveFailed": "Could not save your preference."
     },
     "profilePicture": {
       "title": "Profile Picture",

@@ -9,7 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImageUploader from '@/components/design/ImageUploader';
 import { LanguageSwitcher } from '@/components/language-switcher';
-import { getMyProfile, uploadAvatar, deleteAvatar, updateProfile } from '@/api';
+import { Switch } from '@/components/ui/switch';
+import { getMyProfile, uploadAvatar, deleteAvatar, updateProfile, getEmailPreferences, updateEmailPreferences } from '@/api';
+import { useChangelog } from '@/hooks/use-changelog';
 import { useAuth } from '@/contexts/auth-provider';
 import { createClient } from '@/utils/supabase/client';
 import { cn } from '@/lib/utils';
@@ -34,7 +36,35 @@ export default function AccountPage() {
     { id: 'password' as const, label: t('sections.password') },
     { id: 'account-info' as const, label: t('sections.accountInfo') },
     { id: 'language' as const, label: t('sections.language') },
+    { id: 'product-updates' as const, label: t('sections.productUpdates') },
   ];
+
+  // Product-updates email preference + "you're up to date" status.
+  const [productUpdatesOptOut, setProductUpdatesOptOut] = useState<boolean | null>(null);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const { releases } = useChangelog();
+  const latestVersion = releases.find((r) => r.version)?.version ?? null;
+
+  useEffect(() => {
+    getEmailPreferences()
+      .then((p) => setProductUpdatesOptOut(p.product_updates_opt_out))
+      .catch(() => setProductUpdatesOptOut(false));
+  }, []);
+
+  const handleProductUpdatesToggle = async (enabled: boolean) => {
+    // The switch is "email me" = the inverse of the opt-out flag.
+    const prev = productUpdatesOptOut;
+    setProductUpdatesOptOut(!enabled);
+    setSavingPrefs(true);
+    try {
+      await updateEmailPreferences({ product_updates_opt_out: !enabled });
+    } catch {
+      setProductUpdatesOptOut(prev);
+      setError(t('productUpdates.saveFailed'));
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
 
   // Name editing state
   const [name, setName] = useState('');
@@ -59,7 +89,7 @@ export default function AccountPage() {
       { rootMargin: '-20% 0px -80% 0px' }
     );
 
-    const ids = ['profile-picture', 'password', 'account-info', 'language'];
+    const ids = ['profile-picture', 'password', 'account-info', 'language', 'product-updates'];
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -340,6 +370,42 @@ export default function AccountPage() {
             <div className="space-y-2">
               <Label>{t('language.label')}</Label>
               <LanguageSwitcher />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Product Updates Section */}
+        <Card id="product-updates" className="scroll-mt-24">
+          <CardHeader>
+            <CardTitle className="text-lg">{t('productUpdates.title')}</CardTitle>
+            <CardDescription>{t('productUpdates.description')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="product-updates-email" className="font-medium">
+                  {t('productUpdates.emailLabel')}
+                </Label>
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  {t('productUpdates.emailHint')}
+                </p>
+              </div>
+              <Switch
+                id="product-updates-email"
+                checked={productUpdatesOptOut === null ? true : !productUpdatesOptOut}
+                disabled={productUpdatesOptOut === null || savingPrefs}
+                onCheckedChange={handleProductUpdatesToggle}
+              />
+            </div>
+            <div className="rounded-lg bg-[var(--muted)]/50 px-3 py-2.5 text-sm text-[var(--muted-foreground)]">
+              <span className="font-medium text-[var(--foreground)]">
+                {t('productUpdates.statusUpToDate')}
+              </span>
+              {latestVersion && (
+                <span className="ml-2">
+                  {t('productUpdates.statusVersion', { version: latestVersion })}
+                </span>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
 import { NavUser } from "./nav-user";
+import { ChangelogWidget } from "@/components/changelog/changelog-widget";
 import { Badge } from "@/components/ui/badge";
 import { TrialSidebarWidget } from "@/components/billing/TrialBanner";
 import {
@@ -202,6 +203,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu className="gap-0.5">
             {bottomItems.map(renderNavItem)}
           </SidebarMenu>
+          {/* What's new — Linear-style changelog widget */}
+          <ChangelogWidget />
         </div>
 
         <SidebarSeparator className="mx-3" />

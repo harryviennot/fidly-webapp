@@ -6,7 +6,18 @@
       "profilePicture": "Photo de profil",
       "password": "Mot de passe",
       "accountInfo": "Informations du compte",
-      "language": "Langue"
+      "language": "Langue",
+      "productUpdates": "Nouveautés produit"
+    },
+    "productUpdates": {
+      "title": "Nouveautés produit",
+      "description": "Choisissez comment être informé des nouveautés et des améliorations.",
+      "emailLabel": "M'envoyer un email pour les nouveautés produit",
+      "emailHint": "Un court récapitulatif à chaque fois qu'on livre une nouveauté.",
+      "statusUpToDate": "Vous êtes à jour.",
+      "statusVersion": "Dernière version : {version}",
+      "loadFailed": "Impossible de charger vos préférences.",
+      "saveFailed": "Impossible d'enregistrer votre préférence."
     },
     "profilePicture": {
       "title": "Photo de profil",
