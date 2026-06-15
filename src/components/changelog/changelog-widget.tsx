@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useChangelog } from "@/hooks/use-changelog";
-import { areaChipClass } from "@/lib/changelog-areas";
+import { areaDotHex } from "@/lib/changelog-areas";
 import {
   CATEGORY_ORDER,
   resolveLocale,
@@ -29,7 +29,6 @@ import {
   type ChangelogItem,
   type ChangelogRelease,
 } from "@/api/changelog";
-import { cn } from "@/lib/utils";
 
 const CATEGORY_ICON: Record<ChangelogCategory, typeof Sparkle> = {
   feature: Sparkle,
@@ -298,12 +297,11 @@ function ItemLine({
   return (
     <li className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] text-[var(--foreground)]">
       {area && (
-        <span
-          className={cn(
-            "inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium",
-            areaChipClass(area.color)
-          )}
-        >
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--muted-foreground)]">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: areaDotHex(area.color) }}
+          />
           {locale === "en" ? area.label_en : area.label_fr}
         </span>
       )}
