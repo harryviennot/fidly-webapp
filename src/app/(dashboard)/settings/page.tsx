@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { HexColorPicker, BusinessInfoEditor } from '@/components/settings';
 import { CardBackPreview } from '@/components/settings/CardBackPreview';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CountrySelect } from '@/components/ui/country-select';
 import { updateBusiness, uploadBusinessLogo, deleteBusinessLogo } from '@/api';
 import { DEFAULT_ACCENT, applyTheme } from '@/utils/theme';
 import type { BusinessInfoEntry } from '@/types/business';
@@ -39,6 +40,7 @@ export default function SettingsPage() {
   const [logoHover, setLogoHover] = useState(false);
   const [pulsing, setPulsing] = useState<'cardInfo' | 'theme' | 'language' | null>(null);
   const [localLocale, setLocalLocale] = useState<string>('fr');
+  const [localCountry, setLocalCountry] = useState<string | undefined>(undefined);
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -68,6 +70,7 @@ export default function SettingsPage() {
       originalTheme.current = { accentColor, backgroundColor };
       setBusinessInfo((settings.business_info as BusinessInfoEntry[]) || []);
       setLocalLocale(currentBusiness.primary_locale || 'fr');
+      setLocalCountry(currentBusiness.country ?? undefined);
       setBusinessInfoDirty(false);
     }
   }, [currentBusiness]);
@@ -154,6 +157,21 @@ export default function SettingsPage() {
         primary_locale: value as 'fr' | 'en',
       });
       toast.success(t('language.saved'));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
+    } finally {
+      setPulsing(null);
+    }
+  };
+
+  const handleSaveCountry = async (value: string) => {
+    if (!currentBusiness?.id) return;
+    setLocalCountry(value);
+    setPulsing('language');
+    try {
+      await updateBusiness(currentBusiness.id, { country: value });
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      toast.success(t('language.countrySaved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
     } finally {
@@ -347,23 +365,37 @@ export default function SettingsPage() {
               {t('language.description')}
             </div>
 
-            <div className="max-w-xs">
-              <Label className="text-xs font-semibold text-[#555] mb-1.5 block">
-                {t('language.passLocale')}
-              </Label>
-              <Select
-                value={localLocale}
-                onValueChange={handleSaveLanguage}
-              >
-                <SelectTrigger className="w-full border-[#DEDBD5] rounded-lg h-10">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                  <SelectItem value="en">🇬🇧 English</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-[11px] text-[#B0B0B0] mt-1.5">{t('language.passLocaleHint')}</p>
+            <div className="flex flex-col sm:flex-row gap-5">
+              <div className="flex-1 min-w-0 sm:max-w-xs">
+                <Label className="text-xs font-semibold text-[#555] mb-1.5 block">
+                  {t('language.passLocale')}
+                </Label>
+                <Select
+                  value={localLocale}
+                  onValueChange={handleSaveLanguage}
+                >
+                  <SelectTrigger className="w-full border-[#DEDBD5] rounded-lg h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                    <SelectItem value="en">🇬🇧 English</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-[#B0B0B0] mt-1.5">{t('language.passLocaleHint')}</p>
+              </div>
+
+              <div className="flex-1 min-w-0 sm:max-w-xs">
+                <Label className="text-xs font-semibold text-[#555] mb-1.5 block">
+                  {t('language.country')}
+                </Label>
+                <CountrySelect
+                  value={localCountry}
+                  onChange={handleSaveCountry}
+                  label={t('language.country')}
+                />
+                <p className="text-[11px] text-[#B0B0B0] mt-1.5">{t('language.countryHint')}</p>
+              </div>
             </div>
           </div>
 

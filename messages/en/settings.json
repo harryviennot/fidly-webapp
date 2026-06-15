@@ -72,11 +72,14 @@
       "saveFailed": "Failed to save card info"
     },
     "language": {
-      "title": "Your Business Language",
-      "description": "This is your main business language, and will be used for your loyalty program",
+      "title": "Your business language and country",
+      "description": "Your main business language and the country it operates from.",
       "passLocale": "Language",
       "passLocaleHint": "You can always add translations for other languages in the card style editor.",
-      "saved": "Your business language has been successfully updated."
+      "saved": "Your business language has been successfully updated.",
+      "country": "Country",
+      "countryHint": "The country your business operates from.",
+      "countrySaved": "Your business country has been updated."
     },
     "theme": {
       "title": "Theme Customization",

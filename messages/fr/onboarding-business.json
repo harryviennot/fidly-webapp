@@ -115,7 +115,9 @@
               "logo": "Logo",
               "logoHelp": "Format paysage, jusqu'à 3:1. PNG ou JPG.",
               "slugChecking": "Vérification…",
-              "slugAvailable": "Disponible"
+              "slugAvailable": "Disponible",
+              "country": "Pays",
+              "countryHelp": "Le pays où se trouve votre entreprise."
             }
           },
           "profile": {
