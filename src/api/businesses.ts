@@ -51,6 +51,8 @@ export interface BusinessCreatePayload {
   settings?: Record<string, unknown>;
   logo_url?: string | null;
   primary_locale?: 'fr' | 'en';
+  /** ISO 3166-1 alpha-2 country the business operates from (e.g. "FR"). */
+  country?: string;
   /**
    * Opt into founding-partner pricing at signup. Backend revalidates against
    * `is_founding_program_open()` and the user's reseller flag — passing

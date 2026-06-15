@@ -70,5 +70,11 @@
     "aspectRatio": "Aspect Ratio",
     "logoTitle": "Crop your logo",
     "logoDescription": "Drag the corners to choose the area to keep. Anything from square up to 3:1 wide works."
+  },
+  "countrySelect": {
+    "placeholder": "Select a country",
+    "search": "Search countries…",
+    "noResults": "No countries found",
+    "title": "Country"
   }
 }

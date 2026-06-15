@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Check, Spinner, X } from '@phosphor-icons/react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { CountrySelect } from '@/components/ui/country-select';
 import { ImageUploader } from '@/components/design';
 import { useWizardStep, useWizardDraft } from '../../wizard-context';
 import { useBusiness } from '@/contexts/business-context';
@@ -18,6 +19,7 @@ import {
   uploadBusinessLogo,
 } from '@/api/businesses';
 import { detectBusinessLocale } from '@/lib/locale-detect';
+import { detectDefaultCountry } from '@/lib/countries';
 import { cn } from '@/lib/utils';
 import type { SetupProgress } from '@/types/business';
 
@@ -82,6 +84,13 @@ export function IdentityStep() {
     'identity.website',
     () =>
       (currentBusiness?.settings?.identity_website as string | undefined) ?? ''
+  );
+  // Country the business operates from. Pre-filled from a best-effort guess
+  // (timezone → browser region → language) so the field is never empty; the
+  // owner can change it. Drafts persist it across Back→Forward like the others.
+  const [country, setCountry] = useWizardDraft(
+    'identity.country',
+    () => currentBusiness?.country ?? detectDefaultCountry(uiLocale)
   );
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(
@@ -250,6 +259,7 @@ export function IdentityStep() {
           // `currentBusiness.settings` spread.
           business = await updateBusiness(currentBusiness.id, {
             name: name.trim(),
+            country,
             settings: {
               setup_progress: initialProgress,
               ...(websiteUrl ? { identity_website: websiteUrl } : {}),
@@ -265,6 +275,7 @@ export function IdentityStep() {
             subscription_tier: 'growth',
             settings: {},
             primary_locale: detectBusinessLocale(uiLocale),
+            country,
             // Opt every new signup into founding-partner pricing. The
             // backend gates the flag on `is_founding_program_open()` so
             // requests after the cutoff are silently coerced to false —
@@ -329,6 +340,7 @@ export function IdentityStep() {
     name,
     slug,
     website,
+    country,
     pendingLogoFile,
     editingExisting,
     isNameValid,
@@ -403,6 +415,22 @@ export function IdentityStep() {
             />
           </div>
           <p className="wiz-micro text-[#999]">{t('fields.websiteHelp')}</p>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-3">
+            <Label htmlFor="biz-country" className="wiz-body-sm font-medium">
+              {t('fields.country')}
+            </Label>
+            <CountrySelect
+              id="biz-country"
+              value={country}
+              onChange={setCountry}
+              label={t('fields.country')}
+              className="h-11"
+            />
+          </div>
+          <p className="wiz-micro text-[#999]">{t('fields.countryHelp')}</p>
         </div>
 
         <div className="flex flex-col gap-1.5">
