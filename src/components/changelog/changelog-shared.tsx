@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Sparkle, ArrowUp, Bug, CaretDown } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
-import { areaChipClass } from "@/lib/changelog-areas";
+import { areaDotHex } from "@/lib/changelog-areas";
 import {
   resolveLocale,
   type ChangelogArea,
@@ -118,12 +118,11 @@ export function ChangelogItemRow({
   return (
     <li className="flex flex-col items-start gap-1.5 py-2.5 sm:flex-row sm:items-baseline sm:gap-2.5">
       {area && (
-        <span
-          className={cn(
-            "inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold",
-            areaChipClass(area.color)
-          )}
-        >
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--foreground)]/10 bg-[var(--foreground)]/[0.04] px-2 py-0.5 text-[11px] font-medium text-[var(--foreground)]/70">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: areaDotHex(area.color) }}
+          />
           {locale === "en" ? area.label_en : area.label_fr}
         </span>
       )}

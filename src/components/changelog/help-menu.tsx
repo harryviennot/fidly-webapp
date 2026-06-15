@@ -95,7 +95,7 @@ function WhatsNewTimeline({
               )}
               <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-[var(--accent)] ring-2 ring-[var(--card)]" />
             </span>
-            <span className="flex-1 truncate text-sm text-[#1A1A1A] transition-colors group-hover:text-[var(--accent)]">
+            <span className="flex-1 truncate text-sm text-[#5A5A5A] transition-colors group-hover:text-[var(--accent)]">
               {item.label}
             </span>
             {item.external && (
@@ -149,7 +149,9 @@ export function HelpMenu() {
             className="h-[18px] w-[18px] text-[var(--muted-foreground)]"
             weight="bold"
           />
-          <span className="flex-1 text-sm">{t("support.contactUs")}</span>
+          <span className="flex-1 text-sm text-[#5A5A5A]">
+            {t("support.contactUs")}
+          </span>
         </MenuRow>
         <MenuRow
           onSelect={() =>
@@ -160,7 +162,9 @@ export function HelpMenu() {
             className="h-[18px] w-[18px] text-[var(--muted-foreground)]"
             weight="bold"
           />
-          <span className="flex-1 text-sm">{t("support.downloadApps")}</span>
+          <span className="flex-1 text-sm text-[#5A5A5A]">
+            {t("support.downloadApps")}
+          </span>
         </MenuRow>
 
         {releases.length > 0 && (
