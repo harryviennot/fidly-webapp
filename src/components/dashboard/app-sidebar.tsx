@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { NavUser } from "./nav-user";
 import { ChangelogWidget } from "@/components/changelog/changelog-widget";
+import { SupportPopover } from "@/components/changelog/support-popover";
 import { Badge } from "@/components/ui/badge";
 import { TrialSidebarWidget } from "@/components/billing/TrialBanner";
 import {
@@ -36,7 +37,6 @@ import {
   MapPin,
   UserCircle,
   Wallet,
-  Question,
 } from "@phosphor-icons/react";
 
 interface NavItem {
@@ -87,11 +87,6 @@ const manageItems: NavItem[] = [
   { href: "/team", labelKey: "nav.team", icon: UserCircle },
   { href: "/settings", labelKey: "nav.settings", icon: GearSix },
   { href: "/billing", labelKey: "nav.billing", icon: Wallet },
-];
-
-// Bottom utility links
-const bottomItems: NavItem[] = [
-  { href: "/support", labelKey: "nav.support", icon: Question },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -201,9 +196,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* Bottom utility links */}
         <div className="px-3">
           <SidebarMenu className="gap-0.5">
-            {bottomItems.map(renderNavItem)}
+            <SupportPopover />
           </SidebarMenu>
-          {/* What's new — Linear-style changelog widget */}
+          {/* What's new — surfaces only when there's an unseen update */}
           <ChangelogWidget />
         </div>
 

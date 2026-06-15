@@ -21,6 +21,11 @@
     "sectionLoyaltyProgram": "Loyalty Program",
     "sectionManage": "Manage"
   },
+  "support": {
+    "title": "Support",
+    "latestUpdate": "Latest update",
+    "whatsapp": "Chat on WhatsApp"
+  },
   "header": {
     "loyaltyProgram": "Loyalty Program",
     "customers": "Customers",

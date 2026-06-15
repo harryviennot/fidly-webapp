@@ -21,6 +21,11 @@
     "sectionLoyaltyProgram": "Programme de fidélité",
     "sectionManage": "Gestion"
   },
+  "support": {
+    "title": "Support",
+    "latestUpdate": "Dernière nouveauté",
+    "whatsapp": "Nous écrire sur WhatsApp"
+  },
   "header": {
     "loyaltyProgram": "Programme de fidélité",
     "customers": "Clients",
