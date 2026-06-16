@@ -30,7 +30,9 @@
     "contactTitle": "Contact us",
     "contactDescription": "How would you like to reach us?",
     "contactEmail": "Send an email",
-    "contactEmailSubject": "Support request: {slug}"
+    "contactEmailSubject": "Support request: {slug}",
+    "downloadTitle": "Download the app",
+    "downloadDescription": "Scan cards and add stamps from your phone."
   },
   "header": {
     "loyaltyProgram": "Loyalty Program",

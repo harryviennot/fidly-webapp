@@ -19,8 +19,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { resolveLocale, type ChangelogRelease } from "@/api/changelog";
 import { useChangelogModal } from "./changelog-modal-provider";
-import { showcaseChangelogUrl, scannerAppUrl } from "./changelog-shared";
+import { showcaseChangelogUrl } from "./changelog-shared";
 import { ContactDialog } from "./contact-dialog";
+import { DownloadAppDialog } from "./download-app-dialog";
 
 /** A dialog/modal opened from a menu must wait for the menu (a bottom sheet on
  *  mobile) to finish closing — otherwise Radix's overlapping scroll-lock leaves
@@ -124,6 +125,7 @@ export function HelpMenu() {
   const isMobile = useIsMobile();
   const { releases, unreadCount, markSeen } = useChangelogModal();
   const [contactOpen, setContactOpen] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
   const delay = closeDelay(isMobile);
 
   return (
@@ -159,7 +161,7 @@ export function HelpMenu() {
         </MenuRow>
         <MenuRow
           onSelect={() =>
-            window.open(scannerAppUrl(locale), "_blank", "noopener,noreferrer")
+            window.setTimeout(() => setDownloadOpen(true), delay)
           }
         >
           <DeviceMobile
@@ -183,6 +185,7 @@ export function HelpMenu() {
       </AdaptiveMenu>
 
       <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
+      <DownloadAppDialog open={downloadOpen} onOpenChange={setDownloadOpen} />
     </>
   );
 }
