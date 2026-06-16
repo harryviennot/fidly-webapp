@@ -177,7 +177,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         {/* Manage section */}
         {filteredManage.length > 0 && (
-          <SidebarGroup>
+          <SidebarGroup className="mb-8">
             <SidebarGroupLabel className="text-[11px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">
               {t("nav.sectionManage")}
             </SidebarGroupLabel>
@@ -188,20 +188,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-0">
+      <SidebarFooter className="relative p-0">
         {/* Trial widget */}
         <TrialSidebarWidget />
 
-        {/* Help menu — contact, scanner app, and What's new (unseen dot) */}
-        <div className="flex items-center px-3 py-0.5">
-          <HelpMenu />
-        </div>
-
-        <SidebarSeparator className="mx-3" />
+        {/* Separator inset to match the px-3 content above/below (the base
+            primitive forces w-full, so neutralize it to w-auto + margins). */}
+        <SidebarSeparator className="-mx-0.4 w-auto data-[orientation=horizontal]:w-auto" />
 
         {/* User footer */}
         <div className="px-3 pb-3">
           <NavUser />
+        </div>
+
+        {/* Help (?) — a Linear-style circular button that FLOATS over the
+            sidebar bottom-left (aligned with the nav icon column) instead of
+            taking its own footer row, so it never shrinks the sidebar. */}
+        <div className="absolute bottom-full left-2 z-30 mb-2">
+          <HelpMenu />
         </div>
       </SidebarFooter>
     </Sidebar>

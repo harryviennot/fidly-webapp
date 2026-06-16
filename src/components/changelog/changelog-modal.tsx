@@ -18,8 +18,8 @@ import {
   CategoryAccordion,
   ChangelogHero,
   ChangelogItemRow,
+  ChangelogMarkdown,
   formatReleaseDate,
-  plainExcerpt,
   showcaseChangelogUrl,
 } from "./changelog-shared";
 
@@ -100,9 +100,10 @@ export function ChangelogModal({
       )}
 
       {body && (
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[var(--muted-foreground)]">
-          {plainExcerpt(body)}
-        </p>
+        <ChangelogMarkdown
+          source={body}
+          className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]"
+        />
       )}
 
       {byCategory.length > 0 && (

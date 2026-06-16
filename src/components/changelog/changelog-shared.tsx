@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { Sparkle, ArrowUp, Bug, CaretDown } from "@phosphor-icons/react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 import { cn } from "@/lib/utils";
 import { areaDotHex } from "@/lib/changelog-areas";
@@ -30,6 +33,55 @@ export function plainExcerpt(md: string): string {
     .replace(/[#>*_`~-]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Tailwind descendant styling for rendered Markdown — keeps the look tied to
+ *  the app's tokens without pulling in the typography plugin. */
+const MD_PROSE =
+  "[&>*:first-child]:mt-0 [&_p]:mb-2 [&_p:last-child]:mb-0 " +
+  "[&_strong]:font-semibold [&_strong]:text-[var(--foreground)] [&_em]:italic [&_u]:underline " +
+  "[&_ul]:my-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-1.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mt-1 " +
+  "[&_h1]:mb-1 [&_h1]:mt-2 [&_h1]:text-sm [&_h1]:font-semibold [&_h1]:text-[var(--foreground)] " +
+  "[&_h2]:mb-1 [&_h2]:mt-2 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-[var(--foreground)] " +
+  "[&_h3]:mb-1 [&_h3]:mt-2 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-[var(--foreground)] " +
+  "[&_img]:my-2 [&_img]:w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-[var(--card-border)] " +
+  "[&_code]:rounded [&_code]:bg-[var(--muted)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em] " +
+  "[&_blockquote]:border-l-2 [&_blockquote]:border-[var(--border)] [&_blockquote]:pl-3 [&_blockquote]:italic " +
+  "[&_hr]:my-3 [&_hr]:border-[var(--border)]";
+
+/** Renders superadmin-authored Markdown (bold, links, lists, embedded images,
+ *  inline HTML like <u>) for the changelog modal. Trusted content, so raw HTML
+ *  is allowed. Links open in a new tab so the dashboard isn't navigated away. */
+export function ChangelogMarkdown({
+  source,
+  className,
+}: {
+  source: string;
+  className?: string;
+}) {
+  if (!source.trim()) return null;
+  return (
+    <div className={cn(MD_PROSE, className)}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={{
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-[var(--accent)] underline underline-offset-2 hover:opacity-80"
+            >
+              {children}
+            </a>
+          ),
+        }}
+      >
+        {source}
+      </ReactMarkdown>
+    </div>
+  );
 }
 
 /** Public showcase changelog URL for the current locale. */
@@ -136,9 +188,10 @@ export function ChangelogItemRow({
           </span>
         )}
         {body && (
-          <p className="mt-0.5 text-[12px] leading-relaxed text-[var(--muted-foreground)]">
-            {body}
-          </p>
+          <ChangelogMarkdown
+            source={body}
+            className="mt-0.5 text-[12px] leading-relaxed text-[var(--muted-foreground)]"
+          />
         )}
       </div>
     </li>

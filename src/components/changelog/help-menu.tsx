@@ -16,6 +16,7 @@ import {
   useAdaptiveMenuClose,
 } from "@/components/reusables/search-bar/adaptive-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import { resolveLocale, type ChangelogRelease } from "@/api/changelog";
 import { useChangelogModal } from "./changelog-modal-provider";
 import { showcaseChangelogUrl, scannerAppUrl } from "./changelog-shared";
@@ -87,13 +88,16 @@ function WhatsNewTimeline({
               aria-hidden
               className="relative flex w-3.5 shrink-0 items-center justify-center self-stretch"
             >
-              {!isFirst && (
-                <span className="absolute left-1/2 top-0 h-1/2 w-px -translate-x-1/2 bg-[var(--border)]" />
-              )}
-              {!isLast && (
-                <span className="absolute bottom-0 left-1/2 h-1/2 w-px -translate-x-1/2 bg-[var(--border)]" />
-              )}
-              <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-[var(--accent)] ring-2 ring-[var(--card)]" />
+              {/* One unbroken spine: every row paints the FULL-height line, so
+                  consecutive segments meet with no gap. The dot sits on top
+                  (no ring) so the line reads as continuous through each node. */}
+              <span
+                className={cn(
+                  "absolute left-1/2 w-px -translate-x-1/2 bg-[var(--border-dark)]",
+                  isFirst ? "top-1/2 bottom-0" : isLast ? "top-0 bottom-1/2" : "inset-y-0"
+                )}
+              />
+              <span className="relative z-10 h-2 w-2 rounded-full bg-[var(--accent)]" />
             </span>
             <span className="flex-1 truncate text-sm text-[#5A5A5A] transition-colors group-hover:text-[var(--accent)]">
               {item.label}
@@ -135,11 +139,11 @@ export function HelpMenu() {
           <button
             type="button"
             aria-label={t("support.title")}
-            className="relative flex h-8 w-8 items-center justify-center rounded-lg text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] data-[state=open]:bg-[var(--muted)] data-[state=open]:text-[var(--foreground)]"
+            className="relative flex h-8 w-8 items-center justify-center rounded-full pointer-finger-hover border border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] data-[state=open]:bg-[var(--muted)] data-[state=open]:text-[var(--foreground)]"
           >
             <Question className="h-[18px] w-[18px]" weight="bold" />
             {unreadCount > 0 && (
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[var(--accent)] ring-2 ring-[var(--sidebar)]" />
+              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[var(--accent)] ring-2 ring-[var(--card)]" />
             )}
           </button>
         }
