@@ -1,4 +1,5 @@
 export * from './businesses';
+export * from './changelog';
 export * from './impersonation';
 export * from './customers';
 export * from './designs';
