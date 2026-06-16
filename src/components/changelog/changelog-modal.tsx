@@ -50,6 +50,7 @@ export function ChangelogModal({
   const areaBySlug = new Map(areas.map((a) => [a.slug, a]));
   const title = resolveLocale(release.title_fr, release.title_en, locale);
   const body = resolveLocale(release.body_fr, release.body_en, locale);
+  const heroSrc = resolveLocale(release.image_url_fr, release.image_url_en, locale);
   const date = formatReleaseDate(release.published_at, locale);
 
   const byCategory = CATEGORY_ORDER.map((cat) => ({
@@ -91,12 +92,8 @@ export function ChangelogModal({
         {title}
       </h2>
 
-      {release.image_url && (
-        <ChangelogHero
-          src={release.image_url}
-          alt={title || "Changelog"}
-          className="mt-3"
-        />
+      {heroSrc && (
+        <ChangelogHero src={heroSrc} alt={title || "Changelog"} className="mt-3" />
       )}
 
       {body && (

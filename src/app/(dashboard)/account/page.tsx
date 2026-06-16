@@ -36,31 +36,60 @@ export default function AccountPage() {
     { id: 'password' as const, label: t('sections.password') },
     { id: 'account-info' as const, label: t('sections.accountInfo') },
     { id: 'language' as const, label: t('sections.language') },
-    { id: 'product-updates' as const, label: t('sections.productUpdates') },
+    { id: 'emails' as const, label: t('sections.emails') },
   ];
 
-  // Product-updates email preference + "you're up to date" status.
-  const [productUpdatesOptOut, setProductUpdatesOptOut] = useState<boolean | null>(null);
+  // Email category preferences + "you're up to date" status (product updates).
+  // Order: most valued / least frequent first. Each maps to an
+  // email_preferences.{key}_opt_out column; the switch shows "email me" (the
+  // inverse of the opt-out flag).
+  const EMAIL_CATEGORIES = [
+    'digest',
+    'product_updates',
+    'marketing',
+    'reengagement',
+  ] as const;
+  type EmailCategory = (typeof EMAIL_CATEGORIES)[number];
+  type EmailPrefs = Record<`${EmailCategory}_opt_out`, boolean>;
+
+  const [emailPrefs, setEmailPrefs] = useState<EmailPrefs | null>(null);
   const [savingPrefs, setSavingPrefs] = useState(false);
   const { releases } = useChangelog();
   const latestVersion = releases.find((r) => r.version)?.version ?? null;
 
   useEffect(() => {
     getEmailPreferences()
-      .then((p) => setProductUpdatesOptOut(p.product_updates_opt_out))
-      .catch(() => setProductUpdatesOptOut(false));
+      .then((p) =>
+        setEmailPrefs({
+          digest_opt_out: !!p.digest_opt_out,
+          product_updates_opt_out: !!p.product_updates_opt_out,
+          marketing_opt_out: !!p.marketing_opt_out,
+          reengagement_opt_out: !!p.reengagement_opt_out,
+        }),
+      )
+      .catch(() =>
+        setEmailPrefs({
+          digest_opt_out: false,
+          product_updates_opt_out: false,
+          marketing_opt_out: false,
+          reengagement_opt_out: false,
+        }),
+      );
   }, []);
 
-  const handleProductUpdatesToggle = async (enabled: boolean) => {
-    // The switch is "email me" = the inverse of the opt-out flag.
-    const prev = productUpdatesOptOut;
-    setProductUpdatesOptOut(!enabled);
+  const handleEmailToggle = async (category: EmailCategory, enabled: boolean) => {
+    if (!emailPrefs) return;
+    const optOutKey = `${category}_opt_out` as keyof EmailPrefs;
+    const prev = emailPrefs;
+    const next: EmailPrefs = { ...emailPrefs, [optOutKey]: !enabled };
+    setEmailPrefs(next);
     setSavingPrefs(true);
     try {
-      await updateEmailPreferences({ product_updates_opt_out: !enabled });
+      // PATCH accepts a partial; sending the full set is idempotent.
+      await updateEmailPreferences(next);
     } catch {
-      setProductUpdatesOptOut(prev);
-      setError(t('productUpdates.saveFailed'));
+      setEmailPrefs(prev);
+      setError(t('emails.saveFailed'));
     } finally {
       setSavingPrefs(false);
     }
@@ -89,7 +118,7 @@ export default function AccountPage() {
       { rootMargin: '-20% 0px -80% 0px' }
     );
 
-    const ids = ['profile-picture', 'password', 'account-info', 'language', 'product-updates'];
+    const ids = ['profile-picture', 'password', 'account-info', 'language', 'emails'];
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -374,39 +403,49 @@ export default function AccountPage() {
           </CardContent>
         </Card>
 
-        {/* Product Updates Section */}
-        <Card id="product-updates" className="scroll-mt-24">
+        {/* Email Preferences Section */}
+        <Card id="emails" className="scroll-mt-24">
           <CardHeader>
-            <CardTitle className="text-lg">{t('productUpdates.title')}</CardTitle>
-            <CardDescription>{t('productUpdates.description')}</CardDescription>
+            <CardTitle className="text-lg">{t('emails.title')}</CardTitle>
+            <CardDescription>{t('emails.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <Label htmlFor="product-updates-email" className="font-medium">
-                  {t('productUpdates.emailLabel')}
-                </Label>
-                <p className="text-sm text-[var(--muted-foreground)]">
-                  {t('productUpdates.emailHint')}
-                </p>
-              </div>
-              <Switch
-                id="product-updates-email"
-                checked={productUpdatesOptOut === null ? true : !productUpdatesOptOut}
-                disabled={productUpdatesOptOut === null || savingPrefs}
-                onCheckedChange={handleProductUpdatesToggle}
-              />
+            <div className="divide-y divide-[var(--border)]">
+              {EMAIL_CATEGORIES.map((category) => {
+                const optOutKey = `${category}_opt_out` as const;
+                const checked = emailPrefs === null ? true : !emailPrefs[optOutKey];
+                return (
+                  <div
+                    key={category}
+                    className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0"
+                  >
+                    <div className="space-y-1">
+                      <Label htmlFor={`email-pref-${category}`} className="font-medium">
+                        {t(`emails.categories.${category}.label`)}
+                      </Label>
+                      <p className="text-sm text-[var(--muted-foreground)]">
+                        {t(`emails.categories.${category}.hint`)}
+                      </p>
+                      {category === 'product_updates' && latestVersion && (
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          {t('emails.statusUpToDate')}{' '}
+                          {t('emails.statusVersion', { version: latestVersion })}
+                        </p>
+                      )}
+                    </div>
+                    <Switch
+                      id={`email-pref-${category}`}
+                      checked={checked}
+                      disabled={emailPrefs === null || savingPrefs}
+                      onCheckedChange={(enabled) => handleEmailToggle(category, enabled)}
+                    />
+                  </div>
+                );
+              })}
             </div>
-            <div className="rounded-lg bg-[var(--muted)]/50 px-3 py-2.5 text-sm text-[var(--muted-foreground)]">
-              <span className="font-medium text-[var(--foreground)]">
-                {t('productUpdates.statusUpToDate')}
-              </span>
-              {latestVersion && (
-                <span className="ml-2">
-                  {t('productUpdates.statusVersion', { version: latestVersion })}
-                </span>
-              )}
-            </div>
+            <p className="text-xs italic text-[var(--muted-foreground)]">
+              {t('emails.transactionalNote')}
+            </p>
           </CardContent>
         </Card>
       </div>
