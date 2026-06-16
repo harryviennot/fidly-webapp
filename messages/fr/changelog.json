@@ -1,0 +1,16 @@
+{
+  "changelog": {
+    "trigger": "Nouveautés",
+    "title": "Nouveautés",
+    "changelogLink": "Tout le journal",
+    "close": "Fermer",
+    "viewAll": "Voir tout le journal",
+    "empty": "Vous êtes à jour.",
+    "forTeam": "Pour votre équipe",
+    "categories": {
+      "feature": "Nouveautés",
+      "improvement": "Améliorations",
+      "fix": "Corrections"
+    }
+  }
+}

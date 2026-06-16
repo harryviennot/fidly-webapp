@@ -6,7 +6,34 @@
       "profilePicture": "Photo de profil",
       "password": "Mot de passe",
       "accountInfo": "Informations du compte",
-      "language": "Langue"
+      "language": "Langue",
+      "emails": "Emails"
+    },
+    "emails": {
+      "title": "Préférences d'emails",
+      "description": "Choisissez les emails Stampeo que vous voulez recevoir.",
+      "categories": {
+        "digest": {
+          "label": "Rapports de performance",
+          "hint": "Votre bilan hebdomadaire ou mensuel, et les moments forts de votre programme."
+        },
+        "product_updates": {
+          "label": "Nouveautés produit",
+          "hint": "Un court récapitulatif à chaque fois qu'on livre une nouveauté."
+        },
+        "marketing": {
+          "label": "Conseils et astuces",
+          "hint": "Bonnes pratiques et idées pour tirer le meilleur de votre programme."
+        },
+        "reengagement": {
+          "label": "Rappels d'activation",
+          "hint": "Des rappels pour finir la configuration, ou relancer votre programme après une pause."
+        }
+      },
+      "transactionalNote": "Les emails essentiels (reçus, mots de passe, alertes de paiement, avertissements sur vos cartes) sont toujours envoyés.",
+      "statusUpToDate": "Vous êtes à jour.",
+      "statusVersion": "Dernière version : {version}",
+      "saveFailed": "Impossible d'enregistrer votre préférence."
     },
     "profilePicture": {
       "title": "Photo de profil",

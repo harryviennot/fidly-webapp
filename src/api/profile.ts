@@ -59,3 +59,37 @@ export async function updateProfile(data: { name?: string; locale?: string }): P
 
   return response.json();
 }
+
+export interface EmailPreferences {
+  reengagement_opt_out: boolean;
+  marketing_opt_out: boolean;
+  product_updates_opt_out: boolean;
+  digest_opt_out: boolean;
+}
+
+export async function getEmailPreferences(): Promise<EmailPreferences> {
+  const response = await fetch(`${API_BASE_URL}/profile/email-preferences`, {
+    method: 'GET',
+    headers: await getAuthHeaders(),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to load email preferences'));
+  }
+  return response.json();
+}
+
+export async function updateEmailPreferences(
+  data: Partial<EmailPreferences>
+): Promise<EmailPreferences> {
+  const response = await fetch(`${API_BASE_URL}/profile/email-preferences`, {
+    method: 'PATCH',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to update email preferences'));
+  }
+  return response.json();
+}

@@ -19,6 +19,7 @@ import { OverLimitBanner } from "@/components/billing/OverLimitBanner";
 import { ImpersonationBanner } from "@/components/impersonation/impersonation-banner";
 import { useImpersonationBeacon } from "@/hooks/use-impersonation-beacon";
 import { AchievementRecorder } from "@/components/achievements";
+import { ChangelogModalProvider } from "@/components/changelog/changelog-modal-provider";
 
 const PLAN_STEP_PATH = "/onboarding/business/plan";
 
@@ -251,16 +252,18 @@ export default function AdminLayout({
 
   return (
     <RoleGuard>
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
-          <ImpersonationBanner />
-          {currentBusiness.billing_status === "suspended" && <SuspendedBanner />}
-          <OverLimitBanner />
-          <TrialMobileBanner />
-          <main className="p-4 md:p-6">{children}</main>
-        </SidebarInset>
-      </SidebarProvider>
+      <ChangelogModalProvider>
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
+            <ImpersonationBanner />
+            {currentBusiness.billing_status === "suspended" && <SuspendedBanner />}
+            <OverLimitBanner />
+            <TrialMobileBanner />
+            <main className="p-4 md:p-6">{children}</main>
+          </SidebarInset>
+        </SidebarProvider>
+      </ChangelogModalProvider>
       <Toaster position="bottom-right" />
       <AchievementRecorder />
     </RoleGuard>

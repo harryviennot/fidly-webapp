@@ -6,7 +6,34 @@
       "profilePicture": "Profile Picture",
       "password": "Password",
       "accountInfo": "Account Info",
-      "language": "Language"
+      "language": "Language",
+      "emails": "Emails"
+    },
+    "emails": {
+      "title": "Email preferences",
+      "description": "Choose which Stampeo emails you want to receive.",
+      "categories": {
+        "digest": {
+          "label": "Performance reports",
+          "hint": "Your weekly or monthly recap, plus the big moments in your program."
+        },
+        "product_updates": {
+          "label": "Product updates",
+          "hint": "A short recap each time we ship something new."
+        },
+        "marketing": {
+          "label": "Tips and best practices",
+          "hint": "Ideas and best practices to get the most from your program."
+        },
+        "reengagement": {
+          "label": "Activation reminders",
+          "hint": "Reminders to finish setup, or to restart your program after a break."
+        }
+      },
+      "transactionalNote": "Essential emails (receipts, password resets, payment alerts, warnings about your cards) are always sent.",
+      "statusUpToDate": "You're up to date.",
+      "statusVersion": "Latest version: {version}",
+      "saveFailed": "Could not save your preference."
     },
     "profilePicture": {
       "title": "Profile Picture",

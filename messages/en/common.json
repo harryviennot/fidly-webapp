@@ -21,6 +21,19 @@
     "sectionLoyaltyProgram": "Loyalty Program",
     "sectionManage": "Manage"
   },
+  "support": {
+    "title": "Support",
+    "whatsNew": "What's new",
+    "contactUs": "Contact us",
+    "downloadApps": "Download apps",
+    "whatsapp": "Chat on WhatsApp",
+    "contactTitle": "Contact us",
+    "contactDescription": "How would you like to reach us?",
+    "contactEmail": "Send an email",
+    "contactEmailSubject": "Support request: {slug}",
+    "downloadTitle": "Download the app",
+    "downloadDescription": "Scan cards and add stamps from your phone."
+  },
   "header": {
     "loyaltyProgram": "Loyalty Program",
     "customers": "Customers",

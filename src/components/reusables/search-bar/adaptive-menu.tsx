@@ -44,6 +44,8 @@ export interface AdaptiveMenuProps {
   children: React.ReactNode;
   align?: "start" | "end" | "center";
   contentClassName?: string;
+  /** Notified whenever the menu opens or closes (e.g. to mark items seen). */
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function AdaptiveMenu({
@@ -52,15 +54,26 @@ export function AdaptiveMenu({
   children,
   align = "start",
   contentClassName,
+  onOpenChange,
 }: AdaptiveMenuProps) {
   const isMobile = useIsMobile();
   const [open, setOpen] = React.useState(false);
-  const close = React.useCallback(() => setOpen(false), []);
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      setOpen(next);
+      onOpenChange?.(next);
+    },
+    [onOpenChange]
+  );
+  const close = React.useCallback(
+    () => handleOpenChange(false),
+    [handleOpenChange]
+  );
 
   if (isMobile) {
     return (
       <AdaptiveMenuContext.Provider value={{ asSheet: true, close }}>
-        <Sheet open={open} onOpenChange={setOpen}>
+        <Sheet open={open} onOpenChange={handleOpenChange}>
           <SheetTrigger asChild>{trigger}</SheetTrigger>
           <SheetContent
             side="bottom"
@@ -82,7 +95,7 @@ export function AdaptiveMenu({
 
   return (
     <AdaptiveMenuContext.Provider value={{ asSheet: false, close }}>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
         <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
         <DropdownMenuContent
           align={align}
@@ -156,4 +169,9 @@ export function MenuSeparator() {
   const { asSheet } = React.useContext(AdaptiveMenuContext);
   if (asSheet) return <div className="my-1 mx-2.5 h-px bg-[var(--border)]" />;
   return <DropdownMenuSeparator />;
+}
+
+/** Close the surrounding AdaptiveMenu from a custom (non-MenuRow) child. */
+export function useAdaptiveMenuClose() {
+  return React.useContext(AdaptiveMenuContext).close;
 }

@@ -9,7 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImageUploader from '@/components/design/ImageUploader';
 import { LanguageSwitcher } from '@/components/language-switcher';
-import { getMyProfile, uploadAvatar, deleteAvatar, updateProfile } from '@/api';
+import { Switch } from '@/components/ui/switch';
+import { getMyProfile, uploadAvatar, deleteAvatar, updateProfile, getEmailPreferences, updateEmailPreferences } from '@/api';
+import { useChangelog } from '@/hooks/use-changelog';
 import { useAuth } from '@/contexts/auth-provider';
 import { createClient } from '@/utils/supabase/client';
 import { cn } from '@/lib/utils';
@@ -34,7 +36,64 @@ export default function AccountPage() {
     { id: 'password' as const, label: t('sections.password') },
     { id: 'account-info' as const, label: t('sections.accountInfo') },
     { id: 'language' as const, label: t('sections.language') },
+    { id: 'emails' as const, label: t('sections.emails') },
   ];
+
+  // Email category preferences + "you're up to date" status (product updates).
+  // Order: most valued / least frequent first. Each maps to an
+  // email_preferences.{key}_opt_out column; the switch shows "email me" (the
+  // inverse of the opt-out flag).
+  const EMAIL_CATEGORIES = [
+    'digest',
+    'product_updates',
+    'marketing',
+    'reengagement',
+  ] as const;
+  type EmailCategory = (typeof EMAIL_CATEGORIES)[number];
+  type EmailPrefs = Record<`${EmailCategory}_opt_out`, boolean>;
+
+  const [emailPrefs, setEmailPrefs] = useState<EmailPrefs | null>(null);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const { releases } = useChangelog();
+  const latestVersion = releases.find((r) => r.version)?.version ?? null;
+
+  useEffect(() => {
+    getEmailPreferences()
+      .then((p) =>
+        setEmailPrefs({
+          digest_opt_out: !!p.digest_opt_out,
+          product_updates_opt_out: !!p.product_updates_opt_out,
+          marketing_opt_out: !!p.marketing_opt_out,
+          reengagement_opt_out: !!p.reengagement_opt_out,
+        }),
+      )
+      .catch(() =>
+        setEmailPrefs({
+          digest_opt_out: false,
+          product_updates_opt_out: false,
+          marketing_opt_out: false,
+          reengagement_opt_out: false,
+        }),
+      );
+  }, []);
+
+  const handleEmailToggle = async (category: EmailCategory, enabled: boolean) => {
+    if (!emailPrefs) return;
+    const optOutKey = `${category}_opt_out` as keyof EmailPrefs;
+    const prev = emailPrefs;
+    const next: EmailPrefs = { ...emailPrefs, [optOutKey]: !enabled };
+    setEmailPrefs(next);
+    setSavingPrefs(true);
+    try {
+      // PATCH accepts a partial; sending the full set is idempotent.
+      await updateEmailPreferences(next);
+    } catch {
+      setEmailPrefs(prev);
+      setError(t('emails.saveFailed'));
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
 
   // Name editing state
   const [name, setName] = useState('');
@@ -59,7 +118,7 @@ export default function AccountPage() {
       { rootMargin: '-20% 0px -80% 0px' }
     );
 
-    const ids = ['profile-picture', 'password', 'account-info', 'language'];
+    const ids = ['profile-picture', 'password', 'account-info', 'language', 'emails'];
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -341,6 +400,52 @@ export default function AccountPage() {
               <Label>{t('language.label')}</Label>
               <LanguageSwitcher />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Email Preferences Section */}
+        <Card id="emails" className="scroll-mt-24">
+          <CardHeader>
+            <CardTitle className="text-lg">{t('emails.title')}</CardTitle>
+            <CardDescription>{t('emails.description')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="divide-y divide-[var(--border)]">
+              {EMAIL_CATEGORIES.map((category) => {
+                const optOutKey = `${category}_opt_out` as const;
+                const checked = emailPrefs === null ? true : !emailPrefs[optOutKey];
+                return (
+                  <div
+                    key={category}
+                    className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0"
+                  >
+                    <div className="space-y-1">
+                      <Label htmlFor={`email-pref-${category}`} className="font-medium">
+                        {t(`emails.categories.${category}.label`)}
+                      </Label>
+                      <p className="text-sm text-[var(--muted-foreground)]">
+                        {t(`emails.categories.${category}.hint`)}
+                      </p>
+                      {category === 'product_updates' && latestVersion && (
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          {t('emails.statusUpToDate')}{' '}
+                          {t('emails.statusVersion', { version: latestVersion })}
+                        </p>
+                      )}
+                    </div>
+                    <Switch
+                      id={`email-pref-${category}`}
+                      checked={checked}
+                      disabled={emailPrefs === null || savingPrefs}
+                      onCheckedChange={(enabled) => handleEmailToggle(category, enabled)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs italic text-[var(--muted-foreground)]">
+              {t('emails.transactionalNote')}
+            </p>
           </CardContent>
         </Card>
       </div>
