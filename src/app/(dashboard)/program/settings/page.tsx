@@ -28,7 +28,7 @@ import { useProgram } from '../layout';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-import type { FieldCollectionMode } from '@/types/business';
+import { normalizeFieldMode } from '@/lib/customer-data-collection';
 import type { StampGoalImpact } from '@/types';
 
 const DEFAULT_DATA_COLLECTION: DataCollectionValue = {
@@ -45,13 +45,6 @@ const DEFAULT_PROGRAM_DETAILS: ProgramDetailsValue = {
   stackableRewards: false,
   maxStackedRewards: null,
 };
-
-/** Normalise legacy boolean values to the new tri-state. */
-function normalizeFieldMode(value: FieldCollectionMode | boolean | undefined): FieldCollectionMode {
-  if (value === true) return 'required';
-  if (value === false || value === undefined) return 'off';
-  return value;
-}
 
 export default function ProgramSettingsPage() {
   const { currentBusiness } = useBusiness();
