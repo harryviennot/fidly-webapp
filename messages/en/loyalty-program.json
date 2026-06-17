@@ -3,7 +3,7 @@
     "title": "Loyalty Program",
     "subtitle": "Manage your loyalty card and program settings",
     "newCard": "New Card",
-    "cardTemplates": "Card Templates",
+    "cardTemplates": "Card styles",
     "programSettings": "Configuration",
     "configureProgram": "Set up your loyalty program rules and data collection",
     "businessUrl": "Business URL",
@@ -22,7 +22,7 @@
       "design": "Card Style",
       "overview": "Overview",
       "configuration": "Configuration",
-      "templates": "Templates",
+      "templates": "Card styles",
       "notifications": "Notifications",
       "broadcasts": "Broadcasts",
       "locations": "Locations"
