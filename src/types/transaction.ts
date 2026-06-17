@@ -58,6 +58,25 @@ export interface ActivityStatsResponse {
   best_day_date: string | null;
 }
 
+/**
+ * Program-effectiveness metrics for the /program control center (migration 115).
+ * Scoped to the business's default program. Rates are 0..1 fractions.
+ */
+export interface ProgramHealthResponse {
+  total_enrollments: number;
+  /** Reached the goal: redeemed once, holding a banked reward, or status='completed'. */
+  completed_count: number;
+  completion_rate: number;
+  total_rewards_redeemed: number;
+  redemption_rate: number;
+  avg_stamps_per_customer: number;
+  /** null (not 0) when nobody has redeemed yet — render an em-dash. */
+  avg_days_to_first_reward: number | null;
+  install_rate: number;
+  active_cards: number;
+  banked_rewards_count: number;
+}
+
 /** One complete week of stamp volume, used to derive the weekly-goal baseline. */
 export interface WeeklyStampPoint {
   week_start: string;

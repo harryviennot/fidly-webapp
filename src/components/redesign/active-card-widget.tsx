@@ -9,20 +9,29 @@ import type { CardDesign } from "@/types";
 
 interface ActiveCardWidgetProps {
   design: CardDesign | null | undefined;
-  totalCustomers: number;
-  activeCards: number;
+  totalCustomers?: number;
+  activeCards?: number;
   className?: string;
   delay?: number;
   isOwner?: boolean;
+  /** Render the cards-issued / active-passes / install-rate stats. The Dashboard
+   *  shows them; the Program control center hides them (install rate lives in the
+   *  Program Health card there) and surfaces template actions instead. */
+  showStats?: boolean;
+  /** When set (and isOwner), a "Switch template" link appears in the header.
+   *  Used on the Program page to make this widget program-specific. */
+  switchTemplateHref?: string;
 }
 
 export function ActiveCardWidget({
   design,
-  totalCustomers,
-  activeCards,
+  totalCustomers = 0,
+  activeCards = 0,
   className,
   delay = 0,
   isOwner = true,
+  showStats = true,
+  switchTemplateHref,
 }: ActiveCardWidgetProps) {
   const t = useTranslations("dashboard");
 
@@ -108,28 +117,43 @@ export function ActiveCardWidget({
           {t("activeCard")}
         </h3>
         {design && isOwner && (
-          <Link
-            href={`/design/${design.id}`}
-            className="text-xs text-[var(--accent)] font-medium hover:underline"
-          >
-            {t("edit")}
-          </Link>
+          <div className="flex items-center gap-3">
+            {switchTemplateHref && (
+              <Link
+                href={switchTemplateHref}
+                className="text-xs text-[var(--muted-foreground)] font-medium hover:text-[var(--foreground)] hover:underline"
+              >
+                {t("switchTemplate")}
+              </Link>
+            )}
+            <Link
+              href={`/design/${design.id}`}
+              className="text-xs text-[var(--accent)] font-medium hover:underline"
+            >
+              {t("edit")}
+            </Link>
+          </div>
         )}
       </div>
 
-      {/* Horizontal layout when stacked (below lg), vertical when in sidebar column (lg+) */}
-      <div className="flex flex-row gap-4 lg:flex-col lg:gap-0">
-        {/* Card preview — 1/3 width when horizontal, full width when vertical */}
-        <div className="w-1/2 md:w-1/3 shrink-0 lg:w-full">
-          {cardPreview}
-        </div>
+      {showStats ? (
+        /* Horizontal layout when stacked (below lg), vertical when in sidebar column (lg+) */
+        <div className="flex flex-row gap-4 lg:flex-col lg:gap-0">
+          {/* Card preview — 1/3 width when horizontal, full width when vertical */}
+          <div className="w-1/2 md:w-1/3 shrink-0 lg:w-full">
+            {cardPreview}
+          </div>
 
-        {/* Stats — expanded blocks when horizontal, compact rows when in sidebar */}
-        <div className="flex-1 flex flex-col justify-center lg:mt-4">
-          <div className="hidden lg:block">{statsCompact}</div>
-          <div className="block lg:hidden">{statsExpanded}</div>
+          {/* Stats — expanded blocks when horizontal, compact rows when in sidebar */}
+          <div className="flex-1 flex flex-col justify-center lg:mt-4">
+            <div className="hidden lg:block">{statsCompact}</div>
+            <div className="block lg:hidden">{statsExpanded}</div>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Program control center: preview only (install rate lives in Program Health). */
+        cardPreview
+      )}
     </div>
   );
 }
