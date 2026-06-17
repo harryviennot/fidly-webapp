@@ -73,6 +73,7 @@
     "loyaltyCard": "Loyalty Card",
     "activeCard": "Loyalty card",
     "edit": "Edit",
+    "switchTemplate": "Switch card style",
     "noCardYet": "No card style yet",
     "cardsIssued": "Cards issued",
     "activePasses": "Installed cards",

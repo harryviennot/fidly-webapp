@@ -27,7 +27,7 @@ import { useProgram } from '../layout';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-import type { FieldCollectionMode } from '@/types/business';
+import { normalizeFieldMode } from '@/lib/customer-data-collection';
 import type { StampGoalImpact } from '@/types';
 
 const DEFAULT_DATA_COLLECTION: DataCollectionValue = {
