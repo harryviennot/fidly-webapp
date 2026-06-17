@@ -12,9 +12,9 @@
     "linkCopied": "Link copied to clipboard",
     "qrCodeHint": "QR code downloads are available in the scanner app",
     "dataCollectionDescription": "Collect this information when customers sign up for their loyalty card.",
-    "anonymousModeNote": "Collecting no data enables anonymous mode: customers can sign up without providing any information.",
-    "anonymousModeWarning": "Anonymous mode is active. Customers won't need to fill any form, but you won't be able to identify them. They won't be able to recover a lost card or sync across devices, and you won't be able to contact them.",
-    "anonymousModeTitle": "Anonymous Mode active",
+    "anonymousModeNote": "Collect nothing and customers sign up anonymously, with no form to fill.",
+    "anonymousModeWarning": "Customers sign up without filling anything in. In exchange, they can't recover a lost card or move it to a new phone, and you can't reach them later. A good fit for walk-in trade or short-lived programs.",
+    "anonymousModeTitle": "Anonymous sign-up",
     "rewardFallback": "a reward",
     "recommended": "Recommended",
     "nav": {
@@ -176,8 +176,15 @@
     "livePreview": "Live Preview",
     "programSummaryLabel": "Program Summary",
     "anonymous": "Anonymous",
+    "recap": {
+      "title": "What your customers get",
+      "earn": "Customers earn <b>{reward}</b> after <b>{stamps}</b> stamps.",
+      "headStart": "New sign-ups start with {count, plural, one {# stamp} other {# stamps}} already filled."
+    },
     "saveProgram": "Save changes",
     "saving": "Saving...",
+    "saved": "Saved",
+    "revert": "Revert",
     "unsavedChanges": "Unsaved changes",
     "dataFields": {
       "name": "Name",
@@ -187,6 +194,7 @@
       "phone": "Phone",
       "phoneDescription": "Collect it if you'd like to reach customers yourself. Stampeo doesn't send SMS."
     },
+    "fieldOff": "Off",
     "requiredField": "Required",
     "optionalField": "Optional",
     "toasts": {

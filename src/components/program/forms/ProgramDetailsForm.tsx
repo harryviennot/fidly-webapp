@@ -51,12 +51,6 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
   const accentHex = colors?.accentHex ?? 'var(--accent)';
   const iconColorHex = colors?.iconColorHex ?? '#fff';
 
-  const loyaltyTypes = [
-    { id: 'stamps', label: t('stampsType'), emoji: '⭐', desc: t('stampsTypeDesc'), tag: null },
-    { id: 'points', label: t('pointsType'), emoji: '🎯', desc: t('pointsTypeDesc'), tag: t('comingSoonBadge') },
-    { id: 'tiered', label: t('tieredType'), emoji: '🏆', desc: t('tieredTypeDesc'), tag: t('comingSoonBadge') },
-  ];
-
   const patch = (next: Partial<ProgramDetailsValue>) => onChange({ ...value, ...next });
 
   return (
@@ -75,50 +69,21 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
         />
       </div>
 
-      {/* Loyalty Type */}
+      {/* Loyalty Type — stamps is the only type today, so confirm it rather
+          than offering dead, un-clickable options. */}
       <div>
         <label className="block text-[12px] font-semibold text-[#555] mb-2">
           {t('loyaltyTypeLabel')}
         </label>
-        <div className="flex gap-2 flex-wrap">
-          {loyaltyTypes.map((lt) => {
-            const isActive = lt.id === 'stamps';
-            const isDisabled = lt.tag !== null;
-            return (
-              <button
-                key={lt.id}
-                type="button"
-                disabled={isDisabled}
-                className={cn(
-                  'flex-1 min-w-0 min-[1080px]:min-w-[140px] p-3.5 px-4 rounded-[10px] text-left transition-all duration-150 cursor-pointer max-[767px]:min-w-full min-h-[80px]',
-                  isActive
-                    ? 'border-2 border-[var(--accent)] bg-[var(--accent-light)]'
-                    : 'border-[1.5px] border-[var(--border)]',
-                  isDisabled && 'bg-[var(--paper)] opacity-60 cursor-not-allowed'
-                )}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[20px]">{lt.emoji}</span>
-                    <span className={cn('text-[14px] font-semibold', isActive ? 'text-[#1A1A1A]' : 'text-[#555]')}>
-                      {lt.label}
-                    </span>
-                  </div>
-                  {lt.tag && (
-                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-[var(--paper-hover)] text-[#A0A0A0] tracking-wide">
-                      {lt.tag}
-                    </span>
-                  )}
-                  {isActive && !lt.tag && (
-                    <div className="w-[18px] h-[18px] rounded-full bg-[var(--accent)] flex items-center justify-center flex-shrink-0">
-                      <CheckIcon className="w-2.5 h-2.5 text-white" weight="bold" />
-                    </div>
-                  )}
-                </div>
-                <div className="text-[11.5px] text-[#8A8A8A] leading-[1.4]">{lt.desc}</div>
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-2.5 p-3.5 px-4 rounded-[10px] border-2 border-[var(--accent)] bg-[var(--accent-light)]">
+          <span className="text-[20px]" aria-hidden="true">⭐</span>
+          <div className="flex-1 min-w-0">
+            <div className="text-[14px] font-semibold text-[#1A1A1A]">{t('stampsType')}</div>
+            <div className="text-[11.5px] text-[#8A8A8A] leading-[1.4]">{t('stampsTypeDesc')}</div>
+          </div>
+          <div className="w-[18px] h-[18px] rounded-full bg-[var(--accent)] flex items-center justify-center flex-shrink-0">
+            <CheckIcon className="w-2.5 h-2.5 text-white" weight="bold" />
+          </div>
         </div>
       </div>
 

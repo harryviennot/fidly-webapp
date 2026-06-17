@@ -255,7 +255,7 @@ export default function AdminLayout({
       <ChangelogModalProvider>
         <SidebarProvider>
           <AppSidebar />
-          <SidebarInset className="bg-[var(--background)] overflow-y-auto max-h-screen hide-scrollbar">
+          <SidebarInset className="bg-[var(--background)] overflow-y-auto h-svh hide-scrollbar">
             <ImpersonationBanner />
             {currentBusiness.billing_status === "suspended" && <SuspendedBanner />}
             <OverLimitBanner />
