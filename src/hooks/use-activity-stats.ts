@@ -18,7 +18,9 @@ export function useActivityStats(businessId: string | undefined) {
     queryKey: activityKeys.stats(businessId!),
     queryFn: () => getActivityStats(businessId!),
     enabled: !!businessId,
-    refetchInterval: 30_000,
+    // Live updates come from useActivityRealtime (transaction INSERTs). This is
+    // just a slow fallback in case a realtime channel silently drops.
+    refetchInterval: 120_000,
     refetchIntervalInBackground: false,
   });
 }

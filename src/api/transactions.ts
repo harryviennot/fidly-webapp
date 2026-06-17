@@ -3,6 +3,7 @@ import type {
   AchievementLedgerResponse,
   ActivityStatsResponse,
   BusinessAchievementsResponse,
+  ProgramHealthResponse,
   TransactionListResponse,
   TransactionResponse,
 } from '@/types/transaction';
@@ -76,6 +77,21 @@ export async function getActivityStats(
 
   if (!response.ok) {
     throw new Error('Failed to fetch activity stats');
+  }
+
+  return response.json();
+}
+
+export async function getProgramHealth(
+  businessId: string
+): Promise<ProgramHealthResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/transactions/${businessId}/program-health`,
+    { headers: await getAuthHeaders() }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch program health');
   }
 
   return response.json();

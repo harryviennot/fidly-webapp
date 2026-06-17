@@ -14,6 +14,14 @@ interface ViewToggleProps<T extends string> {
   onChange: (value: T) => void;
   options: ViewToggleOption<T>[];
   className?: string;
+  /**
+   * "subtle" (default) is the low-contrast view switcher used in toolbars.
+   * "solid" is a high-contrast segmented control: a muted track with a white
+   * selected pill, for primary in-form choices.
+   */
+  variant?: "subtle" | "solid";
+  /** Stretch to fill the container, each option taking an equal share. */
+  fullWidth?: boolean;
 }
 
 export function ViewToggle<T extends string>({
@@ -21,12 +29,19 @@ export function ViewToggle<T extends string>({
   onChange,
   options,
   className,
+  variant = "subtle",
+  fullWidth = false,
 }: ViewToggleProps<T>) {
+  const solid = variant === "solid";
   return (
     <div
       role="tablist"
       className={cn(
-        "inline-flex items-center rounded-lg border border-[var(--border)] bg-[var(--background)] p-0.5",
+        "items-center rounded-lg border p-0.5",
+        fullWidth ? "flex w-full" : "inline-flex",
+        solid
+          ? "border-[var(--border-medium)] bg-[var(--muted)]"
+          : "border-[var(--border)] bg-[var(--background)]",
         className,
       )}
     >
@@ -40,10 +55,15 @@ export function ViewToggle<T extends string>({
             aria-selected={selected}
             onClick={() => onChange(opt.value)}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              "flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all",
+              fullWidth && "flex-1",
               selected
-                ? "bg-[var(--muted)] text-[var(--foreground)]"
-                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+                ? solid
+                  ? "bg-white text-[#1A1A1A] font-semibold shadow-sm"
+                  : "bg-[var(--muted)] text-[var(--foreground)]"
+                : solid
+                  ? "text-[#8A8A8A] hover:text-[var(--foreground)]"
+                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
             )}
           >
             {opt.icon}

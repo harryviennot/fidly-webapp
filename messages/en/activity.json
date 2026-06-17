@@ -60,10 +60,12 @@
       "older": "Older"
     },
     "stats": {
-      "stampsToday": "Stamps Today",
-      "rewardsToday": "Rewards Today",
-      "totalThisWeek": "Total This Week",
-      "activeCustomersToday": "Active today"
+      "todayActivity": "Today's activity",
+      "todayActivityInfo": "Stamps and rewards added today, compared to a typical day (about {avg}).",
+      "typicalPerDay": "usually ~{avg}/day",
+      "thisWeek": "This week",
+      "vsLastWeek": "vs last week",
+      "bestDay": "Best day"
     },
     "emptyState": {
       "title": "No activity yet",

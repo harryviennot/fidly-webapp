@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,8 +8,9 @@ import { SearchBar } from "@/components/reusables/search-bar";
 import { useBusiness } from "@/contexts/business-context";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { useActiveDesign } from "@/hooks/use-designs";
-import { useActivityStats, activityKeys } from "@/hooks/use-activity-stats";
+import { useActivityStats } from "@/hooks/use-activity-stats";
 import { useActivityFeed } from "@/hooks/use-activity-feed";
+import { useActivityRealtime } from "@/hooks/use-activity-realtime";
 import { useLocations } from "@/hooks/use-locations";
 import { useHasLegacyTransactions } from "@/hooks/use-transactions";
 import { getCustomer } from "@/api";
@@ -96,6 +97,9 @@ export default function ActivityPage() {
 
   const feed = useActivityFeed(businessId, feedFilters);
 
+  // Push new transactions live (replaces the old latest_transaction_at polling).
+  useActivityRealtime(businessId);
+
   const transactions = useMemo(() => {
     const all = feed.data?.pages.flatMap((p) => p.transactions) ?? [];
     if (!search) return all;
@@ -107,20 +111,6 @@ export default function ActivityPage() {
       return name.includes(term) || email.includes(term);
     });
   }, [feed.data, search]);
-
-  // Track latest_transaction_at to auto-refresh feed
-  const latestRef = useRef<string | null>(null);
-  useEffect(() => {
-    const serverLatest = stats.data?.latest_transaction_at;
-    if (!serverLatest) return;
-
-    if (latestRef.current && serverLatest > latestRef.current) {
-      queryClient.invalidateQueries({
-        queryKey: activityKeys.feed(businessId!, feedFilters),
-      });
-    }
-    latestRef.current = serverLatest;
-  }, [stats.data?.latest_transaction_at, businessId, feedFilters, queryClient]);
 
   const hasActiveFilters =
     typeFilter !== "all" || (showLocationUi && locationFilter !== undefined);

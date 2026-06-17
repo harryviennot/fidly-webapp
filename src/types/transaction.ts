@@ -49,6 +49,32 @@ export interface ActivityStatsResponse {
   rewards_prev_week: number;
   new_customers_this_week: number;
   new_customers_prev_week: number;
+  /** "Typical day" baseline: avg per-active-day stamps+rewards over the last 30d. */
+  avg_daily_activity: number;
+  /** Previous week up to the same elapsed point as now (honest week-to-date WoW). */
+  total_prev_week_to_date: number;
+  /** Busiest single day on record (same event set as the Today card) + its date. */
+  best_day_count: number;
+  best_day_date: string | null;
+}
+
+/**
+ * Program-effectiveness metrics for the /program control center (migration 115).
+ * Scoped to the business's default program. Rates are 0..1 fractions.
+ */
+export interface ProgramHealthResponse {
+  total_enrollments: number;
+  /** Reached the goal: redeemed once, holding a banked reward, or status='completed'. */
+  completed_count: number;
+  completion_rate: number;
+  total_rewards_redeemed: number;
+  redemption_rate: number;
+  avg_stamps_per_customer: number;
+  /** null (not 0) when nobody has redeemed yet — render an em-dash. */
+  avg_days_to_first_reward: number | null;
+  install_rate: number;
+  active_cards: number;
+  banked_rewards_count: number;
 }
 
 /** One complete week of stamp volume, used to derive the weekly-goal baseline. */
