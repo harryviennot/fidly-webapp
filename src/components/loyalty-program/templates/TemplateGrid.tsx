@@ -1,9 +1,20 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { CardDesign } from '@/types';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   PlusIcon,
   PencilIcon,
@@ -16,52 +27,84 @@ import { useDesignEntitlements } from '@/hooks/useEntitlements';
 import { toast } from 'sonner';
 
 interface TemplateGridProps {
-  activeDesign: CardDesign | undefined;
-  inactiveDesigns: CardDesign[];
+  /** Card styles to render as tiles (the inactive ones). */
+  designs: CardDesign[];
+  /** Total number of styles (active + inactive), used for plan limits. */
+  totalDesignCount: number;
+  /** Whether an active style exists (drives the empty-state copy). */
+  hasActiveDesign: boolean;
   onDelete: (id: string) => void;
   onActivate: (id: string) => void;
   onDuplicate: (id: string) => void;
 }
 
 export function TemplateGrid({
-  activeDesign,
-  inactiveDesigns,
+  designs,
+  totalDesignCount,
+  hasActiveDesign,
   onDelete,
   onActivate,
   onDuplicate,
 }: TemplateGridProps) {
   const t = useTranslations('designEditor');
   const tFeatures = useTranslations('features');
-  const allDesigns = activeDesign
-    ? [activeDesign, ...inactiveDesigns]
-    : inactiveDesigns;
-  const { canCreateDesign, isAtDesignLimit, getLimit } = useDesignEntitlements(allDesigns.length);
-  const designLimit = getLimit("designs.max_active");
+  const { canCreateDesign, isAtDesignLimit, getLimit } = useDesignEntitlements(totalDesignCount);
+  const designLimit = getLimit('designs.max_active');
+
+  // Pending activation awaiting confirmation. Activation pushes an update to
+  // every customer's wallet, so it must be confirmed before it fires.
+  const [pendingActivateId, setPendingActivateId] = useState<string | null>(null);
 
   const handleOverLimitClick = () => {
     toast(tFeatures('overLimit.toastDesignLocked', { limit: designLimit ?? 1 }));
   };
 
+  // Relative "Edited ..." label from updated_at.
+  const editedLabel = (iso?: string): string | null => {
+    if (!iso) return null;
+    const days = Math.floor((new Date().getTime() - new Date(iso).getTime()) / 86_400_000);
+    let rel: string;
+    if (days <= 0) rel = t('time.today');
+    else if (days === 1) rel = t('time.yesterday');
+    else if (days < 7) rel = t('time.daysAgo', { count: days });
+    else if (days < 30) rel = t('time.weeksAgo', { count: Math.floor(days / 7) });
+    else rel = t('time.monthsAgo', { count: Math.floor(days / 30) });
+    return t('edited', { time: rel });
+  };
+
+  const confirmActivate = () => {
+    if (pendingActivateId) onActivate(pendingActivateId);
+    setPendingActivateId(null);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Card grid */}
-      {allDesigns.length > 0 ? (
+      {designs.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {allDesigns.map((design) => {
+          {designs.map((design, index) => {
             const isOverLimit = design.is_over_limit ?? false;
+            const metadata = editedLabel(design.updated_at) ?? undefined;
+            const animationDelay = `${Math.min(index, 8) * 60}ms`;
 
             const card = (
               <CardWrapper
                 href={isOverLimit ? undefined : `/design/${design.id}`}
-                title={design.organization_name || t('yourBusiness')}
+                title={design.name || t('pages.untitledDesign')}
                 badge={
-                  design.is_active
-                    ? { label: t('active'), variant: 'success' }
-                    : isOverLimit
-                      ? { label: tFeatures('overLimit.readOnly'), variant: 'warning' }
-                      : undefined
+                  isOverLimit
+                    ? { label: tFeatures('overLimit.readOnly'), variant: 'warning' }
+                    : undefined
                 }
-                metadata={t('stamps', { count: design.total_stamps })}
+                metadata={metadata}
+                primaryAction={
+                  isOverLimit
+                    ? undefined
+                    : {
+                        label: t('setAsActive'),
+                        icon: <CheckCircleIcon className="h-4 w-4" />,
+                        onClick: () => setPendingActivateId(design.id),
+                      }
+                }
                 actions={isOverLimit ? [] : [
                   {
                     label: t('edit'),
@@ -73,25 +116,12 @@ export function TemplateGrid({
                     icon: <CopyIcon className="h-4 w-4" />,
                     onClick: () => onDuplicate(design.id),
                   },
-                  ...(!design.is_active
-                    ? [
-                      {
-                        label: t('setAsActive'),
-                        icon: <CheckCircleIcon className="h-4 w-4" />,
-                        onClick: () => onActivate(design.id),
-                      },
-                    ]
-                    : []),
-                  ...(!design.is_active
-                    ? [
-                      {
-                        label: t('delete'),
-                        icon: <TrashIcon className="h-4 w-4" />,
-                        onClick: () => onDelete(design.id),
-                        destructive: true,
-                      },
-                    ]
-                    : []),
+                  {
+                    label: t('delete'),
+                    icon: <TrashIcon className="h-4 w-4" />,
+                    onClick: () => onDelete(design.id),
+                    destructive: true,
+                  },
                 ]}
               >
                 <WalletCard
@@ -104,13 +134,27 @@ export function TemplateGrid({
 
             if (isOverLimit) {
               return (
-                <button key={design.id} type="button" onClick={handleOverLimitClick} className="text-left w-full">
+                <button
+                  key={design.id}
+                  type="button"
+                  onClick={handleOverLimitClick}
+                  className="text-left w-full max-w-[340px] mx-auto animate-slide-up"
+                  style={{ animationDelay }}
+                >
                   {card}
                 </button>
               );
             }
 
-            return <div key={design.id}>{card}</div>;
+            return (
+              <div
+                key={design.id}
+                className="w-full max-w-[340px] mx-auto animate-slide-up"
+                style={{ animationDelay }}
+              >
+                {card}
+              </div>
+            );
           })}
         </div>
       ) : (
@@ -119,21 +163,21 @@ export function TemplateGrid({
             <PlusIcon className="w-6 h-6 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            {t('createFirstDesign')}
+            {hasActiveDesign ? t('createAnother') : t('createFirstDesign')}
           </p>
           {canCreateDesign && (
             <Button asChild variant="outline" className="rounded-full">
               <Link href="/design/new">
                 <PlusIcon className="w-4 h-4 mr-2" />
-                {t('createCard')}
+                {t('newStyle')}
               </Link>
             </Button>
           )}
         </div>
       )}
 
-      {/* Upgrade hint for users at their design limit */}
-      {isAtDesignLimit && activeDesign && (
+      {/* Upgrade hint for users at their plan's style limit */}
+      {isAtDesignLimit && hasActiveDesign && (
         <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--cream)] p-4">
           <p className="text-sm">
             <span className="font-medium">{tFeatures('upgrade.designs')}</span>
@@ -146,6 +190,22 @@ export function TemplateGrid({
           </Button>
         </div>
       )}
+
+      <AlertDialog
+        open={!!pendingActivateId}
+        onOpenChange={(open) => !open && setPendingActivateId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('activateTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('activateBody')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('pages.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmActivate}>{t('setAsActive')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

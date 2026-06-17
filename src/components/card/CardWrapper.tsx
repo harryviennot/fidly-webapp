@@ -38,6 +38,9 @@ export interface CardWrapperProps {
   };
   /** Dropdown menu actions */
   actions?: CardWrapperAction[];
+  /** Surfaced primary action shown as a visible button next to the menu
+   *  (e.g. "Activate"). Keep secondary actions in `actions`. */
+  primaryAction?: CardWrapperAction;
   /** Link wrapper for the card */
   href?: string;
   /** Show hover edit indicator */
@@ -84,6 +87,7 @@ export function CardWrapper({
   title,
   badge,
   actions,
+  primaryAction,
   href,
   showEditOverlay = false,
   emptyState,
@@ -166,7 +170,7 @@ export function CardWrapper({
   );
 
   // No title/actions - just return the card
-  if (!title && !actions?.length && !badge && !metadata) {
+  if (!title && !actions?.length && !primaryAction && !badge && !metadata) {
     return <div className={className}>{linkedCard}</div>;
   }
 
@@ -197,7 +201,7 @@ export function CardWrapper({
 
         {actions && actions.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="p-1.5 hover:bg-muted rounded-lg transition-colors">
+            <DropdownMenuTrigger className="shrink-0 p-1.5 hover:bg-muted rounded-lg transition-colors">
               <DotsThree className="w-5 h-5" weight="bold" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -243,6 +247,33 @@ export function CardWrapper({
           </DropdownMenu>
         )}
       </div>
+
+      {/* Surfaced primary action — full-width, visible accent button */}
+      {primaryAction && (
+        primaryAction.href ? (
+          <Button
+            asChild
+            variant="ghost"
+            className="w-full rounded-full bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white"
+            disabled={primaryAction.disabled}
+          >
+            <Link href={primaryAction.href}>
+              {primaryAction.icon}
+              {primaryAction.label}
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            variant="secondary"
+            className="w-full rounded-full bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white"
+            onClick={primaryAction.onClick}
+            disabled={primaryAction.disabled}
+          >
+            {primaryAction.icon}
+            {primaryAction.label}
+          </Button>
+        )
+      )}
     </div>
   );
 }
