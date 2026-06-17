@@ -38,12 +38,15 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
 
   const pct = (v: number) => `${Math.round(v * 100)}%`;
 
+  // Only the rates whose meaning isn't obvious from the label carry a tooltip
+  // (what counts as "complete", what the install-rate denominator is, etc.).
+  // Self-explanatory metrics — avg stamps, time to reward, rewards waiting — don't.
   const rows: Array<{
     key: string;
     icon: Icon;
     tone: Tone;
     label: string;
-    info: string;
+    info?: string;
     value: string;
   }> = data
     ? [
@@ -64,25 +67,6 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
           value: pct(data.redemption_rate),
         },
         {
-          key: 'avgStamps',
-          icon: StampIcon,
-          tone: 'muted',
-          label: t('avgStampsPerCustomer'),
-          info: t('avgStampsInfo'),
-          value: data.avg_stamps_per_customer.toFixed(1),
-        },
-        {
-          key: 'timeToReward',
-          icon: ClockIcon,
-          tone: 'muted',
-          label: t('avgTimeToReward'),
-          info: t('avgTimeToRewardInfo'),
-          value:
-            data.avg_days_to_first_reward == null
-              ? '—'
-              : t('daysValue', { count: Math.round(data.avg_days_to_first_reward) }),
-        },
-        {
           key: 'install',
           icon: DownloadSimpleIcon,
           tone: 'info',
@@ -91,11 +75,27 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
           value: pct(data.install_rate),
         },
         {
+          key: 'avgStamps',
+          icon: StampIcon,
+          tone: 'muted',
+          label: t('avgStampsPerCustomer'),
+          value: data.avg_stamps_per_customer.toFixed(1),
+        },
+        {
+          key: 'timeToReward',
+          icon: ClockIcon,
+          tone: 'muted',
+          label: t('avgTimeToReward'),
+          value:
+            data.avg_days_to_first_reward == null
+              ? '—'
+              : t('daysValue', { count: Math.round(data.avg_days_to_first_reward) }),
+        },
+        {
           key: 'banked',
           icon: StackIcon,
           tone: 'muted',
           label: t('bankedRewards'),
-          info: t('bankedRewardsInfo'),
           value: data.banked_rewards_count.toLocaleString(),
         },
       ]
@@ -107,14 +107,13 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
     <Card
       flat
       hover={false}
-      className="p-4 min-[1080px]:p-5 min-[1080px]:px-6 animate-slide-up"
+      className="p-4 min-[1080px]:p-5 animate-slide-up"
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Header */}
       <div className="flex items-center gap-1.5 mb-4">
         <PulseIcon className="w-[18px] h-[18px] text-[var(--accent)]" weight="bold" />
         <span className="text-[15px] font-semibold text-[#1A1A1A]">{t('programHealth')}</span>
-        <InfoPopover content={t('programHealthInfo')} />
       </div>
 
       {isLoading ? (
@@ -123,7 +122,7 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
             <div key={i} className="flex items-center justify-between py-2.5">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-muted animate-pulse" />
-                <div className="h-3.5 w-32 bg-muted rounded animate-pulse" />
+                <div className="h-3.5 w-28 bg-muted rounded animate-pulse" />
               </div>
               <div className="h-4 w-10 bg-muted rounded animate-pulse" />
             </div>
@@ -152,8 +151,8 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
                   >
                     <RowIcon className="w-4 h-4" weight="bold" />
                   </span>
-                  <span className="text-[12px] text-[#555] truncate">{row.label}</span>
-                  <InfoPopover content={row.info} />
+                  <span className="text-[12px] text-[#555] leading-tight">{row.label}</span>
+                  {row.info && <InfoPopover content={row.info} />}
                 </div>
                 <span className="text-[15px] font-semibold text-[#1A1A1A] tabular-nums shrink-0">
                   {row.value}

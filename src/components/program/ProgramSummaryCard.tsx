@@ -13,7 +13,6 @@ import {
   UserCircleIcon,
   CheckCircleIcon,
   XCircleIcon,
-  DeviceMobileIcon,
   type Icon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
@@ -83,7 +82,6 @@ export function ProgramSummaryCard({ program, delay = 0, isOwner = true }: Progr
       icon: isActive ? CheckCircleIcon : XCircleIcon,
       tone: isActive ? 'accent' : 'danger',
     },
-    { label: t('passType'), value: t('appleAndGoogle'), icon: DeviceMobileIcon },
   ];
 
   return (

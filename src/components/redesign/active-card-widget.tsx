@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { WalletCard } from "@/components/card";
 import { ScaledCardWrapper } from "@/components/design/ScaledCardWrapper";
 import type { CardDesign } from "@/types";
@@ -111,48 +112,57 @@ export function ActiveCardWidget({
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
-      {/* Header: title + edit link */}
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-body text-[15px] font-semibold text-[#1A1A1A]">
-          {t("activeCard")}
-        </h3>
-        {design && isOwner && (
-          <div className="flex items-center gap-3">
-            {switchTemplateHref && (
+      {showStats ? (
+        <>
+          {/* Dashboard: header (title + edit link) above preview + stats */}
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-body text-[15px] font-semibold text-[#1A1A1A]">
+              {t("activeCard")}
+            </h3>
+            {design && isOwner && (
               <Link
-                href={switchTemplateHref}
-                className="text-xs text-[var(--muted-foreground)] font-medium hover:text-[var(--foreground)] hover:underline"
+                href={`/design/${design.id}`}
+                className="text-xs text-[var(--accent)] font-medium hover:underline"
               >
-                {t("switchTemplate")}
+                {t("edit")}
               </Link>
             )}
-            <Link
-              href={`/design/${design.id}`}
-              className="text-xs text-[var(--accent)] font-medium hover:underline"
-            >
-              {t("edit")}
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {showStats ? (
-        /* Horizontal layout when stacked (below lg), vertical when in sidebar column (lg+) */
-        <div className="flex flex-row gap-4 lg:flex-col lg:gap-0">
-          {/* Card preview — 1/3 width when horizontal, full width when vertical */}
-          <div className="w-1/2 md:w-1/3 shrink-0 lg:w-full">
-            {cardPreview}
           </div>
 
-          {/* Stats — expanded blocks when horizontal, compact rows when in sidebar */}
-          <div className="flex-1 flex flex-col justify-center lg:mt-4">
-            <div className="hidden lg:block">{statsCompact}</div>
-            <div className="block lg:hidden">{statsExpanded}</div>
+          {/* Horizontal layout when stacked (below lg), vertical when in sidebar column (lg+) */}
+          <div className="flex flex-row gap-4 lg:flex-col lg:gap-0">
+            <div className="w-1/2 md:w-1/3 shrink-0 lg:w-full">
+              {cardPreview}
+            </div>
+            <div className="flex-1 flex flex-col justify-center lg:mt-4">
+              <div className="hidden lg:block">{statsCompact}</div>
+              <div className="block lg:hidden">{statsExpanded}</div>
+            </div>
           </div>
-        </div>
+        </>
       ) : (
-        /* Program control center: preview only (install rate lives in Program Health). */
-        cardPreview
+        <>
+          {/* Program control center: preview first, title + actions below. */}
+          {cardPreview}
+
+          <div className="mt-3.5">
+            <h3 className="font-body text-[13px] font-semibold text-[#1A1A1A] mb-2.5">
+              {t("activeCard")}
+            </h3>
+            {design && isOwner && (
+              <div className="flex flex-col gap-2">
+                <Button size="sm" className="w-full" asChild>
+                  <Link href={`/design/${design.id}`}>{t("edit")}</Link>
+                </Button>
+                {switchTemplateHref && (
+                  <Button variant="outline" size="sm" className="w-full" asChild>
+                    <Link href={switchTemplateHref}>{t("switchTemplate")}</Link>
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

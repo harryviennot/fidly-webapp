@@ -9,14 +9,18 @@ import { OverviewPageSkeleton } from '@/components/loyalty-program/skeletons/Ove
 import { PageHeader, ActiveCardWidget } from '@/components/redesign';
 
 /**
- * Loyalty Program control center. Three stacked jobs, mobile-first:
- *   1. Share & grow      — BusinessUrlCard (QR + link)
- *   2. (the card itself) — ActiveCardWidget, program-specific (edit / switch)
- *   3. Program health    — ProgramHealthCard (effectiveness metrics)
- *   4. Set up & manage   — ProgramSummaryCard (real config at a glance)
+ * Loyalty Program control center, mobile-first.
  *
- * Explicit grid placement lets mobile lead with Share & grow (order-*) while
- * desktop keeps the card preview in a 290px right rail (col/row-start).
+ * Mobile order (single column, via order-*):
+ *   1. Share & grow    — BusinessUrlCard (QR + link)
+ *   2. The card itself — ActiveCardWidget (preview + edit / switch)
+ *   3. Program health  — ProgramHealthCard (effectiveness metrics)
+ *   4. Set up & manage — ProgramSummaryCard (real config at a glance)
+ *
+ * Desktop (>=1080px): two independent columns. The column wrappers are
+ * `display:contents` on mobile (so their cards flow into one ordered stack) and
+ * become flex columns on desktop — that keeps column heights independent (no
+ * shared grid-row gaps). Left = link + config, right rail = card + health.
  */
 export default function ProgramOverviewPage() {
   const { program, activeDesign, loading, isOwner } = useProgram();
@@ -30,31 +34,31 @@ export default function ProgramOverviewPage() {
     <div className="flex flex-col gap-[14px] animate-slide-up" style={{ animationDelay: '150ms' }}>
       <PageHeader title={t('title')} subtitle={t('subtitle')} />
 
-      <div className="grid grid-cols-1 min-[1080px]:grid-cols-[minmax(0,1fr)_290px] gap-[14px] items-start">
-        {/* Job 1 — Share & grow (mobile: first) */}
-        <div className="order-1 min-[1080px]:col-start-1 min-[1080px]:row-start-1">
-          <BusinessUrlCard delay={0} />
+      <div className="flex flex-col gap-[14px] min-[1080px]:grid min-[1080px]:grid-cols-[minmax(0,1fr)_290px] min-[1080px]:items-start">
+        {/* Left column: Share & grow + Set up & manage */}
+        <div className="contents min-[1080px]:flex min-[1080px]:flex-col min-[1080px]:gap-[14px]">
+          <div className="order-1">
+            <BusinessUrlCard delay={0} />
+          </div>
+          <div className="order-4">
+            <ProgramSummaryCard program={program} delay={240} isOwner={isOwner} />
+          </div>
         </div>
 
-        {/* The card itself — program-specific (mobile: second; desktop: right rail) */}
-        <div className="order-2 min-[1080px]:col-start-2 min-[1080px]:row-start-1">
-          <ActiveCardWidget
-            design={activeDesign ?? null}
-            isOwner={isOwner}
-            showStats={false}
-            switchTemplateHref="/program/templates"
-            delay={80}
-          />
-        </div>
-
-        {/* Job 2 — Program health */}
-        <div className="order-3 min-[1080px]:col-start-1 min-[1080px]:row-start-2">
-          <ProgramHealthCard delay={160} />
-        </div>
-
-        {/* Job 3 — Set up & manage */}
-        <div className="order-4 min-[1080px]:col-start-1 min-[1080px]:row-start-3">
-          <ProgramSummaryCard program={program} delay={240} isOwner={isOwner} />
+        {/* Right rail: the card itself + program health */}
+        <div className="contents min-[1080px]:flex min-[1080px]:flex-col min-[1080px]:gap-[14px]">
+          <div className="order-2">
+            <ActiveCardWidget
+              design={activeDesign ?? null}
+              isOwner={isOwner}
+              showStats={false}
+              switchTemplateHref="/program/templates"
+              delay={80}
+            />
+          </div>
+          <div className="order-3">
+            <ProgramHealthCard delay={160} />
+          </div>
         </div>
       </div>
     </div>
