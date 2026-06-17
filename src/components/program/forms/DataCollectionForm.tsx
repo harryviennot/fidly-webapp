@@ -1,10 +1,9 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { UserIcon, EnvelopeIcon, PhoneIcon } from '@phosphor-icons/react';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { InfoBox } from '@/components/reusables/info-box';
+import { ViewToggle, type ViewToggleOption } from '@/components/ui/view-toggle';
 import { cn } from '@/lib/utils';
 import type { FieldCollectionMode } from '@/types/business';
 
@@ -23,8 +22,8 @@ interface DataCollectionFormProps {
 
 /**
  * Shared form for choosing which customer fields to collect at sign-up.
- * Pure UI — no save side-effects. Each toggle flips a tri-state
- * (off / required / optional) and the parent persists.
+ * Pure UI — no save side-effects. Each field has a single tri-state segmented
+ * control (off / optional / required) and the parent persists.
  */
 export function DataCollectionForm({ value, onChange }: DataCollectionFormProps) {
   const t = useTranslations('loyaltyProgram');
@@ -34,7 +33,6 @@ export function DataCollectionForm({ value, onChange }: DataCollectionFormProps)
     label: string;
     description: string;
     icon: string;
-    fieldIcon: typeof UserIcon;
     recommended: boolean;
   }> = [
     {
@@ -42,7 +40,6 @@ export function DataCollectionForm({ value, onChange }: DataCollectionFormProps)
       label: t('dataFields.name'),
       description: t('dataFields.nameDescription'),
       icon: '👤',
-      fieldIcon: UserIcon,
       recommended: true,
     },
     {
@@ -50,7 +47,6 @@ export function DataCollectionForm({ value, onChange }: DataCollectionFormProps)
       label: t('dataFields.email'),
       description: t('dataFields.emailDescription'),
       icon: '📧',
-      fieldIcon: EnvelopeIcon,
       recommended: true,
     },
     {
@@ -58,24 +54,18 @@ export function DataCollectionForm({ value, onChange }: DataCollectionFormProps)
       label: t('dataFields.phone'),
       description: t('dataFields.phoneDescription'),
       icon: '📱',
-      fieldIcon: PhoneIcon,
       recommended: false,
     },
   ];
 
-  const handleToggle = (field: FieldKey) => {
-    onChange({
-      ...value,
-      [field]: value[field] === 'off' ? 'required' : 'off',
-    });
-  };
+  const modeOptions: ViewToggleOption<FieldCollectionMode>[] = [
+    { value: 'off', label: t('fieldOff') },
+    { value: 'optional', label: t('optionalField') },
+    { value: 'required', label: t('requiredField') },
+  ];
 
-  const handleRequiredToggle = (field: FieldKey) => {
-    onChange({
-      ...value,
-      [field]: value[field] === 'required' ? 'optional' : 'required',
-    });
-  };
+  const setMode = (field: FieldKey, mode: FieldCollectionMode) =>
+    onChange({ ...value, [field]: mode });
 
   const isAnonymousMode =
     value.collect_name === 'off' && value.collect_email === 'off' && value.collect_phone === 'off';
@@ -89,50 +79,40 @@ export function DataCollectionForm({ value, onChange }: DataCollectionFormProps)
           return (
             <div
               key={field.key}
-              className="flex items-center gap-3.5 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
+              className="flex flex-col gap-3 min-[600px]:flex-row min-[600px]:items-center min-[600px]:gap-4 px-4 py-3.5 rounded-[10px] bg-[var(--paper)] border-[1.5px] border-[var(--border-light)]"
             >
-              <span className="text-[22px] flex-shrink-0" aria-hidden="true">
-                {field.icon}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Label
-                    className={cn(
-                      'text-[14px] font-semibold',
-                      isEnabled ? 'text-[#1A1A1A]' : 'text-[#888]'
+              <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                <span className="text-[22px] flex-shrink-0" aria-hidden="true">
+                  {field.icon}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <Label
+                      className={cn(
+                        'text-[14px] font-semibold',
+                        isEnabled ? 'text-[#1A1A1A]' : 'text-[#888]'
+                      )}
+                    >
+                      {field.label}
+                    </Label>
+                    {field.recommended && (
+                      <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
+                        {t('recommended').toUpperCase()}
+                      </span>
                     )}
-                  >
-                    {field.label}
-                  </Label>
-                  {field.recommended && (
-                    <span className="text-[9px] font-bold px-1.5 py-px rounded bg-[var(--accent-light)] text-[var(--accent)]">
-                      {t('recommended').toUpperCase()}
-                    </span>
-                  )}
+                  </div>
+                  <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
                 </div>
-                <p className="text-[12px] text-[#8A8A8A] leading-[1.4]">{field.description}</p>
               </div>
-              {isEnabled && (
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <Switch
-                    checked={mode === 'required'}
-                    onCheckedChange={() => handleRequiredToggle(field.key)}
-                    className="scale-75 flex-shrink-0"
-                  />
-                  <span
-                    className={cn(
-                      'text-[11px] font-medium whitespace-nowrap',
-                      mode === 'required' ? 'text-[#1A1A1A]' : 'text-[#8A8A8A]'
-                    )}
-                  >
-                    {mode === 'required' ? t('requiredField') : t('optionalField')}
-                  </span>
-                </div>
-              )}
-              <Switch
-                checked={isEnabled}
-                onCheckedChange={() => handleToggle(field.key)}
-                className="flex-shrink-0"
+              {/* Full-width and tall on phones for easy tapping; collapses to an
+                  inline control on the right once the row is wide enough. */}
+              <ViewToggle
+                variant="solid"
+                fullWidth
+                value={mode}
+                onChange={(next) => setMode(field.key, next)}
+                options={modeOptions}
+                className="min-[600px]:w-auto min-[600px]:inline-flex [&>button]:min-h-[44px] [&>button]:py-2.5 [&>button]:text-[13px] min-[600px]:[&>button]:flex-none min-[600px]:[&>button]:min-h-[34px] min-[600px]:[&>button]:py-1 min-[600px]:[&>button]:text-xs"
               />
             </div>
           );
@@ -140,9 +120,9 @@ export function DataCollectionForm({ value, onChange }: DataCollectionFormProps)
       </div>
 
       {isAnonymousMode ? (
-        <InfoBox variant="warning" title={t('anonymousModeTitle')} message={t('anonymousModeWarning')} />
+        <InfoBox variant="info" title={t('anonymousModeTitle')} message={t('anonymousModeWarning')} />
       ) : (
-        <InfoBox variant="info" message={t('anonymousModeNote')} />
+        <InfoBox variant="note" message={t('anonymousModeNote')} />
       )}
     </div>
   );

@@ -12,9 +12,9 @@
     "linkCopied": "Lien copié dans le presse-papiers",
     "qrCodeHint": "Les QR codes sont disponibles dans l'application scanner",
     "dataCollectionDescription": "Collectez ces informations lorsque les clients s'inscrivent à leur carte de fidélité.",
-    "anonymousModeNote": "Ne collecter aucune donnée active le mode anonyme : les clients peuvent s'inscrire sans fournir aucune information.",
+    "anonymousModeNote": "Ne rien collecter, et vos clients s'inscrivent de façon anonyme, sans aucun formulaire à remplir.",
     "anonymousModeWarning": "Vos clients s'inscrivent sans rien remplir. En revanche, ils ne pourront pas récupérer leur carte en cas de perte ou de changement de téléphone, et vous ne pourrez pas les recontacter. Utile pour les commerces de passage ou les programmes éphémères.",
-    "anonymousModeTitle": "Mode anonyme activé",
+    "anonymousModeTitle": "Inscription anonyme",
     "rewardFallback": "une récompense",
     "recommended": "Recommandé",
     "nav": {
@@ -188,8 +188,15 @@
     "livePreview": "Aperçu en direct",
     "programSummaryLabel": "Résumé du programme",
     "anonymous": "Anonyme",
+    "recap": {
+      "title": "Ce que vos clients obtiennent",
+      "earn": "Vos clients gagnent <b>{reward}</b> après <b>{stamps}</b> tampons.",
+      "headStart": "Les nouveaux inscrits démarrent avec {count, plural, one {# tampon déjà rempli} other {# tampons déjà remplis}}."
+    },
     "saveProgram": "Enregistrer les modifications",
     "saving": "Enregistrement...",
+    "saved": "Enregistré",
+    "revert": "Annuler",
     "unsavedChanges": "Modifications non enregistrées",
     "dataFields": {
       "name": "Nom",
@@ -199,6 +206,7 @@
       "phone": "Téléphone",
       "phoneDescription": "À demander uniquement si vous comptez les contacter vous-même. Stampeo n'envoie pas de SMS."
     },
+    "fieldOff": "Désactivé",
     "requiredField": "Obligatoire",
     "optionalField": "Facultatif",
     "toasts": {
