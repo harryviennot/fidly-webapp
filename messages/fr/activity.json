@@ -60,10 +60,12 @@
       "older": "Plus ancien"
     },
     "stats": {
-      "stampsToday": "Tampons aujourd'hui",
-      "rewardsToday": "Récompenses aujourd'hui",
-      "totalThisWeek": "Total cette semaine",
-      "activeCustomersToday": "Actifs aujourd'hui"
+      "todayActivity": "Activité du jour",
+      "todayActivityInfo": "Tampons et récompenses ajoutés aujourd'hui, comparés à un jour normal (environ {avg}).",
+      "typicalPerDay": "≈ {avg}/jour d'habitude",
+      "thisWeek": "Cette semaine",
+      "vsLastWeek": "vs semaine dernière",
+      "bestDay": "Meilleur jour"
     },
     "emptyState": {
       "title": "Aucune activité",

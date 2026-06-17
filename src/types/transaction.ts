@@ -49,6 +49,13 @@ export interface ActivityStatsResponse {
   rewards_prev_week: number;
   new_customers_this_week: number;
   new_customers_prev_week: number;
+  /** "Typical day" baseline: avg per-active-day stamps+rewards over the last 30d. */
+  avg_daily_activity: number;
+  /** Previous week up to the same elapsed point as now (honest week-to-date WoW). */
+  total_prev_week_to_date: number;
+  /** Busiest single day on record (same event set as the Today card) + its date. */
+  best_day_count: number;
+  best_day_date: string | null;
 }
 
 /** One complete week of stamp volume, used to derive the weekly-goal baseline. */
