@@ -1,0 +1,442 @@
+{
+  "onboardingBusiness": {
+    "defaults": {
+      "rewardName": {
+        "cafe": "Bebida gratis",
+        "restaurant": "25% de descuento en la cuenta",
+        "bakery": "Bollo gratis",
+        "beauty": "Tratamiento gratis",
+        "retail": "Vale de descuento",
+        "fitness": "Sesión gratis",
+        "services": "Servicio gratis",
+        "other": "Recompensa gratis"
+      },
+      "broadcastBody": {
+        "cafe": "Hoy happy hour, de 17h a 19h. Enseña tu tarjeta y llévate un 20% de descuento.",
+        "restaurant": "El menú de esta noche se sirve hasta las 22h. Reserva tu mesa.",
+        "bakery": "Bollería recién salida del horno esta mañana. Pásate a por ella.",
+        "beauty": "Esta semana: 15% de descuento en todos los tratamientos. Reserva tu cita.",
+        "retail": "Nueva colección en tienda. Pásate hoy a echarle un vistazo.",
+        "fitness": "Esta semana hay nueva clase en grupo. Reserva tu plaza.",
+        "services": "Presupuesto gratuito hasta final de mes. Ponte en contacto.",
+        "other": "Tenemos una novedad que contarte. Pásate esta semana."
+      }
+    },
+    "footer": {
+      "back": "Atrás",
+      "skip": "Omitir",
+      "next": "Continuar",
+      "finish": "Lanzar mi programa",
+      "saving": "Guardando…",
+      "skipAll": "Omitir el resto",
+      "gotIt": "Entendido, adelante",
+      "cta": {
+        "welcome": {
+          "welcome": "Configurar mi programa"
+        },
+        "business": {
+          "identity": "Continuar",
+          "profile": "Guardar mi perfil"
+        },
+        "program": {
+          "program": "Guardar mi programa",
+          "data-collection": "Guardar mis campos"
+        },
+        "card-back": {
+          "intro": "Continuar",
+          "info": "Guardar mis datos"
+        },
+        "design": {
+          "branding": "Diseñar mi tarjeta",
+          "branding_short": "Continuar",
+          "stamps": "Guardar mis sellos",
+          "stamps_short": "Continuar",
+          "content": "Guardar mi contenido",
+          "content_short": "Continuar",
+          "back": "Guardar el reverso",
+          "back_short": "Continuar"
+        },
+        "notifications": {
+          "icon": "Guardar mi icono"
+        },
+        "first-stamp": {
+          "install": "Ya he instalado mi tarjeta",
+          "stamp": "Continuar"
+        },
+        "first-broadcast": {
+          "intro": "Redactar mi difusión",
+          "compose": "Continuar"
+        },
+        "team": {
+          "team": "Omitir"
+        },
+        "recap": {
+          "recap": "Elegir mi plan"
+        },
+        "plan": {
+          "plan": "Empezar mi prueba gratis de 30 días"
+        }
+      }
+    },
+    "errors": {
+      "unknownStep": "No encontramos ese paso de configuración. Empecemos desde el principio.",
+      "slugTaken": "Esa dirección ya está ocupada.",
+      "slugInvalid": "Usa solo letras minúsculas, números y guiones.",
+      "nameRequired": "Ponle un nombre a tu comercio.",
+      "createFailed": "Algo salió mal al crear tu comercio. Inténtalo de nuevo.",
+      "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+      "programNameRequired": "Ponle un nombre a tu programa.",
+      "rewardRequired": "Indica la recompensa que ganarán tus clientes.",
+      "slugTooShort": "Unos cuantos caracteres más."
+    },
+    "chapters": {
+      "welcome": {
+        "title": "Te damos la bienvenida a Stampeo",
+        "subtitle": "Tu tarjeta de fidelidad digital, lista en unos quince minutos.",
+        "body": "Vamos a crear tu tarjeta, instalarla en tu propio teléfono, enviarte un sello de verdad y dejar que difundas tu primer mensaje. Al final sabrás exactamente lo que verán, sentirán y harán tus clientes. Después eliges un plan.",
+        "cta": "Empezar"
+      },
+      "business": {
+        "title": "Sobre tu comercio",
+        "steps": {
+          "identity": {
+            "title": "Identidad",
+            "subtitle": "Lo básico. Lo usamos en tu tarjeta, tu página de clientes y tu panel.",
+            "fields": {
+              "name": "Nombre del comercio",
+              "nameHelp": "El nombre que verán tus clientes en su tarjeta.",
+              "namePlaceholder": "ej. Café du Coin",
+              "slug": "Dirección de tu página de clientes",
+              "slugHelp": "Tu página de clientes estará en stampeo.app/{slug}. Elige algo corto y fácil de recordar.",
+              "slugPlaceholder": "cafe-du-coin",
+              "website": "Tu sitio web",
+              "websiteHelp": "Aparece en el reverso de tu tarjeta.",
+              "websitePlaceholder": "https://…",
+              "logo": "Logo",
+              "logoHelp": "Formato horizontal, hasta proporción 3:1. PNG o JPG.",
+              "slugChecking": "Comprobando…",
+              "slugAvailable": "Disponible",
+              "country": "País",
+              "countryHelp": "Dónde tiene su sede tu comercio."
+            }
+          },
+          "profile": {
+            "title": "Cuéntanos sobre tu comercio",
+            "subtitle": "Cuatro preguntas rápidas para adaptar el estilo de tarjeta, los valores por defecto y los informes a tu sector.",
+            "typeLabel": "¿Qué tipo de comercio tienes?",
+            "sizeLabel": "¿Cómo de grande es tu equipo?",
+            "locationsLabel": "¿Cuántos establecimientos?",
+            "goalLabel": "¿Cuál es tu objetivo principal?",
+            "heardFromLabel": "¿Cómo nos conociste?",
+            "otherFreeText": "Otro (cuéntanos)",
+            "otherPlaceholder": "Describe brevemente a qué te dedicas",
+            "typeOptions": {
+              "cafe": "Café",
+              "restaurant": "Restaurante",
+              "bakery": "Panadería / Pastelería",
+              "beauty": "Belleza / Peluquería",
+              "retail": "Tienda / Boutique",
+              "fitness": "Fitness / Estudio",
+              "services": "Servicios",
+              "other": "Otro"
+            },
+            "sizeOptions": {
+              "solo": "Solo yo",
+              "small": "De 2 a 5",
+              "medium": "De 6 a 20",
+              "large": "Más de 20"
+            },
+            "locationsOptions": {
+              "one": "Solo uno",
+              "few": "De 2 a 5",
+              "several": "De 6 a 20",
+              "many": "Más de 20"
+            },
+            "goalOptions": {
+              "retention": "Que mis clientes vuelvan",
+              "frequency": "Aumentar la frecuencia de visita",
+              "basket": "Subir el gasto medio",
+              "acquisition": "Llegar a nuevos clientes"
+            },
+            "heardFromOptions": {
+              "tiktok": "TikTok",
+              "instagram": "Instagram",
+              "google": "Búsqueda en Google",
+              "ai": "Recomendación de una IA",
+              "friend": "Un amigo",
+              "stampeo_business": "Un comercio con Stampeo",
+              "advertisement": "Un anuncio",
+              "other": "Otro"
+            }
+          }
+        }
+      },
+      "program": {
+        "title": "Programa de fidelidad",
+        "steps": {
+          "program": {
+            "title": "Configura tu programa de fidelidad",
+            "subtitle": "Elige cómo ganan tus clientes, ponle nombre a tu programa y define la recompensa."
+          },
+          "data-collection": {
+            "title": "Qué pedir a tus clientes",
+            "subtitle": "Elige los campos de tu formulario de registro. Menos campos significa más registros."
+          }
+        }
+      },
+      "card-back": {
+        "title": "El reverso de tu tarjeta",
+        "steps": {
+          "intro": {
+            "title": "Tu tarjeta tiene dos caras",
+            "subtitle": "El anverso para los sellos. El reverso para todo lo demás.",
+            "bodyP1": "Tus clientes giran la tarjeta para ver tu horario, dirección, teléfono, sitio web, condiciones y cualquier otra cosa que merezca mostrarse. En Apple Wallet pulsan los tres puntos. En Google Wallet pulsan el icono de información.",
+            "bodyP2": "Añadirás tus datos una sola vez, aquí. Estarán disponibles en cada tarjeta que crees. Más adelante, al diseñar una tarjeta concreta, podrás elegir qué datos mostrar y añadir contenido propio solo para esa tarjeta."
+          },
+          "info": {
+            "title": "Los datos de tu comercio",
+            "subtitle": "Disponibles en cada tarjeta. Hemos rellenado lo que ya sabíamos por tu cuenta."
+          }
+        }
+      },
+      "design": {
+        "title": "Personaliza tu tarjeta",
+        "steps": {
+          "branding": {
+            "title": "Logo y colores",
+            "subtitle": "Sube tu logo y elige tus colores. Los valores por defecto ya funcionan; puedes ajustarlos cuando quieras."
+          },
+          "stamps": {
+            "title": "Sellos y recompensas",
+            "subtitle": "Elige los iconos de sello y recompensa, y luego escoge tu color."
+          },
+          "content": {
+            "title": "Información extra en el anverso",
+            "subtitle": "Campos breves junto a los sellos. La recompensa, una fecha de fin, un límite, cualquier cosa que merezca mostrarse.",
+            "technicalNote": "En Apple Wallet aparecen debajo de los sellos. En Google Wallet aparecen encima del código QR."
+          },
+          "back": {
+            "title": "Qué aparece en el reverso de esta tarjeta",
+            "subtitle": "Elige qué datos de tu comercio mostrar. Añade cualquier cosa que solo valga para esta tarjeta.",
+            "sharedSectionTitle": "Los datos de tu comercio",
+            "sharedSectionHelper": "Marca los que quieras mostrar en esta tarjeta.",
+            "specificSectionTitle": "Solo para esta tarjeta",
+            "specificSectionHelper": "Los campos que añadas aquí solo aparecen en esta tarjeta.",
+            "specificEmpty": "Nada todavía. Añade un campo que solo deba aparecer en esta tarjeta.",
+            "addFieldCta": "Añadir un campo"
+          }
+        }
+      },
+      "notifications": {
+        "title": "Icono de notificaciones",
+        "steps": {
+          "icon": {
+            "title": "Elige tu icono de notificaciones",
+            "subtitle": "Aparece junto a cada notificación que envías: sello añadido, recompensa ganada, difusión.",
+            "uploadSectionTitle": "Tu icono",
+            "uploadCta": "Haz clic para subir",
+            "uploadHint": "PNG, mínimo 87×87 píxeles. Las formas cuadradas quedan mejor.",
+            "previewLabel": "Vista previa",
+            "previewBody": "¡Sello conseguido! Tienes 3 de 10 sellos.",
+            "cropWarning": {
+              "title": "Recorta tu icono",
+              "body": "Tu imagen no es cuadrada. Recórtala antes de continuar, o sube otra.",
+              "cta": "Recortar ahora"
+            },
+            "actions": {
+              "change": "Cambiar",
+              "recrop": "Volver a recortar",
+              "remove": "Quitar"
+            }
+          }
+        }
+      },
+      "first-stamp": {
+        "title": "Pruébalo en directo",
+        "chapterIntro": "Instala tu tarjeta. Luego envíate un sello de verdad.",
+        "steps": {
+          "install": {
+            "title": "Tu tarjeta está lista. Vamos a probarla.",
+            "subtitle": "Recorre el mismo proceso que harán tus clientes.",
+            "loadingTitle": "Preparando tu tarjeta…",
+            "loadingSubtitle": "Ultimando tu estilo de tarjeta personalizado.",
+            "loadingHint": "Solo unos segundos. Quédate aquí.",
+            "explanation": "El enlace de abajo abre tu página de clientes. Es donde llega la gente tras escanear tu código QR o pulsar tu enlace, y donde se registran en tu programa de fidelidad.",
+            "explanationActionDesktop": "Escanea el QR con tu teléfono, regístrate como tu primer cliente y tu tarjeta llegará a tu wallet. Vuelve aquí cuando esté instalada.",
+            "explanationActionMobile": "Pulsa el enlace para abrir tu página de clientes, regístrate como tu primer cliente y tu tarjeta llegará a tu wallet. Vuelve aquí cuando esté instalada.",
+            "signupUrlLabel": "Página de clientes",
+            "copy": "Copiar",
+            "copied": "Copiado",
+            "qrTitle": "Imprime o muestra este QR",
+            "qrBody": "Más adelante, imprímelo para tu mostrador o ponlo en una carta para que tus clientes se registren ellos mismos.",
+            "qrShow": "Mostrar QR",
+            "qrHide": "Ocultar QR",
+            "downloadPng": "Guardar como PNG",
+            "downloadPdf": "Guardar como PDF",
+            "quickInstallTitle": "¿Solo quieres la tarjeta? Sáltate la página de clientes",
+            "quickInstallBody": "Podemos instalarla directamente con los datos de tu cuenta. Ahorras un minuto, pero no verás el proceso del cliente.",
+            "quickInstallCta": "Usar mis datos e instalar",
+            "registering": "Registrando…",
+            "installTitle": "Añade la tarjeta a tu wallet",
+            "installBody": "Pulsa un botón de abajo. La tarjeta llega a tu wallet, lista para el sello de prueba del siguiente paso.",
+            "addToAppleWallet": "Añadir a Apple Wallet",
+            "addToGoogleWallet": "Añadir a Google Wallet",
+            "pollingHint": "Deja esta pestaña abierta. Detectamos el registro automáticamente.",
+            "watchingInstall": "Cliente detectado. Esperando a que la tarjeta llegue a tu wallet…",
+            "manualConfirmCta": "Ya la he añadido a mi wallet",
+            "detected": "Tarjeta instalada. Seguimos en un momento.",
+            "detectedReturning": "Tarjeta instalada.",
+            "installedSummary": "{count, plural, =1 {Tu tarjeta está instalada en 1 dispositivo.} other {Tu tarjeta está instalada en # dispositivos.}}",
+            "installAnotherCta": "Instalar en otro dispositivo",
+            "timeoutTitle": "¿Sigues ahí?",
+            "timeoutBody": "Dejamos de escuchar nuevos registros tras 5 minutos. Pulsa reanudar para seguir atentos.",
+            "retry": "Reanudar la escucha"
+          },
+          "stamp": {
+            "title": "Envíate un sello",
+            "subtitle": "Cada pulsación dispara una notificación real a tu teléfono. Justo lo que recibirán tus clientes.",
+            "prereqTitle": "Instala primero tu tarjeta",
+            "prereqBody": "Vuelve al paso anterior y añade la tarjeta a tu wallet. Sin ella, no puede llegar ninguna notificación.",
+            "readyTitle": "Listo para sellar",
+            "readyBody": "Pulsa abajo. Tu teléfono vibra en unos segundos.",
+            "firstStampLandedTitle": "Eso es lo que se siente",
+            "firstStampLandedBody": "Eso es exactamente lo que sentirán tus clientes cada vez que les pongas un sello. Misma vibración, mismo ritmo, mismo proceso. Envía otro para coger el ritmo.",
+            "keepStampingTitle": "Envía uno más",
+            "keepStampingBody": "Otra pulsación dispara una segunda notificación real. La pequeña espera entre ellas es lo que hace que cada una vibre por su cuenta.",
+            "demoCompleteTitle": "Ya le has cogido el truco",
+            "demoCompleteBody": "Cuando quieras, seguimos.",
+            "sendCta": "Enviar el sello de prueba",
+            "sendAnotherCta": "Enviar otro sello",
+            "watching": "Esperando el sello…",
+            "cooldownCta": "Próximo sello en {seconds}s",
+            "appleWalletHint": "Apple Wallet agrupa las actualizaciones rápidas. Dejar unos 20 segundos entre sellos hace que cada notificación tenga su propia vibración.",
+            "googleWalletHint": "En Google Wallet, la tarjeta solo se actualiza al cerrarla. Ciérrala y vuelve a abrirla para ver el nuevo sello.",
+            "deliveryDisclosure": {
+              "summary": "¿No apareció la notificación? El sello se registró igualmente.",
+              "appleTitle": "En Apple Wallet",
+              "appleBody": "Apple agrupa las actualizaciones según la batería, el Wi-Fi y la cobertura. Un aviso puede tardar segundos o minutos. La tarjeta de tu pantalla bloqueada se actualiza en cuanto tu teléfono se despierta con buena señal.",
+              "googleTitle": "En Google Wallet",
+              "googleBody": "La tarjeta solo se actualiza después de cerrarla. Cierra el wallet y vuelve a abrir la tarjeta para ver el nuevo sello.",
+              "reassuranceTitle": "El sello está guardado",
+              "reassuranceBody": "Aunque la notificación o la vista de la tarjeta no se hayan puesto al día, la cuenta ya está en nuestro servidor. La próxima vez que escanees a este cliente verás el recuento real y actualizado."
+            },
+            "stampsLabel": "Sellos en tu tarjeta",
+            "justStamped": "Sello añadido",
+            "multiDeviceHint": "{count, plural, =1 {} other {Cada pulsación sella los # dispositivos instalados a la vez.}}",
+            "fallback": "¿Todavía sin vibración? Las notificaciones pueden tardar unos segundos. Inténtalo de nuevo dentro de un momento.",
+            "customisationHint": "Este es el mensaje por defecto. Puedes reescribirlo, añadir mensajes propios en distintos recuentos de sellos, o desactivar las notificaciones del todo desde los ajustes de notificaciones."
+          }
+        }
+      },
+      "first-broadcast": {
+        "title": "Tu primera difusión",
+        "steps": {
+          "intro": {
+            "title": "Las difusiones, explicadas",
+            "subtitle": "Un mensaje que envías a mano a cada cliente que tiene tu tarjeta.",
+            "whatItIsTitle": "Qué es",
+            "whatItIsBody": "Una única notificación que se envía a cada cliente que tiene tu tarjeta instalada. Útil para ofertas por tiempo limitado, eventos, nuevos platos de la carta o cualquier cosa que publicarías en redes sociales.",
+            "differentFromTitle": "Distinta de las notificaciones automáticas",
+            "differentFromBody": "Las notificaciones de sello y recompensa se disparan solas cuando pasa algo. Las difusiones son lo contrario: tú decides cuándo, tú decides qué.",
+            "audienceOfOneTitle": "Ahora mismo tu audiencia eres tú",
+            "audienceOfOneBody": "La única tarjeta instalada por ahora es la tuya, así que esta difusión llegará a tu propio teléfono. Es la misma experiencia que tendrá tu audiencia más adelante."
+          },
+          "compose": {
+            "title": "Escribe una difusión",
+            "subtitle": "Un mensaje corto. Llega a tu teléfono en cuanto pulsas enviar.",
+            "composeBody": "Escribe algo que de verdad enviarías a tus clientes. Llega directo a su teléfono y al reverso de su tarjeta.",
+            "titleLabel": "Título",
+            "titlePlaceholder": "ej. Hoy happy hour",
+            "titleHint": "Aparece en negrita en la pantalla bloqueada. Sé concreto. Por defecto toma el nombre de tu programa.",
+            "bodyLabel": "Mensaje",
+            "bodyPlaceholder": "Hoy happy hour, de 17h a 19h. Enseña tu tarjeta y llévate un 20% de descuento.",
+            "bodyHint": "Quedan {remaining} caracteres",
+            "estimating": "Contando destinatarios…",
+            "recipientsLine": "{count, plural, =0 {Aún no hay tarjetas instaladas. Prueba primero el paso anterior.} =1 {Esto llegará a tu propio teléfono.} other {# clientes instalados lo recibirán.}}",
+            "sendCta": "{count, plural, =1 {Enviar a mi teléfono} other {Enviar a # clientes}}",
+            "sendingLabel": "Enviando…",
+            "sentLabel": "Difusión enviada",
+            "noRecipientsLabel": "Todavía no hay nadie a quien enviar",
+            "sendingProgress": "Enviando. Suele tardar de 10 a 20 segundos.",
+            "sendFailed": "No se pudo enviar la difusión. Inténtalo de nuevo dentro de un momento.",
+            "deliveredTitle": "{count, plural, =0 {Aún no se ha entregado ninguna} =1 {Entregada a tu teléfono} other {Entregada a # dispositivos}}",
+            "deliveredHint": "{count, plural, =1 {La misma experiencia exacta que tendrán tus clientes cuando difundas a una audiencia.} other {{delivered} de {total} clientes la recibieron. {skipped, plural, =0 {} =1 {1 cliente omitido, tarjeta no instalada.} other {# clientes omitidos, tarjeta no instalada.}}}}"
+          }
+        }
+      },
+      "team": {
+        "title": "Suma a tu equipo",
+        "subtitle": "Dos niveles de acceso, según lo que necesite hacer cada persona.",
+        "rolesTitle": "Los dos roles",
+        "adminRole": {
+          "label": "Administrador",
+          "description": "Gestiona clientes, envía difusiones e invita a personas. No puede cambiar las reglas de fidelidad, editar tarjetas ni tocar la facturación. Ideal para encargados y personal de marketing."
+        },
+        "scannerRole": {
+          "label": "Escáner",
+          "description": "Sella a los clientes desde una app específica en su teléfono. Sin panel, sin datos de clientes, sin ajustes. Ideal para el personal que atiende en el mostrador."
+        },
+        "inviteLabel": "Enviar una invitación",
+        "inviteHint": "Reciben una invitación por correo. Puedes retirarles el acceso cuando quieras.",
+        "inviteCta": "Invitar"
+      },
+      "recap": {
+        "title": "Has montado un programa de fidelidad de verdad",
+        "subtitle": "Tarjeta real, teléfonos reales, notificaciones reales. Un repaso rápido antes de hablar de planes.",
+        "programDetail": "{totalStamps} sellos por \"{rewardName}\"",
+        "stampsLabel": "{count, plural, =0 {Aún no se ha enviado ningún sello} =1 {1 sello enviado a tu teléfono} other {# sellos enviados a tu teléfono}}",
+        "broadcastLabel": {
+          "sent": "Difusión recibida en tu teléfono",
+          "notSent": "Aún no se ha enviado ninguna difusión"
+        },
+        "teamLabel": "{count, plural, =0 {Equipo: solo tú por ahora} =1 {Equipo: tú y 1 invitación pendiente} other {Equipo: tú y # invitaciones pendientes}}",
+        "nextLabel": "Último paso: elige un plan"
+      },
+      "plan": {
+        "title": "Elige tu plan",
+        "setupWindowLapsed": "Tu periodo de configuración gratuito ha terminado. Elige tu plan para continuar; el resto lo puedes terminar después.",
+        "subtitle": "Empieza con 30 días gratis. Hoy no se te cobra nada; después se te facturará cada mes el plan que elijas, y puedes cancelar en cualquier momento antes de eso.",
+        "subtitleFounding": "Empieza con 30 días gratis. Hoy no se te cobra nada; después se te facturará cada mes a tu tarifa de socio fundador, fija de por vida para que nunca suba. Cancela en cualquier momento antes de eso.",
+        "keepTrialCta": "Decidir más tarde",
+        "recommendedBadge": "El más popular",
+        "perMonth": "/mes",
+        "youdLose": "Perderías:",
+        "andMore": "+ {count} más…",
+        "confirmTitle": "¿Lanzar con {tierName}?",
+        "confirmBodyReverts": "Con {tierName}, parte de lo que configuraste durante tu prueba Pro cambiará:",
+        "confirmBodyNoLosses": "Todo lo que has configurado funcionará con {tierName}.",
+        "confirmCancel": "Elegir otro plan",
+        "confirmCta": "Lanzar mi programa",
+        "tiers": {
+          "starter": {
+            "label": "Starter",
+            "tagline": "Todo lo que necesitas para lanzar.",
+            "cta": "Elegir Starter",
+            "feat1": "1 estilo de tarjeta",
+            "feat2": "Mensajes de notificación por defecto",
+            "feat3": "En solitario o equipo pequeño"
+          },
+          "growth": {
+            "label": "Growth",
+            "tagline": "Para comercios listos para crecer.",
+            "cta": "Elegir Growth",
+            "feat1": "Varios estilos de tarjeta",
+            "feat2": "Mensajes de notificación propios",
+            "feat3": "Difusiones (limitadas)",
+            "feat4": "Invitaciones de equipo"
+          },
+          "pro": {
+            "label": "Pro",
+            "tagline": "Todo, desbloqueado.",
+            "cta": "Elegir Pro",
+            "feat1": "Estilos de tarjeta e hitos ilimitados",
+            "feat2": "Difusiones ilimitadas",
+            "feat3": "Equipo ilimitado",
+            "feat4": "Recordatorios por ubicación",
+            "feat5": "Soporte prioritario"
+          }
+        }
+      }
+    }
+  }
+}

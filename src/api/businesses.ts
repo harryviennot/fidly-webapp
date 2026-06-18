@@ -50,7 +50,7 @@ export interface BusinessCreatePayload {
   subscription_tier: 'starter' | 'growth' | 'pro';
   settings?: Record<string, unknown>;
   logo_url?: string | null;
-  primary_locale?: 'fr' | 'en';
+  primary_locale?: 'fr' | 'en' | 'es';
   /** ISO 3166-1 alpha-2 country the business operates from (e.g. "FR"). */
   country?: string;
   /**

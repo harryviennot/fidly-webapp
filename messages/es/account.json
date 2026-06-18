@@ -1,0 +1,74 @@
+{
+  "account": {
+    "title": "Mi cuenta",
+    "subtitle": "Gestiona tu perfil y tus preferencias",
+    "sections": {
+      "profilePicture": "Foto de perfil",
+      "password": "Contraseña",
+      "accountInfo": "Datos de la cuenta",
+      "language": "Idioma",
+      "emails": "Correos"
+    },
+    "emails": {
+      "title": "Preferencias de correo",
+      "description": "Elige qué correos de Stampeo quieres recibir.",
+      "categories": {
+        "digest": {
+          "label": "Informes de resultados",
+          "hint": "Tu resumen semanal o mensual, además de los grandes momentos de tu programa."
+        },
+        "product_updates": {
+          "label": "Novedades del producto",
+          "hint": "Un breve resumen cada vez que lanzamos algo nuevo."
+        },
+        "marketing": {
+          "label": "Consejos y buenas prácticas",
+          "hint": "Ideas y buenas prácticas para sacar el máximo partido a tu programa."
+        },
+        "reengagement": {
+          "label": "Recordatorios de activación",
+          "hint": "Recordatorios para terminar la configuración o para retomar tu programa tras una pausa."
+        }
+      },
+      "transactionalNote": "Los correos esenciales (recibos, restablecimiento de contraseña, avisos de pago, advertencias sobre tus tarjetas) se envían siempre.",
+      "statusUpToDate": "Estás al día.",
+      "statusVersion": "Última versión: {version}",
+      "saveFailed": "No se ha podido guardar tu preferencia."
+    },
+    "profilePicture": {
+      "title": "Foto de perfil",
+      "description": "Tu foto de perfil es visible para todos los miembros del equipo en todos los comercios a los que perteneces.",
+      "updated": "Foto de perfil actualizada",
+      "removed": "Foto de perfil eliminada",
+      "hint": "PNG o JPG, máximo 2 MB. Las imágenes cuadradas quedan mejor.",
+      "sharedInfo": "Tu foto de perfil se comparte en todos los comercios de los que eres miembro."
+    },
+    "password": {
+      "title": "Contraseña",
+      "description": "Para cambiar tu contraseña, te enviaremos un enlace de restablecimiento por correo.",
+      "sendResetEmail": "Enviar el enlace",
+      "sending": "Enviando...",
+      "emailSent": "¡Enlace enviado! Revisa tu bandeja de entrada.",
+      "rateLimited": "Demasiados intentos. Espera un momento y vuelve a intentarlo.",
+      "sendFailed": "No se ha podido enviar el enlace. Inténtalo de nuevo."
+    },
+    "accountInfo": {
+      "title": "Datos de la cuenta",
+      "description": "Actualiza tu información personal",
+      "name": "Nombre",
+      "namePlaceholder": "Tu nombre",
+      "email": "Correo"
+    },
+    "language": {
+      "title": "Idioma",
+      "description": "Elige el idioma de tu panel y de las comunicaciones por correo.",
+      "label": "Idioma de la interfaz"
+    },
+    "errors": {
+      "loadFailed": "No se ha podido cargar el perfil",
+      "saveFailed": "No se ha podido guardar el nombre",
+      "uploadFailed": "No se ha podido subir el archivo",
+      "deleteFailed": "No se ha podido eliminar"
+    }
+  }
+}

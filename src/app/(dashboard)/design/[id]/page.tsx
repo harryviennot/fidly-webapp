@@ -9,6 +9,7 @@ import { CardDesign, CardDesignUpdate, LoyaltyProgram } from '@/types';
 import { getDesign, updateDesign, getPrograms } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
+import { SUPPORTED_LOCALES } from '@/lib/locale';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
 import { DesignEditorSkeleton } from '@/components/design/DesignEditorSkeleton';
 import TranslationsDialog from '@/components/design/TranslationsDialog';
@@ -107,9 +108,9 @@ export default function EditDesignPage() {
     router.push('/program/design');
   };
 
-  // Target locale is the opposite of the business's primary locale
+  // Translate to every supported locale other than the business's primary.
   const primaryLocale = currentBusiness?.primary_locale || 'fr';
-  const targetLocale = primaryLocale === 'fr' ? 'en' : 'fr';
+  const targetLocales = SUPPORTED_LOCALES.filter((l) => l !== primaryLocale);
 
   const handleSaveTranslations = async (update: CardDesignUpdate) => {
     if (!currentBusiness?.id || !design) return;
@@ -229,7 +230,7 @@ export default function EditDesignPage() {
         design={design}
         translations={design.translations || {}}
         primaryLocale={primaryLocale}
-        targetLocale={targetLocale}
+        targetLocales={targetLocales}
         onSave={handleSaveTranslations}
       />
 

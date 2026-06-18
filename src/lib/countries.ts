@@ -150,5 +150,6 @@ export function detectDefaultCountry(locale: string): string {
       /* ignore */
     }
   }
+  if (locale === "es") return "ES";
   return locale === "en" ? "GB" : "FR";
 }

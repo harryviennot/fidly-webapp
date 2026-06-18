@@ -380,6 +380,7 @@ export default function SettingsPage() {
                   <SelectContent>
                     <SelectItem value="fr">🇫🇷 Français</SelectItem>
                     <SelectItem value="en">🇬🇧 English</SelectItem>
+                    <SelectItem value="es">🇪🇸 Español</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-[11px] text-[#B0B0B0] mt-1.5">{t('language.passLocaleHint')}</p>

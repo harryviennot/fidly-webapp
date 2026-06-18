@@ -45,7 +45,7 @@ export function MilestoneSection({
   rewardNameSet,
 }: Readonly<MilestoneSectionProps>) {
   const t = useTranslations('notifications.milestones');
-  const uiLocale = useLocale() as 'en' | 'fr';
+  const uiLocale = useLocale() as 'en' | 'fr' | 'es';
   const { currentBusiness } = useBusiness();
   const { data, isLoading, error } = useMilestones(currentBusiness?.id);
   const deleteMutation = useDeleteMilestone(currentBusiness?.id);

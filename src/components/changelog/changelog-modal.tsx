@@ -48,9 +48,9 @@ export function ChangelogModal({
   if (!release) return null;
 
   const areaBySlug = new Map(areas.map((a) => [a.slug, a]));
-  const title = resolveLocale(release.title_fr, release.title_en, locale);
-  const body = resolveLocale(release.body_fr, release.body_en, locale);
-  const heroSrc = resolveLocale(release.image_url_fr, release.image_url_en, locale);
+  const title = resolveLocale(release.title_fr, release.title_en, release.title_es, locale);
+  const body = resolveLocale(release.body_fr, release.body_en, release.body_es, locale);
+  const heroSrc = resolveLocale(release.image_url_fr, release.image_url_en, release.image_url_es, locale);
   const date = formatReleaseDate(release.published_at, locale);
 
   const byCategory = CATEGORY_ORDER.map((cat) => ({

@@ -1,0 +1,93 @@
+{
+  "searchBar": {
+    "all": "Todo",
+    "clear": "Borrar",
+    "sort": "Ordenar",
+    "ascending": "Ascendente",
+    "descending": "Descendente"
+  },
+  "nav": {
+    "dashboard": "Inicio",
+    "achievements": "Logros",
+    "program": "Programa",
+    "loyaltyProgram": "Programa de fidelidad",
+    "customers": "Clientes",
+    "activity": "Actividad",
+    "team": "Equipo",
+    "settings": "Ajustes",
+    "billing": "Facturación",
+    "support": "Ayuda",
+    "notifications": "Notificaciones",
+    "sectionLoyaltyProgram": "Programa de fidelidad",
+    "sectionManage": "Gestión"
+  },
+  "support": {
+    "title": "Ayuda",
+    "whatsNew": "Novedades",
+    "contactUs": "Contáctanos",
+    "downloadApps": "Descargar la app",
+    "whatsapp": "Escríbenos por WhatsApp",
+    "contactTitle": "Contáctanos",
+    "contactDescription": "¿Cómo prefieres ponerte en contacto?",
+    "contactEmail": "Enviar un correo",
+    "contactEmailSubject": "Consulta de ayuda: {slug}",
+    "downloadTitle": "Descargar la app",
+    "downloadDescription": "Escanea tarjetas y añade sellos desde tu teléfono."
+  },
+  "header": {
+    "loyaltyProgram": "Programa de fidelidad",
+    "customers": "Clientes",
+    "activity": "Actividad",
+    "design": "Estilo de tarjeta",
+    "team": "Equipo",
+    "settings": "Ajustes",
+    "account": "Cuenta",
+    "new": "Nuevo estilo de tarjeta",
+    "edit": "Editar"
+  },
+  "userMenu": {
+    "account": "Cuenta",
+    "logOut": "Cerrar sesión"
+  },
+  "businessSwitcher": {
+    "yourBusinesses": "Tus comercios",
+    "switchTo": "Cambiar a",
+    "createNew": "Crear un comercio",
+    "viewAll": "Ver todos ({count})"
+  },
+  "roles": {
+    "owner": "Propietario",
+    "admin": "Administrador",
+    "scanner": "Escáner"
+  },
+  "status": {
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "saved": "Guardado"
+  },
+  "layout": {
+    "noBusinessFound": "No se ha encontrado ningún comercio",
+    "noBusinessAccess": "Aún no tienes acceso a ningún comercio."
+  },
+  "noActiveBusiness": {
+    "title": "Aún no tienes un comercio activo",
+    "description": "Si tienes un comercio suspendido, escribe a Ayuda para recuperarlo. Si no, puedes crear uno nuevo aquí abajo.",
+    "createBusinessCta": "Crear un nuevo comercio",
+    "contactSupport": "Contactar con Ayuda"
+  },
+  "poweredBy": "Con la tecnología de",
+  "imageCropper": {
+    "title": "Recortar la imagen",
+    "apply": "Aplicar",
+    "cancel": "Cancelar",
+    "aspectRatio": "Proporción",
+    "logoTitle": "Recorta tu logo",
+    "logoDescription": "Arrastra las esquinas para elegir la zona que quieres conservar. Desde un cuadrado hasta una proporción 3:1 funciona bien."
+  },
+  "countrySelect": {
+    "placeholder": "Selecciona un país",
+    "search": "Buscar un país…",
+    "noResults": "No se ha encontrado ningún país",
+    "title": "País"
+  }
+}

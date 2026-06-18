@@ -1,0 +1,122 @@
+{
+  "settings": {
+    "sidebar": {
+      "businessInfo": "Datos del comercio",
+      "cardInfo": "Datos de la tarjeta",
+      "language": "Idioma",
+      "theme": "Apariencia"
+    },
+    "subtitle": "Datos del comercio, configuración de la tarjeta e identidad visual",
+    "businessInfo": {
+      "title": "Datos del comercio",
+      "description": "Cambia el nombre y el logotipo de tu comercio",
+      "businessName": "Nombre del comercio",
+      "businessNamePlaceholder": "Mi comercio",
+      "businessLogo": "Logotipo del comercio",
+      "logoHint": "PNG o JPG, máximo 2 MB",
+      "remove": "Quitar",
+      "nameHint": "Aparece en tu mini web y en todas las comunicaciones (equipo, notificaciones, etc.)"
+    },
+    "cardInfo": {
+      "title": "Datos de la tarjeta",
+      "description": "Estos datos aparecerán en el reverso de las tarjetas de fidelidad de tus clientes",
+      "addInfo": "Añadir dato",
+      "chooseFieldType": "Elige el tipo de dato",
+      "noInfoYet": "Aún no has añadido datos. Añade la información de tu comercio para mostrarla en el reverso de las tarjetas de fidelidad.",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "types": {
+        "hours": "Horario de apertura",
+        "website": "Sitio web",
+        "phone": "Teléfono",
+        "email": "Correo electrónico",
+        "address": "Dirección",
+        "custom": "Campo personalizado"
+      },
+      "hours": {
+        "title": "Horario de apertura",
+        "days": "Días",
+        "daysPlaceholder": "ej. Lun-Vie",
+        "open": "Apertura",
+        "close": "Cierre",
+        "closed": "Cerrado",
+        "addRow": "Añadir franja horaria",
+        "defaultMonFri": "Lun-Vie",
+        "defaultSat": "Sáb",
+        "defaultSun": "Dom"
+      },
+      "website": {
+        "title": "Sitio web",
+        "urlPlaceholder": "https://ejemplo.com"
+      },
+      "phone": {
+        "title": "Teléfono",
+        "numberPlaceholder": "+34 600 12 34 56"
+      },
+      "email": {
+        "title": "Correo electrónico",
+        "emailPlaceholder": "contacto@ejemplo.com"
+      },
+      "address": {
+        "title": "Dirección",
+        "addressPlaceholder": "Calle Mayor 1, 28013 Madrid"
+      },
+      "custom": {
+        "title": "Campo personalizado",
+        "labelPlaceholder": "Título del campo (ej. Condiciones generales)",
+        "valuePlaceholder": "Contenido del campo..."
+      },
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "saved": "Datos del reverso actualizados. Las tarjetas de tus clientes se actualizarán en breve.",
+      "saveFailed": "No se han podido guardar los datos de la tarjeta"
+    },
+    "language": {
+      "title": "Idioma y país de tu comercio",
+      "description": "El idioma principal de tu comercio y el país desde el que opera.",
+      "passLocale": "Idioma",
+      "passLocaleHint": "Siempre puedes añadir traducciones a otros idiomas en el editor de estilo de tarjeta.",
+      "saved": "El idioma de tu comercio se ha actualizado.",
+      "country": "País",
+      "countryHint": "El país desde el que opera tu comercio.",
+      "countrySaved": "El país de tu comercio se ha actualizado."
+    },
+    "theme": {
+      "title": "Personalización de la apariencia",
+      "description": "Personaliza los colores de tu panel",
+      "accentColor": "Color de acento",
+      "backgroundColor": "Color secundario",
+      "unsavedChanges": "Tienes cambios sin guardar",
+      "upToDate": "La apariencia está al día",
+      "saveTheme": "Guardar apariencia",
+      "accentColorHint": "Se usa para los colores de tu comercio en la mini web y las comunicaciones.",
+      "backgroundColorHint": "Se usa para los colores de tu comercio en la mini web y las comunicaciones.",
+      "saved": "Identidad visual guardada."
+    },
+    "cardBackPreview": {
+      "title": "Vista previa del reverso de la tarjeta",
+      "subtitle": "Así se ve el reverso de tu tarjeta",
+      "loyaltyCard": "Tarjeta de fidelidad",
+      "notSet": "Sin definir",
+      "closed": "Cerrado",
+      "noFields": "Aún no has añadido campos",
+      "settingsLabel": "Ajustes",
+      "language": "Idioma",
+      "backFields": "Campos del reverso",
+      "accent": "Acento",
+      "background": "Fondo",
+      "field": "campo",
+      "fields": "campos",
+      "typeHours": "Horario de apertura",
+      "typeWebsite": "Sitio web",
+      "typePhone": "Teléfono",
+      "typeEmail": "Correo electrónico",
+      "typeAddress": "Dirección",
+      "typeInfo": "Dato"
+    },
+    "errors": {
+      "saveFailed": "No se ha podido guardar",
+      "themeSaveFailed": "No se ha podido guardar la apariencia"
+    }
+  }
+}

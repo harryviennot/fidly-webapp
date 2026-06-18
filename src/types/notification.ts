@@ -5,7 +5,7 @@ export type TriggerType =
   | 'milestone'
   | 'near_reward';
 
-export type Locale = 'en' | 'fr';
+export type Locale = 'en' | 'fr' | 'es';
 
 export type LocalizedBody = Record<Locale, string>;
 
@@ -110,6 +110,7 @@ export interface BroadcastTargetFilter {
 export interface BroadcastTranslations {
   en?: { title: string; body: string };
   fr?: { title: string; body: string };
+  es?: { title: string; body: string };
 }
 
 /**

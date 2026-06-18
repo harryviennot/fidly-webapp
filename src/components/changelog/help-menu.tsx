@@ -52,7 +52,7 @@ function WhatsNewTimeline({
   }[] = [
     ...releases.slice(0, 2).map((r) => ({
       key: r.id,
-      label: resolveLocale(r.title_fr, r.title_en, locale),
+      label: resolveLocale(r.title_fr, r.title_en, r.title_es, locale),
       external: false,
       run: () => openRelease(r),
     })),

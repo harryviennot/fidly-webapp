@@ -1,0 +1,16 @@
+{
+  "changelog": {
+    "trigger": "Novedades",
+    "title": "Novedades",
+    "changelogLink": "Historial de cambios",
+    "close": "Cerrar",
+    "viewAll": "Ver todo el historial de cambios",
+    "empty": "Estás al día.",
+    "forTeam": "Para tu equipo",
+    "categories": {
+      "feature": "Novedades",
+      "improvement": "Mejoras",
+      "fix": "Correcciones"
+    }
+  }
+}

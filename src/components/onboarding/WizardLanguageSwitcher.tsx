@@ -3,12 +3,13 @@
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { updateProfile } from '@/api/profile';
-import type { Locale } from '@/lib/locale';
+import { SUPPORTED_LOCALES, type Locale } from '@/lib/locale';
 
 /**
- * Compact EN/FR toggle button mirrored from the showcase header. Sits in the
- * top-right of the wizard progress bar so a French-speaking owner who
- * landed on the English variant (or vice-versa) can switch with one tap.
+ * Compact language cycle button mirrored from the showcase header. Sits in the
+ * top-right of the wizard progress bar so an owner who landed on the wrong
+ * language can switch with one tap. With three locales it cycles through them
+ * (en -> fr -> es -> en); the label shows the language you'll switch to next.
  *
  * Avoids the `window.location.reload()` flash by writing the cookie
  * directly and calling `router.refresh()` — Next.js re-runs the server
@@ -20,8 +21,9 @@ import type { Locale } from '@/lib/locale';
 export function WizardLanguageSwitcher() {
   const locale = useLocale() as Locale;
   const router = useRouter();
-  const nextLocale: Locale = locale === 'fr' ? 'en' : 'fr';
-  const label = locale === 'fr' ? 'EN' : 'FR';
+  const currentIdx = SUPPORTED_LOCALES.indexOf(locale);
+  const nextLocale: Locale = SUPPORTED_LOCALES[(currentIdx + 1) % SUPPORTED_LOCALES.length];
+  const label = nextLocale.toUpperCase();
 
   const handleSwitch = () => {
     // Cookie + localStorage write — cookie is what `i18n/request.ts` reads

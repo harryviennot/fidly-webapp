@@ -21,14 +21,22 @@ import {
   type VariableKey,
 } from '@/lib/template-variables';
 import { ApiError } from '@/api/client';
+import { SUPPORTED_LOCALES } from '@/lib/locale';
 import { LocaleTabs } from './LocaleTabs';
 import { VariableChips } from './VariableChips';
 import { MessagePreview } from './MessagePreview';
 import { VariableEditor, type VariableEditorHandle } from './VariableEditor';
 import type { NotificationTemplate, Locale } from '@/types/notification';
 
+/** Fill a full per-locale body record from a (possibly partial) source. */
+function buildBody(src: Partial<Record<Locale, string>>): Record<Locale, string> {
+  return Object.fromEntries(
+    SUPPORTED_LOCALES.map((l) => [l, src[l] ?? '']),
+  ) as Record<Locale, string>;
+}
+
 function bodyUsesCustomerName(body: Record<Locale, string>): boolean {
-  return /\{\{customer_first_name\}\}/.test(body.en) || /\{\{customer_first_name\}\}/.test(body.fr);
+  return Object.values(body).some((v) => /\{\{customer_first_name\}\}/.test(v));
 }
 
 export interface TriggerEditFormHandle {
@@ -93,10 +101,9 @@ export const TriggerEditForm = forwardRef<TriggerEditFormHandle, TriggerEditForm
     const isUsingDefault = template.is_using_default === true;
 
     const [locale, setLocale] = useState<Locale>(primaryLocale);
-    const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>({
-      en: template.body.en ?? '',
-      fr: template.body.fr ?? '',
-    });
+    const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>(
+      () => buildBody(template.body),
+    );
     const [isEnabled, setIsEnabled] = useState<boolean>(template.is_enabled !== false);
     const editorRef = useRef<VariableEditorHandle>(null);
 
@@ -118,8 +125,7 @@ export const TriggerEditForm = forwardRef<TriggerEditFormHandle, TriggerEditForm
 
     const isBodyDirty =
       !isUsingDefault &&
-      (bodyByLocale.en !== (template.body.en ?? '') ||
-        bodyByLocale.fr !== (template.body.fr ?? ''));
+      SUPPORTED_LOCALES.some((l) => bodyByLocale[l] !== (template.body[l] ?? ''));
     const isEnabledDirty = isEnabled !== (template.is_enabled !== false);
 
     const canSave =
@@ -138,7 +144,7 @@ export const TriggerEditForm = forwardRef<TriggerEditFormHandle, TriggerEditForm
       try {
         await updateMutation.mutateAsync({
           trigger: template.trigger,
-          body: isBodyDirty ? { en: bodyByLocale.en, fr: bodyByLocale.fr } : undefined,
+          body: isBodyDirty ? buildBody(bodyByLocale) : undefined,
           isEnabled: isEnabledDirty ? isEnabled : undefined,
         });
         toast.success(tToast('saved'));

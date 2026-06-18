@@ -15,14 +15,22 @@ import {
   type VariableKey,
 } from '@/lib/template-variables';
 import { ApiError } from '@/api/client';
+import { SUPPORTED_LOCALES } from '@/lib/locale';
 import { LocaleTabs } from './LocaleTabs';
 import { VariableChips } from './VariableChips';
 import { MessagePreview } from './MessagePreview';
 import { VariableEditor, type VariableEditorHandle } from './VariableEditor';
 import type { Locale, Milestone, MilestoneUpdate } from '@/types/notification';
 
+/** Fill a full per-locale body record from a (possibly partial) source. */
+function buildBody(src: Partial<Record<Locale, string>>): Record<Locale, string> {
+  return Object.fromEntries(
+    SUPPORTED_LOCALES.map((l) => [l, src[l] ?? '']),
+  ) as Record<Locale, string>;
+}
+
 function bodyUsesCustomerName(body: Record<Locale, string>): boolean {
-  return /\{\{customer_first_name\}\}/.test(body.en) || /\{\{customer_first_name\}\}/.test(body.fr);
+  return Object.values(body).some((v) => /\{\{customer_first_name\}\}/.test(v));
 }
 
 const MILESTONE_VARIABLES: VariableKey[] = [
@@ -83,10 +91,9 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
       milestone ? String(milestone.stamp_equals) : ''
     );
     const [locale, setLocale] = useState<Locale>(primaryLocale);
-    const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>({
-      en: milestone?.body.en ?? '',
-      fr: milestone?.body.fr ?? '',
-    });
+    const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>(
+      () => buildBody(milestone?.body ?? {}),
+    );
     const editorRef = useRef<VariableEditorHandle>(null);
 
     const stampNumber = parseInt(stampEquals, 10);
@@ -99,8 +106,7 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
     const isDirty =
       !isEditMode ||
       stampNumber !== milestone!.stamp_equals ||
-      bodyByLocale.en !== (milestone!.body.en ?? '') ||
-      bodyByLocale.fr !== (milestone!.body.fr ?? '');
+      SUPPORTED_LOCALES.some((l) => bodyByLocale[l] !== (milestone!.body[l] ?? ''));
 
     const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
     const isNameCollectionOff = collectName === 'off' || collectName === false;
@@ -119,10 +125,7 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
 
     const handleSave = async (): Promise<boolean> => {
       if (!isValid || !isDirty) return false;
-      const payloadBody: Record<Locale, string> = {
-        en: bodyByLocale.en,
-        fr: bodyByLocale.fr,
-      };
+      const payloadBody: Record<Locale, string> = buildBody(bodyByLocale);
       try {
         if (isEditMode && milestone) {
           const payload: MilestoneUpdate = {};

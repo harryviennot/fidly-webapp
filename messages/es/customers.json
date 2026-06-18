@@ -1,0 +1,206 @@
+{
+  "customers": {
+    "title": "Clientes",
+    "subtitle": "Gestiona y sigue a todos los titulares de tu tarjeta de fidelidad",
+    "export": "Exportar",
+    "addCustomer": "Añadir cliente",
+    "customerProfile": "Perfil del cliente",
+    "loading": "Cargando clientes...",
+    "loadFailed": "No se han podido cargar los clientes. Comprueba que el servidor esté en marcha.",
+    "searchPlaceholder": "Buscar por nombre o correo...",
+    "noResults": "Ningún cliente coincide con tu búsqueda.",
+    "empty": "Aún no hay clientes.",
+    "table": {
+      "name": "Nombre",
+      "email": "Correo",
+      "stamps": "Sellos",
+      "segment": "Segmento",
+      "lastVisit": "Última visita",
+      "redemptions": "Recompensas",
+      "action": "Acción",
+      "actions": "Acciones"
+    },
+    "stats": {
+      "totalCustomers": "Clientes totales",
+      "newLast30d": "Este mes",
+      "repeatRate": "Tasa de repetición",
+      "loyalCustomers": "Clientes fieles",
+      "loyalSubtitle": "Últimos 6 meses",
+      "newSubtitle": "frente al mes anterior",
+      "info": {
+        "repeatRate": "Porcentaje de clientes que han venido al menos dos veces en los últimos 6 meses.",
+        "loyalCustomers": "Número de clientes que han venido al menos dos veces en los últimos 6 meses."
+      }
+    },
+    "sort": {
+      "name": "Nombre",
+      "stamps": "Sellos",
+      "rewards": "Recompensas",
+      "lastActivity": "Última actividad"
+    },
+    "sendPass": {
+      "trigger": "Enviar la tarjeta por correo",
+      "short": "Enviar tarjeta",
+      "dialogTitle": "Enviar la tarjeta por correo",
+      "dialogDescription": "Le enviaremos a {name} un enlace para añadir su tarjeta.",
+      "emailLabel": "Dirección de correo",
+      "emailPlaceholder": "nombre@ejemplo.com",
+      "warningTitle": "Asegúrate de que es su dirección",
+      "warningBody": "Quien reciba este correo tendrá acceso completo a la tarjeta y a sus sellos. Envíalo solo a una dirección que pertenezca a este cliente.",
+      "send": "Enviar tarjeta",
+      "sending": "Enviando...",
+      "cancel": "Cancelar",
+      "successToast": "Tarjeta enviada",
+      "failedToast": "No se ha podido enviar la tarjeta"
+    },
+    "segments": {
+      "label": "Segmento",
+      "all": "Todos",
+      "new": "Nuevo",
+      "regular": "Habitual",
+      "vip": "VIP",
+      "rewardReady": "Recompensa lista",
+      "closeToReward": "Cerca de la recompensa",
+      "atRisk": "En riesgo",
+      "ghost": "Fantasma"
+    },
+    "segmentsHelp": {
+      "title": "¿Qué significan estos segmentos?",
+      "new": "Se ha unido en los últimos 14 días.",
+      "regular": "Clientes activos sin un estado especial.",
+      "vip": "Clientes que han canjeado 3 recompensas o más.",
+      "rewardReady": "Tiene una recompensa lista para canjear: una tarjeta completa o recompensas acumuladas.",
+      "closeToReward": "A menos de 2 sellos de completar su tarjeta.",
+      "atRisk": "Tienen sellos pero no han venido en más de 30 días.",
+      "ghost": "Cogieron su tarjeta pero nunca volvieron. Todavía sin sellos."
+    },
+    "actions": {
+      "addStamp": "Añadir sello",
+      "maxed": "¡Al máximo!",
+      "redeem": "Canjear",
+      "voidLast": "Anular el último",
+      "voidReasonPlaceholder": "p. ej. Sello añadido por error",
+      "voiding": "Anulando...",
+      "confirmVoid": "Anular sello",
+      "voidDialogTitle": "Anular el último sello",
+      "voidChip1": "Añadido por error",
+      "voidChip2": "Escaneo duplicado",
+      "voidChip3": "El cliente lo canceló",
+      "voidReasonLabel": "Motivo de la anulación",
+      "voidReasonHelp": "El cliente no lo ve. Visible solo para tu equipo.",
+      "cancel": "Cancelar",
+      "stampAddedToast": "¡Sello añadido!",
+      "stampFailedToast": "No se ha podido añadir el sello",
+      "redeemSuccessToast": "¡Recompensa canjeada!",
+      "redeemFailedToast": "No se ha podido canjear la recompensa",
+      "voidSuccessToast": "Sello anulado",
+      "voidFailedToast": "No se ha podido anular el sello",
+      "noVoidableStamp": "Ningún sello que anular",
+      "adjustment": {
+        "title": "Añadir un sello",
+        "chip1": "Olvidó escanear",
+        "chip2": "Detalle de la casa",
+        "chip3": "Bonificación de fidelidad",
+        "reasonLabel": "Motivo del ajuste",
+        "reasonPlaceholder": "p. ej. El cliente olvidó escanear",
+        "reasonHelp": "El cliente no lo ve. Visible solo para tu equipo.",
+        "locationLabel": "Establecimiento asociado",
+        "locationHelp": "Opcional. Vincula este sello a uno de tus establecimientos.",
+        "noLocation": "Sin establecimiento",
+        "primary": "principal",
+        "submit": "Añadir sello",
+        "submitting": "Añadiendo...",
+        "errors": {
+          "notAllowed": "Solo los propietarios y administradores pueden añadir sellos manualmente.",
+          "reasonRequired": "Indica un motivo.",
+          "locationNotFound": "Ese establecimiento ya no está disponible.",
+          "locationNotPermitted": "No tienes asignado ese establecimiento."
+        }
+      },
+      "redeemBanked": "{count, plural, =1 {Canjear (1 guardada)} other {Canjear (# guardadas)}}"
+    },
+    "toasts": {
+      "stampAdded": "Sello añadido para {name}",
+      "stampFailed": "No se ha podido añadir el sello"
+    },
+    "time": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "daysAgo": "hace {count} d",
+      "weeksAgo": "hace {count} sem.",
+      "monthsAgo": "hace {count} meses"
+    },
+    "pagination": {
+      "showing": "{from}-{to} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "emptyState": {
+      "title": "Aún no hay clientes",
+      "description": "Los clientes aparecerán aquí en cuanto se registren a través del enlace de tu programa de fidelidad."
+    },
+    "detail": {
+      "customerProfile": "Perfil del cliente",
+      "customerStats": "Datos del cliente",
+      "noEmail": "Sin correo registrado",
+      "stampProgress": "Progreso de sellos",
+      "firstVisit": "Primera visita",
+      "customerSince": "Cliente desde",
+      "lastVisit": "Última visita",
+      "totalVisits": "Visitas totales",
+      "redemptions": "Recompensas",
+      "enrolledAt": "Inscrito en",
+      "directSignup": "Inscripción directa",
+      "wallet": {
+        "label": "Cartera",
+        "appleWallet": "Apple Wallet",
+        "googleWallet": "Google Wallet",
+        "both": "Las dos",
+        "notInstalled": "Sin añadir",
+        "loading": "Comprobando..."
+      },
+      "recentActivity": "Actividad reciente",
+      "segments": {
+        "new": "Nuevo",
+        "regular": "Habitual",
+        "vip": "VIP",
+        "reward_ready": "Recompensa lista",
+        "close_to_reward": "Cerca de la recompensa",
+        "at_risk": "En riesgo",
+        "ghost": "Fantasma"
+      },
+      "rewardsAvailable": "Recompensas por canjear"
+    },
+    "transaction": {
+      "empty": "Aún no hay movimientos",
+      "loadMore": "Cargar más",
+      "loadingMore": "Cargando...",
+      "types": {
+        "stamp_added": "Sello añadido",
+        "reward_redeemed": "Recompensa canjeada",
+        "stamp_voided": "Sello anulado",
+        "bonus_stamp": "Sello de bonificación",
+        "stamps_adjusted": "Sellos ajustados",
+        "card_added": "Tarjeta añadida",
+        "card_re_added": "Tarjeta vuelta a añadir",
+        "card_deleted": "Tarjeta eliminada"
+      },
+      "by": "por",
+      "you": "Tú",
+      "voidReason": "Motivo",
+      "adjustmentReason": "Motivo",
+      "sources": {
+        "scanner": "Escaneo",
+        "dashboard": "Manual"
+      },
+      "time": {
+        "justNow": "Ahora mismo",
+        "minutesAgo": "hace {count} min",
+        "hoursAgo": "hace {count} h",
+        "yesterday": "Ayer",
+        "daysAgo": "hace {count} d"
+      },
+      "rewardsLeft": "{count, plural, =1 {1 recompensa restante} other {# recompensas restantes}}"
+    }
+  }
+}
