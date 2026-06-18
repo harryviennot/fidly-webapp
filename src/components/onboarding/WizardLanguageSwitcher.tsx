@@ -49,9 +49,9 @@ export function WizardLanguageSwitcher() {
       onSelect={handleSelect}
       tileHeight={32}
       tileWidth={44}
-      surfaceClassName="rounded-lg border border-[var(--border)] bg-[var(--background)] shadow-sm"
-      activeTileClassName="bg-[var(--accent)] text-white"
-      inactiveTileClassName="text-[var(--foreground)] hover:bg-[var(--paper-hover)]"
+      surfaceClassName="rounded-lg border border-[var(--border)] bg-[var(--background)]"
+      tileClassName="text-[var(--foreground)] hover:bg-[var(--paper-hover)]"
+      selectedTileClassName="bg-[var(--accent)] text-white"
     />
   );
 }
