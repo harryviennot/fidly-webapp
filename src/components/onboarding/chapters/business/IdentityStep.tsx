@@ -18,8 +18,7 @@ import {
   updateBusiness,
   uploadBusinessLogo,
 } from '@/api/businesses';
-import { detectBusinessLocale } from '@/lib/locale-detect';
-import { detectDefaultCountry } from '@/lib/countries';
+import { detectDefaultCountry, countryToLocale } from '@/lib/countries';
 import { cn } from '@/lib/utils';
 import type { SetupProgress } from '@/types/business';
 
@@ -260,6 +259,11 @@ export function IdentityStep() {
           business = await updateBusiness(currentBusiness.id, {
             name: name.trim(),
             country,
+            // The business's customer-facing language follows the country it
+            // operates from (fr/es, else en). No-op on the backend when it
+            // already matches; an actual change losslessly migrates existing
+            // card/notification content to the new primary locale.
+            primary_locale: countryToLocale(country),
             settings: {
               setup_progress: initialProgress,
               ...(websiteUrl ? { identity_website: websiteUrl } : {}),
@@ -274,7 +278,9 @@ export function IdentityStep() {
             // still lets the owner upgrade or downgrade before finishing.
             subscription_tier: 'growth',
             settings: {},
-            primary_locale: detectBusinessLocale(uiLocale),
+            // Customer-facing language defaults to the language of the selected
+            // country (fr/es, else en), not the dashboard UI locale.
+            primary_locale: countryToLocale(country),
             country,
             // Opt every new signup into founding-partner pricing. The
             // backend gates the flag on `is_founding_program_open()` so
