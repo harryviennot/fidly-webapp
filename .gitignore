@@ -44,3 +44,5 @@ next-env.d.ts
 /ds-bundle/
 .design-sync/.cache/
 .design-sync
+# Claude Code worktrees (build artifacts must never be tracked)
+.claude/worktrees/
