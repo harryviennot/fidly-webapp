@@ -3,51 +3,55 @@
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { updateProfile } from '@/api/profile';
-import type { Locale } from '@/lib/locale';
+import { SUPPORTED_LOCALES, type Locale } from '@/lib/locale';
+import { LanguagePicker } from '@/components/ui/LanguagePicker';
 
 /**
- * Compact EN/FR toggle button mirrored from the showcase header. Sits in the
- * top-right of the wizard progress bar so a French-speaking owner who
- * landed on the English variant (or vice-versa) can switch with one tap.
+ * Wizard language switcher. Sits in the top-right of the progress bar so an
+ * owner who landed on the wrong language can switch in one gesture. The base
+ * tile shows the current language; hovering / tapping it grows the picker
+ * downward to reveal the others, and choosing one slides it back up to the
+ * base position.
  *
- * Avoids the `window.location.reload()` flash by writing the cookie
- * directly and calling `router.refresh()` — Next.js re-runs the server
- * `i18n/request.ts` with the new cookie and pipes fresh messages down
- * through `NextIntlClientProvider` without unloading the page. The
- * `updateProfile` call is fire-and-forget so persistence doesn't block
- * the visual switch.
+ * Switching avoids a `window.location.reload()` flash: we write the cookie
+ * directly and call `router.refresh()`, so Next.js re-runs `i18n/request.ts`
+ * with the new cookie and pipes fresh messages through `NextIntlClientProvider`
+ * without unloading the page. The `updateProfile` call is fire-and-forget so
+ * persistence doesn't block the visual switch.
  */
 export function WizardLanguageSwitcher() {
   const locale = useLocale() as Locale;
   const router = useRouter();
-  const nextLocale: Locale = locale === 'fr' ? 'en' : 'fr';
-  const label = locale === 'fr' ? 'EN' : 'FR';
 
-  const handleSwitch = () => {
-    // Cookie + localStorage write — cookie is what `i18n/request.ts` reads
-    // server-side, localStorage is a client-side mirror for non-SSR contexts.
+  const handleSelect = (next: string) => {
+    const nextLocale = next as Locale;
+    // Cookie is what `i18n/request.ts` reads server-side; localStorage is a
+    // client-side mirror for non-SSR contexts.
     document.cookie = `NEXT_LOCALE=${nextLocale};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
     try {
       localStorage.setItem('NEXT_LOCALE', nextLocale);
     } catch {
       /* localStorage may be unavailable in private modes */
     }
-    // Persist to the user row in the background. Best-effort only; the
-    // cookie is the source of truth for the current session.
+    // Persist to the user row in the background. Best-effort only.
     void updateProfile({ locale: nextLocale }).catch(() => {});
-    // Re-render server components with the new cookie. Smoother than a
-    // full page reload — no white flash, no scroll reset, no remount.
+    // Re-render server components with the new cookie — no white flash, no
+    // scroll reset, no remount.
     router.refresh();
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleSwitch}
-      aria-label={`Switch to ${nextLocale.toUpperCase()}`}
-      className="px-3 py-1.5 text-xs font-bold rounded-lg border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--paper-hover)] transition-colors"
-    >
-      {label}
-    </button>
+    <LanguagePicker
+      direction="down"
+      trigger="hover"
+      value={locale}
+      options={SUPPORTED_LOCALES.map((l) => ({ value: l, label: l.toUpperCase() }))}
+      onSelect={handleSelect}
+      tileHeight={32}
+      tileWidth={44}
+      surfaceClassName="rounded-lg border border-[var(--border)] bg-[var(--background)]"
+      tileClassName="text-[var(--foreground)] hover:bg-[var(--paper-hover)]"
+      selectedTileClassName="bg-[var(--accent)] text-white"
+    />
   );
 }

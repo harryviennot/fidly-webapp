@@ -1,0 +1,53 @@
+{
+  "businessesPage": {
+    "title": "Mis comercios",
+    "subtitle": "Todos los comercios a los que perteneces.",
+    "subtitleAdmin": "Todos los comercios de la plataforma.",
+    "createNew": "Nuevo comercio",
+    "searchPlaceholder": "Buscar por nombre o identificador…",
+    "ownedBy": "Propietario: {name}",
+    "count": "{count} de {total}",
+    "openDashboard": "Abrir",
+    "viewAs": "Ver como…",
+    "viewAsComingSoon": "Pronto",
+    "loadError": "No se han podido cargar los comercios. Vuelve a intentarlo.",
+    "scope": {
+      "label": "Alcance",
+      "mine": "Mis comercios",
+      "all": "Todos los comercios"
+    },
+    "view": {
+      "cards": "Tarjetas",
+      "table": "Tabla"
+    },
+    "statusFilter": {
+      "label": "Estado",
+      "all": "Todos",
+      "active": "Activos",
+      "pending": "Pendientes",
+      "suspended": "Suspendidos"
+    },
+    "status": {
+      "active": "Activo",
+      "pending": "Pendiente",
+      "suspended": "Suspendido"
+    },
+    "empty": {
+      "title": "No se ha encontrado ningún comercio",
+      "description": "Prueba a ajustar la búsqueda o los filtros."
+    },
+    "table": {
+      "business": "Comercio",
+      "owner": "Propietario",
+      "status": "Estado",
+      "plan": "Plan",
+      "role": "Tu rol",
+      "actions": "Acciones"
+    },
+    "pagination": {
+      "showing": "Mostrando {from}–{to} de {total}",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    }
+  }
+}

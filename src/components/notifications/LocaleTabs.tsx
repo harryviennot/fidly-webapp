@@ -23,16 +23,18 @@ interface LocaleSwitcherProps {
   className?: string;
 }
 
-const ALL_LOCALES: Locale[] = ['fr', 'en'];
+const ALL_LOCALES: Locale[] = ['fr', 'en', 'es'];
 
 const LOCALE_FLAGS: Record<Locale, string> = {
   fr: '🇫🇷',
   en: '🇬🇧',
+  es: '🇪🇸',
 };
 
 const LOCALE_NATIVE: Record<Locale, string> = {
   fr: 'Français',
   en: 'English',
+  es: 'Español',
 };
 
 /**

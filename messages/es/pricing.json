@@ -1,0 +1,52 @@
+{
+  "pricing": {
+    "foundingPartner": "FUNDADOR",
+    "popular": "EL MÁS POPULAR",
+    "perMonth": "/mes",
+    "forLife": "/mes, de por vida",
+    "cta": "Empezar",
+    "selected": "Seleccionado",
+    "ctaSubtext": "Sin tarjeta bancaria. Sin compromiso. Cancela cuando quieras.",
+    "legalNotice": "Al confirmar tu suscripción, aceptas nuestras <terms>Condiciones de uso</terms> y reconoces nuestra <privacy>Política de privacidad</privacy>.",
+    "foundingReassurance": "Tu tarifa de fundador queda fijada de por vida. Aunque suban los precios, o canceles y vuelvas más adelante, conservas este precio.",
+    "countdown": {
+      "daysHours": "Tarifa de fundador. Termina en {days}d {hours}h.",
+      "hoursMinutes": "Tarifa de fundador. Termina en {hours}h {minutes}m."
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Todo lo que necesitas para lanzar tu programa de fidelidad.",
+      "featuresLabel": "Todo incluido:",
+      "features": [
+        "1 estilo de tarjeta activo",
+        "Clientes y sellos ilimitados",
+        "2 miembros del equipo (tú + 1)",
+        "Notificaciones automáticas",
+        "Estadísticas básicas"
+      ]
+    },
+    "growth": {
+      "name": "Growth",
+      "tagline": "Para comercios listos para hacer crecer su relación con los clientes.",
+      "featuresLabel": "Todo lo del plan Starter, y además:",
+      "features": [
+        "Sellos o puntos (elige uno)",
+        "Miembros del equipo ilimitados",
+        "Mensajes de notificación personalizados",
+        "8 difusiones al mes",
+        "Estadísticas avanzadas y tendencias"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "Para comercios con varios locales, o que buscan herramientas avanzadas.",
+      "featuresLabel": "Todo lo del plan Growth, y además:",
+      "features": [
+        "Gestión de varios locales",
+        "Notificaciones por ubicación",
+        "Difusiones ilimitadas y segmentación",
+        "Estadísticas avanzadas y retención"
+      ]
+    }
+  }
+}

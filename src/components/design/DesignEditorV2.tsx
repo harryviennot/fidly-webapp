@@ -4,7 +4,7 @@ import { useState, useMemo, useImperativeHandle, forwardRef, useRef, useCallback
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
-import { CardDesign, CardDesignCreate } from '@/types';
+import { CardDesign, CardDesignCreate, DesignTranslation } from '@/types';
 import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activateDesign } from '@/api';
 import { designKeys } from '@/hooks/use-designs';
 import { useBusiness } from '@/contexts/business-context';
@@ -35,6 +35,10 @@ export interface DesignEditorRef {
   saving: boolean;
   isDirty: boolean;
   clearDraft: () => void;
+  /** Current working design (incl. locally-edited translations) — snapshot source for the Translations dialog. */
+  getFormData: () => CardDesignCreate;
+  /** Write translations edited in the dialog back into local state; marks the editor dirty so the main Save persists them. */
+  setTranslations: (translations: Record<string, DesignTranslation>) => void;
 }
 
 interface DesignEditorV2Props {
@@ -207,8 +211,10 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleSave = useCallback(async (): Promise<boolean> => {
       if (!currentBusiness?.id) return false;
-      const { translations, ...data } = formDataRef.current;
-      void translations;
+      // Translations live in formData (edited locally via the Translations
+      // dialog) and are persisted together with the design in this single
+      // request — no separate save surface writes them.
+      const data = { ...formDataRef.current };
       if (!data.name || !data.description) {
         setError(t('requiredFields'));
         return false;
@@ -283,6 +289,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       saving,
       isDirty,
       clearDraft,
+      getFormData: () => formDataRef.current,
+      setTranslations: (translations) =>
+        setFormData((prev) => ({ ...prev, translations })),
     }), [handleSave, saving, isDirty, clearDraft]);
 
     // Cleanup blob URLs on unmount

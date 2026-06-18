@@ -5,10 +5,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { PencilSimple, FloppyDisk, ArrowsClockwise, Translate } from '@phosphor-icons/react';
-import { CardDesign, CardDesignUpdate, LoyaltyProgram } from '@/types';
-import { getDesign, updateDesign, getPrograms } from '@/api';
+import { CardDesign, CardDesignCreate, DesignTranslation, LoyaltyProgram } from '@/types';
+import { getDesign, getPrograms } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
+import { SUPPORTED_LOCALES } from '@/lib/locale';
 import DesignEditorV2, { DesignEditorRef } from '@/components/design/DesignEditorV2';
 import { DesignEditorSkeleton } from '@/components/design/DesignEditorSkeleton';
 import TranslationsDialog from '@/components/design/TranslationsDialog';
@@ -48,6 +49,9 @@ export default function EditDesignPage() {
   const [designName, setDesignName] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [translationsOpen, setTranslationsOpen] = useState(false);
+  // Snapshot of the editor's live working design, taken when the Translations
+  // dialog opens, so the translation source reflects unsaved primary edits.
+  const [dialogSnapshot, setDialogSnapshot] = useState<CardDesignCreate | null>(null);
   const [program, setProgram] = useState<LoyaltyProgram | null>(null);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -107,19 +111,22 @@ export default function EditDesignPage() {
     router.push('/program/design');
   };
 
-  // Target locale is the opposite of the business's primary locale
+  // Translate to every supported locale other than the business's primary.
   const primaryLocale = currentBusiness?.primary_locale || 'fr';
-  const targetLocale = primaryLocale === 'fr' ? 'en' : 'fr';
+  const targetLocales = SUPPORTED_LOCALES.filter((l) => l !== primaryLocale);
 
-  const handleSaveTranslations = async (update: CardDesignUpdate) => {
-    if (!currentBusiness?.id || !design) return;
-    try {
-      const updated = await updateDesign(currentBusiness.id, designId, update);
-      setDesign(updated);
-      toast.success(tTranslations('saved'));
-    } catch {
-      toast.error(tTranslations('saveFailed'));
-    }
+  const openTranslations = () => {
+    // Translate against the editor's live working state (incl. unsaved primary
+    // edits), not the loaded server copy.
+    setDialogSnapshot(editorRef.current?.getFormData() ?? null);
+    setTranslationsOpen(true);
+  };
+
+  // Apply is local-only: hand the edited translations back to the editor's
+  // working state. The single "Save changes" button persists them with the
+  // rest of the design — no separate request from the dialog.
+  const handleApplyTranslations = (translations: Record<string, DesignTranslation>) => {
+    editorRef.current?.setTranslations(translations);
   };
 
   if (loading) {
@@ -184,7 +191,7 @@ export default function EditDesignPage() {
             <Button
               variant="outline"
               className="rounded-full"
-              onClick={() => setTranslationsOpen(true)}
+              onClick={openTranslations}
             >
               <Translate className="w-4 h-4 mr-2" weight="bold" />
               {tTranslations('button')}
@@ -226,11 +233,11 @@ export default function EditDesignPage() {
       <TranslationsDialog
         open={translationsOpen}
         onOpenChange={setTranslationsOpen}
-        design={design}
-        translations={design.translations || {}}
+        source={dialogSnapshot ?? design}
+        translations={dialogSnapshot?.translations ?? design.translations ?? {}}
         primaryLocale={primaryLocale}
-        targetLocale={targetLocale}
-        onSave={handleSaveTranslations}
+        targetLocales={targetLocales}
+        onApply={handleApplyTranslations}
       />
 
       <AlertDialog open={showLeaveDialog} onOpenChange={(open) => !open && cancelLeave()}>

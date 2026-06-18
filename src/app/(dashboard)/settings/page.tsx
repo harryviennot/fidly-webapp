@@ -10,6 +10,16 @@ import { Label } from '@/components/ui/label';
 import { HexColorPicker, BusinessInfoEditor } from '@/components/settings';
 import { CardBackPreview } from '@/components/settings/CardBackPreview';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 import { CountrySelect } from '@/components/ui/country-select';
 import { updateBusiness, uploadBusinessLogo, deleteBusinessLogo } from '@/api';
 import { DEFAULT_ACCENT, applyTheme } from '@/utils/theme';
@@ -40,6 +50,7 @@ export default function SettingsPage() {
   const [logoHover, setLogoHover] = useState(false);
   const [pulsing, setPulsing] = useState<'cardInfo' | 'theme' | 'language' | null>(null);
   const [localLocale, setLocalLocale] = useState<string>('fr');
+  const [pendingLocale, setPendingLocale] = useState<string | null>(null);
   const [localCountry, setLocalCountry] = useState<string | undefined>(undefined);
 
   const [formData, setFormData] = useState<FormData>({
@@ -148,16 +159,37 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSaveLanguage = async (value: string) => {
-    if (!currentBusiness?.id) return;
-    setLocalLocale(value);
+  // Native language labels for the switch-confirmation copy.
+  const LANG_LABEL: Record<string, string> = { fr: 'Français', en: 'English', es: 'Español' };
+
+  // Picking a different language opens a confirm dialog first: changing the
+  // primary language swaps each card / notification / broadcast's primary
+  // content with its matching translation (lossless), so the user should know.
+  const requestLanguageChange = (value: string) => {
+    const current = currentBusiness?.primary_locale || 'fr';
+    if (value === current) return;
+    setLocalLocale(value); // reflect the choice in the Select; reverted on cancel
+    setPendingLocale(value);
+  };
+
+  const cancelLanguageChange = () => {
+    setLocalLocale(currentBusiness?.primary_locale || 'fr');
+    setPendingLocale(null);
+  };
+
+  const confirmLanguageChange = async () => {
+    const value = pendingLocale;
+    setPendingLocale(null);
+    if (!currentBusiness?.id || !value) return;
     setPulsing('language');
     try {
       await updateBusiness(currentBusiness.id, {
-        primary_locale: value as 'fr' | 'en',
+        primary_locale: value as 'fr' | 'en' | 'es',
       });
+      queryClient.invalidateQueries({ queryKey: ['business'] });
       toast.success(t('language.saved'));
     } catch (err) {
+      setLocalLocale(currentBusiness.primary_locale || 'fr');
       toast.error(err instanceof Error ? err.message : t('errors.saveFailed'));
     } finally {
       setPulsing(null);
@@ -372,7 +404,7 @@ export default function SettingsPage() {
                 </Label>
                 <Select
                   value={localLocale}
-                  onValueChange={handleSaveLanguage}
+                  onValueChange={requestLanguageChange}
                 >
                   <SelectTrigger className="w-full border-[#DEDBD5] rounded-lg h-10">
                     <SelectValue />
@@ -380,9 +412,35 @@ export default function SettingsPage() {
                   <SelectContent>
                     <SelectItem value="fr">🇫🇷 Français</SelectItem>
                     <SelectItem value="en">🇬🇧 English</SelectItem>
+                    <SelectItem value="es">🇪🇸 Español</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-[11px] text-[#B0B0B0] mt-1.5">{t('language.passLocaleHint')}</p>
+
+                <AlertDialog
+                  open={pendingLocale !== null}
+                  onOpenChange={(open) => { if (!open) cancelLanguageChange(); }}
+                >
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('language.switchConfirm.title')}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('language.switchConfirm.description', {
+                          old: LANG_LABEL[currentBusiness?.primary_locale || 'fr'] ?? (currentBusiness?.primary_locale || 'fr'),
+                          new: LANG_LABEL[pendingLocale ?? ''] ?? (pendingLocale ?? ''),
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={cancelLanguageChange}>
+                        {t('language.switchConfirm.cancel')}
+                      </AlertDialogCancel>
+                      <AlertDialogAction onClick={confirmLanguageChange}>
+                        {t('language.switchConfirm.confirm')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
 
               <div className="flex-1 min-w-0 sm:max-w-xs">

@@ -17,6 +17,7 @@ interface CardBackPreviewProps {
 const LOCALE_DISPLAY: Record<string, string> = {
   fr: '🇫🇷 Français',
   en: '🇬🇧 English',
+  es: '🇪🇸 Español',
 };
 
 function formatTime(t: string): string {

@@ -11,13 +11,29 @@ const FRENCH_TIMEZONES = new Set([
   "America/Port-au-Prince",
 ]);
 
-export function detectBusinessLocale(fallbackLocale: string): "fr" | "en" {
+// Spanish-speaking regions: Spain (incl. Canary Islands) + major Latin
+// American zones. A base "es" pass covers all of them via OS fallback.
+const SPANISH_TIMEZONES = new Set([
+  "Europe/Madrid", "Atlantic/Canary", "Africa/Ceuta",
+  "America/Mexico_City", "America/Monterrey", "America/Cancun", "America/Tijuana",
+  "America/Bogota", "America/Lima", "America/Argentina/Buenos_Aires",
+  "America/Santiago", "America/Caracas", "America/Guayaquil",
+  "America/La_Paz", "America/Asuncion", "America/Montevideo",
+  "America/Guatemala", "America/Tegucigalpa", "America/Managua",
+  "America/Costa_Rica", "America/Panama", "America/El_Salvador",
+  "America/Santo_Domingo", "America/Havana", "America/Puerto_Rico",
+]);
+
+export function detectBusinessLocale(fallbackLocale: string): "fr" | "en" | "es" {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (tz && FRENCH_TIMEZONES.has(tz)) return "fr";
     if (tz?.startsWith("America/Montreal")) return "fr";
+    if (tz && SPANISH_TIMEZONES.has(tz)) return "es";
   } catch {
     // Intl not available — fall back
   }
-  return fallbackLocale === "fr" ? "fr" : "en";
+  if (fallbackLocale === "fr") return "fr";
+  if (fallbackLocale === "es") return "es";
+  return "en";
 }
