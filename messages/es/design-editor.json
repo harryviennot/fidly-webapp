@@ -192,7 +192,7 @@
       "primaryContent": "Contenido principal",
       "primaryReadonly": "Principal, edítalo en el editor de tarjeta",
       "translatedContent": "Contenido traducido",
-      "saveTranslations": "Guardar las traducciones",
+      "apply": "Aplicar",
       "sameAsPrimary": "Igual que el principal",
       "organizationName": "Nombre de la organización",
       "cardDescription": "Descripción de la tarjeta",

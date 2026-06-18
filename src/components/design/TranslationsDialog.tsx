@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import type { CardDesign, CardDesignUpdate, DesignTranslation, PassField } from '@/types';
+import type { DesignTranslation, PassField } from '@/types';
 
 const LOCALE_NAMES: Record<string, string> = {
   fr: 'Français',
@@ -28,16 +28,29 @@ const LOCALE_FLAGS: Record<string, string> = {
   es: '🇪🇸',
 };
 
+/** Live primary content to translate from (shown read-only as the source). */
+interface TranslationSource {
+  organization_name: string;
+  description: string;
+  logo_text?: string | null;
+  secondary_fields?: PassField[] | null;
+  auxiliary_fields?: PassField[] | null;
+  back_fields?: PassField[] | null;
+}
+
 interface TranslationsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  design: CardDesign;
+  /** Live primary content (from the editor's working state), shown read-only. */
+  source: TranslationSource;
   translations: Record<string, DesignTranslation>;
   primaryLocale: string;
   /** Every supported locale other than the primary. The dialog edits one at a
-   *  time via a tab switcher and saves all of them together. */
+   *  time via a tab switcher and applies all of them together. */
   targetLocales: string[];
-  onSave: (update: CardDesignUpdate) => void;
+  /** Commit edited translations to the editor's local state. No network call —
+   *  the main "Save changes" button persists them with the rest of the design. */
+  onApply: (translations: Record<string, DesignTranslation>) => void;
 }
 
 const EMPTY_TRANSLATION: DesignTranslation = {};
@@ -45,11 +58,11 @@ const EMPTY_TRANSLATION: DesignTranslation = {};
 export default function TranslationsDialog({
   open,
   onOpenChange,
-  design,
+  source,
   translations,
   primaryLocale,
   targetLocales,
-  onSave,
+  onApply,
 }: TranslationsDialogProps) {
   const t = useTranslations('designEditor.translations');
 
@@ -74,15 +87,15 @@ export default function TranslationsDialog({
   const draft = drafts[activeTarget] || EMPTY_TRANSLATION;
 
   // Primary content is OWNED by the main card editor; here it is shown
-  // read-only as the source to translate from. (Writing it from this dialog
-  // would race with the editor's own save and silently revert edits.)
+  // read-only as the live source to translate from. Edits below are applied to
+  // the editor's local state and persisted by the main "Save changes" button.
   const primary = {
-    organization_name: design.organization_name,
-    description: design.description,
-    logo_text: design.logo_text || design.organization_name,
-    secondary_fields: design.secondary_fields ?? [],
-    auxiliary_fields: design.auxiliary_fields ?? [],
-    back_fields: design.back_fields ?? [],
+    organization_name: source.organization_name,
+    description: source.description,
+    logo_text: source.logo_text || source.organization_name,
+    secondary_fields: source.secondary_fields ?? [],
+    auxiliary_fields: source.auxiliary_fields ?? [],
+    back_fields: source.back_fields ?? [],
   };
 
   // --- Translation draft helpers (operate on the active target locale) ---
@@ -128,7 +141,7 @@ export default function TranslationsDialog({
     return field ? (field[prop] || '') : '';
   };
 
-  // --- Save (translations only — never the primary fields) ---
+  // --- Apply (commit translations to local editor state; never the primary) ---
 
   const cleanTranslation = (d: DesignTranslation): DesignTranslation => {
     const cleaned: DesignTranslation = {};
@@ -141,7 +154,7 @@ export default function TranslationsDialog({
     return cleaned;
   };
 
-  const handleSave = () => {
+  const handleApply = () => {
     const updatedTranslations = { ...translations };
     for (const loc of targetLocales) {
       const cleaned = cleanTranslation(drafts[loc] || {});
@@ -152,9 +165,9 @@ export default function TranslationsDialog({
       }
     }
 
-    // Only translations are written here — primary content stays owned by the
-    // card editor, so the two save surfaces never clobber each other.
-    onSave({ translations: updatedTranslations });
+    // Hand the edited translations up to the editor's working state. No network
+    // call — the main "Save changes" button persists them with the design.
+    onApply(updatedTranslations);
     onOpenChange(false);
   };
 
@@ -309,9 +322,9 @@ export default function TranslationsDialog({
         <DialogFooter>
           <Button
             className="rounded-full"
-            onClick={handleSave}
+            onClick={handleApply}
           >
-            {t('saveTranslations')}
+            {t('apply')}
           </Button>
         </DialogFooter>
       </DialogContent>
