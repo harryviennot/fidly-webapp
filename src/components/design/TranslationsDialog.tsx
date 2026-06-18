@@ -28,16 +28,6 @@ const LOCALE_FLAGS: Record<string, string> = {
   es: '🇪🇸',
 };
 
-/** Primary-language fields that can be edited from this dialog. */
-interface PrimaryDraft {
-  organization_name: string;
-  description: string;
-  logo_text: string;
-  secondary_fields: PassField[];
-  auxiliary_fields: PassField[];
-  back_fields: PassField[];
-}
-
 interface TranslationsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -66,17 +56,8 @@ export default function TranslationsDialog({
   // One translation draft per target locale, keyed by locale code.
   const [drafts, setDrafts] = useState<Record<string, DesignTranslation>>({});
   const [activeTarget, setActiveTarget] = useState<string>(targetLocales[0] ?? '');
-  // Draft for the primary-language side (shared across all target locales)
-  const [primary, setPrimary] = useState<PrimaryDraft>({
-    organization_name: '',
-    description: '',
-    logo_text: '',
-    secondary_fields: [],
-    auxiliary_fields: [],
-    back_fields: [],
-  });
 
-  // Re-initialize drafts when dialog opens (adjust state during render)
+  // Re-initialize drafts when dialog opens (adjust state during render).
   const [prevOpen, setPrevOpen] = useState(false);
   if (open && !prevOpen) {
     const initial: Record<string, DesignTranslation> = {};
@@ -85,20 +66,24 @@ export default function TranslationsDialog({
     }
     setDrafts(initial);
     setActiveTarget(targetLocales[0] ?? '');
-    setPrimary({
-      organization_name: design.organization_name,
-      description: design.description,
-      logo_text: design.logo_text || design.organization_name,
-      secondary_fields: design.secondary_fields.map((f) => ({ ...f })),
-      auxiliary_fields: design.auxiliary_fields.map((f) => ({ ...f })),
-      back_fields: design.back_fields.map((f) => ({ ...f })),
-    });
   }
   if (open !== prevOpen) {
     setPrevOpen(open);
   }
 
   const draft = drafts[activeTarget] || EMPTY_TRANSLATION;
+
+  // Primary content is OWNED by the main card editor; here it is shown
+  // read-only as the source to translate from. (Writing it from this dialog
+  // would race with the editor's own save and silently revert edits.)
+  const primary = {
+    organization_name: design.organization_name,
+    description: design.description,
+    logo_text: design.logo_text || design.organization_name,
+    secondary_fields: design.secondary_fields ?? [],
+    auxiliary_fields: design.auxiliary_fields ?? [],
+    back_fields: design.back_fields ?? [],
+  };
 
   // --- Translation draft helpers (operate on the active target locale) ---
 
@@ -143,27 +128,7 @@ export default function TranslationsDialog({
     return field ? (field[prop] || '') : '';
   };
 
-  // --- Primary draft helpers ---
-
-  const updatePrimary = (key: 'organization_name' | 'description' | 'logo_text', value: string) => {
-    setPrimary((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const updatePrimaryField = (
-    arrayKey: 'secondary_fields' | 'auxiliary_fields' | 'back_fields',
-    fieldKey: string,
-    prop: 'label' | 'value',
-    text: string,
-  ) => {
-    setPrimary((prev) => ({
-      ...prev,
-      [arrayKey]: prev[arrayKey].map((f) =>
-        f.key === fieldKey ? { ...f, [prop]: text } : f,
-      ),
-    }));
-  };
-
-  // --- Save ---
+  // --- Save (translations only — never the primary fields) ---
 
   const cleanTranslation = (d: DesignTranslation): DesignTranslation => {
     const cleaned: DesignTranslation = {};
@@ -178,7 +143,6 @@ export default function TranslationsDialog({
 
   const handleSave = () => {
     const updatedTranslations = { ...translations };
-    // Merge every target locale's draft (set when it has content, drop otherwise).
     for (const loc of targetLocales) {
       const cleaned = cleanTranslation(drafts[loc] || {});
       if (Object.keys(cleaned).length > 0) {
@@ -188,18 +152,9 @@ export default function TranslationsDialog({
       }
     }
 
-    // Build the combined update: primary content + translations
-    const update: CardDesignUpdate = {
-      organization_name: primary.organization_name,
-      description: primary.description,
-      logo_text: primary.logo_text,
-      secondary_fields: primary.secondary_fields,
-      auxiliary_fields: primary.auxiliary_fields,
-      back_fields: primary.back_fields,
-      translations: updatedTranslations,
-    };
-
-    onSave(update);
+    // Only translations are written here — primary content stays owned by the
+    // card editor, so the two save surfaces never clobber each other.
+    onSave({ translations: updatedTranslations });
     onOpenChange(false);
   };
 
@@ -207,15 +162,11 @@ export default function TranslationsDialog({
 
   const renderFieldPair = (
     primaryValue: string,
-    onPrimaryChange: (val: string) => void,
     translatedValue: string,
     onTranslatedChange: (val: string) => void,
   ) => (
     <div className="grid grid-cols-2 gap-6 items-start">
-      <Input
-        value={primaryValue}
-        onChange={(e) => onPrimaryChange(e.target.value)}
-      />
+      <Input value={primaryValue} readOnly tabIndex={-1} className="bg-muted/40 text-muted-foreground" />
       <Input
         placeholder={t('sameAsPrimary')}
         value={translatedValue}
@@ -239,13 +190,11 @@ export default function TranslationsDialog({
             <div className="text-xs text-muted-foreground">{field.key}</div>
             {renderFieldPair(
               field.label,
-              (val) => updatePrimaryField(arrayKey, field.key, 'label', val),
               getFieldTranslation(arrayKey, field.key, 'label'),
               (val) => updateFieldTranslation(arrayKey, field.key, 'label', val),
             )}
             {renderFieldPair(
               field.value,
-              (val) => updatePrimaryField(arrayKey, field.key, 'value', val),
               getFieldTranslation(arrayKey, field.key, 'value'),
               (val) => updateFieldTranslation(arrayKey, field.key, 'value', val),
             )}
@@ -293,7 +242,7 @@ export default function TranslationsDialog({
               <div className="flex items-center gap-2 text-sm font-medium">
                 <span className="text-base">{primaryFlag}</span>
                 <span>{primaryName}</span>
-                <span className="text-xs text-muted-foreground font-normal">({t('primaryContent')})</span>
+                <span className="text-xs text-muted-foreground font-normal">({t('primaryReadonly')})</span>
               </div>
               <div className="flex items-center gap-2 text-sm font-medium">
                 <span className="text-base">{targetFlag}</span>
@@ -310,7 +259,6 @@ export default function TranslationsDialog({
             <Label className="text-sm font-medium">{t('organizationName')}</Label>
             {renderFieldPair(
               primary.organization_name,
-              (val) => updatePrimary('organization_name', val),
               draft.organization_name || '',
               (val) => updateDraft('organization_name', val),
             )}
@@ -321,7 +269,6 @@ export default function TranslationsDialog({
             <Label className="text-sm font-medium">{t('cardDescription')}</Label>
             {renderFieldPair(
               primary.description,
-              (val) => updatePrimary('description', val),
               draft.description || '',
               (val) => updateDraft('description', val),
             )}
@@ -332,7 +279,6 @@ export default function TranslationsDialog({
             <Label className="text-sm font-medium">{t('logoText')}</Label>
             {renderFieldPair(
               primary.logo_text,
-              (val) => updatePrimary('logo_text', val),
               draft.logo_text || '',
               (val) => updateDraft('logo_text', val),
             )}

@@ -190,6 +190,7 @@
       "button": "Translations",
       "title": "Translations: {language}",
       "primaryContent": "Primary Content",
+      "primaryReadonly": "Primary, edit in the card editor",
       "translatedContent": "Translated Content",
       "saveTranslations": "Save Translations",
       "sameAsPrimary": "Same as primary",

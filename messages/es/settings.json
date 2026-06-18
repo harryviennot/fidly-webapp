@@ -79,7 +79,13 @@
       "saved": "El idioma de tu comercio se ha actualizado.",
       "country": "País",
       "countryHint": "El país desde el que opera tu comercio.",
-      "countrySaved": "El país de tu comercio se ha actualizado."
+      "countrySaved": "El país de tu comercio se ha actualizado.",
+      "switchConfirm": {
+        "title": "¿Cambiar el idioma de tu comercio?",
+        "description": "Tu contenido actual en {old} se conservará como traducción en {old}, y tu traducción en {new} (si existe) pasará a ser el contenido principal que se ve por defecto. Las tarjetas ya instaladas se actualizan automáticamente.",
+        "confirm": "Cambiar idioma",
+        "cancel": "Cancelar"
+      }
     },
     "theme": {
       "title": "Personalización de la apariencia",

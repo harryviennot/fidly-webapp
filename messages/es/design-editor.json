@@ -190,6 +190,7 @@
       "button": "Traducciones",
       "title": "Traducciones: {language}",
       "primaryContent": "Contenido principal",
+      "primaryReadonly": "Principal, edítalo en el editor de tarjeta",
       "translatedContent": "Contenido traducido",
       "saveTranslations": "Guardar las traducciones",
       "sameAsPrimary": "Igual que el principal",
