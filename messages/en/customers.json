@@ -53,6 +53,27 @@
       "successToast": "Card sent",
       "failedToast": "Couldn't send the card"
     },
+    "editInfo": {
+      "trigger": "Edit customer info",
+      "short": "Edit info",
+      "dialogTitle": "Edit customer info",
+      "dialogDescription": "Update this customer's name, email, or phone.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Customer name",
+      "nameRequired": "Enter a name",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "name@example.com",
+      "emailInvalid": "Enter a valid email address",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "+33 6 12 34 56 78",
+      "phoneInvalid": "Enter a valid phone number",
+      "optional": "Optional",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "successToast": "Details updated",
+      "failedToast": "Couldn't save changes"
+    },
     "segments": {
       "label": "Segment",
       "all": "All",

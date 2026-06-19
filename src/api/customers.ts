@@ -30,6 +30,41 @@ export async function getCustomer(businessId: string, customerId: string): Promi
   return response.json();
 }
 
+export interface CustomerUpdateInput {
+  name?: string;
+  /** Empty string clears the stored email. */
+  email?: string;
+  /** Empty string clears the stored phone. Backend normalizes to E.164. */
+  phone?: string;
+}
+
+/**
+ * Update a customer's contact details (name / email / phone). Owners/admins
+ * only. Only the provided keys are touched; an empty string clears that field.
+ * A duplicate email (already used by another customer) returns 409.
+ */
+export async function updateCustomer(
+  businessId: string,
+  customerId: string,
+  input: CustomerUpdateInput
+): Promise<CustomerResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/customers/${businessId}/${customerId}`,
+    {
+      method: 'PATCH',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(input),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to update customer'));
+  }
+
+  return response.json();
+}
+
 export interface CustomerListParams {
   limit?: number;
   offset?: number;
