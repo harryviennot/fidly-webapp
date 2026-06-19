@@ -23,6 +23,7 @@ import { FlyerPreview } from '@/components/program/FlyerPreview';
 import { PageHeader } from '@/components/redesign';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { ViewToggle } from '@/components/ui/view-toggle';
 import {
   Select,
@@ -162,81 +163,65 @@ export default function FlyerPage() {
         {t('back')}
       </Link>
 
-      <PageHeader
-        title={t('title')}
-        subtitle={t('subtitle')}
-        actions={[
-          {
-            label: busy ? t('downloading') : t('download'),
-            icon: <DownloadSimpleIcon className="w-4 h-4" weight="bold" />,
-            onClick: () => handleDownload('single'),
-            disabled: busy,
-          },
-        ]}
-      />
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
 
-      <div className="grid gap-[14px] lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-        {/* Preview */}
+      <div className="flex flex-col gap-[14px] lg:flex-row lg:items-start">
+        {/* Controls — first on mobile (action stays in reach), right rail on
+            desktop. Explicit grid placement keeps the preview on the left. */}
         <Card
-          flat
+        flat
           hover={false}
-          className="bg-[var(--paper)] p-4 sm:p-6 flex items-center justify-center"
+          className="order-1 p-5 flex flex-col gap-5 lg:order-2 lg:w-[320px] lg:shrink-0 lg:sticky lg:top-4"
         >
-          <FlyerPreview
-            businessId={businessId}
-            locale={locale}
-            locationId={effectiveLocationId}
-          />
-        </Card>
-
-        {/* Controls */}
-        <Card
-          hover={false}
-          className="p-5 flex flex-col gap-5 lg:sticky lg:top-4"
-        >
-          <div className="flex flex-col gap-2">
-            <div className="text-[13px] font-semibold text-[#1A1A1A]">
-              {t('language')}
-            </div>
-            <ViewToggle
-              value={locale}
-              onChange={(v) => {
-                localePickedRef.current = true;
-                setLocale(v as FlyerLocale);
-              }}
-              options={LOCALE_OPTIONS}
-              variant="solid"
-              fullWidth
-            />
-          </div>
-
-          {hasMultiple && (
+          {/* Options the download depends on */}
+          <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <div className="text-[13px] font-semibold text-[#1A1A1A]">
-                {t('location')}
+                {t('language')}
               </div>
-              <Select
-                value={effectiveLocationId ?? undefined}
-                onValueChange={setSelectedLocationId}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {activeLocations.map((l) => (
-                    <SelectItem key={l.id} value={l.id}>
-                      {l.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <ViewToggle
+                value={locale}
+                onChange={(v) => {
+                  localePickedRef.current = true;
+                  setLocale(v as FlyerLocale);
+                }}
+                options={LOCALE_OPTIONS}
+                variant="solid"
+                fullWidth
+              />
             </div>
-          )}
 
-          <div className="flex flex-col gap-2">
+            {hasMultiple && (
+              <div className="flex flex-col gap-2">
+                <div className="text-[13px] font-semibold text-[#1A1A1A]">
+                  {t('location')}
+                </div>
+                <Select
+                  value={effectiveLocationId ?? undefined}
+                  onValueChange={setSelectedLocationId}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeLocations.map((l) => (
+                      <SelectItem key={l.id} value={l.id}>
+                        {l.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Primary action + supporting note */}
+          <div className="flex flex-col gap-2.5">
             <Button
               variant="gradient"
-              className="rounded-full"
+              className="w-full"
               onClick={() => handleDownload('single')}
               disabled={busy}
             >
@@ -254,11 +239,27 @@ export default function FlyerPage() {
                 {t('downloadAll')}
               </Button>
             )}
+            <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted-foreground)]">
+              {t('helper')}
+            </p>
           </div>
+        </Card>
 
-          <p className="text-[12px] leading-relaxed text-[var(--muted-foreground)]">
-            {t('helper')}
-          </p>
+        {/* Preview — below the controls on mobile, left of them on desktop.
+            The cream card is a canvas that fills the available width; the flyer
+            sits centered on it at a comfortable, crisp size (beyond ~620px the
+            A5 iframe would just upscale and blur). */}
+        <Card
+          flat
+          hover={false}
+          className="order-2 lg:order-1 lg:flex-1 lg:min-w-0 bg-[var(--paper)] p-4 sm:p-6 flex items-center justify-center"
+        >
+          <FlyerPreview
+            businessId={businessId}
+            locale={locale}
+            locationId={effectiveLocationId}
+            maxWidth={620}
+          />
         </Card>
       </div>
     </div>

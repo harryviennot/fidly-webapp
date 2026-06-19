@@ -15,6 +15,12 @@ interface FlyerPreviewProps {
   locationId?: string | null;
   showDecor?: boolean;
   showBadges?: boolean;
+  /**
+   * Cap the rendered width (CSS px). The flyer is an A5 page, so left
+   * uncapped it renders huge on wide columns; callers pass a sane max and the
+   * preview centers within whatever space it's given.
+   */
+  maxWidth?: number;
 }
 
 /**
@@ -28,24 +34,31 @@ export function FlyerPreview({
   locationId,
   showDecor = true,
   showBadges = true,
+  maxWidth,
 }: FlyerPreviewProps) {
   const t = useTranslations('loyaltyProgram.overview.flyer');
   const wrapRef = useRef<HTMLDivElement>(null);
   const [html, setHtml] = useState<string | null>(null);
   const [error, setError] = useState(false);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(() =>
+    maxWidth ? Math.min(1, maxWidth / A5_W) : 1
+  );
 
-  // Fit the A5 page to the available width.
+  // Fit the A5 page to the available width (never wider than `maxWidth`, never
+  // upscaled past its natural size). A ResizeObserver keeps it responsive as
+  // the column / viewport changes.
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
     const ro = new ResizeObserver(() => {
       const w = el.clientWidth;
-      if (w > 0) setScale(Math.min(1, w / A5_W));
+      if (w <= 0) return;
+      const target = maxWidth ? Math.min(w, maxWidth) : w;
+      setScale(Math.min(1, target / A5_W));
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [maxWidth]);
 
   // Fetch the rendered HTML whenever the inputs change; cancel stale requests.
   useEffect(() => {
@@ -71,7 +84,11 @@ export function FlyerPreview({
   }, [businessId, locale, locationId, showDecor, showBadges]);
 
   return (
-    <div ref={wrapRef} className="w-full">
+    <div
+      ref={wrapRef}
+      className="w-full mx-auto"
+      style={maxWidth ? { maxWidth } : undefined}
+    >
       <div
         className="relative mx-auto overflow-hidden rounded-xl shadow-[0_18px_50px_rgba(40,28,18,0.16)]"
         style={{ width: A5_W * scale, height: A5_H * scale }}
