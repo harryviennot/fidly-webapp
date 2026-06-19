@@ -34,8 +34,7 @@
       "first_reward": "Primera recompensa canjeada",
       "first_broadcast": "Primera difusión enviada",
       "owner_uses_app": "Primer sello desde la app",
-      "team_uses_app": "Todo el equipo en la app",
-      "printed_flyer": "Folleto en el mostrador"
+      "team_uses_app": "Todo el equipo en la app"
     },
     "info": {
       "growth": "El número total de clientes que han añadido tu tarjeta desde el principio.",
@@ -54,8 +53,7 @@
     "cta": {
       "shareQr": "Compartir mi código QR",
       "openScanner": "Abrir el escáner",
-      "sendBroadcast": "Enviar una difusión",
-      "downloadFlyer": "Conseguir mi folleto"
+      "sendBroadcast": "Enviar una difusión"
     },
     "why": {
       "growth": "Cada cliente que añade tu tarjeta. Tu alcance, creciendo.",

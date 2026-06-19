@@ -214,21 +214,6 @@ html {
   animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Two-beat horizontal "nudge" — used on hover to hint a card is clickable. */
-@keyframes nudge-x {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25%,
-  75% {
-    transform: translateX(5px);
-  }
-  50% {
-    transform: translateX(0);
-  }
-}
-
 /* Stagger delay utilities */
 .delay-0 {
   animation-delay: 0ms;

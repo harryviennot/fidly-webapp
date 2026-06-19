@@ -29,8 +29,8 @@ export default function ScannerWelcomePage() {
   const tAuth = useTranslations("auth");
   const locale = useLocale();
 
-  const appleSrc = locale === "fr" ? "/AppStoreFR.svg" : locale === "es" ? "/AppStoreES.svg" : "/AppStore.svg";
-  const googleSrc = locale === "fr" ? "/GooglePlayFR.svg" : locale === "es" ? "/GooglePlayES.svg" : "/GooglePlay.svg";
+  const appleSrc = locale === "fr" ? "/AppStoreFR.svg" : "/AppStore.svg";
+  const googleSrc = locale === "fr" ? "/GooglePlayFR.svg" : "/GooglePlay.svg";
 
   useEffect(() => {
     if (!loading && currentRole && currentRole !== "scanner") {

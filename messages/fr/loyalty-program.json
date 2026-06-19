@@ -153,24 +153,7 @@
       "broadcasts": "Diffusions",
       "broadcastsDescription": "Envoyez un message promotionnel à tous vos clients en une fois",
       "locations": "Établissements",
-      "locationsDescription": "Établissements de l'entreprise et géorepérage",
-      "flyer": {
-        "cardTitle": "Affichette comptoir",
-        "cardDescription": "Une affichette prête à imprimer pour votre comptoir, pour que vos clients ajoutent leur carte en quelques secondes.",
-        "cardCta": "Aperçu et téléchargement",
-        "title": "Affichette comptoir",
-        "subtitle": "Une affichette prête à imprimer pour votre comptoir. Vos clients la scannent pour ajouter leur carte.",
-        "back": "Programme",
-        "language": "Langue",
-        "location": "Établissement",
-        "download": "Télécharger le PDF",
-        "downloadAll": "Tout télécharger (un seul fichier)",
-        "downloading": "Préparation...",
-        "helper": "Imprimez-la sur une imprimante A5 ou A4, puis posez-la là où vos clients paient.",
-        "previewAlt": "Aperçu de l'affichette",
-        "downloaded": "Affichette téléchargée.",
-        "error": "Impossible de générer votre affichette. Réessayez."
-      }
+      "locationsDescription": "Établissements de l'entreprise et géorepérage"
     },
     "programInfo": "Infos du programme",
     "programName": "Nom du programme",
