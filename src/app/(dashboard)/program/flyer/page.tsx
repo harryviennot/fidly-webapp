@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -61,9 +61,20 @@ export default function FlyerPage() {
   const businessId = currentBusiness?.id;
   const businessName = currentBusiness?.name || 'Stampeo';
 
+  // Default to the business language. `currentBusiness` may still be loading
+  // when the state initializer runs, so sync to its `primary_locale` once it
+  // arrives — until the owner manually picks a language.
   const [locale, setLocale] = useState<FlyerLocale>(
     currentBusiness?.primary_locale ?? 'fr'
   );
+  const localePickedRef = useRef(false);
+  const businessLocale = currentBusiness?.primary_locale;
+  useEffect(() => {
+    if (!localePickedRef.current && businessLocale) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLocale(businessLocale);
+    }
+  }, [businessLocale]);
 
   const canMultiLocation = hasFeature('locations.multiple');
   const { data: locations } = useLocations(
@@ -189,7 +200,10 @@ export default function FlyerPage() {
             </div>
             <ViewToggle
               value={locale}
-              onChange={(v) => setLocale(v as FlyerLocale)}
+              onChange={(v) => {
+                localePickedRef.current = true;
+                setLocale(v as FlyerLocale);
+              }}
               options={LOCALE_OPTIONS}
               variant="solid"
               fullWidth
