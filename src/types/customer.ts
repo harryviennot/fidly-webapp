@@ -13,6 +13,10 @@ export interface CustomerResponse {
   // Nullable: businesses that don't collect email leave this empty (no
   // placeholder). Guard every read with `?? ""` / a presence check.
   email?: string | null;
+  // Nullable (backend migration 116): only present for sign-ups where the
+  // business collects phone. E.164 string. Only the detail endpoint populates
+  // it — the list/search RPC leaves it undefined.
+  phone?: string | null;
   // Flat convenience fields — sourced from enrollments[0]. Customer list,
   // segment classifier, stats cards keep reading these.
   stamps: number;

@@ -10,8 +10,10 @@ import {
   Gift,
   Trophy,
   Envelope,
+  Phone,
   MapPin,
   PaperPlaneTilt,
+  PencilSimple,
   Wallet,
 } from "@phosphor-icons/react";
 import {
@@ -30,6 +32,7 @@ import {
 } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
 import { SendPassDialog } from "./send-pass-dialog";
+import { EditCustomerDialog } from "./edit-customer-dialog";
 import { TransactionTimeline } from "./transaction-timeline";
 import { StampGridContainer } from "@/components/card";
 import { Card } from "@/components/ui/card";
@@ -76,11 +79,13 @@ export function CustomerDetailSheet({
   const { hasFeature } = useEntitlements();
   const t = useTranslations("customers.detail");
   const tSendPass = useTranslations("customers.sendPass");
+  const tEditInfo = useTranslations("customers.editInfo");
   const tTime = useTranslations("customers.time");
   const locale = useLocale();
   const queryClient = useQueryClient();
 
   const [sendPassOpen, setSendPassOpen] = useState(false);
+  const [editInfoOpen, setEditInfoOpen] = useState(false);
 
   // Cache the selected customer locally so the panel keeps rendering through
   // its close animation. Parent pages clear `selectedCustomerId` synchronously
@@ -229,6 +234,17 @@ export function CustomerDetailSheet({
       <ResponsiveSidePanelBody className="pb-[max(4rem,env(safe-area-inset-bottom)+2rem)] md:pb-10">
         {/* ── Centered identity hero ── */}
         <div className="relative px-5 pt-6 pb-5">
+          {/* Edit this person's contact details — anchored top-left, mirroring
+              the send-card action on the right. */}
+          <button
+            type="button"
+            onClick={() => setEditInfoOpen(true)}
+            aria-label={tEditInfo("trigger")}
+            className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-2.5 py-1 text-[12px] font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors cursor-pointer"
+          >
+            <PencilSimple className="w-3.5 h-3.5 shrink-0" weight="bold" />
+            <span className="hidden min-[380px]:inline">{tEditInfo("short")}</span>
+          </button>
           {/* Action about this person — anchored top-right, clear of the panel's
               close button (which lives in the header above). */}
           <button
@@ -250,12 +266,23 @@ export function CustomerDetailSheet({
             <h2 className="text-[18px] font-bold text-[#1A1A1A] mb-0.5">
               {liveCustomer.name}
             </h2>
-            <div className="text-[12px] mb-2 flex items-center gap-1">
-              <Envelope className="w-3.5 h-3.5 text-[#BBB]" />
-              {liveCustomer.email ? (
-                <span className="text-[#A0A0A0]">{liveCustomer.email}</span>
-              ) : (
-                <span className="text-[#BBB] italic">{t("noEmail")}</span>
+            <div className="flex flex-col items-center gap-1 mb-2">
+              <div className="text-[12px] flex items-center gap-1">
+                <Envelope className="w-3.5 h-3.5 text-[#BBB]" />
+                {liveCustomer.email ? (
+                  <span className="text-[#A0A0A0]">{liveCustomer.email}</span>
+                ) : (
+                  <span className="text-[#BBB] italic">{t("noEmail")}</span>
+                )}
+              </div>
+              {/* Phone sits below email in the same style. Only shown when the
+                  business collected one — no "no phone" placeholder, since
+                  most businesses don't collect it at all. */}
+              {liveCustomer.phone && (
+                <div className="text-[12px] flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-[#BBB]" />
+                  <span className="text-[#A0A0A0]">{liveCustomer.phone}</span>
+                </div>
               )}
             </div>
             <span
@@ -400,6 +427,19 @@ export function CustomerDetailSheet({
         customerId={liveCustomer.id}
         customerName={liveCustomer.name}
         currentEmail={liveCustomer.email}
+        businessId={currentBusiness.id}
+        onSuccess={() => customerQuery.refetch()}
+      />
+    )}
+
+    {currentBusiness && (
+      <EditCustomerDialog
+        open={editInfoOpen}
+        onOpenChange={setEditInfoOpen}
+        customerId={liveCustomer.id}
+        currentName={liveCustomer.name}
+        currentEmail={liveCustomer.email}
+        currentPhone={liveCustomer.phone}
         businessId={currentBusiness.id}
         onSuccess={() => customerQuery.refetch()}
       />

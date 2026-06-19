@@ -6,6 +6,8 @@ import {
   redeemReward,
   voidStamp,
   sendCustomerPass,
+  updateCustomer,
+  type CustomerUpdateInput,
 } from "@/api";
 import type { PaginatedCustomerResponse } from "@/types";
 import type { SortKey, SortDir } from "@/components/customers/customer-data-table";
@@ -208,6 +210,30 @@ export function useSendCustomerPass(businessId: string | undefined) {
       sendCustomerPass(businessId!, customerId, email),
     onSuccess: (_data, { customerId }) => {
       // A newly-saved email should show immediately in the detail sheet + list.
+      queryClient.invalidateQueries({
+        queryKey: customerKeys.detail(businessId!, customerId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: customerKeys.all(businessId!),
+      });
+    },
+  });
+}
+
+export function useUpdateCustomer(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      customerId,
+      input,
+    }: {
+      customerId: string;
+      input: CustomerUpdateInput;
+    }) => updateCustomer(businessId!, customerId, input),
+    onSuccess: (_data, { customerId }) => {
+      // Edited name/email/phone should show immediately in the detail sheet
+      // and the customers list.
       queryClient.invalidateQueries({
         queryKey: customerKeys.detail(businessId!, customerId),
       });
