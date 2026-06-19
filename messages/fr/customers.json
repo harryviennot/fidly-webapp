@@ -53,6 +53,27 @@
       "successToast": "Carte envoyée",
       "failedToast": "Échec de l'envoi de la carte"
     },
+    "editInfo": {
+      "trigger": "Modifier les infos du client",
+      "short": "Modifier",
+      "dialogTitle": "Modifier les infos du client",
+      "dialogDescription": "Mettez à jour le nom, l'e-mail ou le téléphone de ce client.",
+      "nameLabel": "Nom",
+      "namePlaceholder": "Nom du client",
+      "nameRequired": "Indiquez un nom",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "nom@exemple.com",
+      "emailInvalid": "Saisissez une adresse e-mail valide",
+      "phoneLabel": "Numéro de téléphone",
+      "phonePlaceholder": "+33 6 12 34 56 78",
+      "phoneInvalid": "Saisissez un numéro de téléphone valide",
+      "optional": "Facultatif",
+      "save": "Enregistrer les modifications",
+      "saving": "Enregistrement...",
+      "cancel": "Annuler",
+      "successToast": "Infos mises à jour",
+      "failedToast": "Échec de l'enregistrement"
+    },
     "segments": {
       "label": "Segment",
       "all": "Tous",
