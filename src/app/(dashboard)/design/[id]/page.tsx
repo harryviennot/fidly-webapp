@@ -187,16 +187,16 @@ export default function EditDesignPage() {
           </div>
         }
         headerRight={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-xl:w-full">
             <Button
               variant="outline"
-              className="rounded-full"
+              className="rounded-full max-xl:flex-1"
               onClick={openTranslations}
             >
               <Translate className="w-4 h-4 mr-2" weight="bold" />
               {tTranslations('button')}
             </Button>
-            <Button className="rounded-full bg-black text-white hover:bg-black/80" onClick={handleSaveClick} disabled={saving}>
+            <Button className="rounded-full bg-black text-white hover:bg-black/80 max-xl:flex-1" onClick={handleSaveClick} disabled={saving}>
               {saving ? (
                 <>
                   <ArrowsClockwise className="w-4 h-4 mr-2 animate-spin" />

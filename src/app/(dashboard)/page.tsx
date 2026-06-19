@@ -132,6 +132,10 @@ export default function DashboardPage() {
             />
           </div>
 
+          {/* Quick actions sit in a row above the activity peek; they stack
+              again once the column is too narrow for a tidy row. */}
+          <QuickActions delay={280} />
+
           {/* A peek at recent activity — the full log lives on Activity */}
           <RecentScans
             transactions={recentTransactions}
@@ -157,7 +161,6 @@ export default function DashboardPage() {
             isOwner={currentRole === "owner"}
             delay={100}
           />
-          <QuickActions delay={200} />
         </div>
       </div>
     </div>

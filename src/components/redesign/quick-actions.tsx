@@ -25,11 +25,11 @@ export function QuickActions({ className, delay = 0 }: QuickActionsProps) {
 
   const actions = [
     {
-      key: "qr",
-      labelKey: "dashboard.qrCode",
-      descKey: "dashboard.qrCodeDesc",
+      key: "flyer",
+      labelKey: "dashboard.downloadFlyer",
+      descKey: "dashboard.downloadFlyerDesc",
       icon: QrCode,
-      href: "/program",
+      href: "/program/flyer",
     },
     {
       key: "broadcast",
@@ -65,14 +65,14 @@ export function QuickActions({ className, delay = 0 }: QuickActionsProps) {
         {t("dashboard.quickActions")}
       </h3>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         {actions.map((action) => {
           const Icon = action.icon;
           return (
             <Link
               key={action.key}
               href={action.href}
-              className="flex items-center gap-3 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--cream)] transition-all duration-150"
+              className="flex flex-1 min-w-0 items-center gap-3 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--cream)] transition-all duration-150"
             >
               <div className="w-9 h-9 rounded-lg bg-[var(--accent-light)] flex items-center justify-center text-[var(--accent)] shrink-0">
                 <Icon className="w-[18px] h-[18px]" weight="bold" />
