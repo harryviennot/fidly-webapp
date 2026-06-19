@@ -62,6 +62,42 @@ export async function downloadFlyerPdf(
   );
 }
 
+/** Generate a flyer PDF and open it in a new tab (the browser's PDF viewer,
+ *  from which the user can print or save). The endpoint is authenticated, so
+ *  we fetch the blob ourselves rather than point an `<a target="_blank">` at
+ *  it. The blank tab is opened synchronously on the user gesture to dodge
+ *  popup blockers, then pointed at the blob once it's ready; if the popup was
+ *  blocked we fall back to a download. */
+export async function openFlyerPdf(
+  businessId: string,
+  p: FlyerParams,
+  fallbackFileName = 'flyer.pdf'
+): Promise<void> {
+  const tab = window.open('', '_blank');
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/businesses/${businessId}/flyer.pdf?${buildQuery(p)}`,
+      { headers: await getAuthHeaders() }
+    );
+    if (!res.ok) throw new Error('Failed to generate flyer');
+    const objectUrl = URL.createObjectURL(await res.blob());
+    if (tab) {
+      tab.location.href = objectUrl;
+    } else {
+      // Popup blocked — degrade gracefully to a download.
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = fallbackFileName;
+      link.click();
+    }
+    // Revoke late so the new tab has time to load the document.
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  } catch (err) {
+    tab?.close();
+    throw err;
+  }
+}
+
 /** Download every active location's flyer as one multi-page PDF. */
 export async function downloadFlyersPdf(
   businessId: string,
