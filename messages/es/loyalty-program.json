@@ -153,7 +153,24 @@
       "broadcasts": "Difusiones",
       "broadcastsDescription": "Envía un mensaje promocional a todos tus clientes a la vez",
       "locations": "Establecimientos",
-      "locationsDescription": "Establecimientos del comercio y geolocalización"
+      "locationsDescription": "Establecimientos del comercio y geolocalización",
+      "flyer": {
+        "cardTitle": "Folleto de mostrador",
+        "cardDescription": "Un folleto listo para imprimir para tu mostrador, para que tus clientes añadan su tarjeta en segundos.",
+        "cardCta": "Vista previa y descarga",
+        "title": "Folleto de mostrador",
+        "subtitle": "Un folleto listo para imprimir para tu mostrador. Tus clientes lo escanean para añadir su tarjeta.",
+        "back": "Programa",
+        "language": "Idioma",
+        "location": "Establecimiento",
+        "download": "Descargar PDF",
+        "downloadAll": "Descargar todo (un solo archivo)",
+        "downloading": "Preparando...",
+        "helper": "Imprímelo en cualquier impresora A5 o A4 y colócalo donde pagan tus clientes.",
+        "previewAlt": "Vista previa del folleto",
+        "downloaded": "Folleto descargado.",
+        "error": "No hemos podido generar tu folleto. Inténtalo de nuevo."
+      }
     },
     "programInfo": "Datos del programa",
     "programName": "Nombre del programa",
