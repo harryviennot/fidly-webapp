@@ -542,8 +542,8 @@ interface WalletInstallCardProps {
 }
 
 function WalletInstallCard({ passUrl, googleWalletUrl, locale, t }: WalletInstallCardProps) {
-  const appleSrc = locale === 'fr' ? '/AppleWalletFR.svg' : '/AppleWallet.svg';
-  const googleSrc = locale === 'fr' ? '/GoogleWalletFR.svg' : '/GoogleWallet.svg';
+  const appleSrc = locale === 'fr' ? '/AppleWalletFR.svg' : locale === 'es' ? '/AppleWalletES.svg' : '/AppleWallet.svg';
+  const googleSrc = locale === 'fr' ? '/GoogleWalletFR.svg' : locale === 'es' ? '/GoogleWalletES.svg' : '/GoogleWallet.svg';
 
   return (
     <Card hover={false} className="p-5 flex flex-col gap-3 items-center">

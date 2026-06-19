@@ -34,7 +34,8 @@
       "first_reward": "First reward redeemed",
       "first_broadcast": "First broadcast sent",
       "owner_uses_app": "First scan from the app",
-      "team_uses_app": "Whole team on the app"
+      "team_uses_app": "Whole team on the app",
+      "printed_flyer": "Flyer at the till"
     },
     "info": {
       "growth": "The total number of customers who have ever added your card.",
@@ -53,7 +54,8 @@
     "cta": {
       "shareQr": "Share my QR code",
       "openScanner": "Open scanner",
-      "sendBroadcast": "Send a broadcast"
+      "sendBroadcast": "Send a broadcast",
+      "downloadFlyer": "Get my flyer"
     },
     "why": {
       "growth": "Every customer who adds your card. Your reach, growing.",

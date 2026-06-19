@@ -24,7 +24,8 @@ export type OneTimeMetric =
   | "first_reward"
   | "first_broadcast"
   | "owner_used_native_app"
-  | "all_employees_use_native_app";
+  | "all_employees_use_native_app"
+  | "printed_flyer";
 
 export type AchievementMetric = LadderMetric | OneTimeMetric;
 
@@ -39,6 +40,7 @@ export interface AchievementMetricValues {
   first_broadcast: boolean;
   owner_used_native_app: boolean;
   all_employees_use_native_app: boolean;
+  printed_flyer: boolean;
 }
 
 export interface LadderDef {
@@ -103,6 +105,9 @@ export const ACHIEVEMENT_ONE_TIMES: OneTimeDef[] = [
   // whole team has moved off the web scanner onto the native app.
   { key: "owner_uses_app", category: "firsts", metric: "owner_used_native_app", icon: "DeviceMobile" },
   { key: "team_uses_app", category: "firsts", metric: "all_employees_use_native_app", icon: "DeviceMobile" },
+  // Ledger-driven (no RPC metric): unlocked when the owner downloads their
+  // printable counter flyer. The /program/flyer screen records it on download.
+  { key: "printed_flyer", category: "firsts", metric: "printed_flyer", icon: "Printer" },
 ];
 
 /** Section order on the /achievements page. */
@@ -139,6 +144,7 @@ export const ACHIEVEMENT_CTA: Partial<Record<AchievementMetric, AchievementCta>>
     href: "/program/broadcasts",
     featureGate: "notifications.broadcast",
   },
+  printed_flyer: { labelKey: "downloadFlyer", href: "/program/flyer" },
 };
 
 /** One recorded trophy from the server ledger (business_achievements, migration 96). */
@@ -297,6 +303,9 @@ export function metricValuesFromData(
     first_broadcast: firstBroadcastSent,
     owner_used_native_app: data.owner_used_native_app,
     all_employees_use_native_app: data.all_employees_use_native_app,
+    // No server metric: this trophy is unlocked purely via the ledger when the
+    // owner downloads the flyer (see /program/flyer). False here is correct.
+    printed_flyer: false,
   };
 }
 
