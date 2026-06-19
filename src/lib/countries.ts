@@ -150,5 +150,48 @@ export function detectDefaultCountry(locale: string): string {
       /* ignore */
     }
   }
+  if (locale === "es") return "ES";
   return locale === "en" ? "GB" : "FR";
+}
+
+// Countries whose business-facing default language is French. Beyond France,
+// this includes Monaco plus the French overseas territories, francophone Africa
+// (French is the/an official language), and Haiti. Belgium and Luxembourg are a
+// deliberate French-market call (French is an official language and matches our
+// positioning); Switzerland and Canada are intentionally left at the English
+// default (German- and English-majority). It is only an initial default — the
+// owner can change the language any time from Settings.
+const FRENCH_DEFAULT_COUNTRIES = new Set<string>([
+  "FR", "MC", "BE", "LU",
+  // French overseas departments & territories
+  "GP", "MQ", "RE", "GF", "YT", "NC", "PF", "BL", "MF", "PM", "WF", "TF",
+  // Francophone Africa
+  "SN", "CI", "CM", "ML", "BF", "NE", "TG", "BJ", "GN", "CG", "CD", "GA",
+  "DJ", "KM", "MG", "TD", "CF", "MR",
+  // Haiti
+  "HT",
+]);
+
+// Countries whose business-facing default language is Spanish: Spain plus the
+// Spanish-speaking Americas, and Equatorial Guinea.
+const SPANISH_DEFAULT_COUNTRIES = new Set<string>([
+  "ES", "MX", "AR", "CO", "PE", "VE", "CL", "EC", "GT", "CU", "BO", "DO",
+  "HN", "PY", "SV", "NI", "CR", "PA", "UY", "PR", "GQ",
+]);
+
+/**
+ * Default business content language for an ISO-2 country code. Returns one of
+ * our supported locales; anything not clearly French- or Spanish-speaking falls
+ * back to English. Used at onboarding so a business's customer-facing language
+ * (card, notifications, emails) starts in the language of the country it
+ * operates from.
+ */
+export function countryToLocale(
+  code: string | null | undefined
+): "fr" | "en" | "es" {
+  if (!code) return "en";
+  const cc = code.toUpperCase();
+  if (SPANISH_DEFAULT_COUNTRIES.has(cc)) return "es";
+  if (FRENCH_DEFAULT_COUNTRIES.has(cc)) return "fr";
+  return "en";
 }

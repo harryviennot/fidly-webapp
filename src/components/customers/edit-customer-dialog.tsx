@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { PencilSimple } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUpdateCustomer } from "@/hooks/use-customers";
+import { useBusiness } from "@/contexts/business-context";
+import { isValidPhoneNumber, type CountryCode } from "libphonenumber-js";
 import { toast } from "sonner";
 
 interface EditCustomerDialogProps {
@@ -26,9 +29,6 @@ interface EditCustomerDialogProps {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Loose client check — the backend does the authoritative E.164 validation and
-// returns a clear error we surface on failure.
-const PHONE_RE = /^\+?[\d\s().-]{6,20}$/;
 
 function isPlaceholder(email?: string | null): boolean {
   return !email || email.endsWith("@placeholder.local");
@@ -46,6 +46,12 @@ export function EditCustomerDialog({
 }: EditCustomerDialogProps) {
   const t = useTranslations("customers.editInfo");
   const updateMutation = useUpdateCustomer(businessId);
+  const { currentBusiness } = useBusiness();
+  // Default the country selector to where the business operates. PhoneInput
+  // falls back to locale/timezone detection when it's unset.
+  const defaultCountry =
+    (currentBusiness?.country?.toUpperCase() as CountryCode | undefined) ||
+    undefined;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -69,7 +75,9 @@ export function EditCustomerDialog({
   const trimmedPhone = phone.trim();
 
   const emailValid = trimmedEmail === "" || EMAIL_RE.test(trimmedEmail);
-  const phoneValid = trimmedPhone === "" || PHONE_RE.test(trimmedPhone);
+  // PhoneInput emits E.164 once the number is complete, so isValidPhoneNumber
+  // can validate without a country hint. Empty = cleared (phone is optional).
+  const phoneValid = trimmedPhone === "" || isValidPhoneNumber(trimmedPhone);
   const nameValid = trimmedName.length > 0;
 
   // Normalize stored values for change detection (placeholder email reads empty).
@@ -146,18 +154,29 @@ export function EditCustomerDialog({
             autoComplete="email"
             error={!emailValid ? t("emailInvalid") : undefined}
           />
-          <Field
-            id="edit-customer-phone"
-            label={t("phoneLabel")}
-            optionalLabel={t("optional")}
-            value={phone}
-            onChange={setPhone}
-            placeholder={t("phonePlaceholder")}
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            error={!phoneValid ? t("phoneInvalid") : undefined}
-          />
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="edit-customer-phone"
+              className="text-[13px] font-medium text-[var(--foreground)]"
+            >
+              {t("phoneLabel")}
+              <span className="ml-1.5 font-normal text-[var(--muted-foreground)]">
+                {t("optional")}
+              </span>
+            </label>
+            <PhoneInput
+              id="edit-customer-phone"
+              value={phone}
+              onChange={setPhone}
+              defaultCountry={defaultCountry}
+              error={trimmedPhone !== "" && !phoneValid}
+            />
+            {trimmedPhone !== "" && !phoneValid && (
+              <p className="text-[12px] text-[var(--destructive)]">
+                {t("phoneInvalid")}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end gap-2">

@@ -153,7 +153,24 @@
       "broadcasts": "Broadcasts",
       "broadcastsDescription": "Send promotional messages to all your customers at once",
       "locations": "Locations",
-      "locationsDescription": "Business locations and geofencing"
+      "locationsDescription": "Business locations and geofencing",
+      "flyer": {
+        "cardTitle": "Counter flyer",
+        "cardDescription": "A print-ready flyer for your till, so customers add your card in seconds.",
+        "cardCta": "Preview and download",
+        "title": "Counter flyer",
+        "subtitle": "A print-ready flyer for your till. Customers scan it to add your card.",
+        "back": "Program",
+        "language": "Language",
+        "location": "Location",
+        "download": "Download PDF",
+        "downloadAll": "Download all (one file)",
+        "downloading": "Preparing...",
+        "helper": "Print it on any A5 or A4 printer and place it where customers pay.",
+        "previewAlt": "Flyer preview",
+        "downloaded": "Flyer downloaded.",
+        "error": "We couldn't generate your flyer. Please try again."
+      }
     },
     "programInfo": "Program Info",
     "programName": "Program name",

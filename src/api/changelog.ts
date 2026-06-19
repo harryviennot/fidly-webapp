@@ -11,6 +11,7 @@ export interface ChangelogArea {
   slug: string;
   label_fr: string;
   label_en: string;
+  label_es: string | null;
   color: string;
   sort_order: number;
 }
@@ -22,8 +23,10 @@ export interface ChangelogItem {
   affects: string[];
   title_fr: string;
   title_en: string | null;
+  title_es: string | null;
   body_fr: string | null;
   body_en: string | null;
+  body_es: string | null;
   sort_order: number;
 }
 
@@ -32,10 +35,13 @@ export interface ChangelogRelease {
   version: string | null;
   title_fr: string | null;
   title_en: string | null;
+  title_es: string | null;
   body_fr: string | null;
   body_en: string | null;
+  body_es: string | null;
   image_url_fr: string | null;
   image_url_en: string | null;
+  image_url_es: string | null;
   published_at: string | null;
   changelog_items: ChangelogItem[];
 }
@@ -71,12 +77,20 @@ export async function markChangelogSeen(): Promise<{ unread_count: number }> {
   return response.json();
 }
 
-/** Resolve a bilingual pair to a locale (EN falls back to FR). */
+/**
+ * Resolve a localized triple to the active locale, with a graceful fallback
+ * chain: es -> en -> fr, en -> fr, fr as-is.
+ */
 export function resolveLocale(
   fr: string | null | undefined,
   en: string | null | undefined,
+  es: string | null | undefined,
   locale: string
 ): string {
-  if (locale === "en") return (en && en.trim()) || fr || "";
-  return fr || "";
+  const f = (fr && fr.trim()) || "";
+  const e = (en && en.trim()) || "";
+  const s = (es && es.trim()) || "";
+  if (locale === "es") return s || e || f;
+  if (locale === "en") return e || f;
+  return f;
 }

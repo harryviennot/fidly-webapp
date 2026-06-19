@@ -65,6 +65,16 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     customer_first_name: 'Sarah',
     store_location: 'Westside',
   },
+  es: {
+    stamp_count: '3',
+    total_stamps: '10',
+    stamps_left: '7',
+    rewards_count: '1',
+    reward_name: 'Café gratis',
+    business_name: 'Tu comercio',
+    customer_first_name: 'Sara',
+    store_location: 'Centro',
+  },
 };
 
 export default function ProgramNotificationsPage() {
@@ -135,7 +145,7 @@ export default function ProgramNotificationsPage() {
     }
   };
 
-  const editingDefaultBody = editingTemplate?.default_body ?? { en: '', fr: '' };
+  const editingDefaultBody = editingTemplate?.default_body ?? { en: '', fr: '', es: '' };
 
   // Side widgets shared between desktop sidebar and mobile collapsibles.
   // Body content is captured once so both placements stay in sync.

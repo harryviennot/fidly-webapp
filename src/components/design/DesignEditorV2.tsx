@@ -4,7 +4,7 @@ import { useState, useMemo, useImperativeHandle, forwardRef, useRef, useCallback
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
-import { CardDesign, CardDesignCreate } from '@/types';
+import { CardDesign, CardDesignCreate, DesignTranslation } from '@/types';
 import { createDesign, updateDesign, uploadLogo, uploadStripBackground, activateDesign } from '@/api';
 import { designKeys } from '@/hooks/use-designs';
 import { useBusiness } from '@/contexts/business-context';
@@ -35,6 +35,10 @@ export interface DesignEditorRef {
   saving: boolean;
   isDirty: boolean;
   clearDraft: () => void;
+  /** Current working design (incl. locally-edited translations) — snapshot source for the Translations dialog. */
+  getFormData: () => CardDesignCreate;
+  /** Write translations edited in the dialog back into local state; marks the editor dirty so the main Save persists them. */
+  setTranslations: (translations: Record<string, DesignTranslation>) => void;
 }
 
 interface DesignEditorV2Props {
@@ -207,8 +211,10 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
     const handleSave = useCallback(async (): Promise<boolean> => {
       if (!currentBusiness?.id) return false;
-      const { translations, ...data } = formDataRef.current;
-      void translations;
+      // Translations live in formData (edited locally via the Translations
+      // dialog) and are persisted together with the design in this single
+      // request — no separate save surface writes them.
+      const data = { ...formDataRef.current };
       if (!data.name || !data.description) {
         setError(t('requiredFields'));
         return false;
@@ -283,6 +289,9 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       saving,
       isDirty,
       clearDraft,
+      getFormData: () => formDataRef.current,
+      setTranslations: (translations) =>
+        setFormData((prev) => ({ ...prev, translations })),
     }), [handleSave, saving, isDirty, clearDraft]);
 
     // Cleanup blob URLs on unmount
@@ -724,20 +733,25 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               <SidebarTrigger className="md:hidden -ml-1 shrink-0" />
               {headerLeft}
             </div>
-            <div className="flex items-center gap-3">
-              <span
-                className={`text-xs text-muted-foreground transition-opacity duration-300 ${draftStatus === 'saved' ? 'opacity-100' : 'opacity-0'
-                  }`}
-              >
-                {t('draftSaved')}
-              </span>
-              {headerRight}
-            </div>
+            {/* On compact the draft-status hint + actions move out of the
+                header (actions go to a sticky bottom bar), so the long card
+                title gets the full row and no longer wraps prematurely. */}
+            {!isCompact && (
+              <div className="flex items-center gap-3">
+                <span
+                  className={`text-xs text-muted-foreground transition-opacity duration-300 ${draftStatus === 'saved' ? 'opacity-100' : 'opacity-0'
+                    }`}
+                >
+                  {t('draftSaved')}
+                </span>
+                {headerRight}
+              </div>
+            )}
           </div>
         )}
 
         {isCompact ? (
-          <div>
+          <div className="pb-28">
             {mobileShowPreview ? previewPanel : formPanel}
           </div>
         ) : (
@@ -753,11 +767,12 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           </div>
         )}
 
-        {/* Compact/mobile: floating toggle button */}
+        {/* Compact/mobile: floating toggle button — raised to clear the
+            sticky action bar below it. */}
         {isCompact && (
           <Button
             size="icon"
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg"
+            className="fixed bottom-24 right-6 z-50 h-14 w-14 rounded-full shadow-lg"
             onClick={() => setMobileShowPreview(!mobileShowPreview)}
           >
             {mobileShowPreview ? (
@@ -766,6 +781,18 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
               <Eye className="w-5 h-5" weight="bold" />
             )}
           </Button>
+        )}
+
+        {/* Compact/mobile: sticky bottom action bar (Save / Translations),
+            mirroring the configuration page so actions stay reachable while
+            scrolling and never overlap the title. Sticky (not fixed) + negative
+            margins keep it within the content column, never under the sidebar. */}
+        {isCompact && headerRight && (
+          <div className="sticky bottom-0 z-40 -mx-4 md:-mx-6 -mb-4 md:-mb-6 border-t border-[var(--border)] bg-[var(--background)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--background)]/80">
+            <div className="flex items-center gap-2 px-4 md:px-6 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+              {headerRight}
+            </div>
+          </div>
         )}
       </div>
     );

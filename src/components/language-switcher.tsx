@@ -15,6 +15,7 @@ import { updateProfile } from "@/api";
 const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",
   fr: "Français",
+  es: "Español",
 };
 
 export function LanguageSwitcher() {

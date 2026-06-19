@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  allowedDevOrigins: ["app.stampeo.10.196.9.69.nip.io", "app.dev.stampeo.app"],
+  allowedDevOrigins: ["app.stampeo.10.1.241.183.nip.io", "app.dev.stampeo.app"],
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {

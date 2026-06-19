@@ -79,7 +79,13 @@
       "saved": "Your business language has been successfully updated.",
       "country": "Country",
       "countryHint": "The country your business operates from.",
-      "countrySaved": "Your business country has been updated."
+      "countrySaved": "Your business country has been updated.",
+      "switchConfirm": {
+        "title": "Change your business language?",
+        "description": "Your current {old} content will be kept as a {old} translation, and your {new} translation (if any) will become the main content customers see by default. Installed cards refresh automatically.",
+        "confirm": "Change language",
+        "cancel": "Cancel"
+      }
     },
     "theme": {
       "title": "Theme Customization",

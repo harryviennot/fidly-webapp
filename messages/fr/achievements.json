@@ -34,7 +34,8 @@
       "first_reward": "Première récompense réclamée",
       "first_broadcast": "Première diffusion envoyée",
       "owner_uses_app": "Premier scan depuis l'application",
-      "team_uses_app": "Toute l'équipe sur l'application"
+      "team_uses_app": "Toute l'équipe sur l'application",
+      "printed_flyer": "Affichette au comptoir"
     },
     "info": {
       "growth": "Le nombre total de clients ayant ajouté votre carte depuis le début.",
@@ -53,7 +54,8 @@
     "cta": {
       "shareQr": "Partager mon QR code",
       "openScanner": "Ouvrir le scanner",
-      "sendBroadcast": "Envoyer une diffusion"
+      "sendBroadcast": "Envoyer une diffusion",
+      "downloadFlyer": "Obtenir mon affichette"
     },
     "why": {
       "growth": "Chaque client qui ajoute votre carte. Votre portée qui grandit.",

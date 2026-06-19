@@ -64,40 +64,66 @@ export function CustomerQuickActions({
     }
   };
 
+  // When stamp + redeem + void all show at once (banked rewards on a not-yet-full
+  // card), three lg buttons with their labels overflow the narrow detail sheet.
+  const allActions = canStamp && canRedeem;
+
+  const stampButton = canStamp ? (
+    <CustomerActionButton
+      variant="stamp"
+      size="lg"
+      label={t("addStamp")}
+      onClick={() => setAdjustOpen(true)}
+      disabled={!enrollmentId}
+    />
+  ) : null;
+
+  const redeemButton = canRedeem ? (
+    <CustomerActionButton
+      variant="redeem"
+      size="lg"
+      label={
+        hasBankedRewards && !isCardFull
+          ? t("redeemBanked", { count: customer.rewards ?? 0 })
+          : t("redeem")
+      }
+      onClick={handleRedeem}
+      loading={redeemMutation.isPending}
+      // In the stacked layout the button is a flex-col child; its baked-in
+      // flex-1 would collapse the height, so reset to flex-none + full width.
+      className={allActions ? "w-full flex-none" : undefined}
+    />
+  ) : null;
+
+  const voidButton = (
+    <CustomerActionButton
+      variant="void"
+      size="lg"
+      label={t("voidLast")}
+      onClick={() => setVoidDialogOpen(true)}
+      disabled={!lastVoidable}
+    />
+  );
+
   return (
-    <div className="flex gap-2">
-      {canStamp && (
-        <CustomerActionButton
-          variant="stamp"
-          size="lg"
-          label={t("addStamp")}
-          onClick={() => setAdjustOpen(true)}
-          disabled={!enrollmentId}
-        />
+    <>
+      {allActions ? (
+        // Split: stamp + void share the top row, redeem takes its own full-width
+        // row below so nothing overflows the sheet width.
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            {stampButton}
+            {voidButton}
+          </div>
+          {redeemButton}
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          {stampButton}
+          {redeemButton}
+          {voidButton}
+        </div>
       )}
-
-      {canRedeem && (
-        <CustomerActionButton
-          variant="redeem"
-          size="lg"
-          label={
-            hasBankedRewards && !isCardFull
-              ? t("redeemBanked", { count: customer.rewards ?? 0 })
-              : t("redeem")
-          }
-          onClick={handleRedeem}
-          loading={redeemMutation.isPending}
-        />
-      )}
-
-      {/* Void Stamp */}
-      <CustomerActionButton
-        variant="void"
-        size="lg"
-        label={t("voidLast")}
-        onClick={() => setVoidDialogOpen(true)}
-        disabled={!lastVoidable}
-      />
 
       {/* Stamp adjustment dialog (manual stamp from dashboard) */}
       {enrollmentId && (
@@ -125,6 +151,6 @@ export function CustomerQuickActions({
           onSuccess={onActionComplete}
         />
       )}
-    </div>
+    </>
   );
 }

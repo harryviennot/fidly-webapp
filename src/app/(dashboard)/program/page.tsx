@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useProgram } from './layout';
 import { BusinessUrlCard } from '@/components/program/BusinessUrlCard';
+import { CounterFlyerCard } from '@/components/program/CounterFlyerCard';
 import { ProgramSummaryCard } from '@/components/program/ProgramSummaryCard';
 import { ProgramHealthCard } from '@/components/program/ProgramHealthCard';
 import { OverviewPageSkeleton } from '@/components/loyalty-program/skeletons/OverviewPageSkeleton';
@@ -37,8 +38,9 @@ export default function ProgramOverviewPage() {
       <div className="flex flex-col gap-[14px] min-[1080px]:grid min-[1080px]:grid-cols-[minmax(0,1fr)_290px] min-[1080px]:items-start">
         {/* Left column: Share & grow + Set up & manage */}
         <div className="contents min-[1080px]:flex min-[1080px]:flex-col min-[1080px]:gap-[14px]">
-          <div className="order-1">
+          <div className="order-1 flex flex-col gap-[14px]">
             <BusinessUrlCard delay={0} />
+            <CounterFlyerCard delay={120} />
           </div>
           <div className="order-4">
             <ProgramSummaryCard program={program} delay={240} isOwner={isOwner} />

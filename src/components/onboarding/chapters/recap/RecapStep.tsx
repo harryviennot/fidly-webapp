@@ -10,6 +10,7 @@ import {
 } from '@phosphor-icons/react';
 import { EditorCard } from '@/components/card/EditorCard';
 import { BusinessUrlCard } from '@/components/program/BusinessUrlCard';
+import { CounterFlyerCard } from '@/components/program/CounterFlyerCard';
 import { Card } from '@/components/ui/card';
 import { useBusiness } from '@/contexts/business-context';
 import { useActiveDesign } from '@/hooks/use-designs';
@@ -187,6 +188,8 @@ export function RecapStep() {
       <div className="animate-slide-up delay-240">
         <BusinessUrlCard />
       </div>
+
+      <CounterFlyerCard variant="pdf" delay={300} />
     </div>
   );
 }

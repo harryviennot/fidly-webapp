@@ -1,0 +1,54 @@
+{
+  "features": {
+    "gate": {
+      "upgrade": "Cambiar de plan",
+      "upgradeToAccess": "Cambia a un plan superior para acceder a esta función"
+    },
+    "errors": {
+      "billingRequired": "Tu prueba ha terminado. Suscríbete para continuar.",
+      "featureNotAvailable": "Esta función requiere el plan {tier}.",
+      "limitExceeded": "Has alcanzado el límite de tu plan. Cambia a un plan superior para tener más.",
+      "limitExceededDesigns": "Has alcanzado el límite de estilos de tarjeta. Cambia a un plan superior para tener estilos de tarjeta ilimitados.",
+      "limitExceededMembers": "Tu plan permite 2 miembros del equipo. Cambia a un plan superior para tener miembros ilimitados."
+    },
+    "upgrade": {
+      "notifications": "Cambia a Growth para personalizar el texto de los avisos",
+      "designs": "¿Quieres más estilos de tarjeta?",
+      "designsHint": "Cambia a un plan superior para crear estilos de tarjeta ilimitados.",
+      "designsAction": "Cambiar de plan",
+      "moreCards": "Cambia de plan para tener más tarjetas",
+      "geofencing": "Cambia a Pro para activar la geolocalización",
+      "scheduling": "Cambia a Pro para programar los cambios de estilo de tarjeta",
+      "locations": "Cambia a Pro para añadir varios establecimientos",
+      "events": "Cambia a Growth para crear eventos promocionales",
+      "broadcasts": "Cambia a Growth para enviar difusiones",
+      "segmentation": "Cambia a Pro para dirigirte a segmentos de clientes",
+      "scheduledSends": "Cambia a Pro para programar avisos",
+      "advancedAnalytics": "Cambia a Pro para tener estadísticas avanzadas"
+    },
+    "tiers": {
+      "starter": "Starter",
+      "growth": "Growth",
+      "pro": "Pro"
+    },
+    "overLimit": {
+      "banner": "Tu plan {tier} tiene límites que tu uso actual supera. Algunas funciones están restringidas.",
+      "bannerDetails": "Ver detalles",
+      "bannerUpgrade": "Cambiar de plan",
+      "sheetTitle": "Límites del plan superados",
+      "sheetTeamMembers": "{current} de {limit} permitidos",
+      "sheetTeamMembersPaused": "{paused} miembros tienen el acceso al escáner suspendido",
+      "sheetDesigns": "{current} de {limit} permitidos",
+      "sheetDesignsReadOnly": "{count} estilos de tarjeta están en solo lectura",
+      "sheetFeaturePaused": "No disponible en {tier}",
+      "sheetReassurance": "Tus datos nunca se eliminan. Si vuelves a cambiar a un plan superior, todo se restaurará por completo.",
+      "sheetUpgrade": "Cambiar de plan",
+      "readOnly": "Solo lectura",
+      "paused": "Suspendido",
+      "active": "Activo",
+      "overLimitBadge": "Fuera de límite",
+      "toastDesignLocked": "Este estilo de tarjeta está en solo lectura porque tu plan permite {limit} estilo de tarjeta. Cambia a un plan superior para tener ilimitados.",
+      "toastFeatureLocked": "Esta función requiere el plan {tier}."
+    }
+  }
+}

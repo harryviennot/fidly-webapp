@@ -84,6 +84,7 @@ import type {
   BroadcastTranslations,
   Locale,
 } from '@/types/notification';
+import { SUPPORTED_LOCALES } from '@/lib/locale';
 
 // ─────────────────────────────────────────────────────────────────────
 // Types + constants
@@ -115,13 +116,28 @@ const TIMEZONE_OPTIONS = [
 interface WizardState {
   title: string;
   body: string;
-  /** Optional secondary-locale translation (nullable when not added yet). */
-  translation: { title: string; body: string } | null;
+  /** Per-locale translations, keyed by non-primary locale. A key is present
+   *  once the user adds that language (even before typing); empty entries are
+   *  dropped at save time. */
+  translations: Partial<Record<Locale, { title: string; body: string }>>;
   targetFilter: BroadcastTargetFilter;
   sendMode: SendMode | null;
   scheduledAt: Date | null;
   /** IANA timezone for the scheduled time. Defaults to browser timezone. */
   timezone: string;
+}
+
+/** Trim and keep only translations that actually have content. */
+function filledTranslations(
+  translations: WizardState['translations'],
+): BroadcastTranslations {
+  const out: BroadcastTranslations = {};
+  for (const [loc, entry] of Object.entries(translations)) {
+    if (entry && (entry.title.trim() || entry.body.trim())) {
+      out[loc as Locale] = { title: entry.title.trim(), body: entry.body.trim() };
+    }
+  }
+  return out;
 }
 
 const BROWSER_TIMEZONE =
@@ -132,7 +148,7 @@ const BROWSER_TIMEZONE =
 const EMPTY_STATE: WizardState = {
   title: '',
   body: '',
-  translation: null,
+  translations: {},
   targetFilter: { all: true },
   sendMode: 'now',
   scheduledAt: null,
@@ -222,7 +238,9 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
   const canSchedule = hasFeature('notifications.scheduled');
   const canSegment = hasFeature('notifications.segmentation');
   const primaryLocale: Locale = currentBusiness?.primary_locale ?? 'fr';
-  const secondaryLocale: Locale = primaryLocale === 'fr' ? 'en' : 'fr';
+  const secondaryLocales: Locale[] = SUPPORTED_LOCALES.filter(
+    (l) => l !== primaryLocale,
+  );
 
   // ─── Initial state ───
   // `title` is an internal-only label the business uses to find broadcasts
@@ -232,14 +250,18 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
   // value as-is.
   const initialState = useMemo<WizardState>(() => {
     if (existing) {
-      const translationEntry =
-        (existing.translations as BroadcastTranslations | undefined)?.[
-        secondaryLocale
-        ] ?? null;
+      // Carry over every non-primary locale's saved translation as-is.
+      const existingTranslations =
+        (existing.translations as BroadcastTranslations | undefined) ?? {};
+      const translations: WizardState['translations'] = {};
+      for (const loc of secondaryLocales) {
+        const entry = existingTranslations[loc];
+        if (entry) translations[loc] = { title: entry.title, body: entry.body };
+      }
       return {
         title: existing.title ?? '',
         body: existing.body ?? '',
-        translation: translationEntry ?? null,
+        translations,
         targetFilter: existing.target_filter ?? { all: true },
         sendMode: existing.scheduled_at ? 'schedule' : null,
         scheduledAt: existing.scheduled_at
@@ -252,7 +274,9 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
       ...EMPTY_STATE,
       title: buildDefaultBroadcastName(primaryLocale),
     };
-  }, [existing, primaryLocale, secondaryLocale]);
+    // secondaryLocales is derived from primaryLocale, so the dep list is stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existing, primaryLocale]);
 
   const [state, setState] = useState<WizardState>(initialState);
   const [currentStep, setCurrentStep] = useState<StepKey>('compose');
@@ -308,19 +332,11 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
   }, [currentStep, state, renderTs]);
 
   // ─── Build payload for save ───
-  const hasFilledTranslation =
-    !!state.translation &&
-    (state.translation.title.trim().length > 0 ||
-      state.translation.body.trim().length > 0);
+  const translationsPayload = filledTranslations(state.translations);
+  const hasFilledTranslation = Object.keys(translationsPayload).length > 0;
 
   const buildPayload = (includeSendMode: boolean) => {
-    const translations: BroadcastTranslations = {};
-    if (hasFilledTranslation && state.translation) {
-      translations[secondaryLocale] = {
-        title: state.translation.title.trim(),
-        body: state.translation.body.trim(),
-      };
-    }
+    const translations: BroadcastTranslations = translationsPayload;
 
     const payload: {
       title: string;
@@ -453,15 +469,6 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
     setConfirmSend(false);
     try {
       if (editId && existing) {
-        const translationsPayload: BroadcastTranslations =
-          hasFilledTranslation && state.translation
-            ? {
-              [secondaryLocale]: {
-                title: state.translation.title.trim(),
-                body: state.translation.body.trim(),
-              },
-            }
-            : {};
         // Edit mode: PATCH with schedule or send via /send
         if (state.sendMode === 'schedule') {
           await updateMutation.mutateAsync({
@@ -642,7 +649,7 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
               state={state}
               setState={setState}
               primaryLocale={primaryLocale}
-              secondaryLocale={secondaryLocale}
+              secondaryLocales={secondaryLocales}
             />
           )}
           {currentStep === 'audience' && (
@@ -836,38 +843,54 @@ interface ComposeStepProps {
   state: WizardState;
   setState: (updater: (prev: WizardState) => WizardState) => void;
   primaryLocale: Locale;
-  secondaryLocale: Locale;
+  secondaryLocales: Locale[];
 }
 
 function ComposeStep({
   state,
   setState,
   primaryLocale,
-  secondaryLocale,
+  secondaryLocales,
 }: Readonly<ComposeStepProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.compose');
   const [editingLocale, setEditingLocale] = useState<Locale>(primaryLocale);
 
+  // Locales the user has added (a key in the translations map), in stable order.
+  const addedLocales = secondaryLocales.filter((l) => l in state.translations);
+
   const isPrimary = editingLocale === primaryLocale;
-  const body = isPrimary ? state.body : state.translation?.body ?? '';
+  const body = isPrimary ? state.body : state.translations[editingLocale]?.body ?? '';
 
   const setBody = (value: string) => {
     setState((s) => {
       if (editingLocale === primaryLocale) return { ...s, body: value };
-      const existing = s.translation ?? { title: '', body: '' };
-      return { ...s, translation: { ...existing, body: value } };
+      const existing = s.translations[editingLocale] ?? { title: '', body: '' };
+      return {
+        ...s,
+        translations: { ...s.translations, [editingLocale]: { ...existing, body: value } },
+      };
     });
   };
 
   const handleLocaleChange = (loc: Locale) => {
-    if (loc !== primaryLocale) {
-      setState((s) =>
-        s.translation
-          ? s
-          : { ...s, translation: { title: '', body: '' } }
-      );
+    // Adding a not-yet-present non-primary locale seeds an empty entry so its
+    // pill appears; switching to an existing one just changes the editor focus.
+    if (loc !== primaryLocale && !(loc in state.translations)) {
+      setState((s) => ({
+        ...s,
+        translations: { ...s.translations, [loc]: { title: '', body: '' } },
+      }));
     }
     setEditingLocale(loc);
+  };
+
+  const handleRemoveLocale = (loc: Locale) => {
+    setState((s) => {
+      const next = { ...s.translations };
+      delete next[loc];
+      return { ...s, translations: next };
+    });
+    if (editingLocale === loc) setEditingLocale(primaryLocale);
   };
 
   return (
@@ -900,13 +923,11 @@ function ComposeStep({
 
       <BroadcastLocalePills
         primaryLocale={primaryLocale}
-        secondaryLocale={secondaryLocale}
+        secondaryLocales={secondaryLocales}
+        addedLocales={addedLocales}
         editingLocale={editingLocale}
-        hasTranslation={!!state.translation}
         onSwitch={handleLocaleChange}
-        onRemoveTranslation={() =>
-          setState((s) => ({ ...s, translation: null }))
-        }
+        onRemoveLocale={handleRemoveLocale}
       />
 
       <div>
@@ -940,28 +961,32 @@ function ComposeStep({
 // switch the fields; click the × on the secondary pill to remove the
 // translation entirely. The "Translations" dropdown on the far right lists
 // languages the user hasn't added yet — empty = dropdown hidden.
-const LOCALE_FLAGS: Record<Locale, string> = { fr: '🇫🇷', en: '🇬🇧' };
-const LOCALE_NATIVE: Record<Locale, string> = { fr: 'Français', en: 'English' };
+const LOCALE_FLAGS: Record<Locale, string> = { fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸' };
+const LOCALE_NATIVE: Record<Locale, string> = { fr: 'Français', en: 'English', es: 'Español' };
 
 interface BroadcastLocalePillsProps {
   primaryLocale: Locale;
-  secondaryLocale: Locale;
+  /** All non-primary locales the business could translate into. */
+  secondaryLocales: Locale[];
+  /** The subset the user has actually added. */
+  addedLocales: Locale[];
   editingLocale: Locale;
-  hasTranslation: boolean;
   onSwitch: (loc: Locale) => void;
-  onRemoveTranslation: () => void;
+  onRemoveLocale: (loc: Locale) => void;
 }
 
 function BroadcastLocalePills({
   primaryLocale,
-  secondaryLocale,
+  secondaryLocales,
+  addedLocales,
   editingLocale,
-  hasTranslation,
   onSwitch,
-  onRemoveTranslation,
+  onRemoveLocale,
 }: Readonly<BroadcastLocalePillsProps>) {
   const t = useTranslations('notifications.editor');
-  const availableToAdd: Locale[] = hasTranslation ? [] : [secondaryLocale];
+  const availableToAdd: Locale[] = secondaryLocales.filter(
+    (l) => !addedLocales.includes(l),
+  );
 
   return (
     <div className="flex items-center justify-between gap-2 mt-4 mb-4 min-h-[32px]">
@@ -971,17 +996,15 @@ function BroadcastLocalePills({
           active={editingLocale === primaryLocale}
           onClick={() => onSwitch(primaryLocale)}
         />
-        {hasTranslation && (
+        {addedLocales.map((loc) => (
           <LocalePill
-            locale={secondaryLocale}
-            active={editingLocale === secondaryLocale}
-            onClick={() => onSwitch(secondaryLocale)}
-            onRemove={() => {
-              onRemoveTranslation();
-              if (editingLocale === secondaryLocale) onSwitch(primaryLocale);
-            }}
+            key={loc}
+            locale={loc}
+            active={editingLocale === loc}
+            onClick={() => onSwitch(loc)}
+            onRemove={() => onRemoveLocale(loc)}
           />
-        )}
+        ))}
       </div>
       {availableToAdd.length > 0 && (
         <DropdownMenu>
@@ -2043,8 +2066,8 @@ function ReviewStep({
     return null;
   }, [state.sendMode, state.scheduledAt, uiLocale]);
 
-  const hasTranslation =
-    !!state.translation && state.translation.body.trim().length > 0;
+  const reviewTranslations = filledTranslations(state.translations);
+  const translationLocales = Object.keys(reviewTranslations) as Locale[];
 
   return (
     <div
@@ -2156,17 +2179,18 @@ function ReviewStep({
           }
         />
 
-        {hasTranslation && state.translation && (
+        {translationLocales.map((loc) => (
           <SummaryCompactRow
+            key={loc}
             icon={<CheckCircleIcon className="h-3.5 w-3.5" weight="fill" />}
-            label={tWizard('review.translationLabel')}
+            label={`${tWizard('review.translationLabel')} · ${LOCALE_NATIVE[loc]}`}
             value={
               <div className="text-[12.5px] text-[#1A1A1A] text-right line-clamp-3 whitespace-pre-wrap">
-                {state.translation.body || '—'}
+                {reviewTranslations[loc]?.body || '—'}
               </div>
             }
           />
-        )}
+        ))}
       </div>
     </div>
   );

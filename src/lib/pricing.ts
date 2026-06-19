@@ -46,7 +46,8 @@ export function isFoundingProgramOpen(now: Date = new Date()): boolean {
 
 /** Format a number for display (no thousand separators; locale-aware decimals). */
 export function formatPrice(price: number, locale?: string): string {
-  if (locale === 'fr') {
+  // FR and ES (Spain) use a comma as the decimal separator.
+  if (locale === 'fr' || locale === 'es') {
     return price % 1 === 0 ? `${price}` : price.toFixed(2).replace('.', ',');
   }
   return price % 1 === 0 ? `${price}` : price.toFixed(2);

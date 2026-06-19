@@ -1,0 +1,49 @@
+{
+  "impersonation": {
+    "dialog": {
+      "title": "Ver como… ({name})",
+      "description": "Abre una sesión de solo lectura en el panel del comercio. Cada acción se registra para auditoría.",
+      "steps": {
+        "target": "1. Objetivo",
+        "reason": "2. Motivo",
+        "targetSubtitle": "Elige con qué identidad vas a ver este comercio.",
+        "reasonSubtitle": "Explica por qué. Se registrará junto con la sesión.",
+        "summaryLabel": "Verás como"
+      },
+      "next": "Siguiente",
+      "back": "Atrás",
+      "mode": {
+        "label": "Cómo elegir el objetivo",
+        "byRole": "Por rol",
+        "byRoleHint": "Elige un rol (seleccionaremos un miembro activo)",
+        "byUser": "Por usuario concreto",
+        "byUserHint": "Elige un miembro concreto de este comercio"
+      },
+      "byRole": {
+        "label": "Rol con el que entrar",
+        "preview": "Verás como {name} ({email})",
+        "noneAvailable": "No hay ningún {role} activo en este comercio"
+      },
+      "byUser": {
+        "label": "Usuario con el que entrar",
+        "placeholder": "Elige un miembro…"
+      },
+      "reason": {
+        "label": "Motivo del acceso",
+        "placeholder": "Ticket #1234, un cliente avisa de que los sellos no se aplican tras el escaneo",
+        "counter": "{count}/{max} caracteres (mín {min})"
+      },
+      "confirmation": "Confirmo que este acceso responde a un motivo de soporte legítimo. La sesión quedará registrada.",
+      "cancel": "Cancelar",
+      "submit": "Iniciar sesión",
+      "starting": "Iniciando…",
+      "loading": "Cargando…",
+      "genericError": "No se ha podido iniciar la sesión de acceso"
+    },
+    "banner": {
+      "text": "Viendo como {name} ({role}) en {business}, solo lectura",
+      "byRoleAnnotation": "seleccionado por rol",
+      "endSession": "Terminar sesión"
+    }
+  }
+}

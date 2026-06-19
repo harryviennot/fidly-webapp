@@ -79,7 +79,13 @@
       "saved": "La langue de votre entreprise a été mise à jour.",
       "country": "Pays",
       "countryHint": "Le pays où se trouve votre entreprise.",
-      "countrySaved": "Le pays de votre entreprise a été mis à jour."
+      "countrySaved": "Le pays de votre entreprise a été mis à jour.",
+      "switchConfirm": {
+        "title": "Changer la langue de votre entreprise ?",
+        "description": "Votre contenu actuel en {old} sera conservé comme traduction {old}, et votre traduction {new} (si elle existe) deviendra le contenu principal vu par défaut. Les cartes déjà installées se mettent à jour automatiquement.",
+        "confirm": "Changer la langue",
+        "cancel": "Annuler"
+      }
     },
     "theme": {
       "title": "Personnalisation du thème",

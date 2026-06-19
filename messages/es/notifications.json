@@ -1,0 +1,512 @@
+{
+  "notifications": {
+    "page": {
+      "title": "Notificaciones",
+      "subtitle": "Mensajes automáticos que se envían a tus clientes cuando reúnen sellos o desbloquean recompensas"
+    },
+    "icon": {
+      "title": "Icono de notificación",
+      "description": "Aparece en la pantalla bloqueada de tus clientes cuando reciben una notificación de tu tarjeta de fidelidad",
+      "changeInSettings": "Cambiar en los ajustes",
+      "default": "Icono por defecto",
+      "defaultHint": "Tus clientes ven una campana genérica en su pantalla bloqueada.",
+      "custom": "Icono personalizado",
+      "customHint": "El icono de tu marca aparece en cada notificación.",
+      "lockedHint": "Pasa a Growth para usar un icono de notificación con tu marca",
+      "upload": "Subir icono",
+      "uploadHint": "PNG, al menos 87×87 píxeles",
+      "preview": "Vista previa",
+      "crop": {
+        "title": "Recorta tu icono",
+        "description": "Arrastra el cuadro para elegir la parte de la imagen que quieres usar. Se redimensionará automáticamente.",
+        "apply": "Aplicar",
+        "cancel": "Cancelar"
+      },
+      "cacheWarning": {
+        "title": "Sobre las actualizaciones",
+        "body": "Los nuevos clientes verán tu icono actualizado de inmediato. Para los clientes que ya tienen la tarjeta puede tardar varios días. Apple Wallet guarda los recursos de la tarjeta en caché de forma agresiva y no podemos forzar la actualización."
+      }
+    },
+    "howItWorks": {
+      "title": "Cómo funciona",
+      "step1": "Un miembro de tu equipo escanea la tarjeta de fidelidad del cliente.",
+      "step2": "Su tarjeta se actualiza en silencio en segundo plano.",
+      "step3": "El cliente ve la notificación en su pantalla bloqueada.",
+      "note": "Tus clientes reciben la notificación directamente en su teléfono y en el reverso de su tarjeta de fidelidad."
+    },
+    "variablesReference": {
+      "title": "Variables disponibles",
+      "description": "Usa estas variables en tu mensaje. Se sustituirán por los valores reales cuando se envíe la notificación.",
+      "example": "Ejemplo"
+    },
+    "triggers": {
+      "sectionTitle": "Mensajes automáticos",
+      "sectionDescription": "Estos mensajes se envían automáticamente cuando un cliente reúne un sello o gana una recompensa",
+      "stamp_added": {
+        "name": "Sello conseguido",
+        "description": "Se envía cuando un cliente reúne un sello nuevo"
+      },
+      "reward_earned": {
+        "name": "Recompensa desbloqueada",
+        "description": "Se envía cuando un cliente completa su tarjeta y gana una recompensa"
+      },
+      "reward_redeemed": {
+        "name": "Recompensa canjeada",
+        "description": "Se envía cuando un cliente canjea su recompensa"
+      },
+      "milestone": {
+        "name": "Hito",
+        "description": "Se envía cuando un cliente alcanza un número concreto de sellos"
+      },
+      "near_reward": {
+        "name": "Recompensa cerca",
+        "description": "Se envía cuando un cliente está a punto de desbloquear su recompensa"
+      }
+    },
+    "localePills": {
+      "enSet": "EN",
+      "frSet": "FR"
+    },
+    "card": {
+      "defaultPill": "Por defecto",
+      "customPill": "Personalizado",
+      "disabledPill": "Desactivado"
+    },
+    "milestones": {
+      "title": "Hitos",
+      "description": "Envía un mensaje especial cuando un cliente alcanza un número concreto de sellos",
+      "add": "Añadir hito",
+      "usage": "{count} de {max} usados",
+      "usageActive": "{count} de {max} activos",
+      "disabledPill": "Desactivado",
+      "unlimited": "{count} hitos",
+      "empty": "Aún no hay hitos. Añade uno para enviar un mensaje personalizado en un número concreto de sellos.",
+      "condition": "Cuando el cliente alcanza {count} sellos",
+      "conditionShort": "A los {count} sellos",
+      "limitReached": "Has alcanzado el límite de hitos de Growth. Pasa a Pro para tener hitos ilimitados.",
+      "stampCountLabel": "Se activa cuando el número de sellos es igual a",
+      "stampCountPlaceholder": "ej. 5",
+      "createTitle": "Nuevo hito",
+      "createDescription": "Envía una notificación personalizada cuando tus clientes alcancen un número concreto de sellos.",
+      "editTitle": "Editar hito",
+      "editDescription": "Cambia el número de sellos o el mensaje de este hito.",
+      "deleteConfirmTitle": "¿Eliminar este hito?",
+      "deleteConfirmDescription": "Este hito dejará de activarse para todos los clientes.",
+      "deleteButton": "Eliminar hito",
+      "errors": {
+        "duplicate": "Ya existe un hito con este número de sellos.",
+        "quotaExceeded": "Has alcanzado tu límite de hitos. Pasa a Pro para tener hitos ilimitados.",
+        "invalidStampCount": "El número de sellos debe ser un número positivo.",
+        "outOfRange": "El número de sellos debe ser menor que {total} (el total de sellos de tu programa)."
+      },
+      "toasts": {
+        "created": "Hito añadido",
+        "createFailed": "No se pudo añadir el hito",
+        "updated": "Hito actualizado",
+        "updateFailed": "No se pudo actualizar el hito",
+        "deleted": "Hito eliminado",
+        "deleteFailed": "No se pudo eliminar el hito",
+        "swappedOff": "El hito en el sello {stamp} se desactivó para hacer hueco",
+        "enabled": "Hito activado",
+        "disabled": "Hito desactivado",
+        "toggleFailed": "No se pudo cambiar el hito"
+      },
+      "proUpsell": {
+        "title": "Hitos ilimitados",
+        "description": "Pasa a Pro para crear tantas notificaciones de hito como necesites, sin límite.",
+        "features": {
+          "unlimited": "Hitos ilimitados",
+          "broadcasts": "Difusiones ilimitadas y programación"
+        },
+        "cta": "Pasar a Pro"
+      }
+    },
+    "nearReward": {
+      "title": "Notificación de recompensa cerca",
+      "description": "Avisa al cliente cuando esté a unos pocos sellos de desbloquear su recompensa",
+      "thresholdLabel": "Avisar a",
+      "thresholdSuffix": "sellos de la recompensa"
+    },
+    "editor": {
+      "editTitle": "Editar mensaje",
+      "bodyLabel": "Mensaje",
+      "variablesLabel": "Insertar variable",
+      "previewLabel": "Vista previa",
+      "reset": "Restablecer",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "translations": "Traducciones",
+      "resetLocale": "Restablecer este idioma",
+      "enabled": "Activado",
+      "disabled": "Desactivado",
+      "disabledHint": "Cuando está desactivado, la tarjeta de fidelidad se sigue actualizando en silencio. Los clientes simplemente no ven una notificación de este evento.",
+      "rewardNameMissing": "Define una recompensa en los ajustes de tu programa para usar esta variable.",
+      "nameCollectionOff": "Activa la recogida de nombres en los ajustes de tu programa para usar esta variable.",
+      "storeLocationPro": "La variable de establecimiento es una función Pro. Pasa a Pro para usarla en tus mensajes.",
+      "nameWarning": "Algunos clientes no tienen un nombre registrado. Verán el mensaje sin el nombre.",
+      "previewWithoutName": "Vista previa para clientes sin nombre",
+      "emptyBody": "El mensaje no puede estar vacío",
+      "variables": {
+        "stamp_count": "Número de sellos actual",
+        "total_stamps": "Sellos necesarios",
+        "stamps_left": "Sellos restantes",
+        "rewards_count": "Recompensas pendientes de canjear",
+        "reward_name": "Nombre de la recompensa",
+        "business_name": "Nombre del comercio",
+        "customer_first_name": "Nombre del cliente",
+        "store_location": "Establecimiento"
+      }
+    },
+    "growthUpsell": {
+      "title": "Desbloquea todas las notificaciones",
+      "description": "Pasa a Growth para reescribir los mensajes por defecto con tu voz y crear notificaciones de hito personalizadas en números concretos de sellos.",
+      "features": {
+        "custom": "Escribe tu propio texto para cada mensaje automático",
+        "milestones": "Crea hitos personalizados en cualquier número de sellos",
+        "icon": "Conserva tu icono de notificación con tu marca"
+      },
+      "cta": "Pasar a Growth"
+    },
+    "plan": {
+      "starterReadOnly": "Estos son los mensajes por defecto. Pasa a un plan superior para personalizar el texto.",
+      "starterUsingDefault": "El contenido personalizado está en pausa en tu plan actual. En su lugar se envían los mensajes por defecto.",
+      "upgradeToCustomize": "Pasa a Growth para personalizar",
+      "upgradeToGrowth": "Pasar a Growth",
+      "upgradeToPro": "Pasar a Pro",
+      "proBadge": "PRO",
+      "growthBadge": "GROWTH",
+      "lockedTooltip": "Disponible con {tier}",
+      "upgradeTo": "Pasar a {tier}"
+    },
+    "toasts": {
+      "saved": "Mensaje guardado",
+      "saveFailed": "No se pudo guardar el mensaje",
+      "reset": "Restablecido",
+      "resetFailed": "No se pudo restablecer el mensaje",
+      "enabled": "Mensaje reactivado",
+      "disabled": "Mensaje desactivado",
+      "iconUploaded": "Icono subido",
+      "iconUploadFailed": "No se pudo subir el icono"
+    },
+    "broadcasts": {
+      "page": {
+        "title": "Difusiones",
+        "subtitle": "Envía un mensaje promocional como notificación a todos tus clientes"
+      },
+      "new": "Nueva difusión",
+      "empty": {
+        "title": "Aún no hay difusiones",
+        "description": "Crea tu primera difusión para llegar a todos tus clientes de una vez.",
+        "cta": "Enviar tu primera difusión",
+        "filters": {
+          "drafts": {
+            "title": "Sin borradores",
+            "description": "Los borradores que guardes aparecerán aquí.",
+            "cta": "Crear una difusión"
+          },
+          "scheduled": {
+            "title": "Sin difusiones programadas",
+            "description": "Programa una difusión para verla aquí.",
+            "cta": "Programar una difusión"
+          },
+          "sent": {
+            "title": "Aún no se ha enviado ninguna difusión",
+            "description": "Tu historial de envíos aparecerá aquí."
+          }
+        }
+      },
+      "preview": {
+        "now": "ahora",
+        "placeholder": "Tu mensaje aparecerá aquí",
+        "fallbackTitle": "Tu comercio"
+      },
+      "howItWorks": {
+        "steps": {
+          "compose": "Escribe tu mensaje.",
+          "audience": "Elige tu público.",
+          "send": "Envía ahora o programa."
+        },
+        "delivery": "Tus clientes reciben la notificación directamente en su teléfono y en el reverso de su tarjeta de fidelidad.",
+        "appleNote": {
+          "title": "A tener en cuenta con Apple Wallet",
+          "body": "Envía solo mensajes relacionados con tu programa o tu comercio. Si Apple considera que las notificaciones que envías no son solicitadas y no tienen relación, puede revocar la tarjeta de fidelidad.",
+          "link": "Más información"
+        },
+        "googleNote": {
+          "title": "A tener en cuenta con Google Wallet",
+          "body": "Google limita las tarjetas a 3 notificaciones al día. Los clientes que ya hayan recibido 3 notificaciones hoy (por ejemplo, sellos) no recibirán esta difusión."
+        }
+      },
+      "lastResults": {
+        "title": "Última difusión",
+        "recipients": "Envíos",
+        "delivered": "Entregados",
+        "deliveredShort": "entregados",
+        "failed": "Fallidos",
+        "deliveryRate": "{rate}% entregados",
+        "relativeJustNow": "ahora mismo",
+        "relativeMinutes": "hace {count}min",
+        "relativeHours": "hace {count}h",
+        "relativeDays": "hace {count}d"
+      },
+      "quota": {
+        "used": "{count} de {max} enviadas este mes",
+        "reached": "Has alcanzado el límite mensual. Pasa a Pro para tener difusiones ilimitadas.",
+        "unlimited": "Ilimitadas"
+      },
+      "filters": {
+        "all": "Todas",
+        "scheduled": "Programadas",
+        "sent": "Enviadas",
+        "drafts": "Borradores"
+      },
+      "status": {
+        "draft": "Borrador",
+        "scheduled": "Programada",
+        "sending": "Enviando",
+        "sent": "Enviada",
+        "cancelled": "Cancelada",
+        "failed": "Fallida"
+      },
+      "row": {
+        "recipients": "{count} destinatarios",
+        "delivered": "{count} entregados",
+        "failed": "{count} fallidos",
+        "throttled": "{count} limitados",
+        "lastEdited": "Editada {date}",
+        "locationTargeted": "{count, plural, one {1 establecimiento} other {# establecimientos}}",
+        "locationTargetedTitle": "Dirigida a {count, plural, one {1 establecimiento} other {# establecimientos}}"
+      },
+      "detail": {
+        "title": "Título",
+        "body": "Mensaje",
+        "audience": "Público",
+        "stats": "Entrega",
+        "createdBy": "Creada por",
+        "createdAt": "Creada el",
+        "sentAt": "Enviada el",
+        "scheduledFor": "Programada para",
+        "edit": "Editar",
+        "delete": "Eliminar borrador",
+        "cancel": "Cancelar envío",
+        "sendNow": "Enviar ahora",
+        "sendAgain": "Reenviar",
+        "sendAgainNow": "Enviar ahora",
+        "sendAgainSchedule": "Programar para más tarde",
+        "sendAgainTitle": "¿Reenviar esta difusión?",
+        "sendAgainBody": "Crearemos una difusión nueva con el mismo mensaje y el mismo público. Las estadísticas de entrega empezarán de cero.",
+        "confirmDelete": "¿Eliminar este borrador?",
+        "confirmDeleteBody": "Este borrador se eliminará de forma permanente. No se puede deshacer.",
+        "confirmCancel": "¿Cancelar esta difusión programada?",
+        "confirmCancelBody": "La difusión no se enviará y volverá a tus borradores. Podrás reprogramarla más tarde.",
+        "reachable": "Localizables",
+        "totalSendsShort": "total",
+        "reachableHint": "Clientes que tienen una tarjeta activa en Apple o Google Wallet en el momento del envío. Los que nunca instalaron la tarjeta se cuentan aparte.",
+        "deliveryRate": "{rate}% entregados",
+        "deliveredHint": "«Entregado» significa que Apple o Google Wallet aceptó la actualización de la tarjeta. Es posible que los clientes hayan silenciado los avisos en su dispositivo, algo que no podemos detectar. La tarjeta en sí se actualiza igualmente.",
+        "apple": "Apple Wallet",
+        "google": "Google Wallet",
+        "failed": "Fallidos",
+        "failedHint": "Clientes para los que ni Apple ni Google Wallet aceptaron la notificación. Suelen ser errores de red temporales; estos clientes volverán a incluirse en tu próxima difusión.",
+        "notReachable": "No localizables",
+        "notReachableBody": "{count} {count, plural, one {cliente no tiene} other {clientes no tienen}} la tarjeta instalada",
+        "passRemoved": "Tarjeta eliminada",
+        "passRemovedHint": "Usuarios de Google Wallet que eliminaron la tarjeta antes de que pudiéramos enviar. No recibirán esta difusión.",
+        "throttledHint": "Google limita cada tarjeta a 3 notificaciones cada 24h. Los clientes limitados recibirán tu próxima difusión."
+      },
+      "wizard": {
+        "steps": {
+          "compose": "Redactar",
+          "audience": "Público",
+          "schedule": "Programar",
+          "review": "Revisar"
+        },
+        "summary": {
+          "messageLabel": "Mensaje",
+          "customerOne": "cliente",
+          "customerOther": "clientes"
+        },
+        "compose": {
+          "title": "Redacta tu difusión",
+          "subtitle": "Escribe el mensaje corto que tus clientes verán en su tarjeta. Añade una traducción si quieres: los clientes ven el idioma que coincide con su teléfono.",
+          "bodyLabel": "Mensaje",
+          "bodyPlaceholder": "¡20% de descuento este fin de semana!",
+          "charCount": "{count} / {max} caracteres",
+          "translationHint": "Si no añades una traducción, todos los clientes ven la versión por defecto, sea cual sea su idioma."
+        },
+        "audience": {
+          "title": "¿Quién recibirá esto?",
+          "subtitle": "Elige a todo el mundo o filtra por actividad.",
+          "all": "Todos los clientes inscritos",
+          "allDescription": "Cada cliente con una tarjeta instalada",
+          "filtered": "Público filtrado",
+          "filteredDescription": "Elige quién lo recibe por actividad",
+          "estimate": "≈ {count} clientes",
+          "estimating": "Calculando...",
+          "group": {
+            "enrollment": "Inscripción",
+            "enrollmentHelp": "Filtra según cuándo y dónde se unió el cliente a tu programa.",
+            "stamps": "Sellos reunidos",
+            "stampsHelp": "Solo se dirige a clientes que tienen entre N y M sellos en su tarjeta actual.",
+            "activity": "Actividad",
+            "activityHelp": "Filtra según el comportamiento de compra, la última visita y dónde estuvieron activos."
+          },
+          "sub": {
+            "enrollmentAge": "Antigüedad de la inscripción",
+            "enrollmentAgeHelp": "Filtra según hace cuánto se unió el cliente a tu programa.",
+            "enrollmentLocation": "Establecimiento de inscripción",
+            "enrollmentLocationHelp": "Solo envía a los clientes que se inscribieron a través de los establecimientos seleccionados. Activa el interruptor para incluir también a los clientes que se unieron sin elegir un establecimiento.",
+            "enrollmentLocationUpsellTitle": "Dirigirse por establecimiento es Pro",
+            "enrollmentLocationUpsellDescription": "Pro te permite dirigirte a los clientes que se inscribieron en un establecimiento concreto.",
+            "includeDirect": "Incluir también las inscripciones directas",
+            "activeLocation": "Activo en un establecimiento",
+            "activeLocationHelp": "Solo envía a los clientes que escanearon en los establecimientos seleccionados en los últimos N días.",
+            "activeLocationUpsellTitle": "Dirigirse por actividad en un establecimiento es Pro",
+            "activeLocationUpsellDescription": "Pro te permite recuperar a los clientes que visitaron un establecimiento concreto hace poco."
+          },
+          "enrollment": {
+            "any": "Todos",
+            "recent": "Recientes",
+            "recentDesc": "Se unieron en los últimos N días",
+            "old": "Antiguos",
+            "oldDesc": "Se unieron hace más de N días",
+            "daysPlaceholder": "ej. 30",
+            "daysSuffix": "días"
+          },
+          "stamps": {
+            "minLabel": "Al menos",
+            "maxLabel": "Como máximo",
+            "placeholder": "ej. 5",
+            "suffix": "sellos",
+            "help": "Consejo: deja un campo vacío para no fijar ese límite.",
+            "hasRewardLabel": "Tiene una recompensa por canjear",
+            "hasRewardHelp": "Solo los clientes que tienen una recompensa en este momento: una tarjeta completa o recompensas acumuladas. Perfecto para un mensaje de «ven a canjearla»."
+          },
+          "activity": {
+            "hasRedeemedLabel": "Ha canjeado una recompensa",
+            "hasRedeemedHelp": "Solo envía a los clientes que ya han canjeado al menos una recompensa.",
+            "inactiveLabel": "Inactivos desde hace",
+            "inactiveHelp": "Dirígete a los clientes que no han vuelto en N días, útil para mensajes de recuperación.",
+            "inactivePlaceholder": "ej. 60"
+          },
+          "filters": {
+            "enrolled_before_days": "Inscritos hace más de N días",
+            "enrolled_after_days": "Inscritos en los últimos N días",
+            "stamp_count_min": "Al menos N sellos",
+            "stamp_count_max": "Como máximo N sellos",
+            "has_redeemed": "Ha canjeado una recompensa",
+            "inactive_days": "Inactivos desde hace N días"
+          },
+          "chip": {
+            "all": "Todo el mundo",
+            "enrolled_before_days": "Inscritos hace > {n}d",
+            "enrolled_after_days": "Inscritos hace < {n}d",
+            "stamp_count_min": "≥ {n} sellos",
+            "stamp_count_max": "≤ {n} sellos",
+            "has_redeemed": "Ha canjeado",
+            "inactive_days": "Inactivos {n}d+",
+            "enrolled_at_location_ids": "Inscritos en {n} {n, plural, one {establecimiento} other {establecimientos}}",
+            "active_at_location_ids": "Activos en {n} {n, plural, one {establecimiento} other {establecimientos}} ({days}d)"
+          },
+          "proUpsell": {
+            "title": "Desbloquea la segmentación de público",
+            "description": "Llega a los clientes adecuados con filtros más precisos en Pro.",
+            "features": {
+              "stamps": "Filtra por umbrales de número de sellos",
+              "activity": "Recupera a los clientes inactivos y premia a quienes canjean",
+              "location": "Dirígete por inscripción o actividad en establecimientos concretos"
+            }
+          }
+        },
+        "schedule": {
+          "title": "¿Cuándo la enviamos?",
+          "subtitle": "Envía de inmediato o programa para una fecha y hora concretas.",
+          "sendNow": "Enviar ahora",
+          "sendNowDescription": "Los clientes la recibirán de inmediato",
+          "scheduleLater": "Programar para más tarde",
+          "scheduleLaterDescription": "Elige una fecha y una hora",
+          "timezoneLabel": "Zona horaria",
+          "pastError": "La fecha programada debe ser en el futuro",
+          "dateLabel": "Fecha",
+          "timeLabel": "Hora"
+        },
+        "review": {
+          "title": "Revisar y enviar",
+          "subtitle": "Un último vistazo antes de enviarla.",
+          "summaryTitle": "Resumen",
+          "audienceLabel": "Público",
+          "sendTimeLabel": "Hora de envío",
+          "recipientsLabel": "Destinatarios",
+          "sendImmediately": "Envío inmediato",
+          "quotaNote": "Esto usará 1 de tus {max} difusiones mensuales",
+          "sendButton": "Enviar la difusión",
+          "scheduleButton": "Programar la difusión",
+          "confirmSend": "¿Enviar la difusión a {count} clientes?",
+          "confirmSendNowBody": "No se puede deshacer. Los clientes recibirán la notificación de inmediato.",
+          "confirmSendScheduleBody": "No se puede deshacer. La difusión se enviará a la hora programada.",
+          "heroRecipients": "{count, plural, one {# cliente} other {# clientes}}",
+          "heroImmediate": "Envío inmediato",
+          "heroScheduledFor": "Programada para {date}",
+          "translationLabel": "Traducción",
+          "contentLabel": "Mensaje",
+          "nameLabel": "Ponle un nombre a esta difusión",
+          "namePlaceholder": "ej. Adelanto del Black Friday",
+          "nameHelp": "Solo para tus registros, los clientes no lo verán. Sirve para encontrar esta difusión en tu historial."
+        },
+        "next": "Siguiente",
+        "back": "Atrás",
+        "cancel": "Cancelar",
+        "saveDraft": "Borrador",
+        "save": "Guardar",
+        "deleteDraft": "Eliminar",
+        "cancelBroadcast": "Cancelar envío",
+        "stepIndicator": "Paso {current} de {total}"
+      },
+      "starter": {
+        "headline": "Llega a todos tus clientes de una vez",
+        "description": "Tus clientes reciben la notificación directamente en su teléfono y en el reverso de su tarjeta de fidelidad.",
+        "features": {
+          "segment": "Dirígete a los clientes por sellos, actividad o fecha de inscripción",
+          "schedule": "Programa difusiones con antelación (Pro)",
+          "tracking": "Seguimiento de entrega en directo, mira quién la recibió"
+        },
+        "cta": "Pasar a Growth"
+      },
+      "proUpsell": {
+        "title": "Programa y difunde sin límites",
+        "description": "Prepara tus difusiones con antelación y llega a todos tus clientes tantas veces como necesites.",
+        "features": {
+          "schedule": "Programa difusiones con días o semanas de antelación",
+          "unlimited": "Difusiones mensuales ilimitadas"
+        },
+        "cta": "Pasar a Pro"
+      },
+      "toasts": {
+        "draftSaved": "Borrador guardado",
+        "draftSaveFailed": "No se pudo guardar el borrador",
+        "sent": "Difusión enviada",
+        "sendFailed": "No se pudo enviar la difusión",
+        "scheduled": "Difusión programada",
+        "scheduleFailed": "No se pudo programar la difusión",
+        "cancelled": "Difusión cancelada",
+        "cancelFailed": "No se pudo cancelar la difusión",
+        "deleted": "Borrador eliminado",
+        "deleteFailed": "No se pudo eliminar el borrador",
+        "scheduledCancelled": "Difusión cancelada, movida a tus borradores",
+        "sentAgain": "Difusión reenviada",
+        "sentAgainFailed": "No se pudo reenviar la difusión"
+      },
+      "errors": {
+        "upgradeRequired": "Las difusiones requieren Growth o Pro.",
+        "quotaExceeded": "Has usado todas tus difusiones de este mes. Guárdala como borrador y envíala cuando se reinicie tu cuota, o pasa a Pro para tener difusiones ilimitadas.",
+        "proFiltersBlocked": "Los filtros avanzados requieren Pro."
+      }
+    },
+    "downgradeBanner": {
+      "title": "Tu plan Growth ha terminado",
+      "description": "{count, plural, =0 {Las plantillas personalizadas están desactivadas.} one {# mensaje programado se canceló y las plantillas personalizadas están desactivadas.} other {# mensajes programados se cancelaron y las plantillas personalizadas están desactivadas.}}",
+      "cta": "Reactiva tu plan para restaurarlas",
+      "dismiss": "Descartar"
+    }
+  }
+}

@@ -29,7 +29,7 @@ export const PRO_ONLY_VARIABLES: ReadonlySet<VariableKey> = new Set([
   'store_location',
 ]);
 
-export type Locale = 'en' | 'fr';
+export type Locale = 'en' | 'fr' | 'es';
 
 /**
  * Localized display names for each canonical variable. Purely a UI concern —
@@ -56,6 +56,16 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     business_name: 'nom_entreprise',
     customer_first_name: 'prenom_client',
     store_location: 'lieu_magasin',
+  },
+  es: {
+    stamp_count: 'sellos_actuales',
+    total_stamps: 'sellos_total',
+    stamps_left: 'sellos_restantes',
+    rewards_count: 'recompensas_pendientes',
+    reward_name: 'nombre_recompensa',
+    business_name: 'nombre_comercio',
+    customer_first_name: 'nombre_cliente',
+    store_location: 'lugar_establecimiento',
   },
 };
 

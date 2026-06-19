@@ -1,0 +1,77 @@
+{
+  "activity": {
+    "title": "Actividad",
+    "subtitle": "Todo lo que ocurre en tu programa, en directo",
+    "export": "Exportar",
+    "searchPlaceholder": "Buscar un cliente...",
+    "loadFailed": "No se pudo cargar la actividad.",
+    "empty": "Aún no hay actividad. Los sellos y las recompensas aparecerán aquí.",
+    "loadMore": "Cargar más",
+    "loadingMore": "Cargando...",
+    "by": "por",
+    "you": "Tú",
+    "live": "En directo",
+    "stampProgress": "{current}/{total} sellos",
+    "sources": {
+      "scanner": "Escaneo",
+      "dashboard": "Manual"
+    },
+    "filters": {
+      "label": "Tipo",
+      "all": "Todo",
+      "stampAdded": "Sellos añadidos",
+      "rewardRedeemed": "Recompensas",
+      "stampVoided": "Sellos anulados",
+      "bonusStamp": "Sellos extra",
+      "stampsAdjusted": "Ajustes",
+      "cardAdded": "Tarjeta añadida",
+      "cardReAdded": "Tarjeta vuelta a añadir",
+      "cardDeleted": "Tarjeta eliminada"
+    },
+    "locationFilter": {
+      "label": "Establecimiento",
+      "allLocations": "Todos los establecimientos",
+      "noLocation": "Sin establecimiento",
+      "primary": "principal",
+      "unknown": "Establecimiento desconocido",
+      "clear": "Quitar el filtro de establecimiento"
+    },
+    "itemVerbs": {
+      "stamp_added": "ha recibido un sello",
+      "reward_redeemed": "ha canjeado una recompensa",
+      "stamp_voided": "ha tenido un sello anulado",
+      "bonus_stamp": "ha recibido un sello extra",
+      "stamps_adjusted": "ha tenido sus sellos ajustados",
+      "card_added": "ha añadido su tarjeta",
+      "card_re_added": "ha vuelto a añadir su tarjeta",
+      "card_deleted": "ha eliminado su tarjeta"
+    },
+    "time": {
+      "justNow": "Ahora mismo",
+      "minutesAgo": "hace {count} min",
+      "hoursAgo": "hace {count} h",
+      "yesterday": "Ayer",
+      "daysAgo": "hace {count} d"
+    },
+    "dateGroups": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "thisWeek": "Esta semana",
+      "older": "Anterior"
+    },
+    "stats": {
+      "todayActivity": "Actividad de hoy",
+      "todayActivityInfo": "Sellos y recompensas añadidos hoy, comparados con un día normal (unos {avg}).",
+      "typicalPerDay": "≈ {avg}/día de media",
+      "thisWeek": "Esta semana",
+      "vsLastWeek": "frente a la semana pasada",
+      "bestDay": "Mejor día"
+    },
+    "emptyState": {
+      "title": "Aún no hay actividad",
+      "description": "Los sellos y las recompensas aparecerán aquí a medida que tus clientes usen tu programa de fidelidad."
+    },
+    "emptyFiltered": "Ninguna actividad coincide con tus filtros.",
+    "rewardsLeft": "{count, plural, =1 {1 recompensa restante} other {# recompensas restantes}}"
+  }
+}

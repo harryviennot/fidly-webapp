@@ -84,26 +84,26 @@ export function ChangelogMarkdown({
   );
 }
 
-/** Public showcase changelog URL for the current locale. */
+/** Public showcase changelog URL for the current locale. FR is prefixless. */
 export function showcaseChangelogUrl(locale: string): string {
   const base = process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
-  return `${base}${locale === "en" ? "/en" : ""}/changelog`;
+  return `${base}${locale === "fr" ? "" : `/${locale}`}/changelog`;
 }
 
 /** Public showcase "mobile scanner" feature page (locale-specific slug). */
 export function scannerAppUrl(locale: string): string {
   const base = process.env.NEXT_PUBLIC_SHOWCASE_URL || "https://stampeo.app";
-  return locale === "en"
-    ? `${base}/en/features/mobile-scanner`
-    : `${base}/features/scanner-mobile`;
+  if (locale === "en") return `${base}/en/features/mobile-scanner`;
+  if (locale === "es") return `${base}/es/features/scanner-movil`;
+  return `${base}/features/scanner-mobile`;
 }
 
-/** Date in the viewer's locale, e.g. "June 11, 2026" / "11 juin 2026". */
+/** Date in the viewer's locale, e.g. "June 11, 2026" / "11 juin 2026" / "11 de junio de 2026". */
 export function formatReleaseDate(iso: string | null, locale: string): string {
   if (!iso) return "";
   try {
     return new Date(iso).toLocaleDateString(
-      locale === "fr" ? "fr-FR" : "en-US",
+      locale === "fr" ? "fr-FR" : locale === "es" ? "es-ES" : "en-US",
       { month: "long", day: "numeric", year: "numeric" }
     );
   } catch {
@@ -161,8 +161,8 @@ export function ChangelogItemRow({
   locale: string;
   forTeamLabel: string;
 }) {
-  const title = resolveLocale(item.title_fr, item.title_en, locale);
-  const body = resolveLocale(item.body_fr, item.body_en, locale);
+  const title = resolveLocale(item.title_fr, item.title_en, item.title_es, locale);
+  const body = resolveLocale(item.body_fr, item.body_en, item.body_es, locale);
   const teamOnly =
     (item.affects ?? []).includes("scanner") &&
     !(item.affects ?? []).includes("owner");
@@ -175,7 +175,7 @@ export function ChangelogItemRow({
             className="h-1.5 w-1.5 rounded-full"
             style={{ backgroundColor: areaDotHex(area.color) }}
           />
-          {locale === "en" ? area.label_en : area.label_fr}
+          {resolveLocale(area.label_fr, area.label_en, area.label_es, locale)}
         </span>
       )}
       <div className="min-w-0">
