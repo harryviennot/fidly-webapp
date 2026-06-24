@@ -4,11 +4,13 @@ import type { CustomerResponse, PaginatedCustomerResponse, StampResponse } from 
 export interface AddStampOptions {
   /**
    * Discriminator picked up by the backend.
-   *   - "scanner" (default, sent as no body) — physical-scan flow, used by
-   *     the onboarding self-test. Reason MUST be absent.
+   *   - "scanner" — physical-scan flow. Reason MUST be absent. Pass it
+   *     explicitly (with `amount`) to simulate a real points scan from the
+   *     onboarding self-test; omitting `options` entirely also defaults the
+   *     backend to a scanner stamp with no body.
    *   - "dashboard" — owner/admin manual adjustment, reason REQUIRED.
    */
-  source?: 'dashboard';
+  source?: 'scanner' | 'dashboard';
   /** Required when source === "dashboard". 1–280 chars, surfaced in activity. */
   reason?: string;
   /**

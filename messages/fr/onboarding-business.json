@@ -210,6 +210,10 @@
             "title": "Tampons et récompense",
             "subtitle": "Choisissez les icônes et la couleur principale. Ces choix donnent le ton de votre carte."
           },
+          "points": {
+            "title": "Points et récompenses",
+            "subtitle": "Choisissez l'affichage de votre solde, puis votre couleur."
+          },
           "content": {
             "title": "Informations visibles en façade",
             "subtitle": "Petites mentions affichées directement sur la carte, sans avoir à la retourner. Idéal pour la récompense en cours, la date de fin, ou une promotion.",
@@ -324,7 +328,26 @@
             "justStamped": "Tampon ajouté",
             "multiDeviceHint": "{count, plural, =1 {} other {Chaque appui tamponne les # téléphones installés à la fois.}}",
             "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",
-            "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre tableau de bord."
+            "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre tableau de bord.",
+            "points": {
+              "title": "Envoyez-vous des points",
+              "subtitle": "Chaque achat test crédite des points et envoie une vraie notification sur votre téléphone.",
+              "readyTitle": "Prêt à ajouter des points",
+              "readyBody": "Appuyez sur le bouton ci-dessous pour enregistrer un achat test. Une vraie notification arrivera sur votre téléphone en quelques secondes.",
+              "firstStampLandedTitle": "Vous l'avez senti.",
+              "firstStampLandedBody": "Cette vibration, c'est exactement ce que vos clients ressentiront à chaque fois qu'ils gagnent des points. Même notification, même timing. Faites-en un deuxième pour bien sentir le rythme.",
+              "keepStampingTitle": "Encore un",
+              "keepStampingBody": "Un dernier achat test crédite encore des points et envoie une deuxième vraie notification. Le petit délai entre les deux permet à chacune de vibrer séparément.",
+              "demoCompleteTitle": "C'est exactement ça.",
+              "demoCompleteBody": "Vous venez de vivre ce que vivront vos clients. Quand vous êtes prêt, on continue.",
+              "sendCta": "Enregistrer un achat test",
+              "sendAnotherCta": "Ajouter des points",
+              "watching": "Les points arrivent…",
+              "cooldownCta": "Prochain achat disponible dans {seconds}s.",
+              "stampsLabel": "Points sur votre carte",
+              "justStamped": "Points ajoutés",
+              "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant."
+            }
           }
         }
       },

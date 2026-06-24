@@ -210,6 +210,10 @@
             "title": "Stamps and rewards",
             "subtitle": "Pick stamp and reward icons, then choose your color."
           },
+          "points": {
+            "title": "Points and rewards",
+            "subtitle": "Choose how your balance shows, then pick your color."
+          },
           "content": {
             "title": "Extra info on the front",
             "subtitle": "Short fields next to the stamps. The reward, an expiry, a limit, anything worth showing.",
@@ -324,7 +328,26 @@
             "justStamped": "Stamp added",
             "multiDeviceHint": "{count, plural, =1 {} other {Each tap stamps all # installed devices at once.}}",
             "fallback": "No buzz yet? Notifications can take a few seconds. Try again in a moment.",
-            "customisationHint": "This is the default message. You can rewrite it, add custom messages at specific stamp counts, or turn notifications off entirely from your notifications settings."
+            "customisationHint": "This is the default message. You can rewrite it, add custom messages at specific stamp counts, or turn notifications off entirely from your notifications settings.",
+            "points": {
+              "title": "Send yourself points",
+              "subtitle": "Each test purchase credits points and fires a real notification to your phone. Exactly what your customers will get.",
+              "readyTitle": "Ready to add points",
+              "readyBody": "Tap below to log a test purchase. Your phone buzzes within a few seconds.",
+              "firstStampLandedTitle": "That's the feel",
+              "firstStampLandedBody": "That's exactly what your customers will feel every time they earn points. Same buzz, same timing, same flow. Add one more to get the rhythm.",
+              "keepStampingTitle": "Add some more",
+              "keepStampingBody": "Another test purchase credits more points and fires a second real notification. The short wait between them is what keeps each one buzzing on its own.",
+              "demoCompleteTitle": "You've got the feel for it",
+              "demoCompleteBody": "Whenever you're ready, we'll move on.",
+              "sendCta": "Log a test purchase",
+              "sendAnotherCta": "Add more points",
+              "watching": "Watching for the points…",
+              "cooldownCta": "Next purchase in {seconds}s",
+              "stampsLabel": "Points on your card",
+              "justStamped": "Points added",
+              "fallback": "No buzz yet? Notifications can take a few seconds. Try again in a moment."
+            }
           }
         }
       },

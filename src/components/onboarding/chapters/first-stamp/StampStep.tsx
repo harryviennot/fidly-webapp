@@ -15,9 +15,10 @@ import {
 } from '@/components/ui/collapsible';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useActiveDesign, useDesigns } from '@/hooks/use-designs';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { computeCardColors } from '@/lib/card-utils';
 import { cn } from '@/lib/utils';
-import type { CardDesign } from '@/types';
+import { isPointsProgram, type CardDesign } from '@/types';
 import { useWizardStep } from '../../wizard-context';
 import { useBusinessInstalls, type BusinessInstall } from './useBusinessInstalls';
 import { useDesignReady } from './useDesignReady';
@@ -42,6 +43,10 @@ const COOLDOWN_TICK_MS = 1000;
 // wow twice; more would just batch into Apple's coalesce window and ruin
 // the next chapter's broadcast push.
 const MAX_STAMPS = 2;
+// Sample ticket price (in the business currency) for the points self-test.
+// The backend credits round(amount × points_per_currency_unit), so this is a
+// believable café ticket that visibly moves the balance on each tap.
+const POINTS_TEST_AMOUNT = 10;
 
 /**
  * Chapter 7 sub-step 2 — optional. The wow moment. Fans out a real /stamps
@@ -60,20 +65,36 @@ export function StampStep() {
   const ctx = useWizardStep();
 
   const businessId = currentBusiness?.id;
+  const { data: program } = useDefaultProgram(businessId);
+  // Points cards "stamp" by logging a test purchase (an amount → credited
+  // points), not by adding a stamp. Drives the copy, the action payload, the
+  // primary-value readout and the cap below.
+  const isPoints = isPointsProgram(program);
+  // Type-aware key picker: points-specific strings live under a `points`
+  // sub-object; everything else falls back to the shared stamp keys.
+  const tk = (key: string) => (isPoints ? t(`points.${key}`) : t(key));
   const { installs, installedCount, refetch, loading: installsLoading } = useBusinessInstalls(businessId);
   const installedWithEnrollment = useMemo(
     () => installs.filter((i) => i.installed && i.enrollment_id),
     [installs]
   );
 
-  // Canonical stamp count for the action card: highest stamp count among
-  // installed customers. They all move together when the fan-out succeeds,
-  // and "max" beats "min" if one stamp call partially fails (we'll surface
-  // the partial result in the toast).
+  // Canonical primary value for the action card: highest count among installed
+  // customers. Points programs read the balance (`points`); stamp programs read
+  // the stamp count. They all move together when the fan-out succeeds, and
+  // "max" beats "min" if one call partially fails (surfaced in the toast).
+  const primaryFor = (i: BusinessInstall) => (isPoints ? i.points : i.stamps);
   const stamps = installedWithEnrollment.length
-    ? Math.max(0, ...installedWithEnrollment.map((i) => i.stamps))
+    ? Math.max(0, ...installedWithEnrollment.map(primaryFor))
     : null;
   const ready = installedWithEnrollment.length >= 1;
+  // Press counter: points balances are unbounded values (e.g. 10, 20), so the
+  // demo cap is keyed off the number of taps this session, not the balance.
+  // Stamps cap on the stamp count itself (1 stamp per tap = same thing).
+  const [sendCount, setSendCount] = useState(0);
+  const reachedMax = isPoints
+    ? sendCount >= MAX_STAMPS
+    : (stamps ?? 0) >= MAX_STAMPS;
 
   const { data: design } = useActiveDesign(businessId);
 

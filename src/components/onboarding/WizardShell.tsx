@@ -150,8 +150,7 @@ export function WizardShell({ slug }: WizardShellProps) {
     () =>
       getVisibleChapters(
         currentBusiness?.settings,
-        getDraft<string>(PROFILE_TEAM_SIZE_DRAFT_KEY),
-        getDraft<string>('program.loyaltyType')
+        getDraft<string>(PROFILE_TEAM_SIZE_DRAFT_KEY)
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentBusiness?.settings?.team_size, slug, getDraft]

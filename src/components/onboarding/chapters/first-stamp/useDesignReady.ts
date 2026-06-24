@@ -74,18 +74,19 @@ export function useDesignReady(
     }
     let cancelled = false;
 
-    // Skip the redundant initial fetch only when the seeded row is *already*
-    // ready — in that case the cache is trustworthy and a second `getDesign`
-    // would just refetch what we already have. If the seed is still
-    // `regenerating`, we MUST refetch on mount: the backend may have flipped
-    // status to `ready` and broadcast its realtime UPDATE before we got a
-    // chance to subscribe (e.g. user navigated away from BackStep, strips
-    // finished while they were on another step, then they returned). That
-    // missed event would otherwise leave the hook stuck in the loader
-    // forever, with the cached row lying about a regeneration that's
-    // already complete server-side.
-    const seedIsStale = !initialDesign || initialDesign.strip_status === 'regenerating';
-    if (seedIsStale) {
+    // Skip the redundant initial fetch only when the row we ALREADY HOLD in
+    // local state is ready — in that case the cache is trustworthy and a
+    // second `getDesign` would just refetch what we already have. We key off
+    // the local `design` (not the `initialDesign` prop) on purpose: on a cold
+    // open (full page load / refresh straight onto this step), `useDesigns`
+    // resolves AFTER first mount, so `design` seeds to null while the prop
+    // later becomes ready. Keying off the prop would make us skip the fetch
+    // and leave `design` stuck at null → `ready` stuck false → loader forever.
+    // Keying off the held row means a null/regenerating local row always
+    // triggers the mount fetch, which also covers the missed-realtime case
+    // (status flipped to ready before we subscribed).
+    const haveReadyRow = !!design && design.strip_status !== 'regenerating';
+    if (!haveReadyRow) {
       setLoading(true);
       (async () => {
         try {

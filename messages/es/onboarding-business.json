@@ -210,6 +210,10 @@
             "title": "Sellos y recompensas",
             "subtitle": "Elige los iconos de sello y recompensa, y luego escoge tu color."
           },
+          "points": {
+            "title": "Puntos y recompensas",
+            "subtitle": "Elige cómo se muestra tu saldo y luego tu color."
+          },
           "content": {
             "title": "Información extra en el anverso",
             "subtitle": "Campos breves junto a los sellos. La recompensa, una fecha de fin, un límite, cualquier cosa que merezca mostrarse.",
@@ -324,7 +328,26 @@
             "justStamped": "Sello añadido",
             "multiDeviceHint": "{count, plural, =1 {} other {Cada pulsación sella los # dispositivos instalados a la vez.}}",
             "fallback": "¿Todavía sin vibración? Las notificaciones pueden tardar unos segundos. Inténtalo de nuevo dentro de un momento.",
-            "customisationHint": "Este es el mensaje por defecto. Puedes reescribirlo, añadir mensajes propios en distintos recuentos de sellos, o desactivar las notificaciones del todo desde los ajustes de notificaciones."
+            "customisationHint": "Este es el mensaje por defecto. Puedes reescribirlo, añadir mensajes propios en distintos recuentos de sellos, o desactivar las notificaciones del todo desde los ajustes de notificaciones.",
+            "points": {
+              "title": "Envíate puntos",
+              "subtitle": "Cada compra de prueba suma puntos y dispara una notificación real a tu teléfono. Justo lo que recibirán tus clientes.",
+              "readyTitle": "Listo para sumar puntos",
+              "readyBody": "Pulsa abajo para registrar una compra de prueba. Tu teléfono vibra en unos segundos.",
+              "firstStampLandedTitle": "Eso es lo que se siente",
+              "firstStampLandedBody": "Eso es exactamente lo que sentirán tus clientes cada vez que ganen puntos. Misma vibración, mismo ritmo, mismo proceso. Suma otra para coger el ritmo.",
+              "keepStampingTitle": "Suma una más",
+              "keepStampingBody": "Otra compra de prueba suma más puntos y dispara una segunda notificación real. La pequeña espera entre ellas hace que cada una vibre por su cuenta.",
+              "demoCompleteTitle": "Ya le has cogido el truco",
+              "demoCompleteBody": "Cuando quieras, seguimos.",
+              "sendCta": "Registrar una compra de prueba",
+              "sendAnotherCta": "Sumar puntos",
+              "watching": "Esperando los puntos…",
+              "cooldownCta": "Próxima compra en {seconds}s",
+              "stampsLabel": "Puntos en tu tarjeta",
+              "justStamped": "Puntos añadidos",
+              "fallback": "¿Todavía sin vibración? Las notificaciones pueden tardar unos segundos. Inténtalo de nuevo dentro de un momento."
+            }
           }
         }
       },
