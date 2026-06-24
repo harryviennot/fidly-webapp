@@ -5,6 +5,7 @@
     "export": "Export",
     "addCustomer": "Add Customer",
     "customerProfile": "Customer Profile",
+    "pointsCustomer": "Points card",
     "loading": "Loading customers...",
     "loadFailed": "Failed to load customers. Make sure the backend is running.",
     "searchPlaceholder": "Search by name or email...",
@@ -97,6 +98,8 @@
     },
     "actions": {
       "addStamp": "Add Stamp",
+      "open": "Open",
+      "addPoints": "Add points",
       "maxed": "Max!",
       "redeem": "Redeem",
       "voidLast": "Void Last",
@@ -138,7 +141,33 @@
           "locationNotPermitted": "You aren't assigned to that location."
         }
       },
-      "redeemBanked": "{count, plural, =1 {Redeem (1 saved)} other {Redeem (# saved)}}"
+      "redeemBanked": "{count, plural, =1 {Redeem (1 saved)} other {Redeem (# saved)}}",
+      "pointsAdd": {
+        "title": "Add points",
+        "amountLabel": "Amount spent",
+        "preview": "= +{points} points",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Why are you adding these points?",
+        "reasonHelp": "Only you see this. It keeps your activity log clear.",
+        "locationLabel": "Location",
+        "noLocation": "No location",
+        "successToast": "Added {points} points",
+        "submitting": "Adding...",
+        "submit": "Add points",
+        "errors": {
+          "amountRequired": "Enter the amount the customer spent."
+        }
+      },
+      "pointsRedeem": {
+        "title": "Redeem a reward",
+        "balance": "{balance} available",
+        "price": "{points} pts",
+        "notEnough": "Not enough points",
+        "successToast": "Redeemed {reward}",
+        "failedToast": "Could not redeem the reward. Try again.",
+        "submitting": "Redeeming...",
+        "submit": "Redeem"
+      }
     },
     "toasts": {
       "stampAdded": "Stamp added for {name}",
@@ -190,7 +219,14 @@
         "at_risk": "At Risk",
         "ghost": "Ghost"
       },
-      "rewardsAvailable": "Rewards to redeem"
+      "rewardsAvailable": "Rewards to redeem",
+      "points": {
+        "title": "Points balance",
+        "lifetime": "{count} earned all-time",
+        "complete": "All rewards unlocked",
+        "limit": "{max} pts limit",
+        "price": "{points} pts"
+      }
     },
     "transaction": {
       "empty": "No transactions yet",
@@ -198,6 +234,7 @@
       "loadingMore": "Loading...",
       "types": {
         "stamp_added": "Stamp Added",
+        "points_earned": "Points earned",
         "reward_redeemed": "Reward Redeemed",
         "stamp_voided": "Stamp Voided",
         "bonus_stamp": "Bonus Stamp",

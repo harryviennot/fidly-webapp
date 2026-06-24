@@ -172,6 +172,39 @@
         "error": "We couldn't generate your flyer. Please try again."
       }
     },
+    "points": {
+      "rateLabel": "Points earned",
+      "rateHelp": "How many points a customer earns for each unit they spend.",
+      "ratePrefix": "{currency}1 spent =",
+      "ratePoints": "points",
+      "rewardMenuLabel": "Reward menu",
+      "rewardMenuHelp": "The rewards customers redeem with their points, and the price of each.",
+      "capLabel": "Cap the balance",
+      "capHelp": "Stop the balance from growing past a limit. Off by default.",
+      "capDescription": "Points stop adding up once the balance reaches the cap.",
+      "capMaxLabel": "Maximum balance",
+      "rewardMenu": {
+        "rewardHeader": "Reward",
+        "priceHeader": "Price",
+        "rewardPlaceholder": "Free coffee",
+        "rewardAria": "Reward {index} name",
+        "priceAria": "Reward {index} price in points",
+        "removeAria": "Remove reward {index}",
+        "addReward": "Add a reward",
+        "pointsSuffix": "pts"
+      },
+      "summary": {
+        "rate": "Earn rate",
+        "rateValue": "{points} pts per {currency}1",
+        "rewards": "Rewards",
+        "cap": "Balance cap",
+        "capValue": "{max} pts",
+        "noCap": "No cap"
+      },
+      "recap": {
+        "earn": "Customers earn <b>{points} points</b> for every {currency}1 they spend."
+      }
+    },
     "programInfo": "Program Info",
     "programName": "Program name",
     "programNameHelp": "Appears on the card and in your customers' notifications.",

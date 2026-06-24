@@ -172,6 +172,39 @@
         "error": "No hemos podido generar tu folleto. Inténtalo de nuevo."
       }
     },
+    "points": {
+      "rateLabel": "Puntos ganados",
+      "rateHelp": "Cuántos puntos gana un cliente por cada unidad que gasta.",
+      "ratePrefix": "{currency}1 gastado =",
+      "ratePoints": "puntos",
+      "rewardMenuLabel": "Carta de recompensas",
+      "rewardMenuHelp": "Las recompensas que tus clientes canjean con sus puntos, y el precio de cada una.",
+      "capLabel": "Limitar el saldo",
+      "capHelp": "Impide que el saldo supere un límite. Desactivado por defecto.",
+      "capDescription": "Los puntos dejan de sumarse cuando el saldo llega al límite.",
+      "capMaxLabel": "Saldo máximo",
+      "rewardMenu": {
+        "rewardHeader": "Recompensa",
+        "priceHeader": "Precio",
+        "rewardPlaceholder": "Café gratis",
+        "rewardAria": "Nombre de la recompensa {index}",
+        "priceAria": "Precio en puntos de la recompensa {index}",
+        "removeAria": "Quitar la recompensa {index}",
+        "addReward": "Añadir una recompensa",
+        "pointsSuffix": "pts"
+      },
+      "summary": {
+        "rate": "Puntos por compra",
+        "rateValue": "{points} pts por {currency}1",
+        "rewards": "Recompensas",
+        "cap": "Límite de saldo",
+        "capValue": "{max} pts",
+        "noCap": "Sin límite"
+      },
+      "recap": {
+        "earn": "Tus clientes ganan <b>{points} puntos</b> por cada {currency}1 que gastan."
+      }
+    },
     "programInfo": "Datos del programa",
     "programName": "Nombre del programa",
     "programNameHelp": "Aparece en la tarjeta y en las notificaciones de tus clientes.",

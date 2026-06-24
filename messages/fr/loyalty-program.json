@@ -172,6 +172,39 @@
         "error": "Impossible de générer votre affichette. Réessayez."
       }
     },
+    "points": {
+      "rateLabel": "Points gagnés",
+      "rateHelp": "Combien de points un client gagne pour chaque unité dépensée.",
+      "ratePrefix": "1 {currency} dépensé =",
+      "ratePoints": "points",
+      "rewardMenuLabel": "Carte des récompenses",
+      "rewardMenuHelp": "Les récompenses que vos clients obtiennent avec leurs points, et le prix de chacune.",
+      "capLabel": "Plafonner le solde",
+      "capHelp": "Empêche le solde de dépasser une limite. Désactivé par défaut.",
+      "capDescription": "Les points cessent de s'accumuler une fois le plafond atteint.",
+      "capMaxLabel": "Solde maximum",
+      "rewardMenu": {
+        "rewardHeader": "Récompense",
+        "priceHeader": "Prix",
+        "rewardPlaceholder": "Café offert",
+        "rewardAria": "Nom de la récompense {index}",
+        "priceAria": "Prix en points de la récompense {index}",
+        "removeAria": "Retirer la récompense {index}",
+        "addReward": "Ajouter une récompense",
+        "pointsSuffix": "pts"
+      },
+      "summary": {
+        "rate": "Gain par achat",
+        "rateValue": "{points} pts par {currency}1",
+        "rewards": "Récompenses",
+        "cap": "Plafond du solde",
+        "capValue": "{max} pts",
+        "noCap": "Sans plafond"
+      },
+      "recap": {
+        "earn": "Vos clients gagnent <b>{points} points</b> pour chaque {currency}1 dépensé."
+      }
+    },
     "programInfo": "Infos du programme",
     "programName": "Nom du programme",
     "programNameHelp": "Apparaît sur la carte et dans les notifications de vos clients.",

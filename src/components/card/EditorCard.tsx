@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { CardDesign, PassField } from "@/types";
+import { CardDesign, PassField, RewardTier } from "@/types";
 import { WalletCard } from "./WalletCard";
 import { computeCardColors, rgbToHex } from "@/lib/card-utils";
 import { renderSamplePreview } from "@/lib/template-variables";
@@ -24,6 +24,9 @@ export interface EditorCardProps {
   organizationName?: string;
   /** Show back side */
   showBack?: boolean;
+  /** Points programs: sample balance + reward ladder for the strip preview. */
+  pointsBalance?: number;
+  pointsRewards?: RewardTier[];
 }
 
 // ============================================================================
@@ -235,6 +238,8 @@ export function EditorCard({
   totalStamps,
   organizationName,
   showBack = false,
+  pointsBalance,
+  pointsRewards,
 }: EditorCardProps) {
   if (showBack) {
     return <CardBack design={design} organizationName={organizationName} />;
@@ -249,6 +254,8 @@ export function EditorCard({
         organizationName={organizationName}
         showQR={true}
         showSecondaryFields={true}
+        pointsBalance={pointsBalance}
+        pointsRewards={pointsRewards}
       />
     </ScaledCardWrapper>
   );

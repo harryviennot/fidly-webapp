@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { getPrograms, updateProgram } from "@/api";
-import type { LoyaltyProgram, LoyaltyProgramUpdate } from "@/types";
+import { createProgram, getPrograms, updateProgram } from "@/api";
+import type { LoyaltyProgram, LoyaltyProgramUpdate, ProgramCreate } from "@/types";
 import { designKeys } from "./use-designs";
 
 export const programKeys = {
@@ -17,6 +17,25 @@ export function useDefaultProgram(businessId: string | undefined) {
     },
     enabled: !!businessId,
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useCreateProgram(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: ProgramCreate) => createProgram(businessId!, data),
+    onSuccess: (created) => {
+      // Backend deletes+recreates the default program, so the cached row is
+      // stale — replace it and refetch the list.
+      queryClient.setQueryData<LoyaltyProgram | null>(
+        programKeys.default(businessId!),
+        created
+      );
+      queryClient.invalidateQueries({ queryKey: programKeys.all(businessId!) });
+      // The old program's designs no longer match the new type.
+      queryClient.invalidateQueries({ queryKey: designKeys.all(businessId!) });
+    },
   });
 }
 

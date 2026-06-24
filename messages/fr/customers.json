@@ -5,6 +5,7 @@
     "export": "Exporter",
     "addCustomer": "Ajouter un client",
     "customerProfile": "Profil client",
+    "pointsCustomer": "Carte à points",
     "loading": "Chargement des clients...",
     "loadFailed": "Impossible de charger les clients. Vérifiez que le serveur est en cours d'exécution.",
     "searchPlaceholder": "Rechercher par nom ou email...",
@@ -97,6 +98,8 @@
     },
     "actions": {
       "addStamp": "Ajouter tampon",
+      "open": "Ouvrir",
+      "addPoints": "Ajouter des points",
       "maxed": "Max !",
       "redeem": "Échanger",
       "voidLast": "Annuler dernier",
@@ -138,7 +141,33 @@
           "locationNotPermitted": "Vous n'êtes pas assigné à cet établissement."
         }
       },
-      "redeemBanked": "{count, plural, =1 {Utiliser (1 en attente)} other {Utiliser (# en attente)}}"
+      "redeemBanked": "{count, plural, =1 {Utiliser (1 en attente)} other {Utiliser (# en attente)}}",
+      "pointsAdd": {
+        "title": "Ajouter des points",
+        "amountLabel": "Montant dépensé",
+        "preview": "= +{points} points",
+        "reasonLabel": "Raison",
+        "reasonPlaceholder": "Pourquoi ajoutez-vous ces points ?",
+        "reasonHelp": "Vous seul le voyez. Cela garde votre historique d'activité clair.",
+        "locationLabel": "Établissement",
+        "noLocation": "Aucun établissement",
+        "successToast": "{points} points ajoutés",
+        "submitting": "Ajout en cours...",
+        "submit": "Ajouter des points",
+        "errors": {
+          "amountRequired": "Indiquez le montant dépensé par le client."
+        }
+      },
+      "pointsRedeem": {
+        "title": "Utiliser une récompense",
+        "balance": "{balance} disponibles",
+        "price": "{points} pts",
+        "notEnough": "Pas assez de points",
+        "successToast": "{reward} utilisée",
+        "failedToast": "Impossible d'utiliser la récompense. Réessayez.",
+        "submitting": "En cours...",
+        "submit": "Utiliser"
+      }
     },
     "toasts": {
       "stampAdded": "Tampon ajouté pour {name}",
@@ -190,7 +219,14 @@
         "at_risk": "À risque",
         "ghost": "Fantôme"
       },
-      "rewardsAvailable": "Récompenses à utiliser"
+      "rewardsAvailable": "Récompenses à utiliser",
+      "points": {
+        "title": "Solde de points",
+        "lifetime": "{count} gagnés au total",
+        "complete": "Toutes les récompenses débloquées",
+        "limit": "Plafond {max} pts",
+        "price": "{points} pts"
+      }
     },
     "transaction": {
       "empty": "Aucune transaction",
@@ -198,6 +234,7 @@
       "loadingMore": "Chargement...",
       "types": {
         "stamp_added": "Tampon ajouté",
+        "points_earned": "Points gagnés",
         "reward_redeemed": "Récompense échangée",
         "stamp_voided": "Tampon annulé",
         "bonus_stamp": "Tampon bonus",

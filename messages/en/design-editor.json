@@ -95,7 +95,8 @@
       "addFieldsHint": "Add terms, contact info, or other details",
       "poweredBy": "Powered by Stampeo",
       "noBackFieldsAdded": "No back fields added yet",
-      "stamps": "stamps"
+      "stamps": "stamps",
+      "points": "Points"
     },
     "editor": {
       "appleWallet": "Apple Wallet",
@@ -103,6 +104,9 @@
       "front": "Front",
       "back": "Back",
       "previewStamps": "Preview Stamps",
+      "pointsSection": "Points",
+      "pointsSectionSubtitle": "Strip style, colors, and reward icons",
+      "previewBalance": "Preview balance",
       "activateDesign": "Activate Card Style",
       "activateConfirm": "Activate this card style? All customers will receive the updated card.",
       "failedToActivate": "Failed to activate",
@@ -351,6 +355,28 @@
       "cropDescription": "Keep just the subject. We trim transparent edges automatically after this step.",
       "arrangement_overlap": "Overlapping",
       "emptyOpacityLabel": "Opacity of remaining stamps"
+    },
+    "points": {
+      "stripStyleLabel": "Strip style",
+      "stripStyle": {
+        "big_point": "Big number",
+        "circle_progress": "Progress ring",
+        "progress_icons": "Reward track"
+      },
+      "accentColorLabel": "Progress color",
+      "accentColorHelp": "The color of the number, ring, and reached rewards.",
+      "rewardIconsLabel": "Reward icons",
+      "rewardIconsHelp": "Shown on the reward track style, one icon per reward.",
+      "untitledReward": "Untitled reward",
+      "rewardPrice": "{points} pts",
+      "pickIcon": "Pick an icon for {reward}"
+    },
+    "pointsStrip": {
+      "objective": "Objective",
+      "next": "Next: {points} pts",
+      "points": "{points} pts",
+      "complete": "Card completed",
+      "limit": "{max} pts limit"
     }
   }
 }

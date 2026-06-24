@@ -5,7 +5,14 @@ import type { TransactionResponse } from "@/types";
 import { useAuth } from "@/contexts/auth-provider";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
-import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
+import {
+  TYPE_CONFIG,
+  isCardLifecycleType,
+  isPointsTransaction,
+  txDelta,
+  txValueAfter,
+  txValueBefore,
+} from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
 import { LocationBadge } from "@/components/locations/location-badge";
 
@@ -64,14 +71,15 @@ export function ActivityItem({
         : transaction.customer_id.slice(0, 8))
     : rawName;
 
-  const deltaText =
-    transaction.stamp_delta > 0
-      ? `+${transaction.stamp_delta}`
-      : String(transaction.stamp_delta);
+  const delta = txDelta(transaction);
+  const deltaText = delta > 0 ? `+${delta}` : String(delta);
+  const isPoints = isPointsTransaction(transaction);
 
   const isAdjustment =
     transaction.source === "dashboard" &&
-    (transaction.type === "stamp_added" || transaction.type === "bonus_stamp");
+    (transaction.type === "stamp_added" ||
+      transaction.type === "bonus_stamp" ||
+      transaction.type === "points_earned");
   const adjustmentReason = isAdjustment
     ? metadata?.adjustment_reason
     : undefined;
@@ -157,22 +165,29 @@ export function ActivityItem({
             ) : (
               <>
                 <span className="font-semibold text-[#555] tabular-nums">
-                  {transaction.stamps_before}
+                  {txValueBefore(transaction)}
                 </span>
                 <span>→</span>
                 <span className="font-semibold tabular-nums text-[#555]">
-                  {transaction.stamps_after}
+                  {txValueAfter(transaction)}
                 </span>
-                {totalStamps != null && totalStamps > 0 && (
+                {isPoints ? (
                   <>
                     <span className="text-[#D8D5CE]">·</span>
-                    <span>
-                      {t("stampProgress", {
-                        current: transaction.stamps_after,
-                        total: totalStamps,
-                      })}
-                    </span>
+                    <span>{t("pointsBalance", { balance: txValueAfter(transaction) })}</span>
                   </>
+                ) : (
+                  totalStamps != null && totalStamps > 0 && (
+                    <>
+                      <span className="text-[#D8D5CE]">·</span>
+                      <span>
+                        {t("stampProgress", {
+                          current: txValueAfter(transaction),
+                          total: totalStamps,
+                        })}
+                      </span>
+                    </>
+                  )
                 )}
                 <span className="text-[#D8D5CE]">·</span>
                 <span>{sourceLabel}</span>

@@ -16,6 +16,12 @@ export interface AddStampOptions {
    * location. Null/undefined → transaction lands with location_id = NULL.
    */
   locationId?: string | null;
+  /**
+   * Points programs only: the ticket price the customer spent. The backend
+   * credits round(amount × points_per_currency_unit). REQUIRED for points
+   * scans (omitting it → 400 AMOUNT_REQUIRED).
+   */
+  amount?: number;
 }
 
 export async function getCustomer(businessId: string, customerId: string): Promise<CustomerResponse> {
@@ -137,6 +143,7 @@ export async function addStamp(
         source: options!.source ?? 'dashboard',
         ...(options!.reason !== undefined && { reason: options!.reason }),
         ...(options!.locationId !== undefined && { location_id: options!.locationId }),
+        ...(options!.amount !== undefined && { amount: options!.amount }),
       })
     : undefined;
 
@@ -156,7 +163,10 @@ export async function addStamp(
 
 export async function redeemReward(
   businessId: string,
-  enrollmentId: string
+  enrollmentId: string,
+  /** Which reward to claim. Required for points menus + multi-reward stamp
+   *  cards; omit for a classic single-reward card (cheapest reachable). */
+  rewardId?: string | null
 ): Promise<StampResponse> {
   const response = await fetch(
     `${API_BASE_URL}/stamps/${businessId}/${enrollmentId}/redeem`,
@@ -165,7 +175,10 @@ export async function redeemReward(
       headers: await getAuthHeaders(),
       // Label the transaction as a dashboard action (the activity log
       // splits real scans from manual dashboard operations).
-      body: JSON.stringify({ source: 'dashboard' }),
+      body: JSON.stringify({
+        source: 'dashboard',
+        ...(rewardId != null && { reward_id: rewardId }),
+      }),
     }
   );
 

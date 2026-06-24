@@ -3,10 +3,11 @@
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { CardDesign } from "@/types";
+import { CardDesign, RewardTier } from "@/types";
 import { StampIconType } from "@/components/design/StampIconPicker";
 import { StampGrid } from "@/components/card/WalletCard";
-import { computeCardColors, getInitials } from "@/lib/card-utils";
+import { PointsStrip } from "@/components/card/PointsStrip";
+import { computeCardColors, rgbToHex, getInitials } from "@/lib/card-utils";
 
 // ============================================================================
 // Types
@@ -25,6 +26,9 @@ export interface GoogleWalletCardProps {
   className?: string;
   /** Show back view with details instead of front */
   showBack?: boolean;
+  /** Points programs (design.card_type === 'points'): sample balance + ladder. */
+  pointsBalance?: number;
+  pointsRewards?: RewardTier[];
 }
 
 // ============================================================================
@@ -151,6 +155,8 @@ export function GoogleWalletCard({
   organizationName,
   className = "",
   showBack = false,
+  pointsBalance,
+  pointsRewards,
 }: GoogleWalletCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [heroWidth, setHeroWidth] = useState(0);
@@ -161,6 +167,10 @@ export function GoogleWalletCard({
   const initials = getInitials(displayName);
   const totalStamps = totalStampsProp ?? design.total_stamps ?? 10;
   const colors = computeCardColors(design);
+  const isPoints = design.card_type === "points";
+  const pointsAccent = design.progress_accent_color
+    ? rgbToHex(design.progress_accent_color)
+    : colors.accentHex;
 
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
@@ -281,19 +291,19 @@ export function GoogleWalletCard({
             </h2>
           </div>
 
-          {/* Stamps Row */}
+          {/* Stamps / Points Row */}
           <div className="px-4 py-2">
             <p
               className="text-xs uppercase font-medium mb-1"
               style={{ color: colors.mutedTextColor }}
             >
-              {t("stamps")}
+              {isPoints ? t("points") : t("stamps")}
             </p>
             <p
               className="text-sm font-normal"
               style={{ color: colors.textColor }}
             >
-              {stamps} / {totalStamps}
+              {isPoints ? (pointsBalance ?? 0) : `${stamps} / ${totalStamps}`}
             </p>
           </div>
 
@@ -378,19 +388,31 @@ export function GoogleWalletCard({
               </div>
             )}
 
-            {/* Stamps */}
+            {/* Stamps / points hero */}
             <div className="relative">
-              {heroWidth > 0 && (
-                <StampGrid
-                  totalStamps={totalStamps}
-                  filledCount={stamps}
-                  colors={colors}
-                  stampIcon={stampIcon}
-                  rewardIcon={rewardIcon}
-                  customConfig={customConfig}
-                  containerWidth={heroWidth}
-                  containerHeight={heroHeight}
+              {isPoints ? (
+                <PointsStrip
+                  style={design.points_strip_style ?? "big_point"}
+                  balance={pointsBalance ?? 0}
+                  rewards={pointsRewards ?? []}
+                  rewardIcons={design.points_reward_icons}
+                  accentColor={pointsAccent}
+                  mutedColor={colors.mutedTextColor}
+                  textColor={colors.textColor}
                 />
+              ) : (
+                heroWidth > 0 && (
+                  <StampGrid
+                    totalStamps={totalStamps}
+                    filledCount={stamps}
+                    colors={colors}
+                    stampIcon={stampIcon}
+                    rewardIcon={rewardIcon}
+                    customConfig={customConfig}
+                    containerWidth={heroWidth}
+                    containerHeight={heroHeight}
+                  />
+                )
               )}
             </div>
           </div>

@@ -31,10 +31,13 @@ import {
   SEGMENT_AVATAR_COLORS,
 } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
+import { PointsBalanceCard } from "./points-balance-card";
 import { SendPassDialog } from "./send-pass-dialog";
 import { EditCustomerDialog } from "./edit-customer-dialog";
 import { TransactionTimeline } from "./transaction-timeline";
 import { StampGridContainer } from "@/components/card";
+import { txDelta } from "@/lib/transaction-constants";
+import { currencySymbol } from "@/lib/currency";
 import { Card } from "@/components/ui/card";
 import { computeCardColors } from "@/lib/card-utils";
 import { cn } from "@/lib/utils";
@@ -169,7 +172,17 @@ export function CustomerDetailSheet({
 
   if (!liveCustomer) return null;
 
-  const segment = classifyCustomer(liveCustomer, maxStamps);
+  const snapshot = liveCustomer.program ?? null;
+  const isPoints = snapshot?.type === "points";
+  const currency = currencySymbol(currentBusiness?.country, currentBusiness?.primary_locale);
+
+  // Points segments come from the server snapshot (reward_ready) rather than
+  // the stamp-threshold math, which would misclassify them.
+  const segment = isPoints
+    ? snapshot?.reward_ready
+      ? "reward_ready"
+      : "regular"
+    : classifyCustomer(liveCustomer, maxStamps);
   const segConfig = getSegmentConfig(segment);
   const avatarColor = SEGMENT_AVATAR_COLORS[segment];
 
@@ -196,9 +209,7 @@ export function CustomerDetailSheet({
     return tTime("weeksAgo", { count: Math.floor(diffDays / 7) });
   };
 
-  const totalVisits = transactions.filter(
-    (txn) => txn.stamp_delta > 0
-  ).length;
+  const totalVisits = transactions.filter((txn) => txDelta(txn) > 0).length;
 
   const firstVisit = liveCustomer.created_at;
   const lastVisit = liveCustomer.last_activity_at ?? liveCustomer.updated_at;
@@ -294,21 +305,25 @@ export function CustomerDetailSheet({
           </div>
         </div>
 
-        {/* ── Stamp Progress ── */}
+        {/* ── Progress (stamp grid or points balance) ── */}
         <div className="px-5 pb-4">
           <div className="bg-[#FAFAF8] rounded-xl border border-[#EEEDEA] px-4 py-3.5">
             <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2.5">
-              {t("stampProgress")}
+              {isPoints ? t("points.title") : t("stampProgress")}
             </p>
-            {colors && (
-              <StampGridContainer
-                totalStamps={maxStamps}
-                filledCount={liveCustomer.stamps}
-                colors={colors}
-                stampIcon={stampIcon ?? "checkmark"}
-                rewardIcon={rewardIcon ?? "gift"}
-                maxWidth={360}
-              />
+            {isPoints && snapshot ? (
+              <PointsBalanceCard snapshot={snapshot} />
+            ) : (
+              colors && (
+                <StampGridContainer
+                  totalStamps={maxStamps}
+                  filledCount={liveCustomer.stamps}
+                  colors={colors}
+                  stampIcon={stampIcon ?? "checkmark"}
+                  rewardIcon={rewardIcon ?? "gift"}
+                  maxWidth={360}
+                />
+              )
             )}
           </div>
         </div>
@@ -322,6 +337,8 @@ export function CustomerDetailSheet({
               maxStamps={maxStamps}
               transactions={transactions}
               onActionComplete={handleActionComplete}
+              snapshot={snapshot}
+              currency={currency}
             />
           </div>
         )}

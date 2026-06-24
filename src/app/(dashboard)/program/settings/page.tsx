@@ -28,8 +28,10 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 import { normalizeFieldMode } from '@/lib/customer-data-collection';
+import { currencySymbol } from '@/lib/currency';
+import { isPointsProgram, isStampProgram } from '@/types';
 import type { FieldCollectionMode } from '@/types/business';
-import type { StampGoalImpact } from '@/types';
+import type { LoyaltyProgram, StampGoalImpact } from '@/types';
 
 const DEFAULT_DATA_COLLECTION: DataCollectionValue = {
   collect_name: 'off',
@@ -44,7 +46,27 @@ const DEFAULT_PROGRAM_DETAILS: ProgramDetailsValue = {
   initialStamps: 0,
   stackableRewards: false,
   maxStackedRewards: null,
+  pointsRate: 1,
+  pointsRewards: [],
+  maxBalance: null,
 };
+
+/** Project a program row into the form's value shape, by type. */
+function programToDetails(program: LoyaltyProgram): ProgramDetailsValue {
+  const points = isPointsProgram(program);
+  const stamp = isStampProgram(program);
+  return {
+    programName: program.name || '',
+    totalStamps: stamp ? program.config.total_stamps ?? 10 : 10,
+    rewardName: program.reward_name || '',
+    initialStamps: stamp ? program.config.initial_stamps ?? 0 : 0,
+    stackableRewards: stamp ? program.config.stackable_rewards ?? false : false,
+    maxStackedRewards: stamp ? program.config.max_stacked_rewards ?? null : null,
+    pointsRate: points ? program.config.points_per_currency_unit ?? 1 : 1,
+    pointsRewards: points ? program.config.rewards ?? [] : [],
+    maxBalance: points ? program.config.max_balance ?? null : null,
+  };
+}
 
 function readDataCollection(
   dc: Partial<Record<keyof DataCollectionValue, FieldCollectionMode | boolean>> | undefined
@@ -60,6 +82,8 @@ export default function ProgramSettingsPage() {
   const { currentBusiness, refetch } = useBusiness();
   const { program, activeDesign, loading, updateProgram } = useProgram();
   const t = useTranslations('loyaltyProgram');
+  const isPoints = isPointsProgram(program);
+  const currency = currencySymbol(currentBusiness?.country, currentBusiness?.primary_locale);
 
   // ── Program details ──────────────────────────────────────────────────────
   const [programDetails, setProgramDetails] = useState<ProgramDetailsValue>(DEFAULT_PROGRAM_DETAILS);
@@ -79,23 +103,11 @@ export default function ProgramSettingsPage() {
   // Sync from program on load (and after a save refreshes it).
   useEffect(() => {
     if (!program) return;
-    setProgramDetails({
-      programName: program.name || '',
-      totalStamps: program.config?.total_stamps ?? 10,
-      rewardName: program.reward_name || '',
-      initialStamps: program.config?.initial_stamps ?? 0,
-      stackableRewards: program.config?.stackable_rewards ?? false,
-      maxStackedRewards: program.config?.max_stacked_rewards ?? null,
-    });
+    setProgramDetails(programToDetails(program));
   }, [program]);
 
   const programDirty = program
-    ? programDetails.programName !== (program.name || '') ||
-      programDetails.totalStamps !== (program.config?.total_stamps ?? 10) ||
-      programDetails.rewardName !== (program.reward_name || '') ||
-      programDetails.initialStamps !== (program.config?.initial_stamps ?? 0) ||
-      programDetails.stackableRewards !== (program.config?.stackable_rewards ?? false) ||
-      programDetails.maxStackedRewards !== (program.config?.max_stacked_rewards ?? null)
+    ? JSON.stringify(programDetails) !== JSON.stringify(programToDetails(program))
     : false;
 
   // ── Data collection ──────────────────────────────────────────────────────
@@ -135,17 +147,26 @@ export default function ProgramSettingsPage() {
       try {
         // Spread the existing config: the backend replaces the JSONB
         // wholesale, so a partial object would wipe keys we don't manage here.
+        const config = isPoints
+          ? {
+              ...program?.config,
+              points_per_currency_unit: programDetails.pointsRate ?? 1,
+              rewards: programDetails.pointsRewards ?? [],
+              max_balance: programDetails.maxBalance ?? null,
+              user_configured: true,
+            }
+          : {
+              ...program?.config,
+              total_stamps: programDetails.totalStamps,
+              initial_stamps: programDetails.initialStamps,
+              stackable_rewards: programDetails.stackableRewards,
+              max_stacked_rewards: programDetails.maxStackedRewards,
+              user_configured: true,
+            };
         await updateProgram({
           name: programDetails.programName,
-          config: {
-            ...program?.config,
-            total_stamps: programDetails.totalStamps,
-            initial_stamps: programDetails.initialStamps,
-            stackable_rewards: programDetails.stackableRewards,
-            max_stacked_rewards: programDetails.maxStackedRewards,
-            user_configured: true,
-          },
-          reward_name: programDetails.rewardName || null,
+          config,
+          reward_name: isPoints ? null : programDetails.rewardName || null,
           ...(strategy ? { existing_customers_strategy: strategy } : {}),
         });
       } catch {
@@ -180,10 +201,17 @@ export default function ProgramSettingsPage() {
   const handleSave = async () => {
     if (!currentBusiness?.id || !program?.id) return;
 
-    const oldTotal = program.config?.total_stamps ?? 10;
+    // Points programs have no stamp-goal concept — the impact dialog (raise /
+    // lower goal, stackable toggle-off) is stamp-only. Save directly.
+    if (isPoints || !isStampProgram(program)) {
+      await doSave();
+      return;
+    }
+
+    const oldTotal = program.config.total_stamps ?? 10;
     const totalChanged = programDetails.totalStamps !== oldTotal;
     const stackableTurnedOff =
-      (program.config?.stackable_rewards ?? false) && !programDetails.stackableRewards;
+      (program.config.stackable_rewards ?? false) && !programDetails.stackableRewards;
 
     // Nothing in the program touches existing customers: save directly.
     if (!programDirty || (!totalChanged && !stackableTurnedOff)) {
@@ -229,16 +257,7 @@ export default function ProgramSettingsPage() {
 
   /** Discard unsaved edits in both sections, back to last-saved values. */
   const handleRevert = () => {
-    if (program) {
-      setProgramDetails({
-        programName: program.name || '',
-        totalStamps: program.config?.total_stamps ?? 10,
-        rewardName: program.reward_name || '',
-        initialStamps: program.config?.initial_stamps ?? 0,
-        stackableRewards: program.config?.stackable_rewards ?? false,
-        maxStackedRewards: program.config?.max_stacked_rewards ?? null,
-      });
-    }
+    if (program) setProgramDetails(programToDetails(program));
     setDataCollection(savedDataCollection);
   };
 
@@ -250,26 +269,48 @@ export default function ProgramSettingsPage() {
 
   const rewardLabel = programDetails.rewardName.trim() || t('rewardFallback');
 
+  const dataCollectedValue = isAnonymousMode
+    ? t('anonymous')
+    : [
+        dataCollection.collect_name !== 'off' && t('dataFields.name'),
+        dataCollection.collect_email !== 'off' && t('dataFields.email'),
+        dataCollection.collect_phone !== 'off' && t('dataFields.phone'),
+      ]
+        .filter(Boolean)
+        .join(', ');
+
   const summaryRows: Array<[string, string]> = useMemo(
-    () => [
-      [t('overview.type'), t('stampsType')],
-      [t('overview.stampsRequired'), `${programDetails.totalStamps}`],
-      [t('overview.reward'), programDetails.rewardName.trim() || '—'],
-      [
-        t('overview.dataCollected'),
-        isAnonymousMode
-          ? t('anonymous')
-          : [
-              dataCollection.collect_name !== 'off' && t('dataFields.name'),
-              dataCollection.collect_email !== 'off' && t('dataFields.email'),
-              dataCollection.collect_phone !== 'off' && t('dataFields.phone'),
-            ]
-              .filter(Boolean)
-              .join(', '),
-      ],
-    ],
+    () =>
+      isPoints
+        ? [
+            [t('overview.type'), t('pointsType')],
+            [
+              t('points.summary.rate'),
+              t('points.summary.rateValue', {
+                currency,
+                points: programDetails.pointsRate ?? 1,
+              }),
+            ],
+            [
+              t('points.summary.rewards'),
+              `${programDetails.pointsRewards?.length ?? 0}`,
+            ],
+            [
+              t('points.summary.cap'),
+              programDetails.maxBalance != null
+                ? t('points.summary.capValue', { max: programDetails.maxBalance })
+                : t('points.summary.noCap'),
+            ],
+            [t('overview.dataCollected'), dataCollectedValue],
+          ]
+        : [
+            [t('overview.type'), t('stampsType')],
+            [t('overview.stampsRequired'), `${programDetails.totalStamps}`],
+            [t('overview.reward'), programDetails.rewardName.trim() || '—'],
+            [t('overview.dataCollected'), dataCollectedValue],
+          ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [programDetails, dataCollection, isAnonymousMode]
+    [isPoints, programDetails, dataCollectedValue, currency]
   );
 
   const designHref = activeDesign ? `/design/${activeDesign.id}` : '/program/templates';
@@ -292,6 +333,8 @@ export default function ProgramSettingsPage() {
               value={programDetails}
               onChange={setProgramDetails}
               activeDesign={activeDesign}
+              loyaltyType={program?.type ?? 'stamp'}
+              currency={currency}
             />
           </section>
 
@@ -311,13 +354,19 @@ export default function ProgramSettingsPage() {
 
               {/* Plain-language rule */}
               <p className="text-[13px] leading-[1.5] text-[#555]">
-                {t.rich('recap.earn', {
-                  reward: rewardLabel,
-                  stamps: programDetails.totalStamps,
-                  b: (chunks) => <strong className="font-semibold text-[#1A1A1A]">{chunks}</strong>,
-                })}
+                {isPoints
+                  ? t.rich('points.recap.earn', {
+                      currency,
+                      points: programDetails.pointsRate ?? 1,
+                      b: (chunks) => <strong className="font-semibold text-[#1A1A1A]">{chunks}</strong>,
+                    })
+                  : t.rich('recap.earn', {
+                      reward: rewardLabel,
+                      stamps: programDetails.totalStamps,
+                      b: (chunks) => <strong className="font-semibold text-[#1A1A1A]">{chunks}</strong>,
+                    })}
               </p>
-              {programDetails.initialStamps > 0 && (
+              {!isPoints && programDetails.initialStamps > 0 && (
                 <p className="text-[13px] leading-[1.5] text-[#555] mt-1.5">
                   {t('recap.headStart', { count: programDetails.initialStamps })}
                 </p>

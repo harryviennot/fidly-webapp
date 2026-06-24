@@ -12,6 +12,7 @@
     "you": "Vous",
     "live": "En direct",
     "stampProgress": "{current}/{total} tampons",
+    "pointsBalance": "{balance} pts",
     "sources": {
       "scanner": "Scan",
       "dashboard": "Manuel"
@@ -20,6 +21,7 @@
       "label": "Type",
       "all": "Tout",
       "stampAdded": "Tampons ajoutés",
+      "pointsEarned": "Points ajoutés",
       "rewardRedeemed": "Récompenses",
       "stampVoided": "Tampons annulés",
       "bonusStamp": "Tampons bonus",
@@ -38,6 +40,7 @@
     },
     "itemVerbs": {
       "stamp_added": "a reçu un tampon",
+      "points_earned": "a gagné des points",
       "reward_redeemed": "a échangé une récompense",
       "stamp_voided": "a eu un tampon annulé",
       "bonus_stamp": "a reçu un tampon bonus",

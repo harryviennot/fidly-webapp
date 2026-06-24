@@ -6,8 +6,10 @@ import { useRedeemReward } from "@/hooks/use-customers";
 import { toast } from "sonner";
 import { StampAdjustmentDialog } from "./stamp-adjustment-dialog";
 import { StampVoidDialog } from "./stamp-void-dialog";
+import { PointsAddDialog } from "./points-add-dialog";
+import { PointsRedeemDialog } from "./points-redeem-dialog";
 import { CustomerActionButton } from "./customer-action-button";
-import type { CustomerResponse, TransactionResponse } from "@/types";
+import type { CustomerResponse, ProgramSnapshot, TransactionResponse } from "@/types";
 
 interface CustomerQuickActionsProps {
   customer: CustomerResponse;
@@ -15,6 +17,10 @@ interface CustomerQuickActionsProps {
   maxStamps: number;
   transactions: TransactionResponse[];
   onActionComplete: () => void;
+  /** Points snapshot (detail endpoint). Present → renders the points actions. */
+  snapshot?: ProgramSnapshot | null;
+  /** Currency symbol for the points add dialog. */
+  currency?: string;
 }
 
 export function CustomerQuickActions({
@@ -23,11 +29,72 @@ export function CustomerQuickActions({
   maxStamps,
   transactions,
   onActionComplete,
+  snapshot,
+  currency = "€",
 }: CustomerQuickActionsProps) {
   const t = useTranslations("customers.actions");
   const redeemMutation = useRedeemReward(businessId);
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
   const [adjustOpen, setAdjustOpen] = useState(false);
+  const [pointsAddOpen, setPointsAddOpen] = useState(false);
+  const [pointsRedeemOpen, setPointsRedeemOpen] = useState(false);
+
+  const isPoints = snapshot?.type === "points";
+  // Phase 4: stamp/redeem/void address an enrollment, not a customer. Today
+  // every customer has exactly one enrollment per business, so [0] is "the"
+  // enrollment. Multi-program pro businesses will pick by program later.
+  const enrollmentId = customer.enrollments[0]?.id;
+
+  if (isPoints && snapshot) {
+    const canRedeemPoints = (snapshot.rewards ?? []).some((r) => r.reached);
+    return (
+      <>
+        <div className="flex gap-2">
+          <CustomerActionButton
+            variant="stamp"
+            size="lg"
+            label={t("addPoints")}
+            onClick={() => setPointsAddOpen(true)}
+            disabled={!enrollmentId}
+          />
+          {canRedeemPoints && (
+            <CustomerActionButton
+              variant="redeem"
+              size="lg"
+              label={t("redeem")}
+              onClick={() => setPointsRedeemOpen(true)}
+            />
+          )}
+        </div>
+
+        {enrollmentId && (
+          <PointsAddDialog
+            open={pointsAddOpen}
+            onOpenChange={setPointsAddOpen}
+            businessId={businessId}
+            customerId={customer.id}
+            customerName={customer.name}
+            enrollmentId={enrollmentId}
+            rate={snapshot.points_per_currency_unit ?? 1}
+            currency={currency}
+            onSuccess={onActionComplete}
+          />
+        )}
+        {enrollmentId && (
+          <PointsRedeemDialog
+            open={pointsRedeemOpen}
+            onOpenChange={setPointsRedeemOpen}
+            businessId={businessId}
+            customerId={customer.id}
+            customerName={customer.name}
+            enrollmentId={enrollmentId}
+            snapshot={snapshot}
+            onSuccess={onActionComplete}
+          />
+        )}
+      </>
+    );
+  }
 
   // Redeemable = classic full card OR banked (stacked) rewards. Banked
   // rewards stay redeemable even after stacking is toggled off
@@ -47,11 +114,6 @@ export function CustomerQuickActions({
         (v) => v.type === "stamp_voided" && v.voided_transaction_id === txn.id
       )
   );
-
-  // Phase 4: stamp/redeem/void address an enrollment, not a customer. Today
-  // every customer has exactly one enrollment per business, so [0] is "the"
-  // enrollment. Multi-program pro businesses will pick by program later.
-  const enrollmentId = customer.enrollments[0]?.id;
 
   const handleRedeem = async () => {
     if (!enrollmentId) return;

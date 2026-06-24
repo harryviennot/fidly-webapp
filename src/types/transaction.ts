@@ -1,5 +1,6 @@
 export type TransactionType =
   | 'stamp_added'
+  | 'points_earned'
   | 'reward_redeemed'
   | 'stamp_voided'
   | 'bonus_stamp'
@@ -17,9 +18,24 @@ export interface TransactionResponse {
   employee_id: string | null;
   employee_name: string | null;
   type: TransactionType;
-  stamp_delta: number;
-  stamps_before: number;
-  stamps_after: number;
+  /**
+   * Type-neutral value columns (backend migration 121). `delta` is the signed
+   * change; `value_before`/`value_after` are the primary value (stamps OR points
+   * balance) around the event. `program_type` snapshots the unit.
+   */
+  delta: number;
+  value_before: number;
+  value_after: number;
+  program_type?: 'stamp' | 'points' | null;
+  /** Ticket price behind a points scan, in the business currency (null for stamps). */
+  amount?: number | null;
+  /**
+   * Legacy stamp-named columns, dual-written during the migration window.
+   * Prefer `delta`/`value_before`/`value_after`; these are kept for back-compat.
+   */
+  stamp_delta?: number;
+  stamps_before?: number;
+  stamps_after?: number;
   metadata: Record<string, unknown> | null;
   source: TransactionSource;
   voided_transaction_id: string | null;
@@ -138,7 +154,15 @@ export interface AchievementLedgerResponse {
 export interface StampResponse {
   customer_id: string;
   name: string;
+  /** Legacy primary value (same as value_after). */
   stamps: number;
+  /** Unambiguous primary value after the action (stamps OR points balance). */
+  value_after?: number | null;
+  program_type?: 'stamp' | 'points' | null;
+  /** Banked rewards (stackable stamp programs). */
+  rewards?: number;
   message: string;
   transaction_id?: string;
+  location_id?: string | null;
+  location_name?: string | null;
 }

@@ -1,5 +1,29 @@
 import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
-import type { LoyaltyProgram, LoyaltyProgramUpdate, StampGoalImpact } from '@/types';
+import type { LoyaltyProgram, LoyaltyProgramUpdate, ProgramCreate, StampGoalImpact } from '@/types';
+
+/**
+ * Create the business's loyalty program. When the business has no customers
+ * (onboarding), the backend deletes the existing default program and recreates
+ * it with the chosen type — this is the only way to switch a program's type.
+ * Throws with the backend error message on 403 (tier gate) / 409 (has customers).
+ */
+export async function createProgram(
+  businessId: string,
+  data: ProgramCreate
+): Promise<LoyaltyProgram> {
+  const response = await fetch(`${API_BASE_URL}/programs/${businessId}`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(error, 'Failed to create program'));
+  }
+
+  return response.json();
+}
 
 export async function getPrograms(businessId: string): Promise<LoyaltyProgram[]> {
   const response = await fetch(`${API_BASE_URL}/programs/${businessId}`, {

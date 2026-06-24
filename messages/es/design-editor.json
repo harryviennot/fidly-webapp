@@ -95,7 +95,8 @@
       "addFieldsHint": "Añade condiciones, datos de contacto u otros detalles",
       "poweredBy": "Con tecnología de Stampeo",
       "noBackFieldsAdded": "Aún no hay campos del reverso",
-      "stamps": "sellos"
+      "stamps": "sellos",
+      "points": "Puntos"
     },
     "editor": {
       "appleWallet": "Apple Wallet",
@@ -103,6 +104,9 @@
       "front": "Anverso",
       "back": "Reverso",
       "previewStamps": "Vista previa de los sellos",
+      "pointsSection": "Puntos",
+      "pointsSectionSubtitle": "Estilo de la franja, colores e iconos de recompensa",
+      "previewBalance": "Saldo de vista previa",
       "activateDesign": "Activar el estilo de tarjeta",
       "activateConfirm": "¿Activar este estilo de tarjeta? Todos los clientes recibirán la tarjeta actualizada.",
       "failedToActivate": "No se pudo activar",
@@ -351,6 +355,28 @@
       "cropDescription": "Conserva solo el motivo. Recortamos los bordes transparentes automáticamente después de este paso.",
       "arrangement_overlap": "Superpuesta",
       "emptyOpacityLabel": "Opacidad de los sellos que faltan"
+    },
+    "points": {
+      "stripStyleLabel": "Estilo de la franja",
+      "stripStyle": {
+        "big_point": "Número grande",
+        "circle_progress": "Anillo de progreso",
+        "progress_icons": "Recorrido de recompensas"
+      },
+      "accentColorLabel": "Color de progreso",
+      "accentColorHelp": "El color del número, el anillo y las recompensas alcanzadas.",
+      "rewardIconsLabel": "Iconos de recompensa",
+      "rewardIconsHelp": "Se muestran en el estilo de recorrido de recompensas, un icono por recompensa.",
+      "untitledReward": "Recompensa sin título",
+      "rewardPrice": "{points} pts",
+      "pickIcon": "Elige un icono para {reward}"
+    },
+    "pointsStrip": {
+      "objective": "Objetivo",
+      "next": "Siguiente: {points} pts",
+      "points": "{points} pts",
+      "complete": "Tarjeta completada",
+      "limit": "Límite de {max} pts"
     }
   }
 }

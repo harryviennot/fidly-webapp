@@ -12,6 +12,7 @@ import {
 } from "@/components/design/StampIconPicker";
 import {
   computeCardColors,
+  rgbToHex,
   getInitials,
   calculateStampLayout,
   calculateStaggeredStampLayout,
@@ -21,7 +22,8 @@ import {
   OVERLAP_MAX_COUNT,
   STAGGERED_MAX_COUNT,
 } from "@/lib/card-utils";
-import type { CustomStampArrangement, CustomStampConfig } from "@/types";
+import type { CustomStampArrangement, CustomStampConfig, RewardTier } from "@/types";
+import { PointsStrip } from "./PointsStrip";
 
 // ============================================================================
 // Types
@@ -42,6 +44,11 @@ export interface WalletCardProps {
   showSecondaryFields?: boolean;
   /** Additional class names */
   className?: string;
+  /** Points programs (design.card_type === 'points'): sample balance for the
+   *  strip preview. */
+  pointsBalance?: number;
+  /** Points programs: the reward ladder, for the strip preview. */
+  pointsRewards?: RewardTier[];
 }
 
 // ============================================================================
@@ -447,6 +454,8 @@ export function WalletCard({
   showQR = true,
   showSecondaryFields = true,
   className = "",
+  pointsBalance,
+  pointsRewards,
 }: WalletCardProps) {
   const t = useTranslations("designEditor.cardBack");
   const displayName =
@@ -454,6 +463,11 @@ export function WalletCard({
   const initials = getInitials(displayName);
   const totalStamps = totalStampsProp ?? design.total_stamps ?? 10;
   const colors = computeCardColors(design);
+  const isPoints = design.card_type === "points";
+  // Points accent: explicit progress color → stamp accent fallback.
+  const pointsAccent = design.progress_accent_color
+    ? rgbToHex(design.progress_accent_color)
+    : colors.accentHex;
 
   // {{variable}} previews use the business's REAL data (reward name,
   // business name, the signed-in user's own first name) and the counts
@@ -529,13 +543,13 @@ export function WalletCard({
                   className="text-[8px] font-bold uppercase tracking-wider transition-colors duration-300"
                   style={{ color: colors.mutedTextColor }}
                 >
-                  {t("stamps")}
+                  {isPoints ? t("points") : t("stamps")}
                 </div>
                 <div
                   className="text-md font-medium flex items-baseline gap-1 justify-end transition-colors duration-300 leading-tight"
                   style={{ color: colors.textColor }}
                 >
-                  {stamps} / {totalStamps}
+                  {isPoints ? (pointsBalance ?? 0) : `${stamps} / ${totalStamps}`}
                 </div>
               </div>
             </div>
@@ -558,14 +572,26 @@ export function WalletCard({
                   />
                 </div>
               )}
-              <StampGridContainer
-                totalStamps={totalStamps}
-                filledCount={stamps}
-                colors={colors}
-                stampIcon={stampIcon}
-                rewardIcon={rewardIcon}
-                customConfig={customConfig}
-              />
+              {isPoints ? (
+                <PointsStrip
+                  style={design.points_strip_style ?? "big_point"}
+                  balance={pointsBalance ?? 0}
+                  rewards={pointsRewards ?? []}
+                  rewardIcons={design.points_reward_icons}
+                  accentColor={pointsAccent}
+                  mutedColor={colors.mutedTextColor}
+                  textColor={colors.textColor}
+                />
+              ) : (
+                <StampGridContainer
+                  totalStamps={totalStamps}
+                  filledCount={stamps}
+                  colors={colors}
+                  stampIcon={stampIcon}
+                  rewardIcon={rewardIcon}
+                  customConfig={customConfig}
+                />
+              )}
             </div>
 
             {/* Secondary Fields - horizontal row like real Apple Wallet */}

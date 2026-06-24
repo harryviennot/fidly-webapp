@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { PencilSimple, FloppyDisk, ArrowsClockwise, Translate } from '@phosphor-icons/react';
-import { CardDesign, CardDesignCreate, DesignTranslation, LoyaltyProgram } from '@/types';
+import { CardDesign, CardDesignCreate, DesignTranslation, LoyaltyProgram, isPointsProgram, isStampProgram } from '@/types';
 import { getDesign, getPrograms } from '@/api';
 import { useBusiness } from '@/contexts/business-context';
 import { useUpdateBusiness } from '@/hooks/use-business-query';
@@ -155,8 +155,10 @@ export default function EditDesignPage() {
         onDirtyChange={setIsDirty}
         onSave={handleSaveComplete}
         designName={designName}
-        programTotalStamps={program?.config?.total_stamps}
+        programTotalStamps={isStampProgram(program) ? program.config.total_stamps : undefined}
         programName={program?.name}
+        programType={program?.type}
+        programRewards={isPointsProgram(program) ? program.config.rewards : undefined}
         headerLeft={
           <div className="flex items-center gap-3">
             {editingName ? (

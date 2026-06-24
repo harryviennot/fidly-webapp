@@ -31,6 +31,7 @@ import {
   useUpdateNotificationTemplate,
 } from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
+import { isStampProgram } from '@/types';
 import { useProgram } from '../layout';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import {
@@ -92,7 +93,10 @@ export default function ProgramNotificationsPage() {
   const templates = useMemo(() => data?.items ?? [], [data]);
   const tier = data?.tier;
   const isEditable = templates.some((tpl) => tpl.is_editable);
-  const totalStamps = program?.config?.total_stamps;
+  // Points notification firing + variables land with backend Phase 9. Until
+  // then a points program has no stamp goal — fall back to generic sample
+  // values for the variable previews rather than reading a stamp-only field.
+  const totalStamps = isStampProgram(program) ? program.config.total_stamps : undefined;
   const programName = program?.name ?? null;
   const rewardNameSet = Boolean(program?.reward_name?.trim());
   const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;

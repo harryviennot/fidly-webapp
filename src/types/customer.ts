@@ -1,3 +1,5 @@
+import type { ProgramSnapshot } from "./program";
+
 export interface Enrollment {
   id: string;
   program_id: string;
@@ -40,6 +42,10 @@ export interface CustomerResponse {
   // Mirrors CustomerSegment in @/lib/customer-segments — kept inline to avoid a
   // type import cycle (customer-segments imports CustomerResponse from here).
   segment?: "new" | "regular" | "vip" | "reward_ready" | "close_to_reward" | "at_risk" | "ghost" | null;
+  // Type-aware progress snapshot (mirrors backend describe_progress). Only the
+  // customer DETAIL endpoint populates it; the list leaves it undefined until
+  // backend Phase 8. Drives the points balance + reward ladder display.
+  program?: ProgramSnapshot | null;
 }
 
 export interface PaginatedCustomerResponse {

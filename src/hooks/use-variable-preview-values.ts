@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useBusiness } from '@/contexts/business-context';
 import { useDefaultProgram } from '@/hooks/use-programs';
+import { isStampProgram } from '@/types';
 import { getMyProfile } from '@/api';
 
 /**
@@ -22,18 +23,19 @@ export function useVariablePreviewValues(): Record<string, string> {
     staleTime: 5 * 60_000,
   });
 
+  const totalStamps = isStampProgram(program) ? program.config.total_stamps : undefined;
+
   return useMemo(() => {
     const overrides: Record<string, string> = {};
     const businessName = currentBusiness?.name?.trim();
     if (businessName) overrides.business_name = businessName;
     const rewardName = program?.reward_name?.trim();
     if (rewardName) overrides.reward_name = rewardName;
-    const total = program?.config?.total_stamps;
-    if (typeof total === 'number' && total > 0) {
-      overrides.total_stamps = String(total);
+    if (typeof totalStamps === 'number' && totalStamps > 0) {
+      overrides.total_stamps = String(totalStamps);
     }
     const firstName = profile?.name?.trim().split(/\s+/)[0];
     if (firstName) overrides.customer_first_name = firstName;
     return overrides;
-  }, [currentBusiness?.name, program?.reward_name, program?.config?.total_stamps, profile?.name]);
+  }, [currentBusiness?.name, program?.reward_name, totalStamps, profile?.name]);
 }

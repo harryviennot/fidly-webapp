@@ -100,17 +100,21 @@ type StampVars = { customerId: string; enrollmentId: string };
 type AddStampVars = StampVars & {
   reason?: string;
   locationId?: string | null;
+  /** Points programs: the ticket price (credits round(amount × rate)). */
+  amount?: number;
 };
 
 export function useAddStamp(businessId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ enrollmentId, reason, locationId }: AddStampVars) =>
+    mutationFn: ({ enrollmentId, reason, locationId, amount }: AddStampVars) =>
       addStamp(
         businessId!,
         enrollmentId,
-        reason !== undefined ? { source: 'dashboard', reason, locationId } : undefined
+        reason !== undefined || amount !== undefined
+          ? { source: 'dashboard', reason, locationId, amount }
+          : undefined
       ),
     onMutate: async ({ customerId }) => {
       await queryClient.cancelQueries({
@@ -158,7 +162,8 @@ export function useRedeemReward(businessId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ enrollmentId }: StampVars) => redeemReward(businessId!, enrollmentId),
+    mutationFn: ({ enrollmentId, rewardId }: StampVars & { rewardId?: string | null }) =>
+      redeemReward(businessId!, enrollmentId, rewardId),
     onMutate: async ({ customerId }) => {
       await queryClient.cancelQueries({
         queryKey: customerKeys.all(businessId!),

@@ -5,6 +5,7 @@
     "export": "Exportar",
     "addCustomer": "Añadir cliente",
     "customerProfile": "Perfil del cliente",
+    "pointsCustomer": "Tarjeta de puntos",
     "loading": "Cargando clientes...",
     "loadFailed": "No se han podido cargar los clientes. Comprueba que el servidor esté en marcha.",
     "searchPlaceholder": "Buscar por nombre o correo...",
@@ -76,6 +77,8 @@
     },
     "actions": {
       "addStamp": "Añadir sello",
+      "open": "Abrir",
+      "addPoints": "Añadir puntos",
       "maxed": "¡Al máximo!",
       "redeem": "Canjear",
       "voidLast": "Anular el último",
@@ -117,7 +120,33 @@
           "locationNotPermitted": "No tienes asignado ese establecimiento."
         }
       },
-      "redeemBanked": "{count, plural, =1 {Canjear (1 guardada)} other {Canjear (# guardadas)}}"
+      "redeemBanked": "{count, plural, =1 {Canjear (1 guardada)} other {Canjear (# guardadas)}}",
+      "pointsAdd": {
+        "title": "Añadir puntos",
+        "amountLabel": "Importe gastado",
+        "preview": "= +{points} puntos",
+        "reasonLabel": "Motivo",
+        "reasonPlaceholder": "¿Por qué añades estos puntos?",
+        "reasonHelp": "Solo tú lo ves. Mantiene tu historial de actividad claro.",
+        "locationLabel": "Establecimiento",
+        "noLocation": "Sin establecimiento",
+        "successToast": "{points} puntos añadidos",
+        "submitting": "Añadiendo...",
+        "submit": "Añadir puntos",
+        "errors": {
+          "amountRequired": "Indica el importe que gastó el cliente."
+        }
+      },
+      "pointsRedeem": {
+        "title": "Canjear una recompensa",
+        "balance": "{balance} disponibles",
+        "price": "{points} pts",
+        "notEnough": "No hay puntos suficientes",
+        "successToast": "{reward} canjeada",
+        "failedToast": "No se pudo canjear la recompensa. Inténtalo de nuevo.",
+        "submitting": "Canjeando...",
+        "submit": "Canjear"
+      }
     },
     "toasts": {
       "stampAdded": "Sello añadido para {name}",
@@ -169,7 +198,14 @@
         "at_risk": "En riesgo",
         "ghost": "Fantasma"
       },
-      "rewardsAvailable": "Recompensas por canjear"
+      "rewardsAvailable": "Recompensas por canjear",
+      "points": {
+        "title": "Saldo de puntos",
+        "lifetime": "{count} ganados en total",
+        "complete": "Todas las recompensas desbloqueadas",
+        "limit": "Límite de {max} pts",
+        "price": "{points} pts"
+      }
     },
     "transaction": {
       "empty": "Aún no hay movimientos",
@@ -177,6 +213,7 @@
       "loadingMore": "Cargando...",
       "types": {
         "stamp_added": "Sello añadido",
+        "points_earned": "Puntos ganados",
         "reward_redeemed": "Recompensa canjeada",
         "stamp_voided": "Sello anulado",
         "bonus_stamp": "Sello de bonificación",

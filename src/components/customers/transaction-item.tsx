@@ -5,7 +5,13 @@ import { useTranslations } from "next-intl";
 import type { TransactionResponse } from "@/types";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
-import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
+import {
+  TYPE_CONFIG,
+  isCardLifecycleType,
+  txDelta,
+  txValueAfter,
+  txValueBefore,
+} from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
 import { LocationBadge } from "@/components/locations/location-badge";
 
@@ -53,15 +59,15 @@ export function TransactionItem({
     return date.toLocaleDateString();
   };
 
-  const deltaText =
-    transaction.stamp_delta > 0
-      ? `+${transaction.stamp_delta}`
-      : String(transaction.stamp_delta);
+  const delta = txDelta(transaction);
+  const deltaText = delta > 0 ? `+${delta}` : String(delta);
 
   const metadata = transaction.metadata as Record<string, string> | null;
   const isAdjustment =
     transaction.source === "dashboard" &&
-    (transaction.type === "stamp_added" || transaction.type === "bonus_stamp");
+    (transaction.type === "stamp_added" ||
+      transaction.type === "bonus_stamp" ||
+      transaction.type === "points_earned");
   const adjustmentReason = isAdjustment ? metadata?.adjustment_reason : undefined;
 
   // Map known source values to translated labels; fall back to the raw value
@@ -136,11 +142,11 @@ export function TransactionItem({
             ) : (
               <>
                 <span className="font-semibold text-[#555] tabular-nums">
-                  {transaction.stamps_before}
+                  {txValueBefore(transaction)}
                 </span>
                 <span>→</span>
                 <span className="font-semibold tabular-nums text-[#555]">
-                  {transaction.stamps_after}
+                  {txValueAfter(transaction)}
                 </span>
                 <span className="text-[#D8D5CE]">·</span>
                 <span>{sourceLabel}</span>

@@ -8,7 +8,7 @@ import {
   CaretRight,
 } from "@phosphor-icons/react";
 import { InfoPopover } from "@/components/reusables/info-popover";
-import type { CustomerResponse, CardDesign } from "@/types";
+import type { CustomerResponse, CardDesign, LoyaltyType } from "@/types";
 import {
   classifyCustomer,
   getSegmentConfig,
@@ -71,6 +71,9 @@ export interface CustomerDataTableProps {
   onVoid: (e: React.MouseEvent, customer: CustomerResponse) => void;
   design: CardDesign | undefined;
   totalStamps: number;
+  /** The program's loyalty type. Points list rows render neutrally because the
+   *  list endpoint has no per-customer points snapshot yet (backend Phase 8). */
+  loyaltyType?: LoyaltyType;
   searchTerm: string;
   selectedCustomerId: string | null;
   onSelectCustomer: (id: string) => void;
@@ -92,12 +95,14 @@ export function CustomerDataTable({
   onVoid,
   design,
   totalStamps,
+  loyaltyType = 'stamp',
   searchTerm,
   selectedCustomerId,
   onSelectCustomer,
   isPendingRedeem,
   isPendingVoid,
 }: CustomerDataTableProps) {
+  const isPoints = loyaltyType === 'points';
   const t = useTranslations("customers");
   const locale = useLocale();
   // French puts a space before the colon; English does not.
@@ -182,7 +187,9 @@ export function CustomerDataTable({
           </TableHeader>
           <TableBody>
             {customers.map((customer) => {
-              const segment = customer.segment ?? classifyCustomer(customer, totalStamps);
+              const segment =
+                (customer.segment as ReturnType<typeof classifyCustomer> | undefined) ??
+                classifyCustomer(customer, totalStamps, undefined, loyaltyType);
               const segConfig = getSegmentConfig(segment);
               const avatarColor = SEGMENT_AVATAR_COLORS[segment];
               const isSelected = selectedCustomerId === customer.id;
@@ -216,12 +223,16 @@ export function CustomerDataTable({
                   </TableCell>
 
                   <TableCell className="py-3 px-3">
-                    <StampProgress
-                      count={customer.stamps}
-                      total={totalStamps}
-                      design={design}
-                      size="sm"
-                    />
+                    {isPoints ? (
+                      <span className="text-[12px] text-[#A5A5A5]">{t("pointsCustomer")}</span>
+                    ) : (
+                      <StampProgress
+                        count={customer.stamps}
+                        total={totalStamps}
+                        design={design}
+                        size="sm"
+                      />
+                    )}
                   </TableCell>
 
                   <TableCell className="py-3 px-3 hidden @[32rem]:table-cell">
@@ -238,31 +249,45 @@ export function CustomerDataTable({
                   </TableCell>
 
                   <TableCell className="py-3 px-3">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {customer.stamps >= totalStamps ? (
-                        <CustomerActionButton
-                          variant="redeem"
-                          size="sm"
-                          label={t("actions.redeem")}
-                          onClick={(e) => onRedeem(e, customer)}
-                          loading={isPendingRedeem}
-                        />
-                      ) : (
+                    {/* Points list actions need the customer's balance + reward
+                        menu (backend Phase 8). Until then the row opens the
+                        detail sheet, which has the full points snapshot. */}
+                    {isPoints ? (
+                      <div className="flex items-center justify-end">
                         <CustomerActionButton
                           variant="stamp"
                           size="sm"
-                          label={t("actions.addStamp")}
-                          onClick={(e) => onAddStamp(e, customer)}
+                          label={t("actions.open")}
+                          onClick={() => onSelectCustomer(customer.id)}
                         />
-                      )}
-                      <CustomerActionButton
-                        variant="void"
-                        size="sm"
-                        label={t("actions.voidLast")}
-                        onClick={(e) => onVoid(e, customer)}
-                        loading={isPendingVoid}
-                      />
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-end gap-1.5">
+                        {customer.stamps >= totalStamps ? (
+                          <CustomerActionButton
+                            variant="redeem"
+                            size="sm"
+                            label={t("actions.redeem")}
+                            onClick={(e) => onRedeem(e, customer)}
+                            loading={isPendingRedeem}
+                          />
+                        ) : (
+                          <CustomerActionButton
+                            variant="stamp"
+                            size="sm"
+                            label={t("actions.addStamp")}
+                            onClick={(e) => onAddStamp(e, customer)}
+                          />
+                        )}
+                        <CustomerActionButton
+                          variant="void"
+                          size="sm"
+                          label={t("actions.voidLast")}
+                          onClick={(e) => onVoid(e, customer)}
+                          loading={isPendingVoid}
+                        />
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               );
@@ -317,7 +342,9 @@ export function CustomerDataTable({
       <div className="md:hidden rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
         <div className="divide-y divide-[#F8F7F5]">
           {customers.map((customer) => {
-            const segment = customer.segment ?? classifyCustomer(customer, totalStamps);
+            const segment =
+              (customer.segment as ReturnType<typeof classifyCustomer> | undefined) ??
+              classifyCustomer(customer, totalStamps, undefined, loyaltyType);
             const segConfig = getSegmentConfig(segment);
             const avatarColor = SEGMENT_AVATAR_COLORS[segment];
 
@@ -354,12 +381,16 @@ export function CustomerDataTable({
 
                 <div className="flex justify-between items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <StampProgress
-                      count={customer.stamps}
-                      total={totalStamps}
-                      design={design}
-                      size="sm"
-                    />
+                    {isPoints ? (
+                      <span className="text-[12px] text-[#A5A5A5]">{t("pointsCustomer")}</span>
+                    ) : (
+                      <StampProgress
+                        count={customer.stamps}
+                        total={totalStamps}
+                        design={design}
+                        size="sm"
+                      />
+                    )}
                   </div>
                   <div className="text-[11px] text-[#8A8A8A] shrink-0 whitespace-nowrap">
                     {customer.total_redemptions ?? 0} {t("table.redemptions").toLowerCase()}

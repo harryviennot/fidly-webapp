@@ -9,6 +9,7 @@ type FilterKey = TransactionType | "all" | "card_added,card_re_added";
 const FILTER_OPTIONS: FilterKey[] = [
   "all",
   "stamp_added",
+  "points_earned",
   "reward_redeemed",
   "stamp_voided",
   "bonus_stamp",
@@ -20,6 +21,7 @@ const FILTER_OPTIONS: FilterKey[] = [
 const FILTER_LABEL_KEYS: Record<FilterKey, string> = {
   all: "filters.all",
   stamp_added: "filters.stampAdded",
+  points_earned: "filters.pointsEarned",
   reward_redeemed: "filters.rewardRedeemed",
   stamp_voided: "filters.stampVoided",
   bonus_stamp: "filters.bonusStamp",
@@ -33,6 +35,7 @@ const FILTER_LABEL_KEYS: Record<FilterKey, string> = {
 const FILTER_COLORS: Record<FilterKey, { color: string; bg: string }> = {
   all: { color: "var(--accent)", bg: "var(--accent-light)" },
   stamp_added: { color: "var(--accent)", bg: "var(--accent-light)" },
+  points_earned: { color: "var(--accent)", bg: "var(--accent-light)" },
   stamp_voided: { color: "#C75050", bg: "#FDE8E4" },
   reward_redeemed: { color: "#C4883D", bg: "#FFF3E0" },
   bonus_stamp: { color: "#3D7CAF", bg: "#E4F0F8" },

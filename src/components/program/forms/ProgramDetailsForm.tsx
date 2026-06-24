@@ -4,12 +4,14 @@ import { useTranslations } from 'next-intl';
 import { CheckIcon } from '@phosphor-icons/react';
 import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { InfoPopover } from '@/components/reusables/info-popover';
 import { NumberStepper } from '@/components/reusables/number-stepper';
 import { SmoothHeight } from '@/components/reusables/smooth-height';
+import { RewardMenuEditor } from '@/components/program/forms/RewardMenuEditor';
 import { computeCardColors } from '@/lib/card-utils';
 import { cn } from '@/lib/utils';
-import type { CardDesign } from '@/types';
+import type { CardDesign, LoyaltyType, RewardTier } from '@/types';
 
 export interface ProgramDetailsValue {
   programName: string;
@@ -21,12 +23,23 @@ export interface ProgramDetailsValue {
   stackableRewards: boolean;
   /** Max banked rewards; null = unlimited. */
   maxStackedRewards: number | null;
+  // ── Points fields (only meaningful when the program is a points program) ──
+  /** Points earned per 1 unit of currency spent. */
+  pointsRate?: number;
+  /** Priced reward menu. */
+  pointsRewards?: RewardTier[];
+  /** Optional balance cap; null = no cap. */
+  maxBalance?: number | null;
 }
 
 interface ProgramDetailsFormProps {
   value: ProgramDetailsValue;
   onChange: (next: ProgramDetailsValue) => void;
   activeDesign?: CardDesign | null;
+  /** The program's (immutable) loyalty type. Drives which fields render. */
+  loyaltyType?: LoyaltyType;
+  /** Currency symbol for the points earn-rate framing. */
+  currency?: string;
 }
 
 const MIN_STAMPS = 2;
@@ -42,8 +55,15 @@ const STAMP_RANGE = MAX_STAMPS - MIN_STAMPS;
  * Card preview is NOT rendered here — parents typically show the live card
  * preview alongside this form in a separate column.
  */
-export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDetailsFormProps) {
+export function ProgramDetailsForm({
+  value,
+  onChange,
+  activeDesign,
+  loyaltyType = 'stamp',
+  currency = '€',
+}: ProgramDetailsFormProps) {
   const t = useTranslations('loyaltyProgram');
+  const isPoints = loyaltyType === 'points';
 
   const stampIcon = (activeDesign?.stamp_icon || 'checkmark') as StampIconType;
   const rewardIcon = (activeDesign?.reward_icon || 'gift') as StampIconType;
@@ -69,17 +89,22 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
         />
       </div>
 
-      {/* Loyalty Type — stamps is the only type today, so confirm it rather
-          than offering dead, un-clickable options. */}
+      {/* Loyalty Type — immutable after creation (the backend strips `type`
+          from PATCH), so confirm the active type rather than offering a picker.
+          Changing type requires the dedicated conversion flow. */}
       <div>
         <label className="block text-[12px] font-semibold text-[#555] mb-2">
           {t('loyaltyTypeLabel')}
         </label>
         <div className="flex items-center gap-2.5 p-3.5 px-4 rounded-[10px] border-2 border-[var(--accent)] bg-[var(--accent-light)]">
-          <span className="text-[20px]" aria-hidden="true">⭐</span>
+          <span className="text-[20px]" aria-hidden="true">{isPoints ? '🎯' : '⭐'}</span>
           <div className="flex-1 min-w-0">
-            <div className="text-[14px] font-semibold text-[#1A1A1A]">{t('stampsType')}</div>
-            <div className="text-[11.5px] text-[#8A8A8A] leading-[1.4]">{t('stampsTypeDesc')}</div>
+            <div className="text-[14px] font-semibold text-[#1A1A1A]">
+              {isPoints ? t('pointsType') : t('stampsType')}
+            </div>
+            <div className="text-[11.5px] text-[#8A8A8A] leading-[1.4]">
+              {isPoints ? t('pointsTypeDesc') : t('stampsTypeDesc')}
+            </div>
           </div>
           <div className="w-[18px] h-[18px] rounded-full bg-[var(--accent)] flex items-center justify-center flex-shrink-0">
             <CheckIcon className="w-2.5 h-2.5 text-white" weight="bold" />
@@ -87,7 +112,104 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
         </div>
       </div>
 
+      {isPoints && (
+        <>
+          {/* Earn rate */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <label className="text-[12px] font-semibold text-[#555]">
+                {t('points.rateLabel')}
+              </label>
+              <InfoPopover content={t('points.rateHelp')} />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] text-[#7A7A7A]">
+                {t('points.ratePrefix', { currency })}
+              </span>
+              <Input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="any"
+                value={Number.isFinite(value.pointsRate) ? value.pointsRate : ''}
+                onChange={(e) => {
+                  const n = parseFloat(e.target.value);
+                  patch({ pointsRate: Number.isNaN(n) ? 0 : n });
+                }}
+                className="h-11 w-24 text-center"
+                aria-label={t('points.rateLabel')}
+              />
+              <span className="text-[13px] text-[#7A7A7A]">{t('points.ratePoints')}</span>
+            </div>
+          </div>
+
+          {/* Reward menu */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <label className="text-[12px] font-semibold text-[#555]">
+                {t('points.rewardMenuLabel')}
+              </label>
+              <InfoPopover content={t('points.rewardMenuHelp')} />
+            </div>
+            <RewardMenuEditor
+              value={value.pointsRewards ?? []}
+              onChange={(rewards) => patch({ pointsRewards: rewards })}
+            />
+          </div>
+
+          {/* Optional balance cap */}
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <label className="text-[12px] font-semibold text-[#555]">
+                  {t('points.capLabel')}
+                </label>
+                <InfoPopover content={t('points.capHelp')} />
+              </div>
+              <Switch
+                checked={(value.maxBalance ?? null) !== null}
+                onCheckedChange={(on) =>
+                  patch({ maxBalance: on ? value.maxBalance ?? 1000 : null })
+                }
+                aria-label={t('points.capLabel')}
+              />
+            </div>
+            <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mt-1">
+              {t('points.capDescription')}
+            </p>
+            <SmoothHeight>
+              {(value.maxBalance ?? null) !== null && (
+                <div className="flex items-center justify-between gap-3 pt-3 animate-slide-up">
+                  <label className="text-[12px] font-semibold text-[#555]">
+                    {t('points.capMaxLabel')}
+                  </label>
+                  <div className="relative w-32">
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      value={value.maxBalance ?? 1}
+                      onChange={(e) => {
+                        const n = parseInt(e.target.value, 10);
+                        patch({ maxBalance: Number.isNaN(n) ? 1 : Math.max(1, n) });
+                      }}
+                      className="h-11 pr-9 text-right"
+                      aria-label={t('points.capMaxLabel')}
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-medium text-[#9A9A9A]">
+                      {t('points.rewardMenu.pointsSuffix')}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </SmoothHeight>
+          </div>
+        </>
+      )}
+
       {/* Stamps to Earn */}
+      {!isPoints && (
+      <>
       <div>
         <div className="flex items-center justify-between mb-3">
           <label className="text-[12px] font-semibold text-[#555]">{t('stampsToEarn')}</label>
@@ -244,6 +366,8 @@ export function ProgramDetailsForm({ value, onChange, activeDesign }: ProgramDet
           )}
         </SmoothHeight>
       </div>
+      </>
+      )}
     </div>
   );
 }

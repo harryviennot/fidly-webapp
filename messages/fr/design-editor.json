@@ -95,7 +95,8 @@
       "addFieldsHint": "Ajoutez des conditions, infos de contact ou d'autres détails",
       "poweredBy": "Propulsé par Stampeo",
       "noBackFieldsAdded": "Aucun champ au dos ajouté",
-      "stamps": "tampons"
+      "stamps": "tampons",
+      "points": "Points"
     },
     "editor": {
       "appleWallet": "Apple Wallet",
@@ -103,6 +104,9 @@
       "front": "Avant",
       "back": "Arrière",
       "previewStamps": "Aperçu des tampons",
+      "pointsSection": "Points",
+      "pointsSectionSubtitle": "Style du bandeau, couleurs et icônes de récompense",
+      "previewBalance": "Solde d'aperçu",
       "activateDesign": "Activer le modèle",
       "activateConfirm": "Activer ce modèle ? Tous les clients recevront la carte mise à jour.",
       "failedToActivate": "Échec de l'activation",
@@ -351,6 +355,28 @@
       "cropDescription": "Gardez seulement le sujet. Les bords transparents sont retirés automatiquement après cette étape.",
       "arrangement_overlap": "Superposée",
       "emptyOpacityLabel": "Opacité des tampons restants"
+    },
+    "points": {
+      "stripStyleLabel": "Style du bandeau",
+      "stripStyle": {
+        "big_point": "Grand nombre",
+        "circle_progress": "Anneau de progression",
+        "progress_icons": "Parcours de récompenses"
+      },
+      "accentColorLabel": "Couleur de progression",
+      "accentColorHelp": "La couleur du nombre, de l'anneau et des récompenses atteintes.",
+      "rewardIconsLabel": "Icônes de récompense",
+      "rewardIconsHelp": "Affichées sur le style parcours de récompenses, une icône par récompense.",
+      "untitledReward": "Récompense sans titre",
+      "rewardPrice": "{points} pts",
+      "pickIcon": "Choisir une icône pour {reward}"
+    },
+    "pointsStrip": {
+      "objective": "Objectif",
+      "next": "Prochaine : {points} pts",
+      "points": "{points} pts",
+      "complete": "Carte complétée",
+      "limit": "Plafond {max} pts"
     }
   }
 }

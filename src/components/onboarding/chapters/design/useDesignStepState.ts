@@ -66,8 +66,14 @@ export function computeInitialFormData({
     value: program?.reward_name ?? '',
   });
 
+  // Tag the design to the program type so the wizard preview renders the right
+  // surface (points strip vs stamp grid) and every design sub-step's save
+  // preserves it. Existing rows keep their stored card_type when set.
+  const programCardType = program?.type === 'points' ? 'points' : 'stamp';
+
   if (existingDesign) {
     const seeded = { ...existingDesign } as CardDesignCreate;
+    if (!seeded.card_type) seeded.card_type = programCardType;
     // Internal admin label — never overwrites a saved value. Falls back to
     // the business name when blank so the dashboard's design list stays
     // readable. This is independent of the `organization_name` (title)
@@ -114,6 +120,7 @@ export function computeInitialFormData({
     name: currentBusiness?.name ?? '',
     organization_name: '',
     logo_url: currentBusiness?.logo_url ?? undefined,
+    card_type: programCardType,
   };
   if (!seen) {
     if (program?.name) base.description = program.name;

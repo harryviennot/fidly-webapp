@@ -384,6 +384,7 @@
         "title": "Has montado un programa de fidelidad de verdad",
         "subtitle": "Tarjeta real, teléfonos reales, notificaciones reales. Un repaso rápido antes de hablar de planes.",
         "programDetail": "{totalStamps} sellos por \"{rewardName}\"",
+        "programDetailPoints": "{rewardCount} recompensas para canjear con puntos",
         "stampsLabel": "{count, plural, =0 {Aún no se ha enviado ningún sello} =1 {1 sello enviado a tu teléfono} other {# sellos enviados a tu teléfono}}",
         "broadcastLabel": {
           "sent": "Difusión recibida en tu teléfono",

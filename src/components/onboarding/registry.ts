@@ -127,12 +127,27 @@ export const TOTAL_CHAPTERS = WIZARD_CHAPTERS.length;
  */
 export function getVisibleChapters(
   settings: BusinessSettings | null | undefined,
-  draftTeamSize?: string | null
+  draftTeamSize?: string | null,
+  /** Wizard-draft loyalty type ('stamps' | 'points'). Points cards have no
+   *  stamp grid, so the design chapter's stamp sub-step is dropped. */
+  loyaltyType?: string | null
 ): ChapterDef[] {
   const effectiveTeamSize = draftTeamSize || settings?.team_size;
   const isSolo = effectiveTeamSize === 'solo';
-  if (!isSolo) return WIZARD_CHAPTERS;
-  return WIZARD_CHAPTERS.filter((c) => c.id !== 'team');
+
+  let chapters = isSolo
+    ? WIZARD_CHAPTERS.filter((c) => c.id !== 'team')
+    : WIZARD_CHAPTERS;
+
+  if (loyaltyType === 'points') {
+    chapters = chapters.map((c) =>
+      c.id === 'design'
+        ? { ...c, subSteps: c.subSteps.filter((s) => s.id !== 'stamps') }
+        : c
+    );
+  }
+
+  return chapters;
 }
 
 /**

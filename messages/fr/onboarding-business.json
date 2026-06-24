@@ -384,6 +384,7 @@
         "title": "Voilà ce que vous venez de construire",
         "subtitle": "Un vrai programme de fidélité, sur de vrais téléphones, avec de vraies notifications. Récapitulons avant de parler offre.",
         "programDetail": "{totalStamps} tampons pour « {rewardName} »",
+        "programDetailPoints": "{rewardCount} récompenses à obtenir avec des points",
         "stampsLabel": "{count, plural, =0 {Aucun tampon envoyé} =1 {1 tampon envoyé et reçu sur votre téléphone} other {# tampons envoyés et reçus sur votre téléphone}}",
         "broadcastLabel": {
           "sent": "1 diffusion envoyée à votre audience (vous, pour l'instant)",

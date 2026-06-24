@@ -12,6 +12,7 @@
     "you": "You",
     "live": "Live",
     "stampProgress": "{current}/{total} stamps",
+    "pointsBalance": "{balance} pts",
     "sources": {
       "scanner": "Scan",
       "dashboard": "Manual"
@@ -20,6 +21,7 @@
       "label": "Type",
       "all": "All",
       "stampAdded": "Stamps Added",
+      "pointsEarned": "Points added",
       "rewardRedeemed": "Rewards Redeemed",
       "stampVoided": "Stamps Voided",
       "bonusStamp": "Bonus Stamps",
@@ -38,6 +40,7 @@
     },
     "itemVerbs": {
       "stamp_added": "received a stamp",
+      "points_earned": "earned points",
       "reward_redeemed": "redeemed a reward",
       "stamp_voided": "had a stamp voided",
       "bonus_stamp": "received a bonus stamp",

@@ -384,6 +384,7 @@
         "title": "You've built a real loyalty program",
         "subtitle": "Real card, real phones, real notifications. Quick recap before we talk plans.",
         "programDetail": "{totalStamps} stamps for \"{rewardName}\"",
+        "programDetailPoints": "{rewardCount} rewards to redeem with points",
         "stampsLabel": "{count, plural, =0 {No stamps sent yet} =1 {1 stamp sent to your phone} other {# stamps sent to your phone}}",
         "broadcastLabel": {
           "sent": "Broadcast received on your phone",

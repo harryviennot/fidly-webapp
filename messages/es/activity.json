@@ -12,6 +12,7 @@
     "you": "Tú",
     "live": "En directo",
     "stampProgress": "{current}/{total} sellos",
+    "pointsBalance": "{balance} pts",
     "sources": {
       "scanner": "Escaneo",
       "dashboard": "Manual"
@@ -20,6 +21,7 @@
       "label": "Tipo",
       "all": "Todo",
       "stampAdded": "Sellos añadidos",
+      "pointsEarned": "Puntos añadidos",
       "rewardRedeemed": "Recompensas",
       "stampVoided": "Sellos anulados",
       "bonusStamp": "Sellos extra",
@@ -38,6 +40,7 @@
     },
     "itemVerbs": {
       "stamp_added": "ha recibido un sello",
+      "points_earned": "ha ganado puntos",
       "reward_redeemed": "ha canjeado una recompensa",
       "stamp_voided": "ha tenido un sello anulado",
       "bonus_stamp": "ha recibido un sello extra",

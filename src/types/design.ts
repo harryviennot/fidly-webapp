@@ -49,6 +49,23 @@ export interface CustomStampConfig {
 
 export type StampIconMode = "preset" | "custom";
 
+export type CardType = "stamp" | "points";
+
+/** The three points strip layouts the backend renders (migration 123). */
+export type PointsStripStyle = "big_point" | "circle_progress" | "progress_icons";
+
+/**
+ * A reward's chosen icon for the `progress_icons` points strip. `preset` ref is
+ * an icon name from the shared 98-icon set; `custom` ref is an uploaded
+ * ProcessedIconAsset id. Keyed by reward id in `points_reward_icons`.
+ */
+export interface PointsRewardIcon {
+  type: "preset" | "custom";
+  ref: string;
+}
+
+export type PointsRewardIcons = Record<string, PointsRewardIcon>;
+
 export interface CardDesign {
   id: string;
   name: string;
@@ -74,9 +91,14 @@ export interface CardDesign {
   icon_color?: string;
 
   // Custom stamp icons (STA-216)
-  card_type?: string;
+  card_type?: CardType;
   stamp_icon_mode?: StampIconMode;
   custom_stamp_config?: CustomStampConfig | null;
+
+  // Points card design (migration 123). Only meaningful when card_type === 'points'.
+  points_strip_style?: PointsStripStyle;
+  progress_accent_color?: string;
+  points_reward_icons?: PointsRewardIcons;
 
   // Asset URLs
   logo_url?: string;
@@ -127,6 +149,12 @@ export interface CardDesignCreate {
   stamp_icon_mode?: StampIconMode;
   custom_stamp_config?: CustomStampConfig | null;
   strip_background_opacity?: number;
+
+  // Points card design (migration 123).
+  card_type?: CardType;
+  points_strip_style?: PointsStripStyle;
+  progress_accent_color?: string;
+  points_reward_icons?: PointsRewardIcons;
 
   logo_url?: string;
   strip_background_url?: string;

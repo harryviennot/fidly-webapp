@@ -1,12 +1,20 @@
-import type { CustomerResponse } from '@/types';
+import type { CustomerResponse, LoyaltyType } from '@/types';
 
 export type CustomerSegment = 'new' | 'regular' | 'vip' | 'reward_ready' | 'close_to_reward' | 'at_risk' | 'ghost';
 
 export function classifyCustomer(
   customer: CustomerResponse,
   maxStamps: number,
-  now = new Date()
+  now = new Date(),
+  loyaltyType: LoyaltyType = 'stamp'
 ): CustomerSegment {
+  // Points segments are computed server-side (backend Phase 8 wires
+  // `customer.segment` into the list). The stamp-threshold math below would
+  // misclassify every points customer as `ghost` (their `stamps` field is 0),
+  // so fall back to a neutral badge until the server value is available.
+  if (loyaltyType === 'points') {
+    return 'regular';
+  }
   const stamps = customer.stamps;
   const createdAt = customer.created_at ? new Date(customer.created_at) : null;
   const lastActivity = customer.last_activity_at ?? customer.updated_at;

@@ -5,8 +5,9 @@ import {
   StarIcon,
   SlidersHorizontalIcon,
   CreditCardIcon,
+  CoinsIcon,
 } from "@phosphor-icons/react";
-import type { TransactionType } from "@/types";
+import type { TransactionResponse, TransactionType } from "@/types";
 
 export interface TransactionTypeConfig {
   icon: typeof StampIcon;
@@ -19,6 +20,13 @@ export interface TransactionTypeConfig {
 export const TYPE_CONFIG: Record<TransactionType, TransactionTypeConfig> = {
   stamp_added: {
     icon: StampIcon,
+    iconColor: "text-[var(--accent)]",
+    bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-[#E8F5E4]",
+    deltaText: "text-[#4A7C59]",
+  },
+  points_earned: {
+    icon: CoinsIcon,
     iconColor: "text-[var(--accent)]",
     bgColor: "bg-[var(--accent-light)]",
     deltaBg: "bg-[#E8F5E4]",
@@ -83,4 +91,23 @@ const CARD_LIFECYCLE_TYPES: Set<TransactionType> = new Set([
 
 export function isCardLifecycleType(type: TransactionType): boolean {
   return CARD_LIFECYCLE_TYPES.has(type);
+}
+
+/**
+ * Read the type-neutral value columns (migration 121), falling back to the
+ * legacy stamp-named columns during the backend dual-write window. Use these
+ * everywhere instead of `stamp_delta` / `stamps_before` / `stamps_after`.
+ */
+export function txDelta(t: TransactionResponse): number {
+  return t.delta ?? t.stamp_delta ?? 0;
+}
+export function txValueBefore(t: TransactionResponse): number {
+  return t.value_before ?? t.stamps_before ?? 0;
+}
+export function txValueAfter(t: TransactionResponse): number {
+  return t.value_after ?? t.stamps_after ?? 0;
+}
+/** A points-program transaction (drives the unit shown: "pts" vs stamps). */
+export function isPointsTransaction(t: TransactionResponse): boolean {
+  return t.program_type === "points" || t.type === "points_earned";
 }
