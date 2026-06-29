@@ -158,7 +158,10 @@
         "reward_name": "Reward name",
         "business_name": "Business name",
         "customer_first_name": "Customer first name",
-        "store_location": "Location"
+        "store_location": "Location",
+        "points_balance": "Current points balance",
+        "points_to_next": "Points until next reward",
+        "next_reward_name": "Next reward name"
       }
     },
     "growthUpsell": {

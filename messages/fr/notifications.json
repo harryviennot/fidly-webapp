@@ -158,7 +158,10 @@
         "reward_name": "Nom de la récompense",
         "business_name": "Nom de l'entreprise",
         "customer_first_name": "Prénom du client",
-        "store_location": "Lieu de l'établissement"
+        "store_location": "Lieu de l'établissement",
+        "points_balance": "Solde de points actuel",
+        "points_to_next": "Points avant la prochaine récompense",
+        "next_reward_name": "Nom de la prochaine récompense"
       }
     },
     "growthUpsell": {
