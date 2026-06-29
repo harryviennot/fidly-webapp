@@ -94,6 +94,7 @@
       "stampCountPlaceholder": "ex. 5",
       "pointsCountLabel": "Se déclenche quand les points atteignent",
       "pointsCountPlaceholder": "ex. 50",
+      "unitPoints": "pts",
       "metricLabel": "Calculé sur",
       "metricBalance": "Solde actuel",
       "metricLifetime": "Total cumulé",

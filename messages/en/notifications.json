@@ -94,6 +94,7 @@
       "stampCountPlaceholder": "e.g. 5",
       "pointsCountLabel": "Fires when points reach",
       "pointsCountPlaceholder": "e.g. 50",
+      "unitPoints": "pts",
       "metricLabel": "Measured against",
       "metricBalance": "Current balance",
       "metricLifetime": "Lifetime total",

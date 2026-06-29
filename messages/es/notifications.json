@@ -94,6 +94,7 @@
       "stampCountPlaceholder": "ej. 5",
       "pointsCountLabel": "Se activa cuando los puntos alcanzan",
       "pointsCountPlaceholder": "ej. 50",
+      "unitPoints": "pts",
       "metricLabel": "Se mide sobre",
       "metricBalance": "Saldo actual",
       "metricLifetime": "Total histórico",

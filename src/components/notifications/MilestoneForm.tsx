@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
+import { NumberField } from '@/components/ui/number-field';
 import { Label } from '@/components/ui/label';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useBusiness } from '@/contexts/business-context';
@@ -223,47 +223,54 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
 
     return (
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="milestone-value" className="text-xs text-muted-foreground">
-            {isPoints ? tMilestones('pointsCountLabel') : tMilestones('stampCountLabel')}
-            {enforceStampCap ? ` (1 - ${totalStamps! - 1})` : ''}
-          </Label>
-          <Input
-            id="milestone-value"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            max={enforceStampCap ? totalStamps! - 1 : undefined}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={isPoints ? tMilestones('pointsCountPlaceholder') : tMilestones('stampCountPlaceholder')}
-            className="max-w-[160px] h-11"
-          />
-        </div>
-
-        {/* Threshold basis: current balance vs all-time (lifetime) total. */}
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">{tMilestones('metricLabel')}</Label>
-          <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--paper)] p-0.5">
-            {(['balance', 'lifetime'] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMetric(m)}
-                aria-pressed={metric === m}
-                className={`px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
-                  metric === m
-                    ? 'bg-white shadow-sm text-[var(--foreground)]'
-                    : 'text-[var(--muted-gray)] hover:text-[var(--foreground)]'
-                }`}
-              >
-                {tMilestones(m === 'balance' ? 'metricBalance' : 'metricLifetime')}
-              </button>
-            ))}
+        {/* Trigger condition: the value to reach, measured against the current
+            balance or the all-time total. Grouped so the two controls read as
+            one rule; each row is label-left / control-right on desktop and
+            stacks on mobile so nothing feels crammed against its label. */}
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--paper)]/40 divide-y divide-[var(--border)]">
+          <div className="flex flex-col gap-2.5 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <Label htmlFor="milestone-value" className="text-[13px] font-medium text-[var(--foreground)]">
+              {isPoints ? tMilestones('pointsCountLabel') : tMilestones('stampCountLabel')}
+            </Label>
+            <NumberField
+              id="milestone-value"
+              value={value}
+              onChange={setValue}
+              min={1}
+              max={enforceStampCap ? totalStamps! - 1 : undefined}
+              suffix={isPoints ? tMilestones('unitPoints') : undefined}
+              placeholder={isPoints ? tMilestones('pointsCountPlaceholder') : tMilestones('stampCountPlaceholder')}
+              aria-label={isPoints ? tMilestones('pointsCountLabel') : tMilestones('stampCountLabel')}
+              className="w-full sm:w-[150px]"
+            />
           </div>
-          <p className="text-[11.5px] text-muted-foreground leading-snug">
-            {tMilestones(metric === 'balance' ? 'metricBalanceHelp' : 'metricLifetimeHelp')}
-          </p>
+
+          {/* Threshold basis: current balance vs all-time (lifetime) total. */}
+          <div className="flex flex-col gap-2.5 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="space-y-1">
+              <Label className="text-[13px] font-medium text-[var(--foreground)]">{tMilestones('metricLabel')}</Label>
+              <p className="text-[11.5px] text-muted-foreground leading-snug max-w-[280px]">
+                {tMilestones(metric === 'balance' ? 'metricBalanceHelp' : 'metricLifetimeHelp')}
+              </p>
+            </div>
+            <div className="inline-flex shrink-0 rounded-lg border border-[var(--border)] bg-[var(--paper)] p-0.5">
+              {(['balance', 'lifetime'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMetric(m)}
+                  aria-pressed={metric === m}
+                  className={`px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+                    metric === m
+                      ? 'bg-white shadow-sm text-[var(--foreground)]'
+                      : 'text-[var(--muted-gray)] hover:text-[var(--foreground)]'
+                  }`}
+                >
+                  {tMilestones(m === 'balance' ? 'metricBalance' : 'metricLifetime')}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <LocaleTabs value={locale} onValueChange={setLocale} primaryLocale={primaryLocale} />
