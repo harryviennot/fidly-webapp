@@ -54,6 +54,10 @@
         "name": "Reward unlocked",
         "description": "Sent when a customer completes their card and earns a reward"
       },
+      "reward_completed": {
+        "name": "Top reward reached",
+        "description": "Sent when a customer unlocks your highest reward, with nothing left above it"
+      },
       "reward_redeemed": {
         "name": "Reward redeemed",
         "description": "Sent when a customer redeems their reward"
@@ -171,7 +175,8 @@
         "store_location": "Location",
         "points_balance": "Current points balance",
         "points_to_next": "Points until next reward",
-        "next_reward_name": "Next reward name"
+        "next_reward_name": "Next reward name",
+        "last_reward_name": "Reward just earned"
       }
     },
     "growthUpsell": {

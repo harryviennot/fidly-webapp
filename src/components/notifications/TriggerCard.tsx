@@ -5,6 +5,7 @@ import {
   CheckCircle,
   Coins,
   Trophy,
+  Crown,
   Gift,
   Flag,
   Target,
@@ -14,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { useBusiness } from '@/contexts/business-context';
 import {
   VARIABLE_PATTERN,
   getVariableDisplayName,
@@ -25,6 +27,7 @@ const TRIGGER_ICONS: Record<TriggerType, Icon> = {
   stamp_added: CheckCircle,
   points_earned: Coins,
   reward_earned: Trophy,
+  reward_completed: Crown,
   reward_redeemed: Gift,
   milestone: Flag,
   near_reward: Target,
@@ -63,18 +66,30 @@ export function TriggerCard({
 }: TriggerCardProps) {
   const t = useTranslations('notifications');
   const uiLocale = useLocale() as Locale;
+  const { currentBusiness } = useBusiness();
+  const primaryLocale = (currentBusiness?.primary_locale ?? 'fr') as Locale;
   // Fall back to a neutral bell so an unmapped trigger from the backend never
   // crashes the page ("Element type is invalid") — the previous failure mode
   // when points programs started returning the `points_earned` trigger.
   const IconComponent = TRIGGER_ICONS[template.trigger] ?? Bell;
 
+  // Preview the body in the business PRIMARY locale — that's what customers
+  // actually receive and what the editor opens on. Falling back to the
+  // dashboard UI locale (or en) made the card show a different, often
+  // un-customised, locale than the one the owner just edited. Pick the first
+  // locale that actually has content so an empty primary still degrades nicely.
+  const previewLocale: Locale =
+    (template.body[primaryLocale] && primaryLocale) ||
+    (template.body[uiLocale] && uiLocale) ||
+    (template.body.en && 'en') ||
+    primaryLocale;
   // Rewrite `{{canonical_key}}` to `{{localized_name}}` so the inline preview
   // on the Messages automatiques card matches what the user sees in the
   // editor. Canonical keys are what the backend stores.
-  const rawBody = template.body[uiLocale] || template.body.en || '';
+  const rawBody = template.body[previewLocale] || '';
   const previewBody = rawBody.replace(
     VARIABLE_PATTERN,
-    (_match, key: string) => `{{${getVariableDisplayName(key, uiLocale)}}}`
+    (_match, key: string) => `{{${getVariableDisplayName(key, previewLocale)}}}`
   );
   const hasEn = Boolean(template.body.en);
   const hasFr = Boolean(template.body.fr);

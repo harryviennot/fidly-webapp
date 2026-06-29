@@ -54,6 +54,10 @@
         "name": "Récompense débloquée",
         "description": "Envoyé lorsqu'un client complète sa carte et gagne une récompense"
       },
+      "reward_completed": {
+        "name": "Récompense maximale atteinte",
+        "description": "Envoyé lorsqu'un client débloque votre plus haute récompense, sans palier au-dessus"
+      },
       "reward_redeemed": {
         "name": "Récompense utilisée",
         "description": "Envoyé lorsqu'un client utilise sa récompense"
@@ -171,7 +175,8 @@
         "store_location": "Lieu de l'établissement",
         "points_balance": "Solde de points actuel",
         "points_to_next": "Points avant la prochaine récompense",
-        "next_reward_name": "Nom de la prochaine récompense"
+        "next_reward_name": "Nom de la prochaine récompense",
+        "last_reward_name": "Récompense obtenue"
       }
     },
     "growthUpsell": {

@@ -16,7 +16,7 @@ import {
 } from '@/hooks/use-notifications';
 import {
   renderSamplePreview,
-  programVariableKeys,
+  triggerVariableKeys,
   PRO_ONLY_VARIABLES,
   type VariableKey,
 } from '@/lib/template-variables';
@@ -111,9 +111,10 @@ export const TriggerEditForm = forwardRef<TriggerEditFormHandle, TriggerEditForm
     const { data: program } = useDefaultProgram(currentBusiness?.id);
     const isPoints = isPointsProgram(program);
 
-    const insertableVariables = programVariableKeys({
+    const insertableVariables = triggerVariableKeys({
       type: program?.type,
       rewardCount: isPoints ? program.config.rewards.length : 0,
+      trigger: template.trigger,
       includeStoreLocation: true,
     });
 

@@ -54,6 +54,10 @@
         "name": "Recompensa desbloqueada",
         "description": "Se envía cuando un cliente completa su tarjeta y gana una recompensa"
       },
+      "reward_completed": {
+        "name": "Recompensa máxima alcanzada",
+        "description": "Se envía cuando un cliente desbloquea tu recompensa más alta, sin ninguna por encima"
+      },
       "reward_redeemed": {
         "name": "Recompensa canjeada",
         "description": "Se envía cuando un cliente canjea su recompensa"
@@ -171,7 +175,8 @@
         "store_location": "Establecimiento",
         "points_balance": "Saldo de puntos actual",
         "points_to_next": "Puntos hasta la próxima recompensa",
-        "next_reward_name": "Nombre de la próxima recompensa"
+        "next_reward_name": "Nombre de la próxima recompensa",
+        "last_reward_name": "Recompensa obtenida"
       }
     },
     "growthUpsell": {

@@ -21,6 +21,9 @@ export const VARIABLE_KEYS = [
   'points_balance',
   'points_to_next',
   'next_reward_name',
+  // The reward the customer just won (multi-reward ladders). Available on the
+  // reward_earned + reward_completed triggers.
+  'last_reward_name',
 ] as const;
 
 export type VariableKey = (typeof VARIABLE_KEYS)[number];
@@ -53,6 +56,7 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     points_balance: 'points_balance',
     points_to_next: 'points_to_next',
     next_reward_name: 'next_reward_name',
+    last_reward_name: 'last_reward_name',
   },
   fr: {
     stamp_count: 'tampons_actuels',
@@ -66,6 +70,7 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     points_balance: 'points_actuels',
     points_to_next: 'points_restants',
     next_reward_name: 'prochaine_recompense',
+    last_reward_name: 'recompense_obtenue',
   },
   es: {
     stamp_count: 'sellos_actuales',
@@ -79,6 +84,7 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     points_balance: 'puntos_actuales',
     points_to_next: 'puntos_restantes',
     next_reward_name: 'siguiente_recompensa',
+    last_reward_name: 'recompensa_obtenida',
   },
 };
 
@@ -129,6 +135,42 @@ export function programVariableKeys(opts: {
 }
 
 /**
+ * Trigger-aware variable set for the per-trigger notification editor.
+ *
+ * Multi-reward points ladders distinguish the reward the customer JUST won
+ * from the one coming NEXT, so the two reward triggers differ:
+ *  - `reward_earned` (a middle rung): "You earned {{last_reward_name}}! Next up
+ *    is {{next_reward_name}}." Offers both names.
+ *  - `reward_completed` (the top rung, no next): only {{last_reward_name}} — the
+ *    backend auto-routes here so "next up" copy never renders blank.
+ * Every other trigger, and every stamp / single-reward points program, keeps the
+ * program-wide set from `programVariableKeys` (single reward → {{reward_name}}).
+ */
+export function triggerVariableKeys(opts: {
+  type: 'stamp' | 'points' | undefined;
+  rewardCount?: number;
+  trigger?: string;
+  includeStoreLocation?: boolean;
+}): VariableKey[] {
+  const { type, rewardCount = 0, trigger, includeStoreLocation = false } = opts;
+
+  const isRewardTrigger = trigger === 'reward_earned' || trigger === 'reward_completed';
+  if (type === 'points' && rewardCount > 1 && isRewardTrigger) {
+    const keys: VariableKey[] = ['points_balance'];
+    if (trigger === 'reward_earned') {
+      keys.push('points_to_next', 'next_reward_name', 'last_reward_name');
+    } else {
+      keys.push('last_reward_name');
+    }
+    keys.push('business_name', 'customer_first_name');
+    if (includeStoreLocation) keys.push('store_location');
+    return keys;
+  }
+
+  return programVariableKeys({ type, rewardCount, includeStoreLocation });
+}
+
+/**
  * Return the UI-facing name for a variable key. Unknown keys fall back
  * to the key itself so custom/legacy placeholders still render readably.
  */
@@ -167,6 +209,7 @@ export function renderSamplePreview(
     points_balance: '120',
     points_to_next: '80',
     next_reward_name: 'Free Coffee',
+    last_reward_name: 'Free Coffee',
   };
   const values = { ...defaults, ...overrides };
   return template.replace(VARIABLE_PATTERN, (_match, key: string) => {

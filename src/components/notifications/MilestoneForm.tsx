@@ -122,14 +122,23 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
       SUPPORTED_LOCALES.some((l) => bodyByLocale[l] !== (milestone!.body[l] ?? ''));
 
     // Points programs hide the stamp-count variables; stamp programs keep the
-    // existing milestone variable set untouched.
-    const milestoneVariables = isPoints
-      ? programVariableKeys({
-          type: 'points',
-          rewardCount: program.config.rewards.length,
-          includeStoreLocation: true,
-        })
-      : MILESTONE_VARIABLES;
+    // existing milestone variable set untouched. Multi-reward points milestones
+    // can also reference the reward just won ({{last_reward_name}}) alongside the
+    // upcoming one ({{next_reward_name}}) — there is no trigger auto-routing here,
+    // the business simply authors whichever fits the threshold they set.
+    const milestoneVariables = (() => {
+      if (!isPoints) return MILESTONE_VARIABLES;
+      const keys = programVariableKeys({
+        type: 'points',
+        rewardCount: program.config.rewards.length,
+        includeStoreLocation: true,
+      });
+      if (program.config.rewards.length > 1) {
+        const idx = keys.indexOf('next_reward_name');
+        keys.splice(idx === -1 ? keys.length : idx + 1, 0, 'last_reward_name');
+      }
+      return keys;
+    })();
     const unitSample: Record<string, string> = isPoints
       ? { points_balance: value || '50' }
       : { stamp_count: value || '5' };

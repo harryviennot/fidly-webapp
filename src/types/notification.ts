@@ -2,6 +2,10 @@ export type TriggerType =
   | 'stamp_added'
   | 'points_earned'
   | 'reward_earned'
+  // Multi-reward points only: fires instead of reward_earned when the customer
+  // wins the top rung (no "next reward" left). Backend auto-routes between the
+  // two; the editor only lists this for multi-reward programs.
+  | 'reward_completed'
   | 'reward_redeemed'
   | 'milestone'
   | 'near_reward';

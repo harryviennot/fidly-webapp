@@ -58,6 +58,7 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     points_balance: '120',
     points_to_next: '80',
     next_reward_name: 'Free coffee',
+    last_reward_name: 'Free coffee',
   },
   fr: {
     stamp_count: '3',
@@ -71,6 +72,7 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     points_balance: '120',
     points_to_next: '80',
     next_reward_name: 'Café offert',
+    last_reward_name: 'Café offert',
   },
   es: {
     stamp_count: '3',
@@ -84,6 +86,7 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     points_balance: '120',
     points_to_next: '80',
     next_reward_name: 'Café gratis',
+    last_reward_name: 'Café gratis',
   },
 };
 
@@ -212,6 +215,23 @@ export default function ProgramNotificationsPage() {
     return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
   }, [rewardNameSet, nameCollectionOff, canMultiLocation, program, t]);
 
+  // Variables shown in the reference panel. Multi-reward points programs also
+  // surface {{last_reward_name}} (the reward just won) alongside
+  // {{next_reward_name}} — it's offered on the reward_earned / reward_completed
+  // and multi-reward milestone editors.
+  const referenceVariables = useMemo(() => {
+    const keys = programVariableKeys({
+      type: program?.type,
+      rewardCount: isPointsProgram(program) ? program.config.rewards.length : 0,
+      includeStoreLocation: true,
+    });
+    if (isPointsProgram(program) && program.config.rewards.length > 1) {
+      const idx = keys.indexOf('next_reward_name');
+      keys.splice(idx === -1 ? keys.length : idx + 1, 0, 'last_reward_name');
+    }
+    return keys;
+  }, [program]);
+
   const variablesIcon = (
     <BracketsCurlyIcon className="h-3.5 w-3.5" weight="bold" />
   );
@@ -222,11 +242,7 @@ export default function ProgramNotificationsPage() {
         {t('variablesReference.description')}
       </p>
       <VariablesList
-        variables={programVariableKeys({
-          type: program?.type,
-          rewardCount: isPointsProgram(program) ? program.config.rewards.length : 0,
-          includeStoreLocation: true,
-        })}
+        variables={referenceVariables}
         examples={variableExamples}
         locale={uiLocale}
         disabledVariables={disabledVars}
