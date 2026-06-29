@@ -141,7 +141,7 @@ export function ProgramStep() {
     () => (isPointsProgram(program) ? program.config.max_balance ?? null : null)
   );
 
-  // Stamps and points are both selectable; tiered stays a disabled roadmap chip.
+  // Stamps and points are both selectable.
   const loyaltyTypeOptions: ChipGroupOption[] = useMemo(
     () => [
       {
@@ -155,14 +155,6 @@ export function ProgramStep() {
         label: tLp('pointsType'),
         description: tLp('pointsTypeDesc'),
         emoji: '🎯',
-      },
-      {
-        id: 'tiered',
-        label: tLp('tieredType'),
-        description: tLp('tieredTypeDesc'),
-        emoji: '🏆',
-        disabled: true,
-        badge: tLp('comingSoonBadge'),
       },
     ],
     [tLp]

@@ -262,6 +262,23 @@ export function useDesignStepState(
     }
   }, [existingDesign, currentBusiness, program, t, bizDefaults]);
 
+  // Reconcile card_type with the program type. card_type is not user-editable
+  // in onboarding — it mirrors the program. The lazy useState seed above can
+  // capture an undefined program (this hook runs before BrandingStep's
+  // program-loaded guard), defaulting card_type to 'stamp'; for a points
+  // program that would render + persist a stamp card. Once the program
+  // resolves, force the correct type (also self-heals designs already saved
+  // with the wrong type). Legitimate external-state sync.
+  const programCardType: 'stamp' | 'points' | undefined =
+    program?.type === 'points' ? 'points' : program ? 'stamp' : undefined;
+  useEffect(() => {
+    if (!programCardType) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFormData((prev) =>
+      prev.card_type === programCardType ? prev : { ...prev, card_type: programCardType }
+    );
+  }, [programCardType]);
+
   // Mirror customColors into the wizard draft store on every change so the
   // history is preserved across step navigation. `setDraft` is not a React
   // setState — it writes to a ref-backed store + localStorage — so this

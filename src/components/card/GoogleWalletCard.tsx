@@ -171,6 +171,9 @@ export function GoogleWalletCard({
   const pointsAccent = design.progress_accent_color
     ? rgbToHex(design.progress_accent_color)
     : colors.accentHex;
+  const stripBgHex = design.strip_background_color
+    ? rgbToHex(design.strip_background_color)
+    : colors.bgHex;
 
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
@@ -372,7 +375,10 @@ export function GoogleWalletCard({
           {/* Stamp Grid at Bottom */}
           <div
             className="relative pb-1"
-            style={{ borderColor: `${colors.textColor}15` }}
+            style={{
+              borderColor: `${colors.textColor}15`,
+              backgroundColor: isPoints ? stripBgHex : undefined,
+            }}
           >
             {/* Strip background layer */}
             {design.strip_background_url && (
@@ -397,8 +403,7 @@ export function GoogleWalletCard({
                   rewards={pointsRewards ?? []}
                   rewardIcons={design.points_reward_icons}
                   accentColor={pointsAccent}
-                  mutedColor={colors.mutedTextColor}
-                  textColor={colors.textColor}
+                  backgroundColor={stripBgHex}
                 />
               ) : (
                 heroWidth > 0 && (

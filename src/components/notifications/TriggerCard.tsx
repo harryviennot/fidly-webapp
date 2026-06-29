@@ -3,10 +3,12 @@
 import { useLocale, useTranslations } from 'next-intl';
 import {
   CheckCircle,
+  Coins,
   Trophy,
   Gift,
   Flag,
   Target,
+  Bell,
   Pencil,
   type Icon,
 } from '@phosphor-icons/react';
@@ -21,6 +23,7 @@ import type { NotificationTemplate, TriggerType } from '@/types/notification';
 
 const TRIGGER_ICONS: Record<TriggerType, Icon> = {
   stamp_added: CheckCircle,
+  points_earned: Coins,
   reward_earned: Trophy,
   reward_redeemed: Gift,
   milestone: Flag,
@@ -60,7 +63,10 @@ export function TriggerCard({
 }: TriggerCardProps) {
   const t = useTranslations('notifications');
   const uiLocale = useLocale() as Locale;
-  const IconComponent = TRIGGER_ICONS[template.trigger];
+  // Fall back to a neutral bell so an unmapped trigger from the backend never
+  // crashes the page ("Element type is invalid") — the previous failure mode
+  // when points programs started returning the `points_earned` trigger.
+  const IconComponent = TRIGGER_ICONS[template.trigger] ?? Bell;
 
   // Rewrite `{{canonical_key}}` to `{{localized_name}}` so the inline preview
   // on the Messages automatiques card matches what the user sees in the

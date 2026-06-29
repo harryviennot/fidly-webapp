@@ -105,6 +105,9 @@ export interface CardDesign {
   custom_filled_stamp_url?: string;
   custom_empty_stamp_url?: string;
   strip_background_url?: string;
+  /** Solid strip canvas color when no strip image is uploaded. Falls back to
+   *  background_color server-side when unset. Used by the points strip. */
+  strip_background_color?: string;
   strip_background_opacity?: number;
 
   // Pass fields
@@ -148,6 +151,7 @@ export interface CardDesignCreate {
   icon_color?: string;
   stamp_icon_mode?: StampIconMode;
   custom_stamp_config?: CustomStampConfig | null;
+  strip_background_color?: string;
   strip_background_opacity?: number;
 
   // Points card design (migration 123).

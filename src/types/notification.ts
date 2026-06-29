@@ -1,5 +1,6 @@
 export type TriggerType =
   | 'stamp_added'
+  | 'points_earned'
   | 'reward_earned'
   | 'reward_redeemed'
   | 'milestone'

@@ -369,14 +369,19 @@
       "rewardIconsHelp": "Shown on the reward track style, one icon per reward.",
       "untitledReward": "Untitled reward",
       "rewardPrice": "{points} pts",
-      "pickIcon": "Pick an icon for {reward}"
+      "pickIcon": "Pick an icon for {reward}",
+      "bgImageLabel": "Strip image",
+      "bgImageHint": "Optional image behind the points. 1125x432px recommended",
+      "bgColorLabel": "Background color",
+      "bgColorHelp": "The strip's background color. Add an image above to use one instead."
     },
     "pointsStrip": {
       "objective": "Objective",
       "next": "Next: {points} pts",
       "points": "{points} pts",
       "complete": "Card completed",
-      "limit": "{max} pts limit"
+      "limit": "{max} pts limit",
+      "nextWord": "Next"
     }
   }
 }

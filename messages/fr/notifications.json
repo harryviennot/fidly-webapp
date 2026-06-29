@@ -46,6 +46,10 @@
         "name": "Tampon collecté",
         "description": "Envoyé lorsqu'un client collecte un nouveau tampon"
       },
+      "points_earned": {
+        "name": "Points gagnés",
+        "description": "Envoyé lorsqu'un client gagne des points"
+      },
       "reward_earned": {
         "name": "Récompense débloquée",
         "description": "Envoyé lorsqu'un client complète sa carte et gagne une récompense"

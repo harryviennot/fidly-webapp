@@ -15,61 +15,125 @@ interface PointsStripProps {
   rewards: RewardTier[];
   /** Per-reward icon choices (progress_icons style). */
   rewardIcons?: PointsRewardIcons;
-  /** Resolved colors. */
+  /** Number / ring / filled-icon / label color (the dark accent). */
   accentColor: string;
-  mutedColor: string;
-  textColor: string;
-  /** Optional balance cap subtext. */
+  /** Strip canvas color. The muted secondary tone is derived from it (blended
+   *  toward the accent, exactly like the backend), and a filled reward disc
+   *  uses it for the glyph. */
+  backgroundColor: string;
+  /** Optional balance cap subtext (completed state). */
   maxLimit?: number | null;
 }
 
-/**
- * In-editor approximation of the backend points strip (3 styles). The
- * authoritative render is produced server-side by `points_strip_generator.py`;
- * this mirrors its layout closely enough for the designer's live preview.
- */
+// The authoritative render is the backend's points_strip_generator.py on a
+// 1125x432 canvas. This mirrors that layout 1:1 using container-query width
+// units so the preview scales with the card and matches the generated strip.
+const BASE_W = 1125;
+const cq = (px: number) => `${(px * 100) / BASE_W}cqw`;
+
+function parseHex(hex: string): [number, number, number] {
+  const h = hex.replace("#", "");
+  const n = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  return [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16)) as [number, number, number];
+}
+
+/** Blend a toward b by t (0..1) — matches `_blend` in the backend generator. */
+function mix(a: string, b: string, t: number): string {
+  const A = parseHex(a);
+  const B = parseHex(b);
+  const c = A.map((x, i) => Math.round(x + (B[i] - x) * t));
+  return `#${c.map((x) => x.toString(16).padStart(2, "0")).join("")}`;
+}
+
 export function PointsStrip({
   style,
   balance,
   rewards,
   rewardIcons,
   accentColor,
-  mutedColor,
-  textColor,
+  backgroundColor,
   maxLimit,
 }: PointsStripProps) {
   const t = useTranslations("designEditor.pointsStrip");
+  const muted = mix(accentColor, backgroundColor, 0.5);
+
   const sorted = [...rewards].sort((a, b) => a.threshold - b.threshold);
+  const top = sorted[sorted.length - 1]?.threshold ?? 0;
   const nextReward = sorted.find((r) => r.threshold > balance) ?? null;
   const afterReward = nextReward
     ? sorted.find((r) => r.threshold > nextReward.threshold) ?? null
     : null;
-  const isComplete = sorted.length > 0 && balance >= sorted[sorted.length - 1].threshold;
+  const isComplete = sorted.length > 0 && balance >= top;
 
-  const objective = (
-    <div className="flex flex-col gap-1 text-left">
-      {isComplete ? (
+  const unit = (n: number) => t("points", { points: n });
+
+  // Shared left block (big_point + circle_progress): OBJECTIVE / next pts /
+  // NEXT → after pts, or the stacked CARD COMPLETED state.
+  const leftBlock = (
+    <div
+      style={{
+        position: "absolute",
+        left: cq(90),
+        top: "50%",
+        transform: "translateY(-50%)",
+        display: "flex",
+        flexDirection: "column",
+        gap: cq(14),
+        textAlign: "left",
+        lineHeight: 1,
+      }}
+    >
+      {isComplete && !nextReward ? (
         <>
-          <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: accentColor }}>
-            {t("complete")}
-          </span>
+          {t("complete")
+            .split(" ")
+            .map((word, i) => (
+              <span
+                key={i}
+                style={{
+                  color: accentColor,
+                  fontWeight: 700,
+                  fontSize: cq(46),
+                  textTransform: "uppercase",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {word}
+              </span>
+            ))}
           {maxLimit != null && (
-            <span className="text-[10px]" style={{ color: mutedColor }}>
+            <span style={{ color: accentColor, fontWeight: 800, fontSize: cq(58) }}>
               {t("limit", { max: maxLimit })}
             </span>
           )}
         </>
       ) : (
         <>
-          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: mutedColor }}>
+          <span
+            style={{
+              color: accentColor,
+              fontWeight: 700,
+              fontSize: cq(40),
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+            }}
+          >
             {t("objective")}
           </span>
-          <span className="text-[14px] font-bold leading-none" style={{ color: textColor }}>
-            {nextReward ? t("points", { points: nextReward.threshold }) : "—"}
+          <span style={{ color: accentColor, fontWeight: 800, fontSize: cq(86) }}>
+            {nextReward ? unit(nextReward.threshold) : "—"}
           </span>
           {afterReward && (
-            <span className="text-[10px] mt-0.5" style={{ color: mutedColor }}>
-              {t("next", { points: afterReward.threshold })}
+            <span
+              style={{
+                color: muted,
+                fontWeight: 700,
+                fontSize: cq(42),
+                textTransform: "uppercase",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {t("nextWord")} → {unit(afterReward.threshold)}
             </span>
           )}
         </>
@@ -78,97 +142,224 @@ export function PointsStrip({
   );
 
   if (style === "big_point") {
+    // Shrink the number as it gets longer so it stays inside the right half,
+    // approximating the backend's fit-to-width behaviour.
+    const digits = String(balance).length;
+    const bigSize = digits <= 3 ? 200 : digits === 4 ? 168 : digits === 5 ? 132 : 108;
     return (
-      <div className="flex items-center justify-between gap-4 px-3 py-2 w-full">
-        {objective}
-        <span className="text-[34px] font-extrabold tabular-nums leading-none" style={{ color: accentColor }}>
+      <Canvas>
+        {leftBlock}
+        <span
+          style={{
+            position: "absolute",
+            right: cq(80),
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: accentColor,
+            fontWeight: 800,
+            fontSize: cq(bigSize),
+            lineHeight: 1,
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
           {balance}
         </span>
-      </div>
+      </Canvas>
     );
   }
 
   if (style === "circle_progress") {
-    const target = nextReward?.threshold ?? sorted[sorted.length - 1]?.threshold ?? 1;
-    const prev = sorted.filter((r) => r.threshold <= balance).slice(-1)[0]?.threshold ?? 0;
-    const span = Math.max(1, target - prev);
-    const pct = Math.max(0, Math.min(1, (balance - prev) / span));
-    const r = 26;
+    // Ring fraction = balance / next objective (backend: value / next_threshold).
+    const target = nextReward?.threshold ?? top ?? 1;
+    const frac = isComplete && !nextReward ? 1 : Math.max(0, Math.min(1, balance / (target || 1)));
+    const r = 150;
+    const cx = BASE_W - 80 - r; // 895 on the base canvas
     const circ = 2 * Math.PI * r;
     return (
-      <div className="flex items-center justify-between gap-4 px-3 py-2 w-full">
-        {objective}
-        <div className="relative shrink-0" style={{ width: 64, height: 64 }}>
-          <svg width="64" height="64" viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r={r} fill="none" stroke={mutedColor} strokeWidth="5" opacity={0.35} />
-            <circle
-              cx="32"
-              cy="32"
-              r={r}
-              fill="none"
-              stroke={accentColor}
-              strokeWidth="5"
-              strokeLinecap="round"
-              strokeDasharray={circ}
-              strokeDashoffset={circ * (1 - pct)}
-              transform="rotate(-90 32 32)"
-            />
+      <Canvas>
+        {leftBlock}
+        <div
+          style={{
+            position: "absolute",
+            left: `${(cx / BASE_W) * 100}cqw`,
+            top: "50%",
+            width: cq(2 * r),
+            height: cq(2 * r),
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <svg viewBox="0 0 300 300" width="100%" height="100%">
+            <circle cx="150" cy="150" r={r} fill="none" stroke={muted} strokeWidth={26} />
+            {frac > 0 && (
+              <circle
+                cx="150"
+                cy="150"
+                r={r}
+                fill="none"
+                stroke={accentColor}
+                strokeWidth={26}
+                strokeLinecap="round"
+                strokeDasharray={circ}
+                strokeDashoffset={circ * (1 - frac)}
+                transform="rotate(-90 150 150)"
+              />
+            )}
           </svg>
           <span
-            className="absolute inset-0 flex items-center justify-center text-[15px] font-bold tabular-nums"
-            style={{ color: accentColor }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: accentColor,
+              fontWeight: 800,
+              fontSize: cq(90),
+              fontVariantNumeric: "tabular-nums",
+            }}
           >
             {balance}
           </span>
         </div>
-      </div>
+      </Canvas>
     );
   }
 
-  // progress_icons — horizontal milestone track
-  const maxThreshold = sorted[sorted.length - 1]?.threshold ?? 1;
-  const fillPct = Math.max(0, Math.min(1, balance / maxThreshold));
+  // progress_icons — balance top-left, horizontal milestone track positioned
+  // proportionally to each threshold (backend pos_x = threshold / top).
+  const x0 = 110;
+  const x1 = BASE_W - 110;
+  const trackY = 255;
+  const iconR = 46;
+  const span = x1 - x0;
+  const posPct = (threshold: number) =>
+    ((x0 + span * (Math.min(threshold, top || 1) / (top || 1))) / BASE_W) * 100;
+  const fillPct = ((x0 + span * (Math.min(balance, top || 1) / (top || 1))) / BASE_W) * 100;
+
   return (
-    <div className="flex flex-col gap-2 px-3 py-2 w-full">
-      <span className="text-[14px] font-bold tabular-nums leading-none" style={{ color: accentColor }}>
-        {t("points", { points: balance })}
+    <Canvas>
+      <span
+        style={{
+          position: "absolute",
+          left: cq(80),
+          top: cq(70),
+          color: accentColor,
+          fontWeight: 800,
+          fontSize: cq(58),
+          lineHeight: 1,
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {unit(balance)}
       </span>
-      <div className="relative flex items-center justify-between pt-1">
-        {/* track */}
-        <div className="absolute left-2 right-2 top-[14px] h-[3px] rounded-full" style={{ background: mutedColor, opacity: 0.4 }} />
-        <div
-          className="absolute left-2 top-[14px] h-[3px] rounded-full"
-          style={{ background: accentColor, width: `calc(${fillPct * 100}% - 8px)` }}
-        />
-        {sorted.map((reward) => {
-          const reached = balance >= reward.threshold;
-          const choice = rewardIcons?.[reward.id];
-          const iconName = (choice?.type === "preset" ? choice.ref : "gift") as StampIconType;
-          return (
-            <div key={reward.id} className="relative z-10 flex flex-col items-center gap-1" style={{ width: 40 }}>
+
+      {sorted.length > 0 && (
+        <>
+          {/* base track (muted) */}
+          <div
+            style={{
+              position: "absolute",
+              left: `${(x0 / BASE_W) * 100}cqw`,
+              right: `${(x0 / BASE_W) * 100}cqw`,
+              top: cq(trackY),
+              height: cq(10),
+              transform: "translateY(-50%)",
+              background: muted,
+            }}
+          />
+          {/* filled track (accent) up to balance */}
+          {fillPct > (x0 / BASE_W) * 100 && (
+            <div
+              style={{
+                position: "absolute",
+                left: `${(x0 / BASE_W) * 100}cqw`,
+                width: `${fillPct - (x0 / BASE_W) * 100}cqw`,
+                top: cq(trackY),
+                height: cq(10),
+                transform: "translateY(-50%)",
+                background: accentColor,
+              }}
+            />
+          )}
+          {sorted.map((reward) => {
+            const reached = balance >= reward.threshold;
+            const choice = rewardIcons?.[reward.id];
+            const iconName = (choice?.type === "preset" ? choice.ref : "gift") as StampIconType;
+            return (
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center"
+                key={reward.id}
                 style={{
-                  background: reached ? accentColor : "transparent",
-                  border: `2px solid ${reached ? accentColor : mutedColor}`,
+                  position: "absolute",
+                  left: `${posPct(reward.threshold)}cqw`,
+                  top: cq(trackY),
+                  transform: "translate(-50%, -50%)",
                 }}
               >
-                <StampIconSvg
-                  icon={iconName}
-                  className="w-3.5 h-3.5"
-                  color={reached ? "#fff" : mutedColor}
-                />
+                <div
+                  style={{
+                    width: cq(2 * iconR),
+                    height: cq(2 * iconR),
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: reached ? accentColor : backgroundColor,
+                    border: reached ? "none" : `${cq(6)} solid ${muted}`,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: cq(iconR * 1.1),
+                      height: cq(iconR * 1.1),
+                      display: "flex",
+                    }}
+                  >
+                    <StampIconSvg
+                      icon={iconName}
+                      className="w-full h-full"
+                      color={reached ? backgroundColor : muted}
+                    />
+                  </div>
+                </div>
+                <span
+                  style={{
+                    position: "absolute",
+                    top: cq(iconR + 20),
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    color: reached ? accentColor : muted,
+                    fontWeight: 700,
+                    fontSize: cq(44),
+                    fontVariantNumeric: "tabular-nums",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {reward.threshold}
+                </span>
               </div>
-              <span
-                className="text-[9px] tabular-nums"
-                style={{ color: reached ? textColor : mutedColor }}
-              >
-                {reward.threshold}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </>
+      )}
+    </Canvas>
+  );
+}
+
+/** Strip canvas: a container-query box at the 1125:432 strip aspect so all
+ *  child `cqw` units resolve against the rendered width. Transparent so the
+ *  WalletCard's strip background color / image shows through. */
+function Canvas({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        containerType: "inline-size",
+        position: "relative",
+        width: "100%",
+        aspectRatio: `${BASE_W} / 432`,
+        overflow: "hidden",
+      }}
+    >
+      {children}
     </div>
   );
 }

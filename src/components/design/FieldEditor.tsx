@@ -27,15 +27,25 @@ interface FieldEditorProps {
   enableVariables?: boolean;
 }
 
-/** Variables that make sense on a pass field. `store_location` is per-scan,
- *  not per-customer, so the backend always strips it from pass fields: the
- *  chip is hidden here entirely. */
-const FIELD_VARIABLES: VariableKey[] = [
+/** Variables that make sense on a STAMP pass field. `store_location` is
+ *  per-scan, not per-customer, so the backend always strips it from pass
+ *  fields: the chip is hidden here entirely. */
+const STAMP_FIELD_VARIABLES: VariableKey[] = [
   'stamp_count',
   'total_stamps',
   'stamps_left',
   'rewards_count',
   'reward_name',
+  'business_name',
+  'customer_first_name',
+];
+
+/** Variables for a POINTS pass field: balance, points to the next reward, and
+ *  the next reward's name — the stamp-count variables are meaningless here. */
+const POINTS_FIELD_VARIABLES: VariableKey[] = [
+  'points_balance',
+  'points_to_next',
+  'next_reward_name',
   'business_name',
   'customer_first_name',
 ];
@@ -54,6 +64,8 @@ export default function FieldEditor({
   const { data: program } = useDefaultProgram(
     enableVariables ? currentBusiness?.id : undefined
   );
+  const fieldVariables =
+    program?.type === 'points' ? POINTS_FIELD_VARIABLES : STAMP_FIELD_VARIABLES;
 
   // Mirror the notification editor's gating: variables whose source data is
   // off/unset render as greyed-out chips with a "turn it on in program
@@ -241,7 +253,7 @@ export default function FieldEditor({
       {enableVariables && fields.length > 0 && (
         <>
           <VariableChips
-            variables={FIELD_VARIABLES}
+            variables={fieldVariables}
             onInsert={handleInsertVariable}
             locale={locale}
             chipClassName="bg-white border-[var(--border-medium)]"

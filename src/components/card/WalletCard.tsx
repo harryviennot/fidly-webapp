@@ -468,20 +468,33 @@ export function WalletCard({
   const pointsAccent = design.progress_accent_color
     ? rgbToHex(design.progress_accent_color)
     : colors.accentHex;
+  // Strip canvas color: a dedicated strip_background_color when set, else the
+  // card background — matches the backend points strip generator.
+  const stripBgHex = design.strip_background_color
+    ? rgbToHex(design.strip_background_color)
+    : colors.bgHex;
 
   // {{variable}} previews use the business's REAL data (reward name,
   // business name, the signed-in user's own first name) and the counts
   // shown on this very card, so the preview matches what a customer sees.
   const realValues = useVariablePreviewValues();
-  const variableValues = useMemo(
-    () => ({
+  const variableValues = useMemo(() => {
+    const values: Record<string, string> = {
       ...realValues,
       stamp_count: String(stamps),
       total_stamps: String(totalStamps),
       stamps_left: String(Math.max(0, totalStamps - stamps)),
-    }),
-    [realValues, stamps, totalStamps]
-  );
+    };
+    if (isPoints) {
+      const balance = pointsBalance ?? 0;
+      const sorted = [...(pointsRewards ?? [])].sort((a, b) => a.threshold - b.threshold);
+      const next = sorted.find((r) => r.threshold > balance) ?? null;
+      values.points_balance = String(balance);
+      values.points_to_next = String(next ? Math.max(0, next.threshold - balance) : 0);
+      if (next?.name) values.next_reward_name = next.name;
+    }
+    return values;
+  }, [realValues, stamps, totalStamps, isPoints, pointsBalance, pointsRewards]);
 
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
@@ -554,35 +567,55 @@ export function WalletCard({
               </div>
             </div>
 
-            {/* Stamps Grid */}
-            <div className="relative flex items-start justify-center py-2">
-              {/* Strip background layer */}
-              {design.strip_background_url && (
-                <div
-                  className="absolute inset-0 rounded-lg overflow-hidden"
-                  style={{ zIndex: 0 }}
-                >
-                  <Image
-                    src={design.strip_background_url}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    style={{ opacity: (design.strip_background_opacity ?? 40) / 100 }}
-                    unoptimized
+            {/* Strip area: points render a full-width strip band (its own
+                canvas color behind the optional image); stamps keep the
+                centered grid. */}
+            {isPoints ? (
+              <div
+                className="relative w-full overflow-hidden"
+                style={{ backgroundColor: stripBgHex }}
+              >
+                {design.strip_background_url && (
+                  <div className="absolute inset-0" style={{ zIndex: 0 }}>
+                    <Image
+                      src={design.strip_background_url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      style={{ opacity: (design.strip_background_opacity ?? 40) / 100 }}
+                      unoptimized
+                    />
+                  </div>
+                )}
+                <div className="relative" style={{ zIndex: 1 }}>
+                  <PointsStrip
+                    style={design.points_strip_style ?? "big_point"}
+                    balance={pointsBalance ?? 0}
+                    rewards={pointsRewards ?? []}
+                    rewardIcons={design.points_reward_icons}
+                    accentColor={pointsAccent}
+                    backgroundColor={stripBgHex}
                   />
                 </div>
-              )}
-              {isPoints ? (
-                <PointsStrip
-                  style={design.points_strip_style ?? "big_point"}
-                  balance={pointsBalance ?? 0}
-                  rewards={pointsRewards ?? []}
-                  rewardIcons={design.points_reward_icons}
-                  accentColor={pointsAccent}
-                  mutedColor={colors.mutedTextColor}
-                  textColor={colors.textColor}
-                />
-              ) : (
+              </div>
+            ) : (
+              <div className="relative flex items-start justify-center py-2">
+                {/* Strip background layer */}
+                {design.strip_background_url && (
+                  <div
+                    className="absolute inset-0 rounded-lg overflow-hidden"
+                    style={{ zIndex: 0 }}
+                  >
+                    <Image
+                      src={design.strip_background_url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      style={{ opacity: (design.strip_background_opacity ?? 40) / 100 }}
+                      unoptimized
+                    />
+                  </div>
+                )}
                 <StampGridContainer
                   totalStamps={totalStamps}
                   filledCount={stamps}
@@ -591,8 +624,8 @@ export function WalletCard({
                   rewardIcon={rewardIcon}
                   customConfig={customConfig}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Secondary Fields - horizontal row like real Apple Wallet */}
             {showSecondaryFields && secondaryFields.length > 0 && (

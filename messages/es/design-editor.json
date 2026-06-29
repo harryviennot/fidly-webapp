@@ -369,14 +369,19 @@
       "rewardIconsHelp": "Se muestran en el estilo de recorrido de recompensas, un icono por recompensa.",
       "untitledReward": "Recompensa sin título",
       "rewardPrice": "{points} pts",
-      "pickIcon": "Elige un icono para {reward}"
+      "pickIcon": "Elige un icono para {reward}",
+      "bgImageLabel": "Imagen de la banda",
+      "bgImageHint": "Imagen opcional detrás de los puntos. 1125x432px recomendado",
+      "bgColorLabel": "Color de fondo",
+      "bgColorHelp": "El color de fondo de la banda. Añade una imagen arriba para usarla en su lugar."
     },
     "pointsStrip": {
       "objective": "Objetivo",
       "next": "Siguiente: {points} pts",
       "points": "{points} pts",
       "complete": "Tarjeta completada",
-      "limit": "Límite de {max} pts"
+      "limit": "Límite de {max} pts",
+      "nextWord": "Siguiente"
     }
   }
 }

@@ -2,11 +2,14 @@
 
 import { useTranslations } from 'next-intl';
 import { ColorPicker } from '@/components/design/ColorPicker';
+import { LabelWithTooltip } from '@/components/design/FieldTooltip';
+import ImageUploader from '@/components/design/ImageUploader';
 import {
   IconLibrary,
   StampIconSvg,
   type StampIconType,
 } from '@/components/design/StampIconPicker';
+import { Label } from '@/components/ui/label';
 import {
   Popover,
   PopoverContent,
@@ -33,13 +36,29 @@ const STRIP_STYLES: PointsStripStyle[] = ['big_point', 'circle_progress', 'progr
  */
 export function PointsForm({ rewards }: PointsFormProps) {
   const t = useTranslations('designEditor.points');
-  const { formData, updateField, accentHex, iconHex } = useDesignForm();
+  const tEditor = useTranslations('designEditor.editor');
+  const {
+    formData,
+    updateField,
+    accentHex,
+    iconHex,
+    handleStripBackgroundUpload,
+    handleStripBackgroundClear,
+  } = useDesignForm();
 
   const stripStyle = formData.points_strip_style ?? 'big_point';
   const rewardIcons = formData.points_reward_icons ?? {};
   const accentValue = formData.progress_accent_color
     ? rgbToHex(formData.progress_accent_color)
     : accentHex;
+  // Strip canvas color, shown only when no strip image is uploaded. Defaults to
+  // the card's background_color (which is what the backend falls back to).
+  const stripBgValue = formData.strip_background_color
+    ? rgbToHex(formData.strip_background_color)
+    : formData.background_color
+      ? rgbToHex(formData.background_color)
+      : '#1c1c1e';
+  const hasStripImage = Boolean(formData.strip_background_url);
 
   const setRewardIcon = (rewardId: string, icon: StampIconType) => {
     updateField('points_reward_icons', {
@@ -94,8 +113,54 @@ export function PointsForm({ rewards }: PointsFormProps) {
         onChange={(hex) => updateField('progress_accent_color', hexToRgb(hex))}
       />
 
-      {/* Reward icons (used by the progress-icons style) */}
-      {rewards.length > 0 && (
+      {/* Strip background: an uploaded image (with opacity) OR — when none is
+          set — a solid background color for the strip canvas. */}
+      <div className="flex flex-col gap-3">
+        <LabelWithTooltip tooltip={tEditor('stripBackgroundTooltip')}>
+          {t('bgImageLabel')}
+        </LabelWithTooltip>
+        <ImageUploader
+          label=""
+          value={formData.strip_background_url}
+          onUpload={handleStripBackgroundUpload}
+          onClear={handleStripBackgroundClear}
+          hint={t('bgImageHint')}
+          enableCrop
+          cropProps={{
+            aspect: 1125 / 432,
+            filename: 'strip-background.png',
+          }}
+        />
+        {hasStripImage ? (
+          <div className="flex flex-col gap-2 pt-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">{tEditor('opacity')}</Label>
+              <span className="text-sm text-muted-foreground">
+                {formData.strip_background_opacity ?? 40}%
+              </span>
+            </div>
+            <input
+              type="range"
+              className="styled-slider w-full"
+              min={0}
+              max={100}
+              value={formData.strip_background_opacity ?? 40}
+              onChange={(e) => updateField('strip_background_opacity', parseInt(e.target.value, 10))}
+            />
+          </div>
+        ) : (
+          <ColorPicker
+            label={t('bgColorLabel')}
+            tooltip={t('bgColorHelp')}
+            colors={designColors}
+            value={stripBgValue}
+            onChange={(hex) => updateField('strip_background_color', hexToRgb(hex))}
+          />
+        )}
+      </div>
+
+      {/* Reward icons — only the reward-track (progress_icons) style shows them. */}
+      {stripStyle === 'progress_icons' && rewards.length > 0 && (
         <div>
           <label className="block text-[12px] font-semibold text-[#555] mb-1">
             {t('rewardIconsLabel')}

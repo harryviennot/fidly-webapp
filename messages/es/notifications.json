@@ -46,6 +46,10 @@
         "name": "Sello conseguido",
         "description": "Se envía cuando un cliente reúne un sello nuevo"
       },
+      "points_earned": {
+        "name": "Puntos ganados",
+        "description": "Enviado cuando un cliente gana puntos"
+      },
       "reward_earned": {
         "name": "Recompensa desbloqueada",
         "description": "Se envía cuando un cliente completa su tarjeta y gana una recompensa"

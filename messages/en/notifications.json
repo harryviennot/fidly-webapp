@@ -46,6 +46,10 @@
         "name": "Stamp collected",
         "description": "Sent when a customer collects a new stamp"
       },
+      "points_earned": {
+        "name": "Points earned",
+        "description": "Sent when a customer earns points"
+      },
       "reward_earned": {
         "name": "Reward unlocked",
         "description": "Sent when a customer completes their card and earns a reward"

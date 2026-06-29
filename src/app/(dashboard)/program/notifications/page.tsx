@@ -55,6 +55,9 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     business_name: 'Your business',
     customer_first_name: 'Sarah',
     store_location: 'Westside',
+    points_balance: '120',
+    points_to_next: '80',
+    next_reward_name: 'Free coffee',
   },
   fr: {
     stamp_count: '3',
@@ -65,6 +68,9 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     business_name: 'Votre entreprise',
     customer_first_name: 'Sarah',
     store_location: 'Westside',
+    points_balance: '120',
+    points_to_next: '80',
+    next_reward_name: 'Café offert',
   },
   es: {
     stamp_count: '3',
@@ -75,6 +81,9 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     business_name: 'Tu comercio',
     customer_first_name: 'Sara',
     store_location: 'Centro',
+    points_balance: '120',
+    points_to_next: '80',
+    next_reward_name: 'Café gratis',
   },
 };
 
@@ -118,14 +127,12 @@ export default function ProgramNotificationsPage() {
         : Number(fallbacks.total_stamps);
     const stampsLeftReal = Math.max(0, totalStampsReal - stampCountReal);
     return {
+      ...fallbacks,
       stamp_count: String(stampCountReal),
       total_stamps: String(totalStampsReal),
       stamps_left: String(stampsLeftReal),
-      rewards_count: fallbacks.rewards_count,
       reward_name: program?.reward_name?.trim() || fallbacks.reward_name,
       business_name: currentBusiness?.name?.trim() || fallbacks.business_name,
-      customer_first_name: fallbacks.customer_first_name,
-      store_location: fallbacks.store_location,
     };
   }, [uiLocale, totalStamps, program?.reward_name, currentBusiness?.name]);
 

@@ -113,6 +113,14 @@ function useCardProps() {
 
   const previewDesign = {
     ...formData,
+    // card_type mirrors the program; derive it from the live program so the
+    // preview shows the right card (points strip vs stamp grid) even on the
+    // first paint, before the seeded formData reconciles.
+    card_type: isPointsProgram(program)
+      ? ('points' as const)
+      : isStampProgram(program)
+        ? ('stamp' as const)
+        : formData.card_type,
     secondary_fields: (formData.secondary_fields ?? []).filter(isLabelled),
     auxiliary_fields: (formData.auxiliary_fields ?? []).filter(isLabelled),
     back_fields: [

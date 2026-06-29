@@ -17,6 +17,10 @@ export const VARIABLE_KEYS = [
   'business_name',
   'customer_first_name',
   'store_location',
+  // Points programs (resolved by build_field_context in the backend).
+  'points_balance',
+  'points_to_next',
+  'next_reward_name',
 ] as const;
 
 export type VariableKey = (typeof VARIABLE_KEYS)[number];
@@ -46,6 +50,9 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     business_name: 'business_name',
     customer_first_name: 'customer_first_name',
     store_location: 'store_location',
+    points_balance: 'points_balance',
+    points_to_next: 'points_to_next',
+    next_reward_name: 'next_reward_name',
   },
   fr: {
     stamp_count: 'tampons_actuels',
@@ -56,6 +63,9 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     business_name: 'nom_entreprise',
     customer_first_name: 'prenom_client',
     store_location: 'lieu_magasin',
+    points_balance: 'points_actuels',
+    points_to_next: 'points_restants',
+    next_reward_name: 'prochaine_recompense',
   },
   es: {
     stamp_count: 'sellos_actuales',
@@ -66,6 +76,9 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     business_name: 'nombre_comercio',
     customer_first_name: 'nombre_cliente',
     store_location: 'lugar_establecimiento',
+    points_balance: 'puntos_actuales',
+    points_to_next: 'puntos_restantes',
+    next_reward_name: 'siguiente_recompensa',
   },
 };
 
@@ -109,6 +122,9 @@ export function renderSamplePreview(
     business_name: 'Your business',
     customer_first_name: 'Sarah',
     store_location: 'Westside',
+    points_balance: '120',
+    points_to_next: '80',
+    next_reward_name: 'Free Coffee',
   };
   const values = { ...defaults, ...overrides };
   return template.replace(VARIABLE_PATTERN, (_match, key: string) => {
