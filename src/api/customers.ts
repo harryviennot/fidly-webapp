@@ -300,6 +300,48 @@ export async function sendCustomerPass(
   return response.json();
 }
 
+export interface AdjustPointsOptions {
+  /** Signed points delta: negative removes, positive grants. */
+  amount: number;
+  /** Required audit reason (1–280 chars), shown in the activity log. */
+  reason: string;
+  /** Optional location to attribute the adjustment to. */
+  locationId?: string | null;
+}
+
+/**
+ * Manually adjust a points balance by a signed amount (POST /stamps/{biz}/{enr}/adjust).
+ * The backend clamps the balance at 0, mirrors lifetime_points, and logs one
+ * `points_adjusted` (negative) or `bonus_points` (positive) transaction. No
+ * transaction id needed — unlike a void, this isn't tied to a prior credit.
+ */
+export async function adjustPoints(
+  businessId: string,
+  enrollmentId: string,
+  options: AdjustPointsOptions
+): Promise<StampResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/stamps/${businessId}/${enrollmentId}/adjust`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({
+        amount: options.amount,
+        reason: options.reason,
+        source: 'dashboard',
+        ...(options.locationId !== undefined && { location_id: options.locationId }),
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to adjust points');
+  }
+
+  return response.json();
+}
+
 export async function voidStamp(
   businessId: string,
   enrollmentId: string,

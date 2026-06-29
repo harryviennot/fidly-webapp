@@ -28,6 +28,7 @@
       "bonusStamp": "Bonus Stamps",
       "bonusPoints": "Bonus Points",
       "stampsAdjusted": "Adjustments",
+      "pointsAdjusted": "Points adjusted",
       "cardAdded": "Card Added",
       "cardReAdded": "Card Re-added",
       "cardDeleted": "Card Deleted"
@@ -49,6 +50,7 @@
       "bonus_stamp": "received a bonus stamp",
       "bonus_points": "earned bonus points",
       "stamps_adjusted": "had stamps adjusted",
+      "points_adjusted": "had points adjusted",
       "card_added": "added their card",
       "card_re_added": "re-added their card",
       "card_deleted": "removed their card"

@@ -102,6 +102,7 @@
       "addStamp": "Ajouter tampon",
       "open": "Ouvrir",
       "addPoints": "Ajouter des points",
+      "removePoints": "Retirer des points",
       "maxed": "Max !",
       "redeem": "Échanger",
       "voidLast": "Annuler dernier",
@@ -126,6 +127,9 @@
       "voidPointsConfirm": "Retirer les points",
       "voidPointsReasonPlaceholder": "ex. Points ajoutés par erreur",
       "voidPointsSuccessToast": "Points retirés",
+      "voidValueLabel": "À retirer",
+      "voidValuePoints": "{points} pts",
+      "voidValueStamps": "{count, plural, one {# tampon} other {# tampons}}",
       "adjustment": {
         "title": "Ajouter un tampon",
         "chip1": "Oubli de scan",
@@ -163,6 +167,17 @@
         "errors": {
           "amountRequired": "Indiquez le montant dépensé par le client."
         }
+      },
+      "pointsRemove": {
+        "title": "Retirer des points",
+        "modeLast": "Dernier crédit",
+        "modeCustom": "Montant libre",
+        "amountLabel": "Points à retirer",
+        "newBalanceLabel": "Nouveau solde",
+        "pointsValue": "{points} pts",
+        "successToast": "{points} points retirés",
+        "submitting": "Retrait...",
+        "submit": "Retirer les points"
       },
       "pointsRedeem": {
         "title": "Utiliser une récompense",
@@ -229,7 +244,7 @@
       "points": {
         "title": "Solde de points",
         "lifetime": "{count} gagnés au total",
-        "complete": "Toutes les récompenses débloquées",
+        "complete": "Carte complétée",
         "limit": "Plafond {max} pts",
         "price": "{points} pts"
       }
@@ -247,6 +262,7 @@
         "bonus_stamp": "Tampon bonus",
         "bonus_points": "Points bonus",
         "stamps_adjusted": "Tampons ajustés",
+        "points_adjusted": "Points ajustés",
         "card_added": "Carte ajoutée",
         "card_re_added": "Carte ré-ajoutée",
         "card_deleted": "Carte supprimée"

@@ -105,6 +105,7 @@ import {
 } from "@phosphor-icons/react";
 import type { ComponentType, SVGProps } from "react";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type PhosphorIcon = ComponentType<
   SVGProps<SVGSVGElement> & {
@@ -309,13 +310,22 @@ function IconButton({ entry, selected, accentColor, iconColor, displayName, onCl
       type="button"
       onClick={onClick}
       title={displayName}
-      className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-110 mx-auto"
-      style={{
-        backgroundColor: selected ? accentColor : "hsl(var(--muted))",
-      }}
       aria-label={displayName}
+      aria-pressed={selected}
+      className={cn(
+        "group flex items-center justify-center w-full aspect-square rounded-xl border transition-colors duration-150 outline-none",
+        "focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40",
+        selected
+          ? "border-transparent shadow-sm ring-1 ring-black/5"
+          : "border-[var(--border)] bg-white hover:bg-[var(--muted)]/60 hover:border-[var(--accent)]/40"
+      )}
+      style={selected ? { backgroundColor: accentColor } : undefined}
     >
-      <Icon className="w-4 h-4" weight="bold" style={{ color: selected ? iconColor : undefined }} />
+      <Icon
+        className="w-[18px] h-[18px] transition-colors"
+        weight={selected ? "fill" : "regular"}
+        style={{ color: selected ? iconColor : "var(--muted-gray, #6B6B6B)" }}
+      />
     </button>
   );
 }
@@ -379,7 +389,7 @@ export function IconLibrary({
   );
 
   const renderGrid = (entries: readonly (typeof STAMP_ICONS)[number][]) => (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-y-2 gap-x-1">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(42px,1fr))] gap-1.5">
       {entries.map((entry) => (
         <IconButton
           key={entry.id}

@@ -7,6 +7,7 @@ export type TransactionType =
   | 'bonus_stamp'
   | 'bonus_points'
   | 'stamps_adjusted'
+  | 'points_adjusted'
   | 'card_added'
   | 'card_re_added'
   | 'card_deleted';

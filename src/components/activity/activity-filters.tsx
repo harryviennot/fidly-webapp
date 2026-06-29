@@ -16,6 +16,7 @@ const FILTER_OPTIONS: FilterKey[] = [
   "bonus_stamp",
   "bonus_points",
   "stamps_adjusted",
+  "points_adjusted",
   "card_added,card_re_added",
   "card_deleted",
 ];
@@ -30,6 +31,7 @@ const FILTER_LABEL_KEYS: Record<FilterKey, string> = {
   bonus_stamp: "filters.bonusStamp",
   bonus_points: "filters.bonusPoints",
   stamps_adjusted: "filters.stampsAdjusted",
+  points_adjusted: "filters.pointsAdjusted",
   "card_added,card_re_added": "filters.cardAdded",
   card_added: "filters.cardAdded",
   card_re_added: "filters.cardReAdded",
@@ -46,6 +48,7 @@ const FILTER_COLORS: Record<FilterKey, { color: string; bg: string }> = {
   bonus_stamp: { color: "#3D7CAF", bg: "#E4F0F8" },
   bonus_points: { color: "#3D7CAF", bg: "#E4F0F8" },
   stamps_adjusted: { color: "#8A8A8A", bg: "#F0EDE7" },
+  points_adjusted: { color: "#8A8A8A", bg: "#F0EDE7" },
   "card_added,card_re_added": { color: "#4A7C59", bg: "#E8F5E4" },
   card_added: { color: "#4A7C59", bg: "#E8F5E4" },
   card_re_added: { color: "#4A7C59", bg: "#E8F5E4" },

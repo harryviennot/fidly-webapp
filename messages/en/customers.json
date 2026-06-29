@@ -102,6 +102,7 @@
       "addStamp": "Add Stamp",
       "open": "Open",
       "addPoints": "Add points",
+      "removePoints": "Remove points",
       "maxed": "Max!",
       "redeem": "Redeem",
       "voidLast": "Void Last",
@@ -126,6 +127,9 @@
       "voidPointsConfirm": "Remove points",
       "voidPointsReasonPlaceholder": "e.g. Points added by mistake",
       "voidPointsSuccessToast": "Points removed",
+      "voidValueLabel": "Removing",
+      "voidValuePoints": "{points} pts",
+      "voidValueStamps": "{count, plural, one {# stamp} other {# stamps}}",
       "adjustment": {
         "title": "Add a stamp",
         "chip1": "Forgot to scan",
@@ -163,6 +167,17 @@
         "errors": {
           "amountRequired": "Enter the amount the customer spent."
         }
+      },
+      "pointsRemove": {
+        "title": "Remove points",
+        "modeLast": "Last credit",
+        "modeCustom": "Custom amount",
+        "amountLabel": "Points to remove",
+        "newBalanceLabel": "New balance",
+        "pointsValue": "{points} pts",
+        "successToast": "Removed {points} points",
+        "submitting": "Removing...",
+        "submit": "Remove points"
       },
       "pointsRedeem": {
         "title": "Redeem a reward",
@@ -229,7 +244,7 @@
       "points": {
         "title": "Points balance",
         "lifetime": "{count} earned all-time",
-        "complete": "All rewards unlocked",
+        "complete": "Card completed",
         "limit": "{max} pts limit",
         "price": "{points} pts"
       }
@@ -247,6 +262,7 @@
         "bonus_stamp": "Bonus Stamp",
         "bonus_points": "Bonus Points",
         "stamps_adjusted": "Stamps Adjusted",
+        "points_adjusted": "Points Adjusted",
         "card_added": "Card Added",
         "card_re_added": "Card Re-added",
         "card_deleted": "Card Deleted"

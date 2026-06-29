@@ -114,7 +114,14 @@ export function CustomerDetailSheet({
     queryKey: customerKeys.detail(currentBusiness?.id ?? "", customer?.id ?? ""),
     queryFn: () => getCustomer(currentBusiness!.id, customer!.id),
     enabled: open && !!customer && !!currentBusiness?.id,
+    // Seed from the list row so the sheet paints instantly, but ALWAYS refetch
+    // the full detail on open — the list payload has no `program` snapshot
+    // (reward ladder + redeem state). The global 5-min staleTime would
+    // otherwise treat the seed as fresh and never fetch, so the points rewards
+    // + redeem button only appeared after a hard refresh.
     initialData: customer ?? undefined,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
   const liveCustomer = customerQuery.data ?? cachedCustomer;
   const { data: program } = useDefaultProgram(currentBusiness?.id);

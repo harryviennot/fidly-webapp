@@ -5,6 +5,7 @@ import {
   addStamp,
   redeemReward,
   voidStamp,
+  adjustPoints,
   sendCustomerPass,
   updateCustomer,
   type CustomerUpdateInput,
@@ -245,6 +246,35 @@ export function useUpdateCustomer(businessId: string | undefined) {
       queryClient.invalidateQueries({
         queryKey: customerKeys.all(businessId!),
       });
+    },
+  });
+}
+
+/** Manually add/remove points by a signed amount (POST /…/adjust). */
+export function useAdjustPoints(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      enrollmentId,
+      amount,
+      reason,
+      locationId,
+    }: {
+      customerId: string;
+      enrollmentId: string;
+      amount: number;
+      reason: string;
+      locationId?: string | null;
+    }) => adjustPoints(businessId!, enrollmentId, { amount, reason, locationId }),
+    onSettled: (_data, _err, { customerId }) => {
+      queryClient.invalidateQueries({ queryKey: customerKeys.all(businessId!) });
+      if (businessId)
+        queryClient.invalidateQueries({
+          queryKey: customerKeys.detail(businessId, customerId),
+        });
+      queryClient.invalidateQueries({ queryKey: ["transactions", businessId] });
+      queryClient.invalidateQueries({ queryKey: ["activity", businessId] });
     },
   });
 }

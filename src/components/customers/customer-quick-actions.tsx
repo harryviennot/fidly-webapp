@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRedeemReward } from "@/hooks/use-customers";
+import { useBusiness } from "@/contexts/business-context";
 import { toast } from "sonner";
 import { StampAdjustmentDialog } from "./stamp-adjustment-dialog";
 import { StampVoidDialog } from "./stamp-void-dialog";
 import { PointsAddDialog } from "./points-add-dialog";
+import { PointsAdjustDialog } from "./points-adjust-dialog";
 import { PointsRedeemDialog } from "./points-redeem-dialog";
 import { CustomerActionButton } from "./customer-action-button";
+import { txDelta } from "@/lib/transaction-constants";
 import type { CustomerResponse, ProgramSnapshot, TransactionResponse } from "@/types";
 
 interface CustomerQuickActionsProps {
@@ -33,12 +36,15 @@ export function CustomerQuickActions({
   currency = "€",
 }: CustomerQuickActionsProps) {
   const t = useTranslations("customers.actions");
+  const { currentRole } = useBusiness();
   const redeemMutation = useRedeemReward(businessId);
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [pointsAddOpen, setPointsAddOpen] = useState(false);
   const [pointsRedeemOpen, setPointsRedeemOpen] = useState(false);
 
+  // Manual signed adjustments are owner/admin-only (the backend 403s scanners).
+  const isManager = currentRole === "owner" || currentRole === "admin";
   const isPoints = snapshot?.type === "points";
   // Phase 4: stamp/redeem/void address an enrollment, not a customer. Today
   // every customer has exactly one enrollment per business, so [0] is "the"
@@ -56,6 +62,9 @@ export function CustomerQuickActions({
           (v) => v.type === "points_voided" && v.voided_transaction_id === txn.id
         )
     );
+    // The remove button is usable when there's a last credit to void (any
+    // role) OR the user is an owner/admin who can remove a custom amount.
+    const canRemovePoints = !!lastVoidablePoints || isManager;
     return (
       <>
         <div className="flex gap-2">
@@ -74,25 +83,31 @@ export function CustomerQuickActions({
               onClick={() => setPointsRedeemOpen(true)}
             />
           )}
+          {/* Remove points: void the last credit, or (owner/admin) a custom amount. */}
           <CustomerActionButton
             variant="void"
             size="lg"
-            label={t("voidLast")}
+            label={t("removePoints")}
             onClick={() => setVoidDialogOpen(true)}
-            disabled={!lastVoidablePoints}
+            disabled={!enrollmentId || !canRemovePoints}
           />
         </div>
 
-        {enrollmentId && lastVoidablePoints && (
-          <StampVoidDialog
+        {enrollmentId && canRemovePoints && (
+          <PointsAdjustDialog
             open={voidDialogOpen}
             onOpenChange={setVoidDialogOpen}
             businessId={businessId}
             customerId={customer.id}
             customerName={customer.name}
             enrollmentId={enrollmentId}
-            transactionId={lastVoidablePoints.id}
-            isPoints
+            currentBalance={snapshot.primary_value}
+            lastCredit={
+              lastVoidablePoints
+                ? { transactionId: lastVoidablePoints.id, amount: txDelta(lastVoidablePoints) }
+                : undefined
+            }
+            canCustom={isManager}
             onSuccess={onActionComplete}
           />
         )}
@@ -240,6 +255,7 @@ export function CustomerQuickActions({
           customerName={customer.name}
           enrollmentId={enrollmentId}
           transactionId={lastVoidable.id}
+          voidValue={txDelta(lastVoidable)}
           onSuccess={onActionComplete}
         />
       )}

@@ -28,6 +28,7 @@
       "bonusStamp": "Tampons bonus",
       "bonusPoints": "Points bonus",
       "stampsAdjusted": "Ajustements",
+      "pointsAdjusted": "Points ajustés",
       "cardAdded": "Carte ajoutée",
       "cardReAdded": "Carte ré-ajoutée",
       "cardDeleted": "Carte supprimée"
@@ -49,6 +50,7 @@
       "bonus_stamp": "a reçu un tampon bonus",
       "bonus_points": "a reçu des points bonus",
       "stamps_adjusted": "a eu ses tampons ajustés",
+      "points_adjusted": "a eu ses points ajustés",
       "card_added": "a ajouté sa carte",
       "card_re_added": "a ré-ajouté sa carte",
       "card_deleted": "a supprimé sa carte"

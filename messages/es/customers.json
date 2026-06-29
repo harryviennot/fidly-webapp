@@ -81,6 +81,7 @@
       "addStamp": "Añadir sello",
       "open": "Abrir",
       "addPoints": "Añadir puntos",
+      "removePoints": "Quitar puntos",
       "maxed": "¡Al máximo!",
       "redeem": "Canjear",
       "voidLast": "Anular el último",
@@ -105,6 +106,9 @@
       "voidPointsConfirm": "Quitar puntos",
       "voidPointsReasonPlaceholder": "p. ej. Puntos añadidos por error",
       "voidPointsSuccessToast": "Puntos quitados",
+      "voidValueLabel": "Se quitará",
+      "voidValuePoints": "{points} pts",
+      "voidValueStamps": "{count, plural, one {# sello} other {# sellos}}",
       "adjustment": {
         "title": "Añadir un sello",
         "chip1": "Olvidó escanear",
@@ -142,6 +146,17 @@
         "errors": {
           "amountRequired": "Indica el importe que gastó el cliente."
         }
+      },
+      "pointsRemove": {
+        "title": "Quitar puntos",
+        "modeLast": "Último crédito",
+        "modeCustom": "Cantidad libre",
+        "amountLabel": "Puntos a quitar",
+        "newBalanceLabel": "Nuevo saldo",
+        "pointsValue": "{points} pts",
+        "successToast": "{points} puntos quitados",
+        "submitting": "Quitando...",
+        "submit": "Quitar puntos"
       },
       "pointsRedeem": {
         "title": "Canjear una recompensa",
@@ -208,7 +223,7 @@
       "points": {
         "title": "Saldo de puntos",
         "lifetime": "{count} ganados en total",
-        "complete": "Todas las recompensas desbloqueadas",
+        "complete": "Tarjeta completada",
         "limit": "Límite de {max} pts",
         "price": "{points} pts"
       }
@@ -226,6 +241,7 @@
         "bonus_stamp": "Sello de bonificación",
         "bonus_points": "Puntos extra",
         "stamps_adjusted": "Sellos ajustados",
+        "points_adjusted": "Puntos ajustados",
         "card_added": "Tarjeta añadida",
         "card_re_added": "Tarjeta vuelta a añadir",
         "card_deleted": "Tarjeta eliminada"

@@ -35,12 +35,27 @@ export interface NotificationTemplatesResponse {
   items: NotificationTemplate[];
 }
 
-/** Stamp-count milestone — fires when customer reaches a specific stamp count. */
+/** What a milestone threshold is measured against. `balance` = the customer's
+ *  current stamp/points balance; `lifetime` = their all-time earned total. */
+export type MilestoneMetric = 'balance' | 'lifetime';
+
+/** A milestone fires when a customer reaches a threshold. Legacy stamp
+ *  milestones carry `stamp_equals` (a current-balance stamp count); new ones
+ *  carry `value` + `metric` and work for both stamp and points programs. */
 export interface Milestone {
   id: string;
-  stamp_equals: number;
+  /** Legacy stamp-count trigger. Null on new value+metric milestones. */
+  stamp_equals: number | null;
+  /** New unified threshold (stamps or points, depending on the program). */
+  value?: number | null;
+  metric?: MilestoneMetric | null;
   body: LocalizedBody;
   is_enabled: boolean;
+}
+
+/** The milestone's threshold, preferring the new `value` over legacy `stamp_equals`. */
+export function milestoneValue(m: Pick<Milestone, 'value' | 'stamp_equals'>): number {
+  return m.value ?? m.stamp_equals ?? 0;
 }
 
 /** Envelope returned by GET /notifications/{business_id}/milestones */
@@ -53,14 +68,16 @@ export interface MilestonesResponse {
 }
 
 export interface MilestoneCreate {
-  stamp_equals: number;
+  value: number;
+  metric: MilestoneMetric;
   body: LocalizedBody;
   is_enabled?: boolean;
 }
 
 /** Partial update — any field is optional but at least one is required by the backend. */
 export interface MilestoneUpdate {
-  stamp_equals?: number;
+  value?: number;
+  metric?: MilestoneMetric;
   body?: LocalizedBody;
   is_enabled?: boolean;
 }

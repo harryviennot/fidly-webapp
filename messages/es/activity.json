@@ -28,6 +28,7 @@
       "bonusStamp": "Sellos extra",
       "bonusPoints": "Puntos extra",
       "stampsAdjusted": "Ajustes",
+      "pointsAdjusted": "Puntos ajustados",
       "cardAdded": "Tarjeta añadida",
       "cardReAdded": "Tarjeta vuelta a añadir",
       "cardDeleted": "Tarjeta eliminada"
@@ -49,6 +50,7 @@
       "bonus_stamp": "ha recibido un sello extra",
       "bonus_points": "ha recibido puntos extra",
       "stamps_adjusted": "ha tenido sus sellos ajustados",
+      "points_adjusted": "ha tenido sus puntos ajustados",
       "card_added": "ha añadido su tarjeta",
       "card_re_added": "ha vuelto a añadir su tarjeta",
       "card_deleted": "ha eliminado su tarjeta"

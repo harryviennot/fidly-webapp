@@ -74,6 +74,13 @@ export const TYPE_CONFIG: Record<TransactionType, TransactionTypeConfig> = {
     deltaBg: "bg-[#F0EDE7]",
     deltaText: "text-[#8A8A8A]",
   },
+  points_adjusted: {
+    icon: SlidersHorizontalIcon,
+    iconColor: "text-[var(--muted-foreground)]",
+    bgColor: "bg-[var(--background-subtle)]",
+    deltaBg: "bg-[#F0EDE7]",
+    deltaText: "text-[#8A8A8A]",
+  },
   card_added: {
     icon: CreditCardIcon,
     iconColor: "text-[#4A7C59]",
@@ -127,6 +134,7 @@ export function isPointsTransaction(t: TransactionResponse): boolean {
     t.program_type === "points" ||
     t.type === "points_earned" ||
     t.type === "points_voided" ||
+    t.type === "points_adjusted" ||
     t.type === "bonus_points"
   );
 }

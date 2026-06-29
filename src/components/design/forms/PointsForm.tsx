@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ColorPicker } from '@/components/design/ColorPicker';
 import { LabelWithTooltip } from '@/components/design/FieldTooltip';
@@ -48,6 +49,9 @@ export function PointsForm({ rewards }: PointsFormProps) {
 
   const stripStyle = formData.points_strip_style ?? 'big_point';
   const rewardIcons = formData.points_reward_icons ?? {};
+  // Which reward's icon popover is open (one at a time). Selecting an icon
+  // closes it — see setRewardIcon.
+  const [openRewardIcon, setOpenRewardIcon] = useState<string | null>(null);
   const accentValue = formData.progress_accent_color
     ? rgbToHex(formData.progress_accent_color)
     : accentHex;
@@ -65,6 +69,7 @@ export function PointsForm({ rewards }: PointsFormProps) {
       ...rewardIcons,
       [rewardId]: { type: 'preset', ref: icon },
     });
+    setOpenRewardIcon(null);
   };
 
   const iconFor = (rewardId: string): StampIconType => {
@@ -184,7 +189,10 @@ export function PointsForm({ rewards }: PointsFormProps) {
                     {t('rewardPrice', { points: reward.threshold })}
                   </div>
                 </div>
-                <Popover>
+                <Popover
+                  open={openRewardIcon === reward.id}
+                  onOpenChange={(o) => setOpenRewardIcon(o ? reward.id : null)}
+                >
                   <PopoverTrigger asChild>
                     <button
                       type="button"
