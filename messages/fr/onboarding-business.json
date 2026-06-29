@@ -54,7 +54,8 @@
           "content": "Enregistrer le contenu de ma carte",
           "content_short": "Continuer",
           "back": "Enregistrer le dos de ma carte",
-          "back_short": "Continuer"
+          "back_short": "Continuer",
+          "points": "Enregistrer ma carte"
         },
         "notifications": {
           "icon": "Enregistrer mon icône"
@@ -176,7 +177,8 @@
         "steps": {
           "program": {
             "title": "Votre programme de fidélité",
-            "subtitle": "Combien de tampons pour gagner quoi, et comment."
+            "subtitle": "Combien de tampons pour gagner quoi, et comment.",
+            "subtitlePoints": "Ce que vos clients gagnent par achat, et ce qu’ils peuvent obtenir."
           },
           "data-collection": {
             "title": "Que demander à vos clients",
@@ -189,7 +191,7 @@
         "steps": {
           "intro": {
             "title": "Le verso de votre carte",
-            "subtitle": "Tout ce qui n'est pas un tampon est rangé au dos.",
+            "subtitle": "Tout ce qui n'est pas sur le devant de la carte est rangé au dos.",
             "bodyP1": "Vos clients consultent le verso de leur carte en appuyant sur les trois points dans Apple Wallet, ou sur l'icône info dans Google Wallet. Ils y trouvent les informations que vous y placez : horaires, adresse, téléphone, site web, conditions, et tout ce que vous voulez rendre visible.",
             "bodyP2": "Vous saisissez ces informations une seule fois maintenant. Elles seront disponibles pour chaque carte que vous créerez à l'avenir."
           },
@@ -236,7 +238,7 @@
         "steps": {
           "icon": {
             "title": "Icône des notifications",
-            "subtitle": "À chaque tampon ou récompense, vos clients reçoivent une notification sur leur téléphone. Voici l'icône qui l'accompagnera.",
+            "subtitle": "À chaque mise à jour de leur carte, vos clients reçoivent une notification sur leur téléphone. Voici l'icône qui l'accompagnera.",
             "uploadSectionTitle": "Votre icône",
             "uploadCta": "Glissez votre image ici, ou appuyez pour la choisir",
             "uploadHint": "PNG, 87 par 87 pixels minimum.",
@@ -316,7 +318,7 @@
             "appleWalletHint": "Apple Wallet regroupe les mises à jour rapides. Environ 20 secondes entre les tampons, et chaque notification a son propre buzz.",
             "googleWalletHint": "Sur Google Wallet, la carte ne se met à jour qu'une fois fermée. Quittez l'application et rouvrez votre carte pour voir le nouveau tampon.",
             "deliveryDisclosure": {
-              "summary": "La notification n'arrive pas ? Le tampon est bien enregistré, ne vous inquiétez pas.",
+              "summary": "La notification n'arrive pas ? L'opération est bien enregistrée, ne vous inquiétez pas.",
               "appleTitle": "Sur Apple Wallet",
               "appleBody": "Apple choisit le meilleur moment pour livrer la notification en fonction de la batterie, du Wi-Fi et du réseau. Elle arrive en quelques secondes à quelques minutes. La carte sur l'écran verrouillé se met à jour dès que les conditions le permettent.",
               "googleTitle": "Sur Google Wallet",

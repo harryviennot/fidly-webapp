@@ -41,8 +41,19 @@ export function StampsStep() {
   const { mutateAsync: updateBusiness } = useUpdateBusiness(businessId);
   const ctx = useWizardStep();
 
+  const tFooter = useTranslations('onboardingBusiness.footer.cta.design');
+
   const { formData, pendingStripFile, setPendingStripFile, designContext } =
     useDesignStepState(existingDesign, 'stamps');
+
+  // The shared footer CTA key (`design.stamps`) reads "Save my stamps" — wrong
+  // for a points card. Override it with the points label; the shell resets the
+  // label on step change so the cleanup is belt-and-suspenders.
+  useEffect(() => {
+    if (!isPoints) return;
+    ctx.setNextLabel(tFooter('points'));
+    return () => ctx.setNextLabel(null);
+  }, [isPoints, ctx, tFooter]);
 
   useEffect(() => {
     ctx.setCanSkip(true);

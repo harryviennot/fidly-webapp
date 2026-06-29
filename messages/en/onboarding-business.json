@@ -54,7 +54,8 @@
           "content": "Save my content",
           "content_short": "Continue",
           "back": "Save the back",
-          "back_short": "Continue"
+          "back_short": "Continue",
+          "points": "Save my card"
         },
         "notifications": {
           "icon": "Save my icon"
@@ -176,7 +177,8 @@
         "steps": {
           "program": {
             "title": "Set up your loyalty program",
-            "subtitle": "Pick how customers earn, name your program, and define the reward."
+            "subtitle": "Pick how customers earn, name your program, and define the reward.",
+            "subtitlePoints": "What customers earn per purchase, and what they can redeem."
           },
           "data-collection": {
             "title": "What to collect from customers",
@@ -189,7 +191,7 @@
         "steps": {
           "intro": {
             "title": "Your card has two sides",
-            "subtitle": "Front for stamps. Back for everything else.",
+            "subtitle": "Everything that isn't on the front of the card lives on the back.",
             "bodyP1": "Customers flip the card to see your hours, address, phone, website, terms, and anything else worth showing. On Apple Wallet they tap the three dots. On Google Wallet they tap the i icon.",
             "bodyP2": "You'll add your details once, here. They'll be available on every card you ever create. Later, when you design a specific card, you can pick which details to show and add extras that only apply to that card."
           },
@@ -236,7 +238,7 @@
         "steps": {
           "icon": {
             "title": "Choose your notification icon",
-            "subtitle": "Shown next to every notification you send: stamp added, reward earned, broadcast.",
+            "subtitle": "Every time their card updates, your customers get a notification on their phone. Here's the icon that goes with it.",
             "uploadSectionTitle": "Your icon",
             "uploadCta": "Click to upload",
             "uploadHint": "PNG, minimum 87×87 pixels. Square shapes work best.",
@@ -316,7 +318,7 @@
             "appleWalletHint": "Apple Wallet groups rapid updates. Leaving roughly 20 seconds between stamps gives each notification its own buzz.",
             "googleWalletHint": "On Google Wallet, the card only refreshes once closed. Close and reopen to see the new stamp.",
             "deliveryDisclosure": {
-              "summary": "Notification didn't appear? The stamp was still recorded.",
+              "summary": "Notification didn't appear? It was still recorded.",
               "appleTitle": "On Apple Wallet",
               "appleBody": "Apple groups updates based on battery, Wi-Fi, and cellular conditions. A banner may take seconds or minutes. The card on your lock screen refreshes as soon as your phone wakes with a good signal.",
               "googleTitle": "On Google Wallet",

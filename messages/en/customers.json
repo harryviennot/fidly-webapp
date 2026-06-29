@@ -6,6 +6,7 @@
     "addCustomer": "Add Customer",
     "customerProfile": "Customer Profile",
     "pointsCustomer": "Points card",
+    "pointsBalance": "{points} pts",
     "loading": "Loading customers...",
     "loadFailed": "Failed to load customers. Make sure the backend is running.",
     "searchPlaceholder": "Search by name or email...",
@@ -19,7 +20,8 @@
       "lastVisit": "Last Visit",
       "redemptions": "Rewards",
       "action": "Action",
-      "actions": "Actions"
+      "actions": "Actions",
+      "points": "Points"
     },
     "stats": {
       "totalCustomers": "Total Customers",

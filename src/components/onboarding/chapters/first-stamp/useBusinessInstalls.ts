@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
-import { getCustomer, getCustomers, getCustomerWalletStatus } from '@/api/customers';
+import { getCustomers, getCustomerWalletStatus } from '@/api/customers';
 import { createClient } from '@/utils/supabase/client';
 
 export interface BusinessInstall {
@@ -57,46 +57,28 @@ export function useBusinessInstalls(businessId: string | undefined): UseBusiness
       const page = await getCustomers(businessId, { limit: 100 });
       if (seq !== refetchSeq.current) return;
       const customers = page.data ?? [];
-      // Per-customer wallet status (install) + detail (authoritative balance).
-      // The list RPC flattens points enrollments to {stamps: 0}, so the points
-      // balance only comes back on the detail endpoint's `program` snapshot
-      // (primary_value) — fetch both. For stamp programs the list value already
-      // works; detail just confirms it.
-      const [statuses, details] = await Promise.all([
-        Promise.all(
-          customers.map((c) =>
-            getCustomerWalletStatus(businessId, c.id).catch(() => ({
-              installed: false,
-              apple: false,
-              google: false,
-            }))
-          )
-        ),
-        Promise.all(
-          customers.map((c) => getCustomer(businessId, c.id).catch(() => null))
-        ),
-      ]);
+      const statuses = await Promise.all(
+        customers.map((c) =>
+          getCustomerWalletStatus(businessId, c.id).catch(() => ({
+            installed: false,
+            apple: false,
+            google: false,
+          }))
+        )
+      );
       if (seq !== refetchSeq.current) return;
       const merged: BusinessInstall[] = customers.map((c, i) => {
         const status = statuses[i];
-        const snapshot = details[i]?.program ?? null;
-        const detailProgress = details[i]?.enrollments?.[0]?.progress;
-        const isPoints = snapshot?.type === 'points';
         return {
           customer_id: c.id,
           name: c.name,
           email: c.email ?? "",
           enrollment_id: c.enrollments?.[0]?.id ?? null,
-          stamps:
-            detailProgress?.stamps ??
-            c.enrollments?.[0]?.progress?.stamps ??
-            c.stamps ??
-            0,
-          // Points balance: the snapshot's primary_value is authoritative;
-          // fall back to the detail enrollment's raw progress.
-          points: isPoints
-            ? snapshot?.primary_value ?? detailProgress?.points ?? 0
-            : detailProgress?.points ?? 0,
+          stamps: c.enrollments?.[0]?.progress?.stamps ?? c.stamps ?? 0,
+          // Type-agnostic headline counter from the list RPC (migration 128):
+          // the points balance for points programs. Only read by the points
+          // branch in StampStep, so it's safe to surface unconditionally.
+          points: c.primary_value ?? c.enrollments?.[0]?.progress?.points ?? 0,
           has_apple: status.apple,
           has_google: status.google,
           installed: status.installed,

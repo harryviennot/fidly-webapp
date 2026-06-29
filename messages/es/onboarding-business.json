@@ -54,7 +54,8 @@
           "content": "Guardar mi contenido",
           "content_short": "Continuar",
           "back": "Guardar el reverso",
-          "back_short": "Continuar"
+          "back_short": "Continuar",
+          "points": "Guardar mi tarjeta"
         },
         "notifications": {
           "icon": "Guardar mi icono"
@@ -176,7 +177,8 @@
         "steps": {
           "program": {
             "title": "Configura tu programa de fidelidad",
-            "subtitle": "Elige cómo ganan tus clientes, ponle nombre a tu programa y define la recompensa."
+            "subtitle": "Elige cómo ganan tus clientes, ponle nombre a tu programa y define la recompensa.",
+            "subtitlePoints": "Lo que ganan tus clientes por compra y lo que pueden canjear."
           },
           "data-collection": {
             "title": "Qué pedir a tus clientes",
@@ -189,7 +191,7 @@
         "steps": {
           "intro": {
             "title": "Tu tarjeta tiene dos caras",
-            "subtitle": "El anverso para los sellos. El reverso para todo lo demás.",
+            "subtitle": "Todo lo que no está en el frente de la tarjeta va en el reverso.",
             "bodyP1": "Tus clientes giran la tarjeta para ver tu horario, dirección, teléfono, sitio web, condiciones y cualquier otra cosa que merezca mostrarse. En Apple Wallet pulsan los tres puntos. En Google Wallet pulsan el icono de información.",
             "bodyP2": "Añadirás tus datos una sola vez, aquí. Estarán disponibles en cada tarjeta que crees. Más adelante, al diseñar una tarjeta concreta, podrás elegir qué datos mostrar y añadir contenido propio solo para esa tarjeta."
           },
@@ -236,7 +238,7 @@
         "steps": {
           "icon": {
             "title": "Elige tu icono de notificaciones",
-            "subtitle": "Aparece junto a cada notificación que envías: sello añadido, recompensa ganada, difusión.",
+            "subtitle": "Cada vez que se actualiza su tarjeta, tus clientes reciben una notificación en su teléfono. Este es el icono que la acompaña.",
             "uploadSectionTitle": "Tu icono",
             "uploadCta": "Haz clic para subir",
             "uploadHint": "PNG, mínimo 87×87 píxeles. Las formas cuadradas quedan mejor.",
@@ -316,7 +318,7 @@
             "appleWalletHint": "Apple Wallet agrupa las actualizaciones rápidas. Dejar unos 20 segundos entre sellos hace que cada notificación tenga su propia vibración.",
             "googleWalletHint": "En Google Wallet, la tarjeta solo se actualiza al cerrarla. Ciérrala y vuelve a abrirla para ver el nuevo sello.",
             "deliveryDisclosure": {
-              "summary": "¿No apareció la notificación? El sello se registró igualmente.",
+              "summary": "¿No apareció la notificación? Se registró igualmente.",
               "appleTitle": "En Apple Wallet",
               "appleBody": "Apple agrupa las actualizaciones según la batería, el Wi-Fi y la cobertura. Un aviso puede tardar segundos o minutos. La tarjeta de tu pantalla bloqueada se actualiza en cuanto tu teléfono se despierta con buena señal.",
               "googleTitle": "En Google Wallet",

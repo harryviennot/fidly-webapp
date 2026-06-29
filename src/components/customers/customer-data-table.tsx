@@ -149,7 +149,7 @@ export function CustomerDataTable({
                 className="cursor-pointer select-none text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-3 whitespace-nowrap"
                 onClick={() => onSort("stamps")}
               >
-                {t("table.stamps")}
+                {isPoints ? t("table.points") : t("table.stamps")}
                 <SortIndicator sortKey={sortKey} sortDir={sortDir} column="stamps" />
               </TableHead>
               <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-3 hidden @[32rem]:table-cell">
@@ -224,7 +224,9 @@ export function CustomerDataTable({
 
                   <TableCell className="py-3 px-3">
                     {isPoints ? (
-                      <span className="text-[12px] text-[#A5A5A5]">{t("pointsCustomer")}</span>
+                      <span className="text-[13px] font-semibold text-[#1A1A1A] tabular-nums">
+                        {t("pointsBalance", { points: customer.primary_value ?? 0 })}
+                      </span>
                     ) : (
                       <StampProgress
                         count={customer.stamps}
@@ -382,7 +384,9 @@ export function CustomerDataTable({
                 <div className="flex justify-between items-center gap-3">
                   <div className="flex-1 min-w-0">
                     {isPoints ? (
-                      <span className="text-[12px] text-[#A5A5A5]">{t("pointsCustomer")}</span>
+                      <span className="text-[13px] font-semibold text-[#1A1A1A] tabular-nums">
+                        {t("pointsBalance", { points: customer.primary_value ?? 0 })}
+                      </span>
                     ) : (
                       <StampProgress
                         count={customer.stamps}

@@ -22,6 +22,11 @@ export interface CustomerResponse {
   // Flat convenience fields — sourced from enrollments[0]. Customer list,
   // segment classifier, stats cards keep reading these.
   stamps: number;
+  // Type-agnostic headline counter (backend migration 128 search_customers):
+  // the points balance for points programs, the stamp count for stamp
+  // programs. Only the list endpoint populates it; other producers default it
+  // to the stamp count. Read it (not `stamps`) when displaying a points balance.
+  primary_value?: number;
   // Banked (earned, unredeemed) rewards from stackable rewards. Backends
   // predating migration 105 omit it: guard with `?? 0`.
   rewards?: number;

@@ -91,6 +91,13 @@ export interface ProgramHealthResponse {
   install_rate: number;
   active_cards: number;
   banked_rewards_count: number;
+  /** Program type (migration 125) — relabels the stamp-named columns above for
+   *  points programs (e.g. avg_stamps_per_customer is an avg BALANCE). */
+  program_type?: 'stamp' | 'points' | null;
+  /** Points programs: SUM of ticket prices (transactions.amount). 0 for stamps. */
+  total_spend?: number | null;
+  /** Points programs: AVG ticket price. null for stamps. */
+  avg_ticket?: number | null;
 }
 
 /** One complete week of stamp volume, used to derive the weekly-goal baseline. */

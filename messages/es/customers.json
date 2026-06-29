@@ -6,6 +6,7 @@
     "addCustomer": "Añadir cliente",
     "customerProfile": "Perfil del cliente",
     "pointsCustomer": "Tarjeta de puntos",
+    "pointsBalance": "{points} pts",
     "loading": "Cargando clientes...",
     "loadFailed": "No se han podido cargar los clientes. Comprueba que el servidor esté en marcha.",
     "searchPlaceholder": "Buscar por nombre o correo...",
@@ -19,7 +20,8 @@
       "lastVisit": "Última visita",
       "redemptions": "Recompensas",
       "action": "Acción",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "points": "Puntos"
     },
     "stats": {
       "totalCustomers": "Clientes totales",

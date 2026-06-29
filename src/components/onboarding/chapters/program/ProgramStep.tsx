@@ -294,7 +294,7 @@ export function ProgramStep() {
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
           {t('title')}
         </h2>
-        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{isPoints ? t('subtitlePoints') : t('subtitle')}</p>
       </header>
 
       <div className="flex flex-col gap-6 animate-slide-up delay-80">
