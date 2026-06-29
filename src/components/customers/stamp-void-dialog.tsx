@@ -24,6 +24,8 @@ interface StampVoidDialogProps {
   customerName: string;
   enrollmentId: string;
   transactionId: string;
+  /** Points programs void a points credit (different copy + success toast). */
+  isPoints?: boolean;
   /** Fired after a successful void — caller invalidates anything extra. */
   onSuccess?: () => void;
 }
@@ -36,6 +38,7 @@ export function StampVoidDialog({
   customerName,
   enrollmentId,
   transactionId,
+  isPoints = false,
   onSuccess,
 }: StampVoidDialogProps) {
   const t = useTranslations("customers.actions");
@@ -64,7 +67,7 @@ export function StampVoidDialog({
         transactionId,
         reason: reasonTrimmed,
       });
-      toast.success(t("voidSuccessToast"));
+      toast.success(t(isPoints ? "voidPointsSuccessToast" : "voidSuccessToast"));
       handleOpenChange(false);
       onSuccess?.();
     } catch (error) {
@@ -80,7 +83,7 @@ export function StampVoidDialog({
             <Prohibit className="w-5 h-5" weight="duotone" style={{ color: "var(--error)" }} />
           </div>
           <div className="min-w-0">
-            <DialogTitle className="text-[17px] leading-tight">{t("voidDialogTitle")}</DialogTitle>
+            <DialogTitle className="text-[17px] leading-tight">{t(isPoints ? "voidPointsDialogTitle" : "voidDialogTitle")}</DialogTitle>
             <DialogDescription className="text-[13px] mt-0.5 truncate">
               {customerName}
             </DialogDescription>
@@ -98,7 +101,7 @@ export function StampVoidDialog({
             id="void-reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder={t("voidReasonPlaceholder")}
+            placeholder={t(isPoints ? "voidPointsReasonPlaceholder" : "voidReasonPlaceholder")}
             maxLength={REASON_MAX}
             rows={3}
             autoFocus
@@ -143,7 +146,7 @@ export function StampVoidDialog({
             onClick={handleSubmit}
             disabled={!canSubmit}
           >
-            {voidMutation.isPending ? t("voiding") : t("confirmVoid")}
+            {voidMutation.isPending ? t("voiding") : t(isPoints ? "voidPointsConfirm" : "confirmVoid")}
           </Button>
         </div>
       </DialogContent>

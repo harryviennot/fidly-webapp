@@ -86,6 +86,48 @@ export function isKnownVariable(key: string): key is VariableKey {
   return (VARIABLE_KEYS as readonly string[]).includes(key);
 }
 
+/** The stamp-program variable set (order = display order). */
+const STAMP_VARIABLE_KEYS: VariableKey[] = [
+  'stamp_count',
+  'total_stamps',
+  'stamps_left',
+  'rewards_count',
+  'reward_name',
+  'business_name',
+  'customer_first_name',
+];
+
+/**
+ * Which {{variables}} a surface should offer for the active program. Stamp
+ * programs never see points variables and vice-versa — a points business used
+ * to be offered stamp_count / total_stamps / stamps_left, which are meaningless
+ * for it. For points the reward variable is type-of-ladder dependent: a single
+ * reward exposes {{reward_name}} (the lone reward), a multi-reward ladder
+ * exposes {{next_reward_name}} (the immediate objective) and hides reward_name.
+ *
+ * `includeStoreLocation` adds the Pro-only {{store_location}} chip (notification
+ * surfaces show it, gated; pass fields strip it entirely so they omit it).
+ */
+export function programVariableKeys(opts: {
+  type: 'stamp' | 'points' | undefined;
+  rewardCount?: number;
+  includeStoreLocation?: boolean;
+}): VariableKey[] {
+  const { type, rewardCount = 0, includeStoreLocation = false } = opts;
+  const keys: VariableKey[] =
+    type === 'points'
+      ? [
+          'points_balance',
+          'points_to_next',
+          rewardCount > 1 ? 'next_reward_name' : 'reward_name',
+          'business_name',
+          'customer_first_name',
+        ]
+      : [...STAMP_VARIABLE_KEYS];
+  if (includeStoreLocation) keys.push('store_location');
+  return keys;
+}
+
 /**
  * Return the UI-facing name for a variable key. Unknown keys fall back
  * to the key itself so custom/legacy placeholders still render readably.

@@ -14,7 +14,9 @@ import {
   VariableEditor,
   type VariableEditorHandle,
 } from '@/components/notifications/VariableEditor';
+import { programVariableKeys } from '@/lib/template-variables';
 import type { Locale, VariableKey } from '@/lib/template-variables';
+import { isPointsProgram } from '@/types';
 
 interface FieldEditorProps {
   title: string;
@@ -26,29 +28,6 @@ interface FieldEditorProps {
    *  Off by default: BusinessInfoEditor and other static surfaces stay plain. */
   enableVariables?: boolean;
 }
-
-/** Variables that make sense on a STAMP pass field. `store_location` is
- *  per-scan, not per-customer, so the backend always strips it from pass
- *  fields: the chip is hidden here entirely. */
-const STAMP_FIELD_VARIABLES: VariableKey[] = [
-  'stamp_count',
-  'total_stamps',
-  'stamps_left',
-  'rewards_count',
-  'reward_name',
-  'business_name',
-  'customer_first_name',
-];
-
-/** Variables for a POINTS pass field: balance, points to the next reward, and
- *  the next reward's name — the stamp-count variables are meaningless here. */
-const POINTS_FIELD_VARIABLES: VariableKey[] = [
-  'points_balance',
-  'points_to_next',
-  'next_reward_name',
-  'business_name',
-  'customer_first_name',
-];
 
 export default function FieldEditor({
   title,
@@ -64,8 +43,14 @@ export default function FieldEditor({
   const { data: program } = useDefaultProgram(
     enableVariables ? currentBusiness?.id : undefined
   );
-  const fieldVariables =
-    program?.type === 'points' ? POINTS_FIELD_VARIABLES : STAMP_FIELD_VARIABLES;
+  // store_location is per-scan, not per-customer, so the backend always strips
+  // it from pass fields — keep it out here (includeStoreLocation: false).
+  const rewardCount = isPointsProgram(program) ? program.config.rewards.length : 0;
+  const fieldVariables = programVariableKeys({
+    type: program?.type,
+    rewardCount,
+    includeStoreLocation: false,
+  });
 
   // Mirror the notification editor's gating: variables whose source data is
   // off/unset render as greyed-out chips with a "turn it on in program
@@ -82,7 +67,10 @@ export default function FieldEditor({
       tips.customer_first_name = tNotif('editor.nameCollectionOff');
       hrefs.customer_first_name = '/program/settings';
     }
-    if (program && !program.reward_name?.trim()) {
+    // Stamp programs gate {{reward_name}} on the program-level reward label
+    // being set. Points programs resolve it from the reward ladder (single
+    // reward), which always exists, so never gate it there.
+    if (program?.type !== 'points' && program && !program.reward_name?.trim()) {
       disabled.add('reward_name');
       tips.reward_name = tNotif('editor.rewardNameMissing');
       hrefs.reward_name = '/program/settings';

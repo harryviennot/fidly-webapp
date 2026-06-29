@@ -11,9 +11,12 @@ import { useEntitlements } from '@/hooks/useEntitlements';
 import { useCreateMilestone, useUpdateMilestone } from '@/hooks/use-notifications';
 import {
   renderSamplePreview,
+  programVariableKeys,
   PRO_ONLY_VARIABLES,
   type VariableKey,
 } from '@/lib/template-variables';
+import { useDefaultProgram } from '@/hooks/use-programs';
+import { isPointsProgram } from '@/types';
 import { ApiError } from '@/api/client';
 import { SUPPORTED_LOCALES } from '@/lib/locale';
 import { LocaleTabs } from './LocaleTabs';
@@ -108,11 +111,23 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
       stampNumber !== milestone!.stamp_equals ||
       SUPPORTED_LOCALES.some((l) => bodyByLocale[l] !== (milestone!.body[l] ?? ''));
 
+    const { data: program } = useDefaultProgram(currentBusiness?.id);
+    const isPoints = isPointsProgram(program);
+    // Points programs hide the stamp-count variables; stamp programs keep the
+    // existing milestone variable set untouched.
+    const milestoneVariables = isPoints
+      ? programVariableKeys({
+          type: 'points',
+          rewardCount: program.config.rewards.length,
+          includeStoreLocation: true,
+        })
+      : MILESTONE_VARIABLES;
+
     const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
     const isNameCollectionOff = collectName === 'off' || collectName === false;
     const canMultiLocation = hasFeature('locations.multiple');
     const disabledVars = new Set<VariableKey>();
-    if (!rewardNameSet) disabledVars.add('reward_name');
+    if (!isPoints && !rewardNameSet) disabledVars.add('reward_name');
     if (isNameCollectionOff) disabledVars.add('customer_first_name');
     if (!canMultiLocation) {
       for (const v of PRO_ONLY_VARIABLES) disabledVars.add(v);
@@ -231,7 +246,7 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
         </div>
 
         <VariableChips
-          variables={MILESTONE_VARIABLES}
+          variables={milestoneVariables}
           onInsert={insertVariable}
           locale={locale}
           disabledVariables={disabledVars.size > 0 ? disabledVars : undefined}

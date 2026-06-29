@@ -103,9 +103,16 @@ export function StampsStep() {
         // keeps the contrast swap honest.
         if (currentBusiness) {
           // Send ONLY the diff — see BrandingStep for the race rationale.
-          const stampFilledHex = rgbToHex(data.stamp_filled_color || 'rgb(249, 115, 22)');
+          // The business accent is derived from the card's lead color with a
+          // contrast-on-white check (getThemeColor picks it if dark enough,
+          // else falls back to the background). Points cards have no stamp-fill
+          // color, so use the progress accent the merchant picked for the
+          // strip; stamps use the stamp-filled color as before.
           const bgHex = rgbToHex(data.background_color || 'rgb(28, 28, 30)');
-          const themeAccent = getThemeColor(stampFilledHex, bgHex);
+          const leadHex = isPoints
+            ? rgbToHex(data.progress_accent_color || data.stamp_filled_color || 'rgb(249, 115, 22)')
+            : rgbToHex(data.stamp_filled_color || 'rgb(249, 115, 22)');
+          const themeAccent = getThemeColor(leadHex, bgHex);
           await updateBusiness({
             settings: {
               accentColor: themeAccent,
@@ -121,7 +128,7 @@ export function StampsStep() {
       }
     });
     return () => ctx.setSubmitHandler(null);
-  }, [businessId, formData, pendingStripFile, existingDesign?.id, currentBusiness, updateBusiness, queryClient, setPendingStripFile, ctx, tErr]);
+  }, [businessId, formData, pendingStripFile, existingDesign?.id, currentBusiness, updateBusiness, queryClient, setPendingStripFile, ctx, tErr, isPoints]);
 
   // Gate render on program data so the design state initialiser sees the
   // resolved program name. See BrandingStep for the rationale.

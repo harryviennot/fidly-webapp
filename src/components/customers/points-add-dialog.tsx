@@ -60,8 +60,12 @@ export function PointsAddDialog({
 }: PointsAddDialogProps) {
   const t = useTranslations("customers.actions.pointsAdd");
   const tShared = useTranslations("customers.actions");
+  const tAdj = useTranslations("customers.actions.adjustment");
   const { hasFeature } = useEntitlements();
   const addStampMutation = useAddStamp(businessId);
+
+  // Same quick reason presets as the stamp adjustment dialog.
+  const reasonChips = [tAdj("chip1"), tAdj("chip2"), tAdj("chip3")];
 
   const showLocationPicker = hasFeature("locations.multiple");
   const { data: locations } = useLocations(showLocationPicker ? businessId : undefined);
@@ -178,6 +182,25 @@ export function PointsAddDialog({
             rows={2}
             className="resize-none focus-visible:ring-[var(--accent)]/30 focus-visible:border-[var(--accent)]"
           />
+          <div className="flex flex-wrap gap-1.5">
+            {reasonChips.map((c) => {
+              const active = reason.trim() === c;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setReason(active ? "" : c)}
+                  className={`px-2.5 py-1 rounded-full text-[12px] font-medium border transition-all ${
+                    active
+                      ? "bg-[var(--accent-light)] border-[var(--accent)] text-[var(--accent)]"
+                      : "bg-white border-[var(--border)] text-[var(--muted-gray)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                  }`}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
           <p className="flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)] mt-0.5">
             <EyeSlash className="w-3 h-3 shrink-0" weight="bold" />
             {t("reasonHelp")}

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   TYPE_CONFIG,
   isCardLifecycleType,
+  isPointsTransaction,
   txDelta,
   txValueAfter,
   txValueBefore,
@@ -79,9 +80,13 @@ export function TransactionItem({
         ? t("sources.dashboard")
         : transaction.source;
 
-  // Stackable rewards: remaining banked count recorded on redemptions.
+  // Stackable rewards: remaining banked count recorded on redemptions. Banked
+  // rewards are a stamp concept; points redemptions spend the balance directly
+  // (no "rewards remaining"), so never show the count for points.
   const rewardsLeft =
-    transaction.type === "reward_redeemed" && metadata?.rewards_after != null
+    transaction.type === "reward_redeemed" &&
+    !isPointsTransaction(transaction) &&
+    metadata?.rewards_after != null
       ? Number(metadata.rewards_after)
       : null;
 

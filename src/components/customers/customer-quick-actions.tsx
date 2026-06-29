@@ -47,6 +47,15 @@ export function CustomerQuickActions({
 
   if (isPoints && snapshot) {
     const canRedeemPoints = (snapshot.rewards ?? []).some((r) => r.reached);
+    // Last points credit not already reversed — the void target. Mirrors the
+    // stamp voidable logic but for points_earned / bonus_points.
+    const lastVoidablePoints = transactions.find(
+      (txn) =>
+        (txn.type === "points_earned" || txn.type === "bonus_points") &&
+        !transactions.some(
+          (v) => v.type === "points_voided" && v.voided_transaction_id === txn.id
+        )
+    );
     return (
       <>
         <div className="flex gap-2">
@@ -65,7 +74,28 @@ export function CustomerQuickActions({
               onClick={() => setPointsRedeemOpen(true)}
             />
           )}
+          <CustomerActionButton
+            variant="void"
+            size="lg"
+            label={t("voidLast")}
+            onClick={() => setVoidDialogOpen(true)}
+            disabled={!lastVoidablePoints}
+          />
         </div>
+
+        {enrollmentId && lastVoidablePoints && (
+          <StampVoidDialog
+            open={voidDialogOpen}
+            onOpenChange={setVoidDialogOpen}
+            businessId={businessId}
+            customerId={customer.id}
+            customerName={customer.name}
+            enrollmentId={enrollmentId}
+            transactionId={lastVoidablePoints.id}
+            isPoints
+            onSuccess={onActionComplete}
+          />
+        )}
 
         {enrollmentId && (
           <PointsAddDialog

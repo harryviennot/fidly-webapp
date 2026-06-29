@@ -479,11 +479,16 @@ export function WalletCard({
   const { data: defaultProgram } = useDefaultProgram(
     needProgramRewards ? currentBusiness?.id : undefined
   );
-  const resolvedRewards: RewardTier[] =
-    pointsRewards ??
-    (isPointsProgram(defaultProgram) ? defaultProgram.config.rewards : []);
-  const resolvedBalance =
-    pointsBalance ?? defaultPointsSampleBalance(resolvedRewards);
+  const resolvedRewards = useMemo<RewardTier[]>(
+    () =>
+      pointsRewards ??
+      (isPointsProgram(defaultProgram) ? defaultProgram.config.rewards : []),
+    [pointsRewards, defaultProgram]
+  );
+  const resolvedBalance = useMemo(
+    () => pointsBalance ?? defaultPointsSampleBalance(resolvedRewards),
+    [pointsBalance, resolvedRewards]
+  );
 
   // Points accent: explicit progress color → stamp accent fallback.
   const pointsAccent = design.progress_accent_color

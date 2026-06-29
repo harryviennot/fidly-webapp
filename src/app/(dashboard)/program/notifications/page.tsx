@@ -31,11 +31,11 @@ import {
   useUpdateNotificationTemplate,
 } from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
-import { isStampProgram } from '@/types';
+import { isStampProgram, isPointsProgram } from '@/types';
 import { useProgram } from '../layout';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import {
-  VARIABLE_KEYS,
+  programVariableKeys,
   PRO_ONLY_VARIABLES,
   type Locale,
   type VariableKey,
@@ -185,7 +185,9 @@ export default function ProgramNotificationsPage() {
     const tips: Partial<Record<VariableKey, string>> = {};
     const hrefs: Partial<Record<VariableKey, string>> = {};
 
-    if (!rewardNameSet) {
+    // Points programs resolve {{reward_name}} from the reward ladder, so it's
+    // never "unset" there; only gate it for stamp programs.
+    if (!isPointsProgram(program) && !rewardNameSet) {
       disabled.add('reward_name');
       tips.reward_name = t('editor.rewardNameMissing');
       hrefs.reward_name = '/program/settings';
@@ -208,7 +210,7 @@ export default function ProgramNotificationsPage() {
     }
 
     return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
-  }, [rewardNameSet, nameCollectionOff, canMultiLocation, t]);
+  }, [rewardNameSet, nameCollectionOff, canMultiLocation, program, t]);
 
   const variablesIcon = (
     <BracketsCurlyIcon className="h-3.5 w-3.5" weight="bold" />
@@ -220,7 +222,11 @@ export default function ProgramNotificationsPage() {
         {t('variablesReference.description')}
       </p>
       <VariablesList
-        variables={VARIABLE_KEYS}
+        variables={programVariableKeys({
+          type: program?.type,
+          rewardCount: isPointsProgram(program) ? program.config.rewards.length : 0,
+          includeStoreLocation: true,
+        })}
         examples={variableExamples}
         locale={uiLocale}
         disabledVariables={disabledVars}

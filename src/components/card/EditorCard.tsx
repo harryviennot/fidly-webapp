@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { CardDesign, PassField, RewardTier } from "@/types";
+import { CardDesign, PassField, RewardTier, isPointsProgram } from "@/types";
 import { WalletCard } from "./WalletCard";
 import { computeCardColors, rgbToHex } from "@/lib/card-utils";
 import { renderSamplePreview } from "@/lib/template-variables";
+import { buildPointsRewardBackFields } from "@/lib/points-backfields";
 import { useVariablePreviewValues } from "@/hooks/use-variable-preview-values";
+import { useBusiness } from "@/contexts/business-context";
+import { useDefaultProgram } from "@/hooks/use-programs";
 import { ScaledCardWrapper } from "@/components/design/ScaledCardWrapper";
 
 // ============================================================================
@@ -82,6 +85,26 @@ function CardBack({ design, organizationName }: CardBackProps) {
   // Real business/program/user values for {{variable}} previews.
   const variableValues = useVariablePreviewValues();
   const t = useTranslations("designEditor.cardBack");
+  const tEditor = useTranslations("designEditor.editor");
+  const { currentBusiness } = useBusiness();
+  const { data: program } = useDefaultProgram(currentBusiness?.id);
+
+  // Points cards always carry the program reward menu + cap on the back
+  // (the backend injects it on the real pass). Mirror it in the preview so
+  // the back side matches what customers see. Appended after the design's
+  // card-specific fields, exactly like the pass.
+  const programBackFields = useMemo<PassField[]>(() => {
+    if (!isPointsProgram(program)) return [];
+    return buildPointsRewardBackFields(
+      program.config.rewards,
+      program.config.max_balance ?? null,
+      {
+        menu: tEditor("programRewardsMenuLabel"),
+        max: tEditor("programRewardsMax"),
+        unit: "pts",
+      }
+    );
+  }, [program, tEditor]);
   const { cardRef, rotate, glare, handleMouseMove, handleMouseLeave } =
     use3DEffect();
 
@@ -98,7 +121,7 @@ function CardBack({ design, organizationName }: CardBackProps) {
     : colors.mutedTextColor;
   const dividerColor = colors.emptyStampBorder;
 
-  const backFields = design.back_fields ?? [];
+  const backFields = [...(design.back_fields ?? []), ...programBackFields];
 
   return (
     <ScaledCardWrapper baseWidth={280} targetWidth={440}>

@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarBlank,
   Clock,
+  Coins,
   Footprints,
   Gift,
   Trophy,
@@ -46,6 +47,8 @@ import {
   transactionKeys,
 } from "@/hooks/use-transactions";
 import { customerKeys } from "@/hooks/use-customers";
+import { useDefaultProgram } from "@/hooks/use-programs";
+import { isPointsProgram } from "@/types";
 import type { CustomerResponse, TransactionResponse } from "@/types";
 import type { CardDesign } from "@/types/design";
 import type { StampIconType } from "@/components/design/StampIconPicker";
@@ -114,6 +117,7 @@ export function CustomerDetailSheet({
     initialData: customer ?? undefined,
   });
   const liveCustomer = customerQuery.data ?? cachedCustomer;
+  const { data: program } = useDefaultProgram(currentBusiness?.id);
 
   // Which wallet(s) hold this customer's card. Gated on the live `customer`
   // prop (not the exit-animation cache) so it doesn't fire while closed.
@@ -173,7 +177,13 @@ export function CustomerDetailSheet({
   if (!liveCustomer) return null;
 
   const snapshot = liveCustomer.program ?? null;
-  const isPoints = snapshot?.type === "points";
+  // Derive the stamp-vs-points layout from the business program (there's one
+  // program per business, and it's cached app-wide), NOT from the per-customer
+  // `snapshot.type`. The snapshot only arrives after the detail fetch resolves,
+  // so keying off it used to render the stamp view first and flip to points a
+  // beat later (the "needs a refresh" flash). The snapshot still drives the
+  // balance + reward ladder once it loads.
+  const isPoints = program ? isPointsProgram(program) : snapshot?.type === "points";
   const currency = currencySymbol(currentBusiness?.country, currentBusiness?.primary_locale);
 
   // Points segments come from the server snapshot (reward_ready) rather than
@@ -311,8 +321,19 @@ export function CustomerDetailSheet({
             <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2.5">
               {isPoints ? t("points.title") : t("stampProgress")}
             </p>
-            {isPoints && snapshot ? (
-              <PointsBalanceCard snapshot={snapshot} />
+            {isPoints ? (
+              snapshot ? (
+                <PointsBalanceCard snapshot={snapshot} />
+              ) : (
+                // Snapshot (reward ladder) still loading — show the balance from
+                // the list payload so we never fall through to the stamp grid.
+                <div className="flex items-baseline gap-2">
+                  <Coins className="w-5 h-5 text-[var(--accent)] self-center" weight="duotone" />
+                  <span className="text-[26px] font-bold tabular-nums leading-none text-[#1A1A1A]">
+                    {liveCustomer.primary_value ?? 0}
+                  </span>
+                </div>
+              )
             ) : (
               colors && (
                 <StampGridContainer

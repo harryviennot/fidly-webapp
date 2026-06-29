@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import {
   TYPE_CONFIG,
   isCardLifecycleType,
+  isPointsTransaction,
   txDelta,
   txValueAfter,
   txValueBefore,
@@ -191,6 +192,7 @@ export function RecentScans({
                             {txValueAfter(tx)}
                           </span>
                           {tx.type === "reward_redeemed" &&
+                            !isPointsTransaction(tx) &&
                             metadata?.rewards_after != null && (
                               <>
                                 <span className="text-[#D8D5CE]">·</span>

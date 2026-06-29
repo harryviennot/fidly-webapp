@@ -46,7 +46,21 @@ export const TYPE_CONFIG: Record<TransactionType, TransactionTypeConfig> = {
     deltaBg: "bg-[#FDE8E4]",
     deltaText: "text-[#C75050]",
   },
+  points_voided: {
+    icon: ProhibitIcon,
+    iconColor: "text-[var(--stamp-coral)]",
+    bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-[#FDE8E4]",
+    deltaText: "text-[#C75050]",
+  },
   bonus_stamp: {
+    icon: StarIcon,
+    iconColor: "text-[var(--stamp-sage)]",
+    bgColor: "bg-[var(--accent-light)]",
+    deltaBg: "bg-[#E4F0F8]",
+    deltaText: "text-[#3D7CAF]",
+  },
+  bonus_points: {
     icon: StarIcon,
     iconColor: "text-[var(--stamp-sage)]",
     bgColor: "bg-[var(--accent-light)]",
@@ -109,5 +123,10 @@ export function txValueAfter(t: TransactionResponse): number {
 }
 /** A points-program transaction (drives the unit shown: "pts" vs stamps). */
 export function isPointsTransaction(t: TransactionResponse): boolean {
-  return t.program_type === "points" || t.type === "points_earned";
+  return (
+    t.program_type === "points" ||
+    t.type === "points_earned" ||
+    t.type === "points_voided" ||
+    t.type === "bonus_points"
+  );
 }

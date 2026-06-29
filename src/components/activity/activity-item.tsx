@@ -171,27 +171,25 @@ export function ActivityItem({
                 <span className="font-semibold tabular-nums text-[#555]">
                   {txValueAfter(transaction)}
                 </span>
-                {isPoints ? (
+                {/* Points already show the balance transition in `before → after`,
+                    so the separate balance chip would just repeat `after`. Only
+                    stamps add the x/total progress context. */}
+                {!isPoints && totalStamps != null && totalStamps > 0 && (
                   <>
                     <span className="text-[#D8D5CE]">·</span>
-                    <span>{t("pointsBalance", { balance: txValueAfter(transaction) })}</span>
+                    <span>
+                      {t("stampProgress", {
+                        current: txValueAfter(transaction),
+                        total: totalStamps,
+                      })}
+                    </span>
                   </>
-                ) : (
-                  totalStamps != null && totalStamps > 0 && (
-                    <>
-                      <span className="text-[#D8D5CE]">·</span>
-                      <span>
-                        {t("stampProgress", {
-                          current: txValueAfter(transaction),
-                          total: totalStamps,
-                        })}
-                      </span>
-                    </>
-                  )
                 )}
                 <span className="text-[#D8D5CE]">·</span>
                 <span>{sourceLabel}</span>
-                {rewardsLeft != null && (
+                {/* "rewards remaining" is a stamp (banked-reward) concept; for
+                    points it always reads 0, so hide it. */}
+                {rewardsLeft != null && !isPoints && (
                   <>
                     <span className="text-[#D8D5CE]">·</span>
                     <span className="font-semibold text-[var(--warning)]">
