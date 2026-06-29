@@ -18,10 +18,14 @@ import {
   calculateStaggeredStampLayout,
   customIconBoxSize,
   resolveStampIconUrl,
+  defaultPointsSampleBalance,
   CUSTOM_GRID_VPAD_SCALE,
   OVERLAP_MAX_COUNT,
   STAGGERED_MAX_COUNT,
 } from "@/lib/card-utils";
+import { useBusiness } from "@/contexts/business-context";
+import { useDefaultProgram } from "@/hooks/use-programs";
+import { isPointsProgram } from "@/types";
 import type { CustomStampArrangement, CustomStampConfig, RewardTier } from "@/types";
 import { PointsStrip } from "./PointsStrip";
 
@@ -464,6 +468,23 @@ export function WalletCard({
   const totalStamps = totalStampsProp ?? design.total_stamps ?? 10;
   const colors = computeCardColors(design);
   const isPoints = design.card_type === "points";
+
+  // Points previews need a reward ladder + a sample balance. Editor surfaces
+  // pass them explicitly (slider-driven). Everywhere else (dashboard, templates,
+  // overview) renders a points card WITHOUT them, which used to preview a blank
+  // "0" strip. When rewards aren't supplied, pull the active program's ladder
+  // and seed a representative balance so the card is never empty.
+  const { currentBusiness } = useBusiness();
+  const needProgramRewards = isPoints && pointsRewards === undefined;
+  const { data: defaultProgram } = useDefaultProgram(
+    needProgramRewards ? currentBusiness?.id : undefined
+  );
+  const resolvedRewards: RewardTier[] =
+    pointsRewards ??
+    (isPointsProgram(defaultProgram) ? defaultProgram.config.rewards : []);
+  const resolvedBalance =
+    pointsBalance ?? defaultPointsSampleBalance(resolvedRewards);
+
   // Points accent: explicit progress color → stamp accent fallback.
   const pointsAccent = design.progress_accent_color
     ? rgbToHex(design.progress_accent_color)
@@ -486,15 +507,15 @@ export function WalletCard({
       stamps_left: String(Math.max(0, totalStamps - stamps)),
     };
     if (isPoints) {
-      const balance = pointsBalance ?? 0;
-      const sorted = [...(pointsRewards ?? [])].sort((a, b) => a.threshold - b.threshold);
+      const balance = resolvedBalance;
+      const sorted = [...resolvedRewards].sort((a, b) => a.threshold - b.threshold);
       const next = sorted.find((r) => r.threshold > balance) ?? null;
       values.points_balance = String(balance);
       values.points_to_next = String(next ? Math.max(0, next.threshold - balance) : 0);
       if (next?.name) values.next_reward_name = next.name;
     }
     return values;
-  }, [realValues, stamps, totalStamps, isPoints, pointsBalance, pointsRewards]);
+  }, [realValues, stamps, totalStamps, isPoints, resolvedBalance, resolvedRewards]);
 
   const stampIcon = (design.stamp_icon || "checkmark") as StampIconType;
   const rewardIcon = (design.reward_icon || "gift") as StampIconType;
@@ -562,7 +583,7 @@ export function WalletCard({
                   className="text-md font-medium flex items-baseline gap-1 justify-end transition-colors duration-300 leading-tight"
                   style={{ color: colors.textColor }}
                 >
-                  {isPoints ? (pointsBalance ?? 0) : `${stamps} / ${totalStamps}`}
+                  {isPoints ? resolvedBalance : `${stamps} / ${totalStamps}`}
                 </div>
               </div>
             </div>
@@ -590,8 +611,8 @@ export function WalletCard({
                 <div className="relative" style={{ zIndex: 1 }}>
                   <PointsStrip
                     style={design.points_strip_style ?? "big_point"}
-                    balance={pointsBalance ?? 0}
-                    rewards={pointsRewards ?? []}
+                    balance={resolvedBalance}
+                    rewards={resolvedRewards}
                     rewardIcons={design.points_reward_icons}
                     accentColor={pointsAccent}
                     backgroundColor={stripBgHex}

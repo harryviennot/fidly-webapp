@@ -172,9 +172,15 @@ export function PointsStrip({
     // Ring fraction = balance / next objective (backend: value / next_threshold).
     const target = nextReward?.threshold ?? top ?? 1;
     const frac = isComplete && !nextReward ? 1 : Math.max(0, Math.min(1, balance / (target || 1)));
-    const r = 150;
+    const r = 150; // layout radius — sizes the box footprint
+    const stroke = 26;
+    // Draw the ring on a smaller radius so the stroke stays fully inside the
+    // 300x300 viewBox. Drawing at r=150 with a 26px stroke pushes the outer
+    // edge to 163 and the top/bottom of the ring get clipped by the viewBox
+    // (preview-only artefact — the backend strip already insets it).
+    const drawR = r - stroke / 2; // 137
     const cx = BASE_W - 80 - r; // 895 on the base canvas
-    const circ = 2 * Math.PI * r;
+    const circ = 2 * Math.PI * drawR;
     return (
       <Canvas>
         {leftBlock}
@@ -189,15 +195,15 @@ export function PointsStrip({
           }}
         >
           <svg viewBox="0 0 300 300" width="100%" height="100%">
-            <circle cx="150" cy="150" r={r} fill="none" stroke={muted} strokeWidth={26} />
+            <circle cx="150" cy="150" r={drawR} fill="none" stroke={muted} strokeWidth={stroke} />
             {frac > 0 && (
               <circle
                 cx="150"
                 cy="150"
-                r={r}
+                r={drawR}
                 fill="none"
                 stroke={accentColor}
-                strokeWidth={26}
+                strokeWidth={stroke}
                 strokeLinecap="round"
                 strokeDasharray={circ}
                 strokeDashoffset={circ * (1 - frac)}
@@ -323,8 +329,11 @@ export function PointsStrip({
                 </div>
                 <span
                   style={{
+                    // Sit fully below the icon disc (height = 2*iconR) with a
+                    // small gap. iconR+20 placed the label inside the disc's
+                    // lower third, colliding with the glyph.
                     position: "absolute",
-                    top: cq(iconR + 20),
+                    top: cq(2 * iconR + 14),
                     left: "50%",
                     transform: "translateX(-50%)",
                     color: reached ? accentColor : muted,

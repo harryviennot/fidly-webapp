@@ -113,50 +113,52 @@ export function PointsForm({ rewards }: PointsFormProps) {
         onChange={(hex) => updateField('progress_accent_color', hexToRgb(hex))}
       />
 
-      {/* Strip background: an uploaded image (with opacity) OR — when none is
-          set — a solid background color for the strip canvas. */}
-      <div className="flex flex-col gap-3">
-        <LabelWithTooltip tooltip={tEditor('stripBackgroundTooltip')}>
-          {t('bgImageLabel')}
-        </LabelWithTooltip>
-        <ImageUploader
-          label=""
-          value={formData.strip_background_url}
-          onUpload={handleStripBackgroundUpload}
-          onClear={handleStripBackgroundClear}
-          hint={t('bgImageHint')}
-          enableCrop
-          cropProps={{
-            aspect: 1125 / 432,
-            filename: 'strip-background.png',
-          }}
+      {/* Strip background: the solid canvas color is always editable (it shows
+          through wherever an image is absent or transparent). An optional image
+          layer sits on top, with its own opacity. Color first, image second. */}
+      <div className="flex flex-col gap-4">
+        <ColorPicker
+          label={t('bgColorLabel')}
+          tooltip={t('bgColorHelp')}
+          colors={designColors}
+          value={stripBgValue}
+          onChange={(hex) => updateField('strip_background_color', hexToRgb(hex))}
         />
-        {hasStripImage ? (
-          <div className="flex flex-col gap-2 pt-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm">{tEditor('opacity')}</Label>
-              <span className="text-sm text-muted-foreground">
-                {formData.strip_background_opacity ?? 40}%
-              </span>
-            </div>
-            <input
-              type="range"
-              className="styled-slider w-full"
-              min={0}
-              max={100}
-              value={formData.strip_background_opacity ?? 40}
-              onChange={(e) => updateField('strip_background_opacity', parseInt(e.target.value, 10))}
-            />
-          </div>
-        ) : (
-          <ColorPicker
-            label={t('bgColorLabel')}
-            tooltip={t('bgColorHelp')}
-            colors={designColors}
-            value={stripBgValue}
-            onChange={(hex) => updateField('strip_background_color', hexToRgb(hex))}
+        <div className="flex flex-col gap-3">
+          <LabelWithTooltip tooltip={tEditor('stripBackgroundTooltip')}>
+            {t('bgImageLabel')}
+          </LabelWithTooltip>
+          <ImageUploader
+            label=""
+            value={formData.strip_background_url}
+            onUpload={handleStripBackgroundUpload}
+            onClear={handleStripBackgroundClear}
+            hint={t('bgImageHint')}
+            enableCrop
+            cropProps={{
+              aspect: 1125 / 432,
+              filename: 'strip-background.png',
+            }}
           />
-        )}
+          {hasStripImage && (
+            <div className="flex flex-col gap-2 pt-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">{tEditor('opacity')}</Label>
+                <span className="text-sm text-muted-foreground">
+                  {formData.strip_background_opacity ?? 40}%
+                </span>
+              </div>
+              <input
+                type="range"
+                className="styled-slider w-full"
+                min={0}
+                max={100}
+                value={formData.strip_background_opacity ?? 40}
+                onChange={(e) => updateField('strip_background_opacity', parseInt(e.target.value, 10))}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Reward icons — only the reward-track (progress_icons) style shows them. */}

@@ -18,6 +18,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Eye, SlidersHorizontal, Palette, Stamp, TextT, ArrowUDownLeft } from '@phosphor-icons/react';
 import { getEntryLabel, getEntryPreview } from '@/lib/business-info-utils';
+import { defaultPointsSampleBalance } from '@/lib/card-utils';
 import type { BusinessInfoEntry } from '@/types/business';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { rgbToHex, hexToRgb, autoIconColor, contrastRatio } from '@/lib/color-utils';
@@ -174,7 +175,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     });
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
     const [previewStamps, setPreviewStamps] = useState(3);
-    const [previewBalance, setPreviewBalance] = useState(() => Math.round(pointsMax / 2));
+    const [previewBalance, setPreviewBalance] = useState(() => defaultPointsSampleBalance(pointsRewards));
     const isPoints = (formData.card_type ?? programType) === 'points';
     const [showBack, setShowBack] = useState(false);
     const [previewWallet, setPreviewWallet] = useState<'apple' | 'google'>('apple');
