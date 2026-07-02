@@ -417,7 +417,9 @@ export function IconLibrary({
         />
       </div>
 
-      <div className={`${listClassName} overflow-y-auto pr-1 -mr-1`}>
+      {/* px/py-1 gives the tiles' focus + selected rings room so they aren't
+          clipped by the scroll container's edges. */}
+      <div className={`${listClassName} overflow-y-auto px-1 py-1`}>
         {filtered ? (
           filtered.length > 0 ? (
             renderGrid(filtered)

@@ -1,23 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { ColorPicker } from '@/components/design/ColorPicker';
 import { LabelWithTooltip } from '@/components/design/FieldTooltip';
 import ImageUploader from '@/components/design/ImageUploader';
 import {
-  IconLibrary,
   StampIconSvg,
+  REWARD_ICON_IDS,
   type StampIconType,
 } from '@/components/design/StampIconPicker';
+import { IconPickerField } from '@/components/design/IconPickerField';
 import { Label } from '@/components/ui/label';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { useDesignForm } from './DesignFormContext';
 import { designColors, rgbToHex, hexToRgb } from '@/lib/color-utils';
+import { paletteToSwatches } from '@/lib/logo-palette';
 import { cn } from '@/lib/utils';
 import type { PointsStripStyle, RewardTier } from '@/types';
 
@@ -38,20 +35,33 @@ const STRIP_STYLES: PointsStripStyle[] = ['big_point', 'circle_progress', 'progr
 export function PointsForm({ rewards }: PointsFormProps) {
   const t = useTranslations('designEditor.points');
   const tEditor = useTranslations('designEditor.editor');
+  const tAuto = useTranslations('designEditor.autoGenerate');
   const {
     formData,
     updateField,
     accentHex,
     iconHex,
+    customColors,
+    addCustomColor,
+    extractedPalette,
     handleStripBackgroundUpload,
     handleStripBackgroundClear,
   } = useDesignForm();
 
+  // Colors pulled from the uploaded logo, shown as a "From your logo" preset
+  // row in each picker — same as StampsForm / BrandingForm.
+  const logoPresets = useMemo(
+    () =>
+      paletteToSwatches(extractedPalette).map((hex, i) => ({
+        name: `${tAuto('fromLogo')} ${i + 1}`,
+        value: hex,
+      })),
+    [extractedPalette, tAuto]
+  );
+  const logoPresetsLabel = logoPresets.length > 0 ? tAuto('fromLogo') : undefined;
+
   const stripStyle = formData.points_strip_style ?? 'big_point';
   const rewardIcons = formData.points_reward_icons ?? {};
-  // Which reward's icon popover is open (one at a time). Selecting an icon
-  // closes it — see setRewardIcon.
-  const [openRewardIcon, setOpenRewardIcon] = useState<string | null>(null);
   const accentValue = formData.progress_accent_color
     ? rgbToHex(formData.progress_accent_color)
     : accentHex;
@@ -69,7 +79,6 @@ export function PointsForm({ rewards }: PointsFormProps) {
       ...rewardIcons,
       [rewardId]: { type: 'preset', ref: icon },
     });
-    setOpenRewardIcon(null);
   };
 
   const iconFor = (rewardId: string): StampIconType => {
@@ -80,10 +89,10 @@ export function PointsForm({ rewards }: PointsFormProps) {
   return (
     <div className="flex flex-col gap-5">
       {/* Strip style */}
-      <div>
-        <label className="block text-[12px] font-semibold text-[#555] mb-2">
+      <div className="flex flex-col gap-3">
+        <Label>
           {t('stripStyleLabel')}
-        </label>
+        </Label>
         <div className="grid grid-cols-3 gap-2">
           {STRIP_STYLES.map((style) => {
             const active = stripStyle === style;
@@ -116,6 +125,10 @@ export function PointsForm({ rewards }: PointsFormProps) {
         colors={designColors}
         value={accentValue}
         onChange={(hex) => updateField('progress_accent_color', hexToRgb(hex))}
+        customColors={customColors}
+        onCustomColor={addCustomColor}
+        extraPresets={logoPresets}
+        extraPresetsLabel={logoPresetsLabel}
       />
 
       {/* Strip background: the solid canvas color is always editable (it shows
@@ -128,6 +141,10 @@ export function PointsForm({ rewards }: PointsFormProps) {
           colors={designColors}
           value={stripBgValue}
           onChange={(hex) => updateField('strip_background_color', hexToRgb(hex))}
+          customColors={customColors}
+          onCustomColor={addCustomColor}
+          extraPresets={logoPresets}
+          extraPresetsLabel={logoPresetsLabel}
         />
         <div className="flex flex-col gap-3">
           <LabelWithTooltip tooltip={tEditor('stripBackgroundTooltip')}>
@@ -168,13 +185,11 @@ export function PointsForm({ rewards }: PointsFormProps) {
 
       {/* Reward icons — only the reward-track (progress_icons) style shows them. */}
       {stripStyle === 'progress_icons' && rewards.length > 0 && (
-        <div>
-          <label className="block text-[12px] font-semibold text-[#555] mb-1">
-            {t('rewardIconsLabel')}
-          </label>
-          <p className="text-[11.5px] text-[#8A8A8A] leading-[1.4] mb-2.5">
-            {t('rewardIconsHelp')}
-          </p>
+        <div className="flex flex-col gap-3">
+          <LabelWithTooltip tooltip={t('rewardIconsHelp')}>
+          {t('rewardIconsLabel')}
+          </LabelWithTooltip>
+          
           <div className="flex flex-col gap-2">
             {rewards.map((reward) => (
               <div
@@ -189,11 +204,14 @@ export function PointsForm({ rewards }: PointsFormProps) {
                     {t('rewardPrice', { points: reward.threshold })}
                   </div>
                 </div>
-                <Popover
-                  open={openRewardIcon === reward.id}
-                  onOpenChange={(o) => setOpenRewardIcon(o ? reward.id : null)}
-                >
-                  <PopoverTrigger asChild>
+                <IconPickerField
+                  value={iconFor(reward.id)}
+                  onChange={(icon) => setRewardIcon(reward.id, icon)}
+                  accentColor={accentValue}
+                  iconColor={iconHex}
+                  suggested={REWARD_ICON_IDS}
+                  label={reward.name || t('untitledReward')}
+                  trigger={
                     <button
                       type="button"
                       className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors"
@@ -202,16 +220,8 @@ export function PointsForm({ rewards }: PointsFormProps) {
                     >
                       <StampIconSvg icon={iconFor(reward.id)} className="w-4 h-4" color={iconHex} />
                     </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0" align="end">
-                    <IconLibrary
-                      value={iconFor(reward.id)}
-                      onChange={(icon) => setRewardIcon(reward.id, icon)}
-                      accentColor={accentValue}
-                      iconColor={iconHex}
-                    />
-                  </PopoverContent>
-                </Popover>
+                  }
+                />
               </div>
             ))}
           </div>
