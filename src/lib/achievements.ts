@@ -6,17 +6,18 @@
  * i18n — this module stays pure (no React, no next-intl) so the same logic feeds
  * the dashboard widget and the /achievements page.
  *
- * Metric definitions come straight from get_business_achievements (migration 95),
- * so a trophy total always agrees with the dashboard StatCards.
- * See web/docs/dashboard-achievements.md.
+ * Metric definitions come straight from get_business_achievements (migration 95,
+ * scan columns since migration 132: a scan = stamp_added or points_earned, so both
+ * program types earn the same trophies), and a trophy total always agrees with the
+ * dashboard StatCards. See web/docs/dashboard-achievements.md.
  */
 
 export type AchievementCategory = "growth" | "engagement" | "momentum" | "loyalty" | "firsts";
 
 export type LadderMetric =
   | "total_customers"
-  | "total_stamps_given"
-  | "stamps_last_30d"
+  | "total_scans"
+  | "scans_last_30d"
   | "new_customers_last_30d"
   | "repeat_customers";
 
@@ -32,8 +33,8 @@ export type AchievementMetric = LadderMetric | OneTimeMetric;
 /** Resolved metric values the resolver scores against. */
 export interface AchievementMetricValues {
   total_customers: number;
-  total_stamps_given: number;
-  stamps_last_30d: number;
+  total_scans: number;
+  scans_last_30d: number;
   new_customers_last_30d: number;
   repeat_customers: number;
   first_reward: boolean;
@@ -73,13 +74,13 @@ export const ACHIEVEMENT_LADDERS: LadderDef[] = [
   },
   {
     category: "engagement",
-    metric: "total_stamps_given",
+    metric: "total_scans",
     thresholds: [1, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000, 100000],
     icon: "Stamp",
   },
   {
     category: "momentum",
-    metric: "stamps_last_30d",
+    metric: "scans_last_30d",
     thresholds: [10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
     icon: "TrendUp",
   },
@@ -136,8 +137,8 @@ export interface AchievementCta {
 export const ACHIEVEMENT_CTA: Partial<Record<AchievementMetric, AchievementCta>> = {
   total_customers: { labelKey: "shareQr", href: "/program" },
   new_customers_last_30d: { labelKey: "shareQr", href: "/program" },
-  total_stamps_given: { labelKey: "openScanner", external: true },
-  stamps_last_30d: { labelKey: "openScanner", external: true },
+  total_scans: { labelKey: "openScanner", external: true },
+  scans_last_30d: { labelKey: "openScanner", external: true },
   repeat_customers: { labelKey: "openScanner", external: true },
   first_broadcast: {
     labelKey: "sendBroadcast",
@@ -194,6 +195,24 @@ function rungKey(metric: AchievementMetric, threshold: number): string {
   return `${metric}_${threshold}`;
 }
 
+/**
+ * Ledger keys recorded before the scans rename (stamp-era metric names). The
+ * server ledger is migrated in place (migration 132), but rows written by an
+ * older client between deploys are normalized here so momentum trophies keep
+ * their stickiness, unlock dates, and acknowledged state.
+ */
+const LEGACY_LEDGER_PREFIXES: Array<[legacy: string, current: string]> = [
+  ["total_stamps_given_", "total_scans_"],
+  ["stamps_last_30d_", "scans_last_30d_"],
+];
+
+function normalizeLedgerKey(key: string): string {
+  for (const [legacy, current] of LEGACY_LEDGER_PREFIXES) {
+    if (key.startsWith(legacy)) return current + key.slice(legacy.length);
+  }
+  return key;
+}
+
 function clamp01(n: number): number {
   if (!Number.isFinite(n)) return 0;
   return Math.min(1, Math.max(0, n));
@@ -213,7 +232,7 @@ export function computeAchievements(
   values: AchievementMetricValues,
   ledger: AchievementLedgerEntry[] = []
 ): ComputedAchievements {
-  const byKey = new Map(ledger.map((e) => [e.key, e]));
+  const byKey = new Map(ledger.map((e) => [normalizeLedgerKey(e.key), e]));
   const seen = new Set(byKey.keys());
   const all: ResolvedAchievement[] = [];
 
@@ -283,8 +302,8 @@ export function computeAchievements(
 export function metricValuesFromData(
   data: {
     total_customers: number;
-    total_stamps_given: number;
-    stamps_last_30d: number;
+    total_scans: number;
+    scans_last_30d: number;
     new_customers_last_30d: number;
     repeat_customers: number;
     total_rewards_redeemed: number;
@@ -295,8 +314,8 @@ export function metricValuesFromData(
 ): AchievementMetricValues {
   return {
     total_customers: data.total_customers,
-    total_stamps_given: data.total_stamps_given,
-    stamps_last_30d: data.stamps_last_30d,
+    total_scans: data.total_scans,
+    scans_last_30d: data.scans_last_30d,
     new_customers_last_30d: data.new_customers_last_30d,
     repeat_customers: data.repeat_customers,
     first_reward: data.total_rewards_redeemed >= 1,
@@ -357,10 +376,10 @@ export function achievementTitle(t: TFunc, a: ResolvedAchievement): string {
   switch (a.metric) {
     case "total_customers":
       return t("ladders.customers", { count: a.threshold });
-    case "total_stamps_given":
-      return t("ladders.stamps", { count: a.threshold });
-    case "stamps_last_30d":
-      return t("ladders.stamps30d", { count: a.threshold });
+    case "total_scans":
+      return t("ladders.scans", { count: a.threshold });
+    case "scans_last_30d":
+      return t("ladders.scans30d", { count: a.threshold });
     case "new_customers_last_30d":
       return t("ladders.customers30d", { count: a.threshold });
     case "repeat_customers":

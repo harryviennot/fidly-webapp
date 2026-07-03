@@ -38,6 +38,7 @@
     "sort": {
       "name": "Nom",
       "stamps": "Tampons",
+      "points": "Points",
       "rewards": "Récompenses",
       "lastActivity": "Dernière activité"
     },
@@ -93,10 +94,10 @@
       "new": "Inscrits il y a moins de 14 jours.",
       "regular": "Clients actifs sans statut particulier.",
       "vip": "Clients ayant utilisé 3 récompenses ou plus.",
-      "rewardReady": "A une récompense à utiliser : carte pleine ou récompenses cumulées.",
+      "rewardReady": "A une récompense à utiliser dès maintenant.",
       "closeToReward": "À moins de 2 tampons de leur récompense.",
-      "atRisk": "Ont des tampons mais ne sont pas venus depuis plus de 30 jours.",
-      "ghost": "Ont pris leur carte mais ne sont jamais revenus : aucun tampon."
+      "atRisk": "Sont déjà venus, mais pas depuis plus de 30 jours.",
+      "ghost": "Ont pris leur carte mais ne sont jamais revenus."
     },
     "actions": {
       "addStamp": "Ajouter tampon",

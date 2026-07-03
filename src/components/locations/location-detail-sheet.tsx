@@ -320,8 +320,8 @@ export function LocationDetailSheet({
                       delay={0}
                     />
                     <StatCard
-                      title={t("stampsAdded")}
-                      value={statsQuery.data.stamps_added}
+                      title={t("scansAdded")}
+                      value={statsQuery.data.scans_added}
                       icon={<SealCheckIcon className="h-4 w-4" weight="bold" />}
                       tone="info"
                       delay={60}
@@ -334,8 +334,8 @@ export function LocationDetailSheet({
                       delay={120}
                     />
                     <StatCard
-                      title={t("stampsVoided")}
-                      value={statsQuery.data.stamps_voided}
+                      title={t("scansVoided")}
+                      value={statsQuery.data.scans_voided}
                       icon={<ProhibitIcon className="h-4 w-4" weight="bold" />}
                       tone="neutral"
                       delay={180}

@@ -5,7 +5,7 @@
     "export": "Exporter",
     "searchPlaceholder": "Rechercher un client...",
     "loadFailed": "Impossible de charger le fil d'activité.",
-    "empty": "Aucune activité pour le moment. Les tampons et récompenses apparaîtront ici.",
+    "empty": "Aucune activité pour le moment. Les scans et récompenses apparaîtront ici.",
     "loadMore": "Charger plus",
     "loadingMore": "Chargement...",
     "by": "par",
@@ -70,7 +70,7 @@
     },
     "stats": {
       "todayActivity": "Activité du jour",
-      "todayActivityInfo": "Tampons et récompenses ajoutés aujourd'hui, comparés à un jour normal (environ {avg}).",
+      "todayActivityInfo": "Scans et récompenses ajoutés aujourd'hui, comparés à un jour normal (environ {avg}).",
       "typicalPerDay": "≈ {avg}/jour d'habitude",
       "thisWeek": "Cette semaine",
       "vsLastWeek": "vs semaine dernière",
@@ -78,7 +78,7 @@
     },
     "emptyState": {
       "title": "Aucune activité",
-      "description": "Les tampons et récompenses apparaîtront ici lorsque vos clients interagiront avec votre programme de fidélité."
+      "description": "Les scans et récompenses apparaîtront ici lorsque vos clients interagiront avec votre programme de fidélité."
     },
     "emptyFiltered": "Aucune activité ne correspond à vos filtres.",
     "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}"

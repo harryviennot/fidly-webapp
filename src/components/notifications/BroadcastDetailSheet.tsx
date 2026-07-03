@@ -105,7 +105,9 @@ function DetailBody({ broadcast, onClose }: Readonly<DetailBodyProps>) {
 
   const chipTranslator = (key: string, values?: Record<string, unknown>) =>
     tWizard(key, values as { n: number });
-  const chips = describeFilter(broadcast.target_filter, chipTranslator);
+  const chips = describeFilter(broadcast.target_filter, chipTranslator, {
+    points: program?.type === 'points',
+  });
 
   const formatDate = (iso: string | null) => {
     if (!iso) return '—';

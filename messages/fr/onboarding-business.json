@@ -322,13 +322,13 @@
               "appleTitle": "Sur Apple Wallet",
               "appleBody": "Apple choisit le meilleur moment pour livrer la notification en fonction de la batterie, du Wi-Fi et du réseau. Elle arrive en quelques secondes à quelques minutes. La carte sur l'écran verrouillé se met à jour dès que les conditions le permettent.",
               "googleTitle": "Sur Google Wallet",
-              "googleBody": "La carte ne se met à jour qu'après avoir été fermée. Quittez l'application et rouvrez votre carte pour voir le nouveau tampon.",
-              "reassuranceTitle": "Dans tous les cas, le tampon est enregistré",
-              "reassuranceBody": "Même si la notification tarde, le décompte est sauvegardé immédiatement. À la prochaine visite de ce client, vous verrez le bon nombre de tampons."
+              "googleBody": "La carte ne se met à jour qu'après avoir été fermée. Quittez l'application et rouvrez votre carte pour voir la mise à jour.",
+              "reassuranceTitle": "Dans tous les cas, le scan est enregistré",
+              "reassuranceBody": "Même si la notification tarde, le décompte est sauvegardé immédiatement. À la prochaine visite de ce client, vous verrez le bon décompte."
             },
             "stampsLabel": "Tampons sur votre carte",
             "justStamped": "Tampon ajouté",
-            "multiDeviceHint": "{count, plural, =1 {} other {Chaque appui tamponne les # téléphones installés à la fois.}}",
+            "multiDeviceHint": "{count, plural, =1 {} other {Chaque appui met à jour les # téléphones installés à la fois.}}",
             "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",
             "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre tableau de bord.",
             "points": {

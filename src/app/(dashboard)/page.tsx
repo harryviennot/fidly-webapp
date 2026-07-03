@@ -60,7 +60,7 @@ export default function DashboardPage() {
   // Lifetime totals + "currently loyal" (>=2 visits in the last 6 months), all
   // from get_business_achievements. Loyalty here is recency-windowed on purpose,
   // unlike the lifetime repeat-count behind the loyalty trophy.
-  const totalStamps = achievements?.total_stamps_given ?? 0;
+  const totalScans = achievements?.total_scans ?? 0;
   const totalRewards = achievements?.total_rewards_redeemed ?? 0;
   const loyalCustomers = achievements?.loyal_customers_6m ?? 0;
 
@@ -99,7 +99,7 @@ export default function DashboardPage() {
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
               title={isPoints ? t("dashboard.totalPurchases") : t("dashboard.totalStamps")}
-              value={totalStamps}
+              value={totalScans}
               icon={isPoints ? <CoinsIcon className="w-4 h-4" weight="bold" /> : <Stamp className="w-4 h-4" weight="bold" />}
               tone="accent"
               change={stampsThisWeek > 0 ? t("dashboard.plusThisWeek", { count: stampsThisWeek }) : undefined}

@@ -103,10 +103,10 @@ export interface ProgramHealthResponse {
   avg_ticket?: number | null;
 }
 
-/** One complete week of stamp volume, used to derive the weekly-goal baseline. */
-export interface WeeklyStampPoint {
+/** One complete week of scan volume, used to derive the weekly-goal baseline. */
+export interface WeeklyScanPoint {
   week_start: string;
-  stamps: number;
+  scans: number;
 }
 
 /** One recorded trophy in the business_achievements ledger (migration 96).
@@ -118,32 +118,33 @@ export interface UnlockedAchievement {
 }
 
 /**
- * Lifetime "trophy" counters + a trailing weekly stamp series powering the
+ * Lifetime "trophy" counters + a trailing weekly scan series powering the
  * dashboard Achievements + weekly-goal widget and the /achievements page.
- * Definitions mirror the dashboard StatCards exactly (stamps = stamp_added only;
- * repeat = >=2 distinct stamp-days; repeat_rate is a 0..1 fraction).
- * See web/docs/dashboard-achievements.md.
+ * Definitions mirror the dashboard StatCards exactly (a scan = stamp_added or
+ * points_earned, so both program types count; repeat = >=2 distinct scan-days;
+ * repeat_rate is a 0..1 fraction). See web/docs/dashboard-achievements.md.
  */
 export interface BusinessAchievementsResponse {
   total_customers: number;
-  total_stamps_given: number;
+  total_scans: number;
   total_rewards_redeemed: number;
   repeat_customers: number;
-  /** customers with >=2 distinct stamp-days / customers who ever stamped (0..1) */
+  /** customers with >=2 distinct scan-days / customers who ever scanned (0..1) */
   repeat_rate: number;
   active_cards: number;
   first_reward_redeemed_at: string | null;
-  current_week_stamps: number;
+  current_week_scans: number;
   /** Rolling 30-day windows (now - 30d). Reward sustained effort. */
-  stamps_last_30d: number;
+  scans_last_30d: number;
   new_customers_last_30d: number;
   /** Prior 30-day window [now-60d, now-30d) — powers the customer-page growth badge. */
   new_customers_prev_30d: number;
-  /** Customers with >=2 distinct stamp-days in the last 6 months ("currently loyal"
-   *  dashboard KPI), distinct from the lifetime `repeat_customers` trophy metric. */
+  /** Customers with >=2 distinct scan-days OR >=1 redemption in the last 6 months
+   *  ("currently loyal" dashboard KPI), distinct from the lifetime
+   *  `repeat_customers` trophy metric. */
   loyal_customers_6m: number;
   /** Last 5 complete weeks, oldest -> newest. Excludes the current partial week. */
-  weekly_stamp_series: WeeklyStampPoint[];
+  weekly_scan_series: WeeklyScanPoint[];
   /** App-adoption trophies (per-membership platforms_used): the owner has scanned
    *  from the native app; every active scanner uses the native app, not the browser. */
   owner_used_native_app: boolean;

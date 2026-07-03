@@ -5,7 +5,7 @@
     "export": "Export",
     "searchPlaceholder": "Search customer name...",
     "loadFailed": "Failed to load activity feed.",
-    "empty": "No activity yet. Stamps and rewards will appear here.",
+    "empty": "No activity yet. Scans and rewards will appear here.",
     "loadMore": "Load More",
     "loadingMore": "Loading...",
     "by": "by",
@@ -70,7 +70,7 @@
     },
     "stats": {
       "todayActivity": "Today's activity",
-      "todayActivityInfo": "Stamps and rewards added today, compared to a typical day (about {avg}).",
+      "todayActivityInfo": "Scans and rewards added today, compared to a typical day (about {avg}).",
       "typicalPerDay": "usually ~{avg}/day",
       "thisWeek": "This week",
       "vsLastWeek": "vs last week",
@@ -78,7 +78,7 @@
     },
     "emptyState": {
       "title": "No activity yet",
-      "description": "Stamps and rewards will appear here as customers interact with your loyalty program."
+      "description": "Scans and rewards will appear here as customers interact with your loyalty program."
     },
     "emptyFiltered": "No activity matches your filters.",
     "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"

@@ -322,13 +322,13 @@
               "appleTitle": "En Apple Wallet",
               "appleBody": "Apple agrupa las actualizaciones según la batería, el Wi-Fi y la cobertura. Un aviso puede tardar segundos o minutos. La tarjeta de tu pantalla bloqueada se actualiza en cuanto tu teléfono se despierta con buena señal.",
               "googleTitle": "En Google Wallet",
-              "googleBody": "La tarjeta solo se actualiza después de cerrarla. Cierra el wallet y vuelve a abrir la tarjeta para ver el nuevo sello.",
-              "reassuranceTitle": "El sello está guardado",
+              "googleBody": "La tarjeta solo se actualiza después de cerrarla. Cierra la app y vuelve a abrir la tarjeta para ver el cambio.",
+              "reassuranceTitle": "El escaneo está guardado",
               "reassuranceBody": "Aunque la notificación o la vista de la tarjeta no se hayan puesto al día, la cuenta ya está en nuestro servidor. La próxima vez que escanees a este cliente verás el recuento real y actualizado."
             },
             "stampsLabel": "Sellos en tu tarjeta",
             "justStamped": "Sello añadido",
-            "multiDeviceHint": "{count, plural, =1 {} other {Cada pulsación sella los # dispositivos instalados a la vez.}}",
+            "multiDeviceHint": "{count, plural, =1 {} other {Cada pulsación actualiza los # dispositivos instalados a la vez.}}",
             "fallback": "¿Todavía sin vibración? Las notificaciones pueden tardar unos segundos. Inténtalo de nuevo dentro de un momento.",
             "customisationHint": "Este es el mensaje por defecto. Puedes reescribirlo, añadir mensajes propios en distintos recuentos de sellos, o desactivar las notificaciones del todo desde los ajustes de notificaciones.",
             "points": {

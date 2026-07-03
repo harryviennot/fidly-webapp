@@ -57,14 +57,14 @@ The 4 KPIs (balanced grid, no single hero). Definitions are owned by
 | KPI | Value | Trend | Source |
 |---|---|---|---|
 | Total customers | cumulative count | WoW (prior baseline reconstructed from `new_customers_this_week`) | `useCustomers` + `get_activity_stats` |
-| Total stamps | `total_stamps_given` (lifetime) | `+{stamps_this_week} this week` subtitle, no arrow | `get_business_achievements` |
+| Total scans | `total_scans` (lifetime; a scan = `stamp_added` or `points_earned`, so both program types count) | `+{stamps_this_week} this week` subtitle, no arrow | `get_business_achievements` |
 | Total rewards | `total_rewards_redeemed` (lifetime) | level only | `get_business_achievements` |
 | Loyal customers | `loyal_customers_6m` | level only, `active last 6 months` subtitle | `get_business_achievements` (migration 97) |
 
 **Loyalty is defined two ways on purpose.** The dashboard KPI uses `loyal_customers_6m`
-(>=2 distinct stamp-days in the **last 6 months**) — "currently loyal", because someone who
+(>=2 distinct scan-days OR >=1 redemption in the **last 6 months**) — "currently loyal", because someone who
 came twice years ago and never returned is not loyal today. The loyalty **trophy** uses the
-lifetime `repeat_customers` (>=2 distinct stamp-days **ever**), which must stay monotonic so a
+lifetime `repeat_customers` (>=2 distinct scan-days **ever**), which must stay monotonic so a
 trophy never re-locks. Keep them separate.
 
 Below the grid: a 5-row **recent-activity peek** (`RecentScans`) that links to `/activity`.
@@ -81,8 +81,8 @@ is defined there once; the UI only formats labels via i18n (`messages/{en,fr}/ac
 Early rungs are deliberately tiny so a new shop unlocks something fast.
 
 - **Growth, Customers** (`total_customers`): 1, 5, 10, 25, 50, 100, 200, 500, 1000, 2500, 5000
-- **Engagement, Stamps** (`total_stamps_given`): 1, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000, 100000
-- **This month, Stamps in 30 days** (`stamps_last_30d`): 10, 25, 50, 100, 250, 500, 1000, 2500, 5000
+- **Engagement, Scans** (`total_scans`): 1, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000, 100000
+- **This month, Scans in 30 days** (`scans_last_30d`): 10, 25, 50, 100, 250, 500, 1000, 2500, 5000
 - **This month, New customers in 30 days** (`new_customers_last_30d`): 5, 10, 25, 50, 100, 250, 500
 - **Loyalty, Returning customers** (`repeat_customers`, a **count**, not a percentage): 1, 5, 10, 25, 50, 100, 250, 500, 1000
 - **Firsts (one-time)**: `first_reward` (`total_rewards_redeemed >= 1`), `first_broadcast`
@@ -115,21 +115,23 @@ completion, so there is always an "almost there" target. Setup/adoption badges a
 excluded: that belongs to the onboarding checklist. A rewards ladder is an easy future add (the
 RPC already returns `total_rewards_redeemed`).
 
-All counters come from `get_business_achievements` (migration 95). "Stamps given" counts
-`type = 'stamp_added'` only, so a trophy total always agrees with the dashboard StatCards.
+All counters come from `get_business_achievements` (migration 95; scan columns since 132).
+"Scans" counts `type IN ('stamp_added', 'points_earned')` — the earn event of either program
+type — so a trophy total always agrees with the dashboard StatCards and points businesses
+earn the same trophies.
 
 **Page display (suspense without overwhelm).** `achievementsForDisplay` shows, per ladder, every
 earned rung + the current goal clearly, the rung right after it **blurred** (a teaser so the
 owner knows another challenge exists), and **hides** everything beyond. Each category has a
 clickable `InfoPopover` (`web/src/components/reusables/info-popover.tsx`, touch-friendly)
-explaining its metric; the weekly goal carries one too (it answers "of what?": stamps).
+explaining its metric; the weekly goal carries one too (it answers "of what?": scans).
 
 ### 4.2 Weekly goal (smart auto, editable)
 
 Logic in `web/src/lib/weekly-goal.ts`.
 
-- **Baseline** = average of the trailing 4 complete weeks' stamps (the RPC returns 5 complete
-  weeks via `weekly_stamp_series`, current partial week excluded).
+- **Baseline** = average of the trailing 4 complete weeks' scans (the RPC returns 5 complete
+  weeks via `weekly_scan_series`, current partial week excluded).
 - **Auto target** = `max(10, roundToNearest5(baseline))`. New / no-history → starter 10.
 - **Override** = `businesses.settings.weekly_goal` (owner edits inline). null / absent = auto.
 - **Framing is always positive.** "{remaining} to go" when under, "Goal reached" when at/over.
@@ -214,7 +216,7 @@ The page is Pro-gated for "advanced"; a basic subset can stay free, matching
 
 - Reintroducing lifecycle staging or the momentum/insight cards on the home.
 - Putting charts, heatmaps, or cohort tables on the dashboard home (they belong on Analytics).
-- Counting `bonus_stamp` toward "stamps given" (would disagree with the StatCards).
+- Counting `bonus_stamp` / `bonus_points` toward "scans" (would disagree with the StatCards).
 - Showing a fabricated WoW arrow on repeat rate or install rate (no baseline exists).
 - Celebrating retroactively-earned trophies on first load (seed `achievements_seen` silently).
 - Hardcoding achievement thresholds in a component instead of `web/src/lib/achievements.ts`.

@@ -38,6 +38,7 @@
     "sort": {
       "name": "Name",
       "stamps": "Stamps",
+      "points": "Points",
       "rewards": "Rewards",
       "lastActivity": "Last activity"
     },
@@ -93,10 +94,10 @@
       "new": "Joined within the last 14 days.",
       "regular": "Active customers without a special status.",
       "vip": "Customers who have redeemed 3 or more rewards.",
-      "rewardReady": "Has a reward waiting to be redeemed: a full card or stacked rewards.",
+      "rewardReady": "Has a reward ready to redeem right now.",
       "closeToReward": "Within 2 stamps of completing their card.",
-      "atRisk": "Have stamps but haven't visited in over 30 days.",
-      "ghost": "Got their card but never came back. No stamps yet."
+      "atRisk": "Engaged before but haven't visited in over 30 days.",
+      "ghost": "Got their card but never came back to earn anything."
     },
     "actions": {
       "addStamp": "Add Stamp",

@@ -25,25 +25,25 @@
     },
     "ladders": {
       "customers": "{count, plural, =1 {Primer cliente} other {# clientes}}",
-      "stamps": "{count, plural, =1 {Primer sello dado} other {# sellos dados}}",
-      "stamps30d": "{count} sellos en 30 días",
+      "scans": "{count, plural, =1 {Primer escaneo} other {# escaneos}}",
+      "scans30d": "{count} escaneos en 30 días",
       "customers30d": "{count} clientes nuevos en 30 días",
       "repeatCustomers": "{count, plural, =1 {Primer cliente que vuelve} other {# clientes que vuelven}}"
     },
     "firsts": {
       "first_reward": "Primera recompensa canjeada",
       "first_broadcast": "Primera difusión enviada",
-      "owner_uses_app": "Primer sello desde la app",
+      "owner_uses_app": "Primer escaneo desde la app",
       "team_uses_app": "Todo el equipo en la app",
       "printed_flyer": "Folleto en el mostrador"
     },
     "info": {
       "growth": "El número total de clientes que han añadido tu tarjeta desde el principio.",
-      "engagement": "El número total de sellos que ha dado tu equipo desde el principio.",
+      "engagement": "El número total de escaneos que ha hecho tu equipo desde el principio.",
       "momentum": "Tus últimos 30 días, siempre avanzando. Hoy cuenta, y todo lo que supera los 30 días deja de contar.",
       "loyalty": "Los clientes que vuelven, contados como fieles en cuanto regresan otro día.",
-      "firsts": "Metas que consigues una sola vez, la primera vez que llegas a cada una, como tu primer sello o tu primera difusión.",
-      "weeklyGoal": "Los sellos que da tu equipo esta semana. Te sugerimos un objetivo según tus últimas semanas, y puedes cambiarlo cuando quieras."
+      "firsts": "Metas que consigues una sola vez, la primera vez que llegas a cada una, como tu primer escaneo o tu primera difusión.",
+      "weeklyGoal": "Los escaneos que hace tu equipo esta semana. Te sugerimos un objetivo según tus últimas semanas, y puedes cambiarlo cuando quieras."
     },
     "hero": {
       "earnedTitle": "{earned} de {total} conseguidos",
@@ -59,19 +59,19 @@
     },
     "why": {
       "growth": "Cada cliente que añade tu tarjeta. Tu alcance, creciendo.",
-      "engagement": "Cada sello es una visita. Más sellos, más hábito.",
+      "engagement": "Cada escaneo es una visita. Más escaneos, más hábito.",
       "momentum": "Tus últimos 30 días, una ventana móvil. Premia un buen mes reciente.",
       "loyalty": "Clientes que han vuelto en dos días distintos, tus habituales.",
       "firsts": "Metas que alcanzas la primera vez que haces algo."
     },
     "weeklyGoal": {
       "label": "Objetivo de la semana",
-      "unit": "sellos",
-      "toGo": "Te faltan {remaining} sellos, lo tienes.",
-      "reached": "Objetivo alcanzado. {current} de {target} sellos.",
+      "unit": "escaneos",
+      "toGo": "Te faltan {remaining} escaneos, lo tienes.",
+      "reached": "Objetivo alcanzado. {current} de {target} escaneos.",
       "editTitle": "Define tu objetivo de la semana",
-      "editDescription": "El número de sellos que quieres alcanzar esta semana. Te sugerimos {auto}, según tus últimas semanas.",
-      "fieldLabel": "Sellos esta semana",
+      "editDescription": "El número de escaneos que quieres alcanzar esta semana. Te sugerimos {auto}, según tus últimas semanas.",
+      "fieldLabel": "Escaneos esta semana",
       "save": "Guardar mi objetivo",
       "reset": "Volver al modo automático",
       "cancel": "Cancelar"

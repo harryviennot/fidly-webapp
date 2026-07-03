@@ -50,7 +50,7 @@ export type TeamRow = {
   status: "online" | "invited" | "offline" | "paused";
   statusLabel: string;
   joinedDate: string;
-  stampsGiven: number;
+  scansMade: number;
   isCurrentUser: boolean;
   isOwner: boolean;
   isLastOwner: boolean;
@@ -68,7 +68,7 @@ export type TeamRow = {
   status: "invited";
   statusLabel: string;
   joinedDate: string;
-  stampsGiven: number;
+  scansMade: number;
   isCurrentUser: false;
   isOwner: false;
   isLastOwner: false;
@@ -230,7 +230,7 @@ export function TeamTable({
               {locationContext && (
                 <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 hidden xl:table-cell">{t('table.locations')}</TableHead>
               )}
-              <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 text-center hidden lg:table-cell">{t('table.stampsGiven')}</TableHead>
+              <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 text-center hidden lg:table-cell">{t('table.scansMade')}</TableHead>
               {canManageTeam && <TableHead className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider px-4 text-right"></TableHead>}
             </TableRow>
           </TableHeader>
@@ -381,10 +381,10 @@ export function TeamTable({
                     </TableCell>
                   )}
 
-                  {/* Stamps */}
+                  {/* Scans */}
                   <TableCell className="py-3 px-4 text-center hidden lg:table-cell">
-                    <span className={`text-[14px] font-semibold ${row.stampsGiven > 0 ? "text-[#1A1A1A]" : "text-[#CCC]"}`}>
-                      {row.stampsGiven}
+                    <span className={`text-[14px] font-semibold ${row.scansMade > 0 ? "text-[#1A1A1A]" : "text-[#CCC]"}`}>
+                      {row.scansMade}
                     </span>
                   </TableCell>
 

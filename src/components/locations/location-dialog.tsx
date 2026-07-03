@@ -245,7 +245,10 @@ export function LocationDialog(props: LocationDialogProps) {
 
     const body: LocationCreate | LocationPatch = {
       name: name.trim(),
-      slug: slug.trim() || undefined,
+      // The slug is immutable after creation. Only send it on create — re-sending
+      // it on a name-only edit would trip the backend immutability guard when the
+      // stored slug is malformed (a legacy row).
+      slug: mode === "create" ? slug.trim() || undefined : undefined,
       address: formattedText || undefined,
       address_components: componentsForSave ?? undefined,
       latitude: parseFloatOrNull(lat),

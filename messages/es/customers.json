@@ -38,6 +38,7 @@
     "sort": {
       "name": "Nombre",
       "stamps": "Sellos",
+      "points": "Puntos",
       "rewards": "Recompensas",
       "lastActivity": "Última actividad"
     },
@@ -72,10 +73,10 @@
       "new": "Se ha unido en los últimos 14 días.",
       "regular": "Clientes activos sin un estado especial.",
       "vip": "Clientes que han canjeado 3 recompensas o más.",
-      "rewardReady": "Tiene una recompensa lista para canjear: una tarjeta completa o recompensas acumuladas.",
+      "rewardReady": "Tiene una recompensa lista para canjear ahora mismo.",
       "closeToReward": "A menos de 2 sellos de completar su tarjeta.",
-      "atRisk": "Tienen sellos pero no han venido en más de 30 días.",
-      "ghost": "Cogieron su tarjeta pero nunca volvieron. Todavía sin sellos."
+      "atRisk": "Ya habían venido, pero no en más de 30 días.",
+      "ghost": "Cogieron su tarjeta pero nunca volvieron."
     },
     "actions": {
       "addStamp": "Añadir sello",

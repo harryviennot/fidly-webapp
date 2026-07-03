@@ -388,7 +388,13 @@ export function GoogleWalletCard({
                   alt=""
                   fill
                   className="object-cover"
-                  style={{ opacity: (design.strip_background_opacity ?? 40) / 100 }}
+                  style={{
+                    // image_only shows the raw image edge-to-edge (no dimming).
+                    opacity:
+                      design.points_strip_style === "image_only"
+                        ? 1
+                        : (design.strip_background_opacity ?? 40) / 100,
+                  }}
                   unoptimized
                 />
               </div>

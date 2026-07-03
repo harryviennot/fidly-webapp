@@ -322,13 +322,13 @@
               "appleTitle": "On Apple Wallet",
               "appleBody": "Apple groups updates based on battery, Wi-Fi, and cellular conditions. A banner may take seconds or minutes. The card on your lock screen refreshes as soon as your phone wakes with a good signal.",
               "googleTitle": "On Google Wallet",
-              "googleBody": "The card only refreshes after it's been closed. Close the wallet and reopen the card to see the new stamp.",
-              "reassuranceTitle": "The stamp is saved",
+              "googleBody": "The card only refreshes after it's been closed. Close the wallet and reopen the card to see the update.",
+              "reassuranceTitle": "Your scan is saved",
               "reassuranceBody": "Even if the notification or the card preview hasn't caught up, the count is already on our server. Next time you scan this customer, you'll see the real, up-to-date count."
             },
             "stampsLabel": "Stamps on your card",
             "justStamped": "Stamp added",
-            "multiDeviceHint": "{count, plural, =1 {} other {Each tap stamps all # installed devices at once.}}",
+            "multiDeviceHint": "{count, plural, =1 {} other {Each tap updates all # installed devices at once.}}",
             "fallback": "No buzz yet? Notifications can take a few seconds. Try again in a moment.",
             "customisationHint": "This is the default message. You can rewrite it, add custom messages at specific stamp counts, or turn notifications off entirely from your notifications settings.",
             "points": {

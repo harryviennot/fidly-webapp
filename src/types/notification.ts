@@ -118,10 +118,17 @@ export interface BroadcastTargetFilter {
   all?: boolean;
   enrolled_before_days?: number;
   enrolled_after_days?: number;
+  /** Progress-range bounds: stamp count for stamp programs, points balance
+   *  for points programs. Canonical keys; rows written before the scans
+   *  rename carry `stamp_count_min/max` instead (see normalizeTargetFilter). */
+  value_min?: number;
+  value_max?: number;
+  /** @deprecated Legacy key on pre-rename rows. Read via normalizeTargetFilter. */
   stamp_count_min?: number;
+  /** @deprecated Legacy key on pre-rename rows. Read via normalizeTargetFilter. */
   stamp_count_max?: number;
-  /** Customer currently holds a redeemable reward: banked rewards
-   *  (stackable rewards) or a full card. */
+  /** Customer currently holds a redeemable reward: banked rewards or a full
+   *  card (stamps), or a balance covering at least one reward (points). */
   has_unredeemed_reward?: boolean;
   has_redeemed?: boolean;
   inactive_days?: number;

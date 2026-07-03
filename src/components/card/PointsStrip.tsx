@@ -45,6 +45,39 @@ function mix(a: string, b: string, t: number): string {
   return `#${c.map((x) => x.toString(16).padStart(2, "0")).join("")}`;
 }
 
+/** Non-overlapping x-positions for reward markers along the track. Markers
+ *  start at their proportional position (threshold / top) then get pushed apart
+ *  so consecutive centers are at least `gap` apart, where
+ *  `gap = max(discGap, halfWidth[i-1] + halfWidth[i] + labelPad)` — so neither
+ *  discs nor numeric labels collide. Overflow past the right edge is pulled left
+ *  (clamped to x0). MUST mirror space_reward_positions in the backend generator. */
+function spaceRewardPositions(
+  thresholds: number[],
+  x0: number,
+  x1: number,
+  top: number,
+  halfWidths: number[],
+  discGap: number,
+  labelPad = 10,
+): number[] {
+  const n = thresholds.length;
+  if (n === 0) return [];
+  const t = top || 1;
+  const pos = thresholds.map((th) => x0 + (x1 - x0) * (Math.min(th, t) / t));
+  const gap = (i: number) => Math.max(discGap, halfWidths[i - 1] + halfWidths[i] + labelPad);
+  for (let i = 1; i < n; i++) {
+    if (pos[i] - pos[i - 1] < gap(i)) pos[i] = pos[i - 1] + gap(i);
+  }
+  if (pos[n - 1] > x1) {
+    pos[n - 1] = x1;
+    for (let i = n - 2; i >= 0; i--) {
+      if (pos[i + 1] - pos[i] < gap(i + 1)) pos[i] = pos[i + 1] - gap(i + 1);
+    }
+    if (pos[0] < x0) pos[0] = x0;
+  }
+  return pos;
+}
+
 export function PointsStrip({
   style,
   balance,
@@ -231,16 +264,30 @@ export function PointsStrip({
     );
   }
 
-  // progress_icons — balance top-left, horizontal milestone track positioned
-  // proportionally to each threshold (backend pos_x = threshold / top).
-  const x0 = 110;
-  const x1 = BASE_W - 110;
+  if (style === "image_only") {
+    // The uploaded strip image IS the strip — the WalletCard renders it behind
+    // this component at full opacity, so there's nothing to draw on top.
+    return <Canvas />;
+  }
+
+  // progress_icons — balance top-left, horizontal milestone track. Markers start
+  // at their proportional position (threshold / top) then get spaced apart so
+  // close thresholds (and their labels) don't overlap. x0 matches the balance
+  // text inset (80) so the track lines up with it.
+  const x0 = 80;
+  const x1 = BASE_W - 80;
   const trackY = 255;
   const iconR = 46;
   const span = x1 - x0;
-  const posPct = (threshold: number) =>
-    ((x0 + span * (Math.min(threshold, top || 1) / (top || 1))) / BASE_W) * 100;
   const fillPct = ((x0 + span * (Math.min(balance, top || 1) / (top || 1))) / BASE_W) * 100;
+
+  const thresholds = sorted.map((r) => r.threshold);
+  // Approximate label width from digit count (no text metrics in cqw); the
+  // generated wallet strip measures exactly. Label font is 44 base units.
+  const halfWidths = thresholds.map((th) => (String(th).length * 44 * 0.55) / 2);
+  const positions = spaceRewardPositions(
+    thresholds, x0, x1, top || 1, halfWidths, 2 * iconR + 12, 10,
+  );
 
   return (
     <Canvas>
@@ -287,7 +334,7 @@ export function PointsStrip({
               }}
             />
           )}
-          {sorted.map((reward) => {
+          {sorted.map((reward, i) => {
             const reached = balance >= reward.threshold;
             const choice = rewardIcons?.[reward.id];
             const iconName = (choice?.type === "preset" ? choice.ref : "gift") as StampIconType;
@@ -296,7 +343,7 @@ export function PointsStrip({
                 key={reward.id}
                 style={{
                   position: "absolute",
-                  left: `${posPct(reward.threshold)}cqw`,
+                  left: `${(positions[i] / BASE_W) * 100}cqw`,
                   top: cq(trackY),
                   transform: "translate(-50%, -50%)",
                 }}
@@ -357,7 +404,7 @@ export function PointsStrip({
 /** Strip canvas: a container-query box at the 1125:432 strip aspect so all
  *  child `cqw` units resolve against the rendered width. Transparent so the
  *  WalletCard's strip background color / image shows through. */
-function Canvas({ children }: { children: React.ReactNode }) {
+function Canvas({ children }: { children?: React.ReactNode }) {
   return (
     <div
       style={{

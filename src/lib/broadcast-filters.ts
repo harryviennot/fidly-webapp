@@ -21,16 +21,37 @@ export interface FilterChip {
 type Translator = (key: string, values?: Record<string, unknown>) => string;
 
 /**
+ * Map a stored `target_filter` onto the canonical keys. Rows written before
+ * the scans rename carry `stamp_count_min/max`; they fold into
+ * `value_min/max` (stamp count for stamp programs, points balance for points
+ * programs). Canonical keys win when both are present.
+ */
+export function normalizeTargetFilter(
+  filter: BroadcastTargetFilter | null | undefined
+): BroadcastTargetFilter {
+  if (!filter) return {};
+  const { stamp_count_min, stamp_count_max, ...rest } = filter;
+  return {
+    ...rest,
+    value_min: rest.value_min ?? stamp_count_min,
+    value_max: rest.value_max ?? stamp_count_max,
+  };
+}
+
+/**
  * Human-readable chips for a `target_filter`. Order is deterministic so the
  * chips render the same way in the list row, detail sheet and review step.
+ * `opts.points` switches the range chips to points wording ("≥ N pts").
  */
 export function describeFilter(
-  filter: BroadcastTargetFilter | null | undefined,
-  t: Translator
+  rawFilter: BroadcastTargetFilter | null | undefined,
+  t: Translator,
+  opts?: { points?: boolean }
 ): FilterChip[] {
-  if (!filter || Object.keys(filter).length === 0 || filter.all) {
+  if (!rawFilter || Object.keys(rawFilter).length === 0 || rawFilter.all) {
     return [{ key: 'all', label: t('audience.all') }];
   }
+  const filter = normalizeTargetFilter(rawFilter);
 
   const chips: FilterChip[] = [];
   const tf = t; // shorthand
@@ -51,16 +72,22 @@ export function describeFilter(
       }),
     });
   }
-  if (filter.stamp_count_min !== undefined) {
+  if (filter.value_min !== undefined) {
     chips.push({
-      key: 'stamp_count_min',
-      label: tf('audience.chip.stamp_count_min', { n: filter.stamp_count_min }),
+      key: 'value_min',
+      label: tf(
+        opts?.points ? 'audience.chip.points_min' : 'audience.chip.stamp_count_min',
+        { n: filter.value_min }
+      ),
     });
   }
-  if (filter.stamp_count_max !== undefined) {
+  if (filter.value_max !== undefined) {
     chips.push({
-      key: 'stamp_count_max',
-      label: tf('audience.chip.stamp_count_max', { n: filter.stamp_count_max }),
+      key: 'value_max',
+      label: tf(
+        opts?.points ? 'audience.chip.points_max' : 'audience.chip.stamp_count_max',
+        { n: filter.value_max }
+      ),
     });
   }
   if (filter.has_redeemed) {

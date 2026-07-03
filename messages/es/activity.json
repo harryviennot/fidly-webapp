@@ -5,7 +5,7 @@
     "export": "Exportar",
     "searchPlaceholder": "Buscar un cliente...",
     "loadFailed": "No se pudo cargar la actividad.",
-    "empty": "Aún no hay actividad. Los sellos y las recompensas aparecerán aquí.",
+    "empty": "Aún no hay actividad. Los escaneos y las recompensas aparecerán aquí.",
     "loadMore": "Cargar más",
     "loadingMore": "Cargando...",
     "by": "por",
@@ -70,7 +70,7 @@
     },
     "stats": {
       "todayActivity": "Actividad de hoy",
-      "todayActivityInfo": "Sellos y recompensas añadidos hoy, comparados con un día normal (unos {avg}).",
+      "todayActivityInfo": "Escaneos y recompensas añadidos hoy, comparados con un día normal (unos {avg}).",
       "typicalPerDay": "≈ {avg}/día de media",
       "thisWeek": "Esta semana",
       "vsLastWeek": "frente a la semana pasada",
@@ -78,7 +78,7 @@
     },
     "emptyState": {
       "title": "Aún no hay actividad",
-      "description": "Los sellos y las recompensas aparecerán aquí a medida que tus clientes usen tu programa de fidelidad."
+      "description": "Los escaneos y las recompensas aparecerán aquí a medida que tus clientes usen tu programa de fidelidad."
     },
     "emptyFiltered": "Ninguna actividad coincide con tus filtros.",
     "rewardsLeft": "{count, plural, =1 {1 recompensa restante} other {# recompensas restantes}}"

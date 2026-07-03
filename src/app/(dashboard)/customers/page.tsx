@@ -243,6 +243,7 @@ export default function CustomersPage() {
       setSelectedSegment(seg);
       setPage(0);
     },
+    isPoints: loyaltyType === "points",
   });
 
   // Sort control shared by the toolbar (works on mobile + desktop) and the
@@ -251,7 +252,7 @@ export default function CustomersPage() {
   const sortConfig = {
     options: [
       { value: "name", label: t("sort.name") },
-      { value: "stamps", label: t("sort.stamps") },
+      { value: "stamps", label: loyaltyType === "points" ? t("sort.points") : t("sort.stamps") },
       { value: "total_redemptions", label: t("sort.rewards") },
       { value: "updated_at", label: t("sort.lastActivity") },
     ],

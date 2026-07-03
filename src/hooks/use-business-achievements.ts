@@ -13,10 +13,10 @@ import {
 } from "@/lib/achievements";
 
 /**
- * Lifetime "trophy" counters + a trailing weekly stamp series + the per-trophy
+ * Lifetime "trophy" counters + a trailing weekly scan series + the per-trophy
  * unlock ledger for the dashboard Achievements + weekly-goal widget and the
- * /achievements page. Definitions mirror the dashboard StatCards (stamps =
- * stamp_added only; repeat = >=2 distinct stamp-days). See
+ * /achievements page. Definitions mirror the dashboard StatCards (a scan =
+ * stamp_added or points_earned; repeat = >=2 distinct scan-days). See
  * web/docs/dashboard-achievements.md.
  */
 export function useBusinessAchievements(businessId: string | undefined) {

@@ -365,7 +365,8 @@
       "stripStyle": {
         "big_point": "Big number",
         "circle_progress": "Progress ring",
-        "progress_icons": "Reward track"
+        "progress_icons": "Reward track",
+        "image_only": "Image only"
       },
       "accentColorLabel": "Progress color",
       "accentColorHelp": "The color of the number, ring, and reached rewards.",
@@ -376,6 +377,7 @@
       "pickIcon": "Pick an icon for {reward}",
       "bgImageLabel": "Strip image",
       "bgImageHint": "Optional image behind the points. 1125x432px recommended",
+      "imageOnlyHint": "This style shows only your strip image. Add one above.",
       "bgColorLabel": "Background color",
       "bgColorHelp": "The strip's background color. Add an image above to use one instead."
     },

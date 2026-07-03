@@ -121,26 +121,3 @@ export const SEGMENT_AVATAR_COLORS: Record<CustomerSegment, string> = {
 export function getSegmentConfig(segment: CustomerSegment): SegmentConfig {
   return SEGMENT_CONFIGS[segment];
 }
-
-export function countBySegment(
-  customers: CustomerResponse[],
-  maxStamps: number
-): Record<CustomerSegment, number> {
-  const now = new Date();
-  const counts: Record<CustomerSegment, number> = {
-    new: 0,
-    regular: 0,
-    vip: 0,
-    reward_ready: 0,
-    close_to_reward: 0,
-    at_risk: 0,
-    ghost: 0,
-  };
-
-  for (const customer of customers) {
-    const segment = classifyCustomer(customer, maxStamps, now);
-    counts[segment]++;
-  }
-
-  return counts;
-}

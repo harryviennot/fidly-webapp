@@ -2,7 +2,7 @@
   "notifications": {
     "page": {
       "title": "Notificaciones",
-      "subtitle": "Mensajes automáticos que se envían a tus clientes cuando reúnen sellos o desbloquean recompensas"
+      "subtitle": "Mensajes automáticos que se envían a tus clientes cuando avanzan o desbloquean recompensas"
     },
     "icon": {
       "title": "Icono de notificación",
@@ -16,6 +16,7 @@
       "upload": "Subir icono",
       "uploadHint": "PNG, al menos 87×87 píxeles",
       "preview": "Vista previa",
+      "previewBody": "¡Gracias por tu visita! Hasta pronto.",
       "crop": {
         "title": "Recorta tu icono",
         "description": "Arrastra el cuadro para elegir la parte de la imagen que quieres usar. Se redimensionará automáticamente.",
@@ -41,7 +42,7 @@
     },
     "triggers": {
       "sectionTitle": "Mensajes automáticos",
-      "sectionDescription": "Estos mensajes se envían automáticamente cuando un cliente reúne un sello o gana una recompensa",
+      "sectionDescription": "Estos mensajes se envían automáticamente cuando un cliente avanza o gana una recompensa",
       "stamp_added": {
         "name": "Sello conseguido",
         "description": "Se envía cuando un cliente reúne un sello nuevo"
@@ -64,7 +65,7 @@
       },
       "milestone": {
         "name": "Hito",
-        "description": "Se envía cuando un cliente alcanza un número concreto de sellos"
+        "description": "Se envía cuando un cliente alcanza un hito que tú defines"
       },
       "near_reward": {
         "name": "Recompensa cerca",
@@ -82,14 +83,14 @@
     },
     "milestones": {
       "title": "Hitos",
-      "description": "Envía un mensaje especial cuando un cliente alcanza un número concreto de sellos",
+      "description": "Envía un mensaje especial cuando un cliente alcanza el valor que elijas",
       "add": "Añadir hito",
       "usage": "{count} de {max} usados",
       "usageActive": "{count} de {max} activos",
       "disabledPill": "Desactivado",
       "unlimited": "{count} hitos",
-      "empty": "Aún no hay hitos. Añade uno para enviar un mensaje personalizado en un número concreto de sellos.",
-      "condition": "Cuando el cliente alcanza {count} sellos",
+      "empty": "Aún no hay hitos. Añade uno para enviar un mensaje personalizado en el valor que elijas.",
+      "condition": "Cuando el cliente alcanza {count}",
       "conditionShort": "A los {count} sellos",
       "conditionShortPoints": "A los {count} puntos",
       "lifetimeTag": "Total",
@@ -105,16 +106,16 @@
       "metricBalanceHelp": "Se activa cuando el saldo actual del cliente alcanza este número.",
       "metricLifetimeHelp": "Se activa cuando su total acumulado de siempre alcanza este número. Sigue contando aunque se canjeen recompensas.",
       "createTitle": "Nuevo hito",
-      "createDescription": "Envía una notificación personalizada cuando tus clientes alcancen un número concreto de sellos.",
+      "createDescription": "Envía una notificación personalizada cuando tus clientes alcancen el valor que elijas.",
       "editTitle": "Editar hito",
-      "editDescription": "Cambia el número de sellos o el mensaje de este hito.",
+      "editDescription": "Cambia el valor o el mensaje de este hito.",
       "deleteConfirmTitle": "¿Eliminar este hito?",
       "deleteConfirmDescription": "Este hito dejará de activarse para todos los clientes.",
       "deleteButton": "Eliminar hito",
       "errors": {
-        "duplicate": "Ya existe un hito con este número de sellos.",
+        "duplicate": "Ya existe un hito con este valor.",
         "quotaExceeded": "Has alcanzado tu límite de hitos. Pasa a Pro para tener hitos ilimitados.",
-        "invalidStampCount": "El número de sellos debe ser un número positivo.",
+        "invalidStampCount": "El valor debe ser un número positivo.",
         "outOfRange": "El número de sellos debe ser menor que {total} (el total de sellos de tu programa)."
       },
       "toasts": {
@@ -124,7 +125,7 @@
         "updateFailed": "No se pudo actualizar el hito",
         "deleted": "Hito eliminado",
         "deleteFailed": "No se pudo eliminar el hito",
-        "swappedOff": "El hito en el sello {stamp} se desactivó para hacer hueco",
+        "swappedOff": "El hito en {stamp} se desactivó para hacer hueco",
         "enabled": "Hito activado",
         "disabled": "Hito desactivado",
         "toggleFailed": "No se pudo cambiar el hito"
@@ -181,10 +182,10 @@
     },
     "growthUpsell": {
       "title": "Desbloquea todas las notificaciones",
-      "description": "Pasa a Growth para reescribir los mensajes por defecto con tu voz y crear notificaciones de hito personalizadas en números concretos de sellos.",
+      "description": "Pasa a Growth para reescribir los mensajes por defecto con tu voz y crear notificaciones de hito personalizadas en los valores que elijas.",
       "features": {
         "custom": "Escribe tu propio texto para cada mensaje automático",
-        "milestones": "Crea hitos personalizados en cualquier número de sellos",
+        "milestones": "Crea hitos personalizados en el valor que elijas",
         "icon": "Conserva tu icono de notificación con tu marca"
       },
       "cta": "Pasar a Growth"
@@ -256,7 +257,7 @@
         },
         "googleNote": {
           "title": "A tener en cuenta con Google Wallet",
-          "body": "Google limita las tarjetas a 3 notificaciones al día. Los clientes que ya hayan recibido 3 notificaciones hoy (por ejemplo, sellos) no recibirán esta difusión."
+          "body": "Google limita las tarjetas a 3 notificaciones al día. Los clientes que ya hayan recibido 3 notificaciones hoy (por ejemplo, tras un escaneo) no recibirán esta difusión."
         }
       },
       "lastResults": {
@@ -370,6 +371,8 @@
             "enrollmentHelp": "Filtra según cuándo y dónde se unió el cliente a tu programa.",
             "stamps": "Sellos reunidos",
             "stampsHelp": "Solo se dirige a clientes que tienen entre N y M sellos en su tarjeta actual.",
+            "points": "Saldo de puntos",
+            "pointsHelp": "Solo se dirige a los clientes cuyo saldo actual está entre N y M puntos.",
             "activity": "Actividad",
             "activityHelp": "Filtra según el comportamiento de compra, la última visita y dónde estuvieron activos."
           },
@@ -400,9 +403,11 @@
             "maxLabel": "Como máximo",
             "placeholder": "ej. 5",
             "suffix": "sellos",
+            "suffixPoints": "pts",
             "help": "Consejo: deja un campo vacío para no fijar ese límite.",
             "hasRewardLabel": "Tiene una recompensa por canjear",
-            "hasRewardHelp": "Solo los clientes que tienen una recompensa en este momento: una tarjeta completa o recompensas acumuladas. Perfecto para un mensaje de «ven a canjearla»."
+            "hasRewardHelp": "Solo los clientes que tienen una recompensa en este momento: una tarjeta completa o recompensas acumuladas. Perfecto para un mensaje de «ven a canjearla».",
+            "hasRewardHelpPoints": "Solo los clientes cuyo saldo ya cubre al menos una recompensa. Perfecto para un mensaje de «ven a canjearla»."
           },
           "activity": {
             "hasRedeemedLabel": "Ha canjeado una recompensa",
@@ -425,6 +430,8 @@
             "enrolled_after_days": "Inscritos hace < {n}d",
             "stamp_count_min": "≥ {n} sellos",
             "stamp_count_max": "≤ {n} sellos",
+            "points_min": "≥ {n} pts",
+            "points_max": "≤ {n} pts",
             "has_redeemed": "Ha canjeado",
             "inactive_days": "Inactivos {n}d+",
             "enrolled_at_location_ids": "Inscritos en {n} {n, plural, one {establecimiento} other {establecimientos}}",
@@ -434,7 +441,7 @@
             "title": "Desbloquea la segmentación de público",
             "description": "Llega a los clientes adecuados con filtros más precisos en Pro.",
             "features": {
-              "stamps": "Filtra por umbrales de número de sellos",
+              "stamps": "Filtra por sellos o saldo de puntos",
               "activity": "Recupera a los clientes inactivos y premia a quienes canjean",
               "location": "Dirígete por inscripción o actividad en establecimientos concretos"
             }
@@ -488,7 +495,7 @@
         "headline": "Llega a todos tus clientes de una vez",
         "description": "Tus clientes reciben la notificación directamente en su teléfono y en el reverso de su tarjeta de fidelidad.",
         "features": {
-          "segment": "Dirígete a los clientes por sellos, actividad o fecha de inscripción",
+          "segment": "Dirígete a los clientes por progreso, actividad o fecha de inscripción",
           "schedule": "Programa difusiones con antelación (Pro)",
           "tracking": "Seguimiento de entrega en directo, mira quién la recibió"
         },

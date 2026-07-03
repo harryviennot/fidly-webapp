@@ -23,7 +23,7 @@ interface PointsFormProps {
   rewards: RewardTier[];
 }
 
-const STRIP_STYLES: PointsStripStyle[] = ['big_point', 'circle_progress', 'progress_icons'];
+const STRIP_STYLES: PointsStripStyle[] = ['big_point', 'circle_progress', 'progress_icons', 'image_only'];
 
 /**
  * Points card design controls (parallel to StampsForm). Edits the points
@@ -93,7 +93,7 @@ export function PointsForm({ rewards }: PointsFormProps) {
         <Label>
           {t('stripStyleLabel')}
         </Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {STRIP_STYLES.map((style) => {
             const active = stripStyle === style;
             return (
@@ -118,34 +118,39 @@ export function PointsForm({ rewards }: PointsFormProps) {
         </div>
       </div>
 
-      {/* Accent color */}
-      <ColorPicker
-        label={t('accentColorLabel')}
-        tooltip={t('accentColorHelp')}
-        colors={designColors}
-        value={accentValue}
-        onChange={(hex) => updateField('progress_accent_color', hexToRgb(hex))}
-        customColors={customColors}
-        onCustomColor={addCustomColor}
-        extraPresets={logoPresets}
-        extraPresetsLabel={logoPresetsLabel}
-      />
-
-      {/* Strip background: the solid canvas color is always editable (it shows
-          through wherever an image is absent or transparent). An optional image
-          layer sits on top, with its own opacity. Color first, image second. */}
-      <div className="flex flex-col gap-4">
+      {/* Accent color — the progress/number/label color. Not shown for
+          image_only, which draws no progress element. */}
+      {stripStyle !== 'image_only' && (
         <ColorPicker
-          label={t('bgColorLabel')}
-          tooltip={t('bgColorHelp')}
+          label={t('accentColorLabel')}
+          tooltip={t('accentColorHelp')}
           colors={designColors}
-          value={stripBgValue}
-          onChange={(hex) => updateField('strip_background_color', hexToRgb(hex))}
+          value={accentValue}
+          onChange={(hex) => updateField('progress_accent_color', hexToRgb(hex))}
           customColors={customColors}
           onCustomColor={addCustomColor}
           extraPresets={logoPresets}
           extraPresetsLabel={logoPresetsLabel}
         />
+      )}
+
+      {/* Strip background: the solid canvas color is editable for the overlay
+          styles (it shows through wherever an image is absent or transparent).
+          image_only hides the color — the image is the whole strip. */}
+      <div className="flex flex-col gap-4">
+        {stripStyle !== 'image_only' && (
+          <ColorPicker
+            label={t('bgColorLabel')}
+            tooltip={t('bgColorHelp')}
+            colors={designColors}
+            value={stripBgValue}
+            onChange={(hex) => updateField('strip_background_color', hexToRgb(hex))}
+            customColors={customColors}
+            onCustomColor={addCustomColor}
+            extraPresets={logoPresets}
+            extraPresetsLabel={logoPresetsLabel}
+          />
+        )}
         <div className="flex flex-col gap-3">
           <LabelWithTooltip tooltip={tEditor('stripBackgroundTooltip')}>
             {t('bgImageLabel')}
@@ -162,7 +167,12 @@ export function PointsForm({ rewards }: PointsFormProps) {
               filename: 'strip-background.png',
             }}
           />
-          {hasStripImage && (
+          {/* image_only lives or dies by its image — nudge if none uploaded. */}
+          {stripStyle === 'image_only' && !hasStripImage && (
+            <p className="text-[12px] text-[var(--accent)]">{t('imageOnlyHint')}</p>
+          )}
+          {/* Opacity is meaningless for image_only (shown at full opacity). */}
+          {hasStripImage && stripStyle !== 'image_only' && (
             <div className="flex flex-col gap-2 pt-2">
               <div className="flex items-center justify-between">
                 <Label className="text-sm">{tEditor('opacity')}</Label>
@@ -256,6 +266,16 @@ function StripStyleThumb({ style }: { style: PointsStripStyle }) {
           strokeDashoffset={2 * Math.PI * 10 * 0.35}
           transform="rotate(-90 14 14)"
         />
+      </svg>
+    );
+  }
+  if (style === 'image_only') {
+    // A little photo glyph — the strip is purely the uploaded image.
+    return (
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
+        <rect x="4" y="7" width="20" height="14" rx="2.5" fill="none" stroke="var(--accent)" strokeWidth="2" />
+        <circle cx="10" cy="12" r="2" fill="var(--accent)" />
+        <path d="M6 20l5-5 3.5 3.5L18 15l4 5z" fill="var(--accent)" />
       </svg>
     );
   }

@@ -365,7 +365,8 @@
       "stripStyle": {
         "big_point": "Grand nombre",
         "circle_progress": "Anneau de progression",
-        "progress_icons": "Parcours de récompenses"
+        "progress_icons": "Parcours de récompenses",
+        "image_only": "Image seule"
       },
       "accentColorLabel": "Couleur de progression",
       "accentColorHelp": "La couleur du nombre, de l'anneau et des récompenses atteintes.",
@@ -376,6 +377,7 @@
       "pickIcon": "Choisir une icône pour {reward}",
       "bgImageLabel": "Image de la bande",
       "bgImageHint": "Image optionnelle derrière les points. 1125x432px recommandé",
+      "imageOnlyHint": "Ce style n'affiche que votre image. Ajoutez-en une ci-dessus.",
       "bgColorLabel": "Couleur de fond",
       "bgColorHelp": "La couleur de fond de la bande. Ajoutez une image ci-dessus pour l'utiliser à la place."
     },

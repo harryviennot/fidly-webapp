@@ -65,7 +65,7 @@ import {
 } from '@/hooks/use-notifications';
 import { ApiError } from '@/api/client';
 import { cn } from '@/lib/utils';
-import { describeFilter } from '@/lib/broadcast-filters';
+import { describeFilter, normalizeTargetFilter } from '@/lib/broadcast-filters';
 import { MessagePreview } from '@/components/notifications';
 import { AnimatedNumber } from '@/components/redesign/animated-number';
 import { GatedFeature } from '@/components/reusables/gated-feature';
@@ -262,7 +262,11 @@ function BroadcastWizard({ editId, existing }: Readonly<BroadcastWizardProps>) {
         title: existing.title ?? '',
         body: existing.body ?? '',
         translations,
-        targetFilter: existing.target_filter ?? { all: true },
+        // Old rows may carry the legacy stamp_count_min/max keys — fold them
+        // into the canonical value_min/max so the form edits one shape.
+        targetFilter: existing.target_filter
+          ? normalizeTargetFilter(existing.target_filter)
+          : { all: true },
         sendMode: existing.scheduled_at ? 'schedule' : null,
         scheduledAt: existing.scheduled_at
           ? new Date(existing.scheduled_at)
@@ -1636,17 +1640,22 @@ function StampsGroup({
   disabled,
 }: Readonly<FilterGroupProps>) {
   const t = useTranslations('notifications.broadcasts.wizard.audience');
+  // The range filter targets stamp count for stamp programs and points
+  // balance for points programs — same value_min/max keys, relabeled.
+  const { program } = useProgram();
+  const isPoints = program?.type === 'points';
+  const suffix = isPoints ? t('stamps.suffixPoints') : t('stamps.suffix');
 
-  const onChange = (
-    key: 'stamp_count_min' | 'stamp_count_max',
-    raw: string
-  ) => {
+  const onChange = (key: 'value_min' | 'value_max', raw: string) => {
     updateFilter(key, raw === '' ? undefined : parseInt(raw, 10));
   };
 
   return (
     <div className="rounded-[10px] border border-[var(--border-light)] bg-[var(--paper)] p-3">
-      <GroupHeader label={t('group.stamps')} help={t('group.stampsHelp')} />
+      <GroupHeader
+        label={isPoints ? t('group.points') : t('group.stamps')}
+        help={isPoints ? t('group.pointsHelp') : t('group.stampsHelp')}
+      />
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label className="text-[11px] text-[#555] mb-1 block">
@@ -1657,13 +1666,13 @@ function StampsGroup({
               type="number"
               min={0}
               disabled={disabled}
-              value={targetFilter.stamp_count_min ?? ''}
+              value={targetFilter.value_min ?? ''}
               placeholder={t('stamps.placeholder')}
-              onChange={(e) => onChange('stamp_count_min', e.target.value)}
+              onChange={(e) => onChange('value_min', e.target.value)}
               className="h-8 text-sm"
             />
             <span className="text-[11px] text-[#8A8A8A] shrink-0">
-              {t('stamps.suffix')}
+              {suffix}
             </span>
           </div>
         </div>
@@ -1676,13 +1685,13 @@ function StampsGroup({
               type="number"
               min={0}
               disabled={disabled}
-              value={targetFilter.stamp_count_max ?? ''}
+              value={targetFilter.value_max ?? ''}
               placeholder={t('stamps.placeholder')}
-              onChange={(e) => onChange('stamp_count_max', e.target.value)}
+              onChange={(e) => onChange('value_max', e.target.value)}
               className="h-8 text-sm"
             />
             <span className="text-[11px] text-[#8A8A8A] shrink-0">
-              {t('stamps.suffix')}
+              {suffix}
             </span>
           </div>
         </div>
@@ -1707,7 +1716,7 @@ function StampsGroup({
               </button>
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-[260px] text-[11px] leading-[1.45]">
-              {t('stamps.hasRewardHelp')}
+              {isPoints ? t('stamps.hasRewardHelpPoints') : t('stamps.hasRewardHelp')}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -2051,7 +2060,9 @@ function ReviewStep({
 
   const chipTranslator = (key: string, values?: Record<string, unknown>) =>
     tWizard(key, values as { n: number });
-  const chips = describeFilter(state.targetFilter, chipTranslator);
+  const chips = describeFilter(state.targetFilter, chipTranslator, {
+    points: program?.type === 'points',
+  });
 
   const scheduledLabel = useMemo(() => {
     if (state.sendMode === 'schedule' && state.scheduledAt) {
@@ -2226,9 +2237,12 @@ function WizardSummarySidebar({
 }: Readonly<WizardSummarySidebarProps>) {
   const tWizard = useTranslations('notifications.broadcasts.wizard');
   const uiLocale = useLocale();
+  const { program } = useProgram();
   const chipTranslator = (key: string, values?: Record<string, unknown>) =>
     tWizard(key, values as { n: number });
-  const chips = describeFilter(state.targetFilter, chipTranslator);
+  const chips = describeFilter(state.targetFilter, chipTranslator, {
+    points: program?.type === 'points',
+  });
   const isEveryone = !!state.targetFilter.all;
 
   // Audience card becomes visible once the user leaves the audience step.
