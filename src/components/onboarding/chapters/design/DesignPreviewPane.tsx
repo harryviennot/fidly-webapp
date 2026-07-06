@@ -6,7 +6,7 @@ import { CreditCardIcon } from '@phosphor-icons/react';
 import { EditorCard } from '@/components/card/EditorCard';
 import { useBusiness } from '@/contexts/business-context';
 import { useDefaultProgram } from '@/hooks/use-programs';
-import { isPointsProgram, isStampProgram } from '@/types';
+import { isPointsProgram, isStampProgram, type LoyaltyProgram } from '@/types';
 import { useDesignForm } from '@/components/design/forms/DesignFormContext';
 import { entryToBackPassField } from '@/lib/business-info-utils';
 import {
@@ -52,6 +52,13 @@ interface DesignPreviewPaneProps {
    * distraction.
    */
   showAutoGenerate?: boolean;
+  /**
+   * Preview against this program instead of the live default program. The
+   * conversion wizard passes its TARGET program shape here — the live
+   * program still has the old type mid-wizard, and previewing against it
+   * would render the wrong card surface.
+   */
+  programOverride?: LoyaltyProgram | null;
 }
 
 /**
@@ -71,19 +78,27 @@ interface DesignPreviewPaneProps {
 export function DesignPreviewPane({
   showBack = false,
   showAutoGenerate = false,
+  programOverride,
 }: DesignPreviewPaneProps) {
   const isLarge = useIsLargeScreen();
   // Single source of truth tied to the same 1024px breakpoint where the
   // form column has room for a side-by-side card. Avoids the previous
   // dead zone at 768–1023px where neither preview surface was rendered.
-  if (isLarge) return <DesktopPreview showBack={showBack} />;
-  return <MobilePreview showBack={showBack} showAutoGenerate={showAutoGenerate} />;
+  if (isLarge) return <DesktopPreview showBack={showBack} programOverride={programOverride} />;
+  return (
+    <MobilePreview
+      showBack={showBack}
+      showAutoGenerate={showAutoGenerate}
+      programOverride={programOverride}
+    />
+  );
 }
 
-function useCardProps() {
+function useCardProps(programOverride?: LoyaltyProgram | null) {
   const { currentBusiness } = useBusiness();
   const { formData, businessInfo } = useDesignForm();
-  const { data: program } = useDefaultProgram(currentBusiness?.id);
+  const { data: liveProgram } = useDefaultProgram(currentBusiness?.id);
+  const program = programOverride ?? liveProgram;
   const tCardInfo = useTranslations('settings.cardInfo.types');
   const totalStamps = isStampProgram(program) ? program.config.total_stamps : undefined;
   const previewStamps = totalStamps
@@ -141,8 +156,14 @@ function useCardProps() {
   };
 }
 
-function DesktopPreview({ showBack }: { showBack: boolean }) {
-  const cardProps = useCardProps();
+function DesktopPreview({
+  showBack,
+  programOverride,
+}: {
+  showBack: boolean;
+  programOverride?: LoyaltyProgram | null;
+}) {
+  const cardProps = useCardProps(programOverride);
   const asideRef = useRef<HTMLDivElement>(null);
   // Horizontal centerline of the aside column in viewport coordinates.
   // The inner card uses `position: fixed` (truly anchored to the viewport,
@@ -190,13 +211,15 @@ function DesktopPreview({ showBack }: { showBack: boolean }) {
 function MobilePreview({
   showBack,
   showAutoGenerate,
+  programOverride,
 }: {
   showBack: boolean;
   showAutoGenerate: boolean;
+  programOverride?: LoyaltyProgram | null;
 }) {
   const t = useTranslations('designEditor.preview');
   const ctx = useWizardStep();
-  const cardProps = useCardProps();
+  const cardProps = useCardProps(programOverride);
   const [open, setOpen] = useState(false);
 
   // Register the trigger as the wizard footer's secondary action so it sits

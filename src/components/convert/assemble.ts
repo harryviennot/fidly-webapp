@@ -88,43 +88,89 @@ export function defaultPolicyFor(toType: LoyaltyType): ConversionPolicy {
   return toType === 'points' ? 'cheapest_reward_equivalent' : 'bank_full_cards';
 }
 
+export type StagedLocale = 'en' | 'fr' | 'es';
+
 export interface StagedMilestone {
   value: number;
   metric: 'balance' | 'lifetime';
-  body: string;
+  /** Per-locale message bodies — same shape as the staged trigger templates. */
+  body: Partial<Record<StagedLocale, string>>;
 }
 
 /** Per-trigger, per-locale bodies the owner EDITED in the notifications step
  * (untouched defaults are never staged — the backend defaults keep applying). */
-export type StagedTemplates = Record<string, Partial<Record<'en' | 'fr' | 'es', string>>>;
+export type StagedTemplates = Record<string, Partial<Record<StagedLocale, string>>>;
+
+function trimmedBodies(bodies: Partial<Record<string, string>>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [loc, text] of Object.entries(bodies ?? {})) {
+    if (typeof text === 'string' && text.trim()) out[loc] = text.trim();
+  }
+  return out;
+}
+
+/** True when at least one locale carries real copy. */
+export function hasMilestoneBody(milestone: StagedMilestone): boolean {
+  return Object.keys(trimmedBodies(milestone.body ?? {})).length > 0;
+}
 
 /**
- * Staged notification copy, applied server-side AFTER the type flip. Template
- * bodies carry every locale the owner wrote; milestone bodies are keyed by the
- * business's primary locale (single-textarea editor). Empty staging returns
- * null so the backend defaults apply untouched.
+ * Drafts written before milestones became multi-locale stored a single string
+ * body (keyed by the business's primary locale at send time). Upgrade those
+ * on read so a mid-wizard draft survives the shape change.
+ */
+export function normalizeStagedMilestones(
+  raw: unknown,
+  fallbackLocale: StagedLocale
+): StagedMilestone[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((entry) => {
+    const m = (entry ?? {}) as Record<string, unknown>;
+    const body = m.body;
+    return {
+      value: typeof m.value === 'number' && Number.isFinite(m.value) ? m.value : 0,
+      metric: m.metric === 'lifetime' ? 'lifetime' : 'balance',
+      body:
+        typeof body === 'string'
+          ? { [fallbackLocale]: body }
+          : ((body ?? {}) as StagedMilestone['body']),
+    };
+  });
+}
+
+/**
+ * Staged notification copy, applied server-side AFTER the type flip. Both
+ * template and milestone bodies carry every locale the owner wrote;
+ * `enabledOverrides` stages on/off toggles (the backend's upsert supports a
+ * body-less enable flip). Empty staging returns null so the backend defaults
+ * apply untouched.
  */
 export function buildNotificationsPayload(
-  locale: string,
   stagedTemplates: StagedTemplates,
-  milestones: StagedMilestone[]
+  milestones: StagedMilestone[],
+  enabledOverrides: Record<string, boolean> = {}
 ): ConversionNotificationsPayload | null {
   const payload: ConversionNotificationsPayload = {};
 
-  const templates = Object.entries(stagedTemplates)
-    .map(([trigger, bodies]) => {
-      const body: Record<string, string> = {};
-      for (const [loc, text] of Object.entries(bodies ?? {})) {
-        if (typeof text === 'string' && text.trim()) body[loc] = text.trim();
-      }
-      return { trigger, body };
-    })
-    .filter((t) => Object.keys(t.body).length > 0);
+  const templates: NonNullable<ConversionNotificationsPayload['templates']> = [];
+  for (const [trigger, bodies] of Object.entries(stagedTemplates)) {
+    const body = trimmedBodies(bodies ?? {});
+    if (Object.keys(body).length === 0) continue;
+    templates.push(
+      trigger in enabledOverrides
+        ? { trigger, body, is_enabled: enabledOverrides[trigger] }
+        : { trigger, body }
+    );
+  }
+  for (const [trigger, enabled] of Object.entries(enabledOverrides)) {
+    if (templates.some((t) => t.trigger === trigger)) continue;
+    templates.push({ trigger, is_enabled: enabled });
+  }
   if (templates.length > 0) payload.templates = templates;
 
   const staged = milestones
-    .filter((m) => m.value > 0 && m.body.trim().length > 0)
-    .map((m) => ({ value: m.value, metric: m.metric, body: { [locale]: m.body.trim() } }));
+    .filter((m) => m.value > 0 && hasMilestoneBody(m))
+    .map((m) => ({ value: m.value, metric: m.metric, body: trimmedBodies(m.body) }));
   if (staged.length > 0) payload.milestones = staged;
 
   if (!payload.templates && !payload.milestones) return null;
@@ -181,10 +227,10 @@ export interface BuildConvertRequestArgs {
   designId: string;
   rate: number;
   policy: ConversionPolicy;
-  /** Business primary locale — keys the staged milestone bodies. */
-  locale: string;
   stagedTemplates: StagedTemplates;
   milestones: StagedMilestone[];
+  /** Per-trigger on/off toggles staged in the notifications step. */
+  enabledOverrides?: Record<string, boolean>;
   announceEnabled: boolean;
   announceMessages: Record<string, string>;
 }
@@ -192,8 +238,8 @@ export interface BuildConvertRequestArgs {
 /** The full ConvertRequest fired by the execute step. */
 export function buildConvertRequest(args: BuildConvertRequestArgs): ConvertRequest {
   const {
-    draft, designId, rate, policy, locale,
-    stagedTemplates, milestones, announceEnabled, announceMessages,
+    draft, designId, rate, policy,
+    stagedTemplates, milestones, enabledOverrides, announceEnabled, announceMessages,
   } = args;
 
   let announce: ConvertRequest['announce'] = null;
@@ -212,7 +258,7 @@ export function buildConvertRequest(args: BuildConvertRequestArgs): ConvertReque
     design_id: designId,
     config: buildTargetConfig(draft),
     reward_name: draft.toType === 'points' ? null : draft.rewardName.trim() || null,
-    notifications: buildNotificationsPayload(locale, stagedTemplates, milestones),
+    notifications: buildNotificationsPayload(stagedTemplates, milestones, enabledOverrides ?? {}),
     announce,
   };
 }

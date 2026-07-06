@@ -62,12 +62,12 @@
         "subtitle": "On a repris vos couleurs et votre logo. La nouvelle carte ne sera visible qu'une fois le changement terminé.",
         "picker": {
           "title": "{count, plural, =1 {Vous avez déjà une carte de ce type} other {Vous avez déjà # cartes de ce type}}",
-          "subtitle": "Réactivez-en une, ou créez une nouvelle carte.",
-          "reactivate": "Utiliser cette carte",
+          "subtitle": "Modifiez-en une, dupliquez-la pour garder l'originale, ou créez une nouvelle carte.",
           "designNew": "Créer une nouvelle carte",
-          "changeChoice": "Choisir une autre carte"
+          "changeChoice": "Choisir une autre carte",
+          "modify": "Modifier",
+          "duplicate": "Dupliquer"
         },
-        "chosen": "Cette carte sera activée à la fin du changement.",
         "creating": "Préparation de votre carte...",
         "stripPending": "On prépare les images de vos tampons. Ça prend quelques secondes.",
         "defaultNamePoints": "Carte à points",
@@ -116,7 +116,8 @@
           "affected": "Soldes convertis",
           "banked": "Avec récompenses en attente",
           "losers": "Perdent de la valeur",
-          "clamped": "Plafonnés à votre maximum"
+          "clamped": "Plafonnés à votre maximum",
+          "cappedWarning": "{count, plural, =1 {1 client dépasse votre plafond de {max} points : son solde sera ramené à {max} points et le surplus est perdu.} other {# clients dépassent votre plafond de {max} points : leur solde sera ramené à {max} points et le surplus est perdu.}} Vous pouvez augmenter ou retirer le plafond à l'étape du programme."
         },
         "sample": {
           "title": "Avant et après, sur vos vrais clients",
@@ -124,7 +125,9 @@
           "before": "Avant",
           "after": "Après",
           "banked": "En attente",
-          "discardedTag": "perd de la valeur"
+          "discardedTag": "perd de la valeur",
+          "bankedBefore": "{count, plural, =1 {+ 1 récompense} other {+ # récompenses}}",
+          "cappedTag": "plafonné"
         },
         "previewError": "Impossible de calculer l'aperçu. Vérifiez le taux puis réessayez.",
         "loading": "Calcul de l'impact...",
@@ -189,10 +192,16 @@
         },
         "announce": {
           "label": "Annoncer le changement sur la carte de vos clients",
-          "help": "Un court message s'affiche sur leur téléphone quand leur carte se met à jour. Désactivé par défaut.",
+          "help": "Un court message s'affiche sur leur téléphone quand leur carte se met à jour.",
           "messageLabel": "Message de l'annonce"
         },
-        "cta": "Convertir mon programme"
+        "cta": "Convertir mon programme",
+        "confirm": {
+          "title": "Convertir votre programme ?",
+          "body": "La conversion démarre immédiatement et ne peut pas être annulée. Tous les soldes sont convertis et les cartes de vos clients se mettent à jour automatiquement.",
+          "confirm": "Convertir maintenant",
+          "cancel": "Retour"
+        }
       },
       "execute": {
         "converting": "Conversion des soldes...",

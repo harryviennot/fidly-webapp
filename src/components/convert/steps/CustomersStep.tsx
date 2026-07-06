@@ -123,8 +123,8 @@ export function CustomersStep() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h2 className="text-[22px] font-semibold text-[var(--foreground)]">{t('title')}</h2>
-        <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+        <h2 className="wiz-h font-semibold text-[var(--foreground)]">{t('title')}</h2>
+        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
       </header>
 
       {/* Rate */}
@@ -237,19 +237,34 @@ export function CustomersStep() {
             </div>
           </div>
 
+          {(preview.clamped_count ?? 0) > 0 && (
+            <InfoBox
+              variant="warning"
+              message={t('impact.cappedWarning', {
+                count: preview.clamped_count,
+                max: draft.maxBalance ?? 0,
+              })}
+            />
+          )}
+
           {preview.sample.length > 0 && (
             <div>
               <p className="mb-2 text-[13px] font-medium text-[var(--foreground)]">
                 {t('sample.title')}
               </p>
-              <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+              <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--card)]">
                 <table className="w-full min-w-[480px] text-[12.5px]">
                   <thead>
-                    <tr className="border-b border-[var(--border-light)] bg-[var(--paper)] text-left text-[11px] uppercase tracking-wide text-[#8A8A8A]">
+                    <tr className="border-b border-[var(--border)] bg-[var(--paper)] text-left text-[11px] uppercase tracking-wide text-[#8A8A8A]">
                       <th className="px-3 py-2 font-medium">{t('sample.customer')}</th>
                       <th className="px-3 py-2 font-medium">{t('sample.before')}</th>
                       <th className="px-3 py-2 font-medium">{t('sample.after')}</th>
-                      <th className="px-3 py-2 font-medium">{t('sample.banked')}</th>
+                      {/* Post-conversion bank only exists on stamp targets —
+                          for stamps→points the banked value lands in the
+                          points instead, shown in the Before column. */}
+                      {toType === 'stamp' && (
+                        <th className="px-3 py-2 font-medium">{t('sample.banked')}</th>
+                      )}
                       <th className="px-3 py-2" />
                     </tr>
                   </thead>
@@ -257,24 +272,36 @@ export function CustomersStep() {
                     {preview.sample.map((row) => (
                       <tr
                         key={row.enrollment_id}
-                        className="border-b border-[var(--border-light)] last:border-none"
+                        className="border-b border-[var(--border)] bg-[var(--card)] last:border-none"
                       >
                         <td className="max-w-[160px] truncate px-3 py-2 font-medium text-[var(--foreground)]">
                           {row.customer_name}
                         </td>
-                        <td className="px-3 py-2 text-[#555]">
+                        <td className="whitespace-nowrap px-3 py-2 text-[#555]">
                           {tUnits(oldUnit, { count: row.value_before })}
+                          {(row.banked_before ?? 0) > 0 && (
+                            <> {t('sample.bankedBefore', { count: row.banked_before })}</>
+                          )}
                         </td>
                         <td className="px-3 py-2 text-[#555]">
                           {tUnits(newUnit, { count: row.value_after })}
                         </td>
-                        <td className="px-3 py-2 text-[#555]">{row.banked_after}</td>
+                        {toType === 'stamp' && (
+                          <td className="px-3 py-2 text-[#555]">{row.banked_after}</td>
+                        )}
                         <td className="px-3 py-2 text-right">
-                          {row.discarded && (
-                            <span className="rounded-full bg-[var(--warning)]/10 px-2 py-0.5 text-[11px] font-medium text-[var(--warning)]">
-                              {t('sample.discardedTag')}
-                            </span>
-                          )}
+                          <span className="inline-flex flex-wrap justify-end gap-1">
+                            {row.clamped && (
+                              <span className="rounded-full bg-[var(--warning)]/10 px-2 py-0.5 text-[11px] font-medium text-[var(--warning)]">
+                                {t('sample.cappedTag')}
+                              </span>
+                            )}
+                            {row.discarded && (
+                              <span className="rounded-full bg-[var(--warning)]/10 px-2 py-0.5 text-[11px] font-medium text-[var(--warning)]">
+                                {t('sample.discardedTag')}
+                              </span>
+                            )}
+                          </span>
                         </td>
                       </tr>
                     ))}

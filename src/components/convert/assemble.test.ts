@@ -7,6 +7,7 @@ import {
   cheapestRewardThreshold,
   defaultConversionRate,
   defaultPolicyFor,
+  normalizeStagedMilestones,
   staleTemplateVariableKeys,
   staleVariableKeys,
   type TargetProgramDraft,
@@ -100,15 +101,14 @@ describe('defaultPolicyFor', () => {
 
 describe('buildNotificationsPayload', () => {
   test('returns null when nothing was staged', () => {
-    expect(buildNotificationsPayload('fr', {}, [])).toBeNull();
+    expect(buildNotificationsPayload({}, [])).toBeNull();
     // Whitespace-only edits count as untouched.
-    expect(buildNotificationsPayload('fr', { points_earned: { fr: '   ' } }, [])).toBeNull();
+    expect(buildNotificationsPayload({ points_earned: { fr: '   ' } }, [])).toBeNull();
   });
 
   test('stages edited trigger bodies per locale, dropping empty locales', () => {
     expect(
       buildNotificationsPayload(
-        'fr',
         {
           points_earned: { fr: 'Vous avez {{points_balance}} points', en: '' },
           reward_earned: { en: 'Reward unlocked!', fr: 'Récompense débloquée !' },
@@ -126,15 +126,66 @@ describe('buildNotificationsPayload', () => {
     });
   });
 
-  test('stages milestones, dropping empty or non-positive rows', () => {
-    const payload = buildNotificationsPayload('en', {}, [
-      { value: 100, metric: 'balance', body: 'You reached 100' },
-      { value: 0, metric: 'balance', body: 'ignored' },
-      { value: 50, metric: 'lifetime', body: '   ' },
+  test('stages enable overrides, alone or alongside a body edit', () => {
+    expect(
+      buildNotificationsPayload({ points_earned: { fr: 'Merci !' } }, [], {
+        points_earned: false,
+        near_reward: false,
+        reward_earned: true,
+      })
+    ).toEqual({
+      templates: [
+        { trigger: 'points_earned', body: { fr: 'Merci !' }, is_enabled: false },
+        { trigger: 'near_reward', is_enabled: false },
+        { trigger: 'reward_earned', is_enabled: true },
+      ],
+    });
+    // An override with no body edits still produces a payload.
+    expect(buildNotificationsPayload({}, [], { near_reward: false })).toEqual({
+      templates: [{ trigger: 'near_reward', is_enabled: false }],
+    });
+  });
+
+  test('stages per-locale milestone bodies, dropping empty locales and dead rows', () => {
+    const payload = buildNotificationsPayload({}, [
+      {
+        value: 100,
+        metric: 'balance',
+        body: { en: 'You reached 100', fr: 'Vous avez atteint 100', es: '  ' },
+      },
+      { value: 0, metric: 'balance', body: { en: 'ignored' } },
+      { value: 50, metric: 'lifetime', body: { en: '   ' } },
     ]);
     expect(payload).toEqual({
-      milestones: [{ value: 100, metric: 'balance', body: { en: 'You reached 100' } }],
+      milestones: [
+        {
+          value: 100,
+          metric: 'balance',
+          body: { en: 'You reached 100', fr: 'Vous avez atteint 100' },
+        },
+      ],
     });
+  });
+});
+
+describe('normalizeStagedMilestones', () => {
+  test('upgrades legacy single-string bodies to a per-locale map', () => {
+    expect(
+      normalizeStagedMilestones([{ value: 5, metric: 'balance', body: 'old copy' }], 'fr')
+    ).toEqual([{ value: 5, metric: 'balance', body: { fr: 'old copy' } }]);
+  });
+
+  test('passes through the current shape and tolerates junk', () => {
+    expect(
+      normalizeStagedMilestones(
+        [{ value: 100, metric: 'lifetime', body: { en: 'hi' } }, { bogus: true }],
+        'en'
+      )
+    ).toEqual([
+      { value: 100, metric: 'lifetime', body: { en: 'hi' } },
+      { value: 0, metric: 'balance', body: {} },
+    ]);
+    expect(normalizeStagedMilestones('not-an-array', 'en')).toEqual([]);
   });
 });
 
@@ -181,7 +232,6 @@ describe('buildConvertRequest', () => {
       designId: 'design-1',
       rate: 6,
       policy: 'cheapest_reward_equivalent',
-      locale: 'fr',
       stagedTemplates: { points_earned: { fr: 'Merci !' } },
       milestones: [],
       announceEnabled: true,
@@ -210,7 +260,6 @@ describe('buildConvertRequest', () => {
       designId: 'design-2',
       rate: 7.5,
       policy: 'bank_full_cards',
-      locale: 'en',
       stagedTemplates: {},
       milestones: [],
       announceEnabled: false,

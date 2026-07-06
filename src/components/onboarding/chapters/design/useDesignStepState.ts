@@ -178,7 +178,14 @@ const CUSTOM_COLORS_DRAFT_KEY = 'design.customColors';
 
 export function useDesignStepState(
   existingDesign: CardDesign | undefined,
-  stepKey: DesignSubStepKey
+  stepKey: DesignSubStepKey,
+  opts?: {
+    /** Edit against this program instead of the live default program. The
+     *  conversion wizard passes its TARGET program shape — the live program
+     *  still has the old type mid-wizard, and the card_type reconciliation
+     *  below would otherwise force the draft back to the old type. */
+    programOverride?: LoyaltyProgram | null;
+  }
 ): DesignStepState {
   const { currentBusiness } = useBusiness();
   const t = useTranslations('designEditor.editor');
@@ -187,7 +194,8 @@ export function useDesignStepState(
   // reward name. The design chapter is gated behind the program step at the
   // step-component level (early-return until program loads), so by the time
   // this hook runs the program data is in cache.
-  const { data: program } = useDefaultProgram(currentBusiness?.id);
+  const { data: liveProgram } = useDefaultProgram(currentBusiness?.id);
+  const program = opts?.programOverride ?? liveProgram;
   // Step-2 smart defaults — palette + initial colour seeds + icon seeds for
   // first-visit users. Once an existing design row exists, its saved values
   // override these (handled inside `computeInitialFormData`).

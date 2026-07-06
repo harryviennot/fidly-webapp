@@ -62,12 +62,12 @@
         "subtitle": "Hemos recuperado tus colores y tu logotipo. La nueva tarjeta solo se activará cuando termine el cambio.",
         "picker": {
           "title": "{count, plural, =1 {Ya tienes una tarjeta guardada de este tipo} other {Ya tienes # tarjetas guardadas de este tipo}}",
-          "subtitle": "Reactiva una de ellas o crea una tarjeta nueva.",
-          "reactivate": "Usar esta tarjeta",
+          "subtitle": "Edita una, duplícala para conservar la original o crea una tarjeta nueva.",
           "designNew": "Crear una tarjeta nueva",
-          "changeChoice": "Elegir otra tarjeta"
+          "changeChoice": "Elegir otra tarjeta",
+          "modify": "Editar",
+          "duplicate": "Duplicar"
         },
-        "chosen": "Esta tarjeta se activará al terminar el cambio.",
         "creating": "Preparando tu tarjeta...",
         "stripPending": "Estamos preparando las imágenes de tus sellos. Tarda unos segundos.",
         "defaultNamePoints": "Tarjeta de puntos",
@@ -116,7 +116,8 @@
           "affected": "Saldos convertidos",
           "banked": "Con recompensas pendientes",
           "losers": "Pierden algo de valor",
-          "clamped": "Limitados a tu máximo"
+          "clamped": "Limitados a tu máximo",
+          "cappedWarning": "{count, plural, =1 {1 cliente supera tu límite de {max} puntos: su saldo se ajustará a {max} puntos y el excedente se pierde.} other {# clientes superan tu límite de {max} puntos: su saldo se ajustará a {max} puntos y el excedente se pierde.}} Puedes subir o quitar el límite en el paso del programa."
         },
         "sample": {
           "title": "Antes y después, con clientes reales",
@@ -124,7 +125,9 @@
           "before": "Antes",
           "after": "Después",
           "banked": "Pendientes",
-          "discardedTag": "pierde valor"
+          "discardedTag": "pierde valor",
+          "bankedBefore": "{count, plural, =1 {+ 1 recompensa} other {+ # recompensas}}",
+          "cappedTag": "limitado"
         },
         "previewError": "No hemos podido calcular la vista previa. Revisa la tasa y vuelve a intentarlo.",
         "loading": "Calculando el impacto...",
@@ -189,10 +192,16 @@
         },
         "announce": {
           "label": "Anunciar el cambio en la tarjeta de tus clientes",
-          "help": "Un mensaje breve aparece en su teléfono cuando su tarjeta se actualiza. Desactivado por defecto.",
+          "help": "Un mensaje corto aparece en su teléfono cuando su tarjeta se actualiza.",
           "messageLabel": "Mensaje del anuncio"
         },
-        "cta": "Convertir mi programa"
+        "cta": "Convertir mi programa",
+        "confirm": {
+          "title": "¿Convertir tu programa?",
+          "body": "La conversión empieza de inmediato y no se puede deshacer. Todos los saldos se convierten y las tarjetas de tus clientes se actualizan solas.",
+          "confirm": "Convertir ahora",
+          "cancel": "Volver"
+        }
       },
       "execute": {
         "converting": "Convirtiendo los saldos...",

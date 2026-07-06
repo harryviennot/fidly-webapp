@@ -252,17 +252,7 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
           style={{ width: `${percent}%` }}
         />
         <div className="flex items-center gap-3 px-4 py-3 min-[768px]:px-6 min-[768px]:py-4">
-          {!isExecute && (
-            <button
-              type="button"
-              onClick={() => setExitOpen(true)}
-              aria-label={t('exit.label')}
-              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)] text-[#7A7A7A] transition-colors hover:border-[#CCC] hover:text-[var(--foreground)]"
-            >
-              <XIcon className="h-4 w-4" weight="bold" />
-            </button>
-          )}
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-[11px] font-medium uppercase tracking-wider text-[#999]">
               {t('header.step', { current: resolved.index + 1, total: resolved.count })}
             </p>
@@ -270,6 +260,16 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
               {t('header.title')}
             </h1>
           </div>
+          {!isExecute && (
+            <button
+              type="button"
+              onClick={() => setExitOpen(true)}
+              aria-label={t('exit.label')}
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-[#7A7A7A] transition-colors hover:bg-[var(--paper-hover)] hover:text-[var(--foreground)]"
+            >
+              <XIcon className="h-5 w-5" weight="bold" />
+            </button>
+          )}
         </div>
       </header>
 
@@ -289,7 +289,9 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
       <main className="flex-1 overflow-y-auto">
         <div
           className={
-            resolved.id === 'design'
+            // Design (form + side preview) and review (card + facts) are
+            // two-column on desktop; the rest stay a comfortable single column.
+            resolved.id === 'design' || resolved.id === 'review'
               ? 'mx-auto w-full max-w-[1140px] px-4 py-6 min-[768px]:px-6 min-[768px]:py-10'
               : 'mx-auto w-full max-w-[640px] px-4 py-6 min-[768px]:px-6 min-[768px]:py-10'
           }

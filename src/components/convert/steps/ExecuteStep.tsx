@@ -22,6 +22,7 @@ import {
   buildConvertRequest,
   defaultConversionRate,
   defaultPolicyFor,
+  normalizeStagedMilestones,
   type StagedMilestone,
   type StagedTemplates,
 } from '../assemble';
@@ -76,10 +77,16 @@ export function ExecuteStep() {
             defaultConversionRate(draft, currentProgramShape(program)),
           policy:
             ctx.getDraft<ConversionPolicy>('customers.policy') ?? defaultPolicyFor(draft.toType),
-          locale: currentBusiness?.primary_locale ?? 'en',
           stagedTemplates: ctx.getDraft<StagedTemplates>('notifications.templates') ?? {},
-          milestones: ctx.getDraft<StagedMilestone[]>('notifications.milestones') ?? [],
-          announceEnabled: ctx.getDraft<boolean>('review.announceEnabled') ?? false,
+          enabledOverrides: ctx.getDraft<Record<string, boolean>>('notifications.enabled') ?? {},
+          milestones: normalizeStagedMilestones(
+            ctx.getDraft<StagedMilestone[]>('notifications.milestones') ?? [],
+            (['en', 'fr', 'es'] as const).find(
+              (l) => l === currentBusiness?.primary_locale
+            ) ?? 'fr'
+          ),
+          // Announce defaults ON — same fallback as the review step's toggle.
+          announceEnabled: ctx.getDraft<boolean>('review.announceEnabled') ?? true,
           // The review step PRE-FILLS the announce copy but useWizardDraft only
           // persists on edit — untouched prefills never reach the store. Merge
           // the defaults back in so "toggle on, keep the suggested copy" sends

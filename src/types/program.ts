@@ -180,7 +180,12 @@ export interface ConversionSampleRow {
   customer_name: string;
   value_before: number;
   value_after: number;
+  /** Banked (earned, unredeemed) rewards held BEFORE the conversion — their
+   * grant hides inside value_after, so the table shows them explicitly. */
+  banked_before: number;
   banked_after: number;
+  /** True when the owner's max_balance cut this customer's converted total. */
+  clamped: boolean;
   discarded: boolean;
 }
 

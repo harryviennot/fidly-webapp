@@ -62,12 +62,12 @@
         "subtitle": "We pre-filled your colors and logo. The new card only goes live once the switch completes.",
         "picker": {
           "title": "{count, plural, =1 {You already have a saved card of this type} other {You already have # saved cards of this type}}",
-          "subtitle": "Reactivate one of them, or create a new card.",
-          "reactivate": "Use this card",
+          "subtitle": "Edit one of them, duplicate it to keep the original, or create a new card.",
           "designNew": "Create a new card",
-          "changeChoice": "Choose a different card"
+          "changeChoice": "Choose a different card",
+          "modify": "Edit",
+          "duplicate": "Duplicate"
         },
-        "chosen": "This card goes live when the switch completes.",
         "creating": "Preparing your card...",
         "stripPending": "We are rendering your stamp images. This takes a few seconds.",
         "defaultNamePoints": "Points card",
@@ -116,7 +116,8 @@
           "affected": "Balances converted",
           "banked": "With pending rewards",
           "losers": "Lose some value",
-          "clamped": "Capped at your maximum"
+          "clamped": "Capped at your maximum",
+          "cappedWarning": "{count, plural, =1 {1 customer exceeds your cap of {max} points: their balance will be cut to {max} points and the excess is lost.} other {# customers exceed your cap of {max} points: their balances will be cut to {max} points and the excess is lost.}} You can raise or remove the cap in the program step."
         },
         "sample": {
           "title": "Before and after, on real customers",
@@ -124,7 +125,9 @@
           "before": "Before",
           "after": "After",
           "banked": "Pending",
-          "discardedTag": "loses value"
+          "discardedTag": "loses value",
+          "bankedBefore": "{count, plural, =1 {+ 1 reward} other {+ # rewards}}",
+          "cappedTag": "capped"
         },
         "previewError": "We could not compute the preview. Check the rate and try again.",
         "loading": "Computing the impact...",
@@ -189,10 +192,16 @@
         },
         "announce": {
           "label": "Announce the change on your customers' cards",
-          "help": "A short message shows on their phone when their card updates. Off by default.",
+          "help": "A short message shows on their phone when their card updates.",
           "messageLabel": "Announcement message"
         },
-        "cta": "Convert my program"
+        "cta": "Convert my program",
+        "confirm": {
+          "title": "Convert your program?",
+          "body": "The conversion starts immediately and cannot be undone. Every balance is converted and your customers' cards update on their own.",
+          "confirm": "Convert now",
+          "cancel": "Go back"
+        }
       },
       "execute": {
         "converting": "Converting balances...",

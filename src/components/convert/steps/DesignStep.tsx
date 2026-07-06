@@ -5,18 +5,18 @@ import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { PlusIcon, SpinnerGapIcon } from '@phosphor-icons/react';
-import DesignEditorV2, { type DesignEditorRef } from '@/components/design/DesignEditorV2';
-import { WalletCard, ScaledCardWrapper } from '@/components/card';
+import { EditorCard } from '@/components/card/EditorCard';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useWizardDraft, useWizardStep } from '@/components/onboarding/wizard-context';
 import { useDesignReady } from '@/components/onboarding/chapters/first-stamp/useDesignReady';
 import { useBusiness } from '@/contexts/business-context';
 import { useDesigns, designKeys } from '@/hooks/use-designs';
-import { createDesign } from '@/api/designs';
+import { createDesign, duplicateDesign } from '@/api/designs';
 import { defaultPointsSampleBalance } from '@/lib/card-utils';
 import type { CardDesign, CardDesignCreate } from '@/types';
 import { useConvertWizard } from '../convert-context';
 import { readTargetDraft } from '../target-draft';
+import { ConvertDesignEditor } from './ConvertDesignEditor';
 
 type DesignMode = 'reactivate' | 'editor' | null;
 
@@ -77,10 +77,9 @@ export function DesignStep() {
   );
 
   const [designId, setDesignId] = useWizardDraft<string | null>('design.designId', () => null);
-  const [mode, setMode] = useWizardDraft<DesignMode>('design.mode', () => null);
+  const [, setMode] = useWizardDraft<DesignMode>('design.mode', () => null);
   const [creating, setCreating] = useState(false);
   const creatingRef = useRef(false);
-  const editorRef = useRef<DesignEditorRef>(null);
 
   const chosenDesign = designId ? designs.find((d) => d.id === designId) ?? null : null;
   const targetDraft = readTargetDraft(ctx.getDraft, toType, program);
@@ -146,32 +145,66 @@ export function DesignStep() {
     if (matching.length === 0) void createNewDraft();
   }, [isLoading, designId, creating, matching.length, createNewDraft]);
 
-  // Continue is allowed once a design is chosen (and, for stamp targets, its
-  // strips finished rendering).
-  const canProceed = !!designId && (!needsStrips || stripsReady);
-  useEffect(() => {
-    ctx.setCanProceed(canProceed);
-  }, [ctx, canProceed]);
-
-  // Save pending editor work before advancing.
-  useEffect(() => {
-    ctx.setSubmitHandler(async () => {
-      if (!designId) return { ok: false };
-      if (mode === 'editor' && editorRef.current?.isDirty) {
-        const ok = await editorRef.current.handleSave();
-        if (!ok) return { ok: false };
+  // Duplicate-then-edit: keeps the original card intact while the owner
+  // adapts the copy for the new program type.
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const duplicateAndEdit = useCallback(
+    async (source: CardDesign) => {
+      if (!businessId || duplicatingId) return;
+      setDuplicatingId(source.id);
+      try {
+        const copy = await duplicateDesign(businessId, source.id);
+        queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (cached) =>
+          cached ? [...cached.filter((d) => d.id !== copy.id), copy] : [copy]
+        );
+        queryClient.invalidateQueries({ queryKey: designKeys.all(businessId) });
+        setDesignId(copy.id);
+        setMode('editor');
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : tErr('generic'));
+      } finally {
+        setDuplicatingId(null);
       }
-      return { ok: true };
-    });
-    return () => ctx.setSubmitHandler(null);
-  }, [ctx, designId, mode]);
+    },
+    [businessId, duplicatingId, queryClient, setDesignId, setMode, tErr]
+  );
+
+  // While the embedded editor is mounted IT owns the footer gate and the
+  // submit handler (it saves all sections on Continue). The parent only
+  // registers them for the picker branch. No cleanups here: the shell resets
+  // both on step navigation, and a cleanup would clobber the editor's
+  // registration when it mounts (child effects run first).
+  const editorMounted = !!designId && !!chosenDesign;
+  useEffect(() => {
+    if (editorMounted) return;
+    ctx.setCanProceed(false);
+  }, [ctx, editorMounted]);
+
+  useEffect(() => {
+    if (editorMounted) return;
+    ctx.setSubmitHandler(async () => ({ ok: !!designId }));
+  }, [ctx, designId, editorMounted]);
+
+  // Same preview surface as the editor pane and the review step: EditorCard
+  // rendered against the TARGET program values, so a points card shows the
+  // drafted reward ladder and a stamp card the drafted goal.
+  const previewProps =
+    toType === 'points'
+      ? {
+          pointsRewards: targetDraft.pointsRewards,
+          pointsBalance: defaultPointsSampleBalance(targetDraft.pointsRewards),
+        }
+      : {
+          totalStamps: targetDraft.totalStamps,
+          previewStamps: Math.max(1, Math.floor(targetDraft.totalStamps * 0.3)),
+        };
 
   const header = (
     <header className="flex flex-col gap-1">
-      <h2 className="text-[22px] font-semibold text-[var(--foreground)]">
+      <h2 className="wiz-h font-semibold text-[var(--foreground)]">
         {toType === 'points' ? t('titleToPoints') : t('titleToStamp')}
       </h2>
-      <p className="text-[14px] text-[#7A7A7A]">{t('subtitle')}</p>
+      <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
     </header>
   );
 
@@ -198,47 +231,43 @@ export function DesignStep() {
           </p>
           <p className="mt-0.5 text-[13px] text-[#7A7A7A]">{t('picker.subtitle')}</p>
         </div>
-        <div className="grid grid-cols-1 gap-4 min-[560px]:grid-cols-2">
+        <div className="grid grid-cols-1 items-stretch gap-6 min-[560px]:grid-cols-2">
           {matching.map((design) => (
-            <button
-              key={design.id}
-              type="button"
-              onClick={() => {
-                setDesignId(design.id);
-                setMode('reactivate');
-              }}
-              className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-left transition-colors hover:border-[var(--accent)]"
-            >
-              <ScaledCardWrapper dynamicHeight>
-                <WalletCard
-                  design={design}
-                  showQR={false}
-                  showSecondaryFields
-                  pointsRewards={toType === 'points' ? targetDraft.pointsRewards : undefined}
-                  pointsBalance={
-                    toType === 'points'
-                      ? defaultPointsSampleBalance(targetDraft.pointsRewards)
-                      : undefined
-                  }
-                  totalStamps={toType === 'stamp' ? targetDraft.totalStamps : undefined}
-                  stamps={toType === 'stamp' ? Math.min(4, targetDraft.totalStamps) : undefined}
-                />
-              </ScaledCardWrapper>
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-[13px] font-medium text-[var(--foreground)]">
-                  {design.name}
-                </span>
-                <span className="flex-shrink-0 text-[12px] font-semibold text-[var(--accent)]">
-                  {t('picker.reactivate')}
-                </span>
+            <div key={design.id} className="flex flex-col gap-3">
+              <EditorCard design={design} {...previewProps} />
+              <span className="truncate px-0.5 text-[13px] font-medium text-[var(--foreground)]">
+                {design.name}
+              </span>
+              <div className="mt-auto flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDesignId(design.id);
+                    setMode('editor');
+                  }}
+                  className="flex-1 rounded-[10px] bg-[var(--accent)] px-3 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--accent-hover)]"
+                >
+                  {t('picker.modify')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void duplicateAndEdit(design)}
+                  disabled={duplicatingId !== null}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3 py-2.5 text-[13px] font-semibold text-[var(--foreground)] transition-colors hover:border-[var(--accent)] disabled:opacity-60"
+                >
+                  {duplicatingId === design.id && (
+                    <SpinnerGapIcon className="h-4 w-4 animate-spin" weight="bold" />
+                  )}
+                  {t('picker.duplicate')}
+                </button>
               </div>
-            </button>
+            </div>
           ))}
           <button
             type="button"
             onClick={() => void createNewDraft()}
             disabled={creating}
-            className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--border)] bg-[var(--paper)] p-4 text-[13px] font-medium text-[#7A7A7A] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-60"
+            className="flex h-full min-h-[240px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--paper)] p-4 text-[13px] font-medium text-[#7A7A7A] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-60"
           >
             {creating ? (
               <SpinnerGapIcon className="h-5 w-5 animate-spin" weight="bold" />
@@ -248,48 +277,6 @@ export function DesignStep() {
             {t('picker.designNew')}
           </button>
         </div>
-      </div>
-    );
-  }
-
-  // ── Reactivated design chosen ───────────────────────────────────────────
-  if (designId && mode === 'reactivate') {
-    return (
-      <div className="flex flex-col gap-6">
-        {header}
-        {chosenDesign && (
-          <div className="mx-auto w-full max-w-[360px]">
-            <ScaledCardWrapper dynamicHeight>
-              <WalletCard
-                design={chosenDesign}
-                showQR={false}
-                showSecondaryFields
-                pointsRewards={toType === 'points' ? targetDraft.pointsRewards : undefined}
-                pointsBalance={
-                  toType === 'points'
-                    ? defaultPointsSampleBalance(targetDraft.pointsRewards)
-                    : undefined
-                }
-                totalStamps={toType === 'stamp' ? targetDraft.totalStamps : undefined}
-                stamps={toType === 'stamp' ? Math.min(4, targetDraft.totalStamps) : undefined}
-              />
-            </ScaledCardWrapper>
-          </div>
-        )}
-        <InfoBox variant="info" message={t('chosen')} />
-        {needsStrips && !stripsReady && (
-          <InfoBox variant="note" message={t('stripPending')} />
-        )}
-        <button
-          type="button"
-          onClick={() => {
-            setDesignId(null);
-            setMode(null);
-          }}
-          className="w-fit text-[13px] font-medium text-[var(--accent)] hover:underline"
-        >
-          {t('picker.changeChoice')}
-        </button>
       </div>
     );
   }
@@ -314,15 +301,10 @@ export function DesignStep() {
         </button>
       )}
       {chosenDesign ? (
-        <DesignEditorV2
-          ref={editorRef}
+        <ConvertDesignEditor
           design={chosenDesign}
-          hideActivate
-          programType={toType}
-          programTotalStamps={toType === 'stamp' ? targetDraft.totalStamps : undefined}
-          programName={program.name}
-          programRewardName={toType === 'stamp' ? targetDraft.rewardName : null}
-          programRewards={toType === 'points' ? targetDraft.pointsRewards : undefined}
+          targetDraft={targetDraft}
+          stripsReady={stripsReady}
         />
       ) : (
         <div className="flex items-center gap-2 py-10 text-[14px] text-[#7A7A7A]">
