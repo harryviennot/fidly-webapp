@@ -27,6 +27,9 @@ interface FieldEditorProps {
    *  Inputs become pill editors and a chip row appears below the list.
    *  Off by default: BusinessInfoEditor and other static surfaces stay plain. */
   enableVariables?: boolean;
+  /** Program the variables target when the card being designed is NOT for the
+   *  live program (conversion wizard drafts). Absent → live default program. */
+  variableContext?: { type: 'stamp' | 'points'; rewardCount: number };
 }
 
 export default function FieldEditor({
@@ -35,6 +38,7 @@ export default function FieldEditor({
   onChange,
   maxFields = 10,
   enableVariables = false,
+  variableContext,
 }: FieldEditorProps) {
   const t = useTranslations('designEditor.fieldEditor');
   const tNotif = useTranslations('notifications');
@@ -45,9 +49,15 @@ export default function FieldEditor({
   );
   // store_location is per-scan, not per-customer, so the backend always strips
   // it from pass fields — keep it out here (includeStoreLocation: false).
-  const rewardCount = isPointsProgram(program) ? program.config.rewards.length : 0;
+  // The card's own type wins over the live program: the conversion wizard
+  // designs a points card while the program is still stamps (and vice versa),
+  // and stamp variables on a points card would render as raw tokens.
+  const effectiveType = variableContext?.type ?? program?.type;
+  const rewardCount =
+    variableContext?.rewardCount ??
+    (isPointsProgram(program) ? program.config.rewards.length : 0);
   const fieldVariables = programVariableKeys({
-    type: program?.type,
+    type: effectiveType,
     rewardCount,
     includeStoreLocation: false,
   });
@@ -68,15 +78,22 @@ export default function FieldEditor({
       hrefs.customer_first_name = '/program/settings';
     }
     // Stamp programs gate {{reward_name}} on the program-level reward label
-    // being set. Points programs resolve it from the reward ladder (single
-    // reward), which always exists, so never gate it there.
-    if (program?.type !== 'points' && program && !program.reward_name?.trim()) {
+    // being set. Points cards resolve it from the reward ladder (single
+    // reward), which always exists — and a conversion-wizard draft targets a
+    // program whose reward label is still being drafted — so gate only when
+    // both the card AND the live program are stamp-typed.
+    if (
+      effectiveType !== 'points' &&
+      program?.type !== 'points' &&
+      program &&
+      !program.reward_name?.trim()
+    ) {
       disabled.add('reward_name');
       tips.reward_name = tNotif('editor.rewardNameMissing');
       hrefs.reward_name = '/program/settings';
     }
     return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
-  }, [enableVariables, currentBusiness?.settings?.customer_data_collection?.collect_name, program, tNotif]);
+  }, [enableVariables, currentBusiness?.settings?.customer_data_collection?.collect_name, program, effectiveType, tNotif]);
 
   // Last-focused pill editor — the chip row inserts into it. Keyed by
   // `${field.key}:${'label'|'value'}`.

@@ -1,5 +1,15 @@
-import { API_BASE_URL, getAuthHeaders, extractErrorMessage } from './client';
-import type { LoyaltyProgram, LoyaltyProgramUpdate, ProgramCreate, StampGoalImpact } from '@/types';
+import { API_BASE_URL, getAuthHeaders, extractErrorMessage, throwApiError } from './client';
+import type {
+  ConversionPreview,
+  ConversionPreviewRequest,
+  ConvertRequest,
+  ConvertResult,
+  LoyaltyProgram,
+  LoyaltyProgramUpdate,
+  ProgramConversion,
+  ProgramCreate,
+  StampGoalImpact,
+} from '@/types';
 
 /**
  * Create the business's loyalty program. When the business has no customers
@@ -64,6 +74,83 @@ export async function getStampGoalImpact(
   }
 
   return response.json();
+}
+
+/**
+ * Impact preview for the conversion wizard. Read-only and repeat-safe: the
+ * wizard calls it (debounced) while the owner tweaks the rate and policy.
+ */
+export async function previewConversion(
+  businessId: string,
+  programId: string,
+  data: ConversionPreviewRequest
+): Promise<ConversionPreview> {
+  const response = await fetch(
+    `${API_BASE_URL}/programs/${businessId}/${programId}/convert/preview`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to preview conversion');
+  }
+
+  return response.json();
+}
+
+/**
+ * Execute the program-type conversion (stamp <-> points). Atomic on the
+ * backend; pass pushes fan out afterwards — follow progress via
+ * getConversions(latest) or the program_conversions realtime channel.
+ * Coded failures: TYPE_ALREADY_CONVERTED / CONVERSION_IN_PROGRESS (409, the
+ * ApiError.detail carries conversion_id so the wizard can attach to the
+ * in-flight progress screen), DESIGN_TYPE_MISMATCH / DESIGN_NOT_READY (422).
+ */
+export async function convertProgram(
+  businessId: string,
+  programId: string,
+  data: ConvertRequest
+): Promise<ConvertResult> {
+  const response = await fetch(
+    `${API_BASE_URL}/programs/${businessId}/${programId}/convert`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to convert program');
+  }
+
+  return response.json();
+}
+
+/** Conversion history (newest first). `latest: true` returns at most one row —
+ * the wizard's progress-poll fallback and the churn-guard/nudge input. */
+export async function getConversions(
+  businessId: string,
+  programId: string,
+  opts?: { latest?: boolean }
+): Promise<ProgramConversion[]> {
+  const suffix = opts?.latest ? '?latest=true' : '';
+  const response = await fetch(
+    `${API_BASE_URL}/programs/${businessId}/${programId}/conversions${suffix}`,
+    { headers: await getAuthHeaders() }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch conversions');
+  }
+
+  const data = await response.json();
+  return data.conversions ?? [];
 }
 
 export async function updateProgram(

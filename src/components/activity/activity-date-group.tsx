@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { TransactionResponse } from "@/types";
 
 export type DateGroup = "today" | "yesterday" | "thisWeek" | "older";
 
@@ -34,10 +33,10 @@ function getDateGroup(dateStr: string): DateGroup {
   return "older";
 }
 
-export function groupByDate(
-  transactions: TransactionResponse[]
-): Map<DateGroup, TransactionResponse[]> {
-  const groups = new Map<DateGroup, TransactionResponse[]>();
+export function groupByDate<T extends { created_at: string }>(
+  transactions: T[]
+): Map<DateGroup, T[]> {
+  const groups = new Map<DateGroup, T[]>();
   const order: DateGroup[] = ["today", "yesterday", "thisWeek", "older"];
 
   for (const group of order) {

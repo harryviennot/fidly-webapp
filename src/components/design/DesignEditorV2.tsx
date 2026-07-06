@@ -58,6 +58,10 @@ interface DesignEditorV2Props {
   programType?: LoyaltyType;
   /** Active program's reward ladder — feeds the points strip preview + icons. */
   programRewards?: RewardTier[];
+  /** Hide the Activate button. The conversion wizard embeds the editor on a
+   *  draft of the TARGET type while the live program is still the old one —
+   *  activating there is invalid (backend 409s) until the conversion commits. */
+  hideActivate?: boolean;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
 }
@@ -136,7 +140,7 @@ async function resolveImageUpdates(
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, programRewardName, programType, programRewards, headerLeft, headerRight }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, programRewardName, programType, programRewards, hideActivate = false, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const queryClient = useQueryClient();
     const { currentBusiness } = useBusiness();
@@ -514,6 +518,13 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       businessInfo,
       showAdvancedStamps,
       designId: design?.id,
+      // Which program the card's {{variables}} must target. Follows the card
+      // being DESIGNED (the conversion wizard edits a target-type draft while
+      // the live program is still the old type), not the live program.
+      variableContext: {
+        type: isPoints ? 'points' : 'stamp',
+        rewardCount: isPoints ? pointsRewards.length : 1,
+      },
       bgHex,
       labelHex,
       textHex,
@@ -666,7 +677,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
           {/* Desktop: Action buttons below preview */}
           <div className={`${isCompact ? 'hidden' : 'flex'} flex-col gap-3 mt-5 w-full`}>
-            {design && !isActive && (
+            {design && !isActive && !hideActivate && (
               <Button
                 variant="outline"
                 className="w-full"
@@ -746,7 +757,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         )}
 
         {/* Compact: Activate button at bottom of form */}
-        {design && !isActive && isCompact && (
+        {design && !isActive && isCompact && !hideActivate && (
           <div className="pt-4">
             <Button
               variant="outline"

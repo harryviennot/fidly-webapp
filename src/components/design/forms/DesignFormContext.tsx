@@ -26,6 +26,13 @@ export interface DesignFormContextValue {
    * "save first" hint while it's undefined (brand-new design).
    */
   designId?: string;
+  /**
+   * Which program the card's {{variables}} target. Set by providers that can
+   * design a card for a DIFFERENT program than the live one (the conversion
+   * wizard edits a target-type draft); absent → FieldEditor falls back to the
+   * live default program.
+   */
+  variableContext?: { type: 'stamp' | 'points'; rewardCount: number };
 
   // ── Computed (hex strings + contrast ratios) ─────────────────────────
   bgHex: string;

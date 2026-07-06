@@ -1,0 +1,238 @@
+{
+  "conversion": {
+    "header": {
+      "title": "Cambiar el tipo de programa",
+      "step": "Paso {current} de {total}"
+    },
+    "exit": {
+      "label": "Cerrar",
+      "title": "¿Salir de la conversión?",
+      "body": "Tus elecciones no se guardarán. Tu programa actual se queda tal cual.",
+      "confirm": "Salir",
+      "cancel": "Quedarme"
+    },
+    "locales": {
+      "en": "English",
+      "fr": "Français",
+      "es": "Español"
+    },
+    "units": {
+      "stamps": "{count, plural, =1 {1 sello} other {# sellos}}",
+      "points": "{count, plural, =1 {1 punto} other {# puntos}}"
+    },
+    "steps": {
+      "intro": {
+        "titleToPoints": "Pasar de sellos a puntos",
+        "titleToStamp": "Pasar de puntos a sellos",
+        "subtitle": "Tus clientes conservan su tarjeta y su progreso. Nosotros convertimos todo por ti.",
+        "how": {
+          "title": "Qué ocurre durante el cambio",
+          "inPlace": "Todos los saldos se convierten de una vez, con una regla que eliges en los pasos siguientes.",
+          "noRedownload": "Las tarjetas se actualizan solas. Nadie tiene que descargar una tarjeta nueva.",
+          "rerender": "Cada tarjeta muestra tu nuevo estilo de tarjeta en su próxima actualización."
+        },
+        "current": {
+          "title": "Tu programa hoy",
+          "type": "Tipo",
+          "stamps": "Sellos",
+          "points": "Puntos",
+          "goal": "Sellos para una recompensa",
+          "reward": "Recompensa",
+          "rate": "Puntos por 1 {currency} gastado",
+          "rewards": "Recompensas del menú"
+        },
+        "churnWarning": "Ya cambiaste de tipo el {date}. Otro cambio tan pronto puede confundir a tus clientes habituales. Tómate un momento antes de continuar.",
+        "pushing": {
+          "title": "Ya hay un cambio en curso",
+          "body": "Tu programa se está convirtiendo ahora mismo. Puedes seguir el avance, pero no puedes iniciar otro cambio hasta que termine.",
+          "viewProgress": "Ver el avance"
+        },
+        "cta": "Empezar el cambio"
+      },
+      "program": {
+        "titleToPoints": "Configura tu programa de puntos",
+        "titleToStamp": "Configura tu tarjeta de sellos",
+        "subtitleToPoints": "Decide cómo ganan puntos tus clientes y qué pueden canjear.",
+        "subtitleToStamp": "Decide cuántos sellos llenan una tarjeta y cuál es la recompensa.",
+        "cta": "Guardar mi programa"
+      },
+      "design": {
+        "titleToPoints": "Crea tu tarjeta de puntos",
+        "titleToStamp": "Crea tu tarjeta de sellos",
+        "subtitle": "Hemos recuperado tus colores y tu logotipo. La nueva tarjeta solo se activará cuando termine el cambio.",
+        "picker": {
+          "title": "{count, plural, =1 {Ya tienes una tarjeta guardada de este tipo} other {Ya tienes # tarjetas guardadas de este tipo}}",
+          "subtitle": "Reactiva una de ellas o crea una tarjeta nueva.",
+          "reactivate": "Usar esta tarjeta",
+          "designNew": "Crear una tarjeta nueva",
+          "changeChoice": "Elegir otra tarjeta"
+        },
+        "chosen": "Esta tarjeta se activará al terminar el cambio.",
+        "creating": "Preparando tu tarjeta...",
+        "stripPending": "Estamos preparando las imágenes de tus sellos. Tarda unos segundos.",
+        "defaultNamePoints": "Tarjeta de puntos",
+        "defaultNameStamp": "Tarjeta de sellos",
+        "cta": "Quedarme con esta tarjeta"
+      },
+      "customers": {
+        "title": "Convierte los saldos de tus clientes",
+        "subtitle": "Elige la tasa y la regla, y comprueba el resultado. De momento no cambia nada.",
+        "rateLabel": "Tasa de conversión",
+        "rateUnit": "puntos por sello",
+        "rateHelpToPoints": "Cada sello se convierte en {rate} punto(s). Siempre redondeamos hacia abajo.",
+        "rateHelpToStamp": "Cada {rate} puntos se convierten en 1 sello. Siempre redondeamos hacia abajo.",
+        "rateSuggested": "Tasa sugerida: {rate}, calculada con tu recompensa más barata.",
+        "policyLabelToPoints": "¿Qué hacemos con las recompensas ya ganadas?",
+        "policyLabelToStamp": "¿Qué hacemos con los puntos que sobran de una tarjeta llena?",
+        "policies": {
+          "cheapest_reward_equivalent": {
+            "name": "Abonar su valor en puntos",
+            "desc": "Cada recompensa pendiente se convierte en el precio en puntos de tu recompensa más barata. Simple y justo."
+          },
+          "full_card_equivalent": {
+            "name": "Abonar una tarjeta llena",
+            "desc": "Cada recompensa pendiente se convierte en el valor en puntos de una tarjeta de sellos completa."
+          },
+          "discard": {
+            "name": "Dejarlas caducar",
+            "desc": "Las recompensas pendientes se pierden. Úsalo solo si nadie tiene ninguna."
+          },
+          "bank_full_cards": {
+            "name": "Guardar todas las tarjetas llenas",
+            "desc": "Cada tarjeta llena en puntos se convierte en una recompensa pendiente. Nadie pierde nada."
+          },
+          "bank_one": {
+            "name": "Guardar una sola recompensa",
+            "desc": "Una tarjeta llena se convierte en una recompensa pendiente. Los puntos de más se pierden."
+          },
+          "cap_card": {
+            "name": "Limitar a una tarjeta",
+            "desc": "Los saldos se convierten hasta una tarjeta llena. Los puntos de más se pierden."
+          }
+        },
+        "impact": {
+          "title": "Impacto en tus clientes",
+          "customers": "Clientes",
+          "affected": "Saldos convertidos",
+          "banked": "Con recompensas pendientes",
+          "losers": "Pierden algo de valor",
+          "clamped": "Limitados a tu máximo"
+        },
+        "sample": {
+          "title": "Antes y después, con clientes reales",
+          "customer": "Cliente",
+          "before": "Antes",
+          "after": "Después",
+          "banked": "Pendientes",
+          "discardedTag": "pierde valor"
+        },
+        "previewError": "No hemos podido calcular la vista previa. Revisa la tasa y vuelve a intentarlo.",
+        "loading": "Calculando el impacto...",
+        "cta": "Confirmar la tasa"
+      },
+      "notifications": {
+        "title": "Actualiza tus notificaciones",
+        "subtitle": "Se aplican en cuanto termine el cambio. Si dejas algo vacío, usamos nuestros mensajes estándar.",
+        "loading": "Cargando tus mensajes...",
+        "editedTag": "Modificado",
+        "reset": "Restablecer el mensaje predeterminado",
+        "milestones": {
+          "title": "Hitos",
+          "help": "Un mensaje único cuando un cliente alcanza un umbral.",
+          "add": "Añadir un hito",
+          "valueToPoints": "Puntos",
+          "valueToStamp": "Sellos",
+          "metricLabel": "Medido sobre",
+          "metricBalance": "Saldo actual",
+          "metricLifetime": "Total acumulado",
+          "bodyPlaceholder": "Tu mensaje...",
+          "remove": "Quitar"
+        },
+        "disabledNotice": "{count, plural, =1 {Tu hito actual se desactivará} other {Tus # hitos actuales se desactivarán}}: sus umbrales se refieren al sistema antiguo. Vuelve a crearlos aquí o más tarde desde la página de notificaciones.",
+        "staleVars": "Estas variables no existen en el nuevo programa y se mostrarían como texto sin más: {vars}",
+        "cta": "Guardar mis mensajes"
+      },
+      "broadcasts": {
+        "title": "Difusiones programadas en espera",
+        "subtitle": "Estas difusiones seleccionan a tus clientes según los valores de tu programa actual, y esos valores cambian con la conversión.",
+        "explain": "Al convertir, vuelven a borradores. Revisa su audiencia y prográmalas de nuevo desde la página de difusiones.",
+        "untitled": "Difusión sin título",
+        "scheduledFor": "Programada para el {date}",
+        "cta": "Continuar"
+      },
+      "review": {
+        "title": "Revisa antes de convertir",
+        "subtitle": "Un último vistazo. No cambia nada hasta que confirmes.",
+        "program": {
+          "title": "Nuevo programa"
+        },
+        "design": {
+          "title": "Nueva tarjeta"
+        },
+        "conversion": {
+          "title": "Conversión de saldos",
+          "rate": "Tasa",
+          "rateValue": "{rate} puntos por sello",
+          "policy": "Regla",
+          "customers": "Clientes convertidos"
+        },
+        "notifications": {
+          "title": "Notificaciones",
+          "custom": "Tus mensajes personalizados sustituyen a los estándar.",
+          "defaults": "Se usarán los mensajes estándar.",
+          "milestonesStaged": "{count, plural, =1 {1 hito nuevo} other {# hitos nuevos}}",
+          "milestonesDisabled": "{count, plural, =1 {1 hito antiguo desactivado} other {# hitos antiguos desactivados}}"
+        },
+        "broadcasts": {
+          "title": "Difusiones",
+          "paused": "{count, plural, =1 {1 difusión programada vuelve a borradores} other {# difusiones programadas vuelven a borradores}}"
+        },
+        "announce": {
+          "label": "Anunciar el cambio en la tarjeta de tus clientes",
+          "help": "Un mensaje breve aparece en su teléfono cuando su tarjeta se actualiza. Desactivado por defecto.",
+          "messageLabel": "Mensaje del anuncio"
+        },
+        "cta": "Convertir mi programa"
+      },
+      "execute": {
+        "converting": "Convirtiendo los saldos...",
+        "convertingBody": "Estamos convirtiendo el saldo de cada cliente. Es cosa de un momento.",
+        "pushing": "Actualizando las tarjetas",
+        "pushingBody": "Las tarjetas se actualizan en los teléfonos de tus clientes, sin que tengan que hacer nada.",
+        "pushProgress": "{pushed} de {total} tarjetas actualizadas",
+        "success": {
+          "titleToPoints": "Tu programa ya funciona con puntos",
+          "titleToStamp": "Tu programa ya funciona con sellos",
+          "converted": "{count, plural, =1 {1 cliente convertido} other {# clientes convertidos}}",
+          "broadcasts": "{count, plural, =1 {1 difusión ha vuelto a borradores} other {# difusiones han vuelto a borradores}}. Revisa su audiencia y prográmalas de nuevo.",
+          "reviewBroadcasts": "Revisar mis difusiones",
+          "milestones": "{count, plural, =1 {1 hito antiguo desactivado} other {# hitos antiguos desactivados}}.",
+          "reviewNotifications": "Revisar mis notificaciones",
+          "cta": "Volver a mi panel"
+        },
+        "failed": {
+          "title": "El cambio no se ha completado",
+          "body": "No se ha perdido nada: tu programa sigue con su tipo anterior. Vuelve a intentarlo y escríbenos si ocurre dos veces.",
+          "retry": "Volver a intentarlo"
+        }
+      }
+    },
+    "announceDefaults": {
+      "toPoints": "Nuestro programa de fidelidad cambia: tus sellos ahora son puntos. Tu saldo se ha convertido automáticamente, no tienes que hacer nada.",
+      "toStamp": "Nuestro programa de fidelidad cambia: tus puntos ahora son sellos. Tu saldo se ha convertido automáticamente, no tienes que hacer nada."
+    },
+    "entry": {
+      "title": "Tipo de programa",
+      "currentStamp": "Tu programa funciona con sellos.",
+      "currentPoints": "Tu programa funciona con puntos.",
+      "body": "Puedes cambiar de tipo sin perder a nadie: cada saldo se convierte y las tarjetas se actualizan solas.",
+      "ctaToPoints": "Pasar a puntos",
+      "ctaToStamp": "Pasar a sellos"
+    },
+    "errors": {
+      "notAllowed": "Tu plan actual no incluye el programa de puntos.",
+      "designNotReady": "Tu tarjeta todavía se está preparando. Espera unos segundos y vuelve a intentarlo.",
+      "generic": "Algo ha salido mal. Vuelve a intentarlo."
+    }
+  }
+}

@@ -6,6 +6,7 @@ import {
   SlidersHorizontalIcon,
   CreditCardIcon,
   CoinsIcon,
+  ArrowsLeftRightIcon,
 } from "@phosphor-icons/react";
 import type { TransactionResponse, TransactionType } from "@/types";
 
@@ -101,6 +102,16 @@ export const TYPE_CONFIG: Record<TransactionType, TransactionTypeConfig> = {
     bgColor: "bg-red-500/15",
     deltaBg: "bg-[#FDE8E4]",
     deltaText: "text-[#C75050]",
+  },
+  // Program-type conversion event (one per enrollment). Neutral palette: it is
+  // a system event, not customer activity. Rendered from METADATA — the value
+  // columns are in different units within the same row.
+  balance_migrated: {
+    icon: ArrowsLeftRightIcon,
+    iconColor: "text-[var(--muted-foreground)]",
+    bgColor: "bg-[var(--background-subtle)]",
+    deltaBg: "bg-[#F0EDE7]",
+    deltaText: "text-[#8A8A8A]",
   },
 };
 

@@ -388,6 +388,7 @@
       "complete": "Tarjeta completada",
       "limit": "Límite de {max} pts",
       "nextWord": "Siguiente"
-    }
+    },
+    "typeMismatchBadge": "Otro tipo de programa"
   }
 }

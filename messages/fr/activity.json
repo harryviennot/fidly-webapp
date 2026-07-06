@@ -81,6 +81,11 @@
       "description": "Les scans et récompenses apparaîtront ici lorsque vos clients interagiront avec votre programme de fidélité."
     },
     "emptyFiltered": "Aucune activité ne correspond à vos filtres.",
-    "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}"
+    "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}",
+    "conversionMarker": {
+      "toPoints": "Programme passé aux points",
+      "toStamps": "Programme passé aux tampons",
+      "summary": "{count, plural, =1 {1 carte convertie} other {# cartes converties}}"
+    }
   }
 }

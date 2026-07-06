@@ -388,6 +388,7 @@
       "complete": "Carte complétée",
       "limit": "Plafond {max} pts",
       "nextWord": "Suivant"
-    }
+    },
+    "typeMismatchBadge": "Autre type de programme"
   }
 }

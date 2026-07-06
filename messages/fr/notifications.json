@@ -529,7 +529,8 @@
         "upgradeRequired": "Les diffusions nécessitent Growth ou Pro.",
         "quotaExceeded": "Vous avez utilisé toutes vos diffusions ce mois-ci. Enregistrez-la comme brouillon et envoyez-la quand votre quota se réinitialise, ou passez à Pro pour des diffusions illimitées.",
         "proFiltersBlocked": "Les filtres avancés nécessitent Pro."
-      }
+      },
+      "conversionPaused": "{count, plural, =1 {1 diffusion programmée a été mise en pause} other {# diffusions programmées ont été mises en pause}} lors du changement de type de programme : leur ciblage reposait sur l'ancien système. Vérifiez-les et reprogrammez-les depuis les brouillons ci-dessous."
     },
     "downgradeBanner": {
       "title": "Votre plan Growth a expiré",

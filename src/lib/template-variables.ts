@@ -181,6 +181,30 @@ export function getVariableDisplayName(key: string, locale: Locale): string {
   return key;
 }
 
+/**
+ * Insert `{{key}}` into `text` at the caret (replacing any selection), with
+ * joining spaces only where the token would otherwise glue onto a word —
+ * never before punctuation or after existing whitespace. Returns the new
+ * text plus the caret position right after the inserted token so the caller
+ * can restore focus there.
+ */
+export function insertVariableAtCursor(
+  text: string,
+  selectionStart: number,
+  selectionEnd: number,
+  key: string
+): { text: string; cursor: number } {
+  const start = Math.max(0, Math.min(selectionStart, text.length));
+  const end = Math.max(start, Math.min(selectionEnd, text.length));
+  const before = text.slice(0, start);
+  const after = text.slice(end);
+  const wordly = /[\p{L}\p{N}]/u;
+  const spaceBefore = before.length > 0 && wordly.test(before[before.length - 1]) ? ' ' : '';
+  const spaceAfter = after.length > 0 && wordly.test(after[0]) ? ' ' : '';
+  const token = `${spaceBefore}{{${key}}}${spaceAfter}`;
+  return { text: before + token + after, cursor: start + token.length };
+}
+
 /** Extract the set of {{variable}} names referenced in a template string. */
 export function extractVariables(template: string): Set<string> {
   const matches = template?.matchAll(VARIABLE_PATTERN) ?? [];

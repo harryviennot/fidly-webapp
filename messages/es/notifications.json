@@ -529,7 +529,8 @@
         "upgradeRequired": "Las difusiones requieren Growth o Pro.",
         "quotaExceeded": "Has usado todas tus difusiones de este mes. Guárdala como borrador y envíala cuando se reinicie tu cuota, o pasa a Pro para tener difusiones ilimitadas.",
         "proFiltersBlocked": "Los filtros avanzados requieren Pro."
-      }
+      },
+      "conversionPaused": "{count, plural, =1 {1 difusión programada se pausó} other {# difusiones programadas se pausaron}} al cambiar el tipo de programa: su segmentación se basaba en el sistema anterior. Revísalas y prográmalas de nuevo desde los borradores de abajo."
     },
     "downgradeBanner": {
       "title": "Tu plan Growth ha terminado",

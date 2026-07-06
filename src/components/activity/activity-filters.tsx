@@ -4,7 +4,13 @@ import { useTranslations } from "next-intl";
 import type { SingleSelectFilterGroup } from "@/components/reusables/search-bar";
 import type { TransactionType } from "@/types";
 
-type FilterKey = TransactionType | "all" | "card_added,card_re_added";
+// balance_migrated is deliberately not filterable: the backend hides it from
+// the business-wide feed (the activity page shows ONE conversion marker
+// instead), so a chip for it would always come back empty.
+type FilterKey =
+  | Exclude<TransactionType, "balance_migrated">
+  | "all"
+  | "card_added,card_re_added";
 
 const FILTER_OPTIONS: FilterKey[] = [
   "all",

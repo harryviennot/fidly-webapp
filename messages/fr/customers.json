@@ -266,7 +266,8 @@
         "points_adjusted": "Points ajustés",
         "card_added": "Carte ajoutée",
         "card_re_added": "Carte ré-ajoutée",
-        "card_deleted": "Carte supprimée"
+        "card_deleted": "Carte supprimée",
+        "balance_migrated": "Solde converti"
       },
       "by": "par",
       "you": "Vous",
@@ -283,7 +284,12 @@
         "yesterday": "Hier",
         "daysAgo": "il y a {count}j"
       },
-      "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}"
+      "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}",
+      "conversion": {
+        "stampsValue": "{count, plural, =1 {1 tampon} other {# tampons}}",
+        "pointsValue": "{count} pts",
+        "rewardsHonored": "{count, plural, =1 {1 récompense conservée} other {# récompenses conservées}}"
+      }
     }
   }
 }

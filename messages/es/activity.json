@@ -81,6 +81,11 @@
       "description": "Los escaneos y las recompensas aparecerán aquí a medida que tus clientes usen tu programa de fidelidad."
     },
     "emptyFiltered": "Ninguna actividad coincide con tus filtros.",
-    "rewardsLeft": "{count, plural, =1 {1 recompensa restante} other {# recompensas restantes}}"
+    "rewardsLeft": "{count, plural, =1 {1 recompensa restante} other {# recompensas restantes}}",
+    "conversionMarker": {
+      "toPoints": "Programa cambiado a puntos",
+      "toStamps": "Programa cambiado a sellos",
+      "summary": "{count, plural, =1 {1 tarjeta convertida} other {# tarjetas convertidas}}"
+    }
   }
 }

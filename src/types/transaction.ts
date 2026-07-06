@@ -10,7 +10,12 @@ export type TransactionType =
   | 'points_adjusted'
   | 'card_added'
   | 'card_re_added'
-  | 'card_deleted';
+  | 'card_deleted'
+  /** One per enrollment at a program-type conversion. Hidden from the main
+   * activity feed (backend default-excludes it); shown in the per-customer
+   * timeline. Its value columns are in DIFFERENT units (before = old type,
+   * after = new type) — render from metadata via lib/conversion.describeMigration. */
+  | 'balance_migrated';
 
 export type TransactionSource = 'scanner' | 'dashboard' | 'api' | 'system' | 'wallet';
 

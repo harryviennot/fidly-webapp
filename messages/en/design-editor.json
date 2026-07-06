@@ -388,6 +388,7 @@
       "complete": "Card completed",
       "limit": "{max} pts limit",
       "nextWord": "Next"
-    }
+    },
+    "typeMismatchBadge": "Other program type"
   }
 }

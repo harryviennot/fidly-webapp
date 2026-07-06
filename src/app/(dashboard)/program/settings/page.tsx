@@ -79,9 +79,10 @@ function readDataCollection(
 }
 
 export default function ProgramSettingsPage() {
-  const { currentBusiness, refetch } = useBusiness();
+  const { currentBusiness, currentRole, refetch } = useBusiness();
   const { program, activeDesign, loading, updateProgram } = useProgram();
   const t = useTranslations('loyaltyProgram');
+  const tConversion = useTranslations('conversion.entry');
   const isPoints = isPointsProgram(program);
   const currency = currencySymbol(currentBusiness?.country, currentBusiness?.primary_locale);
 
@@ -344,6 +345,27 @@ export default function ProgramSettingsPage() {
             <div className="text-[12px] text-[#A0A0A0] mb-5">{t('dataCollectionDescription')}</div>
             <DataCollectionForm value={dataCollection} onChange={setDataCollection} />
           </section>
+
+          {/* Program type switch — the conversion wizard's entry point. Owner
+              only: the wizard restructures every customer's balance. */}
+          {currentRole === 'owner' && program && (
+            <section className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-4 min-[1080px]:p-5 min-[1080px]:px-6">
+              <div className="text-[16px] font-semibold text-[#1A1A1A] mb-1">
+                {tConversion('title')}
+              </div>
+              <div className="text-[12px] text-[#A0A0A0] mb-3">
+                {isPoints ? tConversion('currentPoints') : tConversion('currentStamp')}
+              </div>
+              <p className="text-[13px] leading-[1.5] text-[#555]">{tConversion('body')}</p>
+              <Link
+                href="/convert"
+                className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold text-[var(--foreground)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              >
+                {isPoints ? tConversion('ctaToStamp') : tConversion('ctaToPoints')}
+                <ArrowRightIcon className="h-4 w-4" weight="bold" />
+              </Link>
+            </section>
+          )}
         </div>
 
         {/* Right column — recap (sticky on desktop, inline at the bottom on mobile) */}

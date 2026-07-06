@@ -81,6 +81,11 @@
       "description": "Scans and rewards will appear here as customers interact with your loyalty program."
     },
     "emptyFiltered": "No activity matches your filters.",
-    "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"
+    "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}",
+    "conversionMarker": {
+      "toPoints": "Program switched to points",
+      "toStamps": "Program switched to stamps",
+      "summary": "{count, plural, =1 {1 card converted} other {# cards converted}}"
+    }
   }
 }

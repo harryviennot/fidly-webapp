@@ -1,4 +1,9 @@
 import type { PassField } from './design';
+import type {
+  ConversionPolicy,
+  PointsToStampsPolicy,
+  StampsToPointsPolicy,
+} from '@/lib/conversion';
 
 export type LoyaltyType = 'stamp' | 'points';
 
@@ -131,4 +136,98 @@ export interface StampGoalImpact {
   old_total: number;
   new_total: number;
   stackable_rewards: boolean;
+}
+
+// ── Program type conversion (stamp <-> points) ──
+
+export type { ConversionPolicy, PointsToStampsPolicy, StampsToPointsPolicy };
+
+/** One row of program_conversions — the executed-conversion record powering
+ * the wizard's live progress (realtime on pushed_count/status), the activity
+ * page's conversion marker, and the broadcasts pause nudge. */
+export interface ProgramConversion {
+  id: string;
+  business_id: string;
+  program_id: string;
+  from_type: LoyaltyType;
+  to_type: LoyaltyType;
+  rate: number;
+  policy: ConversionPolicy;
+  total_enrollments: number;
+  converted_count: number;
+  skipped_count: number;
+  banked_rewards_honored: number;
+  paused_broadcast_ids: string[];
+  disabled_milestone_count: number;
+  announce: { enabled?: boolean; messages?: Record<string, string> };
+  status: 'pushing' | 'completed' | 'failed';
+  pushed_count: number;
+  created_at: string;
+  completed_at: string | null;
+}
+
+/** POST /programs/{biz}/{id}/convert/preview body. */
+export interface ConversionPreviewRequest {
+  to_type: LoyaltyType;
+  rate: number;
+  policy: ConversionPolicy;
+  config: Record<string, unknown>;
+  reward_name?: string | null;
+}
+
+export interface ConversionSampleRow {
+  enrollment_id: string;
+  customer_name: string;
+  value_before: number;
+  value_after: number;
+  banked_after: number;
+  discarded: boolean;
+}
+
+/** POST /programs/{biz}/{id}/convert/preview response. */
+export interface ConversionPreview {
+  total_enrollments: number;
+  affected_count: number;
+  banked_holders: number;
+  losers_count: number;
+  clamped_count: number;
+  banked_rewards_honored: number;
+  sample: ConversionSampleRow[];
+  suggested_rate: number;
+  affected_broadcasts: { id: string; title: string | null; scheduled_at: string | null }[];
+  milestone_count: number;
+  last_conversion_at: string | null;
+}
+
+/** Staged notification copy applied server-side AFTER the type flip (a
+ * pre-flip PUT would be rejected as cross-type). */
+export interface ConversionNotificationsPayload {
+  templates?: { trigger: string; body?: Record<string, string>; is_enabled?: boolean }[];
+  milestones?: { value: number; metric?: 'balance' | 'lifetime'; body?: Record<string, string> }[];
+}
+
+/** POST /programs/{biz}/{id}/convert body. */
+export interface ConvertRequest {
+  to_type: LoyaltyType;
+  rate: number;
+  policy: ConversionPolicy;
+  design_id: string;
+  config: Record<string, unknown>;
+  reward_name?: string | null;
+  reward_description?: string | null;
+  back_fields?: Record<string, unknown>[] | null;
+  translations?: Record<string, unknown> | null;
+  notifications?: ConversionNotificationsPayload | null;
+  announce?: { enabled: boolean; messages: Record<string, string> } | null;
+}
+
+/** POST /programs/{biz}/{id}/convert response. */
+export interface ConvertResult {
+  conversion_id: string;
+  total_enrollments: number;
+  converted: number;
+  skipped_final: string[];
+  paused_broadcast_ids: string[];
+  disabled_milestones: number;
+  warnings: string[];
 }

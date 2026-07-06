@@ -529,7 +529,8 @@
         "upgradeRequired": "Broadcasts require Growth or Pro.",
         "quotaExceeded": "You've used all your broadcasts this month. Save it as a draft and send it when your quota resets, or upgrade to Pro for unlimited broadcasts.",
         "proFiltersBlocked": "Advanced filters require Pro."
-      }
+      },
+      "conversionPaused": "{count, plural, =1 {1 scheduled broadcast was paused} other {# scheduled broadcasts were paused}} when your program switched types: the audience targeting referred to the old system. Review and reschedule them from the drafts below."
     },
     "downgradeBanner": {
       "title": "Your Growth plan ended",
