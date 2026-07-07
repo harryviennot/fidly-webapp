@@ -111,7 +111,10 @@ export function DesignStep() {
         organizationName: currentBusiness?.name || '',
         toType,
       });
-      const created = await createDesign(businessId, seed);
+      // purpose=conversion grants a design slot over the tier's limit so
+      // Starter (1 design) can stage this target-type draft; the old design
+      // is deleted at conversion commit.
+      const created = await createDesign(businessId, seed, { purpose: 'conversion' });
       // Append synchronously so the editor mounts immediately and the
       // dangling-id self-heal below never mistakes the fresh draft (not yet
       // in the refetched list) for a stale one.
@@ -161,7 +164,9 @@ export function DesignStep() {
       if (!businessId || duplicatingId) return;
       setDuplicatingId(source.id);
       try {
-        const copy = await duplicateDesign(businessId, source.id);
+        const copy = await duplicateDesign(businessId, source.id, {
+          purpose: 'conversion',
+        });
         queryClient.setQueryData<CardDesign[]>(designKeys.all(businessId), (cached) =>
           cached ? [...cached.filter((d) => d.id !== copy.id), copy] : [copy]
         );

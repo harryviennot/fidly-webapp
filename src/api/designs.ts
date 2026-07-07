@@ -43,12 +43,33 @@ export async function getDesign(businessId: string, designId: string): Promise<C
   return response.json();
 }
 
-export async function createDesign(businessId: string, data: CardDesignCreate): Promise<CardDesign> {
-  const response = await fetch(`${API_BASE_URL}/designs/${businessId}`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
+/** Options for design-creating calls that may need the conversion carve-out. */
+export interface CreateDesignOptions {
+  /**
+   * `'conversion'` grants one design slot over the tier's limit (the convert
+   * wizard's target-type draft). Reconciled at conversion commit, which
+   * deletes the old design when the saved limit is exceeded.
+   */
+  purpose?: 'conversion';
+}
+
+function purposeQuery(opts?: CreateDesignOptions): string {
+  return opts?.purpose ? `?purpose=${opts.purpose}` : '';
+}
+
+export async function createDesign(
+  businessId: string,
+  data: CardDesignCreate,
+  opts?: CreateDesignOptions
+): Promise<CardDesign> {
+  const response = await fetch(
+    `${API_BASE_URL}/designs/${businessId}${purposeQuery(opts)}`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -148,14 +169,21 @@ export async function activateDesign(businessId: string, designId: string): Prom
   return response.json();
 }
 
-export async function duplicateDesign(businessId: string, designId: string): Promise<CardDesign> {
+export async function duplicateDesign(
+  businessId: string,
+  designId: string,
+  opts?: CreateDesignOptions
+): Promise<CardDesign> {
   // Server-side deep clone: copies the full row (card_type + points config +
   // translations + custom-stamp config) and physically copies the Storage
   // assets (logo, strip background, stamp icons) into the new design's folder.
-  const response = await fetch(`${API_BASE_URL}/designs/${businessId}/${designId}/duplicate`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/designs/${businessId}/${designId}/duplicate${purposeQuery(opts)}`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));

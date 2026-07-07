@@ -268,6 +268,24 @@ export function getStepCtaKey(chapterId: string, subStepId: string): string {
 }
 
 /**
+ * i18n key for a sub-step's progress-bar title. Points programs swap the
+ * first-stamp "stamp" step to a purchase-worded title; everything else uses
+ * the plain title key. Centralised (was inline in WizardShell) so the pick is
+ * unit-testable and every type-aware title lands in one place.
+ */
+export function getSubStepTitleKey(
+  chapterId: string,
+  subStepId: string,
+  isPoints: boolean
+): string {
+  const base = `chapters.${chapterId}.steps.${subStepId}`;
+  if (isPoints && chapterId === 'first-stamp' && subStepId === 'stamp') {
+    return `${base}.points.title`;
+  }
+  return `${base}.title`;
+}
+
+/**
  * Check whether all required sub-steps across all chapters are in the
  * `completed` list. Used to gate the "Skip rest of setup" affordance.
  */

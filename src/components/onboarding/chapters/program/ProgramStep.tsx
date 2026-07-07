@@ -1,24 +1,26 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { NumberStepper } from '@/components/reusables/number-stepper';
+import { InfoBox } from '@/components/reusables/info-box';
 import { maxBalanceFloor } from '@/lib/points-config';
 import { SmoothHeight } from '@/components/reusables/smooth-height';
 import { InfoPopover } from '@/components/reusables/info-popover';
 import { RewardMenuEditor } from '@/components/program/forms/RewardMenuEditor';
 import { useBusiness } from '@/contexts/business-context';
 import {
-  useCreateProgram,
   useDefaultProgram,
+  useSwitchProgramType,
   useUpdateProgram,
 } from '@/hooks/use-programs';
 import { useDesigns } from '@/hooks/use-designs';
+import { ApiError } from '@/api/client';
 import { currencySymbol } from '@/lib/currency';
-import { isPointsProgram, isStampProgram, type LoyaltyType, type RewardTier } from '@/types';
+import { isPointsProgram, isStampProgram, type RewardTier } from '@/types';
 import {
   StampsSelector,
   WizardChipGroup,
@@ -34,6 +36,9 @@ import {
   getBusinessTypeDefaults,
   PROFILE_BUSINESS_TYPE_DRAFT_KEY,
 } from '../../businessTypeDefaults';
+import { useCustomerCount } from './useCustomerCount';
+import { buildProgramSavePlan, MAX_SWITCH_CUSTOMERS } from './programSavePlan';
+import { SwitchProgramTypeDialog } from './SwitchProgramTypeDialog';
 
 const MAX_STAMPS = 21;
 
@@ -69,8 +74,18 @@ export function ProgramStep() {
   const { data: designs = [] } = useDesigns(businessId);
   const activeDesign = designs.find((d) => d.is_active) ?? null;
   const { mutateAsync: updateProgram } = useUpdateProgram(businessId);
-  const { mutateAsync: createProgram } = useCreateProgram(businessId);
+  const { mutateAsync: switchType } = useSwitchProgramType(businessId);
   const ctx = useWizardStep();
+
+  // How many customers already exist. A type switch after test installs
+  // converts them in place (confirm dialog) and is blocked above MAX_SWITCH.
+  const customerCount = useCustomerCount(businessId);
+
+  // Switch-dialog interception: the confirm re-runs the submit with the ref
+  // set (mirrors the convert wizard's ReviewStep). The shell owns the busy
+  // state during the awaited switch.
+  const [switchDialogOpen, setSwitchDialogOpen] = useState(false);
+  const confirmedSwitchRef = useRef(false);
 
   const currency = currencySymbol(currentBusiness?.country, currentBusiness?.primary_locale);
 
@@ -201,100 +216,110 @@ export function ProgramStep() {
     programName.trim().length > 0 &&
     (isPoints ? pointsValid : rewardName.trim().length > 0);
 
+  // A type switch above the cap is a dead-end: block the CTA and explain
+  // (the business is scanning real customers — finish setup, then convert).
+  const typeChanged = program != null && (isPoints ? 'points' : 'stamp') !== program.type;
+  const blockedByCustomers = typeChanged && customerCount > MAX_SWITCH_CUSTOMERS;
+
   useEffect(() => {
     ctx.setCanSkip(false);
-    ctx.setCanProceed(isValid);
-  }, [ctx, isValid]);
+    ctx.setCanProceed(isValid && !blockedByCustomers);
+  }, [ctx, isValid, blockedByCustomers]);
+
+  // A fresh type selection invalidates a prior switch confirmation.
+  useEffect(() => {
+    confirmedSwitchRef.current = false;
+  }, [loyaltyType]);
 
   useEffect(() => {
     ctx.setSubmitHandler(async () => {
-      if (!program?.id) {
-        toast.error(tErr('saveFailed'));
-        return { ok: false };
-      }
-      if (!programName.trim()) {
-        toast.error(tErr('programNameRequired'));
-        return { ok: false };
-      }
-      if (!isPoints && !rewardName.trim()) {
-        toast.error(tErr('rewardRequired'));
-        return { ok: false };
-      }
-      if (isPoints && !pointsValid) {
-        toast.error(tErr('saveFailed'));
-        return { ok: false };
-      }
-      if (!isDirty) return { ok: true };
+      const plan = buildProgramSavePlan({ program, snapshot, isDirty, customerCount });
 
-      const programId = program.id;
-      const programConfig = program.config;
-      const { programName: name, totalStamps: stamps, rewardName: reward } = snapshot;
-      const targetType: LoyaltyType = isPoints ? 'points' : 'stamp';
-      // The backend strips `type` from PATCH; switching type requires a POST
-      // that deletes+recreates the default (safe in onboarding — 0 customers).
-      const typeChanged = targetType !== program.type;
-
-      return {
-        ok: true,
-        save: async () => {
+      switch (plan.kind) {
+        case 'invalid': {
+          const key =
+            plan.reason === 'programNameRequired'
+              ? 'programNameRequired'
+              : plan.reason === 'rewardRequired'
+                ? 'rewardRequired'
+                : 'saveFailed';
+          toast.error(tErr(key));
+          return { ok: false };
+        }
+        case 'noop':
+          return { ok: true };
+        case 'blocked':
+          // The inline InfoBox already explains; keep the CTA a no-op.
+          return { ok: false };
+        case 'update':
+          // Same-type edit: background save keeps the snappy forward nav.
+          return {
+            ok: true,
+            save: async () => {
+              try {
+                await updateProgram({ programId: plan.programId, data: plan.data });
+                markSaved();
+                return { ok: true };
+              } catch (err) {
+                return {
+                  ok: false,
+                  reason: err instanceof Error ? err.message : tErr('saveFailed'),
+                };
+              }
+            },
+          };
+        case 'convert': {
+          // Type change flips the program IN PLACE and converts the existing
+          // test cards (reused, not deleted). When any card is out, confirm
+          // first — the dialog re-runs this handler with the ref set. The
+          // switch is AWAITED (not a background closure) so the flip + design
+          // realignment finish before we navigate to the install step, which
+          // reads their output.
+          if (plan.needsConfirm && !confirmedSwitchRef.current) {
+            setSwitchDialogOpen(true);
+            return { ok: false };
+          }
+          if (!program?.id) {
+            toast.error(tErr('saveFailed'));
+            return { ok: false };
+          }
           try {
-            if (isPoints) {
-              const config = {
-                points_per_currency_unit: snapshot.pointsRate,
-                rewards: snapshot.pointsRewards,
-                max_balance: snapshot.maxBalance,
-                user_configured: true,
-              };
-              if (typeChanged) {
-                await createProgram({ name, type: 'points', config, reward_name: null });
-              } else {
-                await updateProgram({
-                  programId,
-                  data: { name, config: { ...programConfig, ...config }, reward_name: null },
-                });
-              }
-            } else {
-              const config = {
-                total_stamps: stamps,
-                stackable_rewards: snapshot.stackableRewards,
-                max_stacked_rewards: snapshot.maxStackedRewards,
-                // Clamp defensively: the stepper caps live, but the goal can
-                // shrink after the prestamp was drafted.
-                initial_stamps: Math.max(0, Math.min(snapshot.initialStamps, stamps - 1)),
-                user_configured: true,
-              };
-              if (typeChanged) {
-                await createProgram({ name, type: 'stamp', config, reward_name: reward });
-              } else {
-                await updateProgram({
-                  programId,
-                  data: { name, config: { ...programConfig, ...config }, reward_name: reward },
-                });
-              }
-            }
+            await switchType({
+              programId: program.id,
+              data: {
+                to_type: plan.data.toType,
+                config: plan.data.config,
+                reward_name: plan.data.rewardName,
+              },
+            });
             markSaved();
+            confirmedSwitchRef.current = false;
             return { ok: true };
           } catch (err) {
-            return {
-              ok: false,
-              reason: err instanceof Error ? err.message : tErr('saveFailed'),
-            };
+            confirmedSwitchRef.current = false;
+            const reason =
+              err instanceof ApiError && err.code === 'TOO_MANY_CUSTOMERS'
+                ? tErr('tooManyCustomers')
+                : err instanceof ApiError && err.code === 'SETUP_ALREADY_COMPLETE'
+                  ? tErr('setupAlreadyComplete')
+                  : err instanceof Error
+                    ? err.message
+                    : tErr('saveFailed');
+            toast.error(reason);
+            return { ok: false };
           }
-        },
-      };
+        }
+      }
     });
     return () => ctx.setSubmitHandler(null);
   }, [
     program,
-    programName,
-    rewardName,
-    isPoints,
-    pointsValid,
     snapshot,
     isDirty,
+    customerCount,
     markSaved,
     updateProgram,
-    createProgram,
+    switchType,
     ctx,
     tErr,
   ]);
@@ -324,13 +349,39 @@ export function ProgramStep() {
           />
         </WizardField>
 
-        <WizardField label={tLp('loyaltyTypeLabel')}>
+        <WizardField
+          label={tLp('loyaltyTypeLabel')}
+          labelInfo={
+            <InfoPopover
+              label={t('typeHelp.label')}
+              content={
+                <div className="flex flex-col gap-2 text-left">
+                  <div>
+                    <p className="font-semibold">{t('typeHelp.stampsTitle')}</p>
+                    <p>{t('typeHelp.stampsBody')}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">{t('typeHelp.pointsTitle')}</p>
+                    <p>{t('typeHelp.pointsBody')}</p>
+                  </div>
+                </div>
+              }
+            />
+          }
+        >
           <WizardChipGroup
             value={loyaltyType}
             onChange={(id) => setLoyaltyType(id as 'stamps' | 'points')}
             options={loyaltyTypeOptions}
             layout="stack"
           />
+          {blockedByCustomers && (
+            <InfoBox
+              variant="warning"
+              className="mt-3"
+              message={t('typeBlocked', { count: customerCount })}
+            />
+          )}
         </WizardField>
 
         {!isPoints && (
@@ -508,6 +559,20 @@ export function ProgramStep() {
           </>
         )}
       </div>
+
+      <SwitchProgramTypeDialog
+        open={switchDialogOpen}
+        toType={isPoints ? 'points' : 'stamp'}
+        count={customerCount}
+        onCancel={() => setSwitchDialogOpen(false)}
+        onConfirm={() => {
+          // Re-run the submit with the confirmation flag; advance() re-enters
+          // the shell's handleNext, which awaits the in-place switch.
+          confirmedSwitchRef.current = true;
+          setSwitchDialogOpen(false);
+          ctx.advance();
+        }}
+      />
     </div>
   );
 }

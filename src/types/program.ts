@@ -82,9 +82,9 @@ export type LoyaltyProgramUpdate = Partial<Pick<LoyaltyProgram,
 };
 
 /**
- * POST /programs/{businessId} body. When the business has no customers (the
- * onboarding case) the backend deletes the existing default program and
- * recreates it with this type — the only way to switch a program's type.
+ * POST /programs/{businessId} body. A 0-customer lazy-init stub is replaced
+ * cleanly; once customers exist, type changes go through the in-place
+ * onboarding switch (POST /programs/{id}/switch-type) or the conversion wizard.
  */
 export interface ProgramCreate {
   name: string;

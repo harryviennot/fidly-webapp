@@ -6,16 +6,17 @@ import type {
   ConvertResult,
   LoyaltyProgram,
   LoyaltyProgramUpdate,
+  ProgramConfig,
   ProgramConversion,
   ProgramCreate,
   StampGoalImpact,
 } from '@/types';
 
 /**
- * Create the business's loyalty program. When the business has no customers
- * (onboarding), the backend deletes the existing default program and recreates
- * it with the chosen type — this is the only way to switch a program's type.
- * Throws with the backend error message on 403 (tier gate) / 409 (has customers).
+ * Create the business's loyalty program. A 0-customer lazy-init stub is
+ * replaced cleanly; once customers exist, type changes go through
+ * {@link switchProgramType} (onboarding) or the conversion wizard. Throws an
+ * {@link ApiError} preserving the backend code so callers can localise.
  */
 export async function createProgram(
   businessId: string,
@@ -29,7 +30,37 @@ export async function createProgram(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(extractErrorMessage(error, 'Failed to create program'));
+    throwApiError(error, 'Failed to create program');
+  }
+
+  return response.json();
+}
+
+/**
+ * Onboarding-only in-place program type switch (stamp <-> points). Flips the
+ * program's type + config and converts every existing test enrollment's
+ * balance server-side (1 stamp = 10 points), reusing the same card so the
+ * owner's installed pass just updates — nothing is deleted. Throws an
+ * {@link ApiError} preserving the backend code (PROGRAM_TYPE_NOT_ALLOWED /
+ * SETUP_ALREADY_COMPLETE / TOO_MANY_CUSTOMERS) so callers can localise.
+ */
+export async function switchProgramType(
+  businessId: string,
+  programId: string,
+  data: { to_type: 'stamp' | 'points'; config: ProgramConfig; reward_name: string | null }
+): Promise<LoyaltyProgram> {
+  const response = await fetch(
+    `${API_BASE_URL}/programs/${businessId}/${programId}/switch-type`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to switch program type');
   }
 
   return response.json();

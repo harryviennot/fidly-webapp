@@ -88,7 +88,9 @@
       "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
       "programNameRequired": "Ponle un nombre a tu programa.",
       "rewardRequired": "Indica la recompensa que ganarán tus clientes.",
-      "slugTooShort": "Unos cuantos caracteres más."
+      "slugTooShort": "Unos cuantos caracteres más.",
+      "tooManyCustomers": "Tienes demasiados clientes para cambiar el tipo aquí. Termina la configuración y empieza tu prueba gratuita, y luego cambia el tipo desde los ajustes de tu programa.",
+      "setupAlreadyComplete": "Este programa ya está configurado, así que su tipo está bloqueado aquí. Cámbialo desde los ajustes de tu programa."
     },
     "chapters": {
       "welcome": {
@@ -178,7 +180,23 @@
           "program": {
             "title": "Configura tu programa de fidelidad",
             "subtitle": "Elige cómo ganan tus clientes, ponle nombre a tu programa y define la recompensa.",
-            "subtitlePoints": "Lo que ganan tus clientes por compra y lo que pueden canjear."
+            "subtitlePoints": "Lo que ganan tus clientes por compra y lo que pueden canjear.",
+            "typeHelp": {
+              "label": "¿Cuál elijo?",
+              "stampsTitle": "Sellos",
+              "stampsBody": "Un sello por visita, la misma recompensa siempre. Ideal cuando tus clientes compran lo mismo, como un café o un corte de pelo.",
+              "pointsTitle": "Puntos",
+              "pointsBody": "Los puntos suben según lo que gasta cada cliente y se canjean por varias recompensas. Ideal cuando el gasto varía, como en una tienda o un restaurante."
+            },
+            "typeBlocked": "Ya tienes {count} clientes en tu tarjeta, demasiados para cambiar el tipo aquí. Termina la configuración y empieza tu prueba gratuita, y luego cambia el tipo desde los ajustes de tu programa.",
+            "switchDialog": {
+              "typeStamps": "sellos",
+              "typePoints": "puntos",
+              "title": "¿Cambiar a {type}?",
+              "body": "Tus {count} tarjeta(s) de prueba cambiarán a {type} y se actualizarán solas, sin quitar ni volver a añadir nada. El progreso de prueba se conserva en el nuevo tipo.",
+              "confirm": "Cambiar el tipo",
+              "cancel": "Mantener el tipo actual"
+            }
           },
           "data-collection": {
             "title": "Qué pedir a tus clientes",
@@ -296,7 +314,10 @@
             "installAnotherCta": "Instalar en otro dispositivo",
             "timeoutTitle": "¿Sigues ahí?",
             "timeoutBody": "Dejamos de escuchar nuevos registros tras 5 minutos. Pulsa reanudar para seguir atentos.",
-            "retry": "Reanudar la escucha"
+            "retry": "Reanudar la escucha",
+            "points": {
+              "installBody": "Pulsa un botón de abajo. La tarjeta llega a tu wallet, lista para la compra de prueba del siguiente paso."
+            }
           },
           "stamp": {
             "title": "Envíate un sello",
@@ -348,7 +369,10 @@
               "cooldownCta": "Próxima compra en {seconds}s",
               "stampsLabel": "Puntos en tu tarjeta",
               "justStamped": "Puntos añadidos",
-              "fallback": "¿Todavía sin vibración? Las notificaciones pueden tardar unos segundos. Inténtalo de nuevo dentro de un momento."
+              "fallback": "¿Todavía sin vibración? Las notificaciones pueden tardar unos segundos. Inténtalo de nuevo dentro de un momento.",
+              "deliveryDisclosure": {
+                "reassuranceBody": "Aunque la notificación o la vista previa de la tarjeta no se hayan actualizado, el saldo ya está en nuestro servidor. La próxima vez que escanees a este cliente, verás el saldo real y al día."
+              }
             }
           }
         }

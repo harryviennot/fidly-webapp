@@ -88,7 +88,9 @@
       "saveFailed": "Couldn't save. Please try again.",
       "programNameRequired": "Give your program a name.",
       "rewardRequired": "Set the reward customers will earn.",
-      "slugTooShort": "A few more characters."
+      "slugTooShort": "A few more characters.",
+      "tooManyCustomers": "You have too many customers to switch type here. Finish setting up and start your free trial, then change the type from your program settings.",
+      "setupAlreadyComplete": "This program is already set up, so its type is locked here. Change it from your program settings."
     },
     "chapters": {
       "welcome": {
@@ -178,7 +180,23 @@
           "program": {
             "title": "Set up your loyalty program",
             "subtitle": "Pick how customers earn, name your program, and define the reward.",
-            "subtitlePoints": "What customers earn per purchase, and what they can redeem."
+            "subtitlePoints": "What customers earn per purchase, and what they can redeem.",
+            "typeHelp": {
+              "label": "Which should I choose?",
+              "stampsTitle": "Stamps",
+              "stampsBody": "One stamp per visit, same reward each time. Best when customers buy the same thing, like a coffee or a haircut.",
+              "pointsTitle": "Points",
+              "pointsBody": "Points scale with what each customer spends, redeemed against several rewards. Best when baskets vary, like a shop or a restaurant."
+            },
+            "typeBlocked": "You now have {count} customers on your card, too many to switch type here. Finish setting up and start your free trial, then change the type from your program settings.",
+            "switchDialog": {
+              "typeStamps": "stamps",
+              "typePoints": "points",
+              "title": "Switch to {type}?",
+              "body": "Your {count} test card(s) will change to {type} and update on their own, nothing to remove or re-add. Any test progress carries over to the new type.",
+              "confirm": "Switch type",
+              "cancel": "Keep current type"
+            }
           },
           "data-collection": {
             "title": "What to collect from customers",
@@ -296,7 +314,10 @@
             "installAnotherCta": "Install on another device",
             "timeoutTitle": "Still here?",
             "timeoutBody": "We paused listening for new sign-ups after 5 minutes. Tap retry to keep watching.",
-            "retry": "Resume listening"
+            "retry": "Resume listening",
+            "points": {
+              "installBody": "Tap a button below. The card lands in your wallet, ready for the test purchase on the next step."
+            }
           },
           "stamp": {
             "title": "Send yourself a stamp",
@@ -348,7 +369,10 @@
               "cooldownCta": "Next purchase in {seconds}s",
               "stampsLabel": "Points on your card",
               "justStamped": "Points added",
-              "fallback": "No buzz yet? Notifications can take a few seconds. Try again in a moment."
+              "fallback": "No buzz yet? Notifications can take a few seconds. Try again in a moment.",
+              "deliveryDisclosure": {
+                "reassuranceBody": "Even if the notification or the card preview hasn't caught up, the balance is already on our server. Next time you scan this customer, you'll see the real, up-to-date balance."
+              }
             }
           }
         }

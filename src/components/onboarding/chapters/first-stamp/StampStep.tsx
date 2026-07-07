@@ -452,7 +452,7 @@ function StampCard({
         </div>
       )}
 
-      <WalletDeliveryDisclosure t={t} />
+      <WalletDeliveryDisclosure t={t} isPoints={isPoints} />
     </Card>
   );
 }
@@ -465,8 +465,19 @@ function StampCard({
  * battery state, network type — and the reassurance that the stamp itself
  * was recorded server-side regardless.
  */
-function WalletDeliveryDisclosure({ t }: { t: ReturnType<typeof useTranslations> }) {
+function WalletDeliveryDisclosure({
+  t,
+  isPoints,
+}: {
+  t: ReturnType<typeof useTranslations>;
+  isPoints: boolean;
+}) {
   const [open, setOpen] = useState(false);
+  // The Apple/Google delivery mechanics are type-neutral; only the "your scan
+  // is saved" reassurance talks about a count vs a points balance.
+  const reassuranceBody = isPoints
+    ? t('points.deliveryDisclosure.reassuranceBody')
+    : t('deliveryDisclosure.reassuranceBody');
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <div className="rounded-lg border border-[var(--border-light)] bg-[var(--paper)]">
@@ -496,7 +507,7 @@ function WalletDeliveryDisclosure({ t }: { t: ReturnType<typeof useTranslations>
           />
           <DisclosureBlock
             title={t('deliveryDisclosure.reassuranceTitle')}
-            body={t('deliveryDisclosure.reassuranceBody')}
+            body={reassuranceBody}
             emphasis
           />
         </CollapsibleContent>

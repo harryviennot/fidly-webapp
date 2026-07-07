@@ -14,6 +14,7 @@ import { WizardStepProvider } from './wizard-context';
 import { useWizardProgress } from './useWizardProgress';
 import {
   getStepCtaKey,
+  getSubStepTitleKey,
   getVisibleChapters,
   nextStepPath,
   pathForStep,
@@ -413,10 +414,7 @@ export function WizardShell({ slug }: WizardShellProps) {
   const { chapter, subStep, chapterIndex, subStepIndex } = resolved;
   const StepComponent = subStep.Component;
   const chapterTitle = t(`chapters.${chapter.id}.title`);
-  const subStepTitleKey =
-    isPoints && chapter.id === 'first-stamp' && subStep.id === 'stamp'
-      ? `chapters.${chapter.id}.steps.${subStep.id}.points.title`
-      : `chapters.${chapter.id}.steps.${subStep.id}.title`;
+  const subStepTitleKey = getSubStepTitleKey(chapter.id, subStep.id, isPoints);
   const subStepTitle = chapter.subSteps.length > 1 ? t(subStepTitleKey) : undefined;
 
   return (

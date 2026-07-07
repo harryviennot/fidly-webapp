@@ -88,7 +88,9 @@
       "saveFailed": "Impossible d'enregistrer. Réessayez.",
       "programNameRequired": "Donnez un nom à votre programme.",
       "rewardRequired": "Indiquez la récompense que vos clients gagneront.",
-      "slugTooShort": "Encore quelques caractères."
+      "slugTooShort": "Encore quelques caractères.",
+      "tooManyCustomers": "Vous avez trop de clients pour changer de type ici. Terminez la configuration et démarrez votre essai gratuit, puis changez le type dans les réglages de votre programme.",
+      "setupAlreadyComplete": "Ce programme est déjà configuré, son type est donc verrouillé ici. Changez-le dans les réglages de votre programme."
     },
     "chapters": {
       "welcome": {
@@ -178,7 +180,23 @@
           "program": {
             "title": "Votre programme de fidélité",
             "subtitle": "Combien de tampons pour gagner quoi, et comment.",
-            "subtitlePoints": "Ce que vos clients gagnent par achat, et ce qu’ils peuvent obtenir."
+            "subtitlePoints": "Ce que vos clients gagnent par achat, et ce qu’ils peuvent obtenir.",
+            "typeHelp": {
+              "label": "Lequel choisir ?",
+              "stampsTitle": "Tampons",
+              "stampsBody": "Un tampon par visite, la même récompense à chaque fois. Parfait quand vos clients prennent la même chose, un café ou une coupe par exemple.",
+              "pointsTitle": "Points",
+              "pointsBody": "Les points suivent le montant dépensé, à échanger contre plusieurs récompenses. Idéal quand le panier varie, en boutique ou au restaurant."
+            },
+            "typeBlocked": "Vous avez déjà {count} clients sur votre carte, trop pour changer de type ici. Terminez la configuration et démarrez votre essai gratuit, puis changez le type dans les réglages de votre programme.",
+            "switchDialog": {
+              "typeStamps": "tampons",
+              "typePoints": "points",
+              "title": "Passer aux {type} ?",
+              "body": "Vos {count} carte(s) test passeront aux {type} et se mettront à jour toutes seules, rien à retirer ni à rajouter. La progression test est reportée sur le nouveau type.",
+              "confirm": "Changer de type",
+              "cancel": "Garder le type actuel"
+            }
           },
           "data-collection": {
             "title": "Que demander à vos clients",
@@ -296,7 +314,10 @@
             "installAnotherCta": "Installer sur un autre téléphone",
             "timeoutTitle": "Toujours là ?",
             "timeoutBody": "On a arrêté d'écouter les nouvelles inscriptions après 5 minutes. Appuyez sur « reprendre » pour continuer à surveiller.",
-            "retry": "Reprendre l'écoute"
+            "retry": "Reprendre l'écoute",
+            "points": {
+              "installBody": "Appuyez sur un bouton ci-dessous. La carte arrive sur votre téléphone, prête pour l'achat test à l'étape suivante."
+            }
           },
           "stamp": {
             "title": "Tamponnez votre carte",
@@ -348,7 +369,10 @@
               "cooldownCta": "Prochain achat disponible dans {seconds}s.",
               "stampsLabel": "Points sur votre carte",
               "justStamped": "Points ajoutés",
-              "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant."
+              "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",
+              "deliveryDisclosure": {
+                "reassuranceBody": "Même si la notification ou l'aperçu de la carte a du retard, le solde est déjà sur notre serveur. Au prochain scan de ce client, vous verrez le solde réel et à jour."
+              }
             }
           }
         }

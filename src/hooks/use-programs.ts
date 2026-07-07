@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { createProgram, getPrograms, updateProgram } from "@/api";
-import type { LoyaltyProgram, LoyaltyProgramUpdate, ProgramCreate } from "@/types";
+import { createProgram, getPrograms, switchProgramType, updateProgram } from "@/api";
+import type { LoyaltyProgram, LoyaltyProgramUpdate, ProgramConfig, ProgramCreate } from "@/types";
 import { designKeys } from "./use-designs";
 
 export const programKeys = {
@@ -34,6 +34,34 @@ export function useCreateProgram(businessId: string | undefined) {
       );
       queryClient.invalidateQueries({ queryKey: programKeys.all(businessId!) });
       // The old program's designs no longer match the new type.
+      queryClient.invalidateQueries({ queryKey: designKeys.all(businessId!) });
+    },
+  });
+}
+
+export function useSwitchProgramType(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      programId,
+      data,
+    }: {
+      programId: string;
+      data: {
+        to_type: "stamp" | "points";
+        config: ProgramConfig;
+        reward_name: string | null;
+      };
+    }) => switchProgramType(businessId!, programId, data),
+    onSuccess: (updated) => {
+      // Same program row, flipped in place — replace the cached default and
+      // refetch. Designs were realigned to the new card_type server-side.
+      queryClient.setQueryData<LoyaltyProgram | null>(
+        programKeys.default(businessId!),
+        updated
+      );
+      queryClient.invalidateQueries({ queryKey: programKeys.all(businessId!) });
       queryClient.invalidateQueries({ queryKey: designKeys.all(businessId!) });
     },
   });
