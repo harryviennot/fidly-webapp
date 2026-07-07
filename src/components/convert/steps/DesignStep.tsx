@@ -4,9 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { PlusIcon, SpinnerGapIcon } from '@phosphor-icons/react';
-import { EditorCard } from '@/components/card/EditorCard';
+import {
+  CheckCircleIcon,
+  CopyIcon,
+  PencilIcon,
+  SpinnerGapIcon,
+} from '@phosphor-icons/react';
+import { CardWrapper, WalletCard } from '@/components/card';
 import { InfoBox } from '@/components/reusables/info-box';
+import { cn } from '@/lib/utils';
 import { useWizardDraft, useWizardStep } from '@/components/onboarding/wizard-context';
 import { useDesignReady } from '@/components/onboarding/chapters/first-stamp/useDesignReady';
 import { useBusiness } from '@/contexts/business-context';
@@ -18,7 +24,9 @@ import { useConvertWizard } from '../convert-context';
 import { readTargetDraft } from '../target-draft';
 import { ConvertDesignEditor } from './ConvertDesignEditor';
 
-type DesignMode = 'reactivate' | 'editor' | null;
+/** 'select' = card clicked in the grid, used as-is ('reactivate' is its
+ * legacy draft spelling); 'editor' = opened in the embedded editor. */
+type DesignMode = 'select' | 'reactivate' | 'editor' | null;
 
 /** Brand seed for the new target-type design: everything the owner already
  * chose (logo, colors, organization name, back content) carries over; only
@@ -77,7 +85,7 @@ export function DesignStep() {
   );
 
   const [designId, setDesignId] = useWizardDraft<string | null>('design.designId', () => null);
-  const [, setMode] = useWizardDraft<DesignMode>('design.mode', () => null);
+  const [mode, setMode] = useWizardDraft<DesignMode>('design.mode', () => null);
   const [creating, setCreating] = useState(false);
   const creatingRef = useRef(false);
 
@@ -171,23 +179,23 @@ export function DesignStep() {
 
   // While the embedded editor is mounted IT owns the footer gate and the
   // submit handler (it saves all sections on Continue). The parent only
-  // registers them for the picker branch. No cleanups here: the shell resets
-  // both on step navigation, and a cleanup would clobber the editor's
-  // registration when it mounts (child effects run first).
-  const editorMounted = !!designId && !!chosenDesign;
+  // registers them for the picker branch (incl. a card selected as-is).
+  // No cleanups here: the shell resets both on step navigation, and a
+  // cleanup would clobber the editor's registration when it mounts (child
+  // effects run first).
+  const editorMounted = mode === 'editor' && !!designId && !!chosenDesign;
   useEffect(() => {
     if (editorMounted) return;
-    ctx.setCanProceed(false);
-  }, [ctx, editorMounted]);
+    ctx.setCanProceed(!!designId && (!needsStrips || stripsReady));
+  }, [ctx, editorMounted, designId, needsStrips, stripsReady]);
 
   useEffect(() => {
     if (editorMounted) return;
     ctx.setSubmitHandler(async () => ({ ok: !!designId }));
   }, [ctx, designId, editorMounted]);
 
-  // Same preview surface as the editor pane and the review step: EditorCard
-  // rendered against the TARGET program values, so a points card shows the
-  // drafted reward ladder and a stamp card the drafted goal.
+  // Previews render against the TARGET program values, so a points card
+  // shows the drafted reward ladder and a stamp card the drafted goal.
   const previewProps =
     toType === 'points'
       ? {
@@ -196,7 +204,7 @@ export function DesignStep() {
         }
       : {
           totalStamps: targetDraft.totalStamps,
-          previewStamps: Math.max(1, Math.floor(targetDraft.totalStamps * 0.3)),
+          stamps: Math.max(1, Math.floor(targetDraft.totalStamps * 0.3)),
         };
 
   const header = (
@@ -220,8 +228,8 @@ export function DesignStep() {
     );
   }
 
-  // ── Reactivation picker ─────────────────────────────────────────────────
-  if (!designId && matching.length > 0) {
+  // ── Picker: click a card to use it as-is, or edit / duplicate it ─────────
+  if (matching.length > 0 && mode !== 'editor') {
     return (
       <div className="flex flex-col gap-6">
         {header}
@@ -231,52 +239,93 @@ export function DesignStep() {
           </p>
           <p className="mt-0.5 text-[13px] text-[#7A7A7A]">{t('picker.subtitle')}</p>
         </div>
-        <div className="grid grid-cols-1 items-stretch gap-6 min-[560px]:grid-cols-2">
-          {matching.map((design) => (
-            <div key={design.id} className="flex flex-col gap-3">
-              <EditorCard design={design} {...previewProps} />
-              <span className="truncate px-0.5 text-[13px] font-medium text-[var(--foreground)]">
-                {design.name}
-              </span>
-              <div className="mt-auto flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDesignId(design.id);
-                    setMode('editor');
+        {/* Same tile as the templates page: scaled WalletCard, name row with
+            a kebab for Edit/Duplicate, "Use this card" as the surfaced
+            action. Clicking the card itself (children only — the kebab and
+            buttons live outside it) toggles the selection. */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {matching.map((design, index) => {
+            const selected = designId === design.id;
+            const toggleSelect = () => {
+              setDesignId(selected ? null : design.id);
+              setMode(selected ? null : 'select');
+            };
+            return (
+              <div
+                key={design.id}
+                className="mx-auto w-full max-w-[340px] animate-slide-up"
+                style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
+              >
+                <CardWrapper
+                  title={
+                    design.name ||
+                    (toType === 'points' ? t('defaultNamePoints') : t('defaultNameStamp'))
+                  }
+                  primaryAction={{
+                    label: selected ? t('picker.selectedTag') : t('picker.select'),
+                    icon: <CheckCircleIcon className="h-4 w-4" weight={selected ? 'fill' : 'regular'} />,
+                    onClick: toggleSelect,
                   }}
-                  className="flex-1 rounded-[10px] bg-[var(--accent)] px-3 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--accent-hover)]"
+                  actions={[
+                    {
+                      label: t('picker.modify'),
+                      icon: <PencilIcon className="h-4 w-4" />,
+                      onClick: () => {
+                        setDesignId(design.id);
+                        setMode('editor');
+                      },
+                    },
+                    {
+                      label: t('picker.duplicate'),
+                      icon: <CopyIcon className="h-4 w-4" />,
+                      onClick: () => void duplicateAndEdit(design),
+                      disabled: duplicatingId !== null,
+                    },
+                  ]}
                 >
-                  {t('picker.modify')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void duplicateAndEdit(design)}
-                  disabled={duplicatingId !== null}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3 py-2.5 text-[13px] font-semibold text-[var(--foreground)] transition-colors hover:border-[var(--accent)] disabled:opacity-60"
-                >
-                  {duplicatingId === design.id && (
-                    <SpinnerGapIcon className="h-4 w-4 animate-spin" weight="bold" />
-                  )}
-                  {t('picker.duplicate')}
-                </button>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={selected}
+                    onClick={toggleSelect}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleSelect();
+                      }
+                    }}
+                    className={cn(
+                      // WalletCard sizes itself to its parent (w-full h-full),
+                      // so this wrapper must forward ScaledCardWrapper's box.
+                      'h-full w-full cursor-pointer rounded-2xl transition-shadow',
+                      selected &&
+                        'ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--background)]'
+                    )}
+                  >
+                    <WalletCard design={design} showQR showSecondaryFields {...previewProps} />
+                  </div>
+                </CardWrapper>
               </div>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => void createNewDraft()}
-            disabled={creating}
-            className="flex h-full min-h-[240px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--paper)] p-4 text-[13px] font-medium text-[#7A7A7A] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-60"
-          >
-            {creating ? (
-              <SpinnerGapIcon className="h-5 w-5 animate-spin" weight="bold" />
-            ) : (
-              <PlusIcon className="h-5 w-5" weight="bold" />
-            )}
-            {t('picker.designNew')}
-          </button>
+            );
+          })}
+          <div className="mx-auto w-full max-w-[340px] animate-slide-up">
+            <CardWrapper
+              className="h-full"
+              isEmpty
+              emptyState={{
+                title: t('picker.designNew'),
+                description: t('picker.designNewHint'),
+                actionLabel: t('picker.designNew'),
+                onAction: () => void createNewDraft(),
+              }}
+            >
+              {null}
+            </CardWrapper>
+          </div>
         </div>
+        {designId && needsStrips && !stripsReady && (
+          <InfoBox variant="note" message={t('stripPending')} />
+        )}
       </div>
     );
   }

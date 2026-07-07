@@ -62,11 +62,14 @@
         "subtitle": "Hemos recuperado tus colores y tu logotipo. La nueva tarjeta solo se activará cuando termine el cambio.",
         "picker": {
           "title": "{count, plural, =1 {Ya tienes una tarjeta guardada de este tipo} other {Ya tienes # tarjetas guardadas de este tipo}}",
-          "subtitle": "Edita una, duplícala para conservar la original o crea una tarjeta nueva.",
+          "subtitle": "Toca una tarjeta para usarla tal cual, edítala o duplícala para conservar la original, o crea una tarjeta nueva.",
           "designNew": "Crear una tarjeta nueva",
           "changeChoice": "Elegir otra tarjeta",
           "modify": "Editar",
-          "duplicate": "Duplicar"
+          "duplicate": "Duplicar",
+          "designNewHint": "Parte de tus colores y tu logo.",
+          "select": "Usar esta tarjeta",
+          "selectedTag": "Seleccionada"
         },
         "creating": "Preparando tu tarjeta...",
         "stripPending": "Estamos preparando las imágenes de tus sellos. Tarda unos segundos.",

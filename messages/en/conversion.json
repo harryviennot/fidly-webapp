@@ -62,11 +62,14 @@
         "subtitle": "We pre-filled your colors and logo. The new card only goes live once the switch completes.",
         "picker": {
           "title": "{count, plural, =1 {You already have a saved card of this type} other {You already have # saved cards of this type}}",
-          "subtitle": "Edit one of them, duplicate it to keep the original, or create a new card.",
+          "subtitle": "Tap a card to use it as is, edit it, or duplicate it to keep the original — or create a new card.",
           "designNew": "Create a new card",
           "changeChoice": "Choose a different card",
           "modify": "Edit",
-          "duplicate": "Duplicate"
+          "duplicate": "Duplicate",
+          "designNewHint": "Start from your brand colors and logo.",
+          "select": "Use this card",
+          "selectedTag": "Selected"
         },
         "creating": "Preparing your card...",
         "stripPending": "We are rendering your stamp images. This takes a few seconds.",

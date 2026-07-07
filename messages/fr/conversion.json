@@ -62,11 +62,14 @@
         "subtitle": "On a repris vos couleurs et votre logo. La nouvelle carte ne sera visible qu'une fois le changement terminé.",
         "picker": {
           "title": "{count, plural, =1 {Vous avez déjà une carte de ce type} other {Vous avez déjà # cartes de ce type}}",
-          "subtitle": "Modifiez-en une, dupliquez-la pour garder l'originale, ou créez une nouvelle carte.",
+          "subtitle": "Touchez une carte pour l'utiliser telle quelle, modifiez-la, ou dupliquez-la pour garder l'originale — ou créez une nouvelle carte.",
           "designNew": "Créer une nouvelle carte",
           "changeChoice": "Choisir une autre carte",
           "modify": "Modifier",
-          "duplicate": "Dupliquer"
+          "duplicate": "Dupliquer",
+          "designNewHint": "Partez de vos couleurs et de votre logo.",
+          "select": "Utiliser cette carte",
+          "selectedTag": "Sélectionnée"
         },
         "creating": "Préparation de votre carte...",
         "stripPending": "On prépare les images de vos tampons. Ça prend quelques secondes.",
