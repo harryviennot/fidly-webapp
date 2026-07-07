@@ -220,13 +220,16 @@
           "reviewBroadcasts": "Vérifier mes diffusions",
           "milestones": "{count, plural, =1 {1 ancien palier désactivé} other {# anciens paliers désactivés}}.",
           "reviewNotifications": "Vérifier mes notifications",
-          "cta": "Retour à mon tableau de bord"
+          "cta": "Retour à mon tableau de bord",
+          "applyWarnings": "Certains de vos messages personnalisés n'ont pas pu être appliqués. Votre programme est bien converti — pensez juste à les vérifier."
         },
         "failed": {
           "title": "Le changement n'a pas abouti",
           "body": "Rien n'est perdu : votre programme est resté sur son ancien type. Réessayez, et contactez-nous si ça se reproduit.",
           "retry": "Réessayer"
-        }
+        },
+        "pushingHint": "Votre programme est déjà converti. Les cartes continuent de se mettre à jour en arrière-plan, vous pouvez quitter cette page.",
+        "pushingLeave": "Retour à mon tableau de bord"
       }
     },
     "announceDefaults": {

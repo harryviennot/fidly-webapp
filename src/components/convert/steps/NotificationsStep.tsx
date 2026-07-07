@@ -148,6 +148,30 @@ export function NotificationsStep() {
     [templates]
   );
 
+  // Prune staged entries for triggers the target type doesn't offer — a
+  // stale draft (or a step that once listed the wrong type's triggers) would
+  // otherwise keep raising stale-variable warnings and, unfiltered, 422 the
+  // conversion. Legit sync-with-fetched-data effect.
+  useEffect(() => {
+    if (items.length === 0) return;
+    const valid = new Set<string>(items.map((i) => i.trigger));
+    const prunedStaged = Object.fromEntries(
+      Object.entries(staged).filter(([trigger]) => valid.has(trigger))
+    );
+    if (Object.keys(prunedStaged).length !== Object.keys(staged).length) {
+       
+      setStaged(prunedStaged);
+    }
+    const prunedEnabled = Object.fromEntries(
+      Object.entries(enabledOverrides).filter(([trigger]) => valid.has(trigger))
+    );
+    if (Object.keys(prunedEnabled).length !== Object.keys(enabledOverrides).length) {
+       
+      setEnabledOverrides(prunedEnabled);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
+
   const valueFor = (item: NotificationTemplate, loc: Locale): string => {
     const stagedBody = staged[item.trigger]?.[loc];
     return stagedBody !== undefined ? stagedBody : (item.body?.[loc] ?? '');

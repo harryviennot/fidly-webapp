@@ -48,7 +48,11 @@ export async function getNotificationTemplates(
       params.set('preview_reward_count', String(opts.previewRewardCount));
     }
   }
-  const query = params.size > 0 ? `?${params.toString()}` : '';
+  // NOT params.size — it's missing on older WebKit (undefined > 0 → false),
+  // which silently stripped the conversion wizard's preview_type param and
+  // made the step list the LIVE type's triggers instead of the target's.
+  const queryString = params.toString();
+  const query = queryString ? `?${queryString}` : '';
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/templates${query}`,
     { headers: await getAuthHeaders() }

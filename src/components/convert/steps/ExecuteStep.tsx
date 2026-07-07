@@ -53,6 +53,9 @@ export function ExecuteStep() {
   const [row, setRow] = useState<ProgramConversion | null>(null);
   const [postFailed, setPostFailed] = useState(false);
   const [retryNonce, setRetryNonce] = useState(0);
+  // Non-fatal issues from the post-flip apply (staged notifications) — the
+  // conversion itself committed; these just need a follow-up.
+  const [warnings, setWarnings] = useState<string[]>([]);
 
   // Snapshot the drafts we still need AFTER clearDraft() runs on completion.
   const designIdRef = useRef<string | null>(ctx.getDraft<string>('design.designId') ?? null);
@@ -103,6 +106,7 @@ export function ExecuteStep() {
         const result = await convertProgram(businessId, program.id, request);
         ctx.setDraft('execute.conversionId', result.conversion_id);
         setConversionId(result.conversion_id);
+        if (result.warnings?.length) setWarnings(result.warnings);
       } catch (err) {
         // A concurrent commit (double-click, refresh race) carries the live
         // conversion_id in the 409 payload — attach to it instead of failing.
@@ -270,6 +274,20 @@ export function ExecuteStep() {
               </button>
             </div>
           )}
+          {warnings.length > 0 && (
+            <div className="rounded-xl border border-[var(--warning)]/40 bg-[var(--warning)]/5 p-3.5">
+              <p className="text-[12.5px] leading-[1.5] text-[#555]">
+                {t('success.applyWarnings')}
+              </p>
+              <button
+                type="button"
+                onClick={() => router.push('/program/notifications')}
+                className="mt-1.5 text-[12.5px] font-semibold text-[var(--accent)] hover:underline"
+              >
+                {t('success.reviewNotifications')}
+              </button>
+            </div>
+          )}
         </div>
 
         <button
@@ -311,6 +329,28 @@ export function ExecuteStep() {
           <p className="mt-2 text-[12px] text-[#8A8A8A]">
             {t('pushProgress', { pushed, total })}
           </p>
+        </div>
+      )}
+
+      {/* The conversion is already committed once the row exists — the push
+          fan-out is background work, so the owner may leave. Invalidate +
+          clear on the way out (the completed-state effect won't get to). */}
+      {pushing && (
+        <div className="mt-2 flex flex-col items-center gap-2">
+          <p className="max-w-[360px] text-[12px] leading-[1.5] text-[#8A8A8A]">
+            {t('pushingHint')}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              void queryClient.invalidateQueries();
+              clearDraft();
+              router.push('/');
+            }}
+            className="text-[12.5px] font-semibold text-[var(--accent)] hover:underline"
+          >
+            {t('pushingLeave')}
+          </button>
         </div>
       )}
     </div>

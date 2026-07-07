@@ -245,8 +245,11 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
   const percent = ((resolved.index + 1) / resolved.count) * 100;
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-[var(--background)]">
-      <header className="border-b border-[var(--border)] bg-[var(--background)]">
+    // Hard-locked to the viewport: the ONLY scroll surface is <main>, so the
+    // footer is a plain flex child docked at the bottom — document scroll and
+    // overscroll rubber-banding can never nudge it.
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-[var(--background)]">
+      <header className="flex-shrink-0 border-b border-[var(--border)] bg-[var(--background)]">
         <div
           className="h-[3px] bg-[var(--accent)] transition-[width] duration-300 ease-out"
           style={{ width: `${percent}%` }}
@@ -286,7 +289,7 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div
           className={
             // Design (form + side preview) and review (card + facts) are

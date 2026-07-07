@@ -11,6 +11,7 @@ import { RewardMenuEditor } from '@/components/program/forms/RewardMenuEditor';
 import { StampsSelector, WizardField } from '@/components/onboarding/form';
 import { useWizardDraft, useWizardStep } from '@/components/onboarding/wizard-context';
 import { useBusiness } from '@/contexts/business-context';
+import { maxBalanceFloor } from '@/lib/points-config';
 import { useDesigns } from '@/hooks/use-designs';
 import { currencySymbol } from '@/lib/currency';
 import type { RewardTier } from '@/types';
@@ -72,6 +73,16 @@ export function ProgramStep() {
     TARGET_DRAFT_KEYS.maxBalance,
     () => defaults.maxBalance
   );
+
+  // The cap must always cover the priciest reward (it would be unreachable
+  // otherwise; the backend rejects such a config). Adding a bigger reward
+  // auto-raises the cap — keyed on rewards only so typing isn't fought.
+  useEffect(() => {
+    if (maxBalance === null) return;
+    const floor = maxBalanceFloor(pointsRewards);
+    if (maxBalance < floor) setMaxBalance(floor);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pointsRewards]);
 
   const pointsValid =
     pointsRate > 0 &&
@@ -225,7 +236,11 @@ export function ProgramStep() {
               </div>
               <Switch
                 checked={maxBalance !== null}
-                onCheckedChange={(on) => setMaxBalance(on ? maxBalance ?? 1000 : null)}
+                onCheckedChange={(on) =>
+                  setMaxBalance(
+                    on ? maxBalance ?? Math.max(1000, maxBalanceFloor(pointsRewards)) : null
+                  )
+                }
                 aria-label={tLp('points.capLabel')}
               />
             </div>
@@ -242,12 +257,15 @@ export function ProgramStep() {
                     <Input
                       type="number"
                       inputMode="numeric"
-                      min={1}
+                      min={maxBalanceFloor(pointsRewards)}
                       value={maxBalance}
                       onChange={(e) => {
                         const n = parseInt(e.target.value, 10);
                         setMaxBalance(Number.isNaN(n) ? 1 : Math.max(1, n));
                       }}
+                      onBlur={() =>
+                        setMaxBalance(Math.max(maxBalance, maxBalanceFloor(pointsRewards)))
+                      }
                       className="h-11 pr-9 text-right"
                       aria-label={tLp('points.capMaxLabel')}
                     />

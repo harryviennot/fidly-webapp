@@ -5,6 +5,7 @@
  */
 
 import { suggestedRate } from '@/lib/conversion';
+import { maxBalanceFloor } from '@/lib/points-config';
 import {
   extractVariables,
   programVariableKeys,
@@ -41,7 +42,12 @@ export function buildTargetConfig(draft: TargetProgramDraft): Record<string, unk
     return {
       points_per_currency_unit: draft.pointsRate,
       rewards: draft.pointsRewards,
-      max_balance: draft.maxBalance,
+      // Never below the priciest reward — the cap would make it unreachable
+      // (backend rejects that config; the forms auto-raise the same way).
+      max_balance:
+        draft.maxBalance === null
+          ? null
+          : Math.max(draft.maxBalance, maxBalanceFloor(draft.pointsRewards)),
       user_configured: true,
     };
   }
@@ -100,6 +106,31 @@ export interface StagedMilestone {
 /** Per-trigger, per-locale bodies the owner EDITED in the notifications step
  * (untouched defaults are never staged — the backend defaults keep applying). */
 export type StagedTemplates = Record<string, Partial<Record<StagedLocale, string>>>;
+
+/**
+ * The notification triggers that exist for a program type — a pure mirror of
+ * the backend's `triggers_for_type` (reward_completed only exists on
+ * multi-reward menus). Used to prune staged copy/toggles that belong to the
+ * OTHER type before they reach the convert payload: the backend 422s the
+ * whole conversion on a foreign trigger.
+ */
+export function allowedTriggersForType(
+  toType: LoyaltyType,
+  rewardCount: number
+): Set<string> {
+  const triggers = [
+    toType === 'points' ? 'points_earned' : 'stamp_added',
+    'reward_earned',
+    'reward_redeemed',
+    'near_reward',
+  ];
+  if (rewardCount > 1) triggers.push('reward_completed');
+  return new Set(triggers);
+}
+
+function pickAllowed<T>(record: Record<string, T>, allowed: Set<string>): Record<string, T> {
+  return Object.fromEntries(Object.entries(record).filter(([key]) => allowed.has(key)));
+}
 
 function trimmedBodies(bodies: Partial<Record<string, string>>): Record<string, string> {
   const out: Record<string, string> = {};
@@ -251,6 +282,14 @@ export function buildConvertRequest(args: BuildConvertRequestArgs): ConvertReque
     announce = { enabled: true, messages };
   }
 
+  // Staged entries for triggers the target type doesn't have (stale drafts,
+  // or a step that listed the wrong type's triggers) would 422 the whole
+  // conversion — drop them here, unconditionally.
+  const allowed = allowedTriggersForType(
+    draft.toType,
+    draft.toType === 'points' ? Math.max(1, draft.pointsRewards.length) : 1
+  );
+
   return {
     to_type: draft.toType,
     rate,
@@ -258,7 +297,11 @@ export function buildConvertRequest(args: BuildConvertRequestArgs): ConvertReque
     design_id: designId,
     config: buildTargetConfig(draft),
     reward_name: draft.toType === 'points' ? null : draft.rewardName.trim() || null,
-    notifications: buildNotificationsPayload(stagedTemplates, milestones, enabledOverrides ?? {}),
+    notifications: buildNotificationsPayload(
+      pickAllowed(stagedTemplates, allowed),
+      milestones,
+      pickAllowed(enabledOverrides ?? {}, allowed)
+    ),
     announce,
   };
 }

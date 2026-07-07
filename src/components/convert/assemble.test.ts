@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { RewardTier } from '@/types';
 import {
+  allowedTriggersForType,
   buildConvertRequest,
   buildNotificationsPayload,
   buildTargetConfig,
@@ -56,6 +57,13 @@ describe('buildTargetConfig', () => {
       max_balance: 500,
       user_configured: true,
     });
+  });
+
+  test('raises a max_balance below the priciest reward to the floor', () => {
+    // Priciest reward on the menu is 100 — a 50-point cap would make it
+    // unreachable, and the backend rejects it. The payload self-heals.
+    expect(buildTargetConfig(pointsDraft({ maxBalance: 50 })).max_balance).toBe(100);
+    expect(buildTargetConfig(pointsDraft({ maxBalance: null })).max_balance).toBeNull();
   });
 
   test('stamp target produces a stamp config and clamps prestamp under the goal', () => {
@@ -225,7 +233,47 @@ describe('staleTemplateVariableKeys', () => {
   });
 });
 
+describe('allowedTriggersForType', () => {
+  test('mirrors the backend trigger sets', () => {
+    expect([...allowedTriggersForType('points', 1)].sort()).toEqual(
+      ['near_reward', 'points_earned', 'reward_earned', 'reward_redeemed'].sort()
+    );
+    expect(allowedTriggersForType('points', 2).has('reward_completed')).toBe(true);
+    expect(allowedTriggersForType('stamp', 1).has('stamp_added')).toBe(true);
+    expect(allowedTriggersForType('stamp', 1).has('points_earned')).toBe(false);
+  });
+});
+
 describe('buildConvertRequest', () => {
+  test('drops staged triggers that do not exist for the target type', () => {
+    // A wizard run that listed the WRONG type's triggers (or a stale draft
+    // from the opposite direction) must never poison the payload — the
+    // backend 422s the whole conversion on a foreign trigger.
+    const req = buildConvertRequest({
+      draft: pointsDraft(),
+      designId: 'design-1',
+      rate: 6,
+      policy: 'cheapest_reward_equivalent',
+      stagedTemplates: {
+        stamp_added: { fr: 'Tampon ajouté !' },
+        points_earned: { fr: 'Merci !' },
+        reward_completed: { fr: 'Bravo !' },
+      },
+      milestones: [],
+      enabledOverrides: { stamp_added: false, near_reward: false },
+      announceEnabled: false,
+      announceMessages: {},
+    });
+    expect(req.notifications).toEqual({
+      templates: [
+        { trigger: 'points_earned', body: { fr: 'Merci !' } },
+        // 2 rewards on the target menu → reward_completed is legal.
+        { trigger: 'reward_completed', body: { fr: 'Bravo !' } },
+        { trigger: 'near_reward', is_enabled: false },
+      ],
+    });
+  });
+
   test('assembles the full request for a points conversion with announce', () => {
     const req = buildConvertRequest({
       draft: pointsDraft({ pointsRate: 2 }),

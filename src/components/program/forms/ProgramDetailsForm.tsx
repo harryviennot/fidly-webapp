@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { CheckIcon } from '@phosphor-icons/react';
 import { StampIconSvg, type StampIconType } from '@/components/design/StampIconPicker';
@@ -10,6 +11,7 @@ import { NumberStepper } from '@/components/reusables/number-stepper';
 import { SmoothHeight } from '@/components/reusables/smooth-height';
 import { RewardMenuEditor } from '@/components/program/forms/RewardMenuEditor';
 import { computeCardColors } from '@/lib/card-utils';
+import { maxBalanceFloor } from '@/lib/points-config';
 import { cn } from '@/lib/utils';
 import type { CardDesign, LoyaltyType, RewardTier } from '@/types';
 
@@ -72,6 +74,17 @@ export function ProgramDetailsForm({
   const iconColorHex = colors?.iconColorHex ?? '#fff';
 
   const patch = (next: Partial<ProgramDetailsValue>) => onChange({ ...value, ...next });
+
+  // The cap must always cover the priciest reward (it would be unreachable
+  // otherwise; the backend rejects such a config). Adding a bigger reward
+  // auto-raises the cap — keyed on rewards only so typing isn't fought.
+  const pointsRewards = value.pointsRewards ?? [];
+  useEffect(() => {
+    if (!isPoints || (value.maxBalance ?? null) === null) return;
+    const floor = maxBalanceFloor(pointsRewards);
+    if ((value.maxBalance as number) < floor) patch({ maxBalance: floor });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value.pointsRewards]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -169,7 +182,11 @@ export function ProgramDetailsForm({
               <Switch
                 checked={(value.maxBalance ?? null) !== null}
                 onCheckedChange={(on) =>
-                  patch({ maxBalance: on ? value.maxBalance ?? 1000 : null })
+                  patch({
+                    maxBalance: on
+                      ? value.maxBalance ?? Math.max(1000, maxBalanceFloor(pointsRewards))
+                      : null,
+                  })
                 }
                 aria-label={t('points.capLabel')}
               />
@@ -187,12 +204,20 @@ export function ProgramDetailsForm({
                     <Input
                       type="number"
                       inputMode="numeric"
-                      min={1}
+                      min={maxBalanceFloor(pointsRewards)}
                       value={value.maxBalance ?? 1}
                       onChange={(e) => {
                         const n = parseInt(e.target.value, 10);
                         patch({ maxBalance: Number.isNaN(n) ? 1 : Math.max(1, n) });
                       }}
+                      onBlur={() =>
+                        patch({
+                          maxBalance: Math.max(
+                            value.maxBalance ?? 1,
+                            maxBalanceFloor(pointsRewards)
+                          ),
+                        })
+                      }
                       className="h-11 pr-9 text-right"
                       aria-label={t('points.capMaxLabel')}
                     />
