@@ -226,7 +226,8 @@
         "failed": {
           "title": "The switch did not complete",
           "body": "Nothing was lost: your program is still on its previous type. Try again, and contact us if it happens twice.",
-          "retry": "Try again"
+          "retry": "Try again",
+          "back": "Go back and adjust"
         },
         "pushingHint": "Your program is already converted. Cards keep updating in the background, so you can leave this page.",
         "pushingLeave": "Back to my dashboard"

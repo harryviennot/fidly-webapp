@@ -226,7 +226,8 @@
         "failed": {
           "title": "Le changement n'a pas abouti",
           "body": "Rien n'est perdu : votre programme est resté sur son ancien type. Réessayez, et contactez-nous si ça se reproduit.",
-          "retry": "Réessayer"
+          "retry": "Réessayer",
+          "back": "Revenir modifier"
         },
         "pushingHint": "Votre programme est déjà converti. Les cartes continuent de se mettre à jour en arrière-plan, vous pouvez quitter cette page.",
         "pushingLeave": "Retour à mon tableau de bord"

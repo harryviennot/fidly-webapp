@@ -27,6 +27,7 @@ import {
   type StagedTemplates,
 } from '../assemble';
 import { defaultAnnounceMessages } from '../announce-defaults';
+import { pathForConvertStep } from '../registry';
 import { currentProgramShape, readTargetDraft } from '../target-draft';
 
 const POLL_INTERVAL_MS = 3000;
@@ -45,7 +46,7 @@ export function ExecuteStep() {
   const queryClient = useQueryClient();
   const { currentBusiness } = useBusiness();
   const businessId = currentBusiness?.id;
-  const { program, toType, clearDraft } = useConvertWizard();
+  const { program, toType, clearDraft, setExitAllowed } = useConvertWizard();
 
   const [conversionId, setConversionId] = useState<string | null>(
     () => ctx.getDraft<string>('execute.conversionId') ?? null
@@ -203,6 +204,14 @@ export function ExecuteStep() {
     setRetryNonce((n) => n + 1);
   }, []);
 
+  // A failed attempt must not trap the owner on this screen: bring the
+  // header X back (nothing was committed on a failed POST; on a failed push
+  // the conversion is done and leaving is equally safe).
+  const failed = postFailed || row?.status === 'failed';
+  useEffect(() => {
+    setExitAllowed(failed);
+  }, [failed, setExitAllowed]);
+
   // ── Render states ────────────────────────────────────────────────────────
 
   if (postFailed || row?.status === 'failed') {
@@ -218,14 +227,25 @@ export function ExecuteStep() {
           {t('failed.body')}
         </p>
         {postFailed && (
-          <button
-            type="button"
-            onClick={retry}
-            className="mt-2 inline-flex items-center gap-2 rounded-[10px] bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[var(--accent-hover)]"
-          >
-            <ArrowsClockwiseIcon className="h-4 w-4" weight="bold" />
-            {t('failed.retry')}
-          </button>
+          <div className="mt-2 flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={retry}
+              className="inline-flex items-center gap-2 rounded-[10px] bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[var(--accent-hover)]"
+            >
+              <ArrowsClockwiseIcon className="h-4 w-4" weight="bold" />
+              {t('failed.retry')}
+            </button>
+            {/* Nothing was committed — walking back through the steps to fix
+                whatever the server rejected is always safe here. */}
+            <button
+              type="button"
+              onClick={() => router.push(pathForConvertStep('review'))}
+              className="text-[13px] font-semibold text-[var(--accent)] hover:underline"
+            >
+              {t('failed.back')}
+            </button>
+          </div>
         )}
       </div>
     );

@@ -180,6 +180,7 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
   // onboarding shell for the submit-handler-clearing race this avoids).
   useEffect(() => {
     setSecondaryAction(null);
+    setExitAllowedOverride(false);
     submitHandlerRef.current = null;
     // t.has, not a speculative t(): next-intl reports a missing key as an
     // error (the execute step deliberately has no CTA key).
@@ -210,10 +211,11 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
   }, [resolved, visibleSteps, router]);
 
   // Abandon path — X in the header, confirm dialog, draft dropped so the
-  // next visit starts clean. Unavailable on the execute step: once the owner
-  // validated the switch, the conversion is committed server-side and the
-  // only way out is the success screen's own CTA.
+  // next visit starts clean. Unavailable on the execute step while a
+  // conversion commits or pushes — but a FAILED attempt (nothing committed)
+  // re-enables it via setExitAllowed so the owner is never trapped.
   const [exitOpen, setExitOpen] = useState(false);
+  const [exitAllowedOverride, setExitAllowedOverride] = useState(false);
   const handleExit = useCallback(() => {
     clearDraft();
     router.push('/program/settings');
@@ -263,7 +265,7 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
               {t('header.title')}
             </h1>
           </div>
-          {!isExecute && (
+          {(!isExecute || exitAllowedOverride) && (
             <button
               type="button"
               onClick={() => setExitOpen(true)}
@@ -300,7 +302,9 @@ export function ConvertWizardShell({ slug }: ConvertWizardShellProps) {
           }
         >
           <WizardStepProvider value={stepContext}>
-            <ConvertWizardProvider value={{ program, toType, clearDraft }}>
+            <ConvertWizardProvider
+              value={{ program, toType, clearDraft, setExitAllowed: setExitAllowedOverride }}
+            >
               <StepComponent />
             </ConvertWizardProvider>
           </WizardStepProvider>

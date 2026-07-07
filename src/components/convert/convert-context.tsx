@@ -16,6 +16,12 @@ export interface ConvertWizardContextValue {
   toType: LoyaltyType;
   /** Wipe the localStorage draft (execute step, after completion). */
   clearDraft: () => void;
+  /**
+   * The execute step hides the header X while a conversion commits / pushes
+   * (leaving mid-flight makes no sense), but a FAILED attempt must never
+   * trap the owner — the step flips this to bring the X back.
+   */
+  setExitAllowed: (allowed: boolean) => void;
 }
 
 const ConvertWizardContext = createContext<ConvertWizardContextValue | null>(null);

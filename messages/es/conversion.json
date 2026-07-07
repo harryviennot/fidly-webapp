@@ -226,7 +226,8 @@
         "failed": {
           "title": "El cambio no se ha completado",
           "body": "No se ha perdido nada: tu programa sigue con su tipo anterior. Vuelve a intentarlo y escríbenos si ocurre dos veces.",
-          "retry": "Volver a intentarlo"
+          "retry": "Volver a intentarlo",
+          "back": "Volver a ajustar"
         },
         "pushingHint": "Tu programa ya está convertido. Las tarjetas siguen actualizándose en segundo plano, puedes salir de esta página.",
         "pushingLeave": "Volver a mi panel"
