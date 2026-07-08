@@ -176,6 +176,7 @@
         "store_location": "Establecimiento",
         "points_balance": "Saldo de puntos actual",
         "points_to_next": "Puntos hasta la próxima recompensa",
+        "next_reward_points": "Meta de puntos de la próxima recompensa",
         "next_reward_name": "Nombre de la próxima recompensa",
         "last_reward_name": "Recompensa obtenida"
       }

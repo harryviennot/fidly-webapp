@@ -20,6 +20,18 @@ export interface CropToAspectOptions {
   mimeType?: string;
 }
 
+/**
+ * Force high-quality resampling on a canvas context before an image is drawn.
+ *
+ * The 2D context defaults to `imageSmoothingQuality: 'low'`, so downscaling a
+ * large logo to the crop's output size (e.g. 2000px → 150px) uses a cheap
+ * filter and looks soft. High quality is a lossless win for any downscale.
+ */
+export function applyHighQualitySmoothing(ctx: CanvasRenderingContext2D): void {
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+}
+
 async function loadImageElement(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -108,6 +120,7 @@ export async function cropToAspect(
     canvas.height = outH;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('No 2d context');
+    applyHighQualitySmoothing(ctx);
 
     ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
 

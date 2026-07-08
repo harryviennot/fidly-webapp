@@ -176,6 +176,7 @@
         "store_location": "Location",
         "points_balance": "Current points balance",
         "points_to_next": "Points until next reward",
+        "next_reward_points": "Next reward point goal",
         "next_reward_name": "Next reward name",
         "last_reward_name": "Reward just earned"
       }

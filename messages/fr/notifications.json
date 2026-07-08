@@ -176,6 +176,7 @@
         "store_location": "Lieu de l'établissement",
         "points_balance": "Solde de points actuel",
         "points_to_next": "Points avant la prochaine récompense",
+        "next_reward_points": "Objectif en points de la prochaine récompense",
         "next_reward_name": "Nom de la prochaine récompense",
         "last_reward_name": "Récompense obtenue"
       }

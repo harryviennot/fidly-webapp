@@ -20,6 +20,9 @@ export const VARIABLE_KEYS = [
   // Points programs (resolved by build_field_context in the backend).
   'points_balance',
   'points_to_next',
+  // The absolute point value of the next reward (the milestone itself), e.g. 100
+  // when the customer has 30 and points_to_next is 70.
+  'next_reward_points',
   'next_reward_name',
   // The reward the customer just won (multi-reward ladders). Available on the
   // reward_earned + reward_completed triggers.
@@ -55,6 +58,7 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     store_location: 'store_location',
     points_balance: 'points_balance',
     points_to_next: 'points_to_next',
+    next_reward_points: 'next_reward_points',
     next_reward_name: 'next_reward_name',
     last_reward_name: 'last_reward_name',
   },
@@ -69,6 +73,7 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     store_location: 'lieu_magasin',
     points_balance: 'points_actuels',
     points_to_next: 'points_restants',
+    next_reward_points: 'points_prochaine_recompense',
     next_reward_name: 'prochaine_recompense',
     last_reward_name: 'recompense_obtenue',
   },
@@ -83,6 +88,7 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     store_location: 'lugar_establecimiento',
     points_balance: 'puntos_actuales',
     points_to_next: 'puntos_restantes',
+    next_reward_points: 'puntos_siguiente_recompensa',
     next_reward_name: 'siguiente_recompensa',
     last_reward_name: 'recompensa_obtenida',
   },
@@ -125,6 +131,7 @@ export function programVariableKeys(opts: {
       ? [
           'points_balance',
           'points_to_next',
+          'next_reward_points',
           rewardCount > 1 ? 'next_reward_name' : 'reward_name',
           'business_name',
           'customer_first_name',
@@ -158,7 +165,7 @@ export function triggerVariableKeys(opts: {
   if (type === 'points' && rewardCount > 1 && isRewardTrigger) {
     const keys: VariableKey[] = ['points_balance'];
     if (trigger === 'reward_earned') {
-      keys.push('points_to_next', 'next_reward_name', 'last_reward_name');
+      keys.push('points_to_next', 'next_reward_points', 'next_reward_name', 'last_reward_name');
     } else {
       keys.push('last_reward_name');
     }
@@ -232,6 +239,7 @@ export function renderSamplePreview(
     store_location: 'Westside',
     points_balance: '120',
     points_to_next: '80',
+    next_reward_points: '200',
     next_reward_name: 'Free Coffee',
     last_reward_name: 'Free Coffee',
   };
