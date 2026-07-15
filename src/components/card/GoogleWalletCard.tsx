@@ -8,6 +8,7 @@ import { StampIconType } from "@/components/design/StampIconPicker";
 import { StampGrid } from "@/components/card/WalletCard";
 import { PointsStrip } from "@/components/card/PointsStrip";
 import { computeCardColors, rgbToHex, getInitials } from "@/lib/card-utils";
+import { stampStripImageOpacity } from "@/lib/stamp-strip";
 
 // ============================================================================
 // Types
@@ -377,7 +378,7 @@ export function GoogleWalletCard({
             className="relative pb-1"
             style={{
               borderColor: `${colors.textColor}15`,
-              backgroundColor: isPoints ? stripBgHex : undefined,
+              backgroundColor: stripBgHex,
             }}
           >
             {/* Strip background layer */}
@@ -390,10 +391,11 @@ export function GoogleWalletCard({
                   className="object-cover"
                   style={{
                     // image_only shows the raw image edge-to-edge (no dimming).
-                    opacity:
-                      design.points_strip_style === "image_only"
+                    opacity: isPoints
+                      ? design.points_strip_style === "image_only"
                         ? 1
-                        : (design.strip_background_opacity ?? 40) / 100,
+                        : (design.strip_background_opacity ?? 40) / 100
+                      : stampStripImageOpacity(design),
                   }}
                   unoptimized
                 />
@@ -411,6 +413,9 @@ export function GoogleWalletCard({
                   accentColor={pointsAccent}
                   backgroundColor={stripBgHex}
                 />
+              ) : design.stamp_icon_mode === "image_only" ? (
+                /* image_only: the hero IS the image — keep its height, no stamps. */
+                <div style={{ height: heroHeight }} />
               ) : (
                 heroWidth > 0 && (
                   <StampGrid

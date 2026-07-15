@@ -329,8 +329,13 @@
       "axe": "Hacha"
     },
     "customStamps": {
-      "tabPresets": "Biblioteca de iconos",
-      "tabCustom": "Tu propia imagen",
+      "styleLabel": "Estilo de la franja",
+      "style_preset": "Sellos clásicos",
+      "style_custom": "Tus propios iconos",
+      "style_image_only": "Solo imagen",
+      "imageOnlyHint": "Este estilo solo muestra tu imagen. Añade una arriba.",
+      "bgColorLabel": "Color de fondo",
+      "bgColorHelp": "El color detrás de tus sellos. Sigue visible bajo la imagen de la franja.",
       "primaryLabel": "Imagen del sello",
       "uploadLabel": "Añadir una imagen",
       "removeBg": "Quitar el fondo",

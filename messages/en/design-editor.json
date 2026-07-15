@@ -329,8 +329,13 @@
       "axe": "Axe"
     },
     "customStamps": {
-      "tabPresets": "Icon library",
-      "tabCustom": "Your own image",
+      "styleLabel": "Strip style",
+      "style_preset": "Classic stamps",
+      "style_custom": "Your own icons",
+      "style_image_only": "Image only",
+      "imageOnlyHint": "This style shows only your strip image. Add one above.",
+      "bgColorLabel": "Background color",
+      "bgColorHelp": "The color behind your stamps. It stays visible under the strip image.",
       "primaryLabel": "Stamp image",
       "uploadLabel": "Add an image",
       "removeBg": "Remove the background",

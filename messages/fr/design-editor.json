@@ -329,8 +329,13 @@
       "axe": "Hache"
     },
     "customStamps": {
-      "tabPresets": "Bibliothèque d'icônes",
-      "tabCustom": "Votre image",
+      "styleLabel": "Style du bandeau",
+      "style_preset": "Tampons classiques",
+      "style_custom": "Vos propres icônes",
+      "style_image_only": "Image seule",
+      "imageOnlyHint": "Ce style n'affiche que votre image. Ajoutez-en une ci-dessus.",
+      "bgColorLabel": "Couleur de fond",
+      "bgColorHelp": "La couleur derrière vos tampons. Elle reste visible sous l'image du bandeau.",
       "primaryLabel": "Image du tampon",
       "uploadLabel": "Importer une image",
       "removeBg": "Supprimer l'arrière-plan",

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { CardDesign } from "@/types";
 import { renderSamplePreview } from "@/lib/template-variables";
+import { stampStripImageOpacity } from "@/lib/stamp-strip";
 import { useVariablePreviewValues } from "@/hooks/use-variable-preview-values";
 import {
   StampIconSvg,
@@ -648,8 +649,33 @@ export function WalletCard({
                   />
                 </div>
               </div>
+            ) : design.stamp_icon_mode === "image_only" ? (
+              /* image_only: the strip IS the uploaded image (or the bare
+                 canvas color) — full-width band, no stamps drawn. */
+              <div
+                className="relative w-full overflow-hidden"
+                style={{ backgroundColor: stripBgHex }}
+              >
+                {design.strip_background_url && (
+                  <div className="absolute inset-0" style={{ zIndex: 0 }}>
+                    <Image
+                      src={design.strip_background_url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      style={{ opacity: stampStripImageOpacity(design) }}
+                      unoptimized
+                    />
+                  </div>
+                )}
+                {/* Spacer keeps the strip's height without drawing stamps. */}
+                <div className="w-full" style={{ aspectRatio: `${STRIP_ASPECT_RATIO}` }} />
+              </div>
             ) : (
-              <div className="relative flex items-start justify-center py-2">
+              <div
+                className="relative flex items-start justify-center py-2"
+                style={{ backgroundColor: stripBgHex }}
+              >
                 {/* Strip background layer */}
                 {design.strip_background_url && (
                   <div
@@ -661,7 +687,7 @@ export function WalletCard({
                       alt=""
                       fill
                       className="object-cover"
-                      style={{ opacity: (design.strip_background_opacity ?? 40) / 100 }}
+                      style={{ opacity: stampStripImageOpacity(design) }}
                       unoptimized
                     />
                   </div>
