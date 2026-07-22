@@ -304,8 +304,10 @@ export default function BillingPage() {
         />
       )}
 
-      {/* Active subscription info */}
-      {(isActive || isCancelled) && (
+      {/* Active subscription info — also for a card-upfront business still in
+          its Stripe-owned trial (isActiveInTrial): they have a real
+          subscription and must be able to cancel before the first charge. */}
+      {(isActive || isCancelled || isActiveInTrial) && (
         <div
           className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6 animate-slide-up"
           style={{ animationDelay: "0ms" }}
@@ -384,7 +386,9 @@ export default function BillingPage() {
       {/* Plan selection */}
       <div className="space-y-4 animate-slide-up" style={{ animationDelay: "80ms" }}>
         <h2 className="text-lg font-bold">
-          {isTrialing || isSuspended || isGrace ? t("choosePlan") : t("changePlan")}
+          {(isTrialing || isSuspended || isGrace) && !isActiveInTrial
+            ? t("choosePlan")
+            : t("changePlan")}
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
