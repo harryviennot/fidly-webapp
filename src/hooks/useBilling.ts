@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useBusiness } from "@/contexts/business-context";
+import { deriveTrialSubscriptionFlags } from "@/lib/billing-state";
 import {
   getBillingStatus,
   createCheckoutSession,
@@ -35,17 +36,17 @@ export function useBillingStatus() {
 
   const hasSubscription = !!data?.stripe_subscription_id;
 
-  // Use query fetch timestamp as "now" to avoid impure Date.now() calls
+  // Use query fetch timestamp as "now" to avoid impure Date.now() calls.
+  // A business with a live subscription is Stripe-owned: it reads as
+  // active-in-trial whether billing_status is "active" (legacy mid-trial
+  // conversion) or "trial" (card-upfront cohort still in its Stripe trial).
   const now = query.dataUpdatedAt || 0;
-  const trialEndMs = data?.trial_ends_at ? new Date(data.trial_ends_at).getTime() : null;
-  const isActiveInTrial =
-    billingStatus === "active" &&
-    hasSubscription &&
-    trialEndMs !== null &&
-    trialEndMs > now;
-  const daysUntilFirstCharge = isActiveInTrial && trialEndMs
-    ? Math.max(0, Math.ceil((trialEndMs - now) / 86_400_000))
-    : null;
+  const { isActiveInTrial, daysUntilFirstCharge } = deriveTrialSubscriptionFlags({
+    billingStatus,
+    hasSubscription,
+    trialEndsAt: data?.trial_ends_at,
+    now,
+  });
 
   return {
     ...query,
