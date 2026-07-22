@@ -11,6 +11,8 @@ import { useActiveDesign } from "@/hooks/use-designs";
 import { useActivityStats } from "@/hooks/use-activity-stats";
 import { useActivityFeed } from "@/hooks/use-activity-feed";
 import { useActivityRealtime } from "@/hooks/use-activity-realtime";
+import { useConversions } from "@/hooks/use-conversions";
+import { useDefaultProgram } from "@/hooks/use-programs";
 import { useLocations } from "@/hooks/use-locations";
 import { useHasLegacyTransactions } from "@/hooks/use-transactions";
 import { getCustomer } from "@/api";
@@ -96,6 +98,13 @@ export default function ActivityPage() {
   );
 
   const feed = useActivityFeed(businessId, feedFilters);
+
+  // Program-type conversion markers, interleaved into the unfiltered feed as
+  // one business-level event each (the per-customer balance_migrated rows are
+  // deliberately excluded from this feed and live in customer timelines).
+  const { data: program } = useDefaultProgram(businessId);
+  const conversionsQuery = useConversions(businessId, program?.id);
+  const conversions = conversionsQuery.data ?? [];
 
   // Push new transactions live (replaces the old latest_transaction_at polling).
   useActivityRealtime(businessId);
@@ -198,6 +207,7 @@ export default function ActivityPage() {
               totalStamps={totalStamps}
               onItemClick={handleItemClick}
               hasActiveFilters={hasActiveFilters || !!search}
+              conversions={hasActiveFilters || search ? undefined : conversions}
               stampIcon={stampIcon}
               rewardIcon={rewardIcon}
               stampFilledColor={colors?.accentHex}

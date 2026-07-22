@@ -5,6 +5,8 @@
     "export": "Export",
     "addCustomer": "Add Customer",
     "customerProfile": "Customer Profile",
+    "pointsCustomer": "Points card",
+    "pointsBalance": "{points} pts",
     "loading": "Loading customers...",
     "loadFailed": "Failed to load customers. Make sure the backend is running.",
     "searchPlaceholder": "Search by name or email...",
@@ -18,7 +20,8 @@
       "lastVisit": "Last Visit",
       "redemptions": "Rewards",
       "action": "Action",
-      "actions": "Actions"
+      "actions": "Actions",
+      "points": "Points"
     },
     "stats": {
       "totalCustomers": "Total Customers",
@@ -35,6 +38,7 @@
     "sort": {
       "name": "Name",
       "stamps": "Stamps",
+      "points": "Points",
       "rewards": "Rewards",
       "lastActivity": "Last activity"
     },
@@ -90,13 +94,16 @@
       "new": "Joined within the last 14 days.",
       "regular": "Active customers without a special status.",
       "vip": "Customers who have redeemed 3 or more rewards.",
-      "rewardReady": "Has a reward waiting to be redeemed: a full card or stacked rewards.",
+      "rewardReady": "Has a reward ready to redeem right now.",
       "closeToReward": "Within 2 stamps of completing their card.",
-      "atRisk": "Have stamps but haven't visited in over 30 days.",
-      "ghost": "Got their card but never came back. No stamps yet."
+      "atRisk": "Engaged before but haven't visited in over 30 days.",
+      "ghost": "Got their card but never came back to earn anything."
     },
     "actions": {
       "addStamp": "Add Stamp",
+      "open": "Open",
+      "addPoints": "Add points",
+      "removePoints": "Remove points",
       "maxed": "Max!",
       "redeem": "Redeem",
       "voidLast": "Void Last",
@@ -117,6 +124,13 @@
       "voidSuccessToast": "Stamp voided",
       "voidFailedToast": "Failed to void stamp",
       "noVoidableStamp": "No stamp to void",
+      "voidPointsDialogTitle": "Remove last points",
+      "voidPointsConfirm": "Remove points",
+      "voidPointsReasonPlaceholder": "e.g. Points added by mistake",
+      "voidPointsSuccessToast": "Points removed",
+      "voidValueLabel": "Removing",
+      "voidValuePoints": "{points} pts",
+      "voidValueStamps": "{count, plural, one {# stamp} other {# stamps}}",
       "adjustment": {
         "title": "Add a stamp",
         "chip1": "Forgot to scan",
@@ -138,7 +152,44 @@
           "locationNotPermitted": "You aren't assigned to that location."
         }
       },
-      "redeemBanked": "{count, plural, =1 {Redeem (1 saved)} other {Redeem (# saved)}}"
+      "redeemBanked": "{count, plural, =1 {Redeem (1 saved)} other {Redeem (# saved)}}",
+      "pointsAdd": {
+        "title": "Add points",
+        "amountLabel": "Amount spent",
+        "preview": "= +{points} points",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Why are you adding these points?",
+        "reasonHelp": "Only you see this. It keeps your activity log clear.",
+        "locationLabel": "Location",
+        "noLocation": "No location",
+        "successToast": "Added {points} points",
+        "submitting": "Adding...",
+        "submit": "Add points",
+        "errors": {
+          "amountRequired": "Enter the amount the customer spent."
+        }
+      },
+      "pointsRemove": {
+        "title": "Remove points",
+        "modeLast": "Last credit",
+        "modeCustom": "Custom amount",
+        "amountLabel": "Points to remove",
+        "newBalanceLabel": "New balance",
+        "pointsValue": "{points} pts",
+        "successToast": "Removed {points} points",
+        "submitting": "Removing...",
+        "submit": "Remove points"
+      },
+      "pointsRedeem": {
+        "title": "Redeem a reward",
+        "balance": "{balance} available",
+        "price": "{points} pts",
+        "notEnough": "Not enough points",
+        "successToast": "Redeemed {reward}",
+        "failedToast": "Could not redeem the reward. Try again.",
+        "submitting": "Redeeming...",
+        "submit": "Redeem"
+      }
     },
     "toasts": {
       "stampAdded": "Stamp added for {name}",
@@ -190,7 +241,14 @@
         "at_risk": "At Risk",
         "ghost": "Ghost"
       },
-      "rewardsAvailable": "Rewards to redeem"
+      "rewardsAvailable": "Rewards to redeem",
+      "points": {
+        "title": "Points balance",
+        "lifetime": "{count} earned all-time",
+        "complete": "Card completed",
+        "limit": "{max} pts limit",
+        "price": "{points} pts"
+      }
     },
     "transaction": {
       "empty": "No transactions yet",
@@ -198,13 +256,18 @@
       "loadingMore": "Loading...",
       "types": {
         "stamp_added": "Stamp Added",
+        "points_earned": "Points earned",
         "reward_redeemed": "Reward Redeemed",
         "stamp_voided": "Stamp Voided",
+        "points_voided": "Points Removed",
         "bonus_stamp": "Bonus Stamp",
+        "bonus_points": "Bonus Points",
         "stamps_adjusted": "Stamps Adjusted",
+        "points_adjusted": "Points Adjusted",
         "card_added": "Card Added",
         "card_re_added": "Card Re-added",
-        "card_deleted": "Card Deleted"
+        "card_deleted": "Card Deleted",
+        "balance_migrated": "Balance converted"
       },
       "by": "by",
       "you": "You",
@@ -221,7 +284,12 @@
         "yesterday": "Yesterday",
         "daysAgo": "{count}d ago"
       },
-      "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"
+      "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}",
+      "conversion": {
+        "stampsValue": "{count, plural, =1 {1 stamp} other {# stamps}}",
+        "pointsValue": "{count} pts",
+        "rewardsHonored": "{count, plural, =1 {1 reward honored} other {# rewards honored}}"
+      }
     }
   }
 }

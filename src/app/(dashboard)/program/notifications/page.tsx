@@ -31,10 +31,11 @@ import {
   useUpdateNotificationTemplate,
 } from '@/hooks/use-notifications';
 import { useBusiness } from '@/contexts/business-context';
+import { isStampProgram, isPointsProgram } from '@/types';
 import { useProgram } from '../layout';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import {
-  VARIABLE_KEYS,
+  programVariableKeys,
   PRO_ONLY_VARIABLES,
   type Locale,
   type VariableKey,
@@ -54,6 +55,11 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     business_name: 'Your business',
     customer_first_name: 'Sarah',
     store_location: 'Westside',
+    points_balance: '120',
+    points_to_next: '80',
+    next_reward_points: '200',
+    next_reward_name: 'Free coffee',
+    last_reward_name: 'Free coffee',
   },
   fr: {
     stamp_count: '3',
@@ -64,6 +70,11 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     business_name: 'Votre entreprise',
     customer_first_name: 'Sarah',
     store_location: 'Westside',
+    points_balance: '120',
+    points_to_next: '80',
+    next_reward_points: '200',
+    next_reward_name: 'Café offert',
+    last_reward_name: 'Café offert',
   },
   es: {
     stamp_count: '3',
@@ -74,6 +85,11 @@ const VARIABLE_FALLBACKS: Record<Locale, Record<VariableKey, string>> = {
     business_name: 'Tu comercio',
     customer_first_name: 'Sara',
     store_location: 'Centro',
+    points_balance: '120',
+    points_to_next: '80',
+    next_reward_points: '200',
+    next_reward_name: 'Café gratis',
+    last_reward_name: 'Café gratis',
   },
 };
 
@@ -92,7 +108,10 @@ export default function ProgramNotificationsPage() {
   const templates = useMemo(() => data?.items ?? [], [data]);
   const tier = data?.tier;
   const isEditable = templates.some((tpl) => tpl.is_editable);
-  const totalStamps = program?.config?.total_stamps;
+  // Points notification firing + variables land with backend Phase 9. Until
+  // then a points program has no stamp goal — fall back to generic sample
+  // values for the variable previews rather than reading a stamp-only field.
+  const totalStamps = isStampProgram(program) ? program.config.total_stamps : undefined;
   const programName = program?.name ?? null;
   const rewardNameSet = Boolean(program?.reward_name?.trim());
   const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
@@ -114,14 +133,12 @@ export default function ProgramNotificationsPage() {
         : Number(fallbacks.total_stamps);
     const stampsLeftReal = Math.max(0, totalStampsReal - stampCountReal);
     return {
+      ...fallbacks,
       stamp_count: String(stampCountReal),
       total_stamps: String(totalStampsReal),
       stamps_left: String(stampsLeftReal),
-      rewards_count: fallbacks.rewards_count,
       reward_name: program?.reward_name?.trim() || fallbacks.reward_name,
       business_name: currentBusiness?.name?.trim() || fallbacks.business_name,
-      customer_first_name: fallbacks.customer_first_name,
-      store_location: fallbacks.store_location,
     };
   }, [uiLocale, totalStamps, program?.reward_name, currentBusiness?.name]);
 
@@ -174,7 +191,9 @@ export default function ProgramNotificationsPage() {
     const tips: Partial<Record<VariableKey, string>> = {};
     const hrefs: Partial<Record<VariableKey, string>> = {};
 
-    if (!rewardNameSet) {
+    // Points programs resolve {{reward_name}} from the reward ladder, so it's
+    // never "unset" there; only gate it for stamp programs.
+    if (!isPointsProgram(program) && !rewardNameSet) {
       disabled.add('reward_name');
       tips.reward_name = t('editor.rewardNameMissing');
       hrefs.reward_name = '/program/settings';
@@ -197,7 +216,24 @@ export default function ProgramNotificationsPage() {
     }
 
     return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
-  }, [rewardNameSet, nameCollectionOff, canMultiLocation, t]);
+  }, [rewardNameSet, nameCollectionOff, canMultiLocation, program, t]);
+
+  // Variables shown in the reference panel. Multi-reward points programs also
+  // surface {{last_reward_name}} (the reward just won) alongside
+  // {{next_reward_name}} — it's offered on the reward_earned / reward_completed
+  // and multi-reward milestone editors.
+  const referenceVariables = useMemo(() => {
+    const keys = programVariableKeys({
+      type: program?.type,
+      rewardCount: isPointsProgram(program) ? program.config.rewards.length : 0,
+      includeStoreLocation: true,
+    });
+    if (isPointsProgram(program) && program.config.rewards.length > 1) {
+      const idx = keys.indexOf('next_reward_name');
+      keys.splice(idx === -1 ? keys.length : idx + 1, 0, 'last_reward_name');
+    }
+    return keys;
+  }, [program]);
 
   const variablesIcon = (
     <BracketsCurlyIcon className="h-3.5 w-3.5" weight="bold" />
@@ -209,7 +245,7 @@ export default function ProgramNotificationsPage() {
         {t('variablesReference.description')}
       </p>
       <VariablesList
-        variables={VARIABLE_KEYS}
+        variables={referenceVariables}
         examples={variableExamples}
         locale={uiLocale}
         disabledVariables={disabledVars}

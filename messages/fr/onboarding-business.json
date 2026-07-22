@@ -54,7 +54,8 @@
           "content": "Enregistrer le contenu de ma carte",
           "content_short": "Continuer",
           "back": "Enregistrer le dos de ma carte",
-          "back_short": "Continuer"
+          "back_short": "Continuer",
+          "points": "Enregistrer ma carte"
         },
         "notifications": {
           "icon": "Enregistrer mon icône"
@@ -87,7 +88,9 @@
       "saveFailed": "Impossible d'enregistrer. Réessayez.",
       "programNameRequired": "Donnez un nom à votre programme.",
       "rewardRequired": "Indiquez la récompense que vos clients gagneront.",
-      "slugTooShort": "Encore quelques caractères."
+      "slugTooShort": "Encore quelques caractères.",
+      "tooManyCustomers": "Vous avez trop de clients pour changer de type ici. Terminez la configuration et démarrez votre essai gratuit, puis changez le type dans les réglages de votre programme.",
+      "setupAlreadyComplete": "Ce programme est déjà configuré, son type est donc verrouillé ici. Changez-le dans les réglages de votre programme."
     },
     "chapters": {
       "welcome": {
@@ -176,7 +179,24 @@
         "steps": {
           "program": {
             "title": "Votre programme de fidélité",
-            "subtitle": "Combien de tampons pour gagner quoi, et comment."
+            "subtitle": "Combien de tampons pour gagner quoi, et comment.",
+            "subtitlePoints": "Ce que vos clients gagnent par achat, et ce qu’ils peuvent obtenir.",
+            "typeHelp": {
+              "label": "Lequel choisir ?",
+              "stampsTitle": "Tampons",
+              "stampsBody": "Un tampon par visite, la même récompense à chaque fois. Parfait quand vos clients prennent la même chose, un café ou une coupe par exemple.",
+              "pointsTitle": "Points",
+              "pointsBody": "Les points suivent le montant dépensé, à échanger contre plusieurs récompenses. Idéal quand le panier varie, en boutique ou au restaurant."
+            },
+            "typeBlocked": "Vous avez déjà {count} clients sur votre carte, trop pour changer de type ici. Terminez la configuration et démarrez votre essai gratuit, puis changez le type dans les réglages de votre programme.",
+            "switchDialog": {
+              "typeStamps": "tampons",
+              "typePoints": "points",
+              "title": "Passer aux {type} ?",
+              "body": "Vos {count} carte(s) test passeront aux {type} et se mettront à jour toutes seules, rien à retirer ni à rajouter. La progression test est reportée sur le nouveau type.",
+              "confirm": "Changer de type",
+              "cancel": "Garder le type actuel"
+            }
           },
           "data-collection": {
             "title": "Que demander à vos clients",
@@ -189,7 +209,7 @@
         "steps": {
           "intro": {
             "title": "Le verso de votre carte",
-            "subtitle": "Tout ce qui n'est pas un tampon est rangé au dos.",
+            "subtitle": "Tout ce qui n'est pas sur le devant de la carte est rangé au dos.",
             "bodyP1": "Vos clients consultent le verso de leur carte en appuyant sur les trois points dans Apple Wallet, ou sur l'icône info dans Google Wallet. Ils y trouvent les informations que vous y placez : horaires, adresse, téléphone, site web, conditions, et tout ce que vous voulez rendre visible.",
             "bodyP2": "Vous saisissez ces informations une seule fois maintenant. Elles seront disponibles pour chaque carte que vous créerez à l'avenir."
           },
@@ -209,6 +229,10 @@
           "stamps": {
             "title": "Tampons et récompense",
             "subtitle": "Choisissez les icônes et la couleur principale. Ces choix donnent le ton de votre carte."
+          },
+          "points": {
+            "title": "Points et récompenses",
+            "subtitle": "Choisissez l'affichage de votre solde, puis votre couleur."
           },
           "content": {
             "title": "Informations visibles en façade",
@@ -232,7 +256,7 @@
         "steps": {
           "icon": {
             "title": "Icône des notifications",
-            "subtitle": "À chaque tampon ou récompense, vos clients reçoivent une notification sur leur téléphone. Voici l'icône qui l'accompagnera.",
+            "subtitle": "À chaque mise à jour de leur carte, vos clients reçoivent une notification sur leur téléphone. Voici l'icône qui l'accompagnera.",
             "uploadSectionTitle": "Votre icône",
             "uploadCta": "Glissez votre image ici, ou appuyez pour la choisir",
             "uploadHint": "PNG, 87 par 87 pixels minimum.",
@@ -290,7 +314,10 @@
             "installAnotherCta": "Installer sur un autre téléphone",
             "timeoutTitle": "Toujours là ?",
             "timeoutBody": "On a arrêté d'écouter les nouvelles inscriptions après 5 minutes. Appuyez sur « reprendre » pour continuer à surveiller.",
-            "retry": "Reprendre l'écoute"
+            "retry": "Reprendre l'écoute",
+            "points": {
+              "installBody": "Appuyez sur un bouton ci-dessous. La carte arrive sur votre téléphone, prête pour l'achat test à l'étape suivante."
+            }
           },
           "stamp": {
             "title": "Tamponnez votre carte",
@@ -312,19 +339,41 @@
             "appleWalletHint": "Apple Wallet regroupe les mises à jour rapides. Environ 20 secondes entre les tampons, et chaque notification a son propre buzz.",
             "googleWalletHint": "Sur Google Wallet, la carte ne se met à jour qu'une fois fermée. Quittez l'application et rouvrez votre carte pour voir le nouveau tampon.",
             "deliveryDisclosure": {
-              "summary": "La notification n'arrive pas ? Le tampon est bien enregistré, ne vous inquiétez pas.",
+              "summary": "La notification n'arrive pas ? L'opération est bien enregistrée, ne vous inquiétez pas.",
               "appleTitle": "Sur Apple Wallet",
               "appleBody": "Apple choisit le meilleur moment pour livrer la notification en fonction de la batterie, du Wi-Fi et du réseau. Elle arrive en quelques secondes à quelques minutes. La carte sur l'écran verrouillé se met à jour dès que les conditions le permettent.",
               "googleTitle": "Sur Google Wallet",
-              "googleBody": "La carte ne se met à jour qu'après avoir été fermée. Quittez l'application et rouvrez votre carte pour voir le nouveau tampon.",
-              "reassuranceTitle": "Dans tous les cas, le tampon est enregistré",
-              "reassuranceBody": "Même si la notification tarde, le décompte est sauvegardé immédiatement. À la prochaine visite de ce client, vous verrez le bon nombre de tampons."
+              "googleBody": "La carte ne se met à jour qu'après avoir été fermée. Quittez l'application et rouvrez votre carte pour voir la mise à jour.",
+              "reassuranceTitle": "Dans tous les cas, le scan est enregistré",
+              "reassuranceBody": "Même si la notification tarde, le décompte est sauvegardé immédiatement. À la prochaine visite de ce client, vous verrez le bon décompte."
             },
             "stampsLabel": "Tampons sur votre carte",
             "justStamped": "Tampon ajouté",
-            "multiDeviceHint": "{count, plural, =1 {} other {Chaque appui tamponne les # téléphones installés à la fois.}}",
+            "multiDeviceHint": "{count, plural, =1 {} other {Chaque appui met à jour les # téléphones installés à la fois.}}",
             "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",
-            "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre tableau de bord."
+            "customisationHint": "C'est juste le message par défaut. Vous pouvez le réécrire, en ajouter à différents paliers, ou désactiver les notifications, à tout moment depuis la page notifications de votre tableau de bord.",
+            "points": {
+              "title": "Envoyez-vous des points",
+              "subtitle": "Chaque achat test crédite des points et envoie une vraie notification sur votre téléphone.",
+              "readyTitle": "Prêt à ajouter des points",
+              "readyBody": "Appuyez sur le bouton ci-dessous pour enregistrer un achat test. Une vraie notification arrivera sur votre téléphone en quelques secondes.",
+              "firstStampLandedTitle": "Vous l'avez senti.",
+              "firstStampLandedBody": "Cette vibration, c'est exactement ce que vos clients ressentiront à chaque fois qu'ils gagnent des points. Même notification, même timing. Faites-en un deuxième pour bien sentir le rythme.",
+              "keepStampingTitle": "Encore un",
+              "keepStampingBody": "Un dernier achat test crédite encore des points et envoie une deuxième vraie notification. Le petit délai entre les deux permet à chacune de vibrer séparément.",
+              "demoCompleteTitle": "C'est exactement ça.",
+              "demoCompleteBody": "Vous venez de vivre ce que vivront vos clients. Quand vous êtes prêt, on continue.",
+              "sendCta": "Enregistrer un achat test",
+              "sendAnotherCta": "Ajouter des points",
+              "watching": "Les points arrivent…",
+              "cooldownCta": "Prochain achat disponible dans {seconds}s.",
+              "stampsLabel": "Points sur votre carte",
+              "justStamped": "Points ajoutés",
+              "fallback": "Pas de vibration ? La notification peut prendre quelques secondes. Réessayez dans un instant.",
+              "deliveryDisclosure": {
+                "reassuranceBody": "Même si la notification ou l'aperçu de la carte a du retard, le solde est déjà sur notre serveur. Au prochain scan de ce client, vous verrez le solde réel et à jour."
+              }
+            }
           }
         }
       },
@@ -384,6 +433,7 @@
         "title": "Voilà ce que vous venez de construire",
         "subtitle": "Un vrai programme de fidélité, sur de vrais téléphones, avec de vraies notifications. Récapitulons avant de parler offre.",
         "programDetail": "{totalStamps} tampons pour « {rewardName} »",
+        "programDetailPoints": "{rewardCount} récompenses à obtenir avec des points",
         "stampsLabel": "{count, plural, =0 {Aucun tampon envoyé} =1 {1 tampon envoyé et reçu sur votre téléphone} other {# tampons envoyés et reçus sur votre téléphone}}",
         "broadcastLabel": {
           "sent": "1 diffusion envoyée à votre audience (vous, pour l'instant)",

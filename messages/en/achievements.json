@@ -25,8 +25,8 @@
     },
     "ladders": {
       "customers": "{count, plural, =1 {First customer} other {# customers}}",
-      "stamps": "{count, plural, =1 {First stamp given} other {# stamps given}}",
-      "stamps30d": "{count} stamps in 30 days",
+      "scans": "{count, plural, =1 {First scan} other {# scans}}",
+      "scans30d": "{count} scans in 30 days",
       "customers30d": "{count} new customers in 30 days",
       "repeatCustomers": "{count, plural, =1 {First returning customer} other {# returning customers}}"
     },
@@ -39,11 +39,11 @@
     },
     "info": {
       "growth": "The total number of customers who have ever added your card.",
-      "engagement": "The total number of stamps your team has ever given.",
+      "engagement": "The total number of scans your team has ever made.",
       "momentum": "Your last 30 days, always moving forward. Today counts, and anything older than 30 days drops off.",
       "loyalty": "Customers who come back, counted as loyal once they visit again on another day.",
-      "firsts": "Milestones you earn just once, the first time you reach each one, like your first stamp or first broadcast.",
-      "weeklyGoal": "Stamps your team gives this week. We suggest a target based on your recent weeks, and you can change it anytime."
+      "firsts": "Milestones you earn just once, the first time you reach each one, like your first scan or first broadcast.",
+      "weeklyGoal": "Scans your team makes this week. We suggest a target based on your recent weeks, and you can change it anytime."
     },
     "hero": {
       "earnedTitle": "{earned} of {total} earned",
@@ -59,19 +59,19 @@
     },
     "why": {
       "growth": "Every customer who adds your card. Your reach, growing.",
-      "engagement": "Every stamp is a visit. More stamps, more habit.",
+      "engagement": "Every scan is a visit. More scans, more habit.",
       "momentum": "Your last 30 days, a rolling window. It rewards a strong recent month.",
       "loyalty": "Customers who came back on two different days, your regulars.",
       "firsts": "Milestones you hit the first time you do something."
     },
     "weeklyGoal": {
       "label": "This week's goal",
-      "unit": "stamps",
-      "toGo": "{remaining} stamps to go, you've got this.",
-      "reached": "Goal reached. {current} of {target} stamps.",
+      "unit": "scans",
+      "toGo": "{remaining} scans to go, you've got this.",
+      "reached": "Goal reached. {current} of {target} scans.",
       "editTitle": "Set your weekly goal",
-      "editDescription": "The number of stamps you want to reach this week. We suggest {auto}, based on your recent weeks.",
-      "fieldLabel": "Stamps this week",
+      "editDescription": "The number of scans you want to reach this week. We suggest {auto}, based on your recent weeks.",
+      "fieldLabel": "Scans this week",
       "save": "Save my goal",
       "reset": "Back to automatic",
       "cancel": "Cancel"

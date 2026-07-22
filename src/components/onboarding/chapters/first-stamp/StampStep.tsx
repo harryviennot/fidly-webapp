@@ -15,9 +15,10 @@ import {
 } from '@/components/ui/collapsible';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useActiveDesign, useDesigns } from '@/hooks/use-designs';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { computeCardColors } from '@/lib/card-utils';
 import { cn } from '@/lib/utils';
-import type { CardDesign } from '@/types';
+import { isPointsProgram, type CardDesign } from '@/types';
 import { useWizardStep } from '../../wizard-context';
 import { useBusinessInstalls, type BusinessInstall } from './useBusinessInstalls';
 import { useDesignReady } from './useDesignReady';
@@ -42,6 +43,10 @@ const COOLDOWN_TICK_MS = 1000;
 // wow twice; more would just batch into Apple's coalesce window and ruin
 // the next chapter's broadcast push.
 const MAX_STAMPS = 2;
+// Sample ticket price (in the business currency) for the points self-test.
+// The backend credits round(amount × points_per_currency_unit), so this is a
+// believable café ticket that visibly moves the balance on each tap.
+const POINTS_TEST_AMOUNT = 10;
 
 /**
  * Chapter 7 sub-step 2 — optional. The wow moment. Fans out a real /stamps
@@ -60,20 +65,36 @@ export function StampStep() {
   const ctx = useWizardStep();
 
   const businessId = currentBusiness?.id;
+  const { data: program } = useDefaultProgram(businessId);
+  // Points cards "stamp" by logging a test purchase (an amount → credited
+  // points), not by adding a stamp. Drives the copy, the action payload, the
+  // primary-value readout and the cap below.
+  const isPoints = isPointsProgram(program);
+  // Type-aware key picker: points-specific strings live under a `points`
+  // sub-object; everything else falls back to the shared stamp keys.
+  const tk = (key: string) => (isPoints ? t(`points.${key}`) : t(key));
   const { installs, installedCount, refetch, loading: installsLoading } = useBusinessInstalls(businessId);
   const installedWithEnrollment = useMemo(
     () => installs.filter((i) => i.installed && i.enrollment_id),
     [installs]
   );
 
-  // Canonical stamp count for the action card: highest stamp count among
-  // installed customers. They all move together when the fan-out succeeds,
-  // and "max" beats "min" if one stamp call partially fails (we'll surface
-  // the partial result in the toast).
+  // Canonical primary value for the action card: highest count among installed
+  // customers. Points programs read the balance (`points`); stamp programs read
+  // the stamp count. They all move together when the fan-out succeeds, and
+  // "max" beats "min" if one call partially fails (surfaced in the toast).
+  const primaryFor = (i: BusinessInstall) => (isPoints ? i.points : i.stamps);
   const stamps = installedWithEnrollment.length
-    ? Math.max(0, ...installedWithEnrollment.map((i) => i.stamps))
+    ? Math.max(0, ...installedWithEnrollment.map(primaryFor))
     : null;
   const ready = installedWithEnrollment.length >= 1;
+  // Press counter: points balances are unbounded values (e.g. 10, 20), so the
+  // demo cap is keyed off the number of taps this session, not the balance.
+  // Stamps cap on the stamp count itself (1 stamp per tap = same thing).
+  const [sendCount, setSendCount] = useState(0);
+  const reachedMax = isPoints
+    ? sendCount >= MAX_STAMPS
+    : (stamps ?? 0) >= MAX_STAMPS;
 
   const { data: design } = useActiveDesign(businessId);
 
@@ -123,7 +144,7 @@ export function StampStep() {
         await refetch();
         const current = Math.max(
           0,
-          ...installedWithEnrollment.map((i) => i.stamps)
+          ...installedWithEnrollment.map((i) => (isPoints ? i.points : i.stamps))
         );
         if (current > baseline) return true;
         await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
@@ -133,7 +154,7 @@ export function StampStep() {
     // installedWithEnrollment is intentionally NOT in deps — we capture a
     // fresh snapshot via refetch() on each loop iteration. Adding it would
     // restart polling every tick.
-    [refetch, installedWithEnrollment]
+    [refetch, installedWithEnrollment, isPoints]
   );
 
   const startCooldown = useCallback(() => {
@@ -162,7 +183,7 @@ export function StampStep() {
 
   const handleSendStamp = useCallback(async () => {
     if (!ready || phase !== 'idle' || !businessId) return;
-    if ((stamps ?? 0) >= MAX_STAMPS) return;
+    if (reachedMax) return;
     setPhase('sending');
     setRecentlyStamped(false);
     const baseline = stamps ?? 0;
@@ -171,10 +192,21 @@ export function StampStep() {
     const targets = installedWithEnrollment;
     try {
       const results = await Promise.allSettled(
-        targets.map((i) => addStamp(businessId, i.enrollment_id!))
+        // Points programs require an amount (a ticket price → credited points);
+        // a bare scan would 400 AMOUNT_REQUIRED. Stamp programs send the
+        // bodiless scanner call unchanged.
+        targets.map((i) =>
+          isPoints
+            ? addStamp(businessId, i.enrollment_id!, {
+                source: 'scanner',
+                amount: POINTS_TEST_AMOUNT,
+              })
+            : addStamp(businessId, i.enrollment_id!)
+        )
       );
       const failed = results.filter((r) => r.status === 'rejected').length;
       const succeeded = targets.length - failed;
+      if (succeeded > 0) setSendCount((c) => c + 1);
       if (failed > 0) {
         toast.error(
           `Stamped ${succeeded} of ${targets.length} devices. ${failed} failed.`
@@ -196,7 +228,7 @@ export function StampStep() {
         }
         setHasStampedThisSession(true);
       } else if (succeeded > 0) {
-        toast.message(t('fallback'));
+        toast.message(isPoints ? t('points.fallback') : t('fallback'));
       }
       startCooldown();
     } catch (err) {
@@ -208,6 +240,8 @@ export function StampStep() {
     phase,
     businessId,
     stamps,
+    reachedMax,
+    isPoints,
     installedWithEnrollment,
     pollForStamp,
     startCooldown,
@@ -220,9 +254,9 @@ export function StampStep() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1 animate-slide-up">
         <h2 className="wiz-h font-semibold text-[var(--foreground)]">
-          {t('title')}
+          {tk('title')}
         </h2>
-        <p className="wiz-body text-[#7A7A7A]">{t('subtitle')}</p>
+        <p className="wiz-body text-[#7A7A7A]">{tk('subtitle')}</p>
       </header>
 
       <div className="animate-slide-up delay-80">
@@ -240,6 +274,8 @@ export function StampStep() {
             cooldownRemaining={cooldownRemaining}
             showCelebration={showCelebration}
             design={design ?? null}
+            isPoints={isPoints}
+            reachedMax={reachedMax}
             onSend={handleSendStamp}
             t={t}
           />
@@ -303,6 +339,12 @@ interface StampCardProps {
   cooldownRemaining: number;
   showCelebration: boolean;
   design: CardDesign | null;
+  /** Points programs reword the action ("test purchase" → points) and read the
+   *  balance instead of a stamp count. */
+  isPoints: boolean;
+  /** Demo cap reached (computed by the parent: balance for stamps, tap count
+   *  for points). */
+  reachedMax: boolean;
   onSend: () => void;
   t: ReturnType<typeof useTranslations>;
 }
@@ -316,35 +358,40 @@ function StampCard({
   cooldownRemaining,
   showCelebration,
   design,
+  isPoints,
+  reachedMax,
   onSend,
   t,
 }: StampCardProps) {
+  // Points-specific copy lives under a `points` sub-object; the rest falls back
+  // to the shared stamp keys.
+  const tk = (key: string, values?: Record<string, string | number>) =>
+    isPoints ? t(`points.${key}`, values) : t(key, values);
   const sending = phase === 'sending';
   const onCooldown = phase === 'cooldown';
   const hasAnyStamp = stamps !== null && stamps > 0;
-  const reachedMax = (stamps ?? 0) >= MAX_STAMPS;
   const disabled = sending || onCooldown || reachedMax;
 
   let label: string;
-  if (sending) label = t('watching');
-  else if (onCooldown) label = t('cooldownCta', { seconds: cooldownRemaining });
-  else if (hasAnyStamp) label = t('sendAnotherCta');
-  else label = t('sendCta');
+  if (sending) label = tk('watching');
+  else if (onCooldown) label = tk('cooldownCta', { seconds: cooldownRemaining });
+  else if (hasAnyStamp) label = tk('sendAnotherCta');
+  else label = tk('sendCta');
 
   let title: string;
   let body: string;
   if (reachedMax && !showCelebration) {
-    title = t('demoCompleteTitle');
-    body = t('demoCompleteBody');
+    title = tk('demoCompleteTitle');
+    body = tk('demoCompleteBody');
   } else if (showCelebration) {
-    title = t('firstStampLandedTitle');
-    body = t('firstStampLandedBody');
+    title = tk('firstStampLandedTitle');
+    body = tk('firstStampLandedBody');
   } else if (hasAnyStamp) {
-    title = t('keepStampingTitle');
-    body = t('keepStampingBody');
+    title = tk('keepStampingTitle');
+    body = tk('keepStampingBody');
   } else {
-    title = t('readyTitle');
-    body = t('readyBody');
+    title = tk('readyTitle');
+    body = tk('readyBody');
   }
 
   return (
@@ -376,7 +423,7 @@ function StampCard({
 
       <div className="flex items-center justify-center gap-3 wiz-body-sm flex-wrap">
         <div className="flex items-center gap-1.5 rounded-full bg-[var(--paper)] border border-[var(--border-light)] px-3 py-1.5">
-          <span className="text-[#999]">{t('stampsLabel')}</span>
+          <span className="text-[#999]">{tk('stampsLabel')}</span>
           <span className="font-semibold tabular-nums text-[var(--foreground)]">
             {stamps ?? '–'}
           </span>
@@ -384,7 +431,7 @@ function StampCard({
         {recentlyStamped && (
           <span className="inline-flex items-center gap-1 text-green-700 font-medium animate-in fade-in duration-200">
             <CheckCircle className="w-4 h-4" weight="fill" />
-            {t('justStamped')}
+            {tk('justStamped')}
           </span>
         )}
       </div>
@@ -405,7 +452,7 @@ function StampCard({
         </div>
       )}
 
-      <WalletDeliveryDisclosure t={t} />
+      <WalletDeliveryDisclosure t={t} isPoints={isPoints} />
     </Card>
   );
 }
@@ -418,8 +465,19 @@ function StampCard({
  * battery state, network type — and the reassurance that the stamp itself
  * was recorded server-side regardless.
  */
-function WalletDeliveryDisclosure({ t }: { t: ReturnType<typeof useTranslations> }) {
+function WalletDeliveryDisclosure({
+  t,
+  isPoints,
+}: {
+  t: ReturnType<typeof useTranslations>;
+  isPoints: boolean;
+}) {
   const [open, setOpen] = useState(false);
+  // The Apple/Google delivery mechanics are type-neutral; only the "your scan
+  // is saved" reassurance talks about a count vs a points balance.
+  const reassuranceBody = isPoints
+    ? t('points.deliveryDisclosure.reassuranceBody')
+    : t('deliveryDisclosure.reassuranceBody');
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <div className="rounded-lg border border-[var(--border-light)] bg-[var(--paper)]">
@@ -449,7 +507,7 @@ function WalletDeliveryDisclosure({ t }: { t: ReturnType<typeof useTranslations>
           />
           <DisclosureBlock
             title={t('deliveryDisclosure.reassuranceTitle')}
-            body={t('deliveryDisclosure.reassuranceBody')}
+            body={reassuranceBody}
             emphasis
           />
         </CollapsibleContent>

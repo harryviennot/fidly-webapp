@@ -3,14 +3,16 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { GearSix, Check } from '@phosphor-icons/react';
+import { GearSix, Check, GiftIcon, LockSimpleIcon } from '@phosphor-icons/react';
 import { BusinessInfoEditor } from '@/components/settings/BusinessInfoEditor';
 import {
   BUSINESS_INFO_TYPE_ICONS,
   getEntryPreview,
 } from '@/lib/business-info-utils';
 import type { BusinessInfoEntry } from '@/types/business';
-import type { PassField } from '@/types';
+import { isPointsProgram, type PassField, type RewardTier } from '@/types';
+import { useBusiness } from '@/contexts/business-context';
+import { useDefaultProgram } from '@/hooks/use-programs';
 import { useDesignForm } from './DesignFormContext';
 
 /** Copy overrides for the back-of-card form. Each field has a default that
@@ -56,9 +58,20 @@ export function BackForm({
 }: BackFormProps = {}) {
   const t = useTranslations('designEditor.editor');
   const tFE = useTranslations('designEditor.fieldEditor');
+  const tPts = useTranslations('designEditor.points');
+  const { currentBusiness } = useBusiness();
+  const { data: program } = useDefaultProgram(currentBusiness?.id);
   const { formData, businessInfo, updateField, toggleBusinessInfoKey } =
     useDesignForm();
   const hiddenKeys = formData.hidden_business_info_keys || [];
+
+  // Points programs always carry a program-rewards block on the card back
+  // (reward menu + cap), injected by the backend. Surface it read-only in the
+  // editor between the card-specific and business sections so the merchant
+  // sees it (it can't be edited or removed here — it follows the program).
+  const isPoints = isPointsProgram(program);
+  const pointsRewards = isPoints ? program.config.rewards : [];
+  const pointsMax = isPoints ? program.config.max_balance ?? null : null;
 
   const sharedSectionTitle = copy?.sharedSectionTitle ?? t('fromBusinessSettings');
   const sharedSectionHelper = copy?.sharedSectionHelper;
@@ -92,15 +105,8 @@ export function BackForm({
         <p className="text-sm text-muted-foreground">{t('backDescription')}</p>
       )}
 
-      <BusinessInfoFields
-        businessInfo={businessInfo}
-        hiddenKeys={hiddenKeys}
-        onToggleKey={toggleBusinessInfoKey}
-        hideSettingsLink={hideSettingsLink}
-        title={sharedSectionTitle}
-        helper={sharedSectionHelper}
-      />
-
+      {/* Order mirrors the actual pass back: card-specific, then the
+          program-rewards block (points only), then business info. */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <span className="text-[15px] font-medium">{specificSectionTitle}</span>
@@ -115,6 +121,86 @@ export function BackForm({
           addLabel={addFieldCta}
           emptyLabel={specificEmpty}
         />
+      </div>
+
+      {isPoints && pointsRewards.length > 0 && (
+        <ProgramRewardsSection
+          rewards={pointsRewards}
+          maxBalance={pointsMax}
+          title={t('programRewardsTitle')}
+          helper={t('programRewardsHelper')}
+          maxLabel={t('programRewardsMax')}
+          formatPrice={(points) => tPts('rewardPrice', { points })}
+        />
+      )}
+
+      <BusinessInfoFields
+        businessInfo={businessInfo}
+        hiddenKeys={hiddenKeys}
+        onToggleKey={toggleBusinessInfoKey}
+        hideSettingsLink={hideSettingsLink}
+        title={sharedSectionTitle}
+        helper={sharedSectionHelper}
+      />
+    </div>
+  );
+}
+
+interface ProgramRewardsSectionProps {
+  rewards: RewardTier[];
+  maxBalance: number | null;
+  title: string;
+  helper: string;
+  maxLabel: string;
+  formatPrice: (points: number) => string;
+}
+
+/**
+ * Read-only mirror of the program-rewards back-field block that the backend
+ * always appends to a points card's back (reward menu + cap). Locked: it
+ * follows the loyalty program, not this card style, so it can't be edited or
+ * removed here. Sits between the card-specific and business sections.
+ */
+function ProgramRewardsSection({
+  rewards,
+  maxBalance,
+  title,
+  helper,
+  maxLabel,
+  formatPrice,
+}: ProgramRewardsSectionProps) {
+  const sorted = [...rewards].sort((a, b) => a.threshold - b.threshold);
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0.5">
+        <span className="inline-flex items-center gap-1.5 text-[15px] font-medium">
+          {title}
+          <LockSimpleIcon className="w-3.5 h-3.5 text-muted-foreground" weight="bold" />
+        </span>
+        <p className="text-xs text-muted-foreground">{helper}</p>
+      </div>
+      <div className="flex flex-col gap-1.5 rounded-xl bg-[#FAFAF8] border border-[#F0EFEB] p-3">
+        {sorted.map((reward) => (
+          <div key={reward.id} className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white border border-[#E8E5DE] flex items-center justify-center shrink-0">
+              <GiftIcon className="w-4 h-4 text-[#777]" />
+            </div>
+            <span className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">
+              {reward.name}
+            </span>
+            <span className="text-xs font-semibold tabular-nums text-[var(--accent)] shrink-0">
+              {formatPrice(reward.threshold)}
+            </span>
+          </div>
+        ))}
+        {maxBalance != null && (
+          <div className="flex items-center justify-between pt-1.5 mt-0.5 border-t border-[#EEEDEA]">
+            <span className="text-xs text-muted-foreground">{maxLabel}</span>
+            <span className="text-xs font-semibold tabular-nums text-foreground">
+              {formatPrice(maxBalance)}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

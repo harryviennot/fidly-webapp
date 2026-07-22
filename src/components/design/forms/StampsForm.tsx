@@ -4,23 +4,26 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LabelWithTooltip } from '@/components/design/FieldTooltip';
 import { ColorPicker } from '@/components/design/ColorPicker';
 import { REWARD_ICON_IDS, type StampIconType } from '@/components/design/StampIconPicker';
 import { IconPickerField } from '@/components/design/IconPickerField';
 import ImageUploader from '@/components/design/ImageUploader';
-import { accentColors, iconColors, emptyStampColors } from '@/lib/color-utils';
+import { accentColors, designColors, iconColors, emptyStampColors, rgbToHex, hexToRgb } from '@/lib/color-utils';
 import { paletteToSwatches } from '@/lib/logo-palette';
+import { boxFromMode, modeForBox, type StampStripBox } from '@/lib/stamp-strip';
+import { cn } from '@/lib/utils';
 import { useDesignForm } from './DesignFormContext';
 import { CustomStampsPanel } from './CustomStampsPanel';
 
+const STRIP_BOXES: StampStripBox[] = ['preset', 'custom', 'image_only'];
+
 /**
- * Stamps section: stamp + reward icon, all stamp-related colors, and the
- * optional strip background. v3 dropped the "Advanced options" collapsible
- * — empty / border / strip controls are surfaced inline so users don't
- * miss them. "From your logo" preset rows are wired into every color
- * picker for consistency.
+ * Stamps section: a 3-box strip-style picker (classic preset icons / custom
+ * uploaded icons / image only), the style's own controls, and the strip
+ * background (color + optional image). Mirrors the points strip picker so
+ * both card types read the same. "From your logo" preset rows are wired
+ * into every color picker for consistency.
  */
 export function StampsForm() {
   const t = useTranslations('designEditor.editor');
@@ -43,25 +46,25 @@ export function StampsForm() {
     palette,
   } = useDesignForm();
 
-  // Local tab state: the saved stamp_icon_mode only flips to 'custom' once
+  // Local box state: the saved stamp_icon_mode only flips to 'custom' once
   // an icon is uploaded (a half-configured custom panel keeps the design
-  // rendering presets), so the tab can't be derived from formData alone.
-  const [iconTab, setIconTab] = useState<'preset' | 'custom'>(
-    formData.stamp_icon_mode === 'custom' ? 'custom' : 'preset'
-  );
+  // rendering presets), so the active box can't be derived from formData alone.
+  const [box, setBox] = useState<StampStripBox>(boxFromMode(formData.stamp_icon_mode));
 
-  const switchIconTab = (tab: 'preset' | 'custom') => {
-    setIconTab(tab);
+  const selectBox = (next: StampStripBox) => {
+    setBox(next);
     const hasIcons = (formData.custom_stamp_config?.icons?.length ?? 0) > 0;
-    // Config is retained when switching back to presets — re-entering the
-    // custom tab restores the previous uploads instantly.
-    updateField('stamp_icon_mode', tab === 'custom' && hasIcons ? 'custom' : 'preset');
+    // Config is retained when switching styles — re-entering the custom box
+    // restores the previous uploads instantly.
+    updateField('stamp_icon_mode', modeForBox(next, hasIcons));
   };
+
   // Wizard overrides with a per-business-type palette; dashboard falls back
   // to the universal `designColors` aliases below.
   const accentPalette = palette ?? accentColors;
   const iconPalette = palette ?? iconColors;
   const emptyPalette = palette ?? emptyStampColors;
+  const stripBgPalette = palette ?? designColors;
 
   const logoPresets = useMemo(() => {
     return paletteToSwatches(extractedPalette).map((hex, i) => ({
@@ -71,22 +74,48 @@ export function StampsForm() {
   }, [extractedPalette, tAuto]);
   const logoPresetsLabel = logoPresets.length > 0 ? tAuto('fromLogo') : undefined;
 
+  // Strip canvas color, shown for the stamp-drawing styles. Defaults to the
+  // card's background_color (which is what the backend falls back to).
+  const stripBgValue = formData.strip_background_color
+    ? rgbToHex(formData.strip_background_color)
+    : formData.background_color
+      ? rgbToHex(formData.background_color)
+      : '#1c1c1e';
+  const hasStripImage = Boolean(formData.strip_background_url);
+
   return (
     <div className="space-y-5">
-      <Tabs value={iconTab} onValueChange={(v) => switchIconTab(v as 'preset' | 'custom')}>
-        <TabsList className="w-full">
-          <TabsTrigger value="preset" className="flex-1">
-            {tCustom('tabPresets')}
-          </TabsTrigger>
-          <TabsTrigger value="custom" className="flex-1">
-            {tCustom('tabCustom')}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* Strip style */}
+      <div className="flex flex-col gap-3">
+        <Label>{tCustom('styleLabel')}</Label>
+        <div className="grid grid-cols-3 gap-2">
+          {STRIP_BOXES.map((style) => {
+            const active = box === style;
+            return (
+              <button
+                key={style}
+                type="button"
+                onClick={() => selectBox(style)}
+                className={cn(
+                  'flex flex-col items-center gap-1.5 rounded-xl border-2 px-2 py-3 transition-colors',
+                  active
+                    ? 'border-[var(--accent)] bg-[var(--accent-light)]'
+                    : 'border-[var(--border)] hover:border-[var(--accent)]/50'
+                )}
+              >
+                <StampStyleThumb style={style} />
+                <span className="text-[11px] font-medium text-[#1A1A1A] text-center leading-tight">
+                  {tCustom(`style_${style}`)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-      {iconTab === 'custom' ? (
-        <CustomStampsPanel />
-      ) : (
+      {box === 'custom' && <CustomStampsPanel />}
+
+      {box === 'preset' && (
         <>
           <div className="flex flex-col gap-3">
             <LabelWithTooltip tooltip={t('stampIconTooltip')}>{t('stampIcon')}</LabelWithTooltip>
@@ -163,6 +192,24 @@ export function StampsForm() {
         </>
       )}
 
+      {/* Strip background: the solid canvas color is editable for the
+          stamp-drawing styles (it shows through wherever the image is absent
+          or transparent). image_only hides the color — the image is the
+          whole strip. */}
+      {box !== 'image_only' && (
+        <ColorPicker
+          label={tCustom('bgColorLabel')}
+          tooltip={tCustom('bgColorHelp')}
+          colors={stripBgPalette}
+          value={stripBgValue}
+          onChange={(hex) => updateField('strip_background_color', hexToRgb(hex))}
+          customColors={customColors}
+          onCustomColor={addCustomColor}
+          extraPresets={logoPresets}
+          extraPresetsLabel={logoPresetsLabel}
+        />
+      )}
+
       <div className="flex flex-col gap-3">
         <LabelWithTooltip tooltip={t('stripBackgroundTooltip')}>
           {t('stripBackground')}
@@ -181,7 +228,12 @@ export function StampsForm() {
             filename: 'strip-background.png',
           }}
         />
-        {formData.strip_background_url && (
+        {/* image_only lives or dies by its image — nudge if none uploaded. */}
+        {box === 'image_only' && !hasStripImage && (
+          <p className="text-[12px] text-[var(--accent)]">{tCustom('imageOnlyHint')}</p>
+        )}
+        {/* Opacity is meaningless for image_only (shown at full opacity). */}
+        {hasStripImage && box !== 'image_only' && (
           <div className="flex flex-col gap-2 pt-2">
             <div className="flex items-center justify-between">
               <Label className="text-sm">{t('opacity')}</Label>
@@ -200,6 +252,44 @@ export function StampsForm() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Tiny inline glyph representing each stamp strip style in the picker. */
+function StampStyleThumb({ style }: { style: StampStripBox }) {
+  if (style === 'custom') {
+    // An uploaded-icon glyph — your own image inside the stamp slot.
+    return (
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
+        <circle cx="14" cy="14" r="11" fill="none" stroke="var(--accent)" strokeWidth="2" />
+        <path
+          d="M14 8.5l1.7 3.4 3.8.6-2.75 2.7.65 3.8L14 17.2 10.6 19l.65-3.8-2.75-2.7 3.8-.6z"
+          fill="var(--accent)"
+        />
+      </svg>
+    );
+  }
+  if (style === 'image_only') {
+    // A little photo glyph — the strip is purely the uploaded image.
+    return (
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
+        <rect x="4" y="7" width="20" height="14" rx="2.5" fill="none" stroke="var(--accent)" strokeWidth="2" />
+        <circle cx="10" cy="12" r="2" fill="var(--accent)" />
+        <path d="M6 20l5-5 3.5 3.5L18 15l4 5z" fill="var(--accent)" />
+      </svg>
+    );
+  }
+  // Classic preset stamps — a row of filled/empty circles.
+  return (
+    <div className="flex items-center gap-1 h-7">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="w-3.5 h-3.5 rounded-full"
+          style={{ background: i < 2 ? 'var(--accent)' : 'var(--border)' }}
+        />
+      ))}
     </div>
   );
 }

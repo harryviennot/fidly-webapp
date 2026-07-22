@@ -131,8 +131,12 @@ export function getVisibleChapters(
 ): ChapterDef[] {
   const effectiveTeamSize = draftTeamSize || settings?.team_size;
   const isSolo = effectiveTeamSize === 'solo';
-  if (!isSolo) return WIZARD_CHAPTERS;
-  return WIZARD_CHAPTERS.filter((c) => c.id !== 'team');
+
+  const chapters = isSolo
+    ? WIZARD_CHAPTERS.filter((c) => c.id !== 'team')
+    : WIZARD_CHAPTERS;
+
+  return chapters;
 }
 
 /**
@@ -261,6 +265,24 @@ export function previousStepPath(
  */
 export function getStepCtaKey(chapterId: string, subStepId: string): string {
   return `footer.cta.${chapterId}.${subStepId}`;
+}
+
+/**
+ * i18n key for a sub-step's progress-bar title. Points programs swap the
+ * first-stamp "stamp" step to a purchase-worded title; everything else uses
+ * the plain title key. Centralised (was inline in WizardShell) so the pick is
+ * unit-testable and every type-aware title lands in one place.
+ */
+export function getSubStepTitleKey(
+  chapterId: string,
+  subStepId: string,
+  isPoints: boolean
+): string {
+  const base = `chapters.${chapterId}.steps.${subStepId}`;
+  if (isPoints && chapterId === 'first-stamp' && subStepId === 'stamp') {
+    return `${base}.points.title`;
+  }
+  return `${base}.title`;
 }
 
 /**

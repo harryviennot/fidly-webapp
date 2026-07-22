@@ -28,6 +28,8 @@ import {
 } from '@/components/reusables';
 import { useBusiness } from '@/contexts/business-context';
 import { useEntitlements } from '@/hooks/useEntitlements';
+import { useDefaultProgram } from '@/hooks/use-programs';
+import { useLatestConversion } from '@/hooks/use-conversions';
 import {
   useInfiniteBroadcasts,
   useBroadcastStats,
@@ -65,6 +67,24 @@ export default function ProgramBroadcastsPage() {
   const canBroadcast = hasFeature('notifications.broadcast');
   const monthlyLimit = getLimit('notifications.broadcast_limit');
   const isStarter = !canBroadcast;
+
+  // Program-type conversion pauses scheduled broadcasts whose audience
+  // targeting referenced the old unit (value_min/max, reward filters). Nudge
+  // the owner to re-target them for two weeks after a conversion.
+  const { data: defaultProgram } = useDefaultProgram(currentBusiness?.id);
+  const { data: latestConversion } = useLatestConversion(
+    currentBusiness?.id,
+    defaultProgram?.id
+  );
+  // Mount-time clock: the 14-day nudge window doesn't need a live tick.
+  const [nowTs] = useState(() => Date.now());
+  const pausedByConversion =
+    latestConversion?.status === 'completed' &&
+    (latestConversion.paused_broadcast_ids?.length ?? 0) > 0 &&
+    nowTs - new Date(latestConversion.completed_at ?? latestConversion.created_at).getTime() <
+      14 * 24 * 60 * 60 * 1000
+      ? latestConversion.paused_broadcast_ids.length
+      : 0;
 
   const activeFilter = (searchParams.get('filter') as FilterKey) || 'all';
 
@@ -215,6 +235,13 @@ export default function ProgramBroadcastsPage() {
           </Button>
         }
       />
+
+      {pausedByConversion > 0 && (
+        <InfoBox
+          variant="warning"
+          message={t('conversionPaused', { count: pausedByConversion })}
+        />
+      )}
 
       <div className="flex gap-[14px] flex-col min-[1080px]:flex-row min-[1080px]:items-start">
         {/* ─── Left column ─────────────────────────────────────── */}

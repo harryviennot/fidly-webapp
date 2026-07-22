@@ -32,6 +32,7 @@ import { useEntitlements } from '@/hooks/useEntitlements';
 import { useSendBroadcastAgain } from '@/hooks/use-notifications';
 import { ApiError } from '@/api/client';
 import { describeFilter } from '@/lib/broadcast-filters';
+import { useProgram } from '../../app/(dashboard)/program/layout';
 import { GatedFeature } from '@/components/reusables/gated-feature';
 import type { Broadcast } from '@/types/notification';
 
@@ -110,6 +111,7 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
   const tToasts = useTranslations('notifications.broadcasts.toasts');
 
   const { currentBusiness } = useBusiness();
+  const { program } = useProgram();
   const { hasFeature } = useEntitlements();
   const canSchedule = hasFeature('notifications.scheduled');
   const sendAgainMutation = useSendBroadcastAgain(currentBusiness?.id);
@@ -121,9 +123,12 @@ function DialogBody({ broadcast, onOpenChange, onSuccess }: Readonly<DialogBodyP
   const chipTranslator = (key: string, values?: Record<string, unknown>) =>
     tWizard(key, values as { n: number });
   const chips = useMemo(
-    () => describeFilter(broadcast.target_filter, chipTranslator),
+    () =>
+      describeFilter(broadcast.target_filter, chipTranslator, {
+        points: program?.type === 'points',
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [broadcast.target_filter]
+    [broadcast.target_filter, program?.type]
   );
 
   const now = Date.now();

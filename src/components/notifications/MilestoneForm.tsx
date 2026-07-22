@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
+import { NumberField } from '@/components/ui/number-field';
 import { Label } from '@/components/ui/label';
 import { InfoBox } from '@/components/reusables/info-box';
 import { useBusiness } from '@/contexts/business-context';
@@ -11,16 +11,20 @@ import { useEntitlements } from '@/hooks/useEntitlements';
 import { useCreateMilestone, useUpdateMilestone } from '@/hooks/use-notifications';
 import {
   renderSamplePreview,
+  programVariableKeys,
   PRO_ONLY_VARIABLES,
   type VariableKey,
 } from '@/lib/template-variables';
+import { useDefaultProgram } from '@/hooks/use-programs';
+import { isPointsProgram } from '@/types';
 import { ApiError } from '@/api/client';
 import { SUPPORTED_LOCALES } from '@/lib/locale';
 import { LocaleTabs } from './LocaleTabs';
 import { VariableChips } from './VariableChips';
 import { MessagePreview } from './MessagePreview';
 import { VariableEditor, type VariableEditorHandle } from './VariableEditor';
-import type { Locale, Milestone, MilestoneUpdate } from '@/types/notification';
+import { milestoneValue } from '@/types/notification';
+import type { Locale, Milestone, MilestoneMetric, MilestoneUpdate } from '@/types/notification';
 
 /** Fill a full per-locale body record from a (possibly partial) source. */
 function buildBody(src: Partial<Record<Locale, string>>): Record<Locale, string> {
@@ -87,32 +91,63 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
     const isEditMode = milestone != null;
     const primaryLocale: Locale = currentBusiness?.primary_locale ?? 'fr';
 
-    const [stampEquals, setStampEquals] = useState<string>(
-      milestone ? String(milestone.stamp_equals) : ''
+    const { data: program } = useDefaultProgram(currentBusiness?.id);
+    const isPoints = isPointsProgram(program);
+
+    const [value, setValue] = useState<string>(
+      milestone ? String(milestoneValue(milestone)) : ''
     );
+    const [metric, setMetric] = useState<MilestoneMetric>(milestone?.metric ?? 'balance');
     const [locale, setLocale] = useState<Locale>(primaryLocale);
     const [bodyByLocale, setBodyByLocale] = useState<Record<Locale, string>>(
       () => buildBody(milestone?.body ?? {}),
     );
     const editorRef = useRef<VariableEditorHandle>(null);
 
-    const stampNumber = parseInt(stampEquals, 10);
-    const stampValid = !Number.isNaN(stampNumber) && stampNumber > 0;
-    const stampInRange = !totalStamps || (stampValid && stampNumber < totalStamps);
+    const valueNumber = parseInt(value, 10);
+    const valueValid = !Number.isNaN(valueNumber) && valueNumber > 0;
+    // The "must be below the card goal" cap only applies to a STAMP program's
+    // current-balance milestone (a card has a fixed goal). Lifetime totals and
+    // points balances have no upper bound.
+    const enforceStampCap = !isPoints && metric === 'balance' && !!totalStamps;
+    const valueInRange = !enforceStampCap || (valueValid && valueNumber < totalStamps!);
     const primaryBody = bodyByLocale[primaryLocale];
     const hasContent = primaryBody.trim().length > 0;
-    const isValid = stampValid && stampInRange && hasContent;
+    const isValid = valueValid && valueInRange && hasContent;
 
     const isDirty =
       !isEditMode ||
-      stampNumber !== milestone!.stamp_equals ||
+      valueNumber !== milestoneValue(milestone!) ||
+      metric !== (milestone!.metric ?? 'balance') ||
       SUPPORTED_LOCALES.some((l) => bodyByLocale[l] !== (milestone!.body[l] ?? ''));
+
+    // Points programs hide the stamp-count variables; stamp programs keep the
+    // existing milestone variable set untouched. Multi-reward points milestones
+    // can also reference the reward just won ({{last_reward_name}}) alongside the
+    // upcoming one ({{next_reward_name}}) — there is no trigger auto-routing here,
+    // the business simply authors whichever fits the threshold they set.
+    const milestoneVariables = (() => {
+      if (!isPoints) return MILESTONE_VARIABLES;
+      const keys = programVariableKeys({
+        type: 'points',
+        rewardCount: program.config.rewards.length,
+        includeStoreLocation: true,
+      });
+      if (program.config.rewards.length > 1) {
+        const idx = keys.indexOf('next_reward_name');
+        keys.splice(idx === -1 ? keys.length : idx + 1, 0, 'last_reward_name');
+      }
+      return keys;
+    })();
+    const unitSample: Record<string, string> = isPoints
+      ? { points_balance: value || '50' }
+      : { stamp_count: value || '5' };
 
     const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
     const isNameCollectionOff = collectName === 'off' || collectName === false;
     const canMultiLocation = hasFeature('locations.multiple');
     const disabledVars = new Set<VariableKey>();
-    if (!rewardNameSet) disabledVars.add('reward_name');
+    if (!isPoints && !rewardNameSet) disabledVars.add('reward_name');
     if (isNameCollectionOff) disabledVars.add('customer_first_name');
     if (!canMultiLocation) {
       for (const v of PRO_ONLY_VARIABLES) disabledVars.add(v);
@@ -129,7 +164,13 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
       try {
         if (isEditMode && milestone) {
           const payload: MilestoneUpdate = {};
-          if (stampNumber !== milestone.stamp_equals) payload.stamp_equals = stampNumber;
+          if (
+            valueNumber !== milestoneValue(milestone) ||
+            metric !== (milestone.metric ?? 'balance')
+          ) {
+            payload.value = valueNumber;
+            payload.metric = metric;
+          }
           if (
             payloadBody.en !== (milestone.body.en ?? '') ||
             payloadBody.fr !== (milestone.body.fr ?? '')
@@ -142,13 +183,13 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
           });
           if (result?.swapped_off) {
             toast.warning(
-              tMilestones('toasts.swappedOff', { stamp: result.swapped_off.stamp_equals })
+              tMilestones('toasts.swappedOff', { stamp: milestoneValue(result.swapped_off) })
             );
           } else {
             toast.success(tMilestones('toasts.updated'));
           }
         } else {
-          await createMutation.mutateAsync({ stamp_equals: stampNumber, body: payloadBody });
+          await createMutation.mutateAsync({ value: valueNumber, metric, body: payloadBody });
           toast.success(tMilestones('toasts.created'));
         }
         onSaved?.();
@@ -187,28 +228,58 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
       onStateChange?.({ canSave, isPending });
     }, [canSave, isPending, onStateChange]);
 
-    const previewBody = renderSamplePreview(bodyByLocale[locale], {
-      stamp_count: stampEquals || '5',
-    });
+    const previewBody = renderSamplePreview(bodyByLocale[locale], unitSample);
 
     return (
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="stamp-equals" className="text-xs text-muted-foreground">
-            {tMilestones('stampCountLabel')}
-            {totalStamps ? ` (1 - ${totalStamps - 1})` : ''}
-          </Label>
-          <Input
-            id="stamp-equals"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            max={totalStamps ? totalStamps - 1 : undefined}
-            value={stampEquals}
-            onChange={(e) => setStampEquals(e.target.value)}
-            placeholder={tMilestones('stampCountPlaceholder')}
-            className="max-w-[160px] h-11"
-          />
+        {/* Trigger condition: the value to reach, measured against the current
+            balance or the all-time total. Grouped so the two controls read as
+            one rule; each row is label-left / control-right on desktop and
+            stacks on mobile so nothing feels crammed against its label. */}
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--paper)]/40 divide-y divide-[var(--border)]">
+          <div className="flex flex-col gap-2.5 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <Label htmlFor="milestone-value" className="text-[13px] font-medium text-[var(--foreground)]">
+              {isPoints ? tMilestones('pointsCountLabel') : tMilestones('stampCountLabel')}
+            </Label>
+            <NumberField
+              id="milestone-value"
+              value={value}
+              onChange={setValue}
+              min={1}
+              max={enforceStampCap ? totalStamps! - 1 : undefined}
+              suffix={isPoints ? tMilestones('unitPoints') : undefined}
+              placeholder={isPoints ? tMilestones('pointsCountPlaceholder') : tMilestones('stampCountPlaceholder')}
+              aria-label={isPoints ? tMilestones('pointsCountLabel') : tMilestones('stampCountLabel')}
+              className="w-full sm:w-[150px]"
+            />
+          </div>
+
+          {/* Threshold basis: current balance vs all-time (lifetime) total. */}
+          <div className="flex flex-col gap-2.5 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="space-y-1">
+              <Label className="text-[13px] font-medium text-[var(--foreground)]">{tMilestones('metricLabel')}</Label>
+              <p className="text-[11.5px] text-muted-foreground leading-snug max-w-[280px]">
+                {tMilestones(metric === 'balance' ? 'metricBalanceHelp' : 'metricLifetimeHelp')}
+              </p>
+            </div>
+            <div className="inline-flex shrink-0 rounded-lg border border-[var(--border)] bg-[var(--paper)] p-0.5">
+              {(['balance', 'lifetime'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMetric(m)}
+                  aria-pressed={metric === m}
+                  className={`px-3.5 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+                    metric === m
+                      ? 'bg-white shadow-sm text-[var(--foreground)]'
+                      : 'text-[var(--muted-gray)] hover:text-[var(--foreground)]'
+                  }`}
+                >
+                  {tMilestones(m === 'balance' ? 'metricBalance' : 'metricLifetime')}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <LocaleTabs value={locale} onValueChange={setLocale} primaryLocale={primaryLocale} />
@@ -231,7 +302,7 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
         </div>
 
         <VariableChips
-          variables={MILESTONE_VARIABLES}
+          variables={milestoneVariables}
           onInsert={insertVariable}
           locale={locale}
           disabledVariables={disabledVars.size > 0 ? disabledVars : undefined}
@@ -247,10 +318,10 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
           }}
         />
 
-        {stampValid && !stampInRange && totalStamps && (
+        {valueValid && !valueInRange && enforceStampCap && (
           <InfoBox
             variant="warning"
-            message={tMilestones('errors.outOfRange', { total: totalStamps })}
+            message={tMilestones('errors.outOfRange', { total: totalStamps! })}
           />
         )}
 
@@ -281,7 +352,7 @@ export const MilestoneForm = forwardRef<MilestoneFormHandle, MilestoneFormProps>
                   programName={programName}
                   businessName={currentBusiness?.name ?? ''}
                   body={renderSamplePreview(bodyByLocale[locale], {
-                    stamp_count: stampEquals || '5',
+                    ...unitSample,
                     customer_first_name: '',
                   })}
                 />

@@ -23,6 +23,8 @@ import { downloadQrPng, downloadQrPdf } from '@/lib/qr-download';
 import { copyToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 import { useDesigns } from '@/hooks/use-designs';
+import { useDefaultProgram } from '@/hooks/use-programs';
+import { isPointsProgram } from '@/types';
 import { useWizardStep } from '../../wizard-context';
 import { useWizardProgress } from '../../useWizardProgress';
 import { useBusinessInstalls } from './useBusinessInstalls';
@@ -80,6 +82,12 @@ export function InstallStep() {
   // hot skips the loader on the very first paint (avoids the one-frame
   // "loader → install" flash that would otherwise happen while the hook's
   // internal `getDesign` is in flight).
+  const { data: program } = useDefaultProgram(businessId);
+  const isPoints = isPointsProgram(program);
+  // The card is the same object either way; only the "test stamp vs test
+  // purchase" hint on the next step differs.
+  const installBody = isPoints ? t('points.installBody') : t('installBody');
+
   const { data: designs = [] } = useDesigns(businessId);
   const wizardDesign = designs[0];
   const designId = wizardDesign?.id;
@@ -256,6 +264,7 @@ export function InstallStep() {
             passUrl={install.passUrl}
             googleWalletUrl={install.googleWalletUrl}
             locale={locale}
+            installBody={installBody}
             t={t}
           />
         </div>
@@ -538,10 +547,12 @@ interface WalletInstallCardProps {
   passUrl: string;
   googleWalletUrl?: string;
   locale: string;
+  /** Type-aware "ready for the test stamp/purchase" hint. */
+  installBody: string;
   t: ReturnType<typeof useTranslations>;
 }
 
-function WalletInstallCard({ passUrl, googleWalletUrl, locale, t }: WalletInstallCardProps) {
+function WalletInstallCard({ passUrl, googleWalletUrl, locale, installBody, t }: WalletInstallCardProps) {
   const appleSrc = locale === 'fr' ? '/AppleWalletFR.svg' : locale === 'es' ? '/AppleWalletES.svg' : '/AppleWallet.svg';
   const googleSrc = locale === 'fr' ? '/GoogleWalletFR.svg' : locale === 'es' ? '/GoogleWalletES.svg' : '/GoogleWallet.svg';
 
@@ -549,7 +560,7 @@ function WalletInstallCard({ passUrl, googleWalletUrl, locale, t }: WalletInstal
     <Card hover={false} className="p-5 flex flex-col gap-3 items-center">
       <p className="wiz-body font-semibold text-[var(--foreground)] text-center">{t('installTitle')}</p>
       <p className="wiz-helper text-[#7A7A7A] text-center max-w-[320px] leading-relaxed">
-        {t('installBody')}
+        {installBody}
       </p>
       <div className="flex flex-row flex-wrap items-center justify-center gap-3 py-1">
         <a href={passUrl} className="block hover:opacity-90 transition-opacity">

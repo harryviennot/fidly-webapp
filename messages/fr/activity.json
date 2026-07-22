@@ -5,13 +5,14 @@
     "export": "Exporter",
     "searchPlaceholder": "Rechercher un client...",
     "loadFailed": "Impossible de charger le fil d'activité.",
-    "empty": "Aucune activité pour le moment. Les tampons et récompenses apparaîtront ici.",
+    "empty": "Aucune activité pour le moment. Les scans et récompenses apparaîtront ici.",
     "loadMore": "Charger plus",
     "loadingMore": "Chargement...",
     "by": "par",
     "you": "Vous",
     "live": "En direct",
     "stampProgress": "{current}/{total} tampons",
+    "pointsBalance": "{balance} pts",
     "sources": {
       "scanner": "Scan",
       "dashboard": "Manuel"
@@ -20,10 +21,14 @@
       "label": "Type",
       "all": "Tout",
       "stampAdded": "Tampons ajoutés",
+      "pointsEarned": "Points ajoutés",
       "rewardRedeemed": "Récompenses",
       "stampVoided": "Tampons annulés",
+      "pointsVoided": "Points retirés",
       "bonusStamp": "Tampons bonus",
+      "bonusPoints": "Points bonus",
       "stampsAdjusted": "Ajustements",
+      "pointsAdjusted": "Points ajustés",
       "cardAdded": "Carte ajoutée",
       "cardReAdded": "Carte ré-ajoutée",
       "cardDeleted": "Carte supprimée"
@@ -38,10 +43,14 @@
     },
     "itemVerbs": {
       "stamp_added": "a reçu un tampon",
+      "points_earned": "a gagné des points",
       "reward_redeemed": "a échangé une récompense",
       "stamp_voided": "a eu un tampon annulé",
+      "points_voided": "a eu des points retirés",
       "bonus_stamp": "a reçu un tampon bonus",
+      "bonus_points": "a reçu des points bonus",
       "stamps_adjusted": "a eu ses tampons ajustés",
+      "points_adjusted": "a eu ses points ajustés",
       "card_added": "a ajouté sa carte",
       "card_re_added": "a ré-ajouté sa carte",
       "card_deleted": "a supprimé sa carte"
@@ -61,7 +70,7 @@
     },
     "stats": {
       "todayActivity": "Activité du jour",
-      "todayActivityInfo": "Tampons et récompenses ajoutés aujourd'hui, comparés à un jour normal (environ {avg}).",
+      "todayActivityInfo": "Scans et récompenses ajoutés aujourd'hui, comparés à un jour normal (environ {avg}).",
       "typicalPerDay": "≈ {avg}/jour d'habitude",
       "thisWeek": "Cette semaine",
       "vsLastWeek": "vs semaine dernière",
@@ -69,9 +78,14 @@
     },
     "emptyState": {
       "title": "Aucune activité",
-      "description": "Les tampons et récompenses apparaîtront ici lorsque vos clients interagiront avec votre programme de fidélité."
+      "description": "Les scans et récompenses apparaîtront ici lorsque vos clients interagiront avec votre programme de fidélité."
     },
     "emptyFiltered": "Aucune activité ne correspond à vos filtres.",
-    "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}"
+    "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}",
+    "conversionMarker": {
+      "toPoints": "Programme passé aux points",
+      "toStamps": "Programme passé aux tampons",
+      "summary": "{count, plural, =1 {1 carte convertie} other {# cartes converties}}"
+    }
   }
 }

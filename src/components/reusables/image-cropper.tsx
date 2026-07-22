@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { applyHighQualitySmoothing } from '@/lib/image-crop';
 
 export interface ImageCropperProps {
   open: boolean;
@@ -93,6 +94,9 @@ function getCroppedCanvas(
 
   canvas.width = outW;
   canvas.height = outH;
+  // Set smoothing AFTER sizing the canvas — assigning width/height resets the
+  // context state, which would otherwise wipe this.
+  applyHighQualitySmoothing(ctx);
 
   ctx.drawImage(
     image,

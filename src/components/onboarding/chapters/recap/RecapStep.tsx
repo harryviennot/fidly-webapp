@@ -19,6 +19,7 @@ import { getCustomers } from '@/api/customers';
 import { getPendingInvitations } from '@/api/invitations';
 import { entryToBackPassField } from '@/lib/business-info-utils';
 import type { BusinessInfoEntry } from '@/types/business';
+import { isPointsProgram, isStampProgram } from '@/types';
 import { useWizardStep } from '../../wizard-context';
 
 /**
@@ -83,8 +84,13 @@ export function RecapStep() {
     return () => { cancelled = true; };
   }, [businessId]);
 
-  const totalStamps = program?.config?.total_stamps ?? 10;
+  const totalStamps = isStampProgram(program) ? program.config.total_stamps ?? 10 : 10;
   const rewardName = program?.reward_name ?? '';
+  const pointsRewards = isPointsProgram(program) ? program.config.rewards : undefined;
+  const pointsBalance =
+    pointsRewards && pointsRewards.length > 0
+      ? Math.max(...pointsRewards.map((r) => r.threshold))
+      : 0;
 
   // Mirror DesignPreviewPane: the back of the card shows card-specific
   // back_fields FIRST, then the business-info entries the owner enabled
@@ -133,6 +139,8 @@ export function RecapStep() {
                   // reads as "incomplete."
                   previewStamps={totalStamps}
                   totalStamps={totalStamps}
+                  pointsBalance={pointsBalance}
+                  pointsRewards={pointsRewards}
                   showBack={false}
                 />
               </div>
@@ -141,6 +149,8 @@ export function RecapStep() {
                   design={backDesign ?? design}
                   previewStamps={totalStamps}
                   totalStamps={totalStamps}
+                  pointsBalance={pointsBalance}
+                  pointsRewards={pointsRewards}
                   showBack
                 />
               </div>
@@ -156,7 +166,11 @@ export function RecapStep() {
           </button>
           {program && (
             <p className="wiz-helper text-center text-[#7A7A7A]">
-              {t('programDetail', { totalStamps, rewardName: rewardName || '—' })}
+              {isPointsProgram(program)
+                ? t('programDetailPoints', {
+                    rewardCount: program.config.rewards?.length ?? 0,
+                  })
+                : t('programDetail', { totalStamps, rewardName: rewardName || '—' })}
             </p>
           )}
         </div>

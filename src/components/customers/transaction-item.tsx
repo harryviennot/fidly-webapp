@@ -5,7 +5,15 @@ import { useTranslations } from "next-intl";
 import type { TransactionResponse } from "@/types";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
-import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
+import {
+  TYPE_CONFIG,
+  isCardLifecycleType,
+  isPointsTransaction,
+  txDelta,
+  txValueAfter,
+  txValueBefore,
+} from "@/lib/transaction-constants";
+import { describeMigration } from "@/lib/conversion";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
 import { LocationBadge } from "@/components/locations/location-badge";
 
@@ -53,15 +61,22 @@ export function TransactionItem({
     return date.toLocaleDateString();
   };
 
-  const deltaText =
-    transaction.stamp_delta > 0
-      ? `+${transaction.stamp_delta}`
-      : String(transaction.stamp_delta);
+  const delta = txDelta(transaction);
+  const deltaText = delta > 0 ? `+${delta}` : String(delta);
+
+  // Program-type conversion event: before/after are in DIFFERENT units, so the
+  // usual delta chip and "X → Y" row would lie. Render from metadata instead.
+  const migration =
+    transaction.type === "balance_migrated"
+      ? describeMigration(transaction.metadata)
+      : null;
 
   const metadata = transaction.metadata as Record<string, string> | null;
   const isAdjustment =
     transaction.source === "dashboard" &&
-    (transaction.type === "stamp_added" || transaction.type === "bonus_stamp");
+    (transaction.type === "stamp_added" ||
+      transaction.type === "bonus_stamp" ||
+      transaction.type === "points_earned");
   const adjustmentReason = isAdjustment ? metadata?.adjustment_reason : undefined;
 
   // Map known source values to translated labels; fall back to the raw value
@@ -73,9 +88,13 @@ export function TransactionItem({
         ? t("sources.dashboard")
         : transaction.source;
 
-  // Stackable rewards: remaining banked count recorded on redemptions.
+  // Stackable rewards: remaining banked count recorded on redemptions. Banked
+  // rewards are a stamp concept; points redemptions spend the balance directly
+  // (no "rewards remaining"), so never show the count for points.
   const rewardsLeft =
-    transaction.type === "reward_redeemed" && metadata?.rewards_after != null
+    transaction.type === "reward_redeemed" &&
+    !isPointsTransaction(transaction) &&
+    metadata?.rewards_after != null
       ? Number(metadata.rewards_after)
       : null;
 
@@ -104,7 +123,7 @@ export function TransactionItem({
               <span className="text-[13px] font-semibold text-[#1A1A1A]">
                 {t(`types.${transaction.type}`)}
               </span>
-              {!isCardLifecycleType(transaction.type) && (
+              {!isCardLifecycleType(transaction.type) && !migration && (
                 <span
                   className={cn(
                     "text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-[5px] shrink-0 ml-1.5 inline-block",
@@ -129,18 +148,48 @@ export function TransactionItem({
 
           {/* Bottom row: stamp transition · source · employee */}
           <div className="flex items-center gap-1.5 flex-wrap text-[12px] text-[#8A8A8A]">
-            {isCardLifecycleType(transaction.type) ? (
+            {migration ? (
+              <>
+                <span className="font-semibold text-[#555] tabular-nums">
+                  {t(
+                    migration.unitBefore === "point"
+                      ? "conversion.pointsValue"
+                      : "conversion.stampsValue",
+                    { count: migration.valueBefore }
+                  )}
+                </span>
+                <span>→</span>
+                <span className="font-semibold text-[#555] tabular-nums">
+                  {t(
+                    migration.unitAfter === "point"
+                      ? "conversion.pointsValue"
+                      : "conversion.stampsValue",
+                    { count: migration.valueAfter }
+                  )}
+                </span>
+                {(migration.bankedHonored > 0 || migration.bankedCards > 0) && (
+                  <>
+                    <span className="text-[#D8D5CE]">·</span>
+                    <span className="font-semibold text-[var(--warning)]">
+                      {t("conversion.rewardsHonored", {
+                        count: migration.bankedHonored || migration.bankedCards,
+                      })}
+                    </span>
+                  </>
+                )}
+              </>
+            ) : isCardLifecycleType(transaction.type) ? (
               <span className="capitalize">
                 {metadata?.wallet_type === "google" ? "Google Wallet" : "Apple Wallet"}
               </span>
             ) : (
               <>
                 <span className="font-semibold text-[#555] tabular-nums">
-                  {transaction.stamps_before}
+                  {txValueBefore(transaction)}
                 </span>
                 <span>→</span>
                 <span className="font-semibold tabular-nums text-[#555]">
-                  {transaction.stamps_after}
+                  {txValueAfter(transaction)}
                 </span>
                 <span className="text-[#D8D5CE]">·</span>
                 <span>{sourceLabel}</span>

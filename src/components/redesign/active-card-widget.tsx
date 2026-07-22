@@ -84,7 +84,7 @@ export function ActiveCardWidget({
       <WalletCard
         design={design}
         showQR
-        showSecondaryFields={false}
+        showSecondaryFields
         className="[&>div]:[box-shadow:none_!important]"
       />
     </ScaledCardWrapper>

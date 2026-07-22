@@ -47,7 +47,27 @@ export interface CustomStampConfig {
   empty_opacity?: number;
 }
 
-export type StampIconMode = "preset" | "custom";
+/** How the stamp strip renders (migration 138): preset icons, custom uploaded
+ *  icons, or "image_only" — just the uploaded strip image, no stamps drawn. */
+export type StampIconMode = "preset" | "custom" | "image_only";
+
+export type CardType = "stamp" | "points";
+
+/** The points strip layouts the backend renders (migrations 123, 135).
+ *  "image_only" shows just the uploaded strip image with no points overlay. */
+export type PointsStripStyle = "big_point" | "circle_progress" | "progress_icons" | "image_only";
+
+/**
+ * A reward's chosen icon for the `progress_icons` points strip. `preset` ref is
+ * an icon name from the shared 98-icon set; `custom` ref is an uploaded
+ * ProcessedIconAsset id. Keyed by reward id in `points_reward_icons`.
+ */
+export interface PointsRewardIcon {
+  type: "preset" | "custom";
+  ref: string;
+}
+
+export type PointsRewardIcons = Record<string, PointsRewardIcon>;
 
 export interface CardDesign {
   id: string;
@@ -74,15 +94,23 @@ export interface CardDesign {
   icon_color?: string;
 
   // Custom stamp icons (STA-216)
-  card_type?: string;
+  card_type?: CardType;
   stamp_icon_mode?: StampIconMode;
   custom_stamp_config?: CustomStampConfig | null;
+
+  // Points card design (migration 123). Only meaningful when card_type === 'points'.
+  points_strip_style?: PointsStripStyle;
+  progress_accent_color?: string;
+  points_reward_icons?: PointsRewardIcons;
 
   // Asset URLs
   logo_url?: string;
   custom_filled_stamp_url?: string;
   custom_empty_stamp_url?: string;
   strip_background_url?: string;
+  /** Solid strip canvas color when no strip image is uploaded. Falls back to
+   *  background_color server-side when unset. Used by the points strip. */
+  strip_background_color?: string;
   strip_background_opacity?: number;
 
   // Pass fields
@@ -126,7 +154,14 @@ export interface CardDesignCreate {
   icon_color?: string;
   stamp_icon_mode?: StampIconMode;
   custom_stamp_config?: CustomStampConfig | null;
+  strip_background_color?: string;
   strip_background_opacity?: number;
+
+  // Points card design (migration 123).
+  card_type?: CardType;
+  points_strip_style?: PointsStripStyle;
+  progress_accent_color?: string;
+  points_reward_icons?: PointsRewardIcons;
 
   logo_url?: string;
   strip_background_url?: string;

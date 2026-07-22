@@ -4,11 +4,13 @@ import type { CustomerResponse, PaginatedCustomerResponse, StampResponse } from 
 export interface AddStampOptions {
   /**
    * Discriminator picked up by the backend.
-   *   - "scanner" (default, sent as no body) — physical-scan flow, used by
-   *     the onboarding self-test. Reason MUST be absent.
+   *   - "scanner" — physical-scan flow. Reason MUST be absent. Pass it
+   *     explicitly (with `amount`) to simulate a real points scan from the
+   *     onboarding self-test; omitting `options` entirely also defaults the
+   *     backend to a scanner stamp with no body.
    *   - "dashboard" — owner/admin manual adjustment, reason REQUIRED.
    */
-  source?: 'dashboard';
+  source?: 'scanner' | 'dashboard';
   /** Required when source === "dashboard". 1–280 chars, surfaced in activity. */
   reason?: string;
   /**
@@ -16,6 +18,12 @@ export interface AddStampOptions {
    * location. Null/undefined → transaction lands with location_id = NULL.
    */
   locationId?: string | null;
+  /**
+   * Points programs only: the ticket price the customer spent. The backend
+   * credits round(amount × points_per_currency_unit). REQUIRED for points
+   * scans (omitting it → 400 AMOUNT_REQUIRED).
+   */
+  amount?: number;
 }
 
 export async function getCustomer(businessId: string, customerId: string): Promise<CustomerResponse> {
@@ -137,6 +145,7 @@ export async function addStamp(
         source: options!.source ?? 'dashboard',
         ...(options!.reason !== undefined && { reason: options!.reason }),
         ...(options!.locationId !== undefined && { location_id: options!.locationId }),
+        ...(options!.amount !== undefined && { amount: options!.amount }),
       })
     : undefined;
 
@@ -156,7 +165,10 @@ export async function addStamp(
 
 export async function redeemReward(
   businessId: string,
-  enrollmentId: string
+  enrollmentId: string,
+  /** Which reward to claim. Required for points menus + multi-reward stamp
+   *  cards; omit for a classic single-reward card (cheapest reachable). */
+  rewardId?: string | null
 ): Promise<StampResponse> {
   const response = await fetch(
     `${API_BASE_URL}/stamps/${businessId}/${enrollmentId}/redeem`,
@@ -165,7 +177,10 @@ export async function redeemReward(
       headers: await getAuthHeaders(),
       // Label the transaction as a dashboard action (the activity log
       // splits real scans from manual dashboard operations).
-      body: JSON.stringify({ source: 'dashboard' }),
+      body: JSON.stringify({
+        source: 'dashboard',
+        ...(rewardId != null && { reward_id: rewardId }),
+      }),
     }
   );
 
@@ -280,6 +295,48 @@ export async function sendCustomerPass(
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(extractErrorMessage(error, 'Failed to send the card'));
+  }
+
+  return response.json();
+}
+
+export interface AdjustPointsOptions {
+  /** Signed points delta: negative removes, positive grants. */
+  amount: number;
+  /** Required audit reason (1–280 chars), shown in the activity log. */
+  reason: string;
+  /** Optional location to attribute the adjustment to. */
+  locationId?: string | null;
+}
+
+/**
+ * Manually adjust a points balance by a signed amount (POST /stamps/{biz}/{enr}/adjust).
+ * The backend clamps the balance at 0, mirrors lifetime_points, and logs one
+ * `points_adjusted` (negative) or `bonus_points` (positive) transaction. No
+ * transaction id needed — unlike a void, this isn't tied to a prior credit.
+ */
+export async function adjustPoints(
+  businessId: string,
+  enrollmentId: string,
+  options: AdjustPointsOptions
+): Promise<StampResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/stamps/${businessId}/${enrollmentId}/adjust`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({
+        amount: options.amount,
+        reason: options.reason,
+        source: 'dashboard',
+        ...(options.locationId !== undefined && { location_id: options.locationId }),
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to adjust points');
   }
 
   return response.json();

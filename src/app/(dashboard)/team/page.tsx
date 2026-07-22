@@ -161,7 +161,7 @@ export default function TeamPage() {
         joinedDate: member.created_at
           ? t('table.added', { date: new Date(member.created_at).toLocaleDateString() })
           : "",
-        stampsGiven: member.scans_count || 0,
+        scansMade: member.scans_count || 0,
         isCurrentUser,
         isOwner: member.role === "owner",
         isLastOwner,
@@ -183,7 +183,7 @@ export default function TeamPage() {
       joinedDate: inv.created_at
         ? t('table.added', { date: new Date(inv.created_at).toLocaleDateString() })
         : "",
-      stampsGiven: 0,
+      scansMade: 0,
       isCurrentUser: false as const,
       isOwner: false as const,
       isLastOwner: false as const,

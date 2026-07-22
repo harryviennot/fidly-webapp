@@ -116,6 +116,8 @@ export function BrandingStep() {
         void translations;
         const cleaned: CardDesignCreate = pruneEmptyLabelFields({
           ...rest,
+          // `card_type` is seeded into formData by useDesignStepState from the
+          // program type, so it rides along in `...rest` and persists on save.
           // Internal admin label — back-fills from the business name when
           // empty so the dashboard's design list stays readable.
           name: rest.name?.trim() || currentBusiness?.name || '',

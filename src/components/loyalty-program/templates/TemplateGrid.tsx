@@ -33,6 +33,11 @@ interface TemplateGridProps {
   totalDesignCount: number;
   /** Whether an active style exists (drives the empty-state copy). */
   hasActiveDesign: boolean;
+  /** The live program's type. A saved design of the OTHER type (a conversion
+   * draft, or the archived pre-conversion design) can't be activated from
+   * here — activation would break the program<->design type invariant (the
+   * backend 409s as a backstop). It goes live through the conversion flow. */
+  programType?: 'stamp' | 'points';
   onDelete: (id: string) => void;
   onActivate: (id: string) => void;
   onDuplicate: (id: string) => void;
@@ -42,6 +47,7 @@ export function TemplateGrid({
   designs,
   totalDesignCount,
   hasActiveDesign,
+  programType,
   onDelete,
   onActivate,
   onDuplicate,
@@ -83,6 +89,8 @@ export function TemplateGrid({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {designs.map((design, index) => {
             const isOverLimit = design.is_over_limit ?? false;
+            const isTypeMismatch =
+              programType != null && (design.card_type ?? 'stamp') !== programType;
             const metadata = editedLabel(design.updated_at) ?? undefined;
             const animationDelay = `${Math.min(index, 8) * 60}ms`;
 
@@ -93,11 +101,13 @@ export function TemplateGrid({
                 badge={
                   isOverLimit
                     ? { label: tFeatures('overLimit.readOnly'), variant: 'warning' }
-                    : undefined
+                    : isTypeMismatch
+                      ? { label: t('typeMismatchBadge'), variant: 'warning' }
+                      : undefined
                 }
                 metadata={metadata}
                 primaryAction={
-                  isOverLimit
+                  isOverLimit || isTypeMismatch
                     ? undefined
                     : {
                         label: t('setAsActive'),

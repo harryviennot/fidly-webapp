@@ -69,6 +69,19 @@ export function TransactionIcon({
     );
   }
 
+  // Points voids carry no stamp icon, so they used to fall through to the
+  // generic (accent-tint) treatment — visually unlike a stamp void. Give them
+  // the same red danger treatment (Prohibit glyph) so voiding reads the same
+  // for both program types.
+  if (type === "points_voided") {
+    const VoidIcon = config.icon;
+    return (
+      <div className={cn("flex items-center justify-center rounded-full shrink-0 bg-red-500/15", s.container)}>
+        <VoidIcon size={s.phosphorSize} weight="duotone" className="text-[#ef4444]" />
+      </div>
+    );
+  }
+
   const Icon = config.icon;
   return (
     <div

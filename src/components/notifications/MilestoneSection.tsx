@@ -26,7 +26,10 @@ import {
   useUpdateMilestone,
 } from '@/hooks/use-notifications';
 import { renderSamplePreview } from '@/lib/template-variables';
+import { useDefaultProgram } from '@/hooks/use-programs';
+import { isPointsProgram } from '@/types';
 import { MilestoneCreateSheet } from './MilestoneCreateSheet';
+import { milestoneValue } from '@/types/notification';
 import type { Milestone } from '@/types/notification';
 
 interface MilestoneSectionProps {
@@ -47,6 +50,8 @@ export function MilestoneSection({
   const t = useTranslations('notifications.milestones');
   const uiLocale = useLocale() as 'en' | 'fr' | 'es';
   const { currentBusiness } = useBusiness();
+  const { data: program } = useDefaultProgram(currentBusiness?.id);
+  const isPoints = isPointsProgram(program);
   const { data, isLoading, error } = useMilestones(currentBusiness?.id);
   const deleteMutation = useDeleteMilestone(currentBusiness?.id);
   const updateMutation = useUpdateMilestone(currentBusiness?.id);
@@ -92,10 +97,8 @@ export function MilestoneSection({
       }
       // Handle auto-swap: backend disabled the oldest active milestone
       if (result?.swapped_off) {
-        const swapped = result.swapped_off;
-        const swappedStamp = swapped.stamp_equals;
         toast.info(
-          t('toasts.swappedOff', { stamp: swappedStamp })
+          t('toasts.swappedOff', { stamp: milestoneValue(result.swapped_off) })
         );
       }
     } catch (err) {
@@ -120,9 +123,9 @@ export function MilestoneSection({
     }
   };
 
-  // Sort by stamp_equals ascending for readability
+  // Sort by threshold ascending for readability
   const sorted = [...milestones].sort(
-    (a, b) => a.stamp_equals - b.stamp_equals
+    (a, b) => milestoneValue(a) - milestoneValue(b)
   );
 
   return (
@@ -182,11 +185,15 @@ export function MilestoneSection({
           <div className="flex flex-col gap-1.5">
             {sorted.map((milestone) => {
               const isDisabled = milestone.is_enabled === false;
+              const mValue = milestoneValue(milestone);
               const bodyText =
                 milestone.body[uiLocale] || milestone.body.en || '';
-              const preview = renderSamplePreview(bodyText, {
-                stamp_count: String(milestone.stamp_equals),
-              });
+              const preview = renderSamplePreview(
+                bodyText,
+                isPoints
+                  ? { points_balance: String(mValue) }
+                  : { stamp_count: String(mValue) }
+              );
               const handleRowKeyDown = (e: React.KeyboardEvent) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
@@ -204,17 +211,22 @@ export function MilestoneSection({
                 >
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isDisabled ? 'bg-[var(--paper-hover)]' : 'bg-[var(--accent-light)]'}`}>
                     <span className={`text-[13px] font-bold tabular-nums ${isDisabled ? 'text-[#A0A0A0]' : 'text-[var(--accent)]'}`}>
-                      {milestone.stamp_equals}
+                      {mValue}
                     </span>
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <span className={`text-[13px] font-semibold ${isDisabled ? 'text-[#8A8A8A]' : 'text-[#1A1A1A]'}`}>
-                        {t('conditionShort', {
-                          count: milestone.stamp_equals,
+                        {t(isPoints ? 'conditionShortPoints' : 'conditionShort', {
+                          count: mValue,
                         })}
                       </span>
+                      {milestone.metric === 'lifetime' && (
+                        <span className="text-[9px] font-bold px-1.5 py-px rounded tracking-wide uppercase bg-[var(--accent-light)] text-[var(--accent)]">
+                          {t('lifetimeTag')}
+                        </span>
+                      )}
                       {isDisabled && (
                         <span className="text-[9px] font-bold px-1.5 py-px rounded tracking-wide uppercase bg-[var(--paper-hover)] text-[#8A8A8A]">
                           {t('disabledPill')}

@@ -10,6 +10,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useBusinessAchievements } from "@/hooks/use-business-achievements";
 import { useActiveDesign } from "@/hooks/use-designs";
+import { useDefaultProgram } from "@/hooks/use-programs";
 import { getCustomer } from "@/api";
 import type { CustomerResponse } from "@/types";
 import type { CustomerSegment } from "@/lib/customer-segments";
@@ -71,6 +72,8 @@ export default function CustomersPage() {
   const { data: txnData } = useTransactions(businessId);
   const { data: achievements } = useBusinessAchievements(businessId);
   const { data: design } = useActiveDesign(businessId);
+  const { data: program } = useDefaultProgram(businessId);
+  const loyaltyType = program?.type ?? 'stamp';
   const redeemMutation = useRedeemReward(businessId);
   const voidMutation = useVoidStamp(businessId);
 
@@ -240,6 +243,7 @@ export default function CustomersPage() {
       setSelectedSegment(seg);
       setPage(0);
     },
+    isPoints: loyaltyType === "points",
   });
 
   // Sort control shared by the toolbar (works on mobile + desktop) and the
@@ -248,7 +252,7 @@ export default function CustomersPage() {
   const sortConfig = {
     options: [
       { value: "name", label: t("sort.name") },
-      { value: "stamps", label: t("sort.stamps") },
+      { value: "stamps", label: loyaltyType === "points" ? t("sort.points") : t("sort.stamps") },
       { value: "total_redemptions", label: t("sort.rewards") },
       { value: "updated_at", label: t("sort.lastActivity") },
     ],
@@ -319,6 +323,7 @@ export default function CustomersPage() {
         onVoid={handleVoid}
         design={design ?? undefined}
         totalStamps={totalStamps}
+        loyaltyType={loyaltyType}
         searchTerm={searchTerm}
         selectedCustomerId={selectedCustomerId}
         onSelectCustomer={setSelectedCustomerId}

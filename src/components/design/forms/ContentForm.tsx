@@ -11,7 +11,7 @@ import { useDesignForm } from './DesignFormContext';
  */
 export function ContentForm() {
   const t = useTranslations('designEditor.editor');
-  const { formData, updateField } = useDesignForm();
+  const { formData, updateField, variableContext } = useDesignForm();
 
   return (
     <div className="flex flex-col gap-5">
@@ -21,6 +21,7 @@ export function ContentForm() {
         onChange={(f) => updateField('secondary_fields', f)}
         maxFields={3}
         enableVariables
+        variableContext={variableContext}
       />
       <FieldEditor
         title={t('additionalInfo')}
@@ -28,6 +29,7 @@ export function ContentForm() {
         onChange={(f) => updateField('auxiliary_fields', f)}
         maxFields={3}
         enableVariables
+        variableContext={variableContext}
       />
     </div>
   );

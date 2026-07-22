@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarBlank,
   Clock,
+  Coins,
   Footprints,
   Gift,
   Trophy,
@@ -31,10 +32,13 @@ import {
   SEGMENT_AVATAR_COLORS,
 } from "@/lib/customer-segments";
 import { CustomerQuickActions } from "./customer-quick-actions";
+import { PointsBalanceCard } from "./points-balance-card";
 import { SendPassDialog } from "./send-pass-dialog";
 import { EditCustomerDialog } from "./edit-customer-dialog";
 import { TransactionTimeline } from "./transaction-timeline";
 import { StampGridContainer } from "@/components/card";
+import { txDelta } from "@/lib/transaction-constants";
+import { currencySymbol } from "@/lib/currency";
 import { Card } from "@/components/ui/card";
 import { computeCardColors } from "@/lib/card-utils";
 import { cn } from "@/lib/utils";
@@ -43,6 +47,8 @@ import {
   transactionKeys,
 } from "@/hooks/use-transactions";
 import { customerKeys } from "@/hooks/use-customers";
+import { useDefaultProgram } from "@/hooks/use-programs";
+import { isPointsProgram } from "@/types";
 import type { CustomerResponse, TransactionResponse } from "@/types";
 import type { CardDesign } from "@/types/design";
 import type { StampIconType } from "@/components/design/StampIconPicker";
@@ -108,9 +114,17 @@ export function CustomerDetailSheet({
     queryKey: customerKeys.detail(currentBusiness?.id ?? "", customer?.id ?? ""),
     queryFn: () => getCustomer(currentBusiness!.id, customer!.id),
     enabled: open && !!customer && !!currentBusiness?.id,
+    // Seed from the list row so the sheet paints instantly, but ALWAYS refetch
+    // the full detail on open — the list payload has no `program` snapshot
+    // (reward ladder + redeem state). The global 5-min staleTime would
+    // otherwise treat the seed as fresh and never fetch, so the points rewards
+    // + redeem button only appeared after a hard refresh.
     initialData: customer ?? undefined,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
   const liveCustomer = customerQuery.data ?? cachedCustomer;
+  const { data: program } = useDefaultProgram(currentBusiness?.id);
 
   // Which wallet(s) hold this customer's card. Gated on the live `customer`
   // prop (not the exit-animation cache) so it doesn't fire while closed.
@@ -169,7 +183,23 @@ export function CustomerDetailSheet({
 
   if (!liveCustomer) return null;
 
-  const segment = classifyCustomer(liveCustomer, maxStamps);
+  const snapshot = liveCustomer.program ?? null;
+  // Derive the stamp-vs-points layout from the business program (there's one
+  // program per business, and it's cached app-wide), NOT from the per-customer
+  // `snapshot.type`. The snapshot only arrives after the detail fetch resolves,
+  // so keying off it used to render the stamp view first and flip to points a
+  // beat later (the "needs a refresh" flash). The snapshot still drives the
+  // balance + reward ladder once it loads.
+  const isPoints = program ? isPointsProgram(program) : snapshot?.type === "points";
+  const currency = currencySymbol(currentBusiness?.country, currentBusiness?.primary_locale);
+
+  // Points segments come from the server snapshot (reward_ready) rather than
+  // the stamp-threshold math, which would misclassify them.
+  const segment = isPoints
+    ? snapshot?.reward_ready
+      ? "reward_ready"
+      : "regular"
+    : classifyCustomer(liveCustomer, maxStamps);
   const segConfig = getSegmentConfig(segment);
   const avatarColor = SEGMENT_AVATAR_COLORS[segment];
 
@@ -196,9 +226,7 @@ export function CustomerDetailSheet({
     return tTime("weeksAgo", { count: Math.floor(diffDays / 7) });
   };
 
-  const totalVisits = transactions.filter(
-    (txn) => txn.stamp_delta > 0
-  ).length;
+  const totalVisits = transactions.filter((txn) => txDelta(txn) > 0).length;
 
   const firstVisit = liveCustomer.created_at;
   const lastVisit = liveCustomer.last_activity_at ?? liveCustomer.updated_at;
@@ -294,21 +322,36 @@ export function CustomerDetailSheet({
           </div>
         </div>
 
-        {/* ── Stamp Progress ── */}
+        {/* ── Progress (stamp grid or points balance) ── */}
         <div className="px-5 pb-4">
           <div className="bg-[#FAFAF8] rounded-xl border border-[#EEEDEA] px-4 py-3.5">
             <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2.5">
-              {t("stampProgress")}
+              {isPoints ? t("points.title") : t("stampProgress")}
             </p>
-            {colors && (
-              <StampGridContainer
-                totalStamps={maxStamps}
-                filledCount={liveCustomer.stamps}
-                colors={colors}
-                stampIcon={stampIcon ?? "checkmark"}
-                rewardIcon={rewardIcon ?? "gift"}
-                maxWidth={360}
-              />
+            {isPoints ? (
+              snapshot ? (
+                <PointsBalanceCard snapshot={snapshot} />
+              ) : (
+                // Snapshot (reward ladder) still loading — show the balance from
+                // the list payload so we never fall through to the stamp grid.
+                <div className="flex items-baseline gap-2">
+                  <Coins className="w-5 h-5 text-[var(--accent)] self-center" weight="duotone" />
+                  <span className="text-[26px] font-bold tabular-nums leading-none text-[#1A1A1A]">
+                    {liveCustomer.primary_value ?? 0}
+                  </span>
+                </div>
+              )
+            ) : (
+              colors && (
+                <StampGridContainer
+                  totalStamps={maxStamps}
+                  filledCount={liveCustomer.stamps}
+                  colors={colors}
+                  stampIcon={stampIcon ?? "checkmark"}
+                  rewardIcon={rewardIcon ?? "gift"}
+                  maxWidth={360}
+                />
+              )
             )}
           </div>
         </div>
@@ -322,6 +365,8 @@ export function CustomerDetailSheet({
               maxStamps={maxStamps}
               transactions={transactions}
               onActionComplete={handleActionComplete}
+              snapshot={snapshot}
+              currency={currency}
             />
           </div>
         )}

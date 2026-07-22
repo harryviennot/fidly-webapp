@@ -56,6 +56,9 @@ export class ApiError extends Error {
   requiredTier: string | undefined;
   limit: number | undefined;
   current: number | undefined;
+  /** The full structured detail for codes that carry extra payload
+   * (e.g. TYPE_ALREADY_CONVERTED includes conversion_id). */
+  detail: Record<string, unknown> | undefined;
 
   constructor(message: string, detail?: Record<string, unknown>) {
     super(message);
@@ -65,6 +68,7 @@ export class ApiError extends Error {
     this.requiredTier = detail?.required_tier as string | undefined;
     this.limit = detail?.limit as number | undefined;
     this.current = detail?.current as number | undefined;
+    this.detail = detail;
   }
 }
 

@@ -5,6 +5,8 @@
     "export": "Exportar",
     "addCustomer": "Añadir cliente",
     "customerProfile": "Perfil del cliente",
+    "pointsCustomer": "Tarjeta de puntos",
+    "pointsBalance": "{points} pts",
     "loading": "Cargando clientes...",
     "loadFailed": "No se han podido cargar los clientes. Comprueba que el servidor esté en marcha.",
     "searchPlaceholder": "Buscar por nombre o correo...",
@@ -18,7 +20,8 @@
       "lastVisit": "Última visita",
       "redemptions": "Recompensas",
       "action": "Acción",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "points": "Puntos"
     },
     "stats": {
       "totalCustomers": "Clientes totales",
@@ -35,6 +38,7 @@
     "sort": {
       "name": "Nombre",
       "stamps": "Sellos",
+      "points": "Puntos",
       "rewards": "Recompensas",
       "lastActivity": "Última actividad"
     },
@@ -69,13 +73,16 @@
       "new": "Se ha unido en los últimos 14 días.",
       "regular": "Clientes activos sin un estado especial.",
       "vip": "Clientes que han canjeado 3 recompensas o más.",
-      "rewardReady": "Tiene una recompensa lista para canjear: una tarjeta completa o recompensas acumuladas.",
+      "rewardReady": "Tiene una recompensa lista para canjear ahora mismo.",
       "closeToReward": "A menos de 2 sellos de completar su tarjeta.",
-      "atRisk": "Tienen sellos pero no han venido en más de 30 días.",
-      "ghost": "Cogieron su tarjeta pero nunca volvieron. Todavía sin sellos."
+      "atRisk": "Ya habían venido, pero no en más de 30 días.",
+      "ghost": "Cogieron su tarjeta pero nunca volvieron."
     },
     "actions": {
       "addStamp": "Añadir sello",
+      "open": "Abrir",
+      "addPoints": "Añadir puntos",
+      "removePoints": "Quitar puntos",
       "maxed": "¡Al máximo!",
       "redeem": "Canjear",
       "voidLast": "Anular el último",
@@ -96,6 +103,13 @@
       "voidSuccessToast": "Sello anulado",
       "voidFailedToast": "No se ha podido anular el sello",
       "noVoidableStamp": "Ningún sello que anular",
+      "voidPointsDialogTitle": "Quitar los últimos puntos",
+      "voidPointsConfirm": "Quitar puntos",
+      "voidPointsReasonPlaceholder": "p. ej. Puntos añadidos por error",
+      "voidPointsSuccessToast": "Puntos quitados",
+      "voidValueLabel": "Se quitará",
+      "voidValuePoints": "{points} pts",
+      "voidValueStamps": "{count, plural, one {# sello} other {# sellos}}",
       "adjustment": {
         "title": "Añadir un sello",
         "chip1": "Olvidó escanear",
@@ -117,7 +131,44 @@
           "locationNotPermitted": "No tienes asignado ese establecimiento."
         }
       },
-      "redeemBanked": "{count, plural, =1 {Canjear (1 guardada)} other {Canjear (# guardadas)}}"
+      "redeemBanked": "{count, plural, =1 {Canjear (1 guardada)} other {Canjear (# guardadas)}}",
+      "pointsAdd": {
+        "title": "Añadir puntos",
+        "amountLabel": "Importe gastado",
+        "preview": "= +{points} puntos",
+        "reasonLabel": "Motivo",
+        "reasonPlaceholder": "¿Por qué añades estos puntos?",
+        "reasonHelp": "Solo tú lo ves. Mantiene tu historial de actividad claro.",
+        "locationLabel": "Establecimiento",
+        "noLocation": "Sin establecimiento",
+        "successToast": "{points} puntos añadidos",
+        "submitting": "Añadiendo...",
+        "submit": "Añadir puntos",
+        "errors": {
+          "amountRequired": "Indica el importe que gastó el cliente."
+        }
+      },
+      "pointsRemove": {
+        "title": "Quitar puntos",
+        "modeLast": "Último crédito",
+        "modeCustom": "Cantidad libre",
+        "amountLabel": "Puntos a quitar",
+        "newBalanceLabel": "Nuevo saldo",
+        "pointsValue": "{points} pts",
+        "successToast": "{points} puntos quitados",
+        "submitting": "Quitando...",
+        "submit": "Quitar puntos"
+      },
+      "pointsRedeem": {
+        "title": "Canjear una recompensa",
+        "balance": "{balance} disponibles",
+        "price": "{points} pts",
+        "notEnough": "No hay puntos suficientes",
+        "successToast": "{reward} canjeada",
+        "failedToast": "No se pudo canjear la recompensa. Inténtalo de nuevo.",
+        "submitting": "Canjeando...",
+        "submit": "Canjear"
+      }
     },
     "toasts": {
       "stampAdded": "Sello añadido para {name}",
@@ -169,7 +220,14 @@
         "at_risk": "En riesgo",
         "ghost": "Fantasma"
       },
-      "rewardsAvailable": "Recompensas por canjear"
+      "rewardsAvailable": "Recompensas por canjear",
+      "points": {
+        "title": "Saldo de puntos",
+        "lifetime": "{count} ganados en total",
+        "complete": "Tarjeta completada",
+        "limit": "Límite de {max} pts",
+        "price": "{points} pts"
+      }
     },
     "transaction": {
       "empty": "Aún no hay movimientos",
@@ -177,13 +235,18 @@
       "loadingMore": "Cargando...",
       "types": {
         "stamp_added": "Sello añadido",
+        "points_earned": "Puntos ganados",
         "reward_redeemed": "Recompensa canjeada",
         "stamp_voided": "Sello anulado",
+        "points_voided": "Puntos retirados",
         "bonus_stamp": "Sello de bonificación",
+        "bonus_points": "Puntos extra",
         "stamps_adjusted": "Sellos ajustados",
+        "points_adjusted": "Puntos ajustados",
         "card_added": "Tarjeta añadida",
         "card_re_added": "Tarjeta vuelta a añadir",
-        "card_deleted": "Tarjeta eliminada"
+        "card_deleted": "Tarjeta eliminada",
+        "balance_migrated": "Saldo convertido"
       },
       "by": "por",
       "you": "Tú",
@@ -200,7 +263,12 @@
         "yesterday": "Ayer",
         "daysAgo": "hace {count} d"
       },
-      "rewardsLeft": "{count, plural, =1 {1 recompensa restante} other {# recompensas restantes}}"
+      "rewardsLeft": "{count, plural, =1 {1 recompensa restante} other {# recompensas restantes}}",
+      "conversion": {
+        "stampsValue": "{count, plural, =1 {1 sello} other {# sellos}}",
+        "pointsValue": "{count} pts",
+        "rewardsHonored": "{count, plural, =1 {1 recompensa conservada} other {# recompensas conservadas}}"
+      }
     }
   }
 }

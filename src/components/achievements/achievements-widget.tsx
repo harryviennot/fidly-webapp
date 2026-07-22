@@ -269,9 +269,9 @@ export function AchievementsWidget({ delay = 0 }: { delay?: number }) {
   if (isError) return null;
   if (isLoading || !data || !computed) return <WidgetSkeleton delay={delay} />;
 
-  const series = data.weekly_stamp_series ?? [];
+  const series = data.weekly_scan_series ?? [];
   const target = resolveWeeklyGoal(goalOverride, series);
-  const goal = weeklyGoalStatus(data.current_week_stamps ?? 0, target);
+  const goal = weeklyGoalStatus(data.current_week_scans ?? 0, target);
 
   // Freshly-earned but not-yet-celebrated trophies — shown as "completed" rows
   // that link to /achievements (where the animation plays).

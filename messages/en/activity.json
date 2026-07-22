@@ -5,13 +5,14 @@
     "export": "Export",
     "searchPlaceholder": "Search customer name...",
     "loadFailed": "Failed to load activity feed.",
-    "empty": "No activity yet. Stamps and rewards will appear here.",
+    "empty": "No activity yet. Scans and rewards will appear here.",
     "loadMore": "Load More",
     "loadingMore": "Loading...",
     "by": "by",
     "you": "You",
     "live": "Live",
     "stampProgress": "{current}/{total} stamps",
+    "pointsBalance": "{balance} pts",
     "sources": {
       "scanner": "Scan",
       "dashboard": "Manual"
@@ -20,10 +21,14 @@
       "label": "Type",
       "all": "All",
       "stampAdded": "Stamps Added",
+      "pointsEarned": "Points added",
       "rewardRedeemed": "Rewards Redeemed",
       "stampVoided": "Stamps Voided",
+      "pointsVoided": "Points Removed",
       "bonusStamp": "Bonus Stamps",
+      "bonusPoints": "Bonus Points",
       "stampsAdjusted": "Adjustments",
+      "pointsAdjusted": "Points adjusted",
       "cardAdded": "Card Added",
       "cardReAdded": "Card Re-added",
       "cardDeleted": "Card Deleted"
@@ -38,10 +43,14 @@
     },
     "itemVerbs": {
       "stamp_added": "received a stamp",
+      "points_earned": "earned points",
       "reward_redeemed": "redeemed a reward",
       "stamp_voided": "had a stamp voided",
+      "points_voided": "had points removed",
       "bonus_stamp": "received a bonus stamp",
+      "bonus_points": "earned bonus points",
       "stamps_adjusted": "had stamps adjusted",
+      "points_adjusted": "had points adjusted",
       "card_added": "added their card",
       "card_re_added": "re-added their card",
       "card_deleted": "removed their card"
@@ -61,7 +70,7 @@
     },
     "stats": {
       "todayActivity": "Today's activity",
-      "todayActivityInfo": "Stamps and rewards added today, compared to a typical day (about {avg}).",
+      "todayActivityInfo": "Scans and rewards added today, compared to a typical day (about {avg}).",
       "typicalPerDay": "usually ~{avg}/day",
       "thisWeek": "This week",
       "vsLastWeek": "vs last week",
@@ -69,9 +78,14 @@
     },
     "emptyState": {
       "title": "No activity yet",
-      "description": "Stamps and rewards will appear here as customers interact with your loyalty program."
+      "description": "Scans and rewards will appear here as customers interact with your loyalty program."
     },
     "emptyFiltered": "No activity matches your filters.",
-    "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}"
+    "rewardsLeft": "{count, plural, =1 {1 reward left} other {# rewards left}}",
+    "conversionMarker": {
+      "toPoints": "Program switched to points",
+      "toStamps": "Program switched to stamps",
+      "summary": "{count, plural, =1 {1 card converted} other {# cards converted}}"
+    }
   }
 }

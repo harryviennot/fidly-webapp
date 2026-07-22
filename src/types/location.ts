@@ -119,9 +119,10 @@ export interface LocationStats {
   location_name: string;
   range: LocationStatsRange;
   total_transactions: number;
-  stamps_added: number;
+  /** Earn-event scans in range: stamp_added + points_earned transactions. */
+  scans_added: number;
   rewards_redeemed: number;
-  stamps_voided: number;
+  scans_voided: number;
   unique_customers: number;
   enrolled_here_total: number;
 }

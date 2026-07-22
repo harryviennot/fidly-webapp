@@ -1,0 +1,254 @@
+{
+  "conversion": {
+    "header": {
+      "title": "Switch program type",
+      "step": "Step {current} of {total}"
+    },
+    "exit": {
+      "label": "Close",
+      "title": "Leave the conversion?",
+      "body": "Your choices won't be saved. Your current program stays exactly as it is.",
+      "confirm": "Leave",
+      "cancel": "Stay"
+    },
+    "locales": {
+      "en": "English",
+      "fr": "Français",
+      "es": "Español"
+    },
+    "units": {
+      "stamps": "{count, plural, =1 {1 stamp} other {# stamps}}",
+      "points": "{count, plural, =1 {1 point} other {# points}}"
+    },
+    "steps": {
+      "intro": {
+        "titleToPoints": "Switch from stamps to points",
+        "titleToStamp": "Switch from points to stamps",
+        "subtitle": "Your customers keep their card and their progress. We convert everything for you.",
+        "how": {
+          "title": "What happens during the switch",
+          "inPlace": "Every balance is converted in one go, with a rule you choose in the next steps.",
+          "noRedownload": "Cards update on their own. Nobody has to download a new card.",
+          "rerender": "Each card shows your new card style the next time it refreshes."
+        },
+        "current": {
+          "title": "Your program today",
+          "type": "Type",
+          "stamps": "Stamps",
+          "points": "Points",
+          "goal": "Stamps for a reward",
+          "reward": "Reward",
+          "rate": "Points per {currency}1 spent",
+          "rewards": "Rewards on the menu"
+        },
+        "churnWarning": "You already switched types on {date}. Switching again this soon can confuse your regulars. Take a moment before you continue.",
+        "pushing": {
+          "title": "A switch is already running",
+          "body": "Your program is being converted right now. You can follow the progress, but you cannot start a new switch until it finishes.",
+          "viewProgress": "View the progress"
+        },
+        "cta": "Start the switch"
+      },
+      "program": {
+        "titleToPoints": "Set up your points program",
+        "titleToStamp": "Set up your stamp card",
+        "subtitleToPoints": "Decide how customers earn points and what they can redeem.",
+        "subtitleToStamp": "Decide how many stamps fill a card and what the reward is.",
+        "cta": "Save my program"
+      },
+      "design": {
+        "titleToPoints": "Create your points card",
+        "titleToStamp": "Create your stamp card",
+        "subtitle": "We pre-filled your colors and logo. The new card only goes live once the switch completes.",
+        "picker": {
+          "title": "{count, plural, =1 {You already have a saved card of this type} other {You already have # saved cards of this type}}",
+          "subtitle": "Tap a card to use it as is, edit it, or duplicate it to keep the original — or create a new card.",
+          "designNew": "Create a new card",
+          "changeChoice": "Choose a different card",
+          "modify": "Edit",
+          "duplicate": "Duplicate",
+          "designNewHint": "Start from your brand colors and logo.",
+          "select": "Use this card",
+          "selectedTag": "Selected"
+        },
+        "creating": "Preparing your card...",
+        "stripPending": "We are rendering your stamp images. This takes a few seconds.",
+        "defaultNamePoints": "Points card",
+        "defaultNameStamp": "Stamp card",
+        "cta": "Keep this card"
+      },
+      "customers": {
+        "title": "Convert your customers' balances",
+        "subtitle": "Pick the rate and the rule, then check the result. Nothing changes yet.",
+        "rateLabel": "Conversion rate",
+        "rateUnit": "points per stamp",
+        "rateHelpToPoints": "Each stamp becomes {rate} point(s). We always round down to whole points.",
+        "rateHelpToStamp": "Every {rate} points become 1 stamp. We always round down to whole stamps.",
+        "rateSuggested": "Suggested rate: {rate}, based on your cheapest reward.",
+        "policyLabelToPoints": "What happens to rewards already earned?",
+        "policyLabelToStamp": "What happens to points beyond a full card?",
+        "policies": {
+          "cheapest_reward_equivalent": {
+            "name": "Grant their value in points",
+            "desc": "Each pending reward becomes the points price of your cheapest reward. Simple and fair."
+          },
+          "full_card_equivalent": {
+            "name": "Grant a full card's worth",
+            "desc": "Each pending reward becomes the points value of a complete stamp card."
+          },
+          "discard": {
+            "name": "Let them expire",
+            "desc": "Pending rewards are lost for your customers. Only use this if nobody holds one."
+          },
+          "bank_full_cards": {
+            "name": "Keep every full card",
+            "desc": "Each full card's worth of points becomes a pending reward. Nobody loses anything."
+          },
+          "bank_one": {
+            "name": "Keep a single reward",
+            "desc": "One full card becomes a pending reward. Points beyond that are lost."
+          },
+          "cap_card": {
+            "name": "Cap at one card",
+            "desc": "Balances convert up to one full card. Points beyond that are lost."
+          }
+        },
+        "impact": {
+          "title": "Impact on your customers",
+          "customers": "Customers",
+          "affected": "Balances converted",
+          "banked": "With pending rewards",
+          "losers": "Lose some value",
+          "clamped": "Capped at your maximum",
+          "cappedWarning": "{count, plural, =1 {1 customer exceeds your cap of {max} points: their balance will be cut to {max} points and the excess is lost.} other {# customers exceed your cap of {max} points: their balances will be cut to {max} points and the excess is lost.}} You can raise or remove the cap in the program step."
+        },
+        "sample": {
+          "title": "Before and after, on real customers",
+          "customer": "Customer",
+          "before": "Before",
+          "after": "After",
+          "banked": "Pending",
+          "discardedTag": "loses value",
+          "bankedBefore": "{count, plural, =1 {+ 1 reward} other {+ # rewards}}",
+          "cappedTag": "capped"
+        },
+        "previewError": "We could not compute the preview. Check the rate and try again.",
+        "loading": "Computing the impact...",
+        "cta": "Confirm the rate"
+      },
+      "notifications": {
+        "title": "Update your notifications",
+        "subtitle": "These apply the moment the switch completes. Leave anything empty and our standard messages take over.",
+        "loading": "Loading your messages...",
+        "editedTag": "Edited",
+        "reset": "Reset to default",
+        "milestones": {
+          "title": "Milestones",
+          "help": "A one-off message when a customer reaches a threshold.",
+          "add": "Add a milestone",
+          "valueToPoints": "Points",
+          "valueToStamp": "Stamps",
+          "metricLabel": "Measured on",
+          "metricBalance": "Current balance",
+          "metricLifetime": "All-time total",
+          "bodyPlaceholder": "Your message...",
+          "remove": "Remove"
+        },
+        "disabledNotice": "{count, plural, =1 {Your existing milestone will be turned off} other {Your # existing milestones will be turned off}}: its thresholds refer to the old system. Rebuild them here, or later from the notifications page.",
+        "staleVars": "These variables do not exist in the new program and would show as raw text: {vars}",
+        "cta": "Save my messages"
+      },
+      "broadcasts": {
+        "title": "Scheduled broadcasts on hold",
+        "subtitle": "These broadcasts target customers using values from your current program, and those values change with the switch.",
+        "explain": "When you convert, they move back to drafts. Check their audience and reschedule them from the broadcasts page.",
+        "untitled": "Untitled broadcast",
+        "scheduledFor": "Scheduled for {date}",
+        "cta": "Continue"
+      },
+      "review": {
+        "title": "Review before you convert",
+        "subtitle": "One last look. Nothing changes until you confirm.",
+        "program": {
+          "title": "New program"
+        },
+        "design": {
+          "title": "New card"
+        },
+        "conversion": {
+          "title": "Balance conversion",
+          "rate": "Rate",
+          "rateValue": "{rate} points per stamp",
+          "policy": "Rule",
+          "customers": "Customers converted"
+        },
+        "notifications": {
+          "title": "Notifications",
+          "custom": "Your custom messages replace the standard ones.",
+          "defaults": "Standard messages will be used.",
+          "milestonesStaged": "{count, plural, =1 {1 new milestone} other {# new milestones}}",
+          "milestonesDisabled": "{count, plural, =1 {1 old milestone turned off} other {# old milestones turned off}}"
+        },
+        "broadcasts": {
+          "title": "Broadcasts",
+          "paused": "{count, plural, =1 {1 scheduled broadcast moves back to drafts} other {# scheduled broadcasts move back to drafts}}"
+        },
+        "announce": {
+          "label": "Announce the change on your customers' cards",
+          "help": "A short message shows on their phone when their card updates.",
+          "messageLabel": "Announcement message"
+        },
+        "cta": "Convert my program",
+        "confirm": {
+          "title": "Convert your program?",
+          "body": "The conversion starts immediately and cannot be undone. Every balance is converted and your customers' cards update on their own.",
+          "confirm": "Convert now",
+          "cancel": "Go back"
+        }
+      },
+      "execute": {
+        "converting": "Converting balances...",
+        "convertingBody": "Every customer's balance is being converted. This only takes a moment.",
+        "pushing": "Updating cards",
+        "pushingBody": "Cards refresh on your customers' phones. They have nothing to do.",
+        "pushProgress": "{pushed} of {total} cards updated",
+        "success": {
+          "titleToPoints": "Your program now runs on points",
+          "titleToStamp": "Your program now runs on stamps",
+          "converted": "{count, plural, =1 {1 customer converted} other {# customers converted}}",
+          "broadcasts": "{count, plural, =1 {1 broadcast moved back to drafts} other {# broadcasts moved back to drafts}}. Check their audience and reschedule them.",
+          "reviewBroadcasts": "Review my broadcasts",
+          "milestones": "{count, plural, =1 {1 old milestone turned off} other {# old milestones turned off}}.",
+          "reviewNotifications": "Review my notifications",
+          "cta": "Back to my dashboard",
+          "applyWarnings": "Some of your custom messages could not be applied. Your program converted fine — just review them."
+        },
+        "failed": {
+          "title": "The switch did not complete",
+          "body": "Nothing was lost: your program is still on its previous type. Try again, and contact us if it happens twice.",
+          "retry": "Try again",
+          "back": "Go back and adjust"
+        },
+        "pushingHint": "Your program is already converted. Cards keep updating in the background, so you can leave this page.",
+        "pushingLeave": "Back to my dashboard"
+      }
+    },
+    "announceDefaults": {
+      "toPoints": "Our loyalty program is evolving: your stamps are now points. Your balance was converted automatically, nothing to do on your side.",
+      "toStamp": "Our loyalty program is evolving: your points are now stamps. Your balance was converted automatically, nothing to do on your side."
+    },
+    "entry": {
+      "title": "Program type",
+      "currentStamp": "Your program runs on stamps.",
+      "currentPoints": "Your program runs on points.",
+      "body": "You can switch types without losing anyone: every balance is converted and cards update on their own.",
+      "ctaToPoints": "Switch to points",
+      "ctaToStamp": "Switch to stamps"
+    },
+    "errors": {
+      "notAllowed": "Your current plan does not include the points program.",
+      "designNotReady": "Your card is still rendering. Give it a few seconds and try again.",
+      "generic": "Something went wrong. Try again."
+    }
+  }
+}

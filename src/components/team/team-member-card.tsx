@@ -120,7 +120,7 @@ export function TeamMemberCard({
 
       {/* Bottom row: stamps + status */}
       <div className="flex justify-between items-center text-[11px] text-[var(--muted-foreground)]">
-        <span>{t('stampsGiven', { count: row.stampsGiven })}</span>
+        <span>{t('scansMade', { count: row.scansMade })}</span>
         <span className={`font-medium ${
           row.status === "online" ? "text-green-600 dark:text-green-400" :
           row.status === "invited" ? "text-amber-600 dark:text-amber-400" :
