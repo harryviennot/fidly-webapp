@@ -5,6 +5,8 @@
     "export": "Exporter",
     "addCustomer": "Ajouter un client",
     "customerProfile": "Profil client",
+    "pointsCustomer": "Carte à points",
+    "pointsBalance": "{points} pts",
     "loading": "Chargement des clients...",
     "loadFailed": "Impossible de charger les clients. Vérifiez que le serveur est en cours d'exécution.",
     "searchPlaceholder": "Rechercher par nom ou email...",
@@ -18,7 +20,8 @@
       "lastVisit": "Dernière visite",
       "redemptions": "Récompenses",
       "action": "Action",
-      "actions": "Actions"
+      "actions": "Actions",
+      "points": "Points"
     },
     "stats": {
       "totalCustomers": "Clients totaux",
@@ -35,6 +38,7 @@
     "sort": {
       "name": "Nom",
       "stamps": "Tampons",
+      "points": "Points",
       "rewards": "Récompenses",
       "lastActivity": "Dernière activité"
     },
@@ -90,13 +94,16 @@
       "new": "Inscrits il y a moins de 14 jours.",
       "regular": "Clients actifs sans statut particulier.",
       "vip": "Clients ayant utilisé 3 récompenses ou plus.",
-      "rewardReady": "A une récompense à utiliser : carte pleine ou récompenses cumulées.",
+      "rewardReady": "A une récompense à utiliser dès maintenant.",
       "closeToReward": "À moins de 2 tampons de leur récompense.",
-      "atRisk": "Ont des tampons mais ne sont pas venus depuis plus de 30 jours.",
-      "ghost": "Ont pris leur carte mais ne sont jamais revenus : aucun tampon."
+      "atRisk": "Sont déjà venus, mais pas depuis plus de 30 jours.",
+      "ghost": "Ont pris leur carte mais ne sont jamais revenus."
     },
     "actions": {
       "addStamp": "Ajouter tampon",
+      "open": "Ouvrir",
+      "addPoints": "Ajouter des points",
+      "removePoints": "Retirer des points",
       "maxed": "Max !",
       "redeem": "Échanger",
       "voidLast": "Annuler dernier",
@@ -117,6 +124,13 @@
       "voidSuccessToast": "Tampon annulé",
       "voidFailedToast": "Échec de l'annulation",
       "noVoidableStamp": "Aucun tampon à annuler",
+      "voidPointsDialogTitle": "Retirer les derniers points",
+      "voidPointsConfirm": "Retirer les points",
+      "voidPointsReasonPlaceholder": "ex. Points ajoutés par erreur",
+      "voidPointsSuccessToast": "Points retirés",
+      "voidValueLabel": "À retirer",
+      "voidValuePoints": "{points} pts",
+      "voidValueStamps": "{count, plural, one {# tampon} other {# tampons}}",
       "adjustment": {
         "title": "Ajouter un tampon",
         "chip1": "Oubli de scan",
@@ -138,7 +152,44 @@
           "locationNotPermitted": "Vous n'êtes pas assigné à cet établissement."
         }
       },
-      "redeemBanked": "{count, plural, =1 {Utiliser (1 en attente)} other {Utiliser (# en attente)}}"
+      "redeemBanked": "{count, plural, =1 {Utiliser (1 en attente)} other {Utiliser (# en attente)}}",
+      "pointsAdd": {
+        "title": "Ajouter des points",
+        "amountLabel": "Montant dépensé",
+        "preview": "= +{points} points",
+        "reasonLabel": "Raison",
+        "reasonPlaceholder": "Pourquoi ajoutez-vous ces points ?",
+        "reasonHelp": "Vous seul le voyez. Cela garde votre historique d'activité clair.",
+        "locationLabel": "Établissement",
+        "noLocation": "Aucun établissement",
+        "successToast": "{points} points ajoutés",
+        "submitting": "Ajout en cours...",
+        "submit": "Ajouter des points",
+        "errors": {
+          "amountRequired": "Indiquez le montant dépensé par le client."
+        }
+      },
+      "pointsRemove": {
+        "title": "Retirer des points",
+        "modeLast": "Dernier crédit",
+        "modeCustom": "Montant libre",
+        "amountLabel": "Points à retirer",
+        "newBalanceLabel": "Nouveau solde",
+        "pointsValue": "{points} pts",
+        "successToast": "{points} points retirés",
+        "submitting": "Retrait...",
+        "submit": "Retirer les points"
+      },
+      "pointsRedeem": {
+        "title": "Utiliser une récompense",
+        "balance": "{balance} disponibles",
+        "price": "{points} pts",
+        "notEnough": "Pas assez de points",
+        "successToast": "{reward} utilisée",
+        "failedToast": "Impossible d'utiliser la récompense. Réessayez.",
+        "submitting": "En cours...",
+        "submit": "Utiliser"
+      }
     },
     "toasts": {
       "stampAdded": "Tampon ajouté pour {name}",
@@ -190,7 +241,14 @@
         "at_risk": "À risque",
         "ghost": "Fantôme"
       },
-      "rewardsAvailable": "Récompenses à utiliser"
+      "rewardsAvailable": "Récompenses à utiliser",
+      "points": {
+        "title": "Solde de points",
+        "lifetime": "{count} gagnés au total",
+        "complete": "Carte complétée",
+        "limit": "Plafond {max} pts",
+        "price": "{points} pts"
+      }
     },
     "transaction": {
       "empty": "Aucune transaction",
@@ -198,13 +256,18 @@
       "loadingMore": "Chargement...",
       "types": {
         "stamp_added": "Tampon ajouté",
+        "points_earned": "Points gagnés",
         "reward_redeemed": "Récompense échangée",
         "stamp_voided": "Tampon annulé",
+        "points_voided": "Points retirés",
         "bonus_stamp": "Tampon bonus",
+        "bonus_points": "Points bonus",
         "stamps_adjusted": "Tampons ajustés",
+        "points_adjusted": "Points ajustés",
         "card_added": "Carte ajoutée",
         "card_re_added": "Carte ré-ajoutée",
-        "card_deleted": "Carte supprimée"
+        "card_deleted": "Carte supprimée",
+        "balance_migrated": "Solde converti"
       },
       "by": "par",
       "you": "Vous",
@@ -221,7 +284,12 @@
         "yesterday": "Hier",
         "daysAgo": "il y a {count}j"
       },
-      "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}"
+      "rewardsLeft": "{count, plural, =1 {1 récompense restante} other {# récompenses restantes}}",
+      "conversion": {
+        "stampsValue": "{count, plural, =1 {1 tampon} other {# tampons}}",
+        "pointsValue": "{count} pts",
+        "rewardsHonored": "{count, plural, =1 {1 récompense conservée} other {# récompenses conservées}}"
+      }
     }
   }
 }

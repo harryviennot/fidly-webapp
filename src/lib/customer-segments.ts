@@ -1,12 +1,20 @@
-import type { CustomerResponse } from '@/types';
+import type { CustomerResponse, LoyaltyType } from '@/types';
 
 export type CustomerSegment = 'new' | 'regular' | 'vip' | 'reward_ready' | 'close_to_reward' | 'at_risk' | 'ghost';
 
 export function classifyCustomer(
   customer: CustomerResponse,
   maxStamps: number,
-  now = new Date()
+  now = new Date(),
+  loyaltyType: LoyaltyType = 'stamp'
 ): CustomerSegment {
+  // Points segments are computed server-side (backend Phase 8 wires
+  // `customer.segment` into the list). The stamp-threshold math below would
+  // misclassify every points customer as `ghost` (their `stamps` field is 0),
+  // so fall back to a neutral badge until the server value is available.
+  if (loyaltyType === 'points') {
+    return 'regular';
+  }
   const stamps = customer.stamps;
   const createdAt = customer.created_at ? new Date(customer.created_at) : null;
   const lastActivity = customer.last_activity_at ?? customer.updated_at;
@@ -112,27 +120,4 @@ export const SEGMENT_AVATAR_COLORS: Record<CustomerSegment, string> = {
 
 export function getSegmentConfig(segment: CustomerSegment): SegmentConfig {
   return SEGMENT_CONFIGS[segment];
-}
-
-export function countBySegment(
-  customers: CustomerResponse[],
-  maxStamps: number
-): Record<CustomerSegment, number> {
-  const now = new Date();
-  const counts: Record<CustomerSegment, number> = {
-    new: 0,
-    regular: 0,
-    vip: 0,
-    reward_ready: 0,
-    close_to_reward: 0,
-    at_risk: 0,
-    ghost: 0,
-  };
-
-  for (const customer of customers) {
-    const segment = classifyCustomer(customer, maxStamps, now);
-    counts[segment]++;
-  }
-
-  return counts;
 }

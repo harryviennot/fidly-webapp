@@ -16,10 +16,12 @@ import {
 } from '@/hooks/use-notifications';
 import {
   renderSamplePreview,
-  VARIABLE_KEYS,
+  triggerVariableKeys,
   PRO_ONLY_VARIABLES,
   type VariableKey,
 } from '@/lib/template-variables';
+import { useDefaultProgram } from '@/hooks/use-programs';
+import { isPointsProgram } from '@/types';
 import { ApiError } from '@/api/client';
 import { SUPPORTED_LOCALES } from '@/lib/locale';
 import { LocaleTabs } from './LocaleTabs';
@@ -106,14 +108,23 @@ export const TriggerEditForm = forwardRef<TriggerEditFormHandle, TriggerEditForm
     );
     const [isEnabled, setIsEnabled] = useState<boolean>(template.is_enabled !== false);
     const editorRef = useRef<VariableEditorHandle>(null);
+    const { data: program } = useDefaultProgram(currentBusiness?.id);
+    const isPoints = isPointsProgram(program);
 
-    const insertableVariables = VARIABLE_KEYS as readonly VariableKey[];
+    const insertableVariables = triggerVariableKeys({
+      type: program?.type,
+      rewardCount: isPoints ? program.config.rewards.length : 0,
+      trigger: template.trigger,
+      includeStoreLocation: true,
+    });
 
     const collectName = currentBusiness?.settings?.customer_data_collection?.collect_name;
     const isNameCollectionOff = collectName === 'off' || collectName === false;
     const canMultiLocation = hasFeature('locations.multiple');
     const disabledVars = new Set<VariableKey>();
-    if (!rewardNameSet) disabledVars.add('reward_name');
+    // Points resolve {{reward_name}} from the reward ladder; only stamp
+    // programs gate it on the program-level reward label.
+    if (!isPoints && !rewardNameSet) disabledVars.add('reward_name');
     if (isNameCollectionOff) disabledVars.add('customer_first_name');
     if (!canMultiLocation) {
       for (const v of PRO_ONLY_VARIABLES) disabledVars.add(v);

@@ -125,7 +125,7 @@ export function IconUploadCard({ readOnly = false }: Readonly<IconUploadCardProp
                 iconUrl={iconUrl}
                 iconOriginalUrl={iconOriginalUrl}
                 businessName={businessName}
-                body="Stamp collected! You have 3 of 10 stamps."
+                body={t('previewBody')}
               />
             </div>
           </div>

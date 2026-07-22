@@ -11,7 +11,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, hover = true, flat = false, ...props }, ref) => (
+  ({ className, hover = true, flat = true, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(

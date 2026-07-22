@@ -2,7 +2,7 @@
   "notifications": {
     "page": {
       "title": "Notifications",
-      "subtitle": "Messages automatiques envoyés à vos clients lorsqu'ils collectent des tampons ou débloquent des récompenses"
+      "subtitle": "Messages automatiques envoyés à vos clients lorsqu'ils progressent ou débloquent des récompenses"
     },
     "icon": {
       "title": "Icône de notification",
@@ -16,6 +16,7 @@
       "upload": "Téléverser une icône",
       "uploadHint": "PNG, au moins 87×87 pixels",
       "preview": "Aperçu",
+      "previewBody": "Merci de votre visite ! À bientôt.",
       "crop": {
         "title": "Recadrez votre icône",
         "description": "Déplacez le carré pour choisir la partie de l'image à utiliser. Elle sera redimensionnée automatiquement.",
@@ -41,14 +42,22 @@
     },
     "triggers": {
       "sectionTitle": "Messages automatiques",
-      "sectionDescription": "Ces messages sont envoyés automatiquement lorsqu'un client collecte un tampon ou gagne une récompense",
+      "sectionDescription": "Ces messages sont envoyés automatiquement lorsqu'un client progresse ou gagne une récompense",
       "stamp_added": {
         "name": "Tampon collecté",
         "description": "Envoyé lorsqu'un client collecte un nouveau tampon"
       },
+      "points_earned": {
+        "name": "Points gagnés",
+        "description": "Envoyé lorsqu'un client gagne des points"
+      },
       "reward_earned": {
         "name": "Récompense débloquée",
         "description": "Envoyé lorsqu'un client complète sa carte et gagne une récompense"
+      },
+      "reward_completed": {
+        "name": "Récompense maximale atteinte",
+        "description": "Envoyé lorsqu'un client débloque votre plus haute récompense, sans palier au-dessus"
       },
       "reward_redeemed": {
         "name": "Récompense utilisée",
@@ -56,7 +65,7 @@
       },
       "milestone": {
         "name": "Palier",
-        "description": "Envoyé lorsqu'un client atteint un nombre précis de tampons"
+        "description": "Envoyé lorsqu'un client atteint un palier que vous définissez"
       },
       "near_reward": {
         "name": "Récompense proche",
@@ -74,29 +83,39 @@
     },
     "milestones": {
       "title": "Paliers",
-      "description": "Envoyez un message spécial lorsqu'un client atteint un nombre précis de tampons",
+      "description": "Envoyez un message spécial lorsqu'un client atteint le seuil de votre choix",
       "add": "Ajouter un palier",
       "usage": "{count} sur {max} utilisés",
       "usageActive": "{count} sur {max} actifs",
       "disabledPill": "Désactivé",
       "unlimited": "{count} paliers",
-      "empty": "Aucun palier pour le moment. Ajoutez-en un pour envoyer un message personnalisé à un nombre précis de tampons.",
-      "condition": "Quand le client atteint {count} tampons",
+      "empty": "Aucun palier pour le moment. Ajoutez-en un pour envoyer un message personnalisé au seuil de votre choix.",
+      "condition": "Quand le client atteint {count}",
       "conditionShort": "À {count} tampons",
+      "conditionShortPoints": "À {count} points",
+      "lifetimeTag": "Cumul",
       "limitReached": "Vous avez atteint la limite de paliers avec Growth. Passez à Pro pour des paliers illimités.",
       "stampCountLabel": "Se déclenche quand le nombre de tampons est égal à",
       "stampCountPlaceholder": "ex. 5",
+      "pointsCountLabel": "Se déclenche quand les points atteignent",
+      "pointsCountPlaceholder": "ex. 50",
+      "unitPoints": "pts",
+      "metricLabel": "Calculé sur",
+      "metricBalance": "Solde actuel",
+      "metricLifetime": "Total cumulé",
+      "metricBalanceHelp": "Se déclenche quand le solde actuel du client atteint ce nombre.",
+      "metricLifetimeHelp": "Se déclenche quand son total gagné depuis le début atteint ce nombre. Il continue de compter même après l'échange de récompenses.",
       "createTitle": "Nouveau palier",
-      "createDescription": "Envoyez une notification personnalisée quand vos clients atteignent un nombre précis de tampons.",
+      "createDescription": "Envoyez une notification personnalisée quand vos clients atteignent le seuil de votre choix.",
       "editTitle": "Modifier le palier",
-      "editDescription": "Modifiez le nombre de tampons ou le message de ce palier.",
+      "editDescription": "Modifiez le seuil ou le message de ce palier.",
       "deleteConfirmTitle": "Supprimer ce palier ?",
       "deleteConfirmDescription": "Ce palier ne se déclenchera plus pour aucun client.",
       "deleteButton": "Supprimer le palier",
       "errors": {
-        "duplicate": "Un palier avec ce nombre de tampons existe déjà.",
+        "duplicate": "Un palier à ce seuil existe déjà.",
         "quotaExceeded": "Vous avez atteint la limite de paliers. Passez à Pro pour des paliers illimités.",
-        "invalidStampCount": "Le nombre de tampons doit être un nombre positif.",
+        "invalidStampCount": "Le seuil doit être un nombre positif.",
         "outOfRange": "Le nombre de tampons doit être inférieur à {total} (le total de tampons de votre programme)."
       },
       "toasts": {
@@ -106,7 +125,7 @@
         "updateFailed": "Échec de la mise à jour",
         "deleted": "Palier supprimé",
         "deleteFailed": "Échec de la suppression",
-        "swappedOff": "Le palier au tampon {stamp} a été désactivé pour faire de la place",
+        "swappedOff": "Le palier à {stamp} a été désactivé pour faire de la place",
         "enabled": "Palier activé",
         "disabled": "Palier désactivé",
         "toggleFailed": "Échec de la mise à jour du palier"
@@ -154,15 +173,20 @@
         "reward_name": "Nom de la récompense",
         "business_name": "Nom de l'entreprise",
         "customer_first_name": "Prénom du client",
-        "store_location": "Lieu de l'établissement"
+        "store_location": "Lieu de l'établissement",
+        "points_balance": "Solde de points actuel",
+        "points_to_next": "Points avant la prochaine récompense",
+        "next_reward_points": "Objectif en points de la prochaine récompense",
+        "next_reward_name": "Nom de la prochaine récompense",
+        "last_reward_name": "Récompense obtenue"
       }
     },
     "growthUpsell": {
       "title": "Débloquez toutes les notifications",
-      "description": "Passez à Growth pour réécrire les messages par défaut à votre façon et créer des notifications personnalisées à des paliers de tampons précis.",
+      "description": "Passez à Growth pour réécrire les messages par défaut à votre façon et créer des notifications personnalisées aux paliers de votre choix.",
       "features": {
         "custom": "Rédigez votre propre texte pour chaque message automatique",
-        "milestones": "Créez des paliers personnalisés à n'importe quel nombre de tampons",
+        "milestones": "Créez des paliers personnalisés au seuil de votre choix",
         "icon": "Conservez votre icône de notification personnalisée"
       },
       "cta": "Passer à Growth"
@@ -234,7 +258,7 @@
         },
         "googleNote": {
           "title": "À noter pour Google Wallet",
-          "body": "Google limite les cartes à 3 notifications par jour. Les clients ayant déjà reçu 3 notifications aujourd'hui (tampons, etc.) ne recevront pas cette diffusion."
+          "body": "Google limite les cartes à 3 notifications par jour. Les clients ayant déjà reçu 3 notifications aujourd'hui (après un scan, par exemple) ne recevront pas cette diffusion."
         }
       },
       "lastResults": {
@@ -348,6 +372,8 @@
             "enrollmentHelp": "Filtrez selon le moment et le lieu d'inscription du client.",
             "stamps": "Tampons collectés",
             "stampsHelp": "Ne cible que les clients qui ont entre N et M tampons sur leur carte actuelle.",
+            "points": "Solde de points",
+            "pointsHelp": "Ne cible que les clients dont le solde actuel se situe entre N et M points.",
             "activity": "Activité",
             "activityHelp": "Filtrez selon le comportement d'achat, la dernière visite et les établissements fréquentés."
           },
@@ -378,9 +404,11 @@
             "maxLabel": "Au plus",
             "placeholder": "ex. 5",
             "suffix": "tampons",
+            "suffixPoints": "pts",
             "help": "Astuce : laissez un champ vide pour ne pas imposer de borne.",
             "hasRewardLabel": "A une récompense à utiliser",
-            "hasRewardHelp": "Uniquement les clients qui ont une récompense en ce moment : carte pleine ou récompenses cumulées. Parfait pour une diffusion « venez l'utiliser »."
+            "hasRewardHelp": "Uniquement les clients qui ont une récompense en ce moment : carte pleine ou récompenses cumulées. Parfait pour une diffusion « venez l'utiliser ».",
+            "hasRewardHelpPoints": "Uniquement les clients dont le solde couvre déjà au moins une récompense. Parfait pour une diffusion « venez l'utiliser »."
           },
           "activity": {
             "hasRedeemedLabel": "A déjà utilisé une récompense",
@@ -403,6 +431,8 @@
             "enrolled_after_days": "Inscrits < {n}j",
             "stamp_count_min": "≥ {n} tampons",
             "stamp_count_max": "≤ {n} tampons",
+            "points_min": "≥ {n} pts",
+            "points_max": "≤ {n} pts",
             "has_redeemed": "A utilisé",
             "inactive_days": "Inactifs {n}j+",
             "enrolled_at_location_ids": "Inscrits à {n} {n, plural, one {établissement} other {établissements}}",
@@ -412,7 +442,7 @@
             "title": "Débloquez la segmentation d'audience",
             "description": "Touchez les bons clients avec des filtres plus fins sur Pro.",
             "features": {
-              "stamps": "Filtrez par nombre de tampons collectés",
+              "stamps": "Filtrez par tampons ou solde de points",
               "activity": "Reconquérez les inactifs et récompensez les fidèles",
               "location": "Ciblez par lieu d'inscription ou d'activité"
             }
@@ -475,7 +505,7 @@
         "headline": "Touchez tous vos clients d'un seul coup",
         "description": "Vos clients reçoivent la notification directement sur leur téléphone et au dos de leur carte de fidélité.",
         "features": {
-          "segment": "Ciblez par tampons, activité ou date d'inscription",
+          "segment": "Ciblez par progression, activité ou date d'inscription",
           "schedule": "Programmez vos diffusions à l'avance (Pro)",
           "tracking": "Suivi de livraison en direct : voyez qui l'a reçue"
         },
@@ -500,7 +530,8 @@
         "upgradeRequired": "Les diffusions nécessitent Growth ou Pro.",
         "quotaExceeded": "Vous avez utilisé toutes vos diffusions ce mois-ci. Enregistrez-la comme brouillon et envoyez-la quand votre quota se réinitialise, ou passez à Pro pour des diffusions illimitées.",
         "proFiltersBlocked": "Les filtres avancés nécessitent Pro."
-      }
+      },
+      "conversionPaused": "{count, plural, =1 {1 diffusion programmée a été mise en pause} other {# diffusions programmées ont été mises en pause}} lors du changement de type de programme : leur ciblage reposait sur l'ancien système. Vérifiez-les et reprogrammez-les depuis les brouillons ci-dessous."
     },
     "downgradeBanner": {
       "title": "Votre plan Growth a expiré",

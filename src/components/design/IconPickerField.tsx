@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { CaretDown } from "@phosphor-icons/react";
 import {
@@ -32,6 +32,14 @@ interface IconPickerFieldProps {
   readonly suggested?: StampIconType[];
   /** Field name shown as the mobile sheet title (e.g. "Stamp icon"). */
   readonly label?: string;
+  /**
+   * Custom trigger element. When omitted, the default full-width field row
+   * (current icon + name + "change") is used — the StampsForm look. Pass a
+   * compact element (e.g. a single icon button) to embed the same adaptive
+   * popover/sheet picker inside a denser layout, like the PointsForm reward
+   * rows. Must be a single focusable element (rendered via Radix `asChild`).
+   */
+  readonly trigger?: ReactNode;
 }
 
 /**
@@ -51,6 +59,7 @@ export function IconPickerField({
   iconColor = "#ffffff",
   suggested,
   label,
+  trigger: customTrigger,
 }: IconPickerFieldProps) {
   const t = useTranslations("designEditor.iconPicker");
   const displayName = useIconDisplayName();
@@ -62,7 +71,7 @@ export function IconPickerField({
     setOpen(false);
   };
 
-  const trigger = (
+  const trigger = customTrigger ?? (
     <button
       type="button"
       className="w-full flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-2 hover:bg-muted/40 transition-colors"
@@ -120,7 +129,10 @@ export function IconPickerField({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className="w-[320px] p-3" align="start">
+      <PopoverContent
+        align="start"
+        className="w-[320px] p-2 rounded-xl border-[var(--border)] bg-[var(--card)] shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
+      >
         <IconLibrary
           value={value}
           onChange={handleChange}

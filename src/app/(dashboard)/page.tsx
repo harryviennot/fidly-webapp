@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Users, QrCodeIcon, Stamp, Gift, Heart } from "@phosphor-icons/react";
+import { Users, QrCodeIcon, Stamp, CoinsIcon, Gift, Heart } from "@phosphor-icons/react";
 import { useBusiness } from "@/contexts/business-context";
 import { useCustomers } from "@/hooks/use-customers";
 import { useActivityStats } from "@/hooks/use-activity-stats";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useDesigns } from "@/hooks/use-designs";
+import { useDefaultProgram } from "@/hooks/use-programs";
 import { useBusinessAchievements } from "@/hooks/use-business-achievements";
 import { getMyProfile } from "@/api";
-import type { User } from "@/types";
+import { isPointsProgram, type User } from "@/types";
 import {
   PageHeader,
   StatCard,
@@ -37,6 +38,11 @@ export default function DashboardPage() {
   const { data: txns, isLoading: txnsLoading } = useTransactions(businessId, 10);
   const { data: designs = [] } = useDesigns(businessId);
   const { data: achievements } = useBusinessAchievements(businessId);
+  const { data: program } = useDefaultProgram(businessId);
+  // Points programs log `points_earned` events, which the analytics RPCs
+  // (migration 125) union into the same earn-event counters. The count is a
+  // purchase count, not stamps, so relabel the headline KPI.
+  const isPoints = isPointsProgram(program);
   const activeDesign = designs.find((d) => d.is_active);
 
   // User profile for welcome message
@@ -54,7 +60,7 @@ export default function DashboardPage() {
   // Lifetime totals + "currently loyal" (>=2 visits in the last 6 months), all
   // from get_business_achievements. Loyalty here is recency-windowed on purpose,
   // unlike the lifetime repeat-count behind the loyalty trophy.
-  const totalStamps = achievements?.total_stamps_given ?? 0;
+  const totalScans = achievements?.total_scans ?? 0;
   const totalRewards = achievements?.total_rewards_redeemed ?? 0;
   const loyalCustomers = achievements?.loyal_customers_6m ?? 0;
 
@@ -92,9 +98,9 @@ export default function DashboardPage() {
             
             <StatCard
               className="flex-1 basis-0 min-w-[140px]"
-              title={t("dashboard.totalStamps")}
-              value={totalStamps}
-              icon={<Stamp className="w-4 h-4" weight="bold" />}
+              title={isPoints ? t("dashboard.totalPurchases") : t("dashboard.totalStamps")}
+              value={totalScans}
+              icon={isPoints ? <CoinsIcon className="w-4 h-4" weight="bold" /> : <Stamp className="w-4 h-4" weight="bold" />}
               tone="accent"
               change={stampsThisWeek > 0 ? t("dashboard.plusThisWeek", { count: stampsThisWeek }) : undefined}
               positive={stampsThisWeek > 0}

@@ -32,7 +32,7 @@
     "contactEmail": "Send an email",
     "contactEmailSubject": "Support request: {slug}",
     "downloadTitle": "Download the app",
-    "downloadDescription": "Scan cards and add stamps from your phone."
+    "downloadDescription": "Scan customer cards from your phone."
   },
   "header": {
     "loyaltyProgram": "Loyalty Program",

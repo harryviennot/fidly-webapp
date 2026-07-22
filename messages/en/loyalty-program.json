@@ -129,6 +129,8 @@
       "inactive": "Inactive",
       "programHealth": "Program Health",
       "avgStampsPerCustomer": "Avg. stamps per customer",
+      "avgBalancePerCustomer": "Avg balance per customer",
+      "avgTicket": "Avg ticket",
       "rewardCompletionRate": "Reward completion rate",
       "completionRateInfo": "The share of customers who filled at least one card, whether they redeemed the reward or are still holding it.",
       "redemptionRate": "Redemption rate",
@@ -170,6 +172,39 @@
         "previewAlt": "Flyer preview",
         "downloaded": "Flyer downloaded.",
         "error": "We couldn't generate your flyer. Please try again."
+      }
+    },
+    "points": {
+      "rateLabel": "Points earned",
+      "rateHelp": "How many points a customer earns for each unit they spend.",
+      "ratePrefix": "{currency}1 spent =",
+      "ratePoints": "pts",
+      "rewardMenuLabel": "Reward menu",
+      "rewardMenuHelp": "The rewards customers redeem with their points, and the price of each.",
+      "capLabel": "Cap the balance",
+      "capHelp": "Stop the balance from growing past a limit. Off by default.",
+      "capDescription": "Points stop adding up once the balance reaches the cap.",
+      "capMaxLabel": "Maximum balance",
+      "rewardMenu": {
+        "rewardHeader": "Reward",
+        "priceHeader": "Price",
+        "rewardPlaceholder": "Free coffee",
+        "rewardAria": "Reward {index} name",
+        "priceAria": "Reward {index} price in points",
+        "removeAria": "Remove reward {index}",
+        "addReward": "Add a reward",
+        "pointsSuffix": "pts"
+      },
+      "summary": {
+        "rate": "Earn rate",
+        "rateValue": "{points} pts per {currency}1",
+        "rewards": "Rewards",
+        "cap": "Balance cap",
+        "capValue": "{max} pts",
+        "noCap": "No cap"
+      },
+      "recap": {
+        "earn": "Customers earn <b>{points} points</b> for every {currency}1 they spend."
       }
     },
     "programInfo": "Program Info",
@@ -270,7 +305,7 @@
         "actions": "More actions",
         "actionsHint": "Manage this location",
         "signups": "Signups",
-        "stamps30d": "Stamps 30d",
+        "scans30d": "Scans 30d",
         "redemptions30d": "Redeemed 30d",
         "addAnother": "Add another location"
       },
@@ -368,9 +403,9 @@
         "statsLoading": "Loading…",
         "statsUpsellTitle": "Per-location stats are Pro",
         "statsUpsellDescription": "See how each location is performing in isolation, not just the global view.",
-        "stampsAdded": "Stamps added",
+        "scansAdded": "Scans",
         "rewardsRedeemed": "Rewards redeemed",
-        "stampsVoided": "Stamps voided",
+        "scansVoided": "Scans voided",
         "uniqueCustomers": "Unique customers",
         "enrolledHere": "Enrolled here",
         "allTime": "All-time",

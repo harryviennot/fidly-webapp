@@ -1,5 +1,21 @@
 # web/ — guidance for Claude
 
+## Testing — write the test first
+
+Per the workspace policy (root `CLAUDE.md`): write the test BEFORE implementing
+a feature or change, run it after; when touching untested code, backfill tests
+for what you touch. Tests are colocated `*.test.ts` files next to the code
+under `src/` and run with Bun's built-in runner:
+
+```bash
+bun test src        # also: bun run test
+```
+
+Target the pure logic in `src/lib/` first (see `broadcast-filters.test.ts`,
+`achievements.test.ts`, `weekly-goal.test.ts`). Extract logic out of components
+into `lib/` when it needs testing rather than reaching for a DOM test harness.
+`@types/bun` is a devDependency so `bun:test` imports type-check.
+
 ## Cards: always use the shared `<Card>`
 
 Any card-shaped surface in `web/` reuses `web/src/components/ui/card.tsx` and its

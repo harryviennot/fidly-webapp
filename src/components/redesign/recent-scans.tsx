@@ -7,7 +7,14 @@ import type { TransactionResponse } from "@/types";
 import { useAuth } from "@/contexts/auth-provider";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
-import { TYPE_CONFIG, isCardLifecycleType } from "@/lib/transaction-constants";
+import {
+  TYPE_CONFIG,
+  isCardLifecycleType,
+  isPointsTransaction,
+  txDelta,
+  txValueAfter,
+  txValueBefore,
+} from "@/lib/transaction-constants";
 import { TransactionIcon } from "@/components/activity/transaction-icon";
 import { SmoothHeight } from "@/components/reusables/smooth-height";
 import { LocationBadge } from "@/components/locations/location-badge";
@@ -17,6 +24,7 @@ import { SectionHeader } from "@/components/redesign/section-header";
 const WIDGET_TYPE_CONFIG = {
   ...TYPE_CONFIG,
   stamp_added: { ...TYPE_CONFIG.stamp_added, deltaBg: "bg-[var(--accent-light)]", deltaText: "text-[var(--accent)]" },
+  points_earned: { ...TYPE_CONFIG.points_earned, deltaBg: "bg-[var(--accent-light)]", deltaText: "text-[var(--accent)]" },
   reward_redeemed: { ...TYPE_CONFIG.reward_redeemed, deltaBg: "bg-[var(--accent-light)]", deltaText: "text-[var(--accent)]" },
 };
 
@@ -118,8 +126,8 @@ export function RecentScans({
             const customerName = metadata?.customer_name || "Customer";
             const voidReason = metadata?.void_reason;
             const isLast = i === transactions.length - 1;
-            const deltaText =
-              tx.stamp_delta > 0 ? `+${tx.stamp_delta}` : String(tx.stamp_delta);
+            const delta = txDelta(tx);
+            const deltaText = delta > 0 ? `+${delta}` : String(delta);
 
             return (
               <Link
@@ -177,13 +185,14 @@ export function RecentScans({
                       ) : (
                         <>
                           <span className="font-semibold text-[#555] tabular-nums">
-                            {tx.stamps_before}
+                            {txValueBefore(tx)}
                           </span>
                           <span>→</span>
                           <span className="font-semibold tabular-nums text-[#555]">
-                            {tx.stamps_after}
+                            {txValueAfter(tx)}
                           </span>
                           {tx.type === "reward_redeemed" &&
+                            !isPointsTransaction(tx) &&
                             metadata?.rewards_after != null && (
                               <>
                                 <span className="text-[#D8D5CE]">·</span>

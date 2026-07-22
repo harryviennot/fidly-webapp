@@ -1,0 +1,254 @@
+{
+  "conversion": {
+    "header": {
+      "title": "Changer de type de programme",
+      "step": "Étape {current} sur {total}"
+    },
+    "exit": {
+      "label": "Fermer",
+      "title": "Quitter la conversion ?",
+      "body": "Vos choix ne seront pas enregistrés. Votre programme actuel reste tel quel.",
+      "confirm": "Quitter",
+      "cancel": "Rester"
+    },
+    "locales": {
+      "en": "English",
+      "fr": "Français",
+      "es": "Español"
+    },
+    "units": {
+      "stamps": "{count, plural, =1 {1 tampon} other {# tampons}}",
+      "points": "{count, plural, =1 {1 point} other {# points}}"
+    },
+    "steps": {
+      "intro": {
+        "titleToPoints": "Passer des tampons aux points",
+        "titleToStamp": "Passer des points aux tampons",
+        "subtitle": "Vos clients gardent leur carte et leur progression. On convertit tout pour vous.",
+        "how": {
+          "title": "Ce qui se passe pendant le changement",
+          "inPlace": "Tous les soldes sont convertis d'un coup, selon une règle que vous choisissez aux étapes suivantes.",
+          "noRedownload": "Les cartes se mettent à jour toutes seules. Personne n'a de nouvelle carte à télécharger.",
+          "rerender": "Chaque carte s'affiche avec votre nouveau style de carte dès sa prochaine mise à jour."
+        },
+        "current": {
+          "title": "Votre programme aujourd'hui",
+          "type": "Type",
+          "stamps": "Tampons",
+          "points": "Points",
+          "goal": "Tampons pour une récompense",
+          "reward": "Récompense",
+          "rate": "Points pour 1 {currency} dépensé",
+          "rewards": "Récompenses au menu"
+        },
+        "churnWarning": "Vous avez déjà changé de type le {date}. Un deuxième changement si vite peut dérouter vos habitués. Prenez le temps d'y réfléchir avant de continuer.",
+        "pushing": {
+          "title": "Un changement est déjà en cours",
+          "body": "Votre programme est en train d'être converti. Vous pouvez suivre l'avancement, mais impossible d'en lancer un nouveau tant qu'il n'est pas terminé.",
+          "viewProgress": "Voir l'avancement"
+        },
+        "cta": "Commencer le changement"
+      },
+      "program": {
+        "titleToPoints": "Configurez votre programme à points",
+        "titleToStamp": "Configurez votre carte à tampons",
+        "subtitleToPoints": "Décidez comment vos clients gagnent des points et ce qu'ils peuvent réclamer.",
+        "subtitleToStamp": "Décidez combien de tampons remplissent une carte et quelle est la récompense.",
+        "cta": "Enregistrer mon programme"
+      },
+      "design": {
+        "titleToPoints": "Créez votre carte à points",
+        "titleToStamp": "Créez votre carte à tampons",
+        "subtitle": "On a repris vos couleurs et votre logo. La nouvelle carte ne sera visible qu'une fois le changement terminé.",
+        "picker": {
+          "title": "{count, plural, =1 {Vous avez déjà une carte de ce type} other {Vous avez déjà # cartes de ce type}}",
+          "subtitle": "Touchez une carte pour l'utiliser telle quelle, modifiez-la, ou dupliquez-la pour garder l'originale — ou créez une nouvelle carte.",
+          "designNew": "Créer une nouvelle carte",
+          "changeChoice": "Choisir une autre carte",
+          "modify": "Modifier",
+          "duplicate": "Dupliquer",
+          "designNewHint": "Partez de vos couleurs et de votre logo.",
+          "select": "Utiliser cette carte",
+          "selectedTag": "Sélectionnée"
+        },
+        "creating": "Préparation de votre carte...",
+        "stripPending": "On prépare les images de vos tampons. Ça prend quelques secondes.",
+        "defaultNamePoints": "Carte à points",
+        "defaultNameStamp": "Carte à tampons",
+        "cta": "Garder cette carte"
+      },
+      "customers": {
+        "title": "Convertissez les soldes de vos clients",
+        "subtitle": "Choisissez le taux et la règle, puis vérifiez le résultat. Rien ne change pour l'instant.",
+        "rateLabel": "Taux de conversion",
+        "rateUnit": "points par tampon",
+        "rateHelpToPoints": "Chaque tampon devient {rate} point(s). On arrondit toujours à l'entier inférieur.",
+        "rateHelpToStamp": "Chaque tranche de {rate} points devient 1 tampon. On arrondit toujours à l'entier inférieur.",
+        "rateSuggested": "Taux conseillé : {rate}, calculé d'après votre récompense la moins chère.",
+        "policyLabelToPoints": "Que faire des récompenses déjà gagnées ?",
+        "policyLabelToStamp": "Que faire des points au-delà d'une carte pleine ?",
+        "policies": {
+          "cheapest_reward_equivalent": {
+            "name": "Créditer leur valeur en points",
+            "desc": "Chaque récompense en attente devient le prix en points de votre récompense la moins chère. Simple et juste."
+          },
+          "full_card_equivalent": {
+            "name": "Créditer une carte pleine",
+            "desc": "Chaque récompense en attente devient la valeur en points d'une carte à tampons complète."
+          },
+          "discard": {
+            "name": "Les laisser expirer",
+            "desc": "Les récompenses en attente sont perdues pour vos clients. À réserver au cas où personne n'en a."
+          },
+          "bank_full_cards": {
+            "name": "Garder toutes les cartes pleines",
+            "desc": "Chaque carte pleine en points devient une récompense en attente. Personne ne perd rien."
+          },
+          "bank_one": {
+            "name": "Garder une seule récompense",
+            "desc": "Une carte pleine devient une récompense en attente. Les points au-delà sont perdus."
+          },
+          "cap_card": {
+            "name": "Plafonner à une carte",
+            "desc": "Les soldes sont convertis jusqu'à une carte pleine. Les points au-delà sont perdus."
+          }
+        },
+        "impact": {
+          "title": "Impact sur vos clients",
+          "customers": "Clients",
+          "affected": "Soldes convertis",
+          "banked": "Avec récompenses en attente",
+          "losers": "Perdent de la valeur",
+          "clamped": "Plafonnés à votre maximum",
+          "cappedWarning": "{count, plural, =1 {1 client dépasse votre plafond de {max} points : son solde sera ramené à {max} points et le surplus est perdu.} other {# clients dépassent votre plafond de {max} points : leur solde sera ramené à {max} points et le surplus est perdu.}} Vous pouvez augmenter ou retirer le plafond à l'étape du programme."
+        },
+        "sample": {
+          "title": "Avant et après, sur vos vrais clients",
+          "customer": "Client",
+          "before": "Avant",
+          "after": "Après",
+          "banked": "En attente",
+          "discardedTag": "perd de la valeur",
+          "bankedBefore": "{count, plural, =1 {+ 1 récompense} other {+ # récompenses}}",
+          "cappedTag": "plafonné"
+        },
+        "previewError": "Impossible de calculer l'aperçu. Vérifiez le taux puis réessayez.",
+        "loading": "Calcul de l'impact...",
+        "cta": "Valider le taux"
+      },
+      "notifications": {
+        "title": "Mettez à jour vos notifications",
+        "subtitle": "Elles s'appliquent dès la fin du changement. Laissez vide et nos messages standards prennent le relais.",
+        "loading": "Chargement de vos messages...",
+        "editedTag": "Modifié",
+        "reset": "Rétablir le message par défaut",
+        "milestones": {
+          "title": "Paliers",
+          "help": "Un message unique quand un client atteint un seuil.",
+          "add": "Ajouter un palier",
+          "valueToPoints": "Points",
+          "valueToStamp": "Tampons",
+          "metricLabel": "Mesuré sur",
+          "metricBalance": "Solde actuel",
+          "metricLifetime": "Total cumulé",
+          "bodyPlaceholder": "Votre message...",
+          "remove": "Retirer"
+        },
+        "disabledNotice": "{count, plural, =1 {Votre palier existant sera désactivé} other {Vos # paliers existants seront désactivés}} : leurs seuils font référence à l'ancien système. Recréez-les ici, ou plus tard depuis la page notifications.",
+        "staleVars": "Ces variables n'existent pas dans le nouveau programme et s'afficheraient telles quelles : {vars}",
+        "cta": "Enregistrer mes messages"
+      },
+      "broadcasts": {
+        "title": "Diffusions programmées en attente",
+        "subtitle": "Ces diffusions ciblent vos clients d'après les valeurs de votre programme actuel, et ces valeurs changent avec la conversion.",
+        "explain": "Au moment du changement, elles repassent en brouillon. Vérifiez leur audience et reprogrammez-les depuis la page diffusions.",
+        "untitled": "Diffusion sans titre",
+        "scheduledFor": "Programmée pour le {date}",
+        "cta": "Continuer"
+      },
+      "review": {
+        "title": "Vérifiez avant de convertir",
+        "subtitle": "Un dernier coup d'œil. Rien ne change tant que vous n'avez pas confirmé.",
+        "program": {
+          "title": "Nouveau programme"
+        },
+        "design": {
+          "title": "Nouvelle carte"
+        },
+        "conversion": {
+          "title": "Conversion des soldes",
+          "rate": "Taux",
+          "rateValue": "{rate} points par tampon",
+          "policy": "Règle",
+          "customers": "Clients convertis"
+        },
+        "notifications": {
+          "title": "Notifications",
+          "custom": "Vos messages personnalisés remplacent les messages standards.",
+          "defaults": "Les messages standards seront utilisés.",
+          "milestonesStaged": "{count, plural, =1 {1 nouveau palier} other {# nouveaux paliers}}",
+          "milestonesDisabled": "{count, plural, =1 {1 ancien palier désactivé} other {# anciens paliers désactivés}}"
+        },
+        "broadcasts": {
+          "title": "Diffusions",
+          "paused": "{count, plural, =1 {1 diffusion programmée repasse en brouillon} other {# diffusions programmées repassent en brouillon}}"
+        },
+        "announce": {
+          "label": "Annoncer le changement sur la carte de vos clients",
+          "help": "Un court message s'affiche sur leur téléphone quand leur carte se met à jour.",
+          "messageLabel": "Message de l'annonce"
+        },
+        "cta": "Convertir mon programme",
+        "confirm": {
+          "title": "Convertir votre programme ?",
+          "body": "La conversion démarre immédiatement et ne peut pas être annulée. Tous les soldes sont convertis et les cartes de vos clients se mettent à jour automatiquement.",
+          "confirm": "Convertir maintenant",
+          "cancel": "Retour"
+        }
+      },
+      "execute": {
+        "converting": "Conversion des soldes...",
+        "convertingBody": "Le solde de chaque client est en train d'être converti. C'est l'affaire d'un instant.",
+        "pushing": "Mise à jour des cartes",
+        "pushingBody": "Les cartes se rafraîchissent sur les téléphones de vos clients, sans aucune action de leur part.",
+        "pushProgress": "{pushed} cartes mises à jour sur {total}",
+        "success": {
+          "titleToPoints": "Votre programme fonctionne désormais aux points",
+          "titleToStamp": "Votre programme fonctionne désormais aux tampons",
+          "converted": "{count, plural, =1 {1 client converti} other {# clients convertis}}",
+          "broadcasts": "{count, plural, =1 {1 diffusion repassée en brouillon} other {# diffusions repassées en brouillon}}. Vérifiez leur audience puis reprogrammez-les.",
+          "reviewBroadcasts": "Vérifier mes diffusions",
+          "milestones": "{count, plural, =1 {1 ancien palier désactivé} other {# anciens paliers désactivés}}.",
+          "reviewNotifications": "Vérifier mes notifications",
+          "cta": "Retour à mon tableau de bord",
+          "applyWarnings": "Certains de vos messages personnalisés n'ont pas pu être appliqués. Votre programme est bien converti — pensez juste à les vérifier."
+        },
+        "failed": {
+          "title": "Le changement n'a pas abouti",
+          "body": "Rien n'est perdu : votre programme est resté sur son ancien type. Réessayez, et contactez-nous si ça se reproduit.",
+          "retry": "Réessayer",
+          "back": "Revenir modifier"
+        },
+        "pushingHint": "Votre programme est déjà converti. Les cartes continuent de se mettre à jour en arrière-plan, vous pouvez quitter cette page.",
+        "pushingLeave": "Retour à mon tableau de bord"
+      }
+    },
+    "announceDefaults": {
+      "toPoints": "Notre programme de fidélité évolue : vos tampons deviennent des points. Votre solde a été converti automatiquement, vous n'avez rien à faire.",
+      "toStamp": "Notre programme de fidélité évolue : vos points deviennent des tampons. Votre solde a été converti automatiquement, vous n'avez rien à faire."
+    },
+    "entry": {
+      "title": "Type de programme",
+      "currentStamp": "Votre programme fonctionne aux tampons.",
+      "currentPoints": "Votre programme fonctionne aux points.",
+      "body": "Vous pouvez changer de type sans perdre personne : chaque solde est converti et les cartes se mettent à jour toutes seules.",
+      "ctaToPoints": "Passer aux points",
+      "ctaToStamp": "Passer aux tampons"
+    },
+    "errors": {
+      "notAllowed": "Votre plan actuel n'inclut pas le programme à points.",
+      "designNotReady": "Votre carte est encore en préparation. Patientez quelques secondes puis réessayez.",
+      "generic": "Une erreur est survenue. Réessayez."
+    }
+  }
+}

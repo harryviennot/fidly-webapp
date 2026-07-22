@@ -54,7 +54,8 @@
           "content": "Save my content",
           "content_short": "Continue",
           "back": "Save the back",
-          "back_short": "Continue"
+          "back_short": "Continue",
+          "points": "Save my card"
         },
         "notifications": {
           "icon": "Save my icon"
@@ -87,7 +88,9 @@
       "saveFailed": "Couldn't save. Please try again.",
       "programNameRequired": "Give your program a name.",
       "rewardRequired": "Set the reward customers will earn.",
-      "slugTooShort": "A few more characters."
+      "slugTooShort": "A few more characters.",
+      "tooManyCustomers": "You have too many customers to switch type here. Finish setting up and start your free trial, then change the type from your program settings.",
+      "setupAlreadyComplete": "This program is already set up, so its type is locked here. Change it from your program settings."
     },
     "chapters": {
       "welcome": {
@@ -176,7 +179,24 @@
         "steps": {
           "program": {
             "title": "Set up your loyalty program",
-            "subtitle": "Pick how customers earn, name your program, and define the reward."
+            "subtitle": "Pick how customers earn, name your program, and define the reward.",
+            "subtitlePoints": "What customers earn per purchase, and what they can redeem.",
+            "typeHelp": {
+              "label": "Which should I choose?",
+              "stampsTitle": "Stamps",
+              "stampsBody": "One stamp per visit, same reward each time. Best when customers buy the same thing, like a coffee or a haircut.",
+              "pointsTitle": "Points",
+              "pointsBody": "Points scale with what each customer spends, redeemed against several rewards. Best when baskets vary, like a shop or a restaurant."
+            },
+            "typeBlocked": "You now have {count} customers on your card, too many to switch type here. Finish setting up and start your free trial, then change the type from your program settings.",
+            "switchDialog": {
+              "typeStamps": "stamps",
+              "typePoints": "points",
+              "title": "Switch to {type}?",
+              "body": "Your {count} test card(s) will change to {type} and update on their own, nothing to remove or re-add. Any test progress carries over to the new type.",
+              "confirm": "Switch type",
+              "cancel": "Keep current type"
+            }
           },
           "data-collection": {
             "title": "What to collect from customers",
@@ -189,7 +209,7 @@
         "steps": {
           "intro": {
             "title": "Your card has two sides",
-            "subtitle": "Front for stamps. Back for everything else.",
+            "subtitle": "Everything that isn't on the front of the card lives on the back.",
             "bodyP1": "Customers flip the card to see your hours, address, phone, website, terms, and anything else worth showing. On Apple Wallet they tap the three dots. On Google Wallet they tap the i icon.",
             "bodyP2": "You'll add your details once, here. They'll be available on every card you ever create. Later, when you design a specific card, you can pick which details to show and add extras that only apply to that card."
           },
@@ -209,6 +229,10 @@
           "stamps": {
             "title": "Stamps and rewards",
             "subtitle": "Pick stamp and reward icons, then choose your color."
+          },
+          "points": {
+            "title": "Points and rewards",
+            "subtitle": "Choose how your balance shows, then pick your color."
           },
           "content": {
             "title": "Extra info on the front",
@@ -232,7 +256,7 @@
         "steps": {
           "icon": {
             "title": "Choose your notification icon",
-            "subtitle": "Shown next to every notification you send: stamp added, reward earned, broadcast.",
+            "subtitle": "Every time their card updates, your customers get a notification on their phone. Here's the icon that goes with it.",
             "uploadSectionTitle": "Your icon",
             "uploadCta": "Click to upload",
             "uploadHint": "PNG, minimum 87×87 pixels. Square shapes work best.",
@@ -290,7 +314,10 @@
             "installAnotherCta": "Install on another device",
             "timeoutTitle": "Still here?",
             "timeoutBody": "We paused listening for new sign-ups after 5 minutes. Tap retry to keep watching.",
-            "retry": "Resume listening"
+            "retry": "Resume listening",
+            "points": {
+              "installBody": "Tap a button below. The card lands in your wallet, ready for the test purchase on the next step."
+            }
           },
           "stamp": {
             "title": "Send yourself a stamp",
@@ -312,19 +339,41 @@
             "appleWalletHint": "Apple Wallet groups rapid updates. Leaving roughly 20 seconds between stamps gives each notification its own buzz.",
             "googleWalletHint": "On Google Wallet, the card only refreshes once closed. Close and reopen to see the new stamp.",
             "deliveryDisclosure": {
-              "summary": "Notification didn't appear? The stamp was still recorded.",
+              "summary": "Notification didn't appear? It was still recorded.",
               "appleTitle": "On Apple Wallet",
               "appleBody": "Apple groups updates based on battery, Wi-Fi, and cellular conditions. A banner may take seconds or minutes. The card on your lock screen refreshes as soon as your phone wakes with a good signal.",
               "googleTitle": "On Google Wallet",
-              "googleBody": "The card only refreshes after it's been closed. Close the wallet and reopen the card to see the new stamp.",
-              "reassuranceTitle": "The stamp is saved",
+              "googleBody": "The card only refreshes after it's been closed. Close the wallet and reopen the card to see the update.",
+              "reassuranceTitle": "Your scan is saved",
               "reassuranceBody": "Even if the notification or the card preview hasn't caught up, the count is already on our server. Next time you scan this customer, you'll see the real, up-to-date count."
             },
             "stampsLabel": "Stamps on your card",
             "justStamped": "Stamp added",
-            "multiDeviceHint": "{count, plural, =1 {} other {Each tap stamps all # installed devices at once.}}",
+            "multiDeviceHint": "{count, plural, =1 {} other {Each tap updates all # installed devices at once.}}",
             "fallback": "No buzz yet? Notifications can take a few seconds. Try again in a moment.",
-            "customisationHint": "This is the default message. You can rewrite it, add custom messages at specific stamp counts, or turn notifications off entirely from your notifications settings."
+            "customisationHint": "This is the default message. You can rewrite it, add custom messages at specific stamp counts, or turn notifications off entirely from your notifications settings.",
+            "points": {
+              "title": "Send yourself points",
+              "subtitle": "Each test purchase credits points and fires a real notification to your phone. Exactly what your customers will get.",
+              "readyTitle": "Ready to add points",
+              "readyBody": "Tap below to log a test purchase. Your phone buzzes within a few seconds.",
+              "firstStampLandedTitle": "That's the feel",
+              "firstStampLandedBody": "That's exactly what your customers will feel every time they earn points. Same buzz, same timing, same flow. Add one more to get the rhythm.",
+              "keepStampingTitle": "Add some more",
+              "keepStampingBody": "Another test purchase credits more points and fires a second real notification. The short wait between them is what keeps each one buzzing on its own.",
+              "demoCompleteTitle": "You've got the feel for it",
+              "demoCompleteBody": "Whenever you're ready, we'll move on.",
+              "sendCta": "Log a test purchase",
+              "sendAnotherCta": "Add more points",
+              "watching": "Watching for the points…",
+              "cooldownCta": "Next purchase in {seconds}s",
+              "stampsLabel": "Points on your card",
+              "justStamped": "Points added",
+              "fallback": "No buzz yet? Notifications can take a few seconds. Try again in a moment.",
+              "deliveryDisclosure": {
+                "reassuranceBody": "Even if the notification or the card preview hasn't caught up, the balance is already on our server. Next time you scan this customer, you'll see the real, up-to-date balance."
+              }
+            }
           }
         }
       },
@@ -384,6 +433,7 @@
         "title": "You've built a real loyalty program",
         "subtitle": "Real card, real phones, real notifications. Quick recap before we talk plans.",
         "programDetail": "{totalStamps} stamps for \"{rewardName}\"",
+        "programDetailPoints": "{rewardCount} rewards to redeem with points",
         "stampsLabel": "{count, plural, =0 {No stamps sent yet} =1 {1 stamp sent to your phone} other {# stamps sent to your phone}}",
         "broadcastLabel": {
           "sent": "Broadcast received on your phone",

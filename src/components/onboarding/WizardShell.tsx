@@ -6,12 +6,15 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useBusiness } from '@/contexts/business-context';
+import { useDefaultProgram } from '@/hooks/use-programs';
+import { isPointsProgram } from '@/types';
 import { WizardProgress } from './WizardProgress';
 import { WizardFooter } from './WizardFooter';
 import { WizardStepProvider } from './wizard-context';
 import { useWizardProgress } from './useWizardProgress';
 import {
   getStepCtaKey,
+  getSubStepTitleKey,
   getVisibleChapters,
   nextStepPath,
   pathForStep,
@@ -41,6 +44,11 @@ export function WizardShell({ slug }: WizardShellProps) {
   const t = useTranslations('onboardingBusiness');
   const { markCompleted, markSkipped, completeAndFinalize, finalize } = useWizardProgress();
   const { currentBusiness } = useBusiness();
+  // Program type drives the first-stamp breadcrumb: the step body is already
+  // type-aware (StampStep's tk()), but the shell title comes from the static
+  // registry, so a points business would still read "Stamp your card" here.
+  const { data: program } = useDefaultProgram(currentBusiness?.id);
+  const isPoints = isPointsProgram(program);
 
   const submitHandlerRef = useRef<SubmitHandler | null>(null);
   const handlersRef = useRef<{ next: () => Promise<void>; skip: () => Promise<void> }>({
@@ -406,8 +414,8 @@ export function WizardShell({ slug }: WizardShellProps) {
   const { chapter, subStep, chapterIndex, subStepIndex } = resolved;
   const StepComponent = subStep.Component;
   const chapterTitle = t(`chapters.${chapter.id}.title`);
-  const subStepTitle =
-    chapter.subSteps.length > 1 ? t(`chapters.${chapter.id}.steps.${subStep.id}.title`) : undefined;
+  const subStepTitleKey = getSubStepTitleKey(chapter.id, subStep.id, isPoints);
+  const subStepTitle = chapter.subSteps.length > 1 ? t(subStepTitleKey) : undefined;
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-[var(--background)]">

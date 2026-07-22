@@ -17,6 +17,16 @@ export const VARIABLE_KEYS = [
   'business_name',
   'customer_first_name',
   'store_location',
+  // Points programs (resolved by build_field_context in the backend).
+  'points_balance',
+  'points_to_next',
+  // The absolute point value of the next reward (the milestone itself), e.g. 100
+  // when the customer has 30 and points_to_next is 70.
+  'next_reward_points',
+  'next_reward_name',
+  // The reward the customer just won (multi-reward ladders). Available on the
+  // reward_earned + reward_completed triggers.
+  'last_reward_name',
 ] as const;
 
 export type VariableKey = (typeof VARIABLE_KEYS)[number];
@@ -46,6 +56,11 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     business_name: 'business_name',
     customer_first_name: 'customer_first_name',
     store_location: 'store_location',
+    points_balance: 'points_balance',
+    points_to_next: 'points_to_next',
+    next_reward_points: 'next_reward_points',
+    next_reward_name: 'next_reward_name',
+    last_reward_name: 'last_reward_name',
   },
   fr: {
     stamp_count: 'tampons_actuels',
@@ -56,6 +71,11 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     business_name: 'nom_entreprise',
     customer_first_name: 'prenom_client',
     store_location: 'lieu_magasin',
+    points_balance: 'points_actuels',
+    points_to_next: 'points_restants',
+    next_reward_points: 'points_prochaine_recompense',
+    next_reward_name: 'prochaine_recompense',
+    last_reward_name: 'recompense_obtenue',
   },
   es: {
     stamp_count: 'sellos_actuales',
@@ -66,11 +86,95 @@ export const VARIABLE_DISPLAY_NAMES: Record<Locale, Record<VariableKey, string>>
     business_name: 'nombre_comercio',
     customer_first_name: 'nombre_cliente',
     store_location: 'lugar_establecimiento',
+    points_balance: 'puntos_actuales',
+    points_to_next: 'puntos_restantes',
+    next_reward_points: 'puntos_siguiente_recompensa',
+    next_reward_name: 'siguiente_recompensa',
+    last_reward_name: 'recompensa_obtenida',
   },
 };
 
 export function isKnownVariable(key: string): key is VariableKey {
   return (VARIABLE_KEYS as readonly string[]).includes(key);
+}
+
+/** The stamp-program variable set (order = display order). */
+const STAMP_VARIABLE_KEYS: VariableKey[] = [
+  'stamp_count',
+  'total_stamps',
+  'stamps_left',
+  'rewards_count',
+  'reward_name',
+  'business_name',
+  'customer_first_name',
+];
+
+/**
+ * Which {{variables}} a surface should offer for the active program. Stamp
+ * programs never see points variables and vice-versa — a points business used
+ * to be offered stamp_count / total_stamps / stamps_left, which are meaningless
+ * for it. For points the reward variable is type-of-ladder dependent: a single
+ * reward exposes {{reward_name}} (the lone reward), a multi-reward ladder
+ * exposes {{next_reward_name}} (the immediate objective) and hides reward_name.
+ *
+ * `includeStoreLocation` adds the Pro-only {{store_location}} chip (notification
+ * surfaces show it, gated; pass fields strip it entirely so they omit it).
+ */
+export function programVariableKeys(opts: {
+  type: 'stamp' | 'points' | undefined;
+  rewardCount?: number;
+  includeStoreLocation?: boolean;
+}): VariableKey[] {
+  const { type, rewardCount = 0, includeStoreLocation = false } = opts;
+  const keys: VariableKey[] =
+    type === 'points'
+      ? [
+          'points_balance',
+          'points_to_next',
+          'next_reward_points',
+          rewardCount > 1 ? 'next_reward_name' : 'reward_name',
+          'business_name',
+          'customer_first_name',
+        ]
+      : [...STAMP_VARIABLE_KEYS];
+  if (includeStoreLocation) keys.push('store_location');
+  return keys;
+}
+
+/**
+ * Trigger-aware variable set for the per-trigger notification editor.
+ *
+ * Multi-reward points ladders distinguish the reward the customer JUST won
+ * from the one coming NEXT, so the two reward triggers differ:
+ *  - `reward_earned` (a middle rung): "You earned {{last_reward_name}}! Next up
+ *    is {{next_reward_name}}." Offers both names.
+ *  - `reward_completed` (the top rung, no next): only {{last_reward_name}} — the
+ *    backend auto-routes here so "next up" copy never renders blank.
+ * Every other trigger, and every stamp / single-reward points program, keeps the
+ * program-wide set from `programVariableKeys` (single reward → {{reward_name}}).
+ */
+export function triggerVariableKeys(opts: {
+  type: 'stamp' | 'points' | undefined;
+  rewardCount?: number;
+  trigger?: string;
+  includeStoreLocation?: boolean;
+}): VariableKey[] {
+  const { type, rewardCount = 0, trigger, includeStoreLocation = false } = opts;
+
+  const isRewardTrigger = trigger === 'reward_earned' || trigger === 'reward_completed';
+  if (type === 'points' && rewardCount > 1 && isRewardTrigger) {
+    const keys: VariableKey[] = ['points_balance'];
+    if (trigger === 'reward_earned') {
+      keys.push('points_to_next', 'next_reward_points', 'next_reward_name', 'last_reward_name');
+    } else {
+      keys.push('last_reward_name');
+    }
+    keys.push('business_name', 'customer_first_name');
+    if (includeStoreLocation) keys.push('store_location');
+    return keys;
+  }
+
+  return programVariableKeys({ type, rewardCount, includeStoreLocation });
 }
 
 /**
@@ -82,6 +186,30 @@ export function getVariableDisplayName(key: string, locale: Locale): string {
     return VARIABLE_DISPLAY_NAMES[locale][key];
   }
   return key;
+}
+
+/**
+ * Insert `{{key}}` into `text` at the caret (replacing any selection), with
+ * joining spaces only where the token would otherwise glue onto a word —
+ * never before punctuation or after existing whitespace. Returns the new
+ * text plus the caret position right after the inserted token so the caller
+ * can restore focus there.
+ */
+export function insertVariableAtCursor(
+  text: string,
+  selectionStart: number,
+  selectionEnd: number,
+  key: string
+): { text: string; cursor: number } {
+  const start = Math.max(0, Math.min(selectionStart, text.length));
+  const end = Math.max(start, Math.min(selectionEnd, text.length));
+  const before = text.slice(0, start);
+  const after = text.slice(end);
+  const wordly = /[\p{L}\p{N}]/u;
+  const spaceBefore = before.length > 0 && wordly.test(before[before.length - 1]) ? ' ' : '';
+  const spaceAfter = after.length > 0 && wordly.test(after[0]) ? ' ' : '';
+  const token = `${spaceBefore}{{${key}}}${spaceAfter}`;
+  return { text: before + token + after, cursor: start + token.length };
 }
 
 /** Extract the set of {{variable}} names referenced in a template string. */
@@ -109,6 +237,11 @@ export function renderSamplePreview(
     business_name: 'Your business',
     customer_first_name: 'Sarah',
     store_location: 'Westside',
+    points_balance: '120',
+    points_to_next: '80',
+    next_reward_points: '200',
+    next_reward_name: 'Free Coffee',
+    last_reward_name: 'Free Coffee',
   };
   const values = { ...defaults, ...overrides };
   return template.replace(VARIABLE_PATTERN, (_match, key: string) => {

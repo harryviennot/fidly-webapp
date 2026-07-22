@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useBusiness } from '@/contexts/business-context';
 import { useDefaultProgram } from '@/hooks/use-programs';
+import { isPointsProgram, isStampProgram } from '@/types';
 
 export default function NewDesignPage() {
   const editorRef = useRef<DesignEditorRef>(null);
@@ -51,9 +52,11 @@ export default function NewDesignPage() {
         onSavingChange={setSaving}
         onDirtyChange={setIsDirty}
         designName={designName}
-        programTotalStamps={program?.config?.total_stamps}
+        programTotalStamps={isStampProgram(program) ? program.config.total_stamps : undefined}
         programName={program?.name}
         programRewardName={program?.reward_name}
+        programType={program?.type}
+        programRewards={isPointsProgram(program) ? program.config.rewards : undefined}
         headerLeft={
           editingName ? (
             <Input

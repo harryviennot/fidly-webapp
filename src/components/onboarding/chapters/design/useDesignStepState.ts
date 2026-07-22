@@ -66,8 +66,14 @@ export function computeInitialFormData({
     value: program?.reward_name ?? '',
   });
 
+  // Tag the design to the program type so the wizard preview renders the right
+  // surface (points strip vs stamp grid) and every design sub-step's save
+  // preserves it. Existing rows keep their stored card_type when set.
+  const programCardType = program?.type === 'points' ? 'points' : 'stamp';
+
   if (existingDesign) {
     const seeded = { ...existingDesign } as CardDesignCreate;
+    if (!seeded.card_type) seeded.card_type = programCardType;
     // Internal admin label — never overwrites a saved value. Falls back to
     // the business name when blank so the dashboard's design list stays
     // readable. This is independent of the `organization_name` (title)
@@ -114,6 +120,7 @@ export function computeInitialFormData({
     name: currentBusiness?.name ?? '',
     organization_name: '',
     logo_url: currentBusiness?.logo_url ?? undefined,
+    card_type: programCardType,
   };
   if (!seen) {
     if (program?.name) base.description = program.name;
@@ -171,7 +178,14 @@ const CUSTOM_COLORS_DRAFT_KEY = 'design.customColors';
 
 export function useDesignStepState(
   existingDesign: CardDesign | undefined,
-  stepKey: DesignSubStepKey
+  stepKey: DesignSubStepKey,
+  opts?: {
+    /** Edit against this program instead of the live default program. The
+     *  conversion wizard passes its TARGET program shape — the live program
+     *  still has the old type mid-wizard, and the card_type reconciliation
+     *  below would otherwise force the draft back to the old type. */
+    programOverride?: LoyaltyProgram | null;
+  }
 ): DesignStepState {
   const { currentBusiness } = useBusiness();
   const t = useTranslations('designEditor.editor');
@@ -180,7 +194,8 @@ export function useDesignStepState(
   // reward name. The design chapter is gated behind the program step at the
   // step-component level (early-return until program loads), so by the time
   // this hook runs the program data is in cache.
-  const { data: program } = useDefaultProgram(currentBusiness?.id);
+  const { data: liveProgram } = useDefaultProgram(currentBusiness?.id);
+  const program = opts?.programOverride ?? liveProgram;
   // Step-2 smart defaults — palette + initial colour seeds + icon seeds for
   // first-visit users. Once an existing design row exists, its saved values
   // override these (handled inside `computeInitialFormData`).
@@ -254,6 +269,23 @@ export function useDesignStepState(
       );
     }
   }, [existingDesign, currentBusiness, program, t, bizDefaults]);
+
+  // Reconcile card_type with the program type. card_type is not user-editable
+  // in onboarding — it mirrors the program. The lazy useState seed above can
+  // capture an undefined program (this hook runs before BrandingStep's
+  // program-loaded guard), defaulting card_type to 'stamp'; for a points
+  // program that would render + persist a stamp card. Once the program
+  // resolves, force the correct type (also self-heals designs already saved
+  // with the wrong type). Legitimate external-state sync.
+  const programCardType: 'stamp' | 'points' | undefined =
+    program?.type === 'points' ? 'points' : program ? 'stamp' : undefined;
+  useEffect(() => {
+    if (!programCardType) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFormData((prev) =>
+      prev.card_type === programCardType ? prev : { ...prev, card_type: programCardType }
+    );
+  }, [programCardType]);
 
   // Mirror customColors into the wizard draft store on every change so the
   // history is preserved across step navigation. `setDraft` is not a React

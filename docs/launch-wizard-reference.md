@@ -106,6 +106,27 @@ Single screen with four chip groups (type, size, locations, goal). Picking the *
 | title | Set up your loyalty program | Configurez votre programme |
 | subtitle | How many stamps it takes, and what your customers earn. | Combien de tampons sont nécessaires, et ce que vos clients gagnent. |
 
+### Program type (stamp ↔ points) switching
+
+The type chips carry a **"Which should I choose?"** InfoPopover (`typeHelp`): stamps = same
+purchase every visit (café, salon); points = variable basket, multi-reward (shop, restaurant).
+
+Switching type is not a plain edit — the backend recreates the program (PATCH drops `type`).
+`buildProgramSavePlan` (`chapters/program/programSavePlan.ts`, pure + unit-tested) decides:
+
+- **Same type, dirty** → background `updateProgram` (snappy forward nav, unchanged).
+- **Type change, 0 customers** → **awaited** `createProgram` (no confirm) so the recreate + design
+  realignment finish before the install step reads them.
+- **Type change, 1..3 customers** → the **`ResetTestCardsDialog`** first ("resets your N test cards");
+  confirm sets a ref and calls `ctx.advance()`, which re-runs the submit and awaits the create with
+  `replace_enrollments: true`.
+- **Type change, > `RESET_MAX_CUSTOMERS` (3)** → **blocked**: an inline warning `InfoBox` (`typeBlocked`)
+  and the CTA is disabled until the owner re-selects their current type. `RESET_MAX_CUSTOMERS` mirrors
+  the backend `RESET_MAX_ENROLLMENTS` — keep them in sync.
+
+Coded backend errors surface localized: `PROGRAM_HAS_CUSTOMERS`, `RESET_BLOCKED_TOO_MANY_CUSTOMERS`
+(`onboardingBusiness.errors.*`). Full semantics: backend `docs/points-program/10-onboarding-type-switch.md`.
+
 ---
 
 ## Chapter 4, Data collection `/data-collection`, skippable

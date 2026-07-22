@@ -1,6 +1,11 @@
 export type TriggerType =
   | 'stamp_added'
+  | 'points_earned'
   | 'reward_earned'
+  // Multi-reward points only: fires instead of reward_earned when the customer
+  // wins the top rung (no "next reward" left). Backend auto-routes between the
+  // two; the editor only lists this for multi-reward programs.
+  | 'reward_completed'
   | 'reward_redeemed'
   | 'milestone'
   | 'near_reward';
@@ -34,12 +39,27 @@ export interface NotificationTemplatesResponse {
   items: NotificationTemplate[];
 }
 
-/** Stamp-count milestone — fires when customer reaches a specific stamp count. */
+/** What a milestone threshold is measured against. `balance` = the customer's
+ *  current stamp/points balance; `lifetime` = their all-time earned total. */
+export type MilestoneMetric = 'balance' | 'lifetime';
+
+/** A milestone fires when a customer reaches a threshold. Legacy stamp
+ *  milestones carry `stamp_equals` (a current-balance stamp count); new ones
+ *  carry `value` + `metric` and work for both stamp and points programs. */
 export interface Milestone {
   id: string;
-  stamp_equals: number;
+  /** Legacy stamp-count trigger. Null on new value+metric milestones. */
+  stamp_equals: number | null;
+  /** New unified threshold (stamps or points, depending on the program). */
+  value?: number | null;
+  metric?: MilestoneMetric | null;
   body: LocalizedBody;
   is_enabled: boolean;
+}
+
+/** The milestone's threshold, preferring the new `value` over legacy `stamp_equals`. */
+export function milestoneValue(m: Pick<Milestone, 'value' | 'stamp_equals'>): number {
+  return m.value ?? m.stamp_equals ?? 0;
 }
 
 /** Envelope returned by GET /notifications/{business_id}/milestones */
@@ -52,14 +72,16 @@ export interface MilestonesResponse {
 }
 
 export interface MilestoneCreate {
-  stamp_equals: number;
+  value: number;
+  metric: MilestoneMetric;
   body: LocalizedBody;
   is_enabled?: boolean;
 }
 
 /** Partial update — any field is optional but at least one is required by the backend. */
 export interface MilestoneUpdate {
-  stamp_equals?: number;
+  value?: number;
+  metric?: MilestoneMetric;
   body?: LocalizedBody;
   is_enabled?: boolean;
 }
@@ -96,10 +118,17 @@ export interface BroadcastTargetFilter {
   all?: boolean;
   enrolled_before_days?: number;
   enrolled_after_days?: number;
+  /** Progress-range bounds: stamp count for stamp programs, points balance
+   *  for points programs. Canonical keys; rows written before the scans
+   *  rename carry `stamp_count_min/max` instead (see normalizeTargetFilter). */
+  value_min?: number;
+  value_max?: number;
+  /** @deprecated Legacy key on pre-rename rows. Read via normalizeTargetFilter. */
   stamp_count_min?: number;
+  /** @deprecated Legacy key on pre-rename rows. Read via normalizeTargetFilter. */
   stamp_count_max?: number;
-  /** Customer currently holds a redeemable reward: banked rewards
-   *  (stackable rewards) or a full card. */
+  /** Customer currently holds a redeemable reward: banked rewards or a full
+   *  card (stamps), or a balance covering at least one reward (points). */
   has_unredeemed_reward?: boolean;
   has_redeemed?: boolean;
   inactive_days?: number;

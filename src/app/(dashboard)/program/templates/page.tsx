@@ -11,6 +11,7 @@ import { useProgram } from '../layout';
 
 export default function ProgramTemplatesPage() {
   const {
+    program,
     designs,
     activeDesign,
     inactiveDesigns,
@@ -54,6 +55,7 @@ export default function ProgramTemplatesPage() {
             designs={inactiveDesigns}
             totalDesignCount={designs.length}
             hasActiveDesign
+            programType={program?.type}
             onDelete={handleDelete}
             onActivate={handleActivate}
             onDuplicate={handleDuplicate}
@@ -64,6 +66,7 @@ export default function ProgramTemplatesPage() {
           designs={inactiveDesigns}
           totalDesignCount={designs.length}
           hasActiveDesign={false}
+          programType={program?.type}
           onDelete={handleDelete}
           onActivate={handleActivate}
           onDuplicate={handleDuplicate}

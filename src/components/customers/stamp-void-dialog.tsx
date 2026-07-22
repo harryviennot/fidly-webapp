@@ -24,6 +24,11 @@ interface StampVoidDialogProps {
   customerName: string;
   enrollmentId: string;
   transactionId: string;
+  /** Points programs void a points credit (different copy + success toast). */
+  isPoints?: boolean;
+  /** The value that will be removed (points or stamps), shown so the user
+   *  knows the impact before confirming. */
+  voidValue?: number;
   /** Fired after a successful void — caller invalidates anything extra. */
   onSuccess?: () => void;
 }
@@ -36,6 +41,8 @@ export function StampVoidDialog({
   customerName,
   enrollmentId,
   transactionId,
+  isPoints = false,
+  voidValue,
   onSuccess,
 }: StampVoidDialogProps) {
   const t = useTranslations("customers.actions");
@@ -64,7 +71,7 @@ export function StampVoidDialog({
         transactionId,
         reason: reasonTrimmed,
       });
-      toast.success(t("voidSuccessToast"));
+      toast.success(t(isPoints ? "voidPointsSuccessToast" : "voidSuccessToast"));
       handleOpenChange(false);
       onSuccess?.();
     } catch (error) {
@@ -80,12 +87,23 @@ export function StampVoidDialog({
             <Prohibit className="w-5 h-5" weight="duotone" style={{ color: "var(--error)" }} />
           </div>
           <div className="min-w-0">
-            <DialogTitle className="text-[17px] leading-tight">{t("voidDialogTitle")}</DialogTitle>
+            <DialogTitle className="text-[17px] leading-tight">{t(isPoints ? "voidPointsDialogTitle" : "voidDialogTitle")}</DialogTitle>
             <DialogDescription className="text-[13px] mt-0.5 truncate">
               {customerName}
             </DialogDescription>
           </div>
         </div>
+
+        {voidValue != null && (
+          <div className="flex items-center justify-between rounded-xl bg-[#FDF1EF] border border-[#F3D9D4] px-3.5 py-2.5">
+            <span className="text-[13px] text-[#9A4B43]">{t("voidValueLabel")}</span>
+            <span className="text-[15px] font-bold tabular-nums text-[#C75050]">
+              {isPoints
+                ? t("voidValuePoints", { points: voidValue })
+                : t("voidValueStamps", { count: voidValue })}
+            </span>
+          </div>
+        )}
 
         <div className="flex flex-col gap-2">
           <label
@@ -98,7 +116,7 @@ export function StampVoidDialog({
             id="void-reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder={t("voidReasonPlaceholder")}
+            placeholder={t(isPoints ? "voidPointsReasonPlaceholder" : "voidReasonPlaceholder")}
             maxLength={REASON_MAX}
             rows={3}
             autoFocus
@@ -143,7 +161,7 @@ export function StampVoidDialog({
             onClick={handleSubmit}
             disabled={!canSubmit}
           >
-            {voidMutation.isPending ? t("voiding") : t("confirmVoid")}
+            {voidMutation.isPending ? t("voiding") : t(isPoints ? "voidPointsConfirm" : "confirmVoid")}
           </Button>
         </div>
       </DialogContent>

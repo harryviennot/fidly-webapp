@@ -4,7 +4,14 @@ import { useEffect, useRef, useMemo } from "react";
 import { ActivityItem, ActivityItemSkeleton } from "./activity-item";
 import { ActivityDateGroupHeader, groupByDate } from "./activity-date-group";
 import { ActivityEmptyState } from "./activity-empty-state";
-import type { TransactionResponse } from "@/types";
+import { ConversionMarker } from "./conversion-marker";
+import type { ProgramConversion, TransactionResponse } from "@/types";
+
+/** A feed row: a customer transaction, or a business-level conversion marker
+ * interleaved at its completion date. */
+type FeedEntry =
+  | { kind: "txn"; id: string; created_at: string; txn: TransactionResponse }
+  | { kind: "conversion"; id: string; created_at: string; conversion: ProgramConversion };
 
 interface ActivityFeedProps {
   transactions: TransactionResponse[];
@@ -16,6 +23,8 @@ interface ActivityFeedProps {
   onItemClick?: (transaction: TransactionResponse) => void;
   newTransactionIds?: Set<string>;
   hasActiveFilters?: boolean;
+  /** Completed program-type conversions, rendered as one marker row each. */
+  conversions?: ProgramConversion[];
   stampIcon?: string;
   rewardIcon?: string;
   stampFilledColor?: string;
@@ -32,6 +41,7 @@ export function ActivityFeed({
   onItemClick,
   newTransactionIds,
   hasActiveFilters,
+  conversions,
   stampIcon,
   rewardIcon,
   stampFilledColor,
@@ -56,13 +66,32 @@ export function ActivityFeed({
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const grouped = useMemo(() => groupByDate(transactions), [transactions]);
+  const grouped = useMemo(() => {
+    const entries: FeedEntry[] = transactions.map((txn) => ({
+      kind: "txn" as const,
+      id: txn.id,
+      created_at: txn.created_at,
+      txn,
+    }));
+    // Interleave completed conversion markers at their completion date, but
+    // only inside the loaded window: a marker older than the oldest loaded
+    // transaction would render in the wrong group until pagination reaches it.
+    const oldestLoaded = transactions[transactions.length - 1]?.created_at;
+    for (const conversion of conversions ?? []) {
+      if (conversion.status !== "completed") continue;
+      const when = conversion.completed_at ?? conversion.created_at;
+      if (oldestLoaded && when < oldestLoaded && hasNextPage) continue;
+      entries.push({ kind: "conversion", id: conversion.id, created_at: when, conversion });
+    }
+    entries.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return groupByDate(entries);
+  }, [transactions, conversions, hasNextPage]);
 
   if (isLoading) {
     return <ActivityFeedSkeleton />;
   }
 
-  if (transactions.length === 0) {
+  if (transactions.length === 0 && !(conversions ?? []).length) {
     return <ActivityEmptyState filtered={hasActiveFilters} />;
   }
 
@@ -72,20 +101,24 @@ export function ActivityFeed({
         <div key={group}>
           <ActivityDateGroupHeader group={group} />
           <div>
-            {items.map((txn, i) => (
-              <ActivityItem
-                key={txn.id}
-                transaction={txn}
-                totalStamps={totalStamps}
-                onClick={onItemClick ? () => onItemClick(txn) : undefined}
-                isNew={newTransactionIds?.has(txn.id)}
-                isLast={i === items.length - 1}
-                stampIcon={stampIcon}
-                rewardIcon={rewardIcon}
-                stampFilledColor={stampFilledColor}
-                iconColor={iconColor}
-              />
-            ))}
+            {items.map((entry, i) =>
+              entry.kind === "conversion" ? (
+                <ConversionMarker key={entry.id} conversion={entry.conversion} />
+              ) : (
+                <ActivityItem
+                  key={entry.id}
+                  transaction={entry.txn}
+                  totalStamps={totalStamps}
+                  onClick={onItemClick ? () => onItemClick(entry.txn) : undefined}
+                  isNew={newTransactionIds?.has(entry.id)}
+                  isLast={i === items.length - 1}
+                  stampIcon={stampIcon}
+                  rewardIcon={rewardIcon}
+                  stampFilledColor={stampFilledColor}
+                  iconColor={iconColor}
+                />
+              )
+            )}
           </div>
         </div>
       ))}

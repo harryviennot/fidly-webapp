@@ -14,7 +14,9 @@ import {
   VariableEditor,
   type VariableEditorHandle,
 } from '@/components/notifications/VariableEditor';
+import { programVariableKeys } from '@/lib/template-variables';
 import type { Locale, VariableKey } from '@/lib/template-variables';
+import { isPointsProgram } from '@/types';
 
 interface FieldEditorProps {
   title: string;
@@ -25,20 +27,10 @@ interface FieldEditorProps {
    *  Inputs become pill editors and a chip row appears below the list.
    *  Off by default: BusinessInfoEditor and other static surfaces stay plain. */
   enableVariables?: boolean;
+  /** Program the variables target when the card being designed is NOT for the
+   *  live program (conversion wizard drafts). Absent → live default program. */
+  variableContext?: { type: 'stamp' | 'points'; rewardCount: number };
 }
-
-/** Variables that make sense on a pass field. `store_location` is per-scan,
- *  not per-customer, so the backend always strips it from pass fields: the
- *  chip is hidden here entirely. */
-const FIELD_VARIABLES: VariableKey[] = [
-  'stamp_count',
-  'total_stamps',
-  'stamps_left',
-  'rewards_count',
-  'reward_name',
-  'business_name',
-  'customer_first_name',
-];
 
 export default function FieldEditor({
   title,
@@ -46,6 +38,7 @@ export default function FieldEditor({
   onChange,
   maxFields = 10,
   enableVariables = false,
+  variableContext,
 }: FieldEditorProps) {
   const t = useTranslations('designEditor.fieldEditor');
   const tNotif = useTranslations('notifications');
@@ -54,6 +47,20 @@ export default function FieldEditor({
   const { data: program } = useDefaultProgram(
     enableVariables ? currentBusiness?.id : undefined
   );
+  // store_location is per-scan, not per-customer, so the backend always strips
+  // it from pass fields — keep it out here (includeStoreLocation: false).
+  // The card's own type wins over the live program: the conversion wizard
+  // designs a points card while the program is still stamps (and vice versa),
+  // and stamp variables on a points card would render as raw tokens.
+  const effectiveType = variableContext?.type ?? program?.type;
+  const rewardCount =
+    variableContext?.rewardCount ??
+    (isPointsProgram(program) ? program.config.rewards.length : 0);
+  const fieldVariables = programVariableKeys({
+    type: effectiveType,
+    rewardCount,
+    includeStoreLocation: false,
+  });
 
   // Mirror the notification editor's gating: variables whose source data is
   // off/unset render as greyed-out chips with a "turn it on in program
@@ -70,13 +77,23 @@ export default function FieldEditor({
       tips.customer_first_name = tNotif('editor.nameCollectionOff');
       hrefs.customer_first_name = '/program/settings';
     }
-    if (program && !program.reward_name?.trim()) {
+    // Stamp programs gate {{reward_name}} on the program-level reward label
+    // being set. Points cards resolve it from the reward ladder (single
+    // reward), which always exists — and a conversion-wizard draft targets a
+    // program whose reward label is still being drafted — so gate only when
+    // both the card AND the live program are stamp-typed.
+    if (
+      effectiveType !== 'points' &&
+      program?.type !== 'points' &&
+      program &&
+      !program.reward_name?.trim()
+    ) {
       disabled.add('reward_name');
       tips.reward_name = tNotif('editor.rewardNameMissing');
       hrefs.reward_name = '/program/settings';
     }
     return { disabledVars: disabled, disabledTooltips: tips, disabledHrefs: hrefs };
-  }, [enableVariables, currentBusiness?.settings?.customer_data_collection?.collect_name, program, tNotif]);
+  }, [enableVariables, currentBusiness?.settings?.customer_data_collection?.collect_name, program, effectiveType, tNotif]);
 
   // Last-focused pill editor — the chip row inserts into it. Keyed by
   // `${field.key}:${'label'|'value'}`.
@@ -241,7 +258,7 @@ export default function FieldEditor({
       {enableVariables && fields.length > 0 && (
         <>
           <VariableChips
-            variables={FIELD_VARIABLES}
+            variables={fieldVariables}
             onInsert={handleInsertVariable}
             locale={locale}
             chipClassName="bg-white border-[var(--border-medium)]"

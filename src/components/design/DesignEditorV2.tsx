@@ -18,6 +18,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Eye, SlidersHorizontal, Palette, Stamp, TextT, ArrowUDownLeft } from '@phosphor-icons/react';
 import { getEntryLabel, getEntryPreview } from '@/lib/business-info-utils';
+import { defaultPointsSampleBalance } from '@/lib/card-utils';
 import type { BusinessInfoEntry } from '@/types/business';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { rgbToHex, hexToRgb, autoIconColor, contrastRatio } from '@/lib/color-utils';
@@ -27,8 +28,10 @@ import { getDesignDraft, useDesignDraftPersistence } from '@/hooks/use-design-dr
 import { DesignFormProvider, type AutoGenerateState, type DesignFormContextValue } from './forms/DesignFormContext';
 import { BrandingForm } from './forms/BrandingForm';
 import { StampsForm } from './forms/StampsForm';
+import { PointsForm } from './forms/PointsForm';
 import { ContentForm } from './forms/ContentForm';
 import { BackForm } from './forms/BackForm';
+import type { LoyaltyType, RewardTier } from '@/types';
 
 export interface DesignEditorRef {
   handleSave: () => Promise<boolean>;
@@ -51,6 +54,14 @@ interface DesignEditorV2Props {
   programTotalStamps?: number;
   programName?: string;
   programRewardName?: string | null;
+  /** Active program's loyalty type — drives the points designer branch. */
+  programType?: LoyaltyType;
+  /** Active program's reward ladder — feeds the points strip preview + icons. */
+  programRewards?: RewardTier[];
+  /** Hide the Activate button. The conversion wizard embeds the editor on a
+   *  draft of the TARGET type while the live program is still the old one —
+   *  activating there is invalid (backend 409s) until the conversion commits. */
+  hideActivate?: boolean;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
 }
@@ -129,7 +140,7 @@ async function resolveImageUpdates(
 }
 
 const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
-  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, programRewardName, headerLeft, headerRight }, ref) {
+  function DesignEditorV2({ design, isNew = false, onSave, onSavingChange, onDirtyChange, designName, programTotalStamps, programName, programRewardName, programType, programRewards, hideActivate = false, headerLeft, headerRight }, ref) {
     const router = useRouter();
     const queryClient = useQueryClient();
     const { currentBusiness } = useBusiness();
@@ -137,6 +148,11 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     const isWideEnough = useMediaQuery('(min-width: 1280px)');
     const isCompact = !isWideEnough;
     const totalStamps = programTotalStamps ?? 10;
+    const pointsRewards = useMemo(() => programRewards ?? [], [programRewards]);
+    const pointsMax = useMemo(
+      () => Math.max(100, ...pointsRewards.map((r) => r.threshold)),
+      [pointsRewards]
+    );
 
     const draftId = design?.id ?? 'new';
     const defaultRewardField = { key: 'reward', label: t('defaultRewardLabel'), value: programRewardName || t('defaultRewardValue', { count: totalStamps }) };
@@ -163,6 +179,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
     });
     const [isActive, setIsActive] = useState(design?.is_active ?? false);
     const [previewStamps, setPreviewStamps] = useState(3);
+    const [previewBalance, setPreviewBalance] = useState(() => defaultPointsSampleBalance(pointsRewards));
+    const isPoints = (formData.card_type ?? programType) === 'points';
     const [showBack, setShowBack] = useState(false);
     const [previewWallet, setPreviewWallet] = useState<'apple' | 'google'>('apple');
     const [saving, setSaving] = useState(false);
@@ -328,6 +346,16 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBusiness?.name, isNew]);
 
+    // Tag a new design with the active program's type so the backend renders
+    // (and the invariant validates) the right surface. Existing designs keep
+    // their stored card_type.
+    useEffect(() => {
+      if (isNew && programType && formData.card_type !== programType) {
+        updateField('card_type', programType);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isNew, programType]);
+
     // Auto-fill description from program name
     useEffect(() => {
       if (programName && isNew && !formData.description) {
@@ -490,6 +518,13 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
       businessInfo,
       showAdvancedStamps,
       designId: design?.id,
+      // Which program the card's {{variables}} must target. Follows the card
+      // being DESIGNED (the conversion wizard edits a target-type draft while
+      // the live program is still the old type), not the live program.
+      variableContext: {
+        type: isPoints ? 'points' : 'stamp',
+        rewardCount: isPoints ? pointsRewards.length : 1,
+      },
       bgHex,
       labelHex,
       textHex,
@@ -547,6 +582,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                           totalStamps={totalStamps}
                           organizationName={formData.organization_name}
                           showBack={false}
+                          pointsBalance={previewBalance}
+                          pointsRewards={pointsRewards}
                         />
                       </div>
                       <div className="card-flip-back">
@@ -556,6 +593,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                           totalStamps={totalStamps}
                           organizationName={formData.organization_name}
                           showBack={true}
+                          pointsBalance={previewBalance}
+                          pointsRewards={pointsRewards}
                         />
                       </div>
                     </div>
@@ -572,6 +611,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                             stamps={previewStamps}
                             totalStamps={totalStamps}
                             organizationName={formData.organization_name}
+                            pointsBalance={previewBalance}
+                            pointsRewards={pointsRewards}
                           />
                         </ScaledCardWrapper>
                       </div>
@@ -582,6 +623,8 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
                             stamps={previewStamps}
                             totalStamps={totalStamps}
                             organizationName={formData.organization_name}
+                            pointsBalance={previewBalance}
+                            pointsRewards={pointsRewards}
                             showBack
                           />
                         </ScaledCardWrapper>
@@ -606,29 +649,35 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
 
         {/* Slider + action buttons below the card */}
         <div className="mt-4 w-full flex flex-col items-center">
-          {/* Stamp Slider */}
+          {/* Stamp / balance slider */}
           {!showBack && (
             <div className="w-full">
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-[11px] text-muted-foreground">{t('previewStamps')}</Label>
+                <Label className="text-[11px] text-muted-foreground">
+                  {isPoints ? t('previewBalance') : t('previewStamps')}
+                </Label>
                 <span className="text-[11px] font-medium text-muted-foreground">
-                  {previewStamps} / {totalStamps}
+                  {isPoints ? previewBalance : `${previewStamps} / ${totalStamps}`}
                 </span>
               </div>
               <input
                 type="range"
                 className="styled-slider w-full"
                 min={0}
-                max={totalStamps}
-                value={previewStamps}
-                onChange={(e) => setPreviewStamps(parseInt(e.target.value))}
+                max={isPoints ? pointsMax : totalStamps}
+                value={isPoints ? previewBalance : previewStamps}
+                onChange={(e) =>
+                  isPoints
+                    ? setPreviewBalance(parseInt(e.target.value))
+                    : setPreviewStamps(parseInt(e.target.value))
+                }
               />
             </div>
           )}
 
           {/* Desktop: Action buttons below preview */}
           <div className={`${isCompact ? 'hidden' : 'flex'} flex-col gap-3 mt-5 w-full`}>
-            {design && !isActive && (
+            {design && !isActive && !hideActivate && (
               <Button
                 variant="outline"
                 className="w-full"
@@ -659,16 +708,16 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
           <BrandingForm />
         </CollapsibleSection>
 
-        {/* Stamps Section */}
+        {/* Stamps / Points Section */}
         <CollapsibleSection
-          title={t('stampsSection')}
-          subtitle={t('stampsSectionSubtitle')}
+          title={isPoints ? t('pointsSection') : t('stampsSection')}
+          subtitle={isPoints ? t('pointsSectionSubtitle') : t('stampsSectionSubtitle')}
           icon={<Stamp className="w-8 h-8 text-foreground" weight='regular' />}
           isOpen={openSections.stamps}
           onToggle={() => toggleSection('stamps')}
-          badge={stampsBadge}
+          badge={isPoints ? null : stampsBadge}
         >
-          <StampsForm />
+          {isPoints ? <PointsForm rewards={pointsRewards} /> : <StampsForm />}
         </CollapsibleSection>
 
         {/* Content Section */}
@@ -708,7 +757,7 @@ const DesignEditorV2 = forwardRef<DesignEditorRef, DesignEditorV2Props>(
         )}
 
         {/* Compact: Activate button at bottom of form */}
-        {design && !isActive && isCompact && (
+        {design && !isActive && isCompact && !hideActivate && (
           <div className="pt-4">
             <Button
               variant="outline"

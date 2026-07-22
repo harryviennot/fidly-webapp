@@ -32,7 +32,7 @@
     "contactEmail": "Envoyer un e-mail",
     "contactEmailSubject": "Demande de support : {slug}",
     "downloadTitle": "Télécharger l'application",
-    "downloadDescription": "Scannez les cartes et ajoutez des tampons depuis votre téléphone."
+    "downloadDescription": "Scannez les cartes de vos clients depuis votre téléphone."
   },
   "header": {
     "loyaltyProgram": "Programme de fidélité",

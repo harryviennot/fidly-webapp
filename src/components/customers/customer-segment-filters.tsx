@@ -31,6 +31,8 @@ interface UseCustomerSegmentFilterGroupArgs {
   totalCount: number;
   selected: CustomerSegment | "all";
   onSelect: (segment: CustomerSegment | "all") => void;
+  /** Points programs never produce close_to_reward (no fixed card size). */
+  isPoints?: boolean;
 }
 
 /**
@@ -43,8 +45,13 @@ export function useCustomerSegmentFilterGroup({
   totalCount,
   selected,
   onSelect,
+  isPoints = false,
 }: UseCustomerSegmentFilterGroupArgs): SingleSelectFilterGroup {
   const t = useTranslations("customers");
+
+  const visibleSegments = isPoints
+    ? SEGMENTS.filter((s) => s !== "close_to_reward")
+    : SEGMENTS;
 
   return {
     id: "segment",
@@ -52,7 +59,7 @@ export function useCustomerSegmentFilterGroup({
     value: selected === "all" ? null : selected,
     allValue: "all",
     onChange: (v) => onSelect((v ?? "all") as CustomerSegment | "all"),
-    options: SEGMENTS.map((segment) => {
+    options: visibleSegments.map((segment) => {
       const count = segment === "all" ? totalCount : segments[segment];
       return {
         value: segment,

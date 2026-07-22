@@ -7,6 +7,8 @@ interface WizardFieldProps {
   label?: string;
   /** When the field has a focusable input, link the label to it. */
   htmlFor?: string;
+  /** Inline node rendered right after the label (e.g. an InfoPopover). */
+  labelInfo?: React.ReactNode;
   /** Calm helper line rendered tightly under the control. */
   helper?: React.ReactNode;
   /** Red error line. Takes precedence over `helper` when set. */
@@ -30,6 +32,7 @@ interface WizardFieldProps {
 export function WizardField({
   label,
   htmlFor,
+  labelInfo,
   helper,
   error,
   required,
@@ -40,20 +43,23 @@ export function WizardField({
     <div className="flex flex-col gap-1.5">
       <div className="flex flex-col gap-3">
         {label && (
-          <label
-            htmlFor={htmlFor}
-            className="wiz-body-sm font-medium text-[var(--foreground)]"
-          >
-            {label}
-            {required && (
-              <span
-                aria-hidden="true"
-                className="ml-0.5 text-[var(--accent)]"
-              >
-                *
-              </span>
-            )}
-          </label>
+          <div className="flex items-center gap-1.5">
+            <label
+              htmlFor={htmlFor}
+              className="wiz-body-sm font-medium text-[var(--foreground)]"
+            >
+              {label}
+              {required && (
+                <span
+                  aria-hidden="true"
+                  className="ml-0.5 text-[var(--accent)]"
+                >
+                  *
+                </span>
+              )}
+            </label>
+            {labelInfo}
+          </div>
         )}
         {children}
       </div>

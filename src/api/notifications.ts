@@ -32,9 +32,27 @@ import type {
 
 export async function getNotificationTemplates(
   businessId: string,
-  programId?: string
+  programId?: string,
+  opts?: {
+    /** Preview the trigger list + defaults of a DIFFERENT program type than
+     *  the live one — used by the conversion wizard before the type flips. */
+    previewType?: 'stamp' | 'points';
+    previewRewardCount?: number;
+  }
 ): Promise<NotificationTemplatesResponse> {
-  const query = programId ? `?program_id=${encodeURIComponent(programId)}` : '';
+  const params = new URLSearchParams();
+  if (programId) params.set('program_id', programId);
+  if (opts?.previewType) {
+    params.set('preview_type', opts.previewType);
+    if (opts.previewRewardCount) {
+      params.set('preview_reward_count', String(opts.previewRewardCount));
+    }
+  }
+  // NOT params.size — it's missing on older WebKit (undefined > 0 → false),
+  // which silently stripped the conversion wizard's preview_type param and
+  // made the step list the LIVE type's triggers instead of the target's.
+  const queryString = params.toString();
+  const query = queryString ? `?${queryString}` : '';
   const response = await fetch(
     `${API_BASE_URL}/notifications/${businessId}/templates${query}`,
     { headers: await getAuthHeaders() }

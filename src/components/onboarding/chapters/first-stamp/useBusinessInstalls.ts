@@ -11,6 +11,9 @@ export interface BusinessInstall {
   email: string;
   enrollment_id: string | null;
   stamps: number;
+  /** Points balance for points programs (progress.points). 0 for stamp
+   *  programs, which track progress.stamps instead. */
+  points: number;
   has_apple: boolean;
   has_google: boolean;
   installed: boolean;
@@ -72,6 +75,10 @@ export function useBusinessInstalls(businessId: string | undefined): UseBusiness
           email: c.email ?? "",
           enrollment_id: c.enrollments?.[0]?.id ?? null,
           stamps: c.enrollments?.[0]?.progress?.stamps ?? c.stamps ?? 0,
+          // Type-agnostic headline counter from the list RPC (migration 128):
+          // the points balance for points programs. Only read by the points
+          // branch in StampStep, so it's safe to surface unconditionally.
+          points: c.primary_value ?? c.enrollments?.[0]?.progress?.points ?? 0,
           has_apple: status.apple,
           has_google: status.google,
           installed: status.installed,

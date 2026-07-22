@@ -25,8 +25,8 @@
     },
     "ladders": {
       "customers": "{count, plural, =1 {Premier client} other {# clients}}",
-      "stamps": "{count, plural, =1 {Premier tampon donné} other {# tampons donnés}}",
-      "stamps30d": "{count} tampons en 30 jours",
+      "scans": "{count, plural, =1 {Premier scan} other {# scans}}",
+      "scans30d": "{count} scans en 30 jours",
       "customers30d": "{count} nouveaux clients en 30 jours",
       "repeatCustomers": "{count, plural, =1 {Premier client fidèle} other {# clients fidèles}}"
     },
@@ -39,11 +39,11 @@
     },
     "info": {
       "growth": "Le nombre total de clients ayant ajouté votre carte depuis le début.",
-      "engagement": "Le nombre total de tampons donnés par votre équipe depuis le début.",
+      "engagement": "Le nombre total de scans réalisés par votre équipe depuis le début.",
       "momentum": "Vos 30 derniers jours, une période glissante. Aujourd'hui compte, et ce qui dépasse 30 jours ne compte plus.",
       "loyalty": "Les clients qui reviennent, comptés comme fidèles dès qu'ils repassent un autre jour.",
-      "firsts": "Des étapes uniques, franchies la toute première fois, comme votre premier tampon ou votre première diffusion.",
-      "weeklyGoal": "Les tampons que votre équipe donne cette semaine. On vous suggère un objectif d'après vos dernières semaines, et vous pouvez le changer quand vous voulez."
+      "firsts": "Des étapes uniques, franchies la toute première fois, comme votre premier scan ou votre première diffusion.",
+      "weeklyGoal": "Les scans que votre équipe réalise cette semaine. On vous suggère un objectif d'après vos dernières semaines, et vous pouvez le changer quand vous voulez."
     },
     "hero": {
       "earnedTitle": "{earned} sur {total} obtenus",
@@ -59,19 +59,19 @@
     },
     "why": {
       "growth": "Chaque client qui ajoute votre carte. Votre portée qui grandit.",
-      "engagement": "Chaque tampon, c'est une visite. Plus de tampons, plus d'habitude.",
+      "engagement": "Chaque scan, c'est une visite. Plus de scans, plus d'habitude.",
       "momentum": "Vos 30 derniers jours, une fenêtre glissante. Elle récompense un bon mois récent.",
       "loyalty": "Les clients revenus sur deux jours différents, vos habitués.",
       "firsts": "Des étapes uniques, franchies la première fois que vous faites quelque chose."
     },
     "weeklyGoal": {
       "label": "Objectif de la semaine",
-      "unit": "tampons",
-      "toGo": "Plus que {remaining} tampons, vous y êtes presque.",
-      "reached": "Objectif atteint ! {current} sur {target} tampons.",
+      "unit": "scans",
+      "toGo": "Plus que {remaining} scans, vous y êtes presque.",
+      "reached": "Objectif atteint ! {current} sur {target} scans.",
       "editTitle": "Définir votre objectif de la semaine",
-      "editDescription": "Le nombre de tampons que vous visez cette semaine. On vous suggère {auto}, d'après vos dernières semaines.",
-      "fieldLabel": "Tampons cette semaine",
+      "editDescription": "Le nombre de scans que vous visez cette semaine. On vous suggère {auto}, d'après vos dernières semaines.",
+      "fieldLabel": "Scans cette semaine",
       "save": "Enregistrer mon objectif",
       "reset": "Revenir au mode automatique",
       "cancel": "Annuler"

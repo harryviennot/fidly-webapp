@@ -54,7 +54,8 @@
           "content": "Guardar mi contenido",
           "content_short": "Continuar",
           "back": "Guardar el reverso",
-          "back_short": "Continuar"
+          "back_short": "Continuar",
+          "points": "Guardar mi tarjeta"
         },
         "notifications": {
           "icon": "Guardar mi icono"
@@ -87,7 +88,9 @@
       "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
       "programNameRequired": "Ponle un nombre a tu programa.",
       "rewardRequired": "Indica la recompensa que ganarán tus clientes.",
-      "slugTooShort": "Unos cuantos caracteres más."
+      "slugTooShort": "Unos cuantos caracteres más.",
+      "tooManyCustomers": "Tienes demasiados clientes para cambiar el tipo aquí. Termina la configuración y empieza tu prueba gratuita, y luego cambia el tipo desde los ajustes de tu programa.",
+      "setupAlreadyComplete": "Este programa ya está configurado, así que su tipo está bloqueado aquí. Cámbialo desde los ajustes de tu programa."
     },
     "chapters": {
       "welcome": {
@@ -176,7 +179,24 @@
         "steps": {
           "program": {
             "title": "Configura tu programa de fidelidad",
-            "subtitle": "Elige cómo ganan tus clientes, ponle nombre a tu programa y define la recompensa."
+            "subtitle": "Elige cómo ganan tus clientes, ponle nombre a tu programa y define la recompensa.",
+            "subtitlePoints": "Lo que ganan tus clientes por compra y lo que pueden canjear.",
+            "typeHelp": {
+              "label": "¿Cuál elijo?",
+              "stampsTitle": "Sellos",
+              "stampsBody": "Un sello por visita, la misma recompensa siempre. Ideal cuando tus clientes compran lo mismo, como un café o un corte de pelo.",
+              "pointsTitle": "Puntos",
+              "pointsBody": "Los puntos suben según lo que gasta cada cliente y se canjean por varias recompensas. Ideal cuando el gasto varía, como en una tienda o un restaurante."
+            },
+            "typeBlocked": "Ya tienes {count} clientes en tu tarjeta, demasiados para cambiar el tipo aquí. Termina la configuración y empieza tu prueba gratuita, y luego cambia el tipo desde los ajustes de tu programa.",
+            "switchDialog": {
+              "typeStamps": "sellos",
+              "typePoints": "puntos",
+              "title": "¿Cambiar a {type}?",
+              "body": "Tus {count} tarjeta(s) de prueba cambiarán a {type} y se actualizarán solas, sin quitar ni volver a añadir nada. El progreso de prueba se conserva en el nuevo tipo.",
+              "confirm": "Cambiar el tipo",
+              "cancel": "Mantener el tipo actual"
+            }
           },
           "data-collection": {
             "title": "Qué pedir a tus clientes",
@@ -189,7 +209,7 @@
         "steps": {
           "intro": {
             "title": "Tu tarjeta tiene dos caras",
-            "subtitle": "El anverso para los sellos. El reverso para todo lo demás.",
+            "subtitle": "Todo lo que no está en el frente de la tarjeta va en el reverso.",
             "bodyP1": "Tus clientes giran la tarjeta para ver tu horario, dirección, teléfono, sitio web, condiciones y cualquier otra cosa que merezca mostrarse. En Apple Wallet pulsan los tres puntos. En Google Wallet pulsan el icono de información.",
             "bodyP2": "Añadirás tus datos una sola vez, aquí. Estarán disponibles en cada tarjeta que crees. Más adelante, al diseñar una tarjeta concreta, podrás elegir qué datos mostrar y añadir contenido propio solo para esa tarjeta."
           },
@@ -209,6 +229,10 @@
           "stamps": {
             "title": "Sellos y recompensas",
             "subtitle": "Elige los iconos de sello y recompensa, y luego escoge tu color."
+          },
+          "points": {
+            "title": "Puntos y recompensas",
+            "subtitle": "Elige cómo se muestra tu saldo y luego tu color."
           },
           "content": {
             "title": "Información extra en el anverso",
@@ -232,7 +256,7 @@
         "steps": {
           "icon": {
             "title": "Elige tu icono de notificaciones",
-            "subtitle": "Aparece junto a cada notificación que envías: sello añadido, recompensa ganada, difusión.",
+            "subtitle": "Cada vez que se actualiza su tarjeta, tus clientes reciben una notificación en su teléfono. Este es el icono que la acompaña.",
             "uploadSectionTitle": "Tu icono",
             "uploadCta": "Haz clic para subir",
             "uploadHint": "PNG, mínimo 87×87 píxeles. Las formas cuadradas quedan mejor.",
@@ -290,7 +314,10 @@
             "installAnotherCta": "Instalar en otro dispositivo",
             "timeoutTitle": "¿Sigues ahí?",
             "timeoutBody": "Dejamos de escuchar nuevos registros tras 5 minutos. Pulsa reanudar para seguir atentos.",
-            "retry": "Reanudar la escucha"
+            "retry": "Reanudar la escucha",
+            "points": {
+              "installBody": "Pulsa un botón de abajo. La tarjeta llega a tu wallet, lista para la compra de prueba del siguiente paso."
+            }
           },
           "stamp": {
             "title": "Envíate un sello",
@@ -312,19 +339,41 @@
             "appleWalletHint": "Apple Wallet agrupa las actualizaciones rápidas. Dejar unos 20 segundos entre sellos hace que cada notificación tenga su propia vibración.",
             "googleWalletHint": "En Google Wallet, la tarjeta solo se actualiza al cerrarla. Ciérrala y vuelve a abrirla para ver el nuevo sello.",
             "deliveryDisclosure": {
-              "summary": "¿No apareció la notificación? El sello se registró igualmente.",
+              "summary": "¿No apareció la notificación? Se registró igualmente.",
               "appleTitle": "En Apple Wallet",
               "appleBody": "Apple agrupa las actualizaciones según la batería, el Wi-Fi y la cobertura. Un aviso puede tardar segundos o minutos. La tarjeta de tu pantalla bloqueada se actualiza en cuanto tu teléfono se despierta con buena señal.",
               "googleTitle": "En Google Wallet",
-              "googleBody": "La tarjeta solo se actualiza después de cerrarla. Cierra el wallet y vuelve a abrir la tarjeta para ver el nuevo sello.",
-              "reassuranceTitle": "El sello está guardado",
+              "googleBody": "La tarjeta solo se actualiza después de cerrarla. Cierra la app y vuelve a abrir la tarjeta para ver el cambio.",
+              "reassuranceTitle": "El escaneo está guardado",
               "reassuranceBody": "Aunque la notificación o la vista de la tarjeta no se hayan puesto al día, la cuenta ya está en nuestro servidor. La próxima vez que escanees a este cliente verás el recuento real y actualizado."
             },
             "stampsLabel": "Sellos en tu tarjeta",
             "justStamped": "Sello añadido",
-            "multiDeviceHint": "{count, plural, =1 {} other {Cada pulsación sella los # dispositivos instalados a la vez.}}",
+            "multiDeviceHint": "{count, plural, =1 {} other {Cada pulsación actualiza los # dispositivos instalados a la vez.}}",
             "fallback": "¿Todavía sin vibración? Las notificaciones pueden tardar unos segundos. Inténtalo de nuevo dentro de un momento.",
-            "customisationHint": "Este es el mensaje por defecto. Puedes reescribirlo, añadir mensajes propios en distintos recuentos de sellos, o desactivar las notificaciones del todo desde los ajustes de notificaciones."
+            "customisationHint": "Este es el mensaje por defecto. Puedes reescribirlo, añadir mensajes propios en distintos recuentos de sellos, o desactivar las notificaciones del todo desde los ajustes de notificaciones.",
+            "points": {
+              "title": "Envíate puntos",
+              "subtitle": "Cada compra de prueba suma puntos y dispara una notificación real a tu teléfono. Justo lo que recibirán tus clientes.",
+              "readyTitle": "Listo para sumar puntos",
+              "readyBody": "Pulsa abajo para registrar una compra de prueba. Tu teléfono vibra en unos segundos.",
+              "firstStampLandedTitle": "Eso es lo que se siente",
+              "firstStampLandedBody": "Eso es exactamente lo que sentirán tus clientes cada vez que ganen puntos. Misma vibración, mismo ritmo, mismo proceso. Suma otra para coger el ritmo.",
+              "keepStampingTitle": "Suma una más",
+              "keepStampingBody": "Otra compra de prueba suma más puntos y dispara una segunda notificación real. La pequeña espera entre ellas hace que cada una vibre por su cuenta.",
+              "demoCompleteTitle": "Ya le has cogido el truco",
+              "demoCompleteBody": "Cuando quieras, seguimos.",
+              "sendCta": "Registrar una compra de prueba",
+              "sendAnotherCta": "Sumar puntos",
+              "watching": "Esperando los puntos…",
+              "cooldownCta": "Próxima compra en {seconds}s",
+              "stampsLabel": "Puntos en tu tarjeta",
+              "justStamped": "Puntos añadidos",
+              "fallback": "¿Todavía sin vibración? Las notificaciones pueden tardar unos segundos. Inténtalo de nuevo dentro de un momento.",
+              "deliveryDisclosure": {
+                "reassuranceBody": "Aunque la notificación o la vista previa de la tarjeta no se hayan actualizado, el saldo ya está en nuestro servidor. La próxima vez que escanees a este cliente, verás el saldo real y al día."
+              }
+            }
           }
         }
       },
@@ -384,6 +433,7 @@
         "title": "Has montado un programa de fidelidad de verdad",
         "subtitle": "Tarjeta real, teléfonos reales, notificaciones reales. Un repaso rápido antes de hablar de planes.",
         "programDetail": "{totalStamps} sellos por \"{rewardName}\"",
+        "programDetailPoints": "{rewardCount} recompensas para canjear con puntos",
         "stampsLabel": "{count, plural, =0 {Aún no se ha enviado ningún sello} =1 {1 sello enviado a tu teléfono} other {# sellos enviados a tu teléfono}}",
         "broadcastLabel": {
           "sent": "Difusión recibida en tu teléfono",

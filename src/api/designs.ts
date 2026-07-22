@@ -43,12 +43,33 @@ export async function getDesign(businessId: string, designId: string): Promise<C
   return response.json();
 }
 
-export async function createDesign(businessId: string, data: CardDesignCreate): Promise<CardDesign> {
-  const response = await fetch(`${API_BASE_URL}/designs/${businessId}`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
+/** Options for design-creating calls that may need the conversion carve-out. */
+export interface CreateDesignOptions {
+  /**
+   * `'conversion'` grants one design slot over the tier's limit (the convert
+   * wizard's target-type draft). Reconciled at conversion commit, which
+   * deletes the old design when the saved limit is exceeded.
+   */
+  purpose?: 'conversion';
+}
+
+function purposeQuery(opts?: CreateDesignOptions): string {
+  return opts?.purpose ? `?purpose=${opts.purpose}` : '';
+}
+
+export async function createDesign(
+  businessId: string,
+  data: CardDesignCreate,
+  opts?: CreateDesignOptions
+): Promise<CardDesign> {
+  const response = await fetch(
+    `${API_BASE_URL}/designs/${businessId}${purposeQuery(opts)}`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -148,29 +169,28 @@ export async function activateDesign(businessId: string, designId: string): Prom
   return response.json();
 }
 
-export async function duplicateDesign(businessId: string, designId: string): Promise<CardDesign> {
-  const original = await getDesign(businessId, designId);
+export async function duplicateDesign(
+  businessId: string,
+  designId: string,
+  opts?: CreateDesignOptions
+): Promise<CardDesign> {
+  // Server-side deep clone: copies the full row (card_type + points config +
+  // translations + custom-stamp config) and physically copies the Storage
+  // assets (logo, strip background, stamp icons) into the new design's folder.
+  const response = await fetch(
+    `${API_BASE_URL}/designs/${businessId}/${designId}/duplicate${purposeQuery(opts)}`,
+    {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+    }
+  );
 
-  const copyData: CardDesignCreate = {
-    name: `${original.name} (Copy)`,
-    organization_name: original.organization_name,
-    description: original.description,
-    logo_text: original.logo_text,
-    foreground_color: original.foreground_color,
-    background_color: original.background_color,
-    label_color: original.label_color,
-    stamp_filled_color: original.stamp_filled_color,
-    stamp_empty_color: original.stamp_empty_color,
-    stamp_border_color: original.stamp_border_color,
-    stamp_icon: original.stamp_icon,
-    reward_icon: original.reward_icon,
-    icon_color: original.icon_color,
-    secondary_fields: original.secondary_fields,
-    auxiliary_fields: original.auxiliary_fields,
-    back_fields: original.back_fields,
-  };
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throwApiError(error, 'Failed to duplicate design');
+  }
 
-  return createDesign(businessId, copyData);
+  return response.json();
 }
 
 export async function uploadLogo(businessId: string, designId: string, file: File): Promise<UploadResponse> {

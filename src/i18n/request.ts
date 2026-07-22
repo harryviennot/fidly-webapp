@@ -31,6 +31,7 @@ export default getRequestConfig(async () => {
       ...(await import(`../../messages/${locale}/onboarding-business.json`)).default,
       ...(await import(`../../messages/${locale}/pricing.json`)).default,
       ...(await import(`../../messages/${locale}/changelog.json`)).default,
+      ...(await import(`../../messages/${locale}/conversion.json`)).default,
     },
   };
 });

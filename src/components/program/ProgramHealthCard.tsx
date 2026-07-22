@@ -5,6 +5,8 @@ import {
   TrophyIcon,
   GiftIcon,
   StampIcon,
+  CoinsIcon,
+  ReceiptIcon,
   ClockIcon,
   DownloadSimpleIcon,
   StackIcon,
@@ -15,6 +17,7 @@ import { Card } from '@/components/ui/card';
 import { InfoPopover } from '@/components/reusables/info-popover';
 import { useBusiness } from '@/contexts/business-context';
 import { useProgramHealth } from '@/hooks/use-program-health';
+import { currencySymbol } from '@/lib/currency';
 
 interface ProgramHealthCardProps {
   delay?: number;
@@ -37,6 +40,12 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
   const { data, isLoading } = useProgramHealth(currentBusiness?.id);
 
   const pct = (v: number) => `${Math.round(v * 100)}%`;
+  // Points programs (migration 125) reuse the stamp-named columns with points
+  // meaning: avg_stamps_per_customer is an avg BALANCE, banked is always 0, and
+  // total_spend/avg_ticket carry the spend analytics. Relabel + reshape rows
+  // accordingly. Banked is dropped (points never bank rewards into progress).
+  const isPoints = data?.program_type === 'points';
+  const sym = currencySymbol(currentBusiness?.country, currentBusiness?.primary_locale);
 
   // Only the rates whose meaning isn't obvious from the label carry a tooltip
   // (what counts as "complete", what the install-rate denominator is, etc.).
@@ -76,10 +85,10 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
         },
         {
           key: 'avgStamps',
-          icon: StampIcon,
+          icon: isPoints ? CoinsIcon : StampIcon,
           tone: 'muted',
-          label: t('avgStampsPerCustomer'),
-          value: data.avg_stamps_per_customer.toFixed(1),
+          label: isPoints ? t('avgBalancePerCustomer') : t('avgStampsPerCustomer'),
+          value: data.avg_stamps_per_customer.toFixed(isPoints ? 0 : 1),
         },
         {
           key: 'timeToReward',
@@ -91,13 +100,26 @@ export function ProgramHealthCard({ delay = 0 }: ProgramHealthCardProps) {
               ? '—'
               : t('daysValue', { count: Math.round(data.avg_days_to_first_reward) }),
         },
-        {
-          key: 'banked',
-          icon: StackIcon,
-          tone: 'muted',
-          label: t('bankedRewards'),
-          value: data.banked_rewards_count.toLocaleString(),
-        },
+        // Points never bank rewards into progress (it's a spend-down wallet),
+        // so swap the banked row for the spend-side "avg ticket" metric.
+        isPoints
+          ? {
+              key: 'avgTicket',
+              icon: ReceiptIcon,
+              tone: 'muted' as Tone,
+              label: t('avgTicket'),
+              value:
+                data.avg_ticket == null
+                  ? '—'
+                  : `${data.avg_ticket.toFixed(2)} ${sym}`,
+            }
+          : {
+              key: 'banked',
+              icon: StackIcon,
+              tone: 'muted' as Tone,
+              label: t('bankedRewards'),
+              value: data.banked_rewards_count.toLocaleString(),
+            },
       ]
     : [];
 

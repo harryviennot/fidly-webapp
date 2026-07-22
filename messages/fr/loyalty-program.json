@@ -129,6 +129,8 @@
       "inactive": "Inactive",
       "programHealth": "Santé du programme",
       "avgStampsPerCustomer": "Moy. tampons par client",
+      "avgBalancePerCustomer": "Solde moyen par client",
+      "avgTicket": "Panier moyen",
       "rewardCompletionRate": "Taux de complétion",
       "completionRateInfo": "La part de clients qui ont rempli au moins une carte, qu'ils aient utilisé la récompense ou qu'ils la gardent de côté.",
       "redemptionRate": "Taux d'utilisation",
@@ -170,6 +172,39 @@
         "previewAlt": "Aperçu de l'affichette",
         "downloaded": "Affichette téléchargée.",
         "error": "Impossible de générer votre affichette. Réessayez."
+      }
+    },
+    "points": {
+      "rateLabel": "Points gagnés",
+      "rateHelp": "Combien de points un client gagne pour chaque unité dépensée.",
+      "ratePrefix": "1 {currency} dépensé =",
+      "ratePoints": "pts",
+      "rewardMenuLabel": "Carte des récompenses",
+      "rewardMenuHelp": "Les récompenses que vos clients obtiennent avec leurs points, et le prix de chacune.",
+      "capLabel": "Plafonner le solde",
+      "capHelp": "Empêche le solde de dépasser une limite. Désactivé par défaut.",
+      "capDescription": "Les points cessent de s'accumuler une fois le plafond atteint.",
+      "capMaxLabel": "Solde maximum",
+      "rewardMenu": {
+        "rewardHeader": "Récompense",
+        "priceHeader": "Prix",
+        "rewardPlaceholder": "Café offert",
+        "rewardAria": "Nom de la récompense {index}",
+        "priceAria": "Prix en points de la récompense {index}",
+        "removeAria": "Retirer la récompense {index}",
+        "addReward": "Ajouter une récompense",
+        "pointsSuffix": "pts"
+      },
+      "summary": {
+        "rate": "Gain par achat",
+        "rateValue": "{points} pts par {currency}1",
+        "rewards": "Récompenses",
+        "cap": "Plafond du solde",
+        "capValue": "{max} pts",
+        "noCap": "Sans plafond"
+      },
+      "recap": {
+        "earn": "Vos clients gagnent <b>{points} points</b> pour chaque {currency}1 dépensé."
       }
     },
     "programInfo": "Infos du programme",
@@ -270,7 +305,7 @@
         "actions": "Plus d'actions",
         "actionsHint": "Gérer cet établissement",
         "signups": "Inscriptions",
-        "stamps30d": "Tampons 30j",
+        "scans30d": "Scans 30j",
         "redemptions30d": "Récompenses 30j",
         "addAnother": "Ajouter un autre établissement"
       },
@@ -368,9 +403,9 @@
         "statsLoading": "Chargement…",
         "statsUpsellTitle": "Les statistiques par établissement sont Pro",
         "statsUpsellDescription": "Voyez les performances de chaque établissement en isolation, pas uniquement la vue globale.",
-        "stampsAdded": "Tampons ajoutés",
+        "scansAdded": "Scans",
         "rewardsRedeemed": "Récompenses échangées",
-        "stampsVoided": "Tampons annulés",
+        "scansVoided": "Scans annulés",
         "uniqueCustomers": "Clients uniques",
         "enrolledHere": "Inscrits ici",
         "allTime": "Cumul",

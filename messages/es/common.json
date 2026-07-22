@@ -32,7 +32,7 @@
     "contactEmail": "Enviar un correo",
     "contactEmailSubject": "Consulta de ayuda: {slug}",
     "downloadTitle": "Descargar la app",
-    "downloadDescription": "Escanea tarjetas y añade sellos desde tu teléfono."
+    "downloadDescription": "Escanea las tarjetas de tus clientes desde tu teléfono."
   },
   "header": {
     "loyaltyProgram": "Programa de fidelidad",

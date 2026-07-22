@@ -2,7 +2,7 @@
   "notifications": {
     "page": {
       "title": "Notifications",
-      "subtitle": "Automatic messages sent to your customers when they collect stamps or unlock rewards"
+      "subtitle": "Automatic messages sent to your customers when they make progress or unlock rewards"
     },
     "icon": {
       "title": "Notification icon",
@@ -16,6 +16,7 @@
       "upload": "Upload icon",
       "uploadHint": "PNG, at least 87×87 pixels",
       "preview": "Preview",
+      "previewBody": "Thanks for your visit! See you soon.",
       "crop": {
         "title": "Crop your icon",
         "description": "Drag the square to pick the part of your image to use. It will be resized automatically.",
@@ -41,14 +42,22 @@
     },
     "triggers": {
       "sectionTitle": "Automated messages",
-      "sectionDescription": "These messages are sent automatically when a customer collects a stamp or earns a reward",
+      "sectionDescription": "These messages are sent automatically when a customer makes progress or earns a reward",
       "stamp_added": {
         "name": "Stamp collected",
         "description": "Sent when a customer collects a new stamp"
       },
+      "points_earned": {
+        "name": "Points earned",
+        "description": "Sent when a customer earns points"
+      },
       "reward_earned": {
         "name": "Reward unlocked",
         "description": "Sent when a customer completes their card and earns a reward"
+      },
+      "reward_completed": {
+        "name": "Top reward reached",
+        "description": "Sent when a customer unlocks your highest reward, with nothing left above it"
       },
       "reward_redeemed": {
         "name": "Reward redeemed",
@@ -56,7 +65,7 @@
       },
       "milestone": {
         "name": "Milestone",
-        "description": "Sent when a customer reaches a specific stamp count"
+        "description": "Sent when a customer reaches a milestone you set"
       },
       "near_reward": {
         "name": "Near reward",
@@ -74,29 +83,39 @@
     },
     "milestones": {
       "title": "Milestones",
-      "description": "Send a special message when a customer reaches a specific stamp count",
+      "description": "Send a special message when a customer reaches a value you choose",
       "add": "Add milestone",
       "usage": "{count} of {max} used",
       "usageActive": "{count} of {max} active",
       "disabledPill": "Disabled",
       "unlimited": "{count} milestones",
-      "empty": "No milestones yet. Add one to send a custom message at a specific stamp count.",
-      "condition": "When customer reaches {count} stamps",
+      "empty": "No milestones yet. Add one to send a custom message at a value you choose.",
+      "condition": "When customer reaches {count}",
       "conditionShort": "At {count} stamps",
+      "conditionShortPoints": "At {count} points",
+      "lifetimeTag": "Lifetime",
       "limitReached": "You've reached the milestone limit for Growth. Upgrade to Pro for unlimited milestones.",
       "stampCountLabel": "Fires when stamp count equals",
       "stampCountPlaceholder": "e.g. 5",
+      "pointsCountLabel": "Fires when points reach",
+      "pointsCountPlaceholder": "e.g. 50",
+      "unitPoints": "pts",
+      "metricLabel": "Measured against",
+      "metricBalance": "Current balance",
+      "metricLifetime": "Lifetime total",
+      "metricBalanceHelp": "Fires when the customer's current balance reaches this number.",
+      "metricLifetimeHelp": "Fires when their all-time earned total reaches this number. It keeps counting even after rewards are redeemed.",
       "createTitle": "New milestone",
-      "createDescription": "Send a custom notification when customers hit a specific stamp count.",
+      "createDescription": "Send a custom notification when customers reach a value you choose.",
       "editTitle": "Edit milestone",
-      "editDescription": "Update the stamp count or the message for this milestone.",
+      "editDescription": "Update the value or the message for this milestone.",
       "deleteConfirmTitle": "Delete milestone?",
       "deleteConfirmDescription": "This milestone will stop firing for all customers.",
       "deleteButton": "Delete milestone",
       "errors": {
-        "duplicate": "A milestone at this stamp count already exists.",
+        "duplicate": "A milestone at this value already exists.",
         "quotaExceeded": "You've reached your milestone limit. Upgrade to Pro for unlimited milestones.",
-        "invalidStampCount": "Stamp count must be a positive number.",
+        "invalidStampCount": "The milestone value must be a positive number.",
         "outOfRange": "Stamp count must be less than {total} (total stamps in your program)."
       },
       "toasts": {
@@ -106,7 +125,7 @@
         "updateFailed": "Failed to update milestone",
         "deleted": "Milestone deleted",
         "deleteFailed": "Failed to delete milestone",
-        "swappedOff": "Milestone at stamp {stamp} was turned off to make room",
+        "swappedOff": "The milestone at {stamp} was turned off to make room",
         "enabled": "Milestone enabled",
         "disabled": "Milestone disabled",
         "toggleFailed": "Failed to toggle milestone"
@@ -154,15 +173,20 @@
         "reward_name": "Reward name",
         "business_name": "Business name",
         "customer_first_name": "Customer first name",
-        "store_location": "Location"
+        "store_location": "Location",
+        "points_balance": "Current points balance",
+        "points_to_next": "Points until next reward",
+        "next_reward_points": "Next reward point goal",
+        "next_reward_name": "Next reward name",
+        "last_reward_name": "Reward just earned"
       }
     },
     "growthUpsell": {
       "title": "Unlock the full notifications toolkit",
-      "description": "Upgrade to Growth to rewrite the default messages in your voice and create custom milestone notifications at specific stamp counts.",
+      "description": "Upgrade to Growth to rewrite the default messages in your voice and create custom milestone notifications at the values you choose.",
       "features": {
         "custom": "Write your own wording for every automated message",
-        "milestones": "Create custom milestones at any stamp count",
+        "milestones": "Create custom milestones at any value",
         "icon": "Keep your branded notification icon"
       },
       "cta": "Upgrade to Growth"
@@ -234,7 +258,7 @@
         },
         "googleNote": {
           "title": "Note about Google Wallet",
-          "body": "Google limits cards to 3 notifications per day. Customers who already received 3 notifications today (e.g. stamps) won't receive this broadcast."
+          "body": "Google limits cards to 3 notifications per day. Customers who already received 3 notifications today (e.g. after a scan) won't receive this broadcast."
         }
       },
       "lastResults": {
@@ -348,6 +372,8 @@
             "enrollmentHelp": "Filter by when and where the customer joined your program.",
             "stamps": "Collected stamps",
             "stampsHelp": "Only targets customers with between N and M stamps on their current card.",
+            "points": "Points balance",
+            "pointsHelp": "Only targets customers whose current balance is between N and M points.",
             "activity": "Activity",
             "activityHelp": "Filter by purchase behavior, last visit, and where they were active."
           },
@@ -378,9 +404,11 @@
             "maxLabel": "At most",
             "placeholder": "e.g. 5",
             "suffix": "stamps",
+            "suffixPoints": "pts",
             "help": "Tip: leave either field empty to skip that bound.",
             "hasRewardLabel": "Has a reward to redeem",
-            "hasRewardHelp": "Only customers who currently hold a reward: a full card or stacked rewards. Perfect for a 'come redeem it' message."
+            "hasRewardHelp": "Only customers who currently hold a reward: a full card or stacked rewards. Perfect for a 'come redeem it' message.",
+            "hasRewardHelpPoints": "Only customers whose balance already covers at least one reward. Perfect for a 'come redeem it' message."
           },
           "activity": {
             "hasRedeemedLabel": "Has redeemed a reward",
@@ -403,6 +431,8 @@
             "enrolled_after_days": "Enrolled < {n} days ago",
             "stamp_count_min": "≥ {n} stamps",
             "stamp_count_max": "≤ {n} stamps",
+            "points_min": "≥ {n} pts",
+            "points_max": "≤ {n} pts",
             "has_redeemed": "Has redeemed",
             "inactive_days": "Inactive {n}d+",
             "enrolled_at_location_ids": "Enrolled at {n} {n, plural, one {location} other {locations}}",
@@ -412,7 +442,7 @@
             "title": "Unlock audience segmentation",
             "description": "Reach the right customers with finer-grained filters on Pro.",
             "features": {
-              "stamps": "Filter by stamp count thresholds",
+              "stamps": "Filter by stamps or points balance",
               "activity": "Win back inactive customers and reward redeemers",
               "location": "Target by enrollment or activity at specific locations"
             }
@@ -466,7 +496,7 @@
         "headline": "Reach every customer at once",
         "description": "Customers receive the notification directly on their phone and on the back of their loyalty card.",
         "features": {
-          "segment": "Target customers by stamps, activity, or enrolment date",
+          "segment": "Target customers by progress, activity, or enrolment date",
           "schedule": "Schedule broadcasts in advance (Pro)",
           "tracking": "Live delivery tracking, see who got it"
         },
@@ -500,7 +530,8 @@
         "upgradeRequired": "Broadcasts require Growth or Pro.",
         "quotaExceeded": "You've used all your broadcasts this month. Save it as a draft and send it when your quota resets, or upgrade to Pro for unlimited broadcasts.",
         "proFiltersBlocked": "Advanced filters require Pro."
-      }
+      },
+      "conversionPaused": "{count, plural, =1 {1 scheduled broadcast was paused} other {# scheduled broadcasts were paused}} when your program switched types: the audience targeting referred to the old system. Review and reschedule them from the drafts below."
     },
     "downgradeBanner": {
       "title": "Your Growth plan ended",
